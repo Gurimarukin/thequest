@@ -1,4 +1,4 @@
-import { createEnum } from '../utils/createEnum'
+import { createEnum } from '../../utils/createEnum'
 
 type Platform = typeof e.T
 

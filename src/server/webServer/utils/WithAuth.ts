@@ -6,7 +6,7 @@ import { Dict, Either, Future, Maybe, Try } from '../../../shared/utils/fp'
 import { futureMaybe } from '../../../shared/utils/futureMaybe'
 
 import { constants } from '../../config/constants'
-import type { TokenContent } from '../../models/webUser/TokenContent'
+import type { TokenContent } from '../../models/user/TokenContent'
 import type { UserService } from '../../services/UserService'
 import type { EndedMiddleware } from '../models/MyMiddleware'
 import { MyMiddleware as M } from '../models/MyMiddleware'

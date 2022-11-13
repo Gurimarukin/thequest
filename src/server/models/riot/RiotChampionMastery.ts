@@ -1,14 +1,14 @@
 import * as D from 'io-ts/Decoder'
 
-import { ChampionId } from '../../../shared/models/ChampionId'
-import { SummonerId } from '../../../shared/models/SummonerId'
+import { ChampionKey } from '../../../shared/models/api/ChampionKey'
+import { SummonerId } from '../../../shared/models/api/SummonerId'
 
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
 
-type ChampionMastery = D.TypeOf<typeof codec>
+type RiotChampionMastery = D.TypeOf<typeof decoder>
 
-const codec = D.struct({
-  championId: ChampionId.codec,
+const decoder = D.struct({
+  championId: ChampionKey.codec,
   championLevel: D.number,
   championPoints: D.number,
   lastPlayTime: DayJsFromNumber.decoder,
@@ -19,6 +19,6 @@ const codec = D.struct({
   summonerId: SummonerId.codec,
 })
 
-const ChampionMastery = { codec }
+const RiotChampionMastery = { decoder }
 
-export { ChampionMastery }
+export { RiotChampionMastery }

@@ -4,6 +4,7 @@ import type { BareFetcher, SWRConfiguration, SWRResponse } from 'swr'
 import useSWR from 'swr'
 
 import type { Tuple, Tuple3 } from '../../shared/utils/fp'
+import { Future } from '../../shared/utils/fp'
 
 import type { HttpOptions } from '../utils/http'
 import { http } from '../utils/http'
@@ -17,6 +18,7 @@ export const useSWRHttp = <A, O, B>(
 ): SWRResponse<A, unknown> =>
   useSWR<A, unknown, Tuple3<string, HttpMethod, typeof http>>(
     [...methodWithUrl, http],
-    (method, url, http_) => http_([method, url], { ...httpOptions }, decoderWithName),
+    (method, url, http_) =>
+      Future.runUnsafe(http_([method, url], { ...httpOptions }, decoderWithName)),
     swrOptions,
   )

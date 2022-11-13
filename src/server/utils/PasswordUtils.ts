@@ -1,9 +1,9 @@
 import { pipe } from 'fp-ts/function'
 
-import { ClearPassword } from '../../shared/models/webUser/ClearPassword'
+import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import { Future } from '../../shared/utils/fp'
 
-import { HashedPassword } from '../models/webUser/HashedPassword'
+import { HashedPassword } from '../models/user/HashedPassword'
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const argon2 = require('@phc/argon2')

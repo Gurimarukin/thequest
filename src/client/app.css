@@ -14,6 +14,7 @@
   font-weight: 'bold';
 }
 
-* {
-  font-family: baloopaaji2;
+@font-face {
+  font-family: lolFont;
+  src: url("fonts/FrizQuadrataRegular.woff");
 }

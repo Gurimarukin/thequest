@@ -8,14 +8,14 @@ import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
 import { UUIDUtils } from '../../utils/UUIDUtils'
 
-type WebUserId = Newtype<{ readonly WebUserId: unique symbol }, string>
+type UserId = Newtype<{ readonly WebUserId: unique symbol }, string>
 
-const { wrap, unwrap } = iso<WebUserId>()
+const { wrap, unwrap } = iso<UserId>()
 
-const codec = fromNewtype<WebUserId>(C.string)
+const codec = fromNewtype<UserId>(C.string)
 
-const generate: IO<WebUserId> = pipe(UUIDUtils.uuidV4, IO.map(wrap))
+const generate: IO<UserId> = pipe(UUIDUtils.uuidV4, IO.map(wrap))
 
-const WebUserId = { wrap, unwrap, codec, generate }
+const UserId = { wrap, unwrap, codec, generate }
 
-export { WebUserId }
+export { UserId }

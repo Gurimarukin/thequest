@@ -6,6 +6,7 @@ import { IO } from '../shared/utils/fp'
 import type { Context } from './Context'
 import { constants } from './config/constants'
 import { HealthCheckController } from './controllers/HealthCheckController'
+import { StaticDataController } from './controllers/StaticDataController'
 import { SummonerController } from './controllers/SummonerController'
 import { UserController } from './controllers/UserController'
 import { HttpClient } from './helpers/HttpClient'
@@ -32,6 +33,7 @@ export const Application = ({
   const userService = UserService(userPersistence, jwtHelper)
 
   const healthCheckController = HealthCheckController(healthCheckService)
+  const staticDataController = StaticDataController(riotApiService)
   const summonerController = SummonerController(riotApiService)
   const userController = UserController(userService)
 
@@ -43,6 +45,7 @@ export const Application = ({
     rateLimiter,
     withAuth,
     healthCheckController,
+    staticDataController,
     summonerController,
     userController,
   )

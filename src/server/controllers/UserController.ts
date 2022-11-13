@@ -1,8 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
-import { LoginPayload } from '../../shared/models/webUser/LoginPayload'
-import { Token } from '../../shared/models/webUser/Token'
+import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
+import { Token } from '../../shared/models/api/user/Token'
 import { Maybe } from '../../shared/utils/fp'
 
 import { constants } from '../config/constants'

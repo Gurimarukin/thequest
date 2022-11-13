@@ -2,7 +2,8 @@ import type { Match, Parser } from 'fp-ts-routing'
 import { end, format, lit, str } from 'fp-ts-routing'
 
 import type { Method } from './models/Method'
-import { Platform } from './models/Platform'
+import { Lang } from './models/api/Lang'
+import { Platform } from './models/api/Platform'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
 
@@ -15,13 +16,15 @@ const { codec } = RouterUtils
 // intermediate
 const api = lit('api')
 const apiHealthcheck = api.then(lit('healthcheck'))
-const apiLogin = api.then(lit('login'))
+const apiStaticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
 const apiPlatform = api.then(codec('platform', Platform.codec))
 const apiPlatformSummoner = apiPlatform.then(lit('summoner'))
 const apiPlatformSummonerByName = apiPlatformSummoner.then(lit('byName')).then(str('summonerName'))
+const apiLogin = api.then(lit('login'))
 
 // final
 const healthcheckGet = m(apiHealthcheck, 'get')
+const staticDataLangGet = m(apiStaticDataLang, 'get')
 const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
 const loginPost = m(apiLogin, 'post')
 
@@ -31,6 +34,7 @@ const loginPost = m(apiLogin, 'post')
 
 export const apiParsers = {
   healthcheck: { get: p(healthcheckGet) },
+  staticData: { lang: { get: p(staticDataLangGet) } },
   platform: {
     summoner: {
       byName: { get: p(platformSummonerByNameGet) },
@@ -44,6 +48,7 @@ export const apiParsers = {
  */
 
 export const apiRoutes = {
+  staticData: { lang: { get: (lang: Lang) => r(staticDataLangGet, { lang }) } },
   platform: {
     summoner: {
       byName: {

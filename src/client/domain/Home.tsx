@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statement */
 import React, { useCallback, useState } from 'react'
 
-import { Platform } from '../../shared/models/Platform'
+import { Platform } from '../../shared/models/api/Platform'
 
 import { Select } from '../components/Select'
 import { useHistory } from '../contexts/HistoryContext'
@@ -21,25 +21,25 @@ export const Home = (): JSX.Element => {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      navigate(appRoutes.summonerPlatformSummonerName(platform, summonerName))
+      navigate(appRoutes.platformSummonerName(platform, summonerName))
     },
     [navigate, platform, summonerName],
   )
 
   return (
-    <div className="flex justify-center p-6 gap-4">
+    <div className="flex justify-center p-6 gap-4 items-center">
       <Select<Platform>
         options={Platform.values}
         value={platform}
         setValue={setPlatform}
-        className="border border-black"
+        className="border border-goldenrod bg-black px-2 py-1"
       />
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           value={summonerName}
           onChange={handleChange}
-          className="border border-black"
+          className="border border-goldenrod bg-transparent px-2 py-1"
         />
       </form>
     </div>

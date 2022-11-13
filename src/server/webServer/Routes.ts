@@ -4,6 +4,7 @@ import { MsDuration } from '../../shared/models/MsDuration'
 import type { List } from '../../shared/utils/fp'
 
 import type { HealthCheckController } from '../controllers/HealthCheckController'
+import type { StaticDataController } from '../controllers/StaticDataController'
 import type { SummonerController } from '../controllers/SummonerController'
 import type { UserController } from '../controllers/UserController'
 import type { EndedMiddleware } from './models/MyMiddleware'
@@ -16,6 +17,7 @@ export const Routes = (
   rateLimiter: RateLimiter,
   withAuth_: WithAuth,
   healthCheckController: HealthCheckController,
+  staticDataController: StaticDataController,
   summonerController: SummonerController,
   userController: UserController,
 ): List<Route> => {
@@ -23,6 +25,7 @@ export const Routes = (
 
   return [
     m(api.healthcheck.get, () => healthCheckController.check),
+    m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
     m(api.platform.summoner.byName.get, ({ platform, summonerName }) =>
       summonerController.byName(platform, summonerName),
     ),

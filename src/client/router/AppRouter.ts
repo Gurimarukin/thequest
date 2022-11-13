@@ -1,6 +1,6 @@
-import { end, format, lit, str } from 'fp-ts-routing'
+import { end, format, str } from 'fp-ts-routing'
 
-import { Platform } from '../../shared/models/Platform'
+import { Platform } from '../../shared/models/api/Platform'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 
 const { codec } = RouterUtils
@@ -9,9 +9,7 @@ const { codec } = RouterUtils
  * matches
  */
 
-const summonerPlatformSummonerNameMatch = lit('summoner')
-  .then(codec('platform', Platform.codec))
-  .then(str('summonerName'))
+const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
 
 /**
  * parser
@@ -20,7 +18,7 @@ const summonerPlatformSummonerNameMatch = lit('summoner')
 // don't forget .then(end).parser
 export const appParsers = {
   index: end.parser,
-  summonerPlatformSummonerName: summonerPlatformSummonerNameMatch.then(end).parser,
+  platformSummonerName: platformSummonerNameMatch.then(end).parser,
 }
 
 /**
@@ -29,6 +27,6 @@ export const appParsers = {
 
 export const appRoutes = {
   index: format(end.formatter, {}),
-  summonerPlatformSummonerName: (platform: Platform, summonerName: string) =>
-    format(summonerPlatformSummonerNameMatch.formatter, { platform, summonerName }),
+  platformSummonerName: (platform: Platform, summonerName: string) =>
+    format(platformSummonerNameMatch.formatter, { platform, summonerName }),
 }

@@ -19,7 +19,7 @@ const t = (element: JSX.Element, title?: string): ElementWithTitle =>
 const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
   .alt(
-    appParsers.summonerPlatformSummonerName.map(({ platform, summonerName }) =>
+    appParsers.platformSummonerName.map(({ platform, summonerName }) =>
       t(<Summoner platform={platform} summonerName={summonerName} />),
     ),
   )

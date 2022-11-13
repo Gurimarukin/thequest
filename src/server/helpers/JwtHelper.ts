@@ -4,7 +4,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import jwt from 'jsonwebtoken'
 
 import { MsDuration } from '../../shared/models/MsDuration'
-import { Token } from '../../shared/models/webUser/Token'
+import { Token } from '../../shared/models/api/user/Token'
 import type { Tuple } from '../../shared/utils/fp'
 import { Dict, Either, Future, List, Maybe } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'

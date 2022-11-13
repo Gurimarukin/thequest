@@ -1,14 +1,14 @@
 import { pipe } from 'fp-ts/function'
 
-import type { ClearPassword } from '../../shared/models/webUser/ClearPassword'
-import type { Token } from '../../shared/models/webUser/Token'
-import type { UserName } from '../../shared/models/webUser/UserName'
+import type { ClearPassword } from '../../shared/models/api/user/ClearPassword'
+import type { Token } from '../../shared/models/api/user/Token'
+import type { UserName } from '../../shared/models/api/user/UserName'
 import type { Future, Maybe } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
 import type { JwtHelper } from '../helpers/JwtHelper'
-import { TokenContent } from '../models/webUser/TokenContent'
+import { TokenContent } from '../models/user/TokenContent'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 

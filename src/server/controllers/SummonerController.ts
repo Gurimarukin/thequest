@@ -1,8 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
-import * as E from 'io-ts/Encoder'
 
-import type { Platform } from '../../shared/models/Platform'
+import type { Platform } from '../../shared/models/api/Platform'
+import { SummonerView } from '../../shared/models/api/SummonerView'
 import { Future } from '../../shared/utils/fp'
 
 import type { RiotApiService } from '../services/RiotApiService'
@@ -20,8 +20,14 @@ const SummonerController = (riotApiService: RiotApiService) => ({
       Future.bind('masteries', ({ summoner }) =>
         riotApiService.lol.championMasteryBySummoner(platform, summoner.id),
       ),
+      Future.map(
+        ({ summoner: { name, profileIconId, summonerLevel }, masteries }): SummonerView => ({
+          summoner: { name, profileIconId, summonerLevel },
+          masteries,
+        }),
+      ),
       M.fromTaskEither,
-      M.ichain(M.jsonWithStatus(Status.OK, E.id())),
+      M.ichain(M.jsonWithStatus(Status.OK, SummonerView.codec)),
     ),
 })
 
