@@ -19,6 +19,7 @@ export type Config = {
   readonly logLevel: LogLevelOrOff
   readonly http: HttpConfig
   readonly db: DbConfig
+  readonly riotApiKey: string
   readonly jwtSecret: string
 }
 
@@ -54,6 +55,7 @@ const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
         user: r(D.string)('DB_USER'),
         password: r(D.string)('DB_PASSWORD'),
       }),
+      riotApiKey: r(D.string)('RIOT_API_KEY'),
       jwtSecret: r(D.string)('JWT_SECRET'),
     }),
   )

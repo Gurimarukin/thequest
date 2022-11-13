@@ -1,7 +1,8 @@
 import type { Match, Parser } from 'fp-ts-routing'
-import { end, format, lit } from 'fp-ts-routing'
+import { end, format, lit, str } from 'fp-ts-routing'
 
 import type { Method } from './models/Method'
+import { Platform } from './models/Platform'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
 
@@ -15,10 +16,13 @@ const { codec } = RouterUtils
 const api = lit('api')
 const apiHealthcheck = api.then(lit('healthcheck'))
 const apiLogin = api.then(lit('login'))
+const apiPlatform = api.then(codec('platform', Platform.codec))
+const apiPlatformSummoner = apiPlatform.then(lit('summoner'))
+const apiPlatformSummonerByName = apiPlatformSummoner.then(lit('byName')).then(str('summonerName'))
 
 // final
 const healthcheckGet = m(apiHealthcheck, 'get')
-
+const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
 const loginPost = m(apiLogin, 'post')
 
 /**
@@ -27,6 +31,11 @@ const loginPost = m(apiLogin, 'post')
 
 export const apiParsers = {
   healthcheck: { get: p(healthcheckGet) },
+  platform: {
+    summoner: {
+      byName: { get: p(platformSummonerByNameGet) },
+    },
+  },
   login: { post: p(loginPost) },
 }
 
@@ -35,6 +44,14 @@ export const apiParsers = {
  */
 
 export const apiRoutes = {
+  platform: {
+    summoner: {
+      byName: {
+        get: (platform: Platform, summonerName: string) =>
+          r(platformSummonerByNameGet, { platform, summonerName }),
+      },
+    },
+  },
   login: { post: r(loginPost, {}) },
 }
 

@@ -12,4 +12,5 @@ export const constants = {
       ttl: MsDuration.days(30),
     },
   },
+  xRiotToken: 'X-Riot-Token',
 }

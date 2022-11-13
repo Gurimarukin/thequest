@@ -3,7 +3,22 @@ import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 
+import { DayJs } from '../../shared/models/DayJs'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
+
+/**
+ * DayJsFromNumber
+ */
+
+const dayJsFromNumberDecoder: Decoder<unknown, DayJs> = pipe(
+  D.number,
+  D.parse(n => {
+    const d = DayJs.of(n)
+    return DayJs.isValid(d) ? D.success(d) : D.failure(n, 'DayJsFromNumber')
+  }),
+)
+
+export const DayJsFromNumber = { decoder: dayJsFromNumberDecoder }
 
 /**
  * BooleanFromString
