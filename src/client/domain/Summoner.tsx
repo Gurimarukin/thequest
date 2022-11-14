@@ -105,7 +105,7 @@ const SummonerViewComponent = ({ summoner }: SummonerViewProps): JSX.Element => 
         <span>{summoner.summoner.name}</span>
         <span>{summoner.summoner.summonerLevel}</span>
       </div>
-      <div className="grid grid-cols-[auto_1fr] gap-y-1 max-w-7xl self-center w-full">
+      <div className="grid grid-cols-[auto_1fr] gap-y-2 max-w-7xl self-center w-full">
         {filteredAndSortedChampions.map(champion => (
           <ChampionComponent key={ChampionKey.unwrap(champion.championId)} champion={champion} />
         ))}
@@ -235,8 +235,8 @@ const getChampionComponent =
               },
             ),
           )}
-          <div title={pointsUntilAndSince} className="grow flex items-center p-1 text-sm">
-            <span>{championPoints.toLocaleString()}</span>
+          <div className="grow flex items-center p-1 text-sm">
+            <span title={pointsUntilAndSince}>{championPoints.toLocaleString()}</span>
           </div>
         </div>
       </>
@@ -292,7 +292,7 @@ const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Elemen
           title={title}
           className={cssClasses(
             'flex absolute left-[15px] top-0 bg-black h-[10px] rounded-br pl-[2px]',
-            ['gap-[1px] pt-[1px] pb-[2px] pr-[2px]', championLevel === 5],
+            ['gap-[2px] pt-[1px] pb-[2px] pr-[2px]', championLevel === 5],
             ['gap-[3px] pb-[1px] pr-[3px]', championLevel === 6],
           )}
         >
