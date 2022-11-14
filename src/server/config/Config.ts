@@ -10,7 +10,11 @@ import type { NonEmptyArray, Try } from '../../shared/utils/fp'
 import { Either, IO, Maybe } from '../../shared/utils/fp'
 import { URLFromString } from '../../shared/utils/ioTsUtils'
 
-import { BooleanFromString, NonEmptyArrayFromString, NumberFromString } from '../utils/ioTsUtils'
+import {
+  BooleanFromString,
+  NonEmptyArrayFromString,
+  NumberFromString,
+} from '../../client/utils/ioTsUtils'
 
 const seqS = ValidatedNea.getSeqS<string>()
 

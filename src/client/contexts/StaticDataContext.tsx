@@ -16,7 +16,8 @@ const { ddragonCdn } = DDragonUtils
 
 const lang: Lang = 'fr_FR' // TODO: based on browser
 
-type DDragonContext = {
+export type StaticDataContext = {
+  readonly champions: List<StaticDataChampion>
   readonly assets: {
     readonly summonerIcon: (iconId: number) => string
     readonly champion: {
@@ -25,28 +26,29 @@ type DDragonContext = {
   }
 }
 
-const DDragonContext = createContext<DDragonContext | undefined>(undefined)
+const StaticDataContext = createContext<StaticDataContext | undefined>(undefined)
 
-export const DDragonContextProvider: React.FC = ({ children }) =>
+export const StaticDataContextProvider: React.FC = ({ children }) =>
   basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang.get(lang), {}, [StaticData.codec, 'StaticData'], {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     }),
   )(({ version, champions }) => {
-    const findChamp = (champion: ChampionKey): Maybe<StaticDataChampion> =>
+    const findChampionByKey = (champion: ChampionKey): Maybe<StaticDataChampion> =>
       pipe(
         champions,
         List.findFirst(c => c.key === champion),
       )
 
-    const value: DDragonContext = {
+    const value: StaticDataContext = {
+      champions,
       assets: {
         summonerIcon: iconId => ddragonCdn(version, `/img/profileicon/${iconId}.png`),
 
         champion: {
           square: flow(
-            findChamp,
+            findChampionByKey,
             Maybe.map(c => c.id),
             Maybe.toNullable,
             name => ddragonCdn(version, `/img/champion/${name}.png`),
@@ -55,14 +57,14 @@ export const DDragonContextProvider: React.FC = ({ children }) =>
       },
     }
 
-    return <DDragonContext.Provider value={value}>{children}</DDragonContext.Provider>
+    return <StaticDataContext.Provider value={value}>{children}</StaticDataContext.Provider>
   })
 
-export const useDDragon = (): DDragonContext => {
-  const context = useContext(DDragonContext)
+export const useStaticData = (): StaticDataContext => {
+  const context = useContext(StaticDataContext)
   if (context === undefined) {
     // eslint-disable-next-line functional/no-throw-statement
-    throw Error('useDDragon must be used within a DDragonContextProvider')
+    throw Error('useStaticData must be used within a StaticDataContextProvider')
   }
   return context
 }

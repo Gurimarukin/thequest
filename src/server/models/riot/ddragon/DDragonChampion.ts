@@ -5,7 +5,7 @@ import { ChampionId } from '../../../../shared/models/api/ChampionId'
 import { ChampionKey } from '../../../../shared/models/api/ChampionKey'
 import { List } from '../../../../shared/utils/fp'
 
-import { NumberFromString } from '../../../utils/ioTsUtils'
+import { NumberFromString } from '../../../../client/utils/ioTsUtils'
 
 type DDragonChampion = D.TypeOf<typeof decoder>
 

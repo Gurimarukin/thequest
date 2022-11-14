@@ -1,9 +1,10 @@
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
+import type { ChampionMasteryView } from '../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../shared/models/api/Platform'
 import { SummonerView } from '../../shared/models/api/SummonerView'
-import { Future } from '../../shared/utils/fp'
+import { Future, List } from '../../shared/utils/fp'
 
 import type { RiotApiService } from '../services/RiotApiService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
@@ -23,7 +24,28 @@ const SummonerController = (riotApiService: RiotApiService) => ({
       Future.map(
         ({ summoner: { name, profileIconId, summonerLevel }, masteries }): SummonerView => ({
           summoner: { name, profileIconId, summonerLevel },
-          masteries,
+          masteries: pipe(
+            masteries,
+            List.map(
+              ({
+                championId,
+                championLevel,
+                championPoints,
+                championPointsSinceLastLevel,
+                championPointsUntilNextLevel,
+                chestGranted,
+                tokensEarned,
+              }): ChampionMasteryView => ({
+                championId,
+                championLevel,
+                championPoints,
+                championPointsSinceLastLevel,
+                championPointsUntilNextLevel,
+                chestGranted,
+                tokensEarned,
+              }),
+            ),
+          ),
         }),
       ),
       M.fromTaskEither,

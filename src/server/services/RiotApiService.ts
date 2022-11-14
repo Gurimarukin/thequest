@@ -24,7 +24,7 @@ type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {
-  const lolDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = http(
+  const lolDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
     [ddragon('/api/versions.json'), 'get'],
     {},
     [NonEmptyArray.decoder(DDragonVersion.codec), 'NonEmptyArray<DDragonVersion>'],
@@ -35,7 +35,7 @@ const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {
       ddragon: {
         apiVersions: lolDDragonApiVersions,
         dataChampions: (version: DDragonVersion, lang: Lang): Future<DDragonChampions> =>
-          http([ddragonCdn(version, `/data/${lang}/champion.json`), 'get'], {}, [
+          httpClient.http([ddragonCdn(version, `/data/${lang}/champion.json`), 'get'], {}, [
             DDragonChampions.decoder,
             'DDragonChampions',
           ]),
@@ -43,7 +43,7 @@ const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {
 
       summoner: {
         byName: (platform: Platform, summonerName: string): Future<RiotSummoner> =>
-          http(
+          httpWithApiKey(
             [platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`), 'get'],
             {},
             [RiotSummoner.decoder, 'Summoner'],
@@ -54,7 +54,7 @@ const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {
         platform: Platform,
         encryptedSummonerId: SummonerId,
       ): Future<List<RiotChampionMastery>> =>
-        http(
+        httpWithApiKey(
           [
             platformUrl(
               platform,
@@ -71,16 +71,16 @@ const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {
   }
 
   // httpClient.http, but with riotApiKey
-  function http<O, B>(
+  function httpWithApiKey<O, B>(
     methodWithUrl: Tuple<string, Method>,
     options?: HttpOptions<O, B>,
   ): Future<unknown>
-  function http<A, O, B>(
+  function httpWithApiKey<A, O, B>(
     methodWithUrl: Tuple<string, Method>,
     options: HttpOptions<O, B>,
     decoderWithName: Tuple<Decoder<unknown, A>, string>,
   ): Future<A>
-  function http<A, O, B>(
+  function httpWithApiKey<A, O, B>(
     [url, method]: Tuple<string, Method>,
     options: HttpOptions<O, B> = {},
     decoderWithName?: Tuple<Decoder<unknown, A>, string>,

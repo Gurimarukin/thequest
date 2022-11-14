@@ -4,6 +4,7 @@
     "outDir": "tsbuild",
     "jsx": "react",
     "lib": ["ES2021", "DOM"],
+    "module": "ESNext",
     "incremental": true,
     "skipLibCheck": true,
     "sourceMap": true,

@@ -1,6 +1,7 @@
 import * as C from 'io-ts/Codec'
-import * as D from 'io-ts/Decoder'
-import * as E from 'io-ts/Encoder'
+
+import { List } from '../../utils/fp'
+import { ChampionMasteryView } from './ChampionMasteryView'
 
 type SummonerView = C.TypeOf<typeof codec>
 
@@ -10,7 +11,7 @@ const codec = C.struct({
     profileIconId: C.number,
     summonerLevel: C.number,
   }),
-  masteries: C.make(D.id<unknown>(), E.id<unknown>()),
+  masteries: List.codec(ChampionMasteryView.codec),
 })
 
 const SummonerView = { codec }
