@@ -20,7 +20,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
   .alt(
     appParsers.platformSummonerName.map(({ platform, summonerName }) =>
-      t(<Summoner platform={platform} summonerName={summonerName} />),
+      t(<Summoner platform={platform} summonerName={summonerName} />, summonerName),
     ),
   )
 
@@ -33,7 +33,7 @@ export const AppRouterComponent = (): JSX.Element => {
       Route.parse(location.pathname),
       t(<NotFound />, 'Page non trouvée'),
     )
-    const title_ = `Bot Jean Plank${pipe(
+    const title_ = `La quêêête${pipe(
       subTitle,
       Maybe.fold(
         () => '',

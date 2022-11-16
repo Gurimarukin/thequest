@@ -1,6 +1,6 @@
 import { number, ord, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import { ChampionKey } from '../../shared/models/api/ChampionKey'
@@ -9,36 +9,52 @@ import type { Platform } from '../../shared/models/api/Platform'
 import { SummonerView } from '../../shared/models/api/SummonerView'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
+import { MainLayout } from '../components/MainLayout'
+import { useHistory } from '../contexts/HistoryContext'
 import type { StaticDataContext } from '../contexts/StaticDataContext'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import { Assets } from '../imgs/Assets'
+import { appRoutes } from '../router/AppRouter'
 import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 import { cssClasses } from '../utils/cssClasses'
+
+type ChampionMasteryViewWithName = ChampionMasteryView & {
+  readonly name: string
+}
 
 type Props = {
   readonly platform: Platform
   readonly summonerName: string
 }
 
-export const Summoner = ({ platform, summonerName }: Props): JSX.Element =>
-  basicAsyncRenderer(
-    useSWRHttp(apiRoutes.platform.summoner.byName.get(platform, summonerName), {}, [
-      SummonerView.codec,
-      'SummonerView',
-    ]),
-  )(summoner => <SummonerViewComponent summoner={summoner} />)
+export const Summoner = ({ platform, summonerName }: Props): JSX.Element => (
+  <MainLayout>
+    {basicAsyncRenderer(
+      useSWRHttp(apiRoutes.platform.summoner.byName.get(platform, summonerName.toLowerCase()), {}, [
+        SummonerView.codec,
+        'SummonerView',
+      ]),
+    )(summoner => (
+      <SummonerViewComponent platform={platform} summoner={summoner} />
+    ))}
+  </MainLayout>
+)
 
 type SummonerViewProps = {
+  readonly platform: Platform
+
   readonly summoner: SummonerView
 }
 
-type ChampionMasteryViewWithName = ChampionMasteryView & {
-  readonly name: string
-}
-
-const SummonerViewComponent = ({ summoner }: SummonerViewProps): JSX.Element => {
+const SummonerViewComponent = ({ platform, summoner }: SummonerViewProps): JSX.Element => {
+  const { navigate } = useHistory()
   const staticData = useStaticData()
+
+  useEffect(
+    () => navigate(appRoutes.platformSummonerName(platform, summoner.summoner.name)),
+    [navigate, platform, summoner.summoner.name],
+  )
 
   const champions = pipe(
     staticData.champions,

@@ -1,21 +1,26 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statement,
+                  functional/no-return-void */
+import { Route, parse } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
+import { Platform } from '../../shared/models/api/Platform'
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import type { UserView } from '../../shared/models/api/user/UserView'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
 
+import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
 import { Assets } from '../imgs/Assets'
-import { PersonIcon } from '../imgs/svgIcons'
-import { appRoutes } from '../router/AppRouter'
+import { PersonIcon, SearchIcon } from '../imgs/svgIcons'
+import { appParsers, appRoutes } from '../router/AppRouter'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http } from '../utils/http'
 import { ClickOutside } from './ClickOutside'
 import { Link } from './Link'
+import { Select } from './Select'
 
 export const MainLayout: React.FC = ({ children }) => {
   const { user } = useUser()
@@ -24,9 +29,12 @@ export const MainLayout: React.FC = ({ children }) => {
     <div className="h-full flex flex-col">
       <header className="bg-zinc-900 border-b border-goldenrod flex justify-center">
         <div className="max-w-7xl px-3 py-2 w-full flex justify-between items-center relative">
-          <Link to={appRoutes.index}>
-            <img src={Assets.iconYuumi} alt="Home icon (Yuumi)" className="w-12" />
-          </Link>
+          <div className="flex gap-6 items-center">
+            <Link to={appRoutes.index}>
+              <img src={Assets.iconYuumi} alt="Home icon (Yuumi)" className="w-12" />
+            </Link>
+            <SearchSummoner />
+          </div>
           {pipe(
             user,
             Maybe.fold(
@@ -40,6 +48,67 @@ export const MainLayout: React.FC = ({ children }) => {
     </div>
   )
 }
+
+const SearchSummoner = (): JSX.Element => {
+  const { location, navigate } = useHistory()
+
+  const summonerNameFromLocation = useMemo(
+    () =>
+      parse(
+        appParsers.platformSummonerName.map(f => Maybe.some(f.summonerName)),
+        Route.parse(location.pathname),
+        Maybe.none,
+      ),
+    [location.pathname],
+  )
+  useEffect(() => {
+    pipe(summonerNameFromLocation, Maybe.map(setSummonerName))
+  }, [summonerNameFromLocation])
+
+  const [summonerName, setSummonerName] = useState(
+    pipe(
+      summonerNameFromLocation,
+      Maybe.getOrElse(() => ''),
+    ),
+  )
+  const [platform, setPlatform] = useState<Platform>('EUW1')
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setSummonerName(e.target.value),
+    [],
+  )
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      navigate(appRoutes.platformSummonerName(platform, summonerName))
+    },
+    [navigate, platform, summonerName],
+  )
+
+  return (
+    <form onSubmit={handleSubmit} className="flex h-8 text-sm">
+      <Select<Platform>
+        options={Platform.values}
+        value={platform}
+        setValue={setPlatform}
+        className="border-l border-y border-goldenrod bg-black pl-1"
+      />
+      <input
+        type="text"
+        value={summonerName}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        className="border border-goldenrod bg-transparent px-2"
+      />
+      <button type="submit">
+        <SearchIcon className="h-6 text-goldenrod -ml-7" />
+      </button>
+    </form>
+  )
+}
+
+const handleFocus = (e: React.FocusEvent<HTMLInputElement>): void => e.target.select()
 
 type State = {
   readonly userName: string
