@@ -173,7 +173,7 @@ export const startWebServer = (
             )
             return handler(request, socket, head)
           }),
-          Future.orElse<Error, Either<SimpleHttpResponse, void>, Error>(handleErrorUpgrade),
+          Future.orElseIOEitherK<Either<SimpleHttpResponse, void>>(handleErrorUpgrade),
           Future.map(Either.getOrElse(res => socket.end(SimpleHttpResponse.toRawHttp(res)))),
           Future.map<void, NotUsed>(toNotUsed),
           Future.run(getOnError(logger)),
@@ -190,11 +190,10 @@ export const startWebServer = (
     )
   }
 
-  function handleErrorUpgrade(e: Error): Future<Either<SimpleHttpResponse, never>> {
+  function handleErrorUpgrade(e: Error): IO<Either<SimpleHttpResponse, never>> {
     return pipe(
       logger.error(e),
       IO.map(() => Either.left(SimpleHttpResponse.of(Status.InternalServerError, ''))),
-      Future.fromIOEither,
     )
   }
 

@@ -20,13 +20,18 @@ const apiStaticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.co
 const apiPlatform = api.then(codec('platform', Platform.codec))
 const apiPlatformSummoner = apiPlatform.then(lit('summoner'))
 const apiPlatformSummonerByName = apiPlatformSummoner.then(lit('byName')).then(str('summonerName'))
-const apiLogin = api.then(lit('login'))
+const apiUser = api.then(lit('user'))
+const apiUserSelf = apiUser.then(lit('self'))
+const apiUserLogin = apiUser.then(lit('login'))
+const apiUserLogout = apiUser.then(lit('logout'))
 
 // final
 const healthcheckGet = m(apiHealthcheck, 'get')
 const staticDataLangGet = m(apiStaticDataLang, 'get')
 const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
-const loginPost = m(apiLogin, 'post')
+const userSelfGet = m(apiUserSelf, 'get')
+const userLoginPost = m(apiUserLogin, 'post')
+const userLogoutPost = m(apiUserLogout, 'post')
 
 /**
  * parsers
@@ -40,7 +45,11 @@ export const apiParsers = {
       byName: { get: p(platformSummonerByNameGet) },
     },
   },
-  login: { post: p(loginPost) },
+  user: {
+    self: { get: p(userSelfGet) },
+    login: { post: p(userLoginPost) },
+    logout: { post: p(userLogoutPost) },
+  },
 }
 
 /**
@@ -57,7 +66,11 @@ export const apiRoutes = {
       },
     },
   },
-  login: { post: r(loginPost, {}) },
+  user: {
+    self: { get: r(userSelfGet, {}) },
+    login: { post: r(userLoginPost, {}) },
+    logout: { post: r(userLogoutPost, {}) },
+  },
 }
 
 /**

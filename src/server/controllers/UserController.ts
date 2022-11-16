@@ -3,9 +3,12 @@ import { Status } from 'hyper-ts'
 
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import { Token } from '../../shared/models/api/user/Token'
+import { UserView } from '../../shared/models/api/user/UserView'
 import { Maybe } from '../../shared/utils/fp'
+import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
+import type { TokenContent } from '../models/user/TokenContent'
 import type { UserService } from '../services/UserService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -40,7 +43,31 @@ function UserController(userService: UserService) {
     ),
   )
 
-  return { login }
+  const logout: EndedMiddleware = pipe(
+    pipe(
+      M.status(Status.NoContent),
+      M.ichain(() => M.clearCookie(constants.account.cookie.name, {})),
+      M.ichain(() => M.closeHeaders()),
+      M.ichain(() => M.send('')),
+    ),
+  )
+
+  return {
+    getSelfUser: (user: TokenContent): EndedMiddleware =>
+      pipe(
+        userService.getUser(user.id),
+        futureMaybe.map(
+          ({ userName }): UserView => ({
+            userName,
+          }),
+        ),
+        M.fromTaskEither,
+        M.ichain(Maybe.fold(() => M.sendWithStatus(Status.NotFound)(''), M.json(UserView.codec))),
+      ),
+
+    login,
+    logout,
+  }
 }
 
 export { UserController }

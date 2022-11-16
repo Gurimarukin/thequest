@@ -29,7 +29,9 @@ export const Routes = (
     m(api.platform.summoner.byName.get, ({ platform, summonerName }) =>
       summonerController.byName(platform, summonerName),
     ),
-    m(api.login.post, () => rateLimiter(2, MsDuration.minutes(1))(userController.login)),
+    m(api.user.self.get, () => withAuth(userController.getSelfUser)),
+    m(api.user.login.post, () => rateLimiter(2, MsDuration.minutes(1))(userController.login)),
+    m(api.user.logout.post, () => userController.logout),
   ]
 }
 

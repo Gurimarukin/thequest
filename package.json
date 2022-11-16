@@ -21,6 +21,7 @@
     "prebuild": "yarn run clean && yarn run checkEnv",
     "build": "tsc -p tsconfig.build.json && parcel build",
     "checkEnv": "ts-node -P tsconfig.ts-node.json src/server/checkEnv.ts && ts-node -P tsconfig.ts-node.json src/client/checkEnv.ts",
+    "createUser": "ts-node -P tsconfig.ts-node.json src/server/createUser.ts",
     "server": "ts-node -P tsconfig.ts-node.json src/server/index.ts",
     "~server": "nodemon -e ts,tsx,js,json,env --ignore dist/ --ignore src/client/ -x \"yarn run server\"",
     "~client": "concurrently -k -n parcel,tsc -c green.bold,cyan.bold \"parcel src/client/index.html --no-autoinstall --dist-dir dist/client\" \"tsc -w --preserveWatchOutput -p tsconfig.client.json\"",

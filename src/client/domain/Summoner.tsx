@@ -12,6 +12,7 @@ import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import type { StaticDataContext } from '../contexts/StaticDataContext'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
+import { Assets } from '../imgs/Assets'
 import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 import { cssClasses } from '../utils/cssClasses'
 
@@ -190,11 +191,7 @@ const getChampionComponent =
           />
           {chestGranted ? (
             <div className="h-[14px] w-[17px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
-              <img
-                src={new URL('../imgs/chest.png', import.meta.url).toString()}
-                alt="chest icon"
-                className="mb-[-2px] w-4"
-              />
+              <img src={Assets.chest} alt="Chest icon" className="mb-[-2px] w-4" />
             </div>
           ) : null}
         </div>
@@ -284,9 +281,8 @@ type TokensProps = {
 
 const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Element | null => {
   const render = useCallback(
-    (totalTockens: number, imgSrc: URL): JSX.Element => {
-      const src = imgSrc.toString()
-      const alt = `mastery ${championLevel + 1} token`
+    (totalTockens: number, src: string): JSX.Element => {
+      const alt = `Mastery ${championLevel + 1} token`
       return (
         <span
           title={title}
@@ -317,8 +313,8 @@ const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Elemen
     [championLevel, title, tokensEarned],
   )
 
-  if (championLevel === 5) return render(2, new URL('../imgs/token-5.png', import.meta.url))
-  if (championLevel === 6) return render(3, new URL('../imgs/token-6.png', import.meta.url))
+  if (championLevel === 5) return render(2, Assets.token5)
+  if (championLevel === 6) return render(3, Assets.token6)
   return null
 }
 

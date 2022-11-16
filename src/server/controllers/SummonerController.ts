@@ -1,5 +1,4 @@
 import { pipe } from 'fp-ts/function'
-import { Status } from 'hyper-ts'
 
 import type { ChampionMasteryView } from '../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../shared/models/api/Platform'
@@ -49,7 +48,7 @@ const SummonerController = (riotApiService: RiotApiService) => ({
         }),
       ),
       M.fromTaskEither,
-      M.ichain(M.jsonWithStatus(Status.OK, SummonerView.codec)),
+      M.ichain(M.json(SummonerView.codec)),
     ),
 })
 

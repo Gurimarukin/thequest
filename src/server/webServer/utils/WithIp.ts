@@ -1,9 +1,9 @@
-import { apply, string } from 'fp-ts'
+import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
-import * as D from 'io-ts/Decoder'
 
 import { Maybe, Tuple } from '../../../shared/utils/fp'
+import { NonEmptyString } from '../../../shared/utils/ioTsUtils'
 
 import type { Config } from '../../config/Config'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
@@ -12,15 +12,7 @@ import { MyMiddleware as M } from '../models/MyMiddleware'
 
 type WithIp = (cause: string) => (f: (ip: string) => EndedMiddleware) => EndedMiddleware
 
-const maybeStr = Tuple.of(
-  Maybe.decoder(
-    pipe(
-      D.string,
-      D.refine((str): str is string => !string.isEmpty(str), 'NonEmptyString'),
-    ),
-  ),
-  'Maybe<NonEmptyString>',
-)
+const maybeStr = Tuple.of(Maybe.decoder(NonEmptyString.codec), 'Maybe<NonEmptyString>')
 
 const WithIp = (Logger: LoggerGetter, config: Config): WithIp => {
   const logger = Logger('WithIp')

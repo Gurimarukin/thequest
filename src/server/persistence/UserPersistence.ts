@@ -8,6 +8,7 @@ import { FpCollection } from '../helpers/FpCollection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { User } from '../models/user/User'
+import { UserId } from '../models/user/UserId'
 
 type UserPersistence = ReturnType<typeof UserPersistence>
 
@@ -26,6 +27,9 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
 
     findByUserName: (userName: UserName): Future<Maybe<User>> =>
       collection.findOne({ userName: UserName.codec.encode(userName) }),
+
+    findById: (id: UserId): Future<Maybe<User>> =>
+      collection.findOne({ id: UserId.codec.encode(id) }),
 
     create: (user: User): Future<boolean> =>
       pipe(

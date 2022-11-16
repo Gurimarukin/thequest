@@ -130,10 +130,15 @@ export const Tuple = {
 export type Tuple3<A, B, C> = readonly [A, B, C]
 
 export type Try<A> = Either<Error, A>
+const {
+  right: {},
+  left: {},
+  ...tryMethods
+} = either
 export const Try = {
-  ...either,
-  right: either.right as <A>(a: A) => Try<A>,
-  left: either.left as <A = never>(e: Error) => Try<A>,
+  ...tryMethods,
+  success: either.right as <A>(a: A) => Try<A>,
+  failure: either.left as <A = never>(e: Error) => Try<A>,
   fromNullable: either.fromNullable as (e: Error) => <A>(a: A) => Try<NonNullable<A>>,
   tryCatch: <A>(a: Lazy<A>): Try<A> => Either.tryCatch(a, Either.toError),
   getUnsafe: <A>(t: Try<A>): A =>
@@ -152,14 +157,12 @@ export const Future = {
   ...taskEither,
   right: taskEither.right as <A>(a: A) => Future<A>,
   left: taskEither.left as <A = never>(e: Error) => Future<A>,
-  chainFirstIOEitherK:
-    <A, B>(f: (a: A) => IO<B>) =>
-    (fa: Future<A>): Future<A> =>
-      pipe(fa, taskEither.chainFirst(flow(f, taskEither.fromIOEither))),
-  orElseIOEitherK:
-    <A>(f: (e: Error) => IO<A>) =>
-    (fa: Future<A>): Future<A> =>
-      pipe(fa, taskEither.orElse(flow(f, Future.fromIOEither))),
+  chainFirstIOEitherK: <A, B>(f: (a: A) => IO<B>): ((fa: Future<A>) => Future<A>) =>
+    taskEither.chainFirst(flow(f, taskEither.fromIOEither)),
+  orElseEitherK: <A>(f: (e: Error) => Try<A>): ((fa: Future<A>) => Future<A>) =>
+    taskEither.orElse(flow(f, Future.fromEither)),
+  orElseIOEitherK: <A>(f: (e: Error) => IO<A>): ((fa: Future<A>) => Future<A>) =>
+    taskEither.orElse(flow(f, Future.fromIOEither)),
   fromIO: taskEither.fromIO as <A>(fa: io.IO<A>) => Future<A>,
   tryCatch: <A>(f: Lazy<Promise<A>>): Future<A> => taskEither.tryCatch(f, Either.toError),
   notUsed: futureNotUsed,

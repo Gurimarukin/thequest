@@ -6,15 +6,8 @@ import type { FromIO2 } from 'fp-ts/FromIO'
 import type { Functor2 } from 'fp-ts/Functor'
 import { flow, identity, pipe } from 'fp-ts/function'
 import type * as http from 'http'
-import type {
-  Connection,
-  CookieOptions,
-  HeadersOpen,
-  ResponseEnded,
-  Status,
-  StatusOpen,
-} from 'hyper-ts'
-import { MediaType } from 'hyper-ts'
+import type { Connection, CookieOptions, HeadersOpen, ResponseEnded, StatusOpen } from 'hyper-ts'
+import { MediaType, Status } from 'hyper-ts'
 import * as M from 'hyper-ts/lib/Middleware'
 import { toRequestHandler as toRequestHandler_ } from 'hyper-ts/lib/express'
 import type { Decoder } from 'io-ts/Decoder'
@@ -138,7 +131,7 @@ const match =
       task.map(
         flow(
           Either.fold(e => Tuple.of(onLeft(e), conn), Tuple.mapFst(onRight)),
-          Try.right,
+          Try.success,
         ),
       ),
     )
@@ -202,6 +195,11 @@ const jsonWithStatus =
       ichain(() => M.json(encoder.encode(data), unknownToError)),
     )
 
+const jsonOK = <O, A>(
+  encoder: Encoder<O, A>,
+  headers: Dict<string, string> = {},
+): ((data: A) => EndedMiddleware) => jsonWithStatus(Status.OK, encoder, headers)
+
 // Express
 
 const toRequestHandler = toRequestHandler_ as <I, O>(
@@ -231,6 +229,7 @@ const MyMiddleware = {
   getBodyString,
   sendWithStatus,
   jsonWithStatus,
+  json: jsonOK,
 
   toRequestHandler,
 }

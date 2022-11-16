@@ -1,6 +1,7 @@
 import type * as dotenv from 'dotenv'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
+import { lens } from 'monocle-ts'
 
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { LogLevelOrOff } from '../../shared/models/logger/LogLevel'
@@ -66,4 +67,8 @@ const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
 
 const load: IO<Config> = pipe(loadDotEnv, IO.map(parse), IO.chain(IO.fromEither))
 
-export const Config = { load }
+const Lens = {
+  logLevel: pipe(lens.id<Config>(), lens.prop('logLevel')),
+}
+
+export const Config = { load, Lens }

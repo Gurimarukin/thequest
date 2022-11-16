@@ -1,5 +1,4 @@
 import { pipe } from 'fp-ts/function'
-import { Status } from 'hyper-ts'
 
 import type { Lang } from '../../shared/models/api/Lang'
 import { StaticData } from '../../shared/models/api/StaticData'
@@ -33,7 +32,7 @@ const StaticDataController = (riotApiService: RiotApiService) => ({
         }),
       ),
       M.fromTaskEither,
-      M.ichain(M.jsonWithStatus(Status.OK, StaticData.codec)),
+      M.ichain(M.json(StaticData.codec)),
     ),
 })
 

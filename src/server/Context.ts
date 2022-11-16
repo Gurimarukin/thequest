@@ -5,6 +5,7 @@ import { Future, NonEmptyArray } from '../shared/utils/fp'
 
 import type { Config } from './config/Config'
 import { constants } from './config/constants'
+import { HttpClient } from './helpers/HttpClient'
 import { JwtHelper } from './helpers/JwtHelper'
 import { LoggerGetter } from './models/logger/LoggerGetter'
 import { MongoCollectionGetter } from './models/mongo/MongoCollection'
@@ -14,6 +15,8 @@ import { MigrationPersistence } from './persistence/MigrationPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
 import { HealthCheckService } from './services/HealthCheckService'
 import { MigrationService } from './services/MigrationService'
+import { RiotApiService } from './services/RiotApiService'
+import { UserService } from './services/UserService'
 import { getOnError } from './utils/getOnError'
 
 type Context = ReturnType<typeof of>
@@ -22,22 +25,22 @@ type Context = ReturnType<typeof of>
 const of = (
   config: Config,
   Logger: LoggerGetter,
-  withDb: WithDb,
-  mongoCollection: MongoCollectionGetter,
+  healthCheckPersistence: HealthCheckPersistence,
+  userPersistence: UserPersistence,
 ) => {
-  const healthCheckPersistence = HealthCheckPersistence(withDb)
-  const userPersistence = UserPersistence(Logger, mongoCollection)
+  const httpClient = HttpClient(Logger)
+  const jwtHelper = JwtHelper(config.jwtSecret)
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
-
-  const jwtHelper = JwtHelper(config.jwtSecret)
+  const riotApiService = RiotApiService(config.riotApiKey, httpClient)
+  const userService = UserService(Logger, userPersistence, jwtHelper)
 
   return {
     config,
     Logger,
-    userPersistence,
     healthCheckService,
-    jwtHelper,
+    riotApiService,
+    userService,
   }
 }
 
@@ -52,10 +55,12 @@ const load = (config: Config): Future<Context> => {
 
   const mongoCollection: MongoCollectionGetter = MongoCollectionGetter.fromWithDb(withDb)
 
-  const context = of(config, Logger, withDb, mongoCollection)
-  const { userPersistence, healthCheckService } = context
-
+  const healthCheckPersistence = HealthCheckPersistence(withDb)
   const migrationPersistence = MigrationPersistence(Logger, mongoCollection)
+  const userPersistence = UserPersistence(Logger, mongoCollection)
+
+  const context = of(config, Logger, healthCheckPersistence, userPersistence)
+  const { healthCheckService } = context
 
   const migrationService = MigrationService(Logger, mongoCollection, migrationPersistence)
 

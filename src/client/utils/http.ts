@@ -1,11 +1,12 @@
-import { pipe } from 'fp-ts/function'
+import { number } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
-import ky from 'ky'
+import ky, { HTTPError } from 'ky'
 import type { HttpMethod, Options } from 'ky/distribution/types/options'
 
-import type { Tuple } from '../../shared/utils/fp'
-import { Either, Future } from '../../shared/utils/fp'
+import type { NonEmptyArray, Tuple } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe, Try } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { config } from '../config/unsafe'
@@ -51,4 +52,16 @@ function http<A, O, B>(
   )
 }
 
-export { http }
+const statusesToOption = (
+  ...statuses: NonEmptyArray<number>
+): (<A>(fa: Future<A>) => Future<Maybe<A>>) =>
+  flow(
+    Future.map(Maybe.some),
+    Future.orElseEitherK(e =>
+      e instanceof HTTPError && pipe(statuses, List.elem(number.Eq)(e.response.status))
+        ? Try.success(Maybe.none)
+        : Try.failure(e),
+    ),
+  )
+
+export { http, statusesToOption }

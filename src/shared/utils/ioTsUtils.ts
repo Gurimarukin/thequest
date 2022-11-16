@@ -1,10 +1,11 @@
-import { json } from 'fp-ts'
+import { json, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import type { DecodeError, Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
+import * as E from 'io-ts/Encoder'
 import type { AnyNewtype, CarrierOf } from 'newtype-ts'
 
 import { DayJs } from '../models/DayJs'
@@ -34,6 +35,26 @@ export const decodeError =
 export const fromNewtype = <N extends AnyNewtype = never>(
   codec: Codec<unknown, CarrierOf<N>, CarrierOf<N>>,
 ): Codec<unknown, CarrierOf<N>, N> => codec
+
+/**
+ * NonEmptyString
+ */
+
+const nonEmptyStringDecoder: Decoder<unknown, string> = pipe(
+  D.string,
+  D.refine((str): str is string => !string.isEmpty(str), 'NonEmptyString'),
+)
+const nonEmptyStringEncoder: Encoder<string, string> = E.id<string>()
+const nonEmptyStringCodec: Codec<unknown, string, string> = C.make(
+  nonEmptyStringDecoder,
+  nonEmptyStringEncoder,
+)
+
+export const NonEmptyString = {
+  decoder: nonEmptyStringDecoder,
+  encoder: nonEmptyStringEncoder,
+  codec: nonEmptyStringCodec,
+}
 
 /**
  * DayJsFromISOString

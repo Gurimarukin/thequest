@@ -56,7 +56,7 @@ const JwtHelper = (secret: string) => ({
             ),
         ),
         Future.chain(
-          Future.fromOption(() => Error('undefined payload (this should never happen)')),
+          Future.fromOption(() => Error('Undefined payload (this should never happen)')),
         ),
         Future.chainEitherK(u =>
           pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u))),
