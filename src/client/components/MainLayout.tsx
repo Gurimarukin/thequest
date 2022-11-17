@@ -1,5 +1,4 @@
-/* eslint-disable functional/no-expression-statement,
-                  functional/no-return-void */
+/* eslint-disable functional/no-expression-statement */
 import { Route, parse } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -7,15 +6,24 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import { Platform } from '../../shared/models/api/Platform'
+import type { SummonerShort } from '../../shared/models/api/SummonerShort'
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import type { UserView } from '../../shared/models/api/user/UserView'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
 
 import { useHistory } from '../contexts/HistoryContext'
+import { useStaticData } from '../contexts/StaticDataContext'
 import { useUser } from '../contexts/UserContext'
 import { Assets } from '../imgs/Assets'
-import { PersonIcon, SearchIcon } from '../imgs/svgIcons'
+import {
+  PersonFilledIcon,
+  SearchOutlineIcon,
+  StarFilledIcon,
+  StarOutlineIcon,
+  TimeOutlineIcon,
+} from '../imgs/svgIcons'
 import { appParsers, appRoutes } from '../router/AppRouter'
+import { cssClasses } from '../utils/cssClasses'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http } from '../utils/http'
 import { ClickOutside } from './ClickOutside'
@@ -51,6 +59,10 @@ export const MainLayout: React.FC = ({ children }) => {
 
 const SearchSummoner = (): JSX.Element => {
   const { location, navigate } = useHistory()
+  const { user, recentSearches } = useUser()
+
+  const [isOpen, setIsOpen] = useState(false)
+  const hide = useCallback(() => setIsOpen(false), [])
 
   const summonerNameFromLocation = useMemo(
     () =>
@@ -78,6 +90,11 @@ const SearchSummoner = (): JSX.Element => {
     [],
   )
 
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select()
+    setIsOpen(true)
+  }, [])
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
@@ -87,28 +104,109 @@ const SearchSummoner = (): JSX.Element => {
   )
 
   return (
-    <form onSubmit={handleSubmit} className="flex h-8 text-sm">
-      <Select<Platform>
-        options={Platform.values}
-        value={platform}
-        setValue={setPlatform}
-        className="border-l border-y border-goldenrod bg-black pl-1"
-      />
-      <input
-        type="text"
-        value={summonerName}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        className="border border-goldenrod bg-transparent px-2"
-      />
-      <button type="submit">
-        <SearchIcon className="h-6 text-goldenrod -ml-7" />
-      </button>
-    </form>
+    <div>
+      <form onSubmit={handleSubmit} className="flex h-8 text-sm">
+        <Select<Platform>
+          options={Platform.values}
+          value={platform}
+          setValue={setPlatform}
+          className="border-l border-y border-goldenrod bg-black pl-1"
+        />
+        <ClickOutside onClickOutside={hide}>
+          <input
+            type="text"
+            value={summonerName}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            className="border border-goldenrod bg-transparent px-2"
+          />
+          <ul
+            className={cssClasses(
+              'absolute top-full z-10 bg-zinc-900 border border-goldenrod grid-cols-[auto_auto_auto] items-center gap-y-3 py-2',
+              ['hidden', !isOpen],
+              ['grid', isOpen],
+            )}
+          >
+            {pipe(
+              user,
+              Maybe.fold(
+                () => null,
+                ({ favoriteSearches }) =>
+                  favoriteSearches.map(s => (
+                    <SummonerSearch key={`${s.platform}${s.name}`} type="favorite" summoner={s} />
+                  )),
+              ),
+            )}
+            {recentSearches.map(s => (
+              <SummonerSearch key={`${s.platform}${s.name}`} type="recent" summoner={s} />
+            ))}
+          </ul>
+        </ClickOutside>
+        <button type="submit">
+          <SearchOutlineIcon className="h-6 text-goldenrod -ml-7" />
+        </button>
+      </form>
+    </div>
   )
 }
 
-const handleFocus = (e: React.FocusEvent<HTMLInputElement>): void => e.target.select()
+type SummonerSearchProps = {
+  readonly type: 'favorite' | 'recent'
+  readonly summoner: SummonerShort
+}
+
+const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element => {
+  const { addFavoriteSearch } = useUser()
+  const staticData = useStaticData()
+
+  const handleAddFavoriteClick = useCallback(
+    () => addFavoriteSearch(summoner),
+    [addFavoriteSearch, summoner],
+  )
+
+  return (
+    <li className="contents">
+      <span className="px-2">
+        <TimeOutlineIcon
+          className={cssClasses('h-4 text-goldenrod', ['invisible', type !== 'recent'])}
+        />
+      </span>
+      <Link
+        to={appRoutes.platformSummonerName(summoner.platform, summoner.name)}
+        className="flex items-center hover:underline"
+      >
+        <img
+          src={staticData.assets.summonerIcon(summoner.profileIconId)}
+          alt={`${summoner.name}'s icon`}
+          className="w-12"
+        />
+        <span className="grow ml-2">{summoner.name}</span>
+        <span className="ml-4">{summoner.platform}</span>
+      </Link>
+
+      {((): JSX.Element => {
+        switch (type) {
+          case 'favorite':
+            return (
+              <button type="button" className="p-3 fill-goldenrod hover:fill-red-700">
+                <StarFilledIcon className="h-5" />
+              </button>
+            )
+          case 'recent':
+            return (
+              <button
+                type="button"
+                onClick={handleAddFavoriteClick}
+                className="p-3 text-goldenrod hover:text-wheat"
+              >
+                <StarOutlineIcon className="h-5" />
+              </button>
+            )
+        }
+      })()}
+    </li>
+  )
+}
 
 type State = {
   readonly userName: string
@@ -172,7 +270,7 @@ const AccountDisconnected = (): JSX.Element => {
         {loginIsVisible ? (
           <form
             onSubmit={handleSubmit}
-            className="absolute right-[1px] top-[calc(100%_+_1px)] flex flex-col bg-zinc-900 border-goldenrod border-x border-b px-5 py-4 gap-2"
+            className="absolute right-[1px] top-full flex flex-col bg-zinc-900 border-goldenrod border px-5 py-4 gap-2 z-10"
           >
             <label className="flex justify-between gap-3">
               <span>Login :</span>
@@ -230,7 +328,7 @@ const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
       <div>
         <button type="button" onClick={toggleMenu} className="flex items-end gap-3 py-2">
           <span>{user.userName}</span>
-          <PersonIcon className="h-7 fill-wheat" />
+          <PersonFilledIcon className="h-7 fill-wheat" />
         </button>
         {menuIsVisible ? (
           <ul className="absolute right-0 top-[calc(100%_+_1px)] p-[2px] gap-[2px] flex flex-col">

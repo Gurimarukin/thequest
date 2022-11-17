@@ -2,7 +2,7 @@ import { pipe } from 'fp-ts/function'
 
 import type { ChampionMasteryView } from '../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../shared/models/api/Platform'
-import { SummonerView } from '../../shared/models/api/SummonerView'
+import { SummonerMasteriesView } from '../../shared/models/api/SummonerMasteriesView'
 import { Future, List } from '../../shared/utils/fp'
 
 import type { RiotApiService } from '../services/RiotApiService'
@@ -21,7 +21,10 @@ const SummonerController = (riotApiService: RiotApiService) => ({
         riotApiService.lol.championMasteryBySummoner(platform, summoner.id),
       ),
       Future.map(
-        ({ summoner: { name, profileIconId, summonerLevel }, masteries }): SummonerView => ({
+        ({
+          summoner: { name, profileIconId, summonerLevel },
+          masteries,
+        }): SummonerMasteriesView => ({
           summoner: { name, profileIconId, summonerLevel },
           masteries: pipe(
             masteries,
@@ -48,7 +51,7 @@ const SummonerController = (riotApiService: RiotApiService) => ({
         }),
       ),
       M.fromTaskEither,
-      M.ichain(M.json(SummonerView.codec)),
+      M.ichain(M.json(SummonerMasteriesView.codec)),
     ),
 })
 

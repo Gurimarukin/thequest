@@ -1,3 +1,6 @@
+import type { eq } from 'fp-ts'
+import { string } from 'fp-ts'
+
 import { createEnum } from '../../utils/createEnum'
 
 type Platform = typeof e.T
@@ -18,12 +21,15 @@ const endpoint: Record<Platform, string> = {
   RU: 'ru.api.riotgames.com',
 }
 
+const Eq: eq.Eq<Platform> = string.Eq
+
 const Platform = {
   codec: e.codec,
   decoder: e.decoder,
   encoder: e.encoder,
   values: e.values,
   endpoint,
+  Eq,
 }
 
 export { Platform }

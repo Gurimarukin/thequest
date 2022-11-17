@@ -3,7 +3,7 @@ import * as C from 'io-ts/Codec'
 import { List } from '../../utils/fp'
 import { ChampionMasteryView } from './ChampionMasteryView'
 
-type SummonerView = C.TypeOf<typeof codec>
+type SummonerMasteriesView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   summoner: C.struct({
@@ -14,6 +14,6 @@ const codec = C.struct({
   masteries: List.codec(ChampionMasteryView.codec),
 })
 
-const SummonerView = { codec }
+const SummonerMasteriesView = { codec }
 
-export { SummonerView }
+export { SummonerMasteriesView }

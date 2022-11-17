@@ -4,7 +4,7 @@ import { Status } from 'hyper-ts'
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { Maybe } from '../../shared/utils/fp'
+import { List, Maybe } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
@@ -59,6 +59,7 @@ function UserController(userService: UserService) {
         futureMaybe.map(
           ({ userName }): UserView => ({
             userName,
+            favoriteSearches: List.empty, // TODO
           }),
         ),
         M.fromTaskEither,

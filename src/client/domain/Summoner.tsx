@@ -6,13 +6,14 @@ import { apiRoutes } from '../../shared/ApiRouter'
 import { ChampionKey } from '../../shared/models/api/ChampionKey'
 import type { ChampionMasteryView } from '../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../shared/models/api/Platform'
-import { SummonerView } from '../../shared/models/api/SummonerView'
+import { SummonerMasteriesView } from '../../shared/models/api/SummonerMasteriesView'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { MainLayout } from '../components/MainLayout'
 import { useHistory } from '../contexts/HistoryContext'
 import type { StaticDataContext } from '../contexts/StaticDataContext'
 import { useStaticData } from '../contexts/StaticDataContext'
+import { useUser } from '../contexts/UserContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import { Assets } from '../imgs/Assets'
 import { appRoutes } from '../router/AppRouter'
@@ -32,28 +33,38 @@ export const Summoner = ({ platform, summonerName }: Props): JSX.Element => (
   <MainLayout>
     {basicAsyncRenderer(
       useSWRHttp(apiRoutes.platform.summoner.byName.get(platform, summonerName.toLowerCase()), {}, [
-        SummonerView.codec,
+        SummonerMasteriesView.codec,
         'SummonerView',
       ]),
     )(summoner => (
-      <SummonerViewComponent platform={platform} summoner={summoner} />
+      <SummonerViewComponent platform={platform} value={summoner} />
     ))}
   </MainLayout>
 )
 
 type SummonerViewProps = {
   readonly platform: Platform
-
-  readonly summoner: SummonerView
+  readonly value: SummonerMasteriesView
 }
 
-const SummonerViewComponent = ({ platform, summoner }: SummonerViewProps): JSX.Element => {
+const SummonerViewComponent = ({ platform, value }: SummonerViewProps): JSX.Element => {
   const { navigate } = useHistory()
+  const { addRecentSearch } = useUser()
   const staticData = useStaticData()
 
   useEffect(
-    () => navigate(appRoutes.platformSummonerName(platform, summoner.summoner.name)),
-    [navigate, platform, summoner.summoner.name],
+    () =>
+      addRecentSearch({
+        platform,
+        name: value.summoner.name,
+        profileIconId: value.summoner.profileIconId,
+      }),
+    [addRecentSearch, platform, value.summoner.name, value.summoner.profileIconId],
+  )
+  useEffect(
+    () =>
+      navigate(appRoutes.platformSummonerName(platform, value.summoner.name), { replace: true }),
+    [navigate, platform, value.summoner.name],
   )
 
   const champions = pipe(
@@ -61,7 +72,7 @@ const SummonerViewComponent = ({ platform, summoner }: SummonerViewProps): JSX.E
     List.map(
       ({ key, name }): ChampionMasteryViewWithName =>
         pipe(
-          summoner.masteries,
+          value.masteries,
           List.findFirst(c => c.championId === key),
           Maybe.fold(
             (): ChampionMasteryViewWithName => ({
@@ -115,12 +126,12 @@ const SummonerViewComponent = ({ platform, summoner }: SummonerViewProps): JSX.E
     <div className="h-full overflow-auto p-2 flex flex-col">
       <div className="flex items-center gap-6">
         <img
-          src={staticData.assets.summonerIcon(summoner.summoner.profileIconId)}
-          alt={`${summoner.summoner.name}’s icon`}
+          src={staticData.assets.summonerIcon(value.summoner.profileIconId)}
+          alt={`${value.summoner.name}’s icon`}
           className="h-24 w-24"
         />
-        <span>{summoner.summoner.name}</span>
-        <span>{summoner.summoner.summonerLevel}</span>
+        <span>{value.summoner.name}</span>
+        <span>{value.summoner.summonerLevel}</span>
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-y-2 max-w-7xl self-center w-full">
         {filteredAndSortedChampions.map(champion => (

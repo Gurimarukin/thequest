@@ -1,18 +1,27 @@
 /* eslint-disable functional/no-return-void */
-import { pipe } from 'fp-ts/function'
-import React, { createContext, useContext } from 'react'
+import { flow, pipe } from 'fp-ts/function'
+import { lens } from 'monocle-ts'
+import React, { createContext, useCallback, useContext } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
+import { SummonerShort } from '../../shared/models/api/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { Maybe } from '../../shared/utils/fp'
+import { List, Maybe, Tuple } from '../../shared/utils/fp'
 
+import { constants } from '../config/constants'
+import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
+
+const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<SummonerShort>')
 
 type UserContext = {
   readonly refreshUser: () => void
   readonly user: Maybe<UserView>
+  readonly addFavoriteSearch: (summoner: SummonerShort) => void
+  readonly recentSearches: List<SummonerShort>
+  readonly addRecentSearch: (summoner: SummonerShort) => void
 }
 
 const UserContext = createContext<UserContext | undefined>(undefined)
@@ -33,6 +42,43 @@ export const UserContextProvider: React.FC = ({ children }) => {
     { revalidateOnFocus: false },
   )
 
+  const addFavoriteSearch = useCallback(
+    (summoner: SummonerShort) =>
+      refreshUser(
+        flow(
+          Maybe.fromNullable,
+          Maybe.flatten,
+          Maybe.map(
+            pipe(
+              UserView.Lens.favoriteSearches,
+              lens.modify((summoners: List<SummonerShort>) =>
+                pipe(summoners, List.elem(SummonerShort.byPlatformAndNameEq)(summoner))
+                  ? summoners
+                  : pipe(summoners, List.append(summoner), List.sort(SummonerShort.byNameOrd)),
+              ),
+            ),
+          ),
+        ),
+        {
+          revalidate: false /* TODO: send to server */,
+        },
+      ),
+    [refreshUser],
+  )
+
+  const [recentSearches_, setRecentSearches_] = useLocalStorageState(
+    constants.recentSearchesLocalStorageKey,
+    recentSearchesCodec,
+    List.empty,
+  )
+  const addRecentSearch = useCallback(
+    (summoner: SummonerShort) =>
+      setRecentSearches_(
+        flow(List.prepend(summoner), List.uniq(SummonerShort.byPlatformAndNameEq)),
+      ),
+    [setRecentSearches_],
+  )
+
   if (error !== undefined) {
     return (
       <div className="flex justify-center">
@@ -41,9 +87,22 @@ export const UserContextProvider: React.FC = ({ children }) => {
     )
   }
 
+  const user = pipe(Maybe.fromNullable(data), Maybe.flatten)
+  const recentSearches = pipe(
+    user,
+    Maybe.fold(
+      () => recentSearches_,
+      ({ favoriteSearches }) =>
+        pipe(recentSearches_, List.difference(SummonerShort.byPlatformAndNameEq)(favoriteSearches)),
+    ),
+  )
+
   const value: UserContext = {
     refreshUser: () => refreshUser(),
-    user: pipe(Maybe.fromNullable(data), Maybe.flatten),
+    user,
+    addFavoriteSearch,
+    recentSearches,
+    addRecentSearch,
   }
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>

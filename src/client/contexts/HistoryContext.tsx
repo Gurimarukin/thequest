@@ -3,9 +3,16 @@ import * as history from 'history'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
+type NavigateOptions = {
+  /**
+   * @default false
+   */
+  readonly replace?: boolean
+}
+
 type HistoryContext = {
   readonly location: history.Location
-  readonly navigate: (to: string) => void
+  readonly navigate: (to: string, options?: NavigateOptions) => void
   readonly query: qs.ParsedQs
 }
 
@@ -17,7 +24,11 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
   const [location, setLocation] = useState(h.location)
   useEffect(() => h.listen(l => setLocation(l.location)), [h])
 
-  const navigate = useCallback((to: string) => h.push({ pathname: to, search: '', hash: '' }), [h])
+  const navigate = useCallback(
+    (to: string, { replace = false }: NavigateOptions = {}) =>
+      (replace ? h.replace : h.push)({ pathname: to, search: '', hash: '' }),
+    [h],
+  )
 
   const query = useMemo(() => qs.parse(location.search.slice(1)), [location.search])
 
