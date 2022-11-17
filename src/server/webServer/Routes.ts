@@ -27,7 +27,7 @@ export const Routes = (
     m(api.healthcheck.get, () => healthCheckController.check),
     m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
     m(api.platform.summoner.byName.get, ({ platform, summonerName }) =>
-      summonerController.byName(platform, summonerName),
+      summonerController.findByName(platform, summonerName),
     ),
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),

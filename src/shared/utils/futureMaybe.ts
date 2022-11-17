@@ -116,7 +116,9 @@ export const futureMaybe = {
   Do,
   ApplyPar,
   Functor,
-  alt: optionT.alt(Future.Monad),
+  alt: optionT.alt(Future.Monad) as <A>(
+    second: Lazy<Future<Maybe<A>>>,
+  ) => (first: Future<Maybe<A>>) => Future<Maybe<A>>,
   apS: apply.apS(ApplyPar),
   bind: fpTsChain.bind(Chain),
   bindTo: functor.bindTo(Functor),

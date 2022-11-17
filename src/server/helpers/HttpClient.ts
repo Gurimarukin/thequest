@@ -1,4 +1,4 @@
-import { json, task } from 'fp-ts'
+import { json, number, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { OptionsOfJSONResponseBody } from 'got'
 import got, { HTTPError } from 'got'
@@ -6,8 +6,8 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 
 import type { Method } from '../../shared/models/Method'
-import type { Tuple } from '../../shared/utils/fp'
-import { Either, Future, IO, Maybe, Try } from '../../shared/utils/fp'
+import type { NonEmptyArray, Tuple } from '../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, Try } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -73,6 +73,18 @@ const HttpClient = (Logger: LoggerGetter) => {
 
   return { http }
 }
+
+export const statusesToOption = (
+  ...statuses: NonEmptyArray<number>
+): (<A>(fa: Future<A>) => Future<Maybe<A>>) =>
+  flow(
+    Future.map(Maybe.some),
+    Future.orElseEitherK(e =>
+      e instanceof HTTPError && pipe(statuses, List.elem(number.Eq)(e.response.statusCode))
+        ? Try.success(Maybe.none)
+        : Try.failure(e),
+    ),
+  )
 
 export { HttpClient }
 

@@ -1,10 +1,41 @@
 import { predicate, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import type { Codec } from 'io-ts/Codec'
+import * as C from 'io-ts/Codec'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
+import type { Encoder } from 'io-ts/Encoder'
 
 import { DayJs } from '../../shared/models/DayJs'
-import { List, NonEmptyArray } from '../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+
+/**
+ * DayJsFromDate
+ */
+
+const dayJsFromDateDecoder: Decoder<unknown, DayJs> = {
+  decode: i =>
+    pipe(
+      i,
+      Maybe.fromPredicate((u): u is Date => u instanceof Date),
+      Maybe.map(d => DayJs.of(d)),
+      Maybe.filter(DayJs.isValid),
+      Maybe.fold(() => D.failure(i, 'DayJsFromDate'), D.success),
+    ),
+}
+
+const dayJsFromDateEncoder: Encoder<Date, DayJs> = { encode: DayJs.toDate }
+
+const dayJsFromDateCodec: Codec<unknown, Date, DayJs> = C.make(
+  dayJsFromDateDecoder,
+  dayJsFromDateEncoder,
+)
+
+export const DayJsFromDate = {
+  decoder: dayJsFromDateDecoder,
+  encoder: dayJsFromDateEncoder,
+  codec: dayJsFromDateCodec,
+}
 
 /**
  * DayJsFromNumber

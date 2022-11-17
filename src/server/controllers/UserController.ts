@@ -7,12 +7,13 @@ import type { SummonerShort } from '../../shared/models/api/summoner/SummonerSho
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { Future, List, Maybe } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe } from '../../shared/utils/fp'
+import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
 import type { TokenContent } from '../models/user/TokenContent'
-import type { RiotApiService } from '../services/RiotApiService'
+import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -20,7 +21,7 @@ import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 type UserController = ReturnType<typeof UserController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function UserController(riotApiService: RiotApiService, userService: UserService) {
+function UserController(summonerService: SummonerService, userService: UserService) {
   const login: EndedMiddleware = pipe(
     M.decodeBody([LoginPayload.codec, 'LoginPayload']),
     M.matchE(
@@ -67,11 +68,12 @@ function UserController(riotApiService: RiotApiService, userService: UserService
               favoriteSearches,
               List.traverse(Future.ApplicativePar)(({ platform, puuid }) =>
                 pipe(
-                  riotApiService.lol.summoner.byPuuid(platform, puuid),
+                  summonerService.findByPuuid(platform, puuid),
                   // TODO: when not found, remove from favorites and from summoners db
-                  Future.map((summoner): SummonerShort => ({ ...summoner, platform })),
+                  futureMaybe.map((summoner): SummonerShort => ({ ...summoner, platform })),
                 ),
               ),
+              Future.map(List.compact),
             ),
           }),
         ),
@@ -84,15 +86,19 @@ function UserController(riotApiService: RiotApiService, userService: UserService
         M.decodeBody([PlatformWithName.codec, 'PlatformWithName']),
         M.ichainTaskEitherK(({ platform, name }) =>
           pipe(
-            riotApiService.lol.summoner.byName(platform, name),
-            Future.chain(({ puuid }) =>
-              userService.addFavoriteSearch(user.id, { platform, puuid }),
+            summonerService.findByName(platform, name),
+            Future.map(Either.fromOption(() => 'Summoner not found')),
+            futureEither.chain(({ puuid }) =>
+              pipe(
+                userService.addFavoriteSearch(user.id, { platform, puuid }),
+                Future.map(Either.fromOption(() => 'User not found')),
+              ),
             ),
           ),
         ),
         M.ichain(
-          Maybe.fold(
-            () => M.sendWithStatus(Status.NotFound)('User not found'),
+          Either.fold(
+            e => M.sendWithStatus(Status.NotFound)(e),
             added =>
               added
                 ? M.noContent()

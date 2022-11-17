@@ -1,3 +1,4 @@
+import { pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 
 import type { Method } from '../../shared/models/Method'
@@ -5,11 +6,12 @@ import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { Lang } from '../../shared/models/api/Lang'
 import { Platform } from '../../shared/models/api/Platform'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
-import type { Future, Tuple } from '../../shared/utils/fp'
+import type { Future, Maybe, Tuple } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
 
 import { constants } from '../config/constants'
 import type { HttpClient, HttpOptions } from '../helpers/HttpClient'
+import { statusesToOption } from '../helpers/HttpClient'
 import { Puuid } from '../models/riot/Puuid'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
@@ -43,60 +45,72 @@ const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {
       },
 
       summoner: {
-        byName: (platform: Platform, summonerName: string): Future<RiotSummoner> =>
-          httpWithApiKey(
-            [platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`), 'get'],
-            {},
-            [RiotSummoner.decoder, 'RiotSummoner'],
+        byName: (platform: Platform, summonerName: string): Future<Maybe<RiotSummoner>> =>
+          pipe(
+            httpWithApiKey(
+              [platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`), 'get'],
+              {},
+              [RiotSummoner.decoder, 'RiotSummoner'],
+            ),
+            statusesToOption(404),
           ),
 
-        byPuuid: (platform: Platform, encryptedPUUID: Puuid) =>
-          httpWithApiKey(
-            [
-              platformUrl(
-                platform,
-                `/lol/summoner/v4/summoners/by-puuid/${Puuid.unwrap(encryptedPUUID)}`,
-              ),
-              'get',
-            ],
-            {},
-            [RiotSummoner.decoder, 'RiotSummoner'],
+        byPuuid: (platform: Platform, encryptedPUUID: Puuid): Future<Maybe<RiotSummoner>> =>
+          pipe(
+            httpWithApiKey(
+              [
+                platformUrl(
+                  platform,
+                  `/lol/summoner/v4/summoners/by-puuid/${Puuid.unwrap(encryptedPUUID)}`,
+                ),
+                'get',
+              ],
+              {},
+              [RiotSummoner.decoder, 'RiotSummoner'],
+            ),
+            statusesToOption(404),
           ),
 
         /**
          * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
          * @deprecated
          */
-        byId: (platform: Platform, encryptedSummonerId: SummonerId): Future<RiotSummoner> =>
-          httpWithApiKey(
-            [
-              platformUrl(
-                platform,
-                `/lol/summoner/v4/summoners/${SummonerId.unwrap(encryptedSummonerId)}`,
-              ),
-              'get',
-            ],
-            {},
-            [RiotSummoner.decoder, 'RiotSummoner'],
+        byId: (platform: Platform, encryptedSummonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
+          pipe(
+            httpWithApiKey(
+              [
+                platformUrl(
+                  platform,
+                  `/lol/summoner/v4/summoners/${SummonerId.unwrap(encryptedSummonerId)}`,
+                ),
+                'get',
+              ],
+              {},
+              [RiotSummoner.decoder, 'RiotSummoner'],
+            ),
+            statusesToOption(404),
           ),
       },
 
       championMasteryBySummoner: (
         platform: Platform,
         encryptedSummonerId: SummonerId,
-      ): Future<List<RiotChampionMastery>> =>
-        httpWithApiKey(
-          [
-            platformUrl(
-              platform,
-              `/lol/champion-mastery/v4/champion-masteries/by-summoner/${SummonerId.unwrap(
-                encryptedSummonerId,
-              )}`,
-            ),
-            'get',
-          ],
-          {},
-          [List.decoder(RiotChampionMastery.decoder), 'List<ChampionMastery>'],
+      ): Future<Maybe<List<RiotChampionMastery>>> =>
+        pipe(
+          httpWithApiKey(
+            [
+              platformUrl(
+                platform,
+                `/lol/champion-mastery/v4/champion-masteries/by-summoner/${SummonerId.unwrap(
+                  encryptedSummonerId,
+                )}`,
+              ),
+              'get',
+            ],
+            {},
+            [List.decoder(RiotChampionMastery.decoder), 'List<ChampionMastery>'],
+          ),
+          statusesToOption(404),
         ),
     },
   }

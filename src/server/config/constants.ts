@@ -15,5 +15,8 @@ export const constants = {
   riotApi: {
     xRiotToken: 'X-Riot-Token',
     regionalHost: 'europe.api.riotgames.com',
+    cache: {
+      summonerTtl: MsDuration.minutes(30),
+    },
   },
 }

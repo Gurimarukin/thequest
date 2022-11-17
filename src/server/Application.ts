@@ -20,14 +20,15 @@ export const Application = ({
   Logger,
   healthCheckService,
   riotApiService,
+  summonerService,
   userService,
 }: Context): IO<NotUsed> => {
   const logger = Logger('Application')
 
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(riotApiService)
-  const summonerController = SummonerController(riotApiService)
-  const userController = UserController(riotApiService, userService)
+  const summonerController = SummonerController(riotApiService, summonerService)
+  const userController = UserController(summonerService, userService)
 
   const withIp = WithIp(Logger, config)
   const rateLimiter = RateLimiter(Logger, withIp, constants.rateLimiterLifeTime)

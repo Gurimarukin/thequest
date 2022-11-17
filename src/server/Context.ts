@@ -12,10 +12,12 @@ import { MongoCollectionGetter } from './models/mongo/MongoCollection'
 import { WithDb } from './models/mongo/WithDb'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { MigrationPersistence } from './persistence/MigrationPersistence'
+import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
 import { HealthCheckService } from './services/HealthCheckService'
 import { MigrationService } from './services/MigrationService'
 import { RiotApiService } from './services/RiotApiService'
+import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
 import { getOnError } from './utils/getOnError'
 
@@ -26,6 +28,7 @@ const of = (
   config: Config,
   Logger: LoggerGetter,
   healthCheckPersistence: HealthCheckPersistence,
+  summonerPersistence: SummonerPersistence,
   userPersistence: UserPersistence,
 ) => {
   const httpClient = HttpClient(Logger)
@@ -33,6 +36,7 @@ const of = (
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const riotApiService = RiotApiService(config.riotApiKey, httpClient)
+  const summonerService = SummonerService(riotApiService, summonerPersistence)
   const userService = UserService(Logger, userPersistence, jwtHelper)
 
   return {
@@ -40,6 +44,7 @@ const of = (
     Logger,
     healthCheckService,
     riotApiService,
+    summonerService,
     userService,
   }
 }
@@ -57,9 +62,10 @@ const load = (config: Config): Future<Context> => {
 
   const healthCheckPersistence = HealthCheckPersistence(withDb)
   const migrationPersistence = MigrationPersistence(Logger, mongoCollection)
+  const summonerPersistence = SummonerPersistence(Logger, mongoCollection)
   const userPersistence = UserPersistence(Logger, mongoCollection)
 
-  const context = of(config, Logger, healthCheckPersistence, userPersistence)
+  const context = of(config, Logger, healthCheckPersistence, summonerPersistence, userPersistence)
   const { healthCheckService } = context
 
   const migrationService = MigrationService(Logger, mongoCollection, migrationPersistence)
@@ -89,7 +95,10 @@ const load = (config: Config): Future<Context> => {
     Future.chain(() => waitDatabaseReady),
     Future.chain(() => migrationService.applyMigrations),
     Future.chain(() =>
-      NonEmptyArray.sequence(Future.ApplicativeSeq)([userPersistence.ensureIndexes]),
+      NonEmptyArray.sequence(Future.ApplicativeSeq)([
+        summonerPersistence.ensureIndexes,
+        userPersistence.ensureIndexes,
+      ]),
     ),
     Future.chainIOEitherK(() => logger.info('Ensured indexes')),
     Future.map(() => context),
