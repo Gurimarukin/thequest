@@ -1,13 +1,17 @@
+/* eslint-disable functional/no-expression-statement */
+
 /* eslint-disable functional/no-return-void */
+import { predicate } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { createContext, useCallback, useContext } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
+import { SummonerId } from '../../shared/models/api/SummonerId'
 import { SummonerShort } from '../../shared/models/api/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { List, Maybe, Tuple } from '../../shared/utils/fp'
+import { Future, List, Maybe, Tuple } from '../../shared/utils/fp'
 
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
@@ -22,6 +26,7 @@ type UserContext = {
   readonly addFavoriteSearch: (summoner: SummonerShort) => void
   readonly recentSearches: List<SummonerShort>
   readonly addRecentSearch: (summoner: SummonerShort) => void
+  readonly removeRecentSearch: (id: SummonerId) => void
 }
 
 const UserContext = createContext<UserContext | undefined>(undefined)
@@ -44,38 +49,52 @@ export const UserContextProvider: React.FC = ({ children }) => {
 
   const addFavoriteSearch = useCallback(
     (summoner: SummonerShort) =>
-      refreshUser(
-        flow(
-          Maybe.fromNullable,
-          Maybe.flatten,
-          Maybe.map(
-            pipe(
-              UserView.Lens.favoriteSearches,
-              lens.modify((summoners: List<SummonerShort>) =>
-                pipe(summoners, List.elem(SummonerShort.byPlatformAndNameEq)(summoner))
-                  ? summoners
-                  : pipe(summoners, List.append(summoner), List.sort(SummonerShort.byNameOrd)),
-              ),
-            ),
+      pipe(
+        data,
+        Maybe.fromNullable,
+        Maybe.flatten,
+        Maybe.filter(
+          flow(
+            UserView.Lens.favoriteSearches.get,
+            predicate.not(List.elem(SummonerShort.byIdEq)(summoner)),
           ),
         ),
-        {
-          revalidate: false /* TODO: send to server */,
-        },
+        Maybe.map(
+          pipe(
+            UserView.Lens.favoriteSearches,
+            lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
+          ),
+        ),
+        Maybe.map(newData => {
+          refreshUser(Maybe.some(newData), { revalidate: false })
+          pipe(
+            http(apiRoutes.user.self.favorites.put, { json: [SummonerId.codec, summoner.id] }),
+            Future.map(() => refreshUser()),
+            futureRunUnsafe,
+          )
+        }),
       ),
-    [refreshUser],
+    [data, refreshUser],
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(
-    constants.recentSearchesLocalStorageKey,
+    constants.recentSearches.localStorageKey,
     recentSearchesCodec,
     List.empty,
   )
   const addRecentSearch = useCallback(
     (summoner: SummonerShort) =>
       setRecentSearches_(
-        flow(List.prepend(summoner), List.uniq(SummonerShort.byPlatformAndNameEq)),
+        flow(
+          List.prepend(summoner),
+          List.uniq(SummonerShort.byIdEq),
+          List.takeLeft(constants.recentSearches.maxCount),
+        ),
       ),
+    [setRecentSearches_],
+  )
+  const removeRecentSearch = useCallback(
+    (id: SummonerId) => setRecentSearches_(List.filter(s => s.id !== id)),
     [setRecentSearches_],
   )
 
@@ -93,7 +112,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
     Maybe.fold(
       () => recentSearches_,
       ({ favoriteSearches }) =>
-        pipe(recentSearches_, List.difference(SummonerShort.byPlatformAndNameEq)(favoriteSearches)),
+        pipe(recentSearches_, List.difference(SummonerShort.byIdEq)(favoriteSearches)),
     ),
   )
 
@@ -103,6 +122,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
     addFavoriteSearch,
     recentSearches,
     addRecentSearch,
+    removeRecentSearch,
   }
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>

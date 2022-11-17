@@ -9,13 +9,14 @@ import { Platform } from '../../shared/models/api/Platform'
 import type { SummonerShort } from '../../shared/models/api/SummonerShort'
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import type { UserView } from '../../shared/models/api/user/UserView'
-import { Either, Future, Maybe } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 
 import { useHistory } from '../contexts/HistoryContext'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useUser } from '../contexts/UserContext'
 import { Assets } from '../imgs/Assets'
 import {
+  CloseFilledIcon,
   PersonFilledIcon,
   SearchOutlineIcon,
   StarFilledIcon,
@@ -103,6 +104,16 @@ const SearchSummoner = (): JSX.Element => {
     [navigate, platform, summonerName],
   )
 
+  const favoriteSearches = pipe(
+    user,
+    Maybe.fold(
+      () => List.empty,
+      u => u.favoriteSearches,
+    ),
+  )
+  const showSearches =
+    isOpen && (List.isNonEmpty(favoriteSearches) || List.isNonEmpty(recentSearches))
+
   return (
     <div>
       <form onSubmit={handleSubmit} className="flex h-8 text-sm">
@@ -123,20 +134,13 @@ const SearchSummoner = (): JSX.Element => {
           <ul
             className={cssClasses(
               'absolute top-full z-10 bg-zinc-900 border border-goldenrod grid-cols-[auto_auto_auto] items-center gap-y-3 py-2',
-              ['hidden', !isOpen],
-              ['grid', isOpen],
+              ['hidden', !showSearches],
+              ['grid', showSearches],
             )}
           >
-            {pipe(
-              user,
-              Maybe.fold(
-                () => null,
-                ({ favoriteSearches }) =>
-                  favoriteSearches.map(s => (
-                    <SummonerSearch key={`${s.platform}${s.name}`} type="favorite" summoner={s} />
-                  )),
-              ),
-            )}
+            {favoriteSearches.map(s => (
+              <SummonerSearch key={`${s.platform}${s.name}`} type="favorite" summoner={s} />
+            ))}
             {recentSearches.map(s => (
               <SummonerSearch key={`${s.platform}${s.name}`} type="recent" summoner={s} />
             ))}
@@ -156,7 +160,7 @@ type SummonerSearchProps = {
 }
 
 const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element => {
-  const { addFavoriteSearch } = useUser()
+  const { addFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
   const handleAddFavoriteClick = useCallback(
@@ -164,13 +168,30 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
     [addFavoriteSearch, summoner],
   )
 
+  const handleRemoveFavoriteClick = useCallback(
+    () => removeRecentSearch(summoner.id),
+    [removeRecentSearch, summoner.id],
+  )
+
   return (
     <li className="contents">
-      <span className="px-2">
-        <TimeOutlineIcon
-          className={cssClasses('h-4 text-goldenrod', ['invisible', type !== 'recent'])}
-        />
-      </span>
+      {((): JSX.Element => {
+        switch (type) {
+          case 'favorite':
+            return (
+              <span className="p-2">
+                <TimeOutlineIcon className="h-4 invisible" />
+              </span>
+            )
+          case 'recent':
+            return (
+              <button type="button" onClick={handleRemoveFavoriteClick} className="group p-2">
+                <TimeOutlineIcon className="h-4 text-goldenrod group-hover:hidden" />
+                <CloseFilledIcon className="h-4 fill-red-700 hidden group-hover:flex" />
+              </button>
+            )
+        }
+      })()}
       <Link
         to={appRoutes.platformSummonerName(summoner.platform, summoner.name)}
         className="flex items-center hover:underline"

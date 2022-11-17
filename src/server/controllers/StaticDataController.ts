@@ -2,8 +2,7 @@ import { pipe } from 'fp-ts/function'
 
 import type { Lang } from '../../shared/models/api/Lang'
 import { StaticData } from '../../shared/models/api/StaticData'
-import type { StaticDataChampion } from '../../shared/models/api/StaticDataChampion'
-import { Dict, Future, List, NonEmptyArray } from '../../shared/utils/fp'
+import { Dict, Future, List, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 
 import type { RiotApiService } from '../services/RiotApiService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
@@ -24,11 +23,7 @@ const StaticDataController = (riotApiService: RiotApiService) => ({
       Future.map(
         ({ version, champions }): StaticData => ({
           version,
-          champions: pipe(
-            champions.data,
-            Dict.toReadonlyArray,
-            List.map(([, { id, key, name }]): StaticDataChampion => ({ id, key, name })),
-          ),
+          champions: pipe(champions.data, Dict.toReadonlyArray, List.map(Tuple.snd)),
         }),
       ),
       M.fromTaskEither,

@@ -55,11 +55,18 @@ const SummonerViewComponent = ({ platform, value }: SummonerViewProps): JSX.Elem
   useEffect(
     () =>
       addRecentSearch({
+        id: value.summoner.id,
         platform,
         name: value.summoner.name,
         profileIconId: value.summoner.profileIconId,
       }),
-    [addRecentSearch, platform, value.summoner.name, value.summoner.profileIconId],
+    [
+      addRecentSearch,
+      platform,
+      value.summoner.id,
+      value.summoner.name,
+      value.summoner.profileIconId,
+    ],
   )
   useEffect(
     () =>

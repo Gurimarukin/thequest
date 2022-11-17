@@ -1,3 +1,6 @@
 export const constants = {
-  recentSearchesLocalStorageKey: 'recentSearches',
+  recentSearches: {
+    localStorageKey: 'recentSearches',
+    maxCount: 10,
+  },
 }

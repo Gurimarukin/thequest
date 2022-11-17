@@ -22,6 +22,7 @@ const apiPlatformSummoner = apiPlatform.then(lit('summoner'))
 const apiPlatformSummonerByName = apiPlatformSummoner.then(lit('byName')).then(str('summonerName'))
 const apiUser = api.then(lit('user'))
 const apiUserSelf = apiUser.then(lit('self'))
+const apiUserSelfFavorites = apiUserSelf.then(lit('favorites'))
 const apiUserLogin = apiUser.then(lit('login'))
 const apiUserLogout = apiUser.then(lit('logout'))
 
@@ -30,6 +31,7 @@ const healthcheckGet = m(apiHealthcheck, 'get')
 const staticDataLangGet = m(apiStaticDataLang, 'get')
 const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
 const userSelfGet = m(apiUserSelf, 'get')
+const userSelfFavoritesPut = m(apiUserSelfFavorites, 'put')
 const userLoginPost = m(apiUserLogin, 'post')
 const userLogoutPost = m(apiUserLogout, 'post')
 
@@ -46,7 +48,10 @@ export const apiParsers = {
     },
   },
   user: {
-    self: { get: p(userSelfGet) },
+    self: {
+      get: p(userSelfGet),
+      favorites: { put: p(userSelfFavoritesPut) },
+    },
     login: { post: p(userLoginPost) },
     logout: { post: p(userLogoutPost) },
   },
@@ -67,7 +72,10 @@ export const apiRoutes = {
     },
   },
   user: {
-    self: { get: r(userSelfGet, {}) },
+    self: {
+      get: r(userSelfGet, {}),
+      favorites: { put: r(userSelfFavoritesPut, {}) },
+    },
     login: { post: r(userLoginPost, {}) },
     logout: { post: r(userLogoutPost, {}) },
   },
