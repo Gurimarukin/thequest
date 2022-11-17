@@ -27,7 +27,7 @@ export const Application = ({
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(riotApiService)
   const summonerController = SummonerController(riotApiService)
-  const userController = UserController(userService)
+  const userController = UserController(riotApiService, userService)
 
   const withIp = WithIp(Logger, config)
   const rateLimiter = RateLimiter(Logger, withIp, constants.rateLimiterLifeTime)

@@ -4,7 +4,7 @@ import * as C from 'io-ts/Codec'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
 
-import { fromNewtype } from '../../utils/ioTsUtils'
+import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
 type SummonerId = Newtype<{ readonly SummonerId: unique symbol }, string>
 

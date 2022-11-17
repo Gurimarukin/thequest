@@ -1,10 +1,11 @@
 import { pipe } from 'fp-ts/function'
 
 import { UserName } from '../../shared/models/api/user/UserName'
-import type { Maybe, NotUsed } from '../../shared/utils/fp'
-import { Future } from '../../shared/utils/fp'
+import type { NotUsed } from '../../shared/utils/fp'
+import { Future, Maybe } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
+import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { User } from '../models/user/User'
@@ -15,7 +16,7 @@ type UserPersistence = ReturnType<typeof UserPersistence>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) {
   const logger = Logger('UserPersistence')
-  const collection = FpCollection(logger)([User.codec, 'WebUser'])(mongoCollection('user'))
+  const collection = FpCollection(logger)([User.codec, 'User'])(mongoCollection('user'))
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
     { key: { id: -1 }, unique: true },
@@ -35,6 +36,22 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
       pipe(
         collection.insertOne(user),
         Future.map(r => r.acknowledged),
+      ),
+
+    /**
+     * @returns none if `id` doesn't exist, some(false) if `search` is already in favorites
+     */
+    addFavoriteSearch: (id: UserId, search: PlatformWithPuuid): Future<Maybe<boolean>> =>
+      pipe(
+        collection.collection.future(c =>
+          c.updateOne(
+            { id: UserId.codec.encode(id) },
+            { $addToSet: { favoriteSearches: PlatformWithPuuid.codec.encode(search) } },
+          ),
+        ),
+        Future.map(res =>
+          res.matchedCount === 1 ? Maybe.some(res.modifiedCount === 1) : Maybe.none,
+        ),
       ),
   }
 }

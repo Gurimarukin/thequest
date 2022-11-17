@@ -21,23 +21,6 @@ const dayJsFromNumberDecoder: Decoder<unknown, DayJs> = pipe(
 export const DayJsFromNumber = { decoder: dayJsFromNumberDecoder }
 
 /**
- * BooleanFromString
- */
-
-const booleanFromStringDecoder: Decoder<unknown, boolean> = pipe(
-  D.string,
-  D.parse(s =>
-    s === 'true'
-      ? D.success(true)
-      : s === 'false'
-      ? D.success(false)
-      : D.failure(s, 'BooleanFromString'),
-  ),
-)
-
-export const BooleanFromString = { decoder: booleanFromStringDecoder }
-
-/**
  * NumberFromString
  */
 

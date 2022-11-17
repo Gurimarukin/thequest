@@ -3,7 +3,7 @@ import * as C from 'io-ts/Codec'
 import { lens } from 'monocle-ts'
 
 import { List } from '../../../utils/fp'
-import { SummonerShort } from '../SummonerShort'
+import { SummonerShort } from '../summoner/SummonerShort'
 import { UserName } from './UserName'
 
 type UserView = C.TypeOf<typeof codec>

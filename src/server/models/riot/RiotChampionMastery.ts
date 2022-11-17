@@ -1,9 +1,9 @@
 import * as D from 'io-ts/Decoder'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import { SummonerId } from '../../../shared/models/api/SummonerId'
 
-import { DayJsFromNumber } from '../../../client/utils/ioTsUtils'
+import { DayJsFromNumber } from '../../utils/ioTsUtils'
+import { SummonerId } from './SummonerId'
 
 type RiotChampionMastery = D.TypeOf<typeof decoder>
 

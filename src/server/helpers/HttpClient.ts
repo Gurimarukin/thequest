@@ -1,13 +1,13 @@
-import { json } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { json, task } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
 import type { OptionsOfJSONResponseBody } from 'got'
-import got from 'got'
+import got, { HTTPError } from 'got'
 import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 
 import type { Method } from '../../shared/models/Method'
 import type { Tuple } from '../../shared/utils/fp'
-import { Either, Future } from '../../shared/utils/fp'
+import { Either, Future, IO, Maybe, Try } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -51,8 +51,15 @@ const HttpClient = (Logger: LoggerGetter) => {
           body: body === undefined ? undefined : JSON.stringify(body),
         }),
       ),
-      Future.chainFirstIOEitherK(res => logger.debug(formatRequest(method, url, res.statusCode))),
-
+      task.chainFirstIOK(
+        flow(
+          Try.fold(
+            e => (e instanceof HTTPError ? Maybe.some(e.response.statusCode) : Maybe.none),
+            res => Maybe.some(res.statusCode),
+          ),
+          Maybe.fold(() => IO.notUsed, flow(formatRequest(method, url), logger.trace)),
+        ),
+      ),
       Future.chainEitherK(res =>
         pipe(json.parse(res.body as string), Either.mapLeft(unknownToError)),
       ),
@@ -69,5 +76,7 @@ const HttpClient = (Logger: LoggerGetter) => {
 
 export { HttpClient }
 
-const formatRequest = (method: Method, url: string, status: number): string =>
-  `${method.toUpperCase()} ${url} ${status}`
+const formatRequest =
+  (method: Method, url: string) =>
+  (statusCode: number): string =>
+    `${method.toUpperCase()} ${url} - ${statusCode}`

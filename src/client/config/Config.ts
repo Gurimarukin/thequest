@@ -4,9 +4,7 @@ import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { parseConfig } from '../../shared/utils/config/parseConfig'
 import type { Dict, Try } from '../../shared/utils/fp'
 import { Either, Maybe } from '../../shared/utils/fp'
-import { URLFromString } from '../../shared/utils/ioTsUtils'
-
-import { BooleanFromString } from '../utils/ioTsUtils'
+import { BooleanFromString, URLFromString } from '../../shared/utils/ioTsUtils'
 
 const seqS = ValidatedNea.getSeqS<string>()
 

@@ -34,7 +34,7 @@ import { UpgradeHandler } from './models/UpgradeHandler'
 
 const accessControl = {
   allowCredentials: true,
-  allowMethods: ['GET', 'POST', 'DELETE'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
   exposeHeaders: ['Set-Cookie'],
 }

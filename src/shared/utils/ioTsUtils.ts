@@ -96,3 +96,20 @@ const urlFromStringDecoder: Decoder<unknown, URL> = pipe(
 )
 
 export const URLFromString = { decoder: urlFromStringDecoder }
+
+/**
+ * BooleanFromString
+ */
+
+const booleanFromStringDecoder: Decoder<unknown, boolean> = pipe(
+  D.string,
+  D.parse(s =>
+    s === 'true'
+      ? D.success(true)
+      : s === 'false'
+      ? D.success(false)
+      : D.failure(s, 'BooleanFromString'),
+  ),
+)
+
+export const BooleanFromString = { decoder: booleanFromStringDecoder }

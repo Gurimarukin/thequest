@@ -1,11 +1,9 @@
 import * as D from 'io-ts/Decoder'
 
-import { SummonerId } from '../../../shared/models/api/SummonerId'
-
-import { DayJsFromNumber } from '../../../client/utils/ioTsUtils'
-
+import { DayJsFromNumber } from '../../utils/ioTsUtils'
 import { AccountId } from './AccountId'
 import { Puuid } from './Puuid'
+import { SummonerId } from './SummonerId'
 
 type RiotSummoner = D.TypeOf<typeof decoder>
 

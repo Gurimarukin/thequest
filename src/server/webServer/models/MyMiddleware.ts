@@ -63,6 +63,11 @@ const ichain = M.ichain as <A, O, Z, B>(
   f: (a: A) => MyMiddleware<O, Z, B>,
 ) => <I>(ma: MyMiddleware<I, O, A>) => MyMiddleware<I, Z, B>
 
+const ichainTaskEitherK = <A, B>(
+  f: (a: A) => Future<B>,
+): (<I, O>(ma: MyMiddleware<I, O, A>) => MyMiddleware<I, O, B>) =>
+  ichain(flow(f, fb => M.fromTaskEither(fb)))
+
 const orElse = M.orElse as <I, O, A>(
   f: (e: Error) => MyMiddleware<I, O, A>,
 ) => (ma: MyMiddleware<I, O, A>) => MyMiddleware<I, O, A>
@@ -187,6 +192,9 @@ const sendWithStatus =
       ichain(() => M.send(message)),
     )
 
+const noContent = (headers: Dict<string, string> = {}): EndedMiddleware =>
+  sendWithStatus(Status.NoContent, headers)('')
+
 const jsonWithStatus =
   <O, A>(status: Status, encoder: Encoder<O, A>, headers: Dict<string, string> = {}) =>
   (data: A): EndedMiddleware =>
@@ -212,6 +220,7 @@ const MyMiddleware = {
   fromIO,
   map,
   ichain,
+  ichainTaskEitherK,
   orElse,
   cookie,
 
@@ -228,6 +237,7 @@ const MyMiddleware = {
   getUrl,
   getBodyString,
   sendWithStatus,
+  noContent,
   jsonWithStatus,
   json: jsonOK,
 

@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { Platform } from '../../shared/models/api/Platform'
-import { SummonerMasteriesView } from '../../shared/models/api/SummonerMasteriesView'
+import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { Future } from '../../shared/utils/fp'
 
 import type { RiotApiService } from '../services/RiotApiService'

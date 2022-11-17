@@ -1,16 +1,16 @@
 /* eslint-disable functional/no-expression-statement */
 import { Route, parse } from 'fp-ts-routing'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { apiRoutes } from '../../shared/ApiRouter'
 import { Platform } from '../../shared/models/api/Platform'
-import type { SummonerShort } from '../../shared/models/api/SummonerShort'
+import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
 import type { UserView } from '../../shared/models/api/user/UserView'
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 
+import { apiUserLoginPost, apiUserLogoutPost } from '../api'
 import { useHistory } from '../contexts/HistoryContext'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useUser } from '../contexts/UserContext'
@@ -26,7 +26,6 @@ import {
 import { appParsers, appRoutes } from '../router/AppRouter'
 import { cssClasses } from '../utils/cssClasses'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
-import { http } from '../utils/http'
 import { ClickOutside } from './ClickOutside'
 import { Link } from './Link'
 import { Select } from './Select'
@@ -169,8 +168,8 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
   )
 
   const handleRemoveFavoriteClick = useCallback(
-    () => removeRecentSearch(summoner.id),
-    [removeRecentSearch, summoner.id],
+    () => removeRecentSearch(summoner),
+    [removeRecentSearch, summoner],
   )
 
   return (
@@ -246,16 +245,16 @@ const AccountDisconnected = (): JSX.Element => {
   const toggleLogin = useCallback(() => setLoginIsVisible(v => !v), [])
   const hideLogin = useCallback(() => setLoginIsVisible(false), [])
 
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Maybe<string>>(Maybe.none)
 
   const [state, setState] = useState(emptyState)
   const updateUserName = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setState(userNameLens.set(e.target.value))
-    setError('')
+    setError(Maybe.none)
   }, [])
   const updatePassword = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setState(passwordLens.set(e.target.value))
-    setError('')
+    setError(Maybe.none)
   }, [])
 
   const validated = useMemo(() => LoginPayload.codec.decode(state), [state])
@@ -265,11 +264,11 @@ const AccountDisconnected = (): JSX.Element => {
       e.preventDefault()
       pipe(
         validated,
-        Either.map(payload =>
-          pipe(
-            http(apiRoutes.user.login.post, { json: [LoginPayload.codec, payload] }),
+        Either.map(
+          flow(
+            apiUserLoginPost,
             Future.map(refreshUser),
-            Future.orElse(() => Future.right(setError('error'))),
+            Future.orElse(() => Future.right(setError(Maybe.some('error')))),
             futureRunUnsafe,
           ),
         ),
@@ -311,8 +310,7 @@ const AccountDisconnected = (): JSX.Element => {
                 className="border border-goldenrod bg-transparent items-center"
               />
             </label>
-            <div className="self-center mt-2">
-              <span>{error}</span>
+            <div className="self-center mt-2 flex flex-col items-center gap-2">
               <button
                 type="submit"
                 disabled={Either.isLeft(validated)}
@@ -320,6 +318,13 @@ const AccountDisconnected = (): JSX.Element => {
               >
                 Connexion
               </button>
+              {pipe(
+                error,
+                Maybe.fold(
+                  () => null,
+                  e => <span className="text-red-700">{e}</span>,
+                ),
+              )}
             </div>
           </form>
         ) : null}
@@ -340,7 +345,7 @@ const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
   const hideMenu = useCallback(() => setMenuIsVisible(false), [])
 
   const disconnect = useCallback(
-    () => pipe(http(apiRoutes.user.logout.post), Future.map(refreshUser), futureRunUnsafe),
+    () => pipe(apiUserLogoutPost, Future.map(refreshUser), futureRunUnsafe),
     [refreshUser],
   )
 

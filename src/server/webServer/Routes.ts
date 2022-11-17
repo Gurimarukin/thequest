@@ -29,7 +29,8 @@ export const Routes = (
     m(api.platform.summoner.byName.get, ({ platform, summonerName }) =>
       summonerController.byName(platform, summonerName),
     ),
-    m(api.user.self.get, () => withAuth(userController.getSelfUser)),
+    m(api.user.self.get, () => withAuth(userController.getSelf)),
+    m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),
     m(api.user.login.post, () => rateLimiter(2, MsDuration.minutes(1))(userController.login)),
     m(api.user.logout.post, () => userController.logout),
   ]

@@ -3,7 +3,6 @@ import { MsDuration } from '../../shared/models/MsDuration'
 export const constants = {
   dbRetryDelay: MsDuration.seconds(10),
 
-  // webserver
   rateLimiterLifeTime: MsDuration.days(1),
   account: {
     tokenTtl: MsDuration.days(30),
@@ -12,5 +11,9 @@ export const constants = {
       ttl: MsDuration.days(30),
     },
   },
-  xRiotToken: 'X-Riot-Token',
+
+  riotApi: {
+    xRiotToken: 'X-Riot-Token',
+    regionalHost: 'europe.api.riotgames.com',
+  },
 }

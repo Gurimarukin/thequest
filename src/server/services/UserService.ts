@@ -6,7 +6,7 @@ import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
-import { Future, toNotUsed } from '../../shared/utils/fp'
+import { Future, List, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
@@ -42,7 +42,7 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
               hashed: PasswordUtils.hash(ClearPassword.wrap(password)),
             }),
             Future.chain(({ id, hashed }) =>
-              userPersistence.create(User.of(id, UserName.wrap(userName), hashed)),
+              userPersistence.create(User.of(id, UserName.wrap(userName), hashed, List.empty)),
             ),
             Future.filterOrElse(
               success => success,
@@ -71,6 +71,7 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
       ),
 
     getUser: userPersistence.findById,
+    addFavoriteSearch: userPersistence.addFavoriteSearch,
   }
 
   function signToken(content: TokenContent): Future<Token> {

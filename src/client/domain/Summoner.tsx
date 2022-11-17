@@ -6,7 +6,7 @@ import { apiRoutes } from '../../shared/ApiRouter'
 import { ChampionKey } from '../../shared/models/api/ChampionKey'
 import type { ChampionMasteryView } from '../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../shared/models/api/Platform'
-import { SummonerMasteriesView } from '../../shared/models/api/SummonerMasteriesView'
+import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { MainLayout } from '../components/MainLayout'
@@ -55,18 +55,11 @@ const SummonerViewComponent = ({ platform, value }: SummonerViewProps): JSX.Elem
   useEffect(
     () =>
       addRecentSearch({
-        id: value.summoner.id,
         platform,
         name: value.summoner.name,
         profileIconId: value.summoner.profileIconId,
       }),
-    [
-      addRecentSearch,
-      platform,
-      value.summoner.id,
-      value.summoner.name,
-      value.summoner.profileIconId,
-    ],
+    [addRecentSearch, platform, value.summoner.name, value.summoner.profileIconId],
   )
   useEffect(
     () =>
