@@ -123,7 +123,7 @@ const SummonerViewComponent = ({ platform, value }: SummonerViewProps): JSX.Elem
   )
 
   return (
-    <div className="h-full overflow-auto p-2 flex flex-col">
+    <div className="p-2 flex flex-col">
       <div className="flex items-center gap-6">
         <img
           src={staticData.assets.summonerIcon(value.summoner.profileIconId)}

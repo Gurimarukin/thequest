@@ -52,7 +52,7 @@ export const MainLayout: React.FC = ({ children }) => {
           )}
         </div>
       </header>
-      <main className="grow">{children}</main>
+      <main className="grow overflow-auto">{children}</main>
     </div>
   )
 }
