@@ -9,9 +9,10 @@ import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
-import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
+import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
+import type { Summoner } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
@@ -60,8 +61,9 @@ function UserController(summonerService: SummonerService, userService: UserServi
   return {
     getSelf: (user: TokenContent): EndedMiddleware =>
       pipe(
-        userService.getUser(user.id),
-        futureMaybe.chainTaskEitherK(({ userName, favoriteSearches }) =>
+        userService.findById(user.id),
+        futureEither.fromTaskEitherOptionK(() => 'User not found'),
+        futureEither.chainTaskEitherK(({ userName, favoriteSearches }) =>
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.right(userName),
             favoriteSearches: pipe(
@@ -69,41 +71,58 @@ function UserController(summonerService: SummonerService, userService: UserServi
               List.traverse(Future.ApplicativePar)(({ platform, puuid }) =>
                 pipe(
                   summonerService.findByPuuid(platform, puuid),
-                  // TODO: when not found, remove from favorites and from summoners db
-                  futureMaybe.map((summoner): SummonerShort => ({ ...summoner, platform })),
+                  Future.map(
+                    Maybe.fold<Summoner, Either<PlatformWithPuuid, SummonerShort>>(
+                      () => Either.left({ platform, puuid }),
+                      summoner => Either.right({ ...summoner, platform }),
+                    ),
+                  ),
                 ),
               ),
-              Future.map(List.compact),
+              Future.chain(eithers => {
+                const { left, right } = List.separate(eithers)
+                if (!List.isNonEmpty(left)) return Future.right(right)
+                return pipe(
+                  apply.sequenceT(Future.ApplyPar)(
+                    userService.removeAllFavoriteSearches(left),
+                    summonerService.deleteSummoners(left),
+                  ),
+                  Future.map(() => right),
+                )
+              }),
             ),
           }),
         ),
         M.fromTaskEither,
-        M.ichain(Maybe.fold(() => M.sendWithStatus(Status.NotFound)(''), M.json(UserView.codec))),
+        M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(UserView.codec))),
       ),
 
     addFavoriteSelf: (user: TokenContent): EndedMiddleware =>
       pipe(
         M.decodeBody([PlatformWithName.codec, 'PlatformWithName']),
-        M.ichainTaskEitherK(({ platform, name }) =>
-          pipe(
-            summonerService.findByName(platform, name),
-            Future.map(Either.fromOption(() => 'Summoner not found')),
-            futureEither.chain(({ puuid }) =>
-              pipe(
-                userService.addFavoriteSearch(user.id, { platform, puuid }),
-                Future.map(Either.fromOption(() => 'User not found')),
+        M.matchE(
+          () => M.sendWithStatus(Status.BadRequest)(''),
+          ({ platform, name }) =>
+            pipe(
+              summonerService.findByName(platform, name),
+              futureEither.fromTaskEitherOptionK(() => 'Summoner not found'),
+              futureEither.chain(({ puuid }) =>
+                pipe(
+                  userService.addFavoriteSearch(user.id, { platform, puuid }),
+                  futureEither.fromTaskEitherOptionK(() => 'User not found'),
+                ),
+              ),
+              M.fromTaskEither,
+              M.ichain(
+                Either.fold(M.sendWithStatus(Status.NotFound), added =>
+                  added
+                    ? M.noContent()
+                    : M.sendWithStatus(Status.BadRequest)(
+                        'Summoner search is already in favorites',
+                      ),
+                ),
               ),
             ),
-          ),
-        ),
-        M.ichain(
-          Either.fold(
-            e => M.sendWithStatus(Status.NotFound)(e),
-            added =>
-              added
-                ? M.noContent()
-                : M.sendWithStatus(Status.BadRequest)('Summoner search is already in favorites'),
-          ),
         ),
       ),
 

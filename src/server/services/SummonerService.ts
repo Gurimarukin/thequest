@@ -1,7 +1,7 @@
 import { flow, pipe } from 'fp-ts/function'
 
-import type { Platform } from '../../shared/models/api/Platform'
 import { DayJs } from '../../shared/models/DayJs'
+import type { Platform } from '../../shared/models/api/Platform'
 import type { Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -23,6 +23,8 @@ const SummonerService = (
   riotApiService: RiotApiService,
   summonerPersistence: SummonerPersistence,
 ) => {
+  const { deleteSummoners } = summonerPersistence
+
   return {
     findByName: (platform: Platform, summonerName: string): Future<Maybe<Summoner>> =>
       findAndCache(
@@ -37,6 +39,8 @@ const SummonerService = (
         insertedAfter => summonerPersistence.findByPuiid(platform, encryptedPUUID, insertedAfter),
         riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
       ),
+
+    deleteSummoners,
   }
 
   function findAndCache(

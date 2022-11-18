@@ -3,8 +3,8 @@ import { Status } from 'hyper-ts'
 
 import type { Platform } from '../../shared/models/api/Platform'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
-import { Maybe } from '../../shared/utils/fp'
-import { futureMaybe } from '../../shared/utils/futureMaybe'
+import { Either } from '../../shared/utils/fp'
+import { futureEither } from '../../shared/utils/futureEither'
 
 import type { RiotApiService } from '../services/RiotApiService'
 import type { SummonerService } from '../services/SummonerService'
@@ -18,17 +18,16 @@ const SummonerController = (riotApiService: RiotApiService, summonerService: Sum
   findByName: (platform: Platform, summonerName: string): EndedMiddleware =>
     pipe(
       summonerService.findByName(platform, summonerName),
-      futureMaybe.bindTo('summoner'),
-      futureMaybe.bind('masteries', ({ summoner }) =>
-        riotApiService.lol.championMasteryBySummoner(platform, summoner.id),
-      ),
-      M.fromTaskEither,
-      M.ichain(
-        Maybe.fold(
-          () => M.sendWithStatus(Status.NotFound)('Summoner not found'),
-          M.json(SummonerMasteriesView.codec),
+      futureEither.fromTaskEitherOptionK(() => 'Summoner not found'),
+      futureEither.bindTo('summoner'),
+      futureEither.bind('masteries', ({ summoner }) =>
+        pipe(
+          riotApiService.lol.championMasteryBySummoner(platform, summoner.id),
+          futureEither.fromTaskEitherOptionK(() => 'Masteries not found'),
         ),
       ),
+      M.fromTaskEither,
+      M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerMasteriesView.codec))),
     ),
 })
 

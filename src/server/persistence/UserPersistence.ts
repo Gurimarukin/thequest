@@ -1,13 +1,15 @@
 import { pipe } from 'fp-ts/function'
+import type { PullOperator } from 'mongodb'
 
 import { UserName } from '../../shared/models/api/user/UserName'
 import type { NotUsed } from '../../shared/utils/fp'
-import { Future, Maybe } from '../../shared/utils/fp'
+import { Future, Maybe, NonEmptyArray, toNotUsed } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
 import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
+import type { UserOutput } from '../models/user/User'
 import { User } from '../models/user/User'
 import { UserId } from '../models/user/UserId'
 
@@ -49,9 +51,28 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
             { $addToSet: { favoriteSearches: PlatformWithPuuid.codec.encode(search) } },
           ),
         ),
+        // TODO: logger.trace
         Future.map(res =>
           res.matchedCount === 1 ? Maybe.some(res.modifiedCount === 1) : Maybe.none,
         ),
+      ),
+
+    removeAllFavoriteSearches: (searches: NonEmptyArray<PlatformWithPuuid>): Future<NotUsed> =>
+      pipe(
+        collection.collection.future(c =>
+          c.updateMany(
+            {},
+            {
+              $pull: {
+                favoriteSearches: {
+                  $in: NonEmptyArray.codec(PlatformWithPuuid.codec).encode(searches),
+                },
+              } as PullOperator<UserOutput>,
+            },
+          ),
+        ),
+        // TODO: logger.trace
+        Future.map(toNotUsed),
       ),
   }
 }

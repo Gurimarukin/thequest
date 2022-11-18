@@ -4,9 +4,10 @@ import * as C from 'io-ts/Codec'
 import type { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
-import { Future } from '../../shared/utils/fp'
+import { Future, NonEmptyArray } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
+import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { Puuid } from '../models/riot/Puuid'
@@ -56,6 +57,18 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
       pipe(
         collection.updateOne({}, summoner, { upsert: true }),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
+      ),
+
+    deleteSummoners: (searches: NonEmptyArray<PlatformWithPuuid>): Future<number> =>
+      pipe(
+        collection.deleteMany({
+          $or: pipe(
+            searches,
+            NonEmptyArray.map(PlatformWithPuuid.codec.encode),
+            NonEmptyArray.asMutable,
+          ),
+        }),
+        Future.map(r => r.deletedCount),
       ),
   }
 }

@@ -24,6 +24,8 @@ type UserService = ReturnType<typeof UserService>
 function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwtHelper: JwtHelper) {
   const logger = Logger('UserService')
 
+  const { findById, addFavoriteSearch, removeAllFavoriteSearches } = userPersistence
+
   const createUser: Future<NotUsed> = pipe(
     Future.fromIOEither(logger.info('Creating user')),
     Future.chain(() =>
@@ -70,8 +72,9 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
         futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),
       ),
 
-    getUser: userPersistence.findById,
-    addFavoriteSearch: userPersistence.addFavoriteSearch,
+    findById,
+    addFavoriteSearch,
+    removeAllFavoriteSearches,
   }
 
   function signToken(content: TokenContent): Future<Token> {

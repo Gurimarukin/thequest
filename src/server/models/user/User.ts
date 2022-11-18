@@ -8,6 +8,7 @@ import { HashedPassword } from './HashedPassword'
 import { UserId } from './UserId'
 
 type User = C.TypeOf<typeof codec>
+type UserOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
   id: UserId.codec,
@@ -30,4 +31,4 @@ const of = (
 
 const User = { codec, of }
 
-export { User }
+export { User, UserOutput }
