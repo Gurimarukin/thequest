@@ -208,7 +208,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
         switch (type) {
           case 'favorite':
             return (
-              <button type="button" className="p-3 fill-goldenrod hover:fill-red-700">
+              <button type="button" className="px-3 pt-2 pb-3 fill-goldenrod hover:fill-red-700">
                 <StarFilledIcon className="h-5" />
               </button>
             )
@@ -217,7 +217,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
               <button
                 type="button"
                 onClick={handleAddFavoriteClick}
-                className="p-3 text-goldenrod hover:text-wheat"
+                className="px-3 pt-2 pb-3 text-goldenrod hover:text-wheat"
               >
                 <StarOutlineIcon className="h-5" />
               </button>
