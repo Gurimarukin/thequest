@@ -1,10 +1,13 @@
+import { ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
+import type { CollationOptions } from 'mongodb'
 
-import type { DayJs } from '../../shared/models/DayJs'
+import { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, NonEmptyArray } from '../../shared/utils/fp'
+import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { FpCollection } from '../helpers/FpCollection'
 import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
@@ -13,6 +16,18 @@ import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { Puuid } from '../models/riot/Puuid'
 import { SummonerDb } from '../models/summoner/SummonerDb'
 import { DayJsFromDate } from '../utils/ioTsUtils'
+
+// https://www.mongodb.com/docs/manual/reference/collation
+const platformAndNameIndexCollation: CollationOptions = {
+  locale: 'en',
+
+  // level 1: compare base characters only, ignoring other differences such as diacritics and case
+  // level 2: also compare diacritics (but not case)
+  strength: 2,
+
+  // whitespace and punctuation are not considered as base characters
+  alternate: 'shifted',
+}
 
 type SummonerPersistence = ReturnType<typeof SummonerPersistence>
 
@@ -25,7 +40,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
     { key: { platform: -1, puuid: -1 }, unique: true },
-    { key: { platform: -1, name: -1 }, unique: true, collation: { locale: 'en', strength: 2 } }, // case insensitive
+    { key: { platform: -1, name: -1 }, unique: true, collation: platformAndNameIndexCollation },
   ])
 
   return {
@@ -36,11 +51,16 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
       name: string,
       insertedAfter: DayJs,
     ): Future<Maybe<SummonerDb>> =>
-      collection.findOne({
-        platform: Platform.codec.encode(platform),
-        name: RegExp(`^${C.string.encode(name)}$`, 'i'),
-        insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
-      }),
+      pipe(
+        collection.findOne(
+          {
+            platform: Platform.codec.encode(platform),
+            name: C.string.encode(name),
+          },
+          { collation: platformAndNameIndexCollation },
+        ),
+        futureMaybe.filter(s => ord.leq(DayJs.Ord)(insertedAfter, s.insertedAt)),
+      ),
 
     findByPuiid: (
       platform: Platform,
@@ -55,7 +75,14 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
 
     upsert: (summoner: SummonerDb): Future<boolean> =>
       pipe(
-        collection.updateOne({}, summoner, { upsert: true }),
+        collection.updateOne(
+          {
+            platform: Platform.codec.encode(summoner.platform),
+            puuid: Puuid.codec.encode(summoner.puuid),
+          },
+          summoner,
+          { upsert: true },
+        ),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),
 

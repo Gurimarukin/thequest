@@ -32,15 +32,19 @@ type Props = {
 export const Summoner = ({ platform, summonerName }: Props): JSX.Element => (
   <MainLayout>
     {basicAsyncRenderer(
-      useSWRHttp(apiRoutes.platform.summoner.byName.get(platform, summonerName.toLowerCase()), {}, [
-        SummonerMasteriesView.codec,
-        'SummonerView',
-      ]),
+      useSWRHttp(
+        apiRoutes.platform.summoner.byName.get(platform, clearSummonerName(summonerName)),
+        {},
+        [SummonerMasteriesView.codec, 'SummonerView'],
+      ),
     )(summoner => (
       <SummonerViewComponent platform={platform} value={summoner} />
     ))}
   </MainLayout>
 )
+
+const whiteSpaces = /\s+/g
+const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 type SummonerViewProps = {
   readonly platform: Platform
