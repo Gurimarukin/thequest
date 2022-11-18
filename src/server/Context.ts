@@ -1,12 +1,16 @@
+import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
+import { PubSub } from '../shared/models/rx/PubSub'
 import { StringUtils } from '../shared/utils/StringUtils'
-import { Future, NonEmptyArray } from '../shared/utils/fp'
+import { Future, IO, NonEmptyArray } from '../shared/utils/fp'
 
 import type { Config } from './config/Config'
 import { constants } from './config/constants'
 import { HttpClient } from './helpers/HttpClient'
 import { JwtHelper } from './helpers/JwtHelper'
+import { scheduleCronJob } from './helpers/scheduleCronJob'
+import type { CronJobEvent } from './models/event/CronJobEvent'
 import { LoggerGetter } from './models/logger/LoggerGetter'
 import { MongoCollectionGetter } from './models/mongo/MongoCollection'
 import { WithDb } from './models/mongo/WithDb'
@@ -28,15 +32,13 @@ const of = (
   config: Config,
   Logger: LoggerGetter,
   healthCheckPersistence: HealthCheckPersistence,
-  summonerPersistence: SummonerPersistence,
   userPersistence: UserPersistence,
+  riotApiService: RiotApiService,
+  summonerService: SummonerService,
 ) => {
-  const httpClient = HttpClient(Logger)
   const jwtHelper = JwtHelper(config.jwtSecret)
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
-  const riotApiService = RiotApiService(config.riotApiKey, httpClient)
-  const summonerService = SummonerService(riotApiService, summonerPersistence)
   const userService = UserService(Logger, userPersistence, jwtHelper)
 
   return {
@@ -65,43 +67,65 @@ const load = (config: Config): Future<Context> => {
   const summonerPersistence = SummonerPersistence(Logger, mongoCollection)
   const userPersistence = UserPersistence(Logger, mongoCollection)
 
-  const context = of(config, Logger, healthCheckPersistence, summonerPersistence, userPersistence)
-  const { healthCheckService } = context
+  const httpClient = HttpClient(Logger)
 
-  const migrationService = MigrationService(Logger, mongoCollection, migrationPersistence)
+  const riotApiService = RiotApiService(config.riotApiKey, httpClient)
 
-  const waitDatabaseReady: Future<boolean> = pipe(
-    healthCheckService.check(),
-    Future.orElse(() =>
-      pipe(
-        logger.info(
-          `Couldn't connect to mongo, waiting ${StringUtils.prettyMs(
-            constants.dbRetryDelay,
-          )} before next try`,
-        ),
-        Future.fromIOEither,
-        Future.chain(() => pipe(waitDatabaseReady, Future.delay(constants.dbRetryDelay))),
-      ),
-    ),
-    Future.filterOrElse(
-      success => success,
-      () => Error("HealthCheck wasn't success"),
-    ),
-  )
+  const cronJobPubSub = PubSub<CronJobEvent>()
 
   return pipe(
-    logger.info('Ensuring indexes'),
-    Future.fromIOEither,
-    Future.chain(() => waitDatabaseReady),
-    Future.chain(() => migrationService.applyMigrations),
-    Future.chain(() =>
-      NonEmptyArray.sequence(Future.ApplicativeSeq)([
-        summonerPersistence.ensureIndexes,
-        userPersistence.ensureIndexes,
-      ]),
+    apply.sequenceT(IO.ApplyPar)(
+      SummonerService(Logger, riotApiService, summonerPersistence, cronJobPubSub.observable),
+      scheduleCronJob(Logger, cronJobPubSub.subject),
     ),
-    Future.chainIOEitherK(() => logger.info('Ensured indexes')),
-    Future.map(() => context),
+    Future.fromIOEither,
+    Future.chain(([summonerService]) => {
+      const context = of(
+        config,
+        Logger,
+        healthCheckPersistence,
+        userPersistence,
+        riotApiService,
+        summonerService,
+      )
+      const { healthCheckService } = context
+
+      const migrationService = MigrationService(Logger, mongoCollection, migrationPersistence)
+
+      const waitDatabaseReady: Future<boolean> = pipe(
+        healthCheckService.check(),
+        Future.orElse(() =>
+          pipe(
+            logger.info(
+              `Couldn't connect to mongo, waiting ${StringUtils.prettyMs(
+                constants.dbRetryDelay,
+              )} before next try`,
+            ),
+            Future.fromIOEither,
+            Future.chain(() => pipe(waitDatabaseReady, Future.delay(constants.dbRetryDelay))),
+          ),
+        ),
+        Future.filterOrElse(
+          success => success,
+          () => Error("HealthCheck wasn't success"),
+        ),
+      )
+
+      return pipe(
+        logger.info('Ensuring indexes'),
+        Future.fromIOEither,
+        Future.chain(() => waitDatabaseReady),
+        Future.chain(() => migrationService.applyMigrations),
+        Future.chain(() =>
+          NonEmptyArray.sequence(Future.ApplicativeSeq)([
+            summonerPersistence.ensureIndexes,
+            userPersistence.ensureIndexes,
+          ]),
+        ),
+        Future.chainIOEitherK(() => logger.info('Ensured indexes')),
+        Future.map(() => context),
+      )
+    }),
   )
 }
 

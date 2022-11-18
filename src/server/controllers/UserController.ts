@@ -85,7 +85,7 @@ function UserController(summonerService: SummonerService, userService: UserServi
                 return pipe(
                   apply.sequenceT(Future.ApplyPar)(
                     userService.removeAllFavoriteSearches(left),
-                    summonerService.deleteSummoners(left),
+                    summonerService.deleteByPlatformAndPuuid(left),
                   ),
                   Future.map(() => right),
                 )

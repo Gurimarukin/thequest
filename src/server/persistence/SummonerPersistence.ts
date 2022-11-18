@@ -59,7 +59,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),
 
-    deleteSummoners: (searches: NonEmptyArray<PlatformWithPuuid>): Future<number> =>
+    deleteByPlatformAndPuuid: (searches: NonEmptyArray<PlatformWithPuuid>): Future<number> =>
       pipe(
         collection.deleteMany({
           $or: pipe(
@@ -68,6 +68,12 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
             NonEmptyArray.asMutable,
           ),
         }),
+        Future.map(r => r.deletedCount),
+      ),
+
+    deleteBeforeDate: (date: DayJs): Future<number> =>
+      pipe(
+        collection.deleteMany({ insertedAt: { $lt: DayJsFromDate.codec.encode(date) } }),
         Future.map(r => r.deletedCount),
       ),
   }
