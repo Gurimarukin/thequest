@@ -8,7 +8,7 @@ import { Maybe, Tuple } from '../../shared/utils/fp'
 import { Link } from '../components/Link'
 import { useHistory } from '../contexts/HistoryContext'
 import { Home } from '../domain/Home'
-import { Summoner } from '../domain/Summoner'
+import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
 import { appParsers, appRoutes } from './AppRouter'
 
 type ElementWithTitle = Tuple<JSX.Element, Maybe<string>>
@@ -20,7 +20,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
   .alt(
     appParsers.platformSummonerName.map(({ platform, summonerName }) =>
-      t(<Summoner platform={platform} summonerName={summonerName} />, summonerName),
+      t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),
     ),
   )
 
