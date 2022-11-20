@@ -98,6 +98,10 @@ export const NonEmptyArray = {
 }
 
 export type List<A> = ReadonlyArray<A>
+const listGroupBy = <A, K extends string>(
+  f: (a: A) => K,
+): ((as: List<A>) => Partial<Dict<K, NonEmptyArray<A>>>) =>
+  readonlyArray.match(() => readonlyRecord.empty, readonlyNonEmptyArray.groupBy(f))
 function mkString(sep: string): (list: List<string>) => string
 function mkString(start: string, sep: string, end: string): (list: List<string>) => string
 function mkString(startOrSep: string, sep?: string, end?: string): (list: List<string>) => string {
@@ -112,6 +116,7 @@ const listEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<List<O>, List<A>> =>
 })
 export const List = {
   ...readonlyArray,
+  groupBy: listGroupBy,
   // eslint-disable-next-line functional/prefer-readonly-type
   asMutable: identity as <A>(fa: List<A>) => A[],
   mkString,

@@ -1,20 +1,27 @@
-import React, { useEffect } from 'react'
+import { monoid, number } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
+import React, { useEffect, useMemo } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
-import type { List } from '../../../shared/utils/fp'
+import type { Dict } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { MainLayout } from '../../components/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
+import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+import type { EnrichedChampionMasteryView } from './Masteries'
 import { Masteries } from './Masteries'
+import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 
 type Props = {
@@ -52,6 +59,7 @@ const SummonerViewComponent = ({
 }: SummonerViewProps): JSX.Element => {
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
+  const staticData = useStaticData()
 
   useEffect(
     () =>
@@ -69,10 +77,90 @@ const SummonerViewComponent = ({
     [summonerNameFromLocation, navigate, platform, summoner.name],
   )
 
+  const { enrichSummoner, enrichedMasteries } = useMemo((): {
+    readonly enrichSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
+    readonly enrichedMasteries: List<EnrichedChampionMasteryView>
+  } => {
+    const enrichedMasteries_ = pipe(
+      staticData.champions,
+      List.map(
+        ({ key, name }): EnrichedChampionMasteryView =>
+          pipe(
+            masteries,
+            List.findFirst(c => c.championId === key),
+            Maybe.fold(
+              (): EnrichedChampionMasteryView => ({
+                championId: key,
+                championLevel: 0,
+                championPoints: 0,
+                championPointsSinceLastLevel: 0,
+                championPointsUntilNextLevel: 0,
+                chestGranted: false,
+                tokensEarned: 0,
+                name,
+                percents: 0,
+              }),
+              champion => ({ ...champion, name, percents: championPercents(champion) }),
+            ),
+          ),
+      ),
+    )
+    const totalChampionsCount = enrichedMasteries_.length
+    const questPercents =
+      pipe(
+        enrichedMasteries_,
+        List.map(c => c.percents),
+        monoid.concatAll(number.MonoidSum),
+      ) / totalChampionsCount
+    const totalMasteryLevel = pipe(
+      enrichedMasteries_,
+      List.map(c => c.championLevel),
+      monoid.concatAll(number.MonoidSum),
+    )
+
+    const grouped: PartialMasteriesGrouped = pipe(
+      enrichedMasteries_,
+      NonEmptyArray.fromReadonlyArray,
+      Maybe.map(List.groupBy(c => ChampionLevelOrZero.stringify(c.championLevel))),
+      Maybe.getOrElse(() => ({})),
+    )
+    const masteriesCount = pipe(
+      ChampionLevelOrZero.values,
+      List.reduce({} as Dict<`${ChampionLevelOrZero}`, number>, (acc, key) => {
+        const value: number = grouped[key]?.length ?? 0
+        return { ...acc, [key]: value }
+      }),
+    )
+    return {
+      enrichSummoner: { questPercents, totalChampionsCount, totalMasteryLevel, masteriesCount },
+      enrichedMasteries: enrichedMasteries_,
+    }
+  }, [masteries, staticData.champions])
+
   return (
     <div className="p-2 flex flex-col">
-      <Summoner summoner={summoner} />
-      <Masteries masteries={masteries} />
+      <Summoner summoner={{ ...summoner, ...enrichSummoner }} />
+      <Masteries masteries={enrichedMasteries} />
     </div>
   )
+}
+
+type PartialMasteriesGrouped = Partial<
+  Dict<`${ChampionLevelOrZero}`, NonEmptyArray<EnrichedChampionMasteryView>>
+>
+
+// Mastery 4: 50%
+// Mastery 6 tokens: 7% each
+// Mastery 7 tokens: 10% each
+// Fragments (not based on user's favorites): 3% each
+const championPercents = (c: ChampionMasteryView): number => {
+  if (c.championLevel === 7) return 100
+
+  // 6-0: 67%, 6-1: 77%, 6-2: 87%, 6-3: 97%
+  if (c.championLevel === 6) return 67 + c.tokensEarned * 10
+
+  // 5-0: 50%, 5-1: 57%, 5-2: 64%
+  if (c.championLevel === 5) return 50 + c.tokensEarned * 7
+
+  return (c.championPoints / 21600) * 50
 }

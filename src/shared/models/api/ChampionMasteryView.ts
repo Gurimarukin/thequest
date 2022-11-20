@@ -1,12 +1,13 @@
 import * as C from 'io-ts/Codec'
 
 import { ChampionKey } from './ChampionKey'
+import { ChampionLevel } from './ChampionLevel'
 
 type ChampionMasteryView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   championId: ChampionKey.codec,
-  championLevel: C.number,
+  championLevel: ChampionLevel.codec,
   championPoints: C.number,
   championPointsSinceLastLevel: C.number,
   championPointsUntilNextLevel: C.number,

@@ -3,6 +3,7 @@ import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback, useMemo } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
+import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -11,56 +12,30 @@ import { Assets } from '../../imgs/Assets'
 import { cssClasses } from '../../utils/cssClasses'
 
 type Props = {
-  readonly masteries: List<ChampionMasteryView>
+  readonly masteries: List<EnrichedChampionMasteryView>
 }
 
-type ChampionMasteryViewWithName = ChampionMasteryView & {
+export type EnrichedChampionMasteryView = Omit<ChampionMasteryView, 'championLevel'> & {
+  readonly championLevel: ChampionLevelOrZero
   readonly name: string
+  readonly percents: number
 }
 
-export const Masteries = ({ masteries }: Props): JSX.Element => {
-  const staticData = useStaticData()
+const sortName = 'sort'
+const directionName = 'direction'
 
-  const championMasteries = useMemo(
-    () =>
-      pipe(
-        staticData.champions,
-        List.map(
-          ({ key, name }): ChampionMasteryViewWithName =>
-            pipe(
-              masteries,
-              List.findFirst(c => c.championId === key),
-              Maybe.fold(
-                (): ChampionMasteryViewWithName => ({
-                  championId: key,
-                  championLevel: 0,
-                  championPoints: 0,
-                  championPointsSinceLastLevel: 0,
-                  championPointsUntilNextLevel: 0,
-                  chestGranted: false,
-                  tokensEarned: 0,
-                  name,
-                }),
-                champion => ({ ...champion, name }),
-              ),
-            ),
-        ),
-      ),
-    [masteries, staticData.champions],
-  )
-
+export const Masteries = ({ masteries: championMasteries }: Props): JSX.Element => {
   // TODO: filter with checkboxes
   const { filteredAndSortedChampions, maybeMaxPoints } = useMemo((): {
-    readonly filteredAndSortedChampions: List<ChampionMasteryViewWithName>
+    readonly filteredAndSortedChampions: List<EnrichedChampionMasteryView>
     readonly maybeMaxPoints: Maybe<number>
   } => {
     const filteredAndSorted = pipe(
       championMasteries,
       List.filter(c => c.championLevel <= 7),
       List.sortBy([
-        ordByLevel,
+        ordByPercents,
         // ordByFragment, // TODO
-        ordByTokens,
         ordByPoints,
         ordByName,
       ]),
@@ -68,7 +43,7 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
     return {
       filteredAndSortedChampions: filteredAndSorted,
       maybeMaxPoints: pipe(
-        filteredAndSortedChampions,
+        filteredAndSorted,
         NonEmptyArray.fromReadonlyArray,
         Maybe.map(
           flow(
@@ -77,25 +52,45 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
           ),
         ),
       ),
-    } as const
+    }
   }, [championMasteries])
 
   return (
-    <div className="grid grid-cols-[auto_1fr] gap-y-2 max-w-7xl self-center w-full">
-      {filteredAndSortedChampions.map(champion => (
-        <ChampionMastery
-          key={ChampionKey.unwrap(champion.championId)}
-          maybeMaxPoints={maybeMaxPoints}
-          champion={champion}
-        />
-      ))}
+    <div className="flex flex-col">
+      <div className="border-b border-goldenrod">
+        <label>
+          <input type="radio" name={sortName} />
+          <span>Trier par %</span>
+        </label>
+        <label>
+          <input type="radio" name={sortName} />
+          <span>Trier par points</span>
+        </label>
+        <label>
+          <input type="radio" name={directionName} />
+          <span>Décroissant</span>
+        </label>
+        <label>
+          <input type="radio" name={directionName} />
+          <span>Croissant</span>
+        </label>
+      </div>
+      <div className="self-center w-full max-w-7xl grid grid-cols-[auto_1fr] gap-y-2 pt-4 pb-2">
+        {filteredAndSortedChampions.map(champion => (
+          <ChampionMastery
+            key={ChampionKey.unwrap(champion.championId)}
+            maybeMaxPoints={maybeMaxPoints}
+            champion={champion}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
 type ChampionMasteryProps = {
   readonly maybeMaxPoints: Maybe<number>
-  readonly champion: ChampionMasteryViewWithName
+  readonly champion: EnrichedChampionMasteryView
 }
 
 const ChampionMastery = ({
@@ -109,6 +104,7 @@ const ChampionMastery = ({
     chestGranted,
     tokensEarned,
     name,
+    percents,
   },
 }: ChampionMasteryProps): JSX.Element => {
   const staticData = useStaticData()
@@ -117,7 +113,7 @@ const ChampionMastery = ({
     championLevel === 5 || championLevel === 6
       ? ` - ${tokensEarned} jeton${tokensEarned < 2 ? '' : 's'}`
       : ''
-  }`
+  }\n${Math.round(percents)}%`
   const pointsUntilAndSince = pipe(
     [
       Maybe.some(pointsStr(championPoints)),
@@ -166,8 +162,8 @@ const ChampionMastery = ({
         </div>
         <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
         {chestGranted ? (
-          <div className="h-[14px] w-[17px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
-            <img src={Assets.chest} alt="Chest icon" className="mb-[-2px] w-4" />
+          <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
+            <img src={Assets.chest} alt="Chest icon" className="w-4" />
           </div>
         ) : null}
       </div>
@@ -177,20 +173,20 @@ const ChampionMastery = ({
           Maybe.fold(
             () => null,
             maxPoints => {
-              const percents = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
+              const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
               return (
                 <div className="h-7 relative">
                   {championPointsUntilNextLevel === 0 ? null : (
                     <div
                       title={pointsUntilAndSince}
                       className="h-full bg-gray-600 opacity-50"
-                      style={{ width: percents(championPoints + championPointsUntilNextLevel) }}
+                      style={{ width: p(championPoints + championPointsUntilNextLevel) }}
                     />
                   )}
                   <div
                     title={pointsUntilAndSince}
                     className={`h-full absolute top-0 ${levelColor(championLevel)}`}
-                    style={{ width: percents(championPoints) }}
+                    style={{ width: p(championPoints) }}
                   />
                   {championLevel < 2 ? null : (
                     <div
@@ -200,7 +196,7 @@ const ChampionMastery = ({
                         if (championLevel === 4) return 'border-gray-400'
                         return 'border-gray-300 '
                       })()}`}
-                      style={{ width: percents(championPoints - championPointsSinceLastLevel) }}
+                      style={{ width: p(championPoints - championPointsSinceLastLevel) }}
                     />
                   )}
                 </div>
@@ -275,25 +271,19 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
   return pipe([...Array(Math.max(n, 0))], List.mapWithIndex(getA))
 }
 
-const ordByLevel: ord.Ord<ChampionMasteryViewWithName> = pipe(
+const ordByPercents: ord.Ord<EnrichedChampionMasteryView> = pipe(
   number.Ord,
   ord.reverse,
-  ord.contramap(c => c.championLevel),
+  ord.contramap(c => c.percents),
 )
 
-const ordByPoints: ord.Ord<ChampionMasteryViewWithName> = pipe(
+const ordByPoints: ord.Ord<EnrichedChampionMasteryView> = pipe(
   number.Ord,
   ord.reverse,
   ord.contramap(c => c.championPoints),
 )
 
-const ordByTokens: ord.Ord<ChampionMasteryViewWithName> = pipe(
-  number.Ord,
-  ord.reverse,
-  ord.contramap(c => c.tokensEarned),
-)
-
-const ordByName: ord.Ord<ChampionMasteryViewWithName> = pipe(
+const ordByName: ord.Ord<EnrichedChampionMasteryView> = pipe(
   string.Ord,
   ord.contramap(c => c.name),
 )
