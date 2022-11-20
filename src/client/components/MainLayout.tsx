@@ -1,5 +1,4 @@
 /* eslint-disable functional/no-expression-statement */
-import { Route, parse } from 'fp-ts-routing'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -14,6 +13,7 @@ import { apiUserLoginPost, apiUserLogoutPost } from '../api'
 import { useHistory } from '../contexts/HistoryContext'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useUser } from '../contexts/UserContext'
+import { useSummonerNameFromLocation } from '../hooks/useSummonerNameFromLocation'
 import { Assets } from '../imgs/Assets'
 import {
   CloseFilledIcon,
@@ -23,7 +23,7 @@ import {
   StarOutlineIcon,
   TimeOutlineIcon,
 } from '../imgs/svgIcons'
-import { appParsers, appRoutes } from '../router/AppRouter'
+import { appRoutes } from '../router/AppRouter'
 import { cssClasses } from '../utils/cssClasses'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { ClickOutside } from './ClickOutside'
@@ -58,21 +58,13 @@ export const MainLayout: React.FC = ({ children }) => {
 }
 
 const SearchSummoner = (): JSX.Element => {
-  const { location, navigate } = useHistory()
+  const { navigate } = useHistory()
   const { user, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
   const hide = useCallback(() => setIsOpen(false), [])
 
-  const summonerNameFromLocation = useMemo(
-    () =>
-      parse(
-        appParsers.platformSummonerName.map(f => Maybe.some(f.summonerName)),
-        Route.parse(location.pathname),
-        Maybe.none,
-      ),
-    [location.pathname],
-  )
+  const summonerNameFromLocation = useSummonerNameFromLocation()
   useEffect(() => {
     pipe(summonerNameFromLocation, Maybe.map(setSummonerName))
   }, [summonerNameFromLocation])
@@ -132,7 +124,7 @@ const SearchSummoner = (): JSX.Element => {
           />
           <ul
             className={cssClasses(
-              'absolute top-full z-10 bg-zinc-900 border border-goldenrod grid-cols-[auto_auto_auto] items-center gap-y-3 py-2',
+              'absolute top-full z-10 bg-zinc-900 border border-goldenrod grid-cols-[auto_auto_auto] items-center gap-y-3 py-2 max-h-[calc(100vh_-_5rem)] overflow-auto',
               ['hidden', !showSearches],
               ['grid', showSearches],
             )}
@@ -140,6 +132,7 @@ const SearchSummoner = (): JSX.Element => {
             {favoriteSearches.map(s => (
               <SummonerSearch key={`${s.platform}${s.name}`} type="favorite" summoner={s} />
             ))}
+            {List.isNonEmpty(favoriteSearches) && List.isNonEmpty(recentSearches) ? <Hr /> : null}
             {recentSearches.map(s => (
               <SummonerSearch key={`${s.platform}${s.name}`} type="recent" summoner={s} />
             ))}
@@ -152,6 +145,14 @@ const SearchSummoner = (): JSX.Element => {
     </div>
   )
 }
+
+const Hr = (): JSX.Element => (
+  <>
+    <div className="border-t border-goldenrod w-[calc(100%_-_1rem)] justify-self-end" />
+    <div className="border-t border-goldenrod" />
+    <div className="border-t border-goldenrod w-[calc(100%_-_1rem)]" />
+  </>
+)
 
 type SummonerSearchProps = {
   readonly type: 'favorite' | 'recent'
@@ -203,7 +204,6 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
         <span className="grow ml-2">{summoner.name}</span>
         <span className="ml-4">{summoner.platform}</span>
       </Link>
-
       {((): JSX.Element => {
         switch (type) {
           case 'favorite':
