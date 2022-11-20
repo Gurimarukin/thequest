@@ -15,6 +15,7 @@ import type { StaticDataContext } from '../contexts/StaticDataContext'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useUser } from '../contexts/UserContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
+import { useSummonerNameFromLocation } from '../hooks/useSummonerNameFromLocation'
 import { Assets } from '../imgs/Assets'
 import { appRoutes } from '../router/AppRouter'
 import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
@@ -65,10 +66,12 @@ const SummonerViewComponent = ({ platform, value }: SummonerViewProps): JSX.Elem
       }),
     [addRecentSearch, platform, value.summoner.name, value.summoner.profileIconId],
   )
+
+  const summonerNameFromLocation = useSummonerNameFromLocation()
   useEffect(
     () =>
       navigate(appRoutes.platformSummonerName(platform, value.summoner.name), { replace: true }),
-    [navigate, platform, value.summoner.name],
+    [summonerNameFromLocation, navigate, platform, value.summoner.name],
   )
 
   const champions = pipe(
