@@ -10,6 +10,7 @@ import { apiRoutes } from '../../shared/ApiRouter'
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
 import { Future, List, Maybe, Tuple } from '../../shared/utils/fp'
+import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
 import { constants } from '../config/constants'
@@ -42,6 +43,9 @@ export const UserContextProvider: React.FC = ({ children }) => {
       pipe(
         http([method, url], { retry: 0 }, [UserView.codec, 'UserView']),
         statusesToOption(401, 404), // no token or user not found
+        futureMaybe.map(
+          pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),
+        ),
         futureRunUnsafe,
       ),
     { revalidateOnFocus: false },
