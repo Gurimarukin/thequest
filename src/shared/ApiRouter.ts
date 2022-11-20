@@ -32,6 +32,7 @@ const staticDataLangGet = m(apiStaticDataLang, 'get')
 const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
 const userSelfGet = m(apiUserSelf, 'get')
 const userSelfFavoritesPut = m(apiUserSelfFavorites, 'put')
+const userSelfFavoritesDelete = m(apiUserSelfFavorites, 'delete')
 const userLoginPost = m(apiUserLogin, 'post')
 const userLogoutPost = m(apiUserLogout, 'post')
 
@@ -50,7 +51,10 @@ export const apiParsers = {
   user: {
     self: {
       get: p(userSelfGet),
-      favorites: { put: p(userSelfFavoritesPut) },
+      favorites: {
+        put: p(userSelfFavoritesPut),
+        delete: p(userSelfFavoritesDelete),
+      },
     },
     login: { post: p(userLoginPost) },
     logout: { post: p(userLogoutPost) },
@@ -74,7 +78,10 @@ export const apiRoutes = {
   user: {
     self: {
       get: r(userSelfGet, {}),
-      favorites: { put: r(userSelfFavoritesPut, {}) },
+      favorites: {
+        put: r(userSelfFavoritesPut, {}),
+        delete: r(userSelfFavoritesDelete, {}),
+      },
     },
     login: { post: r(userLoginPost, {}) },
     logout: { post: r(userLogoutPost, {}) },

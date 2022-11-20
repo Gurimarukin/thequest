@@ -120,7 +120,7 @@ const SearchSummoner = (): JSX.Element => {
             value={summonerName}
             onChange={handleChange}
             onFocus={handleFocus}
-            className="border border-goldenrod bg-transparent px-2"
+            className="border border-goldenrod bg-transparent px-2 w-52"
           />
           <ul
             className={cssClasses(
@@ -160,8 +160,13 @@ type SummonerSearchProps = {
 }
 
 const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element => {
-  const { addFavoriteSearch, removeRecentSearch } = useUser()
+  const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
+
+  const handleRemoveRecentClick = useCallback(
+    () => removeRecentSearch(summoner),
+    [removeRecentSearch, summoner],
+  )
 
   const handleAddFavoriteClick = useCallback(
     () => addFavoriteSearch(summoner),
@@ -169,8 +174,8 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
   )
 
   const handleRemoveFavoriteClick = useCallback(
-    () => removeRecentSearch(summoner),
-    [removeRecentSearch, summoner],
+    () => removeFavoriteSearch(summoner),
+    [removeFavoriteSearch, summoner],
   )
 
   return (
@@ -185,7 +190,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
             )
           case 'recent':
             return (
-              <button type="button" onClick={handleRemoveFavoriteClick} className="group p-2">
+              <button type="button" onClick={handleRemoveRecentClick} className="group p-2">
                 <TimeOutlineIcon className="h-4 text-goldenrod group-hover:hidden" />
                 <CloseFilledIcon className="h-4 fill-red-700 hidden group-hover:flex" />
               </button>
@@ -208,7 +213,11 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
         switch (type) {
           case 'favorite':
             return (
-              <button type="button" className="px-3 pt-2 pb-3 fill-goldenrod hover:fill-red-700">
+              <button
+                type="button"
+                onClick={handleRemoveFavoriteClick}
+                className="px-3 pt-2 pb-3 fill-goldenrod hover:fill-red-700"
+              >
                 <StarFilledIcon className="h-5" />
               </button>
             )

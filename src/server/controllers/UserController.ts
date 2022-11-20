@@ -1,4 +1,5 @@
 import { apply } from 'fp-ts'
+import type { Lazy } from 'fp-ts/function'
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
@@ -14,6 +15,7 @@ import { constants } from '../config/constants'
 import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
+import type { UserId } from '../models/user/UserId'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
@@ -62,7 +64,7 @@ function UserController(summonerService: SummonerService, userService: UserServi
     getSelf: (user: TokenContent): EndedMiddleware =>
       pipe(
         userService.findById(user.id),
-        futureEither.fromTaskEitherOptionK(() => 'User not found'),
+        Future.map(Either.fromOption(() => 'User not found')),
         futureEither.chainTaskEitherK(({ userName, favoriteSearches }) =>
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.right(userName),
@@ -97,7 +99,25 @@ function UserController(summonerService: SummonerService, userService: UserServi
         M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(UserView.codec))),
       ),
 
-    addFavoriteSelf: (user: TokenContent): EndedMiddleware =>
+    addFavoriteSelf: favoriteSelf(
+      userService.addFavoriteSearch,
+      () => 'Summoner search is already in favorites',
+    ),
+
+    removeFavoriteSelf: favoriteSelf(
+      userService.removeFavoriteSearch,
+      () => 'Summoner search is not in favorites',
+    ),
+
+    login,
+    logout,
+  }
+
+  function favoriteSelf(
+    updateFavoriteSearch: (id: UserId, search: PlatformWithPuuid) => Future<Maybe<boolean>>,
+    uselessActionMessage: Lazy<string>,
+  ): (user: TokenContent) => EndedMiddleware {
+    return user =>
       pipe(
         M.decodeBody([PlatformWithName.codec, 'PlatformWithName']),
         M.matchE(
@@ -105,29 +125,24 @@ function UserController(summonerService: SummonerService, userService: UserServi
           ({ platform, name }) =>
             pipe(
               summonerService.findByName(platform, name),
-              futureEither.fromTaskEitherOptionK(() => 'Summoner not found'),
+              Future.map(Either.fromOption(() => 'Summoner not found')),
               futureEither.chain(({ puuid }) =>
                 pipe(
-                  userService.addFavoriteSearch(user.id, { platform, puuid }),
-                  futureEither.fromTaskEitherOptionK(() => 'User not found'),
+                  updateFavoriteSearch(user.id, { platform, puuid }),
+                  Future.map(Either.fromOption(() => 'User not found')),
                 ),
               ),
               M.fromTaskEither,
               M.ichain(
-                Either.fold(M.sendWithStatus(Status.NotFound), added =>
-                  added
+                Either.fold(M.sendWithStatus(Status.NotFound), removed =>
+                  removed
                     ? M.noContent()
-                    : M.sendWithStatus(Status.BadRequest)(
-                        'Summoner search is already in favorites',
-                      ),
+                    : M.sendWithStatus(Status.BadRequest)(uselessActionMessage()),
                 ),
               ),
             ),
         ),
-      ),
-
-    login,
-    logout,
+      )
   }
 }
 

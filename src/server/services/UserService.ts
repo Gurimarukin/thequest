@@ -24,7 +24,8 @@ type UserService = ReturnType<typeof UserService>
 function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwtHelper: JwtHelper) {
   const logger = Logger('UserService')
 
-  const { findById, addFavoriteSearch, removeAllFavoriteSearches } = userPersistence
+  const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
+    userPersistence
 
   const createUser: Future<NotUsed> = pipe(
     Future.fromIOEither(logger.info('Creating user')),
@@ -74,6 +75,7 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
 
     findById,
     addFavoriteSearch,
+    removeFavoriteSearch,
     removeAllFavoriteSearches,
   }
 

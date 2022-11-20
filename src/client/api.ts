@@ -8,6 +8,9 @@ import { http } from './utils/http'
 export const apiUserSelfFavoritesPut = (platformWithName: PlatformWithName): Future<unknown> =>
   http(apiRoutes.user.self.favorites.put, { json: [PlatformWithName.codec, platformWithName] })
 
+export const apiUserSelfFavoritesDelete = (platformWithName: PlatformWithName): Future<unknown> =>
+  http(apiRoutes.user.self.favorites.delete, { json: [PlatformWithName.codec, platformWithName] })
+
 export const apiUserLoginPost = (payload: LoginPayload): Future<unknown> =>
   http(apiRoutes.user.login.post, { json: [LoginPayload.codec, payload] })
 

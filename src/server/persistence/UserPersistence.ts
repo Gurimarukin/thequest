@@ -41,7 +41,7 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
       ),
 
     /**
-     * @returns none if `id` doesn't exist, some(false) if `search` is already in favorites
+     * @returns `none` if `id` doesn't exist, `some(false)` if `search` is already in favorites
      */
     addFavoriteSearch: (id: UserId, search: PlatformWithPuuid): Future<Maybe<boolean>> =>
       pipe(
@@ -49,6 +49,23 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
           c.updateOne(
             { id: UserId.codec.encode(id) },
             { $addToSet: { favoriteSearches: PlatformWithPuuid.codec.encode(search) } },
+          ),
+        ),
+        // TODO: logger.trace
+        Future.map(res =>
+          res.matchedCount === 1 ? Maybe.some(res.modifiedCount === 1) : Maybe.none,
+        ),
+      ),
+
+    /**
+     * @returns `none` if `id` doesn't exist, `some(false)` if `search` was already not in favorites
+     */
+    removeFavoriteSearch: (id: UserId, search: PlatformWithPuuid): Future<Maybe<boolean>> =>
+      pipe(
+        collection.collection.future(c =>
+          c.updateOne(
+            { id: UserId.codec.encode(id) },
+            { $pull: { favoriteSearches: PlatformWithPuuid.codec.encode(search) } },
           ),
         ),
         // TODO: logger.trace

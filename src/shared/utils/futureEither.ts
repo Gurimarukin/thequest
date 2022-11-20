@@ -4,10 +4,8 @@ import type { Chain2 } from 'fp-ts/Chain'
 import type { Functor2 } from 'fp-ts/Functor'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
-import type { Lazy } from 'fp-ts/function'
 import { flow, pipe } from 'fp-ts/function'
 
-import type { Maybe } from './fp'
 import { Either, Future } from './fp'
 
 const URI = 'TaskEitherEither' as const
@@ -76,10 +74,6 @@ type FilterOrElse = {
 
 const filterOrElse = flow(Either.filterOrElse, Future.map) as FilterOrElse
 
-const fromTaskEitherOptionK = <E>(
-  onNone: Lazy<E>,
-): (<A>(fa: Future<Maybe<A>>) => Future<Either<E, A>>) => Future.map(Either.fromOption(onNone))
-
 const map = eitherT.map(Future.Functor)
 
 export const futureEither = {
@@ -91,7 +85,6 @@ export const futureEither = {
   chain,
   chainTaskEitherK,
   filterOrElse,
-  fromTaskEitherOptionK,
   left,
   map,
   right,

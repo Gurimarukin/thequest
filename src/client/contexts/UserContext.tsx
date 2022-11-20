@@ -1,6 +1,5 @@
-/* eslint-disable functional/no-expression-statement */
-
-/* eslint-disable functional/no-return-void */
+/* eslint-disable functional/no-expression-statement,
+                  functional/no-return-void */
 import { predicate } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -12,7 +11,7 @@ import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
 import { Future, List, Maybe, Tuple } from '../../shared/utils/fp'
 
-import { apiUserSelfFavoritesPut } from '../api'
+import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
@@ -24,6 +23,7 @@ type UserContext = {
   readonly refreshUser: () => void
   readonly user: Maybe<UserView>
   readonly addFavoriteSearch: (summoner: SummonerShort) => void
+  readonly removeFavoriteSearch: (summoner: SummonerShort) => void
   readonly recentSearches: List<SummonerShort>
   readonly addRecentSearch: (summoner: SummonerShort) => void
   readonly removeRecentSearch: (summoner: SummonerShort) => void
@@ -48,10 +48,9 @@ export const UserContextProvider: React.FC = ({ children }) => {
   )
 
   const addFavoriteSearch = useCallback(
-    (summoner: SummonerShort) =>
+    (summoner: SummonerShort): Maybe<void> =>
       pipe(
-        data,
-        Maybe.fromNullable,
+        Maybe.fromNullable(data),
         Maybe.flatten,
         Maybe.filter(
           flow(
@@ -69,6 +68,35 @@ export const UserContextProvider: React.FC = ({ children }) => {
           refreshUser(Maybe.some(newData), { revalidate: false })
           pipe(
             apiUserSelfFavoritesPut(summoner),
+            Future.map(() => refreshUser()),
+            futureRunUnsafe,
+          )
+        }),
+      ),
+    [data, refreshUser],
+  )
+
+  const removeFavoriteSearch = useCallback(
+    (summoner: SummonerShort): Maybe<void> =>
+      pipe(
+        Maybe.fromNullable(data),
+        Maybe.flatten,
+        Maybe.filter(
+          flow(
+            UserView.Lens.favoriteSearches.get,
+            List.elem(SummonerShort.byPlatformAndNameEq)(summoner),
+          ),
+        ),
+        Maybe.map(
+          pipe(
+            UserView.Lens.favoriteSearches,
+            lens.modify(List.filter(s => !SummonerShort.byPlatformAndNameEq.equals(s, summoner))),
+          ),
+        ),
+        Maybe.map(newData => {
+          refreshUser(Maybe.some(newData), { revalidate: false })
+          pipe(
+            apiUserSelfFavoritesDelete(summoner),
             Future.map(() => refreshUser()),
             futureRunUnsafe,
           )
@@ -121,6 +149,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
     refreshUser: () => refreshUser(),
     user,
     addFavoriteSearch,
+    removeFavoriteSearch,
     recentSearches,
     addRecentSearch,
     removeRecentSearch,
