@@ -213,7 +213,7 @@ const getChampionComponent =
             />
           </div>
           <div
-            className="absolute top-0 left-0 w-4 h-4 text-xs bg-black flex justify-center pr-1 rounded-br-lg overflow-hidden"
+            className="absolute top-0 left-0 w-[14px] h-4 text-xs bg-black flex justify-center pr-[2px] rounded-br-lg overflow-hidden"
             title={nameLevelTokens}
           >
             <span className="mt-[-2px]">{championLevel}</span>
@@ -321,7 +321,7 @@ const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Elemen
         <span
           title={title}
           className={cssClasses(
-            'flex absolute left-[15px] top-0 bg-black h-[10px] rounded-br pl-[2px]',
+            'flex absolute left-[13px] top-0 bg-black h-[10px] rounded-br pl-[2px]',
             ['gap-[2px] pt-[1px] pb-[2px] pr-[2px]', championLevel === 5],
             ['gap-[3px] pb-[1px] pr-[3px]', championLevel === 6],
           )}
