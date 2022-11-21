@@ -1,7 +1,7 @@
 import { number, ord, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
-import React, { useCallback, useMemo } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
@@ -12,6 +12,7 @@ import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
+import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cssClasses } from '../../utils/cssClasses'
 
 type Props = {
@@ -36,11 +37,8 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
   const setOrder = flow(MasteriesQuery.Lens.order.set, u)
   const setView = flow(MasteriesQuery.Lens.view.set, u)
 
-  const { filteredAndSortedChampions, maybeMaxPoints } = useMemo((): {
-    readonly filteredAndSortedChampions: List<EnrichedChampionMasteryView>
-    readonly maybeMaxPoints: Maybe<number>
-  } => {
-    const filteredAndSorted = pipe(
+  const filteredAndSortedChampions = useMemo(() => {
+    return pipe(
       masteries,
       List.filter(c => c.championLevel <= 7), // TODO: filter with checkboxes
       List.sortBy(
@@ -59,19 +57,6 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
         })(),
       ),
     )
-    return {
-      filteredAndSortedChampions: filteredAndSorted,
-      maybeMaxPoints: pipe(
-        filteredAndSorted,
-        NonEmptyArray.fromReadonlyArray,
-        Maybe.map(
-          flow(
-            NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
-            NonEmptyArray.max(number.Ord),
-          ),
-        ),
-      ),
-    }
 
     function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
       switch (masteriesQuery.order) {
@@ -147,38 +132,76 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
           </label>
         </div>
       </div>
-      <div className="self-center w-full max-w-7xl grid grid-cols-[auto_1fr] gap-y-2 pt-4 pb-2">
-        {filteredAndSortedChampions.map(champion => (
-          <ChampionMastery
-            key={ChampionKey.unwrap(champion.championId)}
-            maybeMaxPoints={maybeMaxPoints}
-            champion={champion}
-          />
-        ))}
-      </div>
+      {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions)}
     </div>
   )
 }
 
-type ChampionMasteryProps = {
-  readonly maybeMaxPoints: Maybe<number>
+const renderChampionMasteries = (
+  view: MasteriesQueryView,
+  champions: List<EnrichedChampionMasteryView>,
+): JSX.Element => {
+  switch (view) {
+    case 'compact':
+      return <ChampionMasteriesCompact champions={champions} />
+    case 'histogram':
+      return <ChampionMasteriesHistogram champions={champions} />
+  }
+}
+
+type ChampionMasteriesCompactProps = {
+  readonly champions: List<EnrichedChampionMasteryView>
+}
+
+const ChampionMasteriesCompact = ({ champions }: ChampionMasteriesCompactProps): JSX.Element => (
+  <div className="flex flex-wrap gap-4 pt-4 pb-2">
+    {champions.map(champion => (
+      <ChampionMasterySquare key={ChampionKey.unwrap(champion.championId)} champion={champion} />
+    ))}
+  </div>
+)
+
+type ChampionMasteriesHistogramProps = {
+  readonly champions: List<EnrichedChampionMasteryView>
+}
+
+const ChampionMasteriesHistogram = ({
+  champions,
+}: ChampionMasteriesHistogramProps): JSX.Element => {
+  const maybeMaxPoints = useMemo(
+    () =>
+      pipe(
+        champions,
+        NonEmptyArray.fromReadonlyArray,
+        Maybe.map(
+          flow(
+            NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
+            NonEmptyArray.max(number.Ord),
+          ),
+        ),
+      ),
+    [champions],
+  )
+
+  return (
+    <div className="self-center w-full max-w-7xl grid grid-cols-[auto_1fr] gap-y-2 pt-4 pb-2">
+      {champions.map(champion => (
+        <Fragment key={ChampionKey.unwrap(champion.championId)}>
+          <ChampionMasterySquare champion={champion} />
+          <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
+        </Fragment>
+      ))}
+    </div>
+  )
+}
+
+type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMasteryView
 }
 
-const ChampionMastery = ({
-  maybeMaxPoints,
-  champion: {
-    championId,
-    championLevel,
-    championPoints,
-    championPointsSinceLastLevel,
-    championPointsUntilNextLevel,
-    chestGranted,
-    tokensEarned,
-    name,
-    percents,
-  },
-}: ChampionMasteryProps): JSX.Element => {
+const ChampionMasterySquare = ({
+  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents },
+}: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
   const nameLevelTokens = `${name} - niveau ${championLevel}${
@@ -186,6 +209,56 @@ const ChampionMastery = ({
       ? ` - ${tokensEarned} jeton${tokensEarned < 2 ? '' : 's'}`
       : ''
   }\n${Math.round(percents)}%`
+
+  return (
+    <div
+      className={cssClasses(
+        'w-16 h-16 relative flex items-center justify-center',
+        ['bg-mastery7-blue', championLevel === 7],
+        ['bg-mastery6-violet', championLevel === 6],
+        ['bg-mastery5-red', championLevel === 5],
+        ['bg-mastery4-brown', championLevel === 4],
+        ['bg-mastery-beige', championLevel < 4],
+      )}
+      title={name}
+    >
+      <div className="w-12 h-12 overflow-hidden">
+        <img
+          src={staticData.assets.champion.square(championId)}
+          alt={`${name}'s icon`}
+          className="max-w-none w-[calc(100%_+_6px)] m-[-3px]"
+        />
+      </div>
+      <div
+        className="absolute top-0 left-0 w-[14px] h-4 text-xs bg-black flex justify-center pr-[2px] rounded-br-lg overflow-hidden"
+        title={nameLevelTokens}
+      >
+        <span className="mt-[-2px]">{championLevel}</span>
+      </div>
+      <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
+      {chestGranted ? (
+        <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
+          <img src={Assets.chest} alt="Chest icon" className="w-4" />
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+type ChampionMasteryHistogramProps = {
+  readonly maybeMaxPoints: Maybe<number>
+  readonly champion: EnrichedChampionMasteryView
+}
+
+const ChampionMasteryHistogram = ({
+  maybeMaxPoints,
+  champion: {
+    championLevel,
+    championPoints,
+    championPointsSinceLastLevel,
+    championPointsUntilNextLevel,
+  },
+}: ChampionMasteryHistogramProps): JSX.Element => {
   const pointsUntilAndSince = pipe(
     [
       Maybe.some(pointsStr(championPoints)),
@@ -206,81 +279,49 @@ const ChampionMastery = ({
     List.compact,
     List.mkString(' - '),
   )
+
   return (
-    <>
-      <div
-        className={cssClasses(
-          'w-16 h-16 relative flex items-center justify-center',
-          ['bg-mastery7-blue', championLevel === 7],
-          ['bg-mastery6-violet', championLevel === 6],
-          ['bg-mastery5-red', championLevel === 5],
-          ['bg-mastery4-brown', championLevel === 4],
-          ['bg-mastery-beige', championLevel < 4],
-        )}
-        title={name}
-      >
-        <div className="w-12 h-12 overflow-hidden">
-          <img
-            src={staticData.assets.champion.square(championId)}
-            alt={`${name}'s icon`}
-            className="max-w-none w-[calc(100%_+_6px)] m-[-3px]"
-          />
-        </div>
-        <div
-          className="absolute top-0 left-0 w-[14px] h-4 text-xs bg-black flex justify-center pr-[2px] rounded-br-lg overflow-hidden"
-          title={nameLevelTokens}
-        >
-          <span className="mt-[-2px]">{championLevel}</span>
-        </div>
-        <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
-        {chestGranted ? (
-          <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
-            <img src={Assets.chest} alt="Chest icon" className="w-4" />
-          </div>
-        ) : null}
-      </div>
-      <div className="flex flex-col">
-        {pipe(
-          maybeMaxPoints,
-          Maybe.fold(
-            () => null,
-            maxPoints => {
-              const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
-              return (
-                <div className="h-7 relative">
-                  {championPointsUntilNextLevel === 0 ? null : (
-                    <div
-                      title={pointsUntilAndSince}
-                      className="h-full bg-gray-600 opacity-50"
-                      style={{ width: p(championPoints + championPointsUntilNextLevel) }}
-                    />
-                  )}
+    <div className="flex flex-col">
+      {pipe(
+        maybeMaxPoints,
+        Maybe.fold(
+          () => null,
+          maxPoints => {
+            const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
+            return (
+              <div className="h-7 relative">
+                {championPointsUntilNextLevel === 0 ? null : (
                   <div
                     title={pointsUntilAndSince}
-                    className={`h-full absolute top-0 ${levelColor(championLevel)}`}
-                    style={{ width: p(championPoints) }}
+                    className="h-full bg-gray-600 opacity-50"
+                    style={{ width: p(championPoints + championPointsUntilNextLevel) }}
                   />
-                  {championLevel < 2 ? null : (
-                    <div
-                      title={pointsUntilAndSince}
-                      className={`h-full border-r absolute top-0 ${((): string => {
-                        if (5 <= championLevel && championLevel <= 7) return 'border-gray-500'
-                        if (championLevel === 4) return 'border-gray-400'
-                        return 'border-gray-300 '
-                      })()}`}
-                      style={{ width: p(championPoints - championPointsSinceLastLevel) }}
-                    />
-                  )}
-                </div>
-              )
-            },
-          ),
-        )}
-        <div className="grow flex items-center p-1 text-sm">
-          <span title={pointsUntilAndSince}>{championPoints.toLocaleString()}</span>
-        </div>
+                )}
+                <div
+                  title={pointsUntilAndSince}
+                  className={`h-full absolute top-0 ${levelColor(championLevel)}`}
+                  style={{ width: p(championPoints) }}
+                />
+                {championLevel < 2 ? null : (
+                  <div
+                    title={pointsUntilAndSince}
+                    className={`h-full border-r absolute top-0 ${((): string => {
+                      if (5 <= championLevel && championLevel <= 7) return 'border-gray-500'
+                      if (championLevel === 4) return 'border-gray-400'
+                      return 'border-gray-300 '
+                    })()}`}
+                    style={{ width: p(championPoints - championPointsSinceLastLevel) }}
+                  />
+                )}
+              </div>
+            )
+          },
+        ),
+      )}
+      <div className="grow flex items-center p-1 text-sm">
+        <span title={pointsUntilAndSince}>{championPoints.toLocaleString()}</span>
       </div>
-    </>
+    </div>
   )
 }
 
