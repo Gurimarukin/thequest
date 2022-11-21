@@ -14,6 +14,6 @@ services:
     volumes:
       - .docker-data/mongo:/data/db
     ports:
-      - "27019:27017"
+      - "27021:27017"
     command:
       mongod
