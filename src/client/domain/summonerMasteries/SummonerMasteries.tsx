@@ -17,6 +17,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
+import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import type { EnrichedChampionMasteryView } from './Masteries'
@@ -57,7 +58,7 @@ const SummonerViewComponent = ({
   summoner,
   masteries,
 }: SummonerViewProps): JSX.Element => {
-  const { navigate } = useHistory()
+  const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
   const staticData = useStaticData()
 
@@ -73,8 +74,16 @@ const SummonerViewComponent = ({
 
   const summonerNameFromLocation = useSummonerNameFromLocation()
   useEffect(
-    () => navigate(appRoutes.platformSummonerName(platform, summoner.name), { replace: true }),
-    [summonerNameFromLocation, navigate, platform, summoner.name],
+    () =>
+      navigate(
+        appRoutes.platformSummonerName(
+          platform,
+          summoner.name,
+          MasteriesQuery.toPartial(masteriesQuery),
+        ),
+        { replace: true },
+      ),
+    [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name],
   )
 
   const { enrichSummoner, enrichedMasteries } = useMemo((): {

@@ -1,4 +1,5 @@
 import { number, ord, string } from 'fp-ts'
+import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback, useMemo } from 'react'
 
@@ -7,8 +8,10 @@ import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLev
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
+import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { cssClasses } from '../../utils/cssClasses'
 
 type Props = {
@@ -23,22 +26,38 @@ export type EnrichedChampionMasteryView = Omit<ChampionMasteryView, 'championLev
 
 const sortName = 'sort'
 const directionName = 'direction'
+const viewName = 'view'
 
-export const Masteries = ({ masteries: championMasteries }: Props): JSX.Element => {
-  // TODO: filter with checkboxes
+export const Masteries = ({ masteries }: Props): JSX.Element => {
+  const { masteriesQuery, updateMasteriesQuery } = useHistory()
+
+  const u = (f: (q: MasteriesQuery) => MasteriesQuery) => () => updateMasteriesQuery(f)
+  const setSort = flow(MasteriesQuery.Lens.sort.set, u)
+  const setOrder = flow(MasteriesQuery.Lens.order.set, u)
+  const setView = flow(MasteriesQuery.Lens.view.set, u)
+
   const { filteredAndSortedChampions, maybeMaxPoints } = useMemo((): {
     readonly filteredAndSortedChampions: List<EnrichedChampionMasteryView>
     readonly maybeMaxPoints: Maybe<number>
   } => {
     const filteredAndSorted = pipe(
-      championMasteries,
-      List.filter(c => c.championLevel <= 7),
-      List.sortBy([
-        ordByPercents,
-        // ordByFragment, // TODO
-        ordByPoints,
-        ordByName,
-      ]),
+      masteries,
+      List.filter(c => c.championLevel <= 7), // TODO: filter with checkboxes
+      List.sortBy(
+        ((): List<Ord<EnrichedChampionMasteryView>> => {
+          switch (masteriesQuery.sort) {
+            case 'percents':
+              return [
+                reverseIfDesc(ordByPercents),
+                /* TODO: ordByFragment, */
+                reverseIfDesc(ordByPoints),
+                ordByName,
+              ]
+            case 'points':
+              return [reverseIfDesc(ordByPoints), ordByName]
+          }
+        })(),
+      ),
     )
     return {
       filteredAndSortedChampions: filteredAndSorted,
@@ -53,27 +72,80 @@ export const Masteries = ({ masteries: championMasteries }: Props): JSX.Element 
         ),
       ),
     }
-  }, [championMasteries])
+
+    function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
+      switch (masteriesQuery.order) {
+        case 'asc':
+          return o
+        case 'desc':
+          return ord.reverse(o)
+      }
+    }
+  }, [masteries, masteriesQuery.order, masteriesQuery.sort])
 
   return (
     <div className="flex flex-col">
       <div className="border-b border-goldenrod">
-        <label>
-          <input type="radio" name={sortName} />
-          <span>Trier par %</span>
-        </label>
-        <label>
-          <input type="radio" name={sortName} />
-          <span>Trier par points</span>
-        </label>
-        <label>
-          <input type="radio" name={directionName} />
-          <span>Décroissant</span>
-        </label>
-        <label>
-          <input type="radio" name={directionName} />
-          <span>Croissant</span>
-        </label>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name={sortName}
+              checked={masteriesQuery.sort === 'percents'}
+              onClick={setSort('percents')}
+            />
+            <span>Trier par %</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name={sortName}
+              checked={masteriesQuery.sort === 'points'}
+              onClick={setSort('points')}
+            />
+            <span>Trier par points</span>
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name={directionName}
+              checked={masteriesQuery.order === 'desc'}
+              onClick={setOrder('desc')}
+            />
+            <span>Décroissant</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name={directionName}
+              checked={masteriesQuery.order === 'asc'}
+              onClick={setOrder('asc')}
+            />
+            <span>Croissant</span>
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name={viewName}
+              checked={masteriesQuery.view === 'compact'}
+              onClick={setView('compact')}
+            />
+            <span>Vue compacte</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name={viewName}
+              checked={masteriesQuery.view === 'histogram'}
+              onClick={setView('histogram')}
+            />
+            <span>Vue histogramme</span>
+          </label>
+        </div>
       </div>
       <div className="self-center w-full max-w-7xl grid grid-cols-[auto_1fr] gap-y-2 pt-4 pb-2">
         {filteredAndSortedChampions.map(champion => (
@@ -271,19 +343,17 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
   return pipe([...Array(Math.max(n, 0))], List.mapWithIndex(getA))
 }
 
-const ordByPercents: ord.Ord<EnrichedChampionMasteryView> = pipe(
+const ordByPercents: Ord<EnrichedChampionMasteryView> = pipe(
   number.Ord,
-  ord.reverse,
   ord.contramap(c => c.percents),
 )
 
-const ordByPoints: ord.Ord<EnrichedChampionMasteryView> = pipe(
+const ordByPoints: Ord<EnrichedChampionMasteryView> = pipe(
   number.Ord,
-  ord.reverse,
   ord.contramap(c => c.championPoints),
 )
 
-const ordByName: ord.Ord<EnrichedChampionMasteryView> = pipe(
+const ordByName: Ord<EnrichedChampionMasteryView> = pipe(
   string.Ord,
   ord.contramap(c => c.name),
 )

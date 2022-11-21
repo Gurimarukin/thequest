@@ -23,6 +23,7 @@ import {
   StarOutlineIcon,
   TimeOutlineIcon,
 } from '../imgs/svgIcons'
+import { MasteriesQuery } from '../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../router/AppRouter'
 import { cssClasses } from '../utils/cssClasses'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
@@ -58,7 +59,7 @@ export const MainLayout: React.FC = ({ children }) => {
 }
 
 const SearchSummoner = (): JSX.Element => {
-  const { navigate } = useHistory()
+  const { navigate, masteriesQuery } = useHistory()
   const { user, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
@@ -90,9 +91,15 @@ const SearchSummoner = (): JSX.Element => {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      navigate(appRoutes.platformSummonerName(platform, summonerName))
+      navigate(
+        appRoutes.platformSummonerName(
+          platform,
+          summonerName,
+          MasteriesQuery.toPartial(masteriesQuery),
+        ),
+      )
     },
-    [navigate, platform, summonerName],
+    [masteriesQuery, navigate, platform, summonerName],
   )
 
   const favoriteSearches = pipe(
@@ -160,6 +167,7 @@ type SummonerSearchProps = {
 }
 
 const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element => {
+  const { masteriesQuery } = useHistory()
   const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
@@ -198,7 +206,11 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
         }
       })()}
       <Link
-        to={appRoutes.platformSummonerName(summoner.platform, summoner.name)}
+        to={appRoutes.platformSummonerName(
+          summoner.platform,
+          summoner.name,
+          MasteriesQuery.toPartial(masteriesQuery),
+        )}
         className="flex items-center hover:underline"
       >
         <img

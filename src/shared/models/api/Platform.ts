@@ -25,8 +25,6 @@ const Eq: eq.Eq<Platform> = string.Eq
 
 const Platform = {
   codec: e.codec,
-  decoder: e.decoder,
-  encoder: e.encoder,
   values: e.values,
   endpoint,
   Eq,

@@ -3,6 +3,8 @@ import { end, format, str } from 'fp-ts-routing'
 import { Platform } from '../../shared/models/api/Platform'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 
+import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
+
 const { codec } = RouterUtils
 
 /**
@@ -27,6 +29,14 @@ export const appParsers = {
 
 export const appRoutes = {
   index: format(end.formatter, {}),
-  platformSummonerName: (platform: Platform, summonerName: string) =>
-    format(platformSummonerNameMatch.formatter, { platform, summonerName }),
+  platformSummonerName: (
+    platform: Platform,
+    summonerName: string,
+    query: PartialMasteriesQuery,
+  ) => {
+    const q = PartialMasteriesQuery.qsStringify(query)
+    return `${format(platformSummonerNameMatch.formatter, { platform, summonerName })}${
+      q === '' ? '' : `?${q}`
+    }`
+  },
 }
