@@ -1,5 +1,6 @@
-import { json, string } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { json, ord, predicate, readonlySet, string } from 'fp-ts'
+import type { Eq } from 'fp-ts/Eq'
+import { flow, pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import type { DecodeError, Decoder } from 'io-ts/Decoder'
@@ -10,7 +11,7 @@ import type { AnyNewtype, CarrierOf } from 'newtype-ts'
 
 import { DayJs } from '../models/DayJs'
 import { StringUtils } from './StringUtils'
-import { Either, Maybe } from './fp'
+import { Either, List, Maybe, NonEmptyArray } from './fp'
 
 const limit = 10000
 
@@ -113,3 +114,92 @@ const booleanFromStringDecoder: Decoder<unknown, boolean> = pipe(
 )
 
 export const BooleanFromString = { decoder: booleanFromStringDecoder }
+
+/**
+ * NumberFromString
+ */
+
+const numberFromStringDecoder: Decoder<unknown, number> = pipe(
+  D.string,
+  D.parse(s => {
+    const n = Number(s)
+    return isNaN(n) ? D.failure(s, 'NumberFromString') : D.success(n)
+  }),
+)
+
+const numberFromStringEncoder: Encoder<string, number> = pipe(E.id<string>(), E.contramap(String))
+
+const numberFromStringCodec: Codec<unknown, string, number> = C.make(
+  numberFromStringDecoder,
+  numberFromStringEncoder,
+)
+
+export const NumberFromString = {
+  decoder: numberFromStringDecoder,
+  encoder: numberFromStringEncoder,
+  codec: numberFromStringCodec,
+}
+
+/**
+ * ArrayFromString
+ */
+
+const prepareArray: (i: string) => List<string> = flow(
+  string.split(','),
+  NonEmptyArray.map(string.trim),
+  List.filter(predicate.not(string.isEmpty)),
+)
+
+const arrayFromStringDecoder = <A>(decoder: Decoder<unknown, A>): Decoder<unknown, List<A>> =>
+  pipe(D.string, D.map(prepareArray), D.compose(List.decoder(decoder)))
+
+const arrayFromStringEncoder = <A>(encoder: Encoder<string, A>): Encoder<string, List<A>> => ({
+  encode: flow(List.map(encoder.encode), List.mkString(',')),
+})
+
+const arrayFromStringCodec = <A>(
+  codec: Codec<unknown, string, A>,
+): Codec<unknown, string, List<A>> =>
+  C.make(arrayFromStringDecoder(codec), arrayFromStringEncoder(codec))
+
+export const ArrayFromString = {
+  decoder: arrayFromStringDecoder,
+  encoder: arrayFromStringEncoder,
+  codec: arrayFromStringCodec,
+}
+
+/**
+ * SetFromString
+ */
+
+const setFromStringDecoder = <A>(
+  decoder: Decoder<unknown, A>,
+  eq_: Eq<A>,
+): Decoder<unknown, ReadonlySet<A>> =>
+  pipe(arrayFromStringDecoder(decoder), D.map(readonlySet.fromReadonlyArray(eq_)))
+
+const setFromStringEncoder = <A>(encoder: Encoder<string, A>): Encoder<string, ReadonlySet<A>> =>
+  pipe(arrayFromStringEncoder(encoder), E.contramap(readonlySet.toReadonlyArray<A>(ord.trivial)))
+
+const setFromStringCodec = <A>(
+  codec: Codec<unknown, string, A>,
+  eq_: Eq<A>,
+): Codec<unknown, string, ReadonlySet<A>> =>
+  C.make(setFromStringDecoder(codec, eq_), setFromStringEncoder(codec))
+
+export const SetFromString = {
+  decoder: setFromStringDecoder,
+  encoder: setFromStringEncoder,
+  codec: setFromStringCodec,
+}
+
+/**
+ * NonEmptyArrayFromString
+ */
+
+const nonEmptyArrayFromStringDecoder = <A>(
+  decoder: Decoder<unknown, A>,
+): Decoder<unknown, NonEmptyArray<A>> =>
+  pipe(D.string, D.map(prepareArray), D.compose(NonEmptyArray.decoder(decoder)))
+
+export const NonEmptyArrayFromString = { decoder: nonEmptyArrayFromStringDecoder }

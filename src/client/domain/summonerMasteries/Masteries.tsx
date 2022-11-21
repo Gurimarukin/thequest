@@ -1,10 +1,11 @@
-import { number, ord, string } from 'fp-ts'
+import { number, ord, readonlySet, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
+import { lens } from 'monocle-ts'
 import React, { Fragment, useCallback, useMemo } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -25,22 +26,13 @@ export type EnrichedChampionMasteryView = Omit<ChampionMasteryView, 'championLev
   readonly percents: number
 }
 
-const sortName = 'sort'
-const directionName = 'direction'
-const viewName = 'view'
-
 export const Masteries = ({ masteries }: Props): JSX.Element => {
-  const { masteriesQuery, updateMasteriesQuery } = useHistory()
-
-  const u = (f: (q: MasteriesQuery) => MasteriesQuery) => () => updateMasteriesQuery(f)
-  const setSort = flow(MasteriesQuery.Lens.sort.set, u)
-  const setOrder = flow(MasteriesQuery.Lens.order.set, u)
-  const setView = flow(MasteriesQuery.Lens.view.set, u)
+  const { masteriesQuery } = useHistory()
 
   const filteredAndSortedChampions = useMemo(() => {
     return pipe(
       masteries,
-      List.filter(c => c.championLevel <= 7), // TODO: filter with checkboxes
+      List.filter(levelFilterPredicate(masteriesQuery.level)),
       List.sortBy(
         ((): List<Ord<EnrichedChampionMasteryView>> => {
           switch (masteriesQuery.sort) {
@@ -66,76 +58,20 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
           return ord.reverse(o)
       }
     }
-  }, [masteries, masteriesQuery.order, masteriesQuery.sort])
+  }, [masteries, masteriesQuery.level, masteriesQuery.order, masteriesQuery.sort])
 
   return (
     <div className="flex flex-col">
-      <div className="border-b border-goldenrod">
-        <div>
-          <label>
-            <input
-              type="radio"
-              name={sortName}
-              checked={masteriesQuery.sort === 'percents'}
-              onClick={setSort('percents')}
-            />
-            <span>Trier par %</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name={sortName}
-              checked={masteriesQuery.sort === 'points'}
-              onClick={setSort('points')}
-            />
-            <span>Trier par points</span>
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name={directionName}
-              checked={masteriesQuery.order === 'desc'}
-              onClick={setOrder('desc')}
-            />
-            <span>Décroissant</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name={directionName}
-              checked={masteriesQuery.order === 'asc'}
-              onClick={setOrder('asc')}
-            />
-            <span>Croissant</span>
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name={viewName}
-              checked={masteriesQuery.view === 'compact'}
-              onClick={setView('compact')}
-            />
-            <span>Vue compacte</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name={viewName}
-              checked={masteriesQuery.view === 'histogram'}
-              onClick={setView('histogram')}
-            />
-            <span>Vue histogramme</span>
-          </label>
-        </div>
-      </div>
+      <Filters />
       {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions)}
     </div>
   )
 }
+
+const levelFilterPredicate =
+  (levels: ReadonlySet<ChampionLevelOrZero>) =>
+  (c: EnrichedChampionMasteryView): boolean =>
+    readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
 const renderChampionMasteries = (
   view: MasteriesQueryView,
@@ -147,6 +83,115 @@ const renderChampionMasteries = (
     case 'histogram':
       return <ChampionMasteriesHistogram champions={champions} />
   }
+}
+
+const sortName = 'sort'
+const orderName = 'order'
+const viewName = 'view'
+
+const Filters = (): JSX.Element => {
+  const { masteriesQuery, updateMasteriesQuery } = useHistory()
+
+  const u = (f: (q: MasteriesQuery) => MasteriesQuery) => () => updateMasteriesQuery(f)
+  const setSort = flow(MasteriesQuery.Lens.sort.set, u)
+  const setOrder = flow(MasteriesQuery.Lens.order.set, u)
+  const setView = flow(MasteriesQuery.Lens.view.set, u)
+
+  const toggleChecked = (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    updateMasteriesQuery(
+      pipe(
+        MasteriesQuery.Lens.level,
+        lens.modify(
+          e.target.checked
+            ? readonlySet.insert(ChampionLevelOrZero.Eq)(level)
+            : readonlySet.remove(ChampionLevelOrZero.Eq)(level),
+        ),
+      ),
+    )
+
+  return (
+    <div className="border-b border-goldenrod">
+      <div className="flex justify-between gap-5 flex-wrap">
+        <div className="flex gap-3">
+          <label className="flex gap-1">
+            <input
+              type="radio"
+              name={sortName}
+              checked={masteriesQuery.sort === 'percents'}
+              onClick={setSort('percents')}
+            />
+            <span>Trier par %</span>
+          </label>
+          <label className="flex gap-1">
+            <input
+              type="radio"
+              name={sortName}
+              checked={masteriesQuery.sort === 'points'}
+              onClick={setSort('points')}
+            />
+            <span>Trier par points</span>
+          </label>
+        </div>
+        <div className="flex gap-3">
+          <label className="flex gap-1">
+            <input
+              type="radio"
+              name={orderName}
+              checked={masteriesQuery.order === 'desc'}
+              onClick={setOrder('desc')}
+            />
+            <span>Décroissant</span>
+          </label>
+          <label className="flex gap-1">
+            <input
+              type="radio"
+              name={orderName}
+              checked={masteriesQuery.order === 'asc'}
+              onClick={setOrder('asc')}
+            />
+            <span>Croissant</span>
+          </label>
+        </div>
+        <div className="flex gap-3">
+          <label className="flex gap-1">
+            <input
+              type="radio"
+              name={viewName}
+              checked={masteriesQuery.view === 'compact'}
+              onClick={setView('compact')}
+            />
+            <span>Vue compacte</span>
+          </label>
+          <label className="flex gap-1">
+            <input
+              type="radio"
+              name={viewName}
+              checked={masteriesQuery.view === 'histogram'}
+              onClick={setView('histogram')}
+            />
+            <span>Vue histogramme</span>
+          </label>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        Maîtrises
+        {pipe(
+          ChampionLevelOrZero.values,
+          List.reverse,
+          List.map(level => (
+            <label key={level} className="flex gap-1">
+              <input
+                type="checkbox"
+                checked={readonlySet.elem(ChampionLevelOrZero.Eq)(level, masteriesQuery.level)}
+                onChange={toggleChecked(level)}
+              />
+              <span>{level}</span>
+            </label>
+          )),
+        )}
+      </div>
+    </div>
+  )
 }
 
 type ChampionMasteriesCompactProps = {

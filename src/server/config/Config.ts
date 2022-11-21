@@ -9,9 +9,12 @@ import { loadDotEnv } from '../../shared/utils/config/loadDotEnv'
 import { parseConfig } from '../../shared/utils/config/parseConfig'
 import type { NonEmptyArray, Try } from '../../shared/utils/fp'
 import { Either, IO, Maybe } from '../../shared/utils/fp'
-import { BooleanFromString, URLFromString } from '../../shared/utils/ioTsUtils'
-
-import { NonEmptyArrayFromString, NumberFromString } from '../utils/ioTsUtils'
+import {
+  BooleanFromString,
+  NonEmptyArrayFromString,
+  NumberFromString,
+  URLFromString,
+} from '../../shared/utils/ioTsUtils'
 
 const seqS = ValidatedNea.getSeqS<string>()
 
