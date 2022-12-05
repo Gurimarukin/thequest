@@ -6,6 +6,7 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
+import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import type { Dict } from '../../../shared/utils/fp'
@@ -86,65 +87,10 @@ const SummonerViewComponent = ({
     [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name],
   )
 
-  const { enrichedSummoner, enrichedMasteries } = useMemo((): {
-    readonly enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
-    readonly enrichedMasteries: List<EnrichedChampionMasteryView>
-  } => {
-    const enrichedMasteries_ = pipe(
-      staticData.champions,
-      List.map(
-        ({ key, name }): EnrichedChampionMasteryView =>
-          pipe(
-            masteries,
-            List.findFirst(c => c.championId === key),
-            Maybe.fold(
-              (): EnrichedChampionMasteryView => ({
-                championId: key,
-                championLevel: 0,
-                championPoints: 0,
-                championPointsSinceLastLevel: 0,
-                championPointsUntilNextLevel: 0,
-                chestGranted: false,
-                tokensEarned: 0,
-                name,
-                percents: 0,
-              }),
-              champion => ({ ...champion, name, percents: championPercents(champion) }),
-            ),
-          ),
-      ),
-    )
-    const totalChampionsCount = enrichedMasteries_.length
-    const questPercents =
-      pipe(
-        enrichedMasteries_,
-        List.map(c => c.percents),
-        monoid.concatAll(number.MonoidSum),
-      ) / totalChampionsCount
-    const totalMasteryLevel = pipe(
-      enrichedMasteries_,
-      List.map(c => c.championLevel),
-      monoid.concatAll(number.MonoidSum),
-    )
-
-    const grouped: PartialMasteriesGrouped = pipe(
-      enrichedMasteries_,
-      NonEmptyArray.fromReadonlyArray,
-      Maybe.map(List.groupBy(c => ChampionLevelOrZero.stringify(c.championLevel))),
-      Maybe.getOrElse(() => ({})),
-    )
-    const masteriesCount = pipe(
-      ChampionLevelOrZero.values,
-      List.reduce({} as Dict<`${ChampionLevelOrZero}`, number>, (acc, key) => {
-        const value: number = grouped[key]?.length ?? 0
-        return { ...acc, [key]: value }
-      }),
-    )
-    return {
-      enrichedSummoner: { questPercents, totalChampionsCount, totalMasteryLevel, masteriesCount },
-      enrichedMasteries: enrichedMasteries_,
-    }
-  }, [masteries, staticData.champions])
+  const { enrichedSummoner, enrichedMasteries } = useMemo(
+    () => enrichAll(masteries, staticData.champions),
+    [masteries, staticData.champions],
+  )
 
   return (
     <div className="p-2 flex flex-col">
@@ -154,9 +100,74 @@ const SummonerViewComponent = ({
   )
 }
 
+type EnrichedAll = {
+  readonly enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
+  readonly enrichedMasteries: List<EnrichedChampionMasteryView>
+}
+
 type PartialMasteriesGrouped = Partial<
   Dict<`${ChampionLevelOrZero}`, NonEmptyArray<EnrichedChampionMasteryView>>
 >
+
+const enrichAll = (
+  masteries: List<ChampionMasteryView>,
+  staticDataChampions: List<StaticDataChampion>,
+): EnrichedAll => {
+  const enrichedMasteries_ = pipe(
+    staticDataChampions,
+    List.map(
+      ({ key, name }): EnrichedChampionMasteryView =>
+        pipe(
+          masteries,
+          List.findFirst(c => c.championId === key),
+          Maybe.fold(
+            (): EnrichedChampionMasteryView => ({
+              championId: key,
+              championLevel: 0,
+              championPoints: 0,
+              championPointsSinceLastLevel: 0,
+              championPointsUntilNextLevel: 0,
+              chestGranted: false,
+              tokensEarned: 0,
+              name,
+              percents: 0,
+            }),
+            champion => ({ ...champion, name, percents: championPercents(champion) }),
+          ),
+        ),
+    ),
+  )
+  const totalChampionsCount = enrichedMasteries_.length
+  const questPercents =
+    pipe(
+      enrichedMasteries_,
+      List.map(c => c.percents),
+      monoid.concatAll(number.MonoidSum),
+    ) / totalChampionsCount
+  const totalMasteryLevel = pipe(
+    enrichedMasteries_,
+    List.map(c => c.championLevel),
+    monoid.concatAll(number.MonoidSum),
+  )
+
+  const grouped: PartialMasteriesGrouped = pipe(
+    enrichedMasteries_,
+    NonEmptyArray.fromReadonlyArray,
+    Maybe.map(List.groupBy(c => ChampionLevelOrZero.stringify(c.championLevel))),
+    Maybe.getOrElse(() => ({})),
+  )
+  const masteriesCount = pipe(
+    ChampionLevelOrZero.values,
+    List.reduce({} as Dict<`${ChampionLevelOrZero}`, number>, (acc, key) => {
+      const value: number = grouped[key]?.length ?? 0
+      return { ...acc, [key]: value }
+    }),
+  )
+  return {
+    enrichedSummoner: { questPercents, totalChampionsCount, totalMasteryLevel, masteriesCount },
+    enrichedMasteries: enrichedMasteries_,
+  }
+}
 
 // Mastery 4: 50%
 // Mastery 6 tokens: 7% each
