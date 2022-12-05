@@ -22,37 +22,50 @@ export const ChampionMasterySquare = ({
       : ''
   }\n${Math.round(percents)}%`
 
+  const glows = name === 'Renekton'
+
   return (
-    <div
-      className={cssClasses(
-        'w-16 h-16 relative flex items-center justify-center',
-        ['bg-mastery7-blue', championLevel === 7],
-        ['bg-mastery6-violet', championLevel === 6],
-        ['bg-mastery5-red', championLevel === 5],
-        ['bg-mastery4-brown', championLevel === 4],
-        ['bg-mastery-beige', championLevel < 4],
-      )}
-      title={name}
-    >
-      <div className="w-12 h-12 overflow-hidden">
-        <img
-          src={staticData.assets.champion.square(championId)}
-          alt={`${name}'s icon`}
-          className="max-w-none w-[calc(100%_+_6px)] m-[-3px]"
-        />
-      </div>
+    <div className="relative">
       <div
-        className="absolute top-0 left-0 w-[14px] h-4 text-xs bg-black flex justify-center pr-[2px] rounded-br-lg overflow-hidden"
-        title={nameLevelTokens}
+        className={cssClasses(
+          ['hidden', !glows],
+          [
+            'w-[76px] h-[76px] absolute left-[-6px] top-[-6px] rounded-[50%] bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm animate-glow',
+            glows,
+          ],
+        )}
+      />
+      <div
+        className={cssClasses(
+          'w-16 h-16 relative flex items-center justify-center',
+          ['bg-mastery7-blue', championLevel === 7],
+          ['bg-mastery6-violet', championLevel === 6],
+          ['bg-mastery5-red', championLevel === 5],
+          ['bg-mastery4-brown', championLevel === 4],
+          ['bg-mastery-beige', championLevel < 4],
+        )}
+        title={name}
       >
-        <span className="mt-[-2px]">{championLevel}</span>
-      </div>
-      <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
-      {chestGranted ? (
-        <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
-          <img src={Assets.chest} alt="Chest icon" className="w-4" />
+        <div className="w-12 h-12 overflow-hidden">
+          <img
+            src={staticData.assets.champion.square(championId)}
+            alt={`${name}'s icon`}
+            className="max-w-none w-[calc(100%_+_6px)] m-[-3px]"
+          />
         </div>
-      ) : null}
+        <div
+          className="absolute top-0 left-0 w-[14px] h-4 text-xs bg-black flex justify-center pr-[2px] rounded-br-lg overflow-hidden"
+          title={nameLevelTokens}
+        >
+          <span className="mt-[-2px]">{championLevel}</span>
+        </div>
+        <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
+        {chestGranted ? (
+          <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
+            <img src={Assets.chest} alt="Chest icon" className="w-4" />
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

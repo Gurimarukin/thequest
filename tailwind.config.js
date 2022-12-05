@@ -24,6 +24,35 @@ module.exports = {
       textShadow: {
         DEFAULT: '0 0 5px var(--tw-shadow-color)',
       },
+      animation: {
+        glow: 'glow 1s ease-in-out infinite',
+      },
+      keyframes: {
+        glow: {
+          '0%': {
+            transform: 'scale(1) rotate(0deg)',
+          },
+          '50%': {
+            transform: 'scale(1.05) rotate(180deg)',
+          },
+          '100%': {
+            transform: 'scale(1) rotate(360deg)',
+          },
+          /* ping and spin */
+          //   '0%': {
+          //     transform: 'scale(1) rotate(0deg)',
+          //     opacity: 1,
+          //   },
+          //   '75%': {
+          //     transform: 'scale(1.2) rotate(270deg)',
+          //     opacity: 0,
+          //   },
+          //   '100%': {
+          //     transform: 'scale(1.2) rotate(360deg)',
+          //     opacity: 0,
+          //   },
+        },
+      },
     },
   },
   plugins: [
