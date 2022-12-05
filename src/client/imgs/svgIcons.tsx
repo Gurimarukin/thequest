@@ -2,6 +2,32 @@ import React from 'react'
 
 type SVGIcon = (props: { readonly className?: string }) => JSX.Element
 
+export const AppsSharp: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+    <rect x="48" y="48" width="112" height="112" rx="8" ry="8" />
+    <rect x="200" y="48" width="112" height="112" rx="8" ry="8" />
+    <rect x="352" y="48" width="112" height="112" rx="8" ry="8" />
+    <rect x="48" y="200" width="112" height="112" rx="8" ry="8" />
+    <rect x="200" y="200" width="112" height="112" rx="8" ry="8" />
+    <rect x="352" y="200" width="112" height="112" rx="8" ry="8" />
+    <rect x="48" y="352" width="112" height="112" rx="8" ry="8" />
+    <rect x="200" y="352" width="112" height="112" rx="8" ry="8" />
+    <rect x="352" y="352" width="112" height="112" rx="8" ry="8" />
+  </svg>
+)
+
+export const CaretDownOutline: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+    <path d="M98 190.06l139.78 163.12a24 24 0 0036.44 0L414 190.06c13.34-15.57 2.28-39.62-18.22-39.62h-279.6c-20.5 0-31.56 24.05-18.18 39.62z" />
+  </svg>
+)
+
+export const CaretUpOutline: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+    <path d="M414 321.94L274.22 158.82a24 24 0 00-36.44 0L98 321.94c-13.34 15.57-2.28 39.62 18.22 39.62h279.6c20.5 0 31.56-24.05 18.18-39.62z" />
+  </svg>
+)
+
 export const CloseFilledIcon: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
     <path d="M289.94 256l95-95A24 24 0 00351 127l-95 95-95-95a24 24 0 00-34 34l95 95-95 95a24 24 0 1034 34l95-95 95 95a24 24 0 0034-34z" />
@@ -63,6 +89,12 @@ export const StarOutlineIcon: SVGIcon = ({ className }) => (
 export const StarFilledIcon: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
     <path d="M394 480a16 16 0 01-9.39-3L256 383.76 127.39 477a16 16 0 01-24.55-18.08L153 310.35 23 221.2a16 16 0 019-29.2h160.38l48.4-148.95a16 16 0 0130.44 0l48.4 149H480a16 16 0 019.05 29.2L359 310.35l50.13 148.53A16 16 0 01394 480z" />
+  </svg>
+)
+
+export const StatsChartSharp: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+    <path d="M128 496H48V304h80zM352 496h-80V208h80zM464 496h-80V96h80zM240 496h-80V16h80z" />
   </svg>
 )
 
