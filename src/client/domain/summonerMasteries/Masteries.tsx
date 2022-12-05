@@ -1,28 +1,20 @@
-import { number, ord, readonlySet, string } from 'fp-ts'
+import { number, ord, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
-import React, { Fragment, useCallback, useMemo } from 'react'
+import React, { Fragment, useMemo } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
-import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
-import { useStaticData } from '../../contexts/StaticDataContext'
-import { Assets } from '../../imgs/Assets'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { cssClasses } from '../../utils/cssClasses'
+import { ChampionMasterySquare } from './ChampionMasterySquare'
+import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './MasteriesFilters'
 
 type Props = {
-  readonly masteries: List<EnrichedChampionMasteryView>
-}
-
-export type EnrichedChampionMasteryView = Omit<ChampionMasteryView, 'championLevel'> & {
-  readonly championLevel: ChampionLevelOrZero
-  readonly name: string
-  readonly percents: number
+  readonly masteries: List<EnrichedChampionMastery>
 }
 
 export const Masteries = ({ masteries }: Props): JSX.Element => {
@@ -33,17 +25,20 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
       masteries,
       List.filter(levelFilterPredicate(masteriesQuery.level)),
       List.sortBy(
-        ((): List<Ord<EnrichedChampionMasteryView>> => {
+        ((): List<Ord<EnrichedChampionMastery>> => {
           switch (masteriesQuery.sort) {
             case 'percents':
               return [
-                reverseIfDesc(ordByPercents),
+                reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
                 /* TODO: ordByFragment, */
-                reverseIfDesc(ordByPoints),
-                ordByName,
+                reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
+                EnrichedChampionMastery.Ord.byName,
               ]
             case 'points':
-              return [reverseIfDesc(ordByPoints), ordByName]
+              return [
+                reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
+                EnrichedChampionMastery.Ord.byName,
+              ]
           }
         })(),
       ),
@@ -73,12 +68,12 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
 
 const levelFilterPredicate =
   (levels: ReadonlySet<ChampionLevelOrZero>) =>
-  (c: EnrichedChampionMasteryView): boolean =>
+  (c: EnrichedChampionMastery): boolean =>
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
 const renderChampionMasteries = (
   view: MasteriesQueryView,
-  champions: List<EnrichedChampionMasteryView>,
+  champions: List<EnrichedChampionMastery>,
 ): JSX.Element => {
   switch (view) {
     case 'compact':
@@ -89,7 +84,7 @@ const renderChampionMasteries = (
 }
 
 type ChampionMasteriesCompactProps = {
-  readonly champions: List<EnrichedChampionMasteryView>
+  readonly champions: List<EnrichedChampionMastery>
 }
 
 const ChampionMasteriesCompact = ({ champions }: ChampionMasteriesCompactProps): JSX.Element => (
@@ -101,7 +96,7 @@ const ChampionMasteriesCompact = ({ champions }: ChampionMasteriesCompactProps):
 )
 
 type ChampionMasteriesHistogramProps = {
-  readonly champions: List<EnrichedChampionMasteryView>
+  readonly champions: List<EnrichedChampionMastery>
 }
 
 const ChampionMasteriesHistogram = ({
@@ -134,59 +129,9 @@ const ChampionMasteriesHistogram = ({
   )
 }
 
-type ChampionMasterySquareProps = {
-  readonly champion: EnrichedChampionMasteryView
-}
-
-const ChampionMasterySquare = ({
-  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents },
-}: ChampionMasterySquareProps): JSX.Element => {
-  const staticData = useStaticData()
-
-  const nameLevelTokens = `${name} - niveau ${championLevel}${
-    championLevel === 5 || championLevel === 6
-      ? ` - ${tokensEarned} jeton${tokensEarned < 2 ? '' : 's'}`
-      : ''
-  }\n${Math.round(percents)}%`
-
-  return (
-    <div
-      className={cssClasses(
-        'w-16 h-16 relative flex items-center justify-center',
-        ['bg-mastery7-blue', championLevel === 7],
-        ['bg-mastery6-violet', championLevel === 6],
-        ['bg-mastery5-red', championLevel === 5],
-        ['bg-mastery4-brown', championLevel === 4],
-        ['bg-mastery-beige', championLevel < 4],
-      )}
-      title={name}
-    >
-      <div className="w-12 h-12 overflow-hidden">
-        <img
-          src={staticData.assets.champion.square(championId)}
-          alt={`${name}'s icon`}
-          className="max-w-none w-[calc(100%_+_6px)] m-[-3px]"
-        />
-      </div>
-      <div
-        className="absolute top-0 left-0 w-[14px] h-4 text-xs bg-black flex justify-center pr-[2px] rounded-br-lg overflow-hidden"
-        title={nameLevelTokens}
-      >
-        <span className="mt-[-2px]">{championLevel}</span>
-      </div>
-      <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
-      {chestGranted ? (
-        <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
-          <img src={Assets.chest} alt="Chest icon" className="w-4" />
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
 type ChampionMasteryHistogramProps = {
   readonly maybeMaxPoints: Maybe<number>
-  readonly champion: EnrichedChampionMasteryView
+  readonly champion: EnrichedChampionMastery
 }
 
 const ChampionMasteryHistogram = ({
@@ -273,67 +218,3 @@ const levelColor = (level: number): string => {
 }
 
 const pointsStr = (n: number): string => `${n.toLocaleString()} point${n < 2 ? '' : 's'}`
-
-type TokensProps = {
-  readonly championLevel: number
-  readonly tokensEarned: number
-  readonly title?: string
-}
-
-const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Element | null => {
-  const render = useCallback(
-    (totalTockens: number, src: string): JSX.Element => {
-      const alt = `Mastery ${championLevel + 1} token`
-      return (
-        <span
-          title={title}
-          className={cssClasses(
-            'flex absolute left-[13px] top-0 bg-black h-[10px] rounded-br pl-[2px]',
-            ['gap-[2px] pt-[1px] pb-[2px] pr-[2px]', championLevel === 5],
-            ['gap-[3px] pb-[1px] pr-[3px]', championLevel === 6],
-          )}
-        >
-          {pipe(
-            repeatElements(tokensEarned, i => (
-              <img key={i} src={src} alt={alt} className="bg-cover h-full" />
-            )),
-            List.concat(
-              repeatElements(totalTockens - tokensEarned, i => (
-                <img
-                  key={totalTockens - i}
-                  src={src}
-                  alt={`${alt} (not earned)`}
-                  className="grayscale bg-cover h-full"
-                />
-              )),
-            ),
-          )}
-        </span>
-      )
-    },
-    [championLevel, title, tokensEarned],
-  )
-
-  if (championLevel === 5) return render(2, Assets.token5)
-  if (championLevel === 6) return render(3, Assets.token6)
-  return null
-}
-
-function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
-  return pipe([...Array(Math.max(n, 0))], List.mapWithIndex(getA))
-}
-
-const ordByPercents: Ord<EnrichedChampionMasteryView> = pipe(
-  number.Ord,
-  ord.contramap(c => c.percents),
-)
-
-const ordByPoints: Ord<EnrichedChampionMasteryView> = pipe(
-  number.Ord,
-  ord.contramap(c => c.championPoints),
-)
-
-const ordByName: Ord<EnrichedChampionMasteryView> = pipe(
-  string.Ord,
-  ord.contramap(c => c.name),
-)

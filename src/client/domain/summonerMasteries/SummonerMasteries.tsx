@@ -21,7 +21,7 @@ import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLoca
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
-import type { EnrichedChampionMasteryView } from './Masteries'
+import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
@@ -102,11 +102,11 @@ const SummonerViewComponent = ({
 
 type EnrichedAll = {
   readonly enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
-  readonly enrichedMasteries: List<EnrichedChampionMasteryView>
+  readonly enrichedMasteries: List<EnrichedChampionMastery>
 }
 
 type PartialMasteriesGrouped = Partial<
-  Dict<`${ChampionLevelOrZero}`, NonEmptyArray<EnrichedChampionMasteryView>>
+  Dict<`${ChampionLevelOrZero}`, NonEmptyArray<EnrichedChampionMastery>>
 >
 
 const enrichAll = (
@@ -116,12 +116,12 @@ const enrichAll = (
   const enrichedMasteries_ = pipe(
     staticDataChampions,
     List.map(
-      ({ key, name }): EnrichedChampionMasteryView =>
+      ({ key, name }): EnrichedChampionMastery =>
         pipe(
           masteries,
           List.findFirst(c => c.championId === key),
           Maybe.fold(
-            (): EnrichedChampionMasteryView => ({
+            (): EnrichedChampionMastery => ({
               championId: key,
               championLevel: 0,
               championPoints: 0,
