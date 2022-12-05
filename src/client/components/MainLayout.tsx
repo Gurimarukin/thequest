@@ -306,48 +306,54 @@ const AccountDisconnected = (): JSX.Element => {
           onClick={toggleLogin}
           className="border border-goldenrod py-1 px-4 hover:bg-goldenrod/75 hover:text-black"
         >
-          Connexion
+          Compte
         </button>
         {loginIsVisible ? (
-          <form
-            onSubmit={handleSubmit}
-            className="absolute right-[1px] top-full flex flex-col bg-zinc-900 border-goldenrod border px-5 py-4 gap-2 z-10"
-          >
-            <label className="flex justify-between gap-3">
-              <span>Login :</span>
-              <input
-                type="text"
-                value={state.userName}
-                onChange={updateUserName}
-                className="border border-goldenrod bg-transparent items-center"
-              />
-            </label>
-            <label className="flex justify-between gap-3">
-              <span>Mot de passe :</span>
-              <input
-                type="password"
-                value={state.password}
-                onChange={updatePassword}
-                className="border border-goldenrod bg-transparent items-center"
-              />
-            </label>
-            <div className="self-center mt-2 flex flex-col items-center gap-2">
-              <button
-                type="submit"
-                disabled={Either.isLeft(validated)}
-                className="bg-goldenrod text-black py-1 px-4 enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
-              >
-                Connexion
-              </button>
-              {pipe(
-                error,
-                Maybe.fold(
-                  () => null,
-                  e => <span className="text-red-700">{e}</span>,
-                ),
-              )}
+          <div className="absolute z-10 right-[1px] top-full bg-zinc-900 border-goldenrod border flex flex-col px-5 py-4 gap-3">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+              <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
+                <label className="contents">
+                  <span>Login :</span>
+                  <input
+                    type="text"
+                    value={state.userName}
+                    onChange={updateUserName}
+                    className="border border-goldenrod bg-transparent"
+                  />
+                </label>
+                <label className="contents">
+                  <span>Mot de passe :</span>
+                  <input
+                    type="password"
+                    value={state.password}
+                    onChange={updatePassword}
+                    className="border border-goldenrod bg-transparent"
+                  />
+                </label>
+              </div>
+              <div className="self-center mt-1 flex flex-col items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={Either.isLeft(validated)}
+                  className="bg-goldenrod text-black py-1 px-4 enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+                >
+                  Connexion
+                </button>
+                {pipe(
+                  error,
+                  Maybe.fold(
+                    () => null,
+                    e => <span className="text-red-700">{e}</span>,
+                  ),
+                )}
+              </div>
+            </form>
+            <div className="flex justify-center border-t border-goldenrod pt-3">
+              <Link to={appRoutes.register} className="underline">
+                Inscription
+              </Link>
             </div>
-          </form>
+          </div>
         ) : null}
       </div>
     </ClickOutside>

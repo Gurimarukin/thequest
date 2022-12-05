@@ -32,8 +32,9 @@ export const Routes = (
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),
     m(api.user.self.favorites.delete, () => withAuth(userController.removeFavoriteSelf)),
-    m(api.user.login.post, () => rateLimiter(2, MsDuration.minutes(1))(userController.login)),
+    m(api.user.login.post, () => rateLimiter(2, MsDuration.minute(1))(userController.login)),
     m(api.user.logout.post, () => userController.logout),
+    m(api.user.register.post, () => rateLimiter(2, MsDuration.minute(1))(userController.register)),
   ]
 }
 

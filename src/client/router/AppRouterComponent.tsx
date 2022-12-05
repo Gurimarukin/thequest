@@ -8,6 +8,7 @@ import { Maybe, Tuple } from '../../shared/utils/fp'
 import { Link } from '../components/Link'
 import { useHistory } from '../contexts/HistoryContext'
 import { Home } from '../domain/Home'
+import { Register } from '../domain/Register'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
 import { appParsers, appRoutes } from './AppRouter'
 
@@ -23,6 +24,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
       t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),
     ),
   )
+  .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
 
 export const AppRouterComponent = (): JSX.Element => {
   const { location } = useHistory()

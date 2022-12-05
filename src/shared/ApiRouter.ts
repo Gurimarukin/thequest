@@ -25,6 +25,7 @@ const apiUserSelf = apiUser.then(lit('self'))
 const apiUserSelfFavorites = apiUserSelf.then(lit('favorites'))
 const apiUserLogin = apiUser.then(lit('login'))
 const apiUserLogout = apiUser.then(lit('logout'))
+const apiUserRegister = apiUser.then(lit('register'))
 
 // final
 const healthcheckGet = m(apiHealthcheck, 'get')
@@ -35,6 +36,7 @@ const userSelfFavoritesPut = m(apiUserSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(apiUserSelfFavorites, 'delete')
 const userLoginPost = m(apiUserLogin, 'post')
 const userLogoutPost = m(apiUserLogout, 'post')
+const userRegisterPost = m(apiUserRegister, 'post')
 
 /**
  * parsers
@@ -58,6 +60,7 @@ export const apiParsers = {
     },
     login: { post: p(userLoginPost) },
     logout: { post: p(userLogoutPost) },
+    register: { post: p(userRegisterPost) },
   },
 }
 
@@ -85,6 +88,7 @@ export const apiRoutes = {
     },
     login: { post: r(userLoginPost, {}) },
     logout: { post: r(userLogoutPost, {}) },
+    register: { post: r(userRegisterPost, {}) },
   },
 }
 

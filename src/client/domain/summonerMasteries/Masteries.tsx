@@ -118,7 +118,7 @@ const Filters = (): JSX.Element => {
               type="radio"
               name={sortName}
               checked={masteriesQuery.sort === 'percents'}
-              onClick={setSort('percents')}
+              onChange={setSort('percents')}
             />
             <span>Trier par %</span>
           </label>
@@ -127,7 +127,7 @@ const Filters = (): JSX.Element => {
               type="radio"
               name={sortName}
               checked={masteriesQuery.sort === 'points'}
-              onClick={setSort('points')}
+              onChange={setSort('points')}
             />
             <span>Trier par points</span>
           </label>
@@ -138,7 +138,7 @@ const Filters = (): JSX.Element => {
               type="radio"
               name={orderName}
               checked={masteriesQuery.order === 'desc'}
-              onClick={setOrder('desc')}
+              onChange={setOrder('desc')}
             />
             <span>Décroissant</span>
           </label>
@@ -147,7 +147,7 @@ const Filters = (): JSX.Element => {
               type="radio"
               name={orderName}
               checked={masteriesQuery.order === 'asc'}
-              onClick={setOrder('asc')}
+              onChange={setOrder('asc')}
             />
             <span>Croissant</span>
           </label>
@@ -158,7 +158,7 @@ const Filters = (): JSX.Element => {
               type="radio"
               name={viewName}
               checked={masteriesQuery.view === 'compact'}
-              onClick={setView('compact')}
+              onChange={setView('compact')}
             />
             <span>Vue compacte</span>
           </label>
@@ -167,7 +167,7 @@ const Filters = (): JSX.Element => {
               type="radio"
               name={viewName}
               checked={masteriesQuery.view === 'histogram'}
-              onClick={setView('histogram')}
+              onChange={setView('histogram')}
             />
             <span>Vue histogramme</span>
           </label>

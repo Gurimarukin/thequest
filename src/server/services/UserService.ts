@@ -5,8 +5,8 @@ import readline from 'readline'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
-import type { Maybe, NotUsed } from '../../shared/utils/fp'
-import { Future, List, toNotUsed } from '../../shared/utils/fp'
+import type { NotUsed } from '../../shared/utils/fp'
+import { Future, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
@@ -27,7 +27,22 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
   const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
     userPersistence
 
-  const createUser: Future<NotUsed> = pipe(
+  const createUser = (userName: UserName, password: ClearPassword): Future<Maybe<User>> =>
+    pipe(
+      apply.sequenceS(Future.ApplyPar)({
+        id: Future.fromIOEither(UserId.generate),
+        hashed: PasswordUtils.hash(password),
+      }),
+      Future.chain(({ id, hashed }) => {
+        const user = User.of(id, userName, hashed, List.empty)
+        return pipe(
+          userPersistence.create(user),
+          Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
+        )
+      }),
+    )
+
+  const createUserInteractive: Future<NotUsed> = pipe(
     Future.fromIOEither(logger.info('Creating user')),
     Future.chain(() =>
       apply.sequenceT(Future.taskEitherSeq)(
@@ -40,17 +55,8 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
       password !== confirm
         ? Future.left(Error('Passwords must be the same'))
         : pipe(
-            apply.sequenceS(Future.ApplyPar)({
-              id: Future.fromIOEither(UserId.generate),
-              hashed: PasswordUtils.hash(ClearPassword.wrap(password)),
-            }),
-            Future.chain(({ id, hashed }) =>
-              userPersistence.create(User.of(id, UserName.wrap(userName), hashed, List.empty)),
-            ),
-            Future.filterOrElse(
-              success => success,
-              () => Error('Failed to create user'),
-            ),
+            createUser(UserName.wrap(userName), ClearPassword.wrap(password)),
+            Future.filterOrElse(Maybe.isSome, () => Error('Failed to create user')),
             Future.map(toNotUsed),
           ),
     ),
@@ -58,10 +64,12 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
 
   return {
     createUser,
+    createUserInteractive,
 
     verifyToken: (token: string): Future<TokenContent> =>
       jwtHelper.verify([TokenContent.codec, 'TokenContent'])(token),
 
+    signToken,
     login: (userName: UserName, clearPassword: ClearPassword): Future<Maybe<Token>> =>
       pipe(
         futureMaybe.Do,

@@ -19,6 +19,7 @@ import { MigrationPersistence } from './persistence/MigrationPersistence'
 import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
 import { HealthCheckService } from './services/HealthCheckService'
+import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
 import { RiotApiService } from './services/RiotApiService'
 import { SummonerService } from './services/SummonerService'
@@ -39,6 +40,7 @@ const of = (
   const jwtHelper = JwtHelper(config.jwtSecret)
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
+  const masteriesService = MasteriesService(riotApiService)
   const userService = UserService(Logger, userPersistence, jwtHelper)
 
   return {
@@ -47,6 +49,7 @@ const of = (
     healthCheckService,
     riotApiService,
     summonerService,
+    masteriesService,
     userService,
   }
 }

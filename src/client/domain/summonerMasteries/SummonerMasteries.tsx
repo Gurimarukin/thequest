@@ -86,8 +86,8 @@ const SummonerViewComponent = ({
     [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name],
   )
 
-  const { enrichSummoner, enrichedMasteries } = useMemo((): {
-    readonly enrichSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
+  const { enrichedSummoner, enrichedMasteries } = useMemo((): {
+    readonly enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
     readonly enrichedMasteries: List<EnrichedChampionMasteryView>
   } => {
     const enrichedMasteries_ = pipe(
@@ -141,14 +141,14 @@ const SummonerViewComponent = ({
       }),
     )
     return {
-      enrichSummoner: { questPercents, totalChampionsCount, totalMasteryLevel, masteriesCount },
+      enrichedSummoner: { questPercents, totalChampionsCount, totalMasteryLevel, masteriesCount },
       enrichedMasteries: enrichedMasteries_,
     }
   }, [masteries, staticData.champions])
 
   return (
     <div className="p-2 flex flex-col">
-      <Summoner summoner={{ ...summoner, ...enrichSummoner }} />
+      <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
       <Masteries masteries={enrichedMasteries} />
     </div>
   )

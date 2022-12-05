@@ -3,8 +3,8 @@ import { pipe } from 'fp-ts/function'
 import type { NotUsed } from '../shared/utils/fp'
 import { IO } from '../shared/utils/fp'
 
-import type { Context } from './Context'
 import { constants } from './config/constants'
+import type { Context } from './Context'
 import { HealthCheckController } from './controllers/HealthCheckController'
 import { StaticDataController } from './controllers/StaticDataController'
 import { SummonerController } from './controllers/SummonerController'
@@ -21,13 +21,14 @@ export const Application = ({
   healthCheckService,
   riotApiService,
   summonerService,
+  masteriesService,
   userService,
 }: Context): IO<NotUsed> => {
   const logger = Logger('Application')
 
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(riotApiService)
-  const summonerController = SummonerController(riotApiService, summonerService)
+  const summonerController = SummonerController(summonerService, masteriesService)
   const userController = UserController(summonerService, userService)
 
   const withIp = WithIp(Logger, config)

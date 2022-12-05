@@ -15,3 +15,6 @@ export const apiUserLoginPost = (payload: LoginPayload): Future<unknown> =>
   http(apiRoutes.user.login.post, { json: [LoginPayload.codec, payload] })
 
 export const apiUserLogoutPost: Future<unknown> = http(apiRoutes.user.logout.post)
+
+export const apiUserRegisterPost = (payload: LoginPayload): Future<unknown> =>
+  http(apiRoutes.user.register.post, { json: [LoginPayload.codec, payload] })

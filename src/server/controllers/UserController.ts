@@ -1,6 +1,6 @@
 import { apply } from 'fp-ts'
 import type { Lazy } from 'fp-ts/function'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
 import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
@@ -10,6 +10,7 @@ import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
+import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { constants } from '../config/constants'
 import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
@@ -18,45 +19,47 @@ import type { TokenContent } from '../models/user/TokenContent'
 import type { UserId } from '../models/user/UserId'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
-import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
-import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
+import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
 type UserController = ReturnType<typeof UserController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserController(summonerService: SummonerService, userService: UserService) {
-  const login: EndedMiddleware = pipe(
-    M.decodeBody([LoginPayload.codec, 'LoginPayload']),
-    M.matchE(
-      () => M.of(Maybe.none),
-      ({ userName, password }) => M.fromTaskEither(userService.login(userName, password)),
-    ),
-    M.ichain(
-      Maybe.fold(
-        () => M.sendWithStatus(Status.BadRequest)(''),
-        token =>
-          pipe(
-            M.status(Status.NoContent),
-            M.ichain(() =>
-              M.cookie(constants.account.cookie.name, Token.codec.encode(token), {
-                maxAge: constants.account.cookie.ttl,
-                httpOnly: true,
-                sameSite: 'strict',
-              }),
-            ),
-            M.ichain(() => M.closeHeaders()),
-            M.ichain(() => M.send('')),
+  const login: EndedMiddleware = EndedMiddleware.withBody(LoginPayload.codec)(
+    ({ userName, password }) =>
+      pipe(
+        userService.login(userName, password),
+        M.fromTaskEither,
+        M.ichain(
+          Maybe.fold(
+            () => M.sendWithStatus(Status.NotFound)('Invalid userName/password'),
+            sendToken,
           ),
+        ),
       ),
-    ),
   )
 
   const logout: EndedMiddleware = pipe(
-    pipe(
-      M.status(Status.NoContent),
-      M.ichain(() => M.clearCookie(constants.account.cookie.name, {})),
-      M.ichain(() => M.closeHeaders()),
-      M.ichain(() => M.send('')),
+    M.status(Status.NoContent),
+    M.ichain(() => M.clearCookie(constants.account.cookie.name, {})),
+    M.ichain(() => M.closeHeaders()),
+    M.ichain(() => M.send('')),
+  )
+
+  const register: EndedMiddleware = EndedMiddleware.withBody(LoginPayload.codec)(
+    flow(
+      Either.right,
+      Either.bind('validatedPassword', ({ password }) => validatePassword(password)),
+      Future.right,
+      futureEither.chain(({ userName, validatedPassword }) =>
+        pipe(
+          userService.createUser(userName, validatedPassword),
+          Future.map(Either.fromOption(() => 'User name already used')),
+        ),
+      ),
+      futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
+      M.fromTaskEither,
+      M.ichain(Either.fold(M.sendWithStatus(Status.BadRequest), sendToken)),
     ),
   )
 
@@ -111,6 +114,22 @@ function UserController(summonerService: SummonerService, userService: UserServi
 
     login,
     logout,
+    register,
+  }
+
+  function sendToken(token: Token): EndedMiddleware {
+    return pipe(
+      M.status(Status.NoContent),
+      M.ichain(() =>
+        M.cookie(constants.account.cookie.name, Token.codec.encode(token), {
+          maxAge: constants.account.cookie.ttl,
+          httpOnly: true,
+          sameSite: 'strict',
+        }),
+      ),
+      M.ichain(() => M.closeHeaders()),
+      M.ichain(() => M.send('')),
+    )
   }
 
   function favoriteSelf(
@@ -118,29 +137,22 @@ function UserController(summonerService: SummonerService, userService: UserServi
     uselessActionMessage: Lazy<string>,
   ): (user: TokenContent) => EndedMiddleware {
     return user =>
-      pipe(
-        M.decodeBody([PlatformWithName.codec, 'PlatformWithName']),
-        M.matchE(
-          () => M.sendWithStatus(Status.BadRequest)(''),
-          ({ platform, name }) =>
+      EndedMiddleware.withBody(PlatformWithName.codec)(({ platform, name }) =>
+        pipe(
+          summonerService.findByName(platform, name),
+          Future.map(Either.fromOption(() => 'Summoner not found')),
+          futureEither.chain(({ puuid }) =>
             pipe(
-              summonerService.findByName(platform, name),
-              Future.map(Either.fromOption(() => 'Summoner not found')),
-              futureEither.chain(({ puuid }) =>
-                pipe(
-                  updateFavoriteSearch(user.id, { platform, puuid }),
-                  Future.map(Either.fromOption(() => 'User not found')),
-                ),
-              ),
-              M.fromTaskEither,
-              M.ichain(
-                Either.fold(M.sendWithStatus(Status.NotFound), removed =>
-                  removed
-                    ? M.noContent()
-                    : M.sendWithStatus(Status.BadRequest)(uselessActionMessage()),
-                ),
-              ),
+              updateFavoriteSearch(user.id, { platform, puuid }),
+              Future.map(Either.fromOption(() => 'User not found')),
             ),
+          ),
+          M.fromTaskEither,
+          M.ichain(
+            Either.fold(M.sendWithStatus(Status.NotFound), removed =>
+              removed ? M.noContent() : M.sendWithStatus(Status.BadRequest)(uselessActionMessage()),
+            ),
+          ),
         ),
       )
   }

@@ -1,4 +1,4 @@
-import { end, format, str } from 'fp-ts-routing'
+import { end, format, lit, str } from 'fp-ts-routing'
 
 import { Platform } from '../../shared/models/api/Platform'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
@@ -12,6 +12,7 @@ const { codec } = RouterUtils
  */
 
 const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
+const registerMatch = lit('register')
 
 /**
  * parser
@@ -21,6 +22,7 @@ const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('su
 export const appParsers = {
   index: end.parser,
   platformSummonerName: platformSummonerNameMatch.then(end).parser,
+  register: registerMatch.then(end).parser,
 }
 
 /**
@@ -39,4 +41,5 @@ export const appRoutes = {
       q === '' ? '' : `?${q}`
     }`
   },
+  register: format(registerMatch.formatter, {}),
 }

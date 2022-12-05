@@ -14,7 +14,7 @@ const main: Future<NotUsed> = pipe(
   Future.chain(({ Logger, userService }) => {
     const logger = Logger('Application')
     return pipe(
-      userService.createUser,
+      userService.createUserInteractive,
       Future.orElseIOEitherK(e => logger.error(e)),
       Future.chainIOEitherK(() => logger.info('Done')),
     )
