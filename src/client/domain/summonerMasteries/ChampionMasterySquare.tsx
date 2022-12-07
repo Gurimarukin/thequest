@@ -5,14 +5,16 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
-import { cssClasses } from '../../utils/cssClasses'
 import { NumberUtils } from '../../utils/NumberUtils'
+import { cssClasses } from '../../utils/cssClasses'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
-const {round} = NumberUtils
+
+const { round } = NumberUtils
 
 type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMastery
 }
+
 export const ChampionMasterySquare = ({
   champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, glow },
 }: ChampionMasterySquareProps): JSX.Element => {
@@ -32,7 +34,7 @@ export const ChampionMasterySquare = ({
         className={cssClasses(
           ['hidden', !isGlowing],
           [
-            'w-[76px] h-[76px] absolute left-[-6px] top-[-6px] rounded-[50%] bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm animate-glow',
+            'w-[76px] h-[76px] absolute left-[-6px] top-[-6px] rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm animate-glow',
             isGlowing,
           ],
         )}
@@ -64,7 +66,10 @@ export const ChampionMasterySquare = ({
         </div>
         <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
         {chestGranted ? (
-          <div className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr">
+          <div
+            title={`${name} - coffre obtenu`}
+            className="h-[15px] w-[18px] absolute left-0 bottom-0 bg-black flex flex-col-reverse rounded-tr"
+          >
             <img src={Assets.chest} alt="Chest icon" className="w-4" />
           </div>
         ) : null}
@@ -73,14 +78,15 @@ export const ChampionMasterySquare = ({
   )
 }
 
-const animationDelay : (glow: Maybe<number>) => React.CSSProperties | undefined = flow(
+const animationDelay: (glow: Maybe<number>) => React.CSSProperties | undefined = flow(
   Maybe.map((delay): React.CSSProperties => {
     const delaySeconds = `${round(delay, 3)}s`
-    return ({
-    animationDelay: delaySeconds,
-    MozAnimationDelay: delaySeconds,
-    WebkitAnimationDelay: delaySeconds,
-  })}),
+    return {
+      animationDelay: delaySeconds,
+      MozAnimationDelay: delaySeconds,
+      WebkitAnimationDelay: delaySeconds,
+    }
+  }),
   Maybe.toUndefined,
 )
 

@@ -183,17 +183,13 @@ const ChampionMasteryHistogram = ({
                 )}
                 <div
                   title={pointsUntilAndSince}
-                  className={`h-full absolute top-0 ${levelColor(championLevel)}`}
+                  className={`h-full absolute top-0 ${bgColor(championLevel)}`}
                   style={{ width: p(championPoints) }}
                 />
                 {championLevel < 2 ? null : (
                   <div
                     title={pointsUntilAndSince}
-                    className={`h-full border-r absolute top-0 ${((): string => {
-                      if (5 <= championLevel && championLevel <= 7) return 'border-gray-500'
-                      if (championLevel === 4) return 'border-gray-400'
-                      return 'border-gray-300 '
-                    })()}`}
+                    className={`h-full border-r absolute top-0 ${rulerColor(championLevel)}`}
                     style={{ width: p(championPoints - championPointsSinceLastLevel) }}
                   />
                 )}
@@ -209,12 +205,18 @@ const ChampionMasteryHistogram = ({
   )
 }
 
-const levelColor = (level: number): string => {
+const bgColor = (level: number): string => {
   if (level === 7) return 'bg-gradient-to-r from-mastery7-blue to-mastery7-blue-secondary'
   if (level === 6) return 'bg-gradient-to-r from-mastery6-violet to-mastery6-violet-secondary'
   if (level === 5) return 'bg-gradient-to-r from-mastery5-red to-mastery5-red-secondary'
   if (level === 4) return 'bg-gradient-to-r from-mastery4-brown to-mastery4-brown-secondary'
   return 'bg-mastery-beige'
+}
+
+const rulerColor = (level: number): string => {
+  if (5 <= level && level <= 7) return 'border-gray-500'
+  if (level === 4) return 'border-gray-400'
+  return 'border-gray-500'
 }
 
 const pointsStr = (n: number): string => `${n.toLocaleString()} point${n < 2 ? '' : 's'}`
