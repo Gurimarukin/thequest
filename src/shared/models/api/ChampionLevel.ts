@@ -26,6 +26,6 @@ const stringify = String as (level: ChampionLevelOrZero) => `${ChampionLevelOrZe
 
 const orZeroEq: eq.Eq<ChampionLevelOrZero> = number.Eq
 
-const ChampionLevelOrZero = { values: eOrZero.values, stringCodec, stringify , Eq: orZeroEq}
+const ChampionLevelOrZero = { values: eOrZero.values, stringCodec, stringify, Eq: orZeroEq }
 
 export { ChampionLevel, ChampionLevelOrZero }

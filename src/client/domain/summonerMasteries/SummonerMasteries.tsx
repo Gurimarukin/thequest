@@ -16,8 +16,8 @@ import { MainLayout } from '../../components/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
-import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
+import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { appRoutes } from '../../router/AppRouter'
@@ -122,7 +122,8 @@ const enrichAll = (
       // TODO: search
       const glow =
         view === 'compact' && List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc'])
-        ? Maybe.some(random.random()) : Maybe.none
+          ? Maybe.some(random.random())
+          : Maybe.none
       return pipe(
         masteries,
         List.findFirst(c => c.championId === key),

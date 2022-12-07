@@ -17,10 +17,6 @@ import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQu
 export const MasteriesFilters = (): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
 
-  const setSort = flow(MasteriesQuery.Lens.sort.set, updateMasteriesQuery)
-  const setOrder = flow(MasteriesQuery.Lens.order.set, updateMasteriesQuery)
-  const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
-
   const toggleChecked = (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) =>
     updateMasteriesQuery(
       pipe(
@@ -32,6 +28,10 @@ export const MasteriesFilters = (): JSX.Element => {
         ),
       ),
     )
+
+  const setSort = flow(MasteriesQuery.Lens.sort.set, updateMasteriesQuery)
+  const setOrder = flow(MasteriesQuery.Lens.order.set, updateMasteriesQuery)
+  const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
   return (
     <div className="flex justify-between gap-5 flex-wrap pt-3">
