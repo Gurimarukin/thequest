@@ -12,7 +12,7 @@ type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMastery
 }
 export const ChampionMasterySquare = ({
-  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents },
+  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, isGlowing },
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
@@ -22,16 +22,14 @@ export const ChampionMasterySquare = ({
       : ''
   }\n${Math.round(percents)}%`
 
-  const glows = name === 'Renekton'
-
   return (
     <div className="relative">
       <div
         className={cssClasses(
-          ['hidden', !glows],
+          ['hidden', !isGlowing],
           [
             'w-[76px] h-[76px] absolute left-[-6px] top-[-6px] rounded-[50%] bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm animate-glow',
-            glows,
+            isGlowing,
           ],
         )}
       />

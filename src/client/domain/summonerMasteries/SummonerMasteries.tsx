@@ -1,4 +1,4 @@
-import { monoid, number } from 'fp-ts'
+import { monoid, number, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import React, { useEffect, useMemo } from 'react'
 
@@ -115,27 +115,29 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(
-      ({ key, name }): EnrichedChampionMastery =>
-        pipe(
-          masteries,
-          List.findFirst(c => c.championId === key),
-          Maybe.fold(
-            (): EnrichedChampionMastery => ({
-              championId: key,
-              championLevel: 0,
-              championPoints: 0,
-              championPointsSinceLastLevel: 0,
-              championPointsUntilNextLevel: 0,
-              chestGranted: false,
-              tokensEarned: 0,
-              name,
-              percents: 0,
-            }),
-            champion => ({ ...champion, name, percents: championPercents(champion) }),
-          ),
+    List.map(({ key, name }): EnrichedChampionMastery => {
+      // TODO: search
+      const isGlowing = List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc'])
+      return pipe(
+        masteries,
+        List.findFirst(c => c.championId === key),
+        Maybe.fold(
+          (): EnrichedChampionMastery => ({
+            championId: key,
+            championLevel: 0,
+            championPoints: 0,
+            championPointsSinceLastLevel: 0,
+            championPointsUntilNextLevel: 0,
+            chestGranted: false,
+            tokensEarned: 0,
+            name,
+            percents: 0,
+            isGlowing,
+          }),
+          champion => ({ ...champion, name, percents: championPercents(champion), isGlowing }),
         ),
-    ),
+      )
+    }),
   )
   const totalChampionsCount = enrichedMasteries_.length
   const questPercents =
