@@ -1,4 +1,4 @@
-import { monoid, number, string } from 'fp-ts'
+import { monoid, number, random, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import React, { useEffect, useMemo } from 'react'
 
@@ -16,9 +16,10 @@ import { MainLayout } from '../../components/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
-import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
+import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
+import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -74,6 +75,7 @@ const SummonerViewComponent = ({
   )
 
   const summonerNameFromLocation = useSummonerNameFromLocation()
+  // Correct case of summoner's name in url
   useEffect(
     () =>
       navigate(
@@ -88,8 +90,8 @@ const SummonerViewComponent = ({
   )
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
-    () => enrichAll(masteries, staticData.champions),
-    [masteries, staticData.champions],
+    () => enrichAll(masteries, masteriesQuery.view, staticData.champions),
+    [masteries, masteriesQuery.view, staticData.champions],
   )
 
   return (
@@ -111,13 +113,16 @@ type PartialMasteriesGrouped = Partial<
 
 const enrichAll = (
   masteries: List<ChampionMasteryView>,
+  view: MasteriesQueryView,
   staticDataChampions: List<StaticDataChampion>,
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
     List.map(({ key, name }): EnrichedChampionMastery => {
       // TODO: search
-      const isGlowing = List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc'])
+      const glow =
+        view === 'compact' && List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc'])
+        ? Maybe.some(random.random()) : Maybe.none
       return pipe(
         masteries,
         List.findFirst(c => c.championId === key),
@@ -132,9 +137,9 @@ const enrichAll = (
             tokensEarned: 0,
             name,
             percents: 0,
-            isGlowing,
+            glow,
           }),
-          champion => ({ ...champion, name, percents: championPercents(champion), isGlowing }),
+          champion => ({ ...champion, name, percents: championPercents(champion), glow }),
         ),
       )
     }),

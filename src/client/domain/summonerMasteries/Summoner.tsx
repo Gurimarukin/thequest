@@ -7,6 +7,9 @@ import type { Dict } from '../../../shared/utils/fp'
 import { List } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { NumberUtils } from '../../utils/NumberUtils'
+
+const { round } = NumberUtils
 
 type Props = {
   readonly summoner: EnrichedSummonerView
@@ -58,9 +61,4 @@ export const Summoner = ({
       </span>
     </div>
   )
-}
-
-const round = (n: number, digits = 0): number => {
-  const e = 10 ** digits
-  return Math.round(n * e) / e
 }

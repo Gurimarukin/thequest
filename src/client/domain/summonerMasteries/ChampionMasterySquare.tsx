@@ -1,18 +1,20 @@
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback } from 'react'
 
-import { List } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { cssClasses } from '../../utils/cssClasses'
+import { NumberUtils } from '../../utils/NumberUtils'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
+const {round} = NumberUtils
 
 type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMastery
 }
 export const ChampionMasterySquare = ({
-  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, isGlowing },
+  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, glow },
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
@@ -21,6 +23,8 @@ export const ChampionMasterySquare = ({
       ? ` - ${tokensEarned} jeton${tokensEarned < 2 ? '' : 's'}`
       : ''
   }\n${Math.round(percents)}%`
+
+  const isGlowing = Maybe.isSome(glow)
 
   return (
     <div className="relative">
@@ -32,6 +36,7 @@ export const ChampionMasterySquare = ({
             isGlowing,
           ],
         )}
+        style={animationDelay(glow)}
       />
       <div
         className={cssClasses(
@@ -67,6 +72,18 @@ export const ChampionMasterySquare = ({
     </div>
   )
 }
+
+const animationDelay : (glow: Maybe<number>) => React.CSSProperties | undefined = flow(
+  Maybe.map((delay): React.CSSProperties => {
+    const delaySeconds = `${round(delay, 3)}s`
+    return ({
+    animationDelay: delaySeconds,
+    MozAnimationDelay: delaySeconds,
+    WebkitAnimationDelay: delaySeconds,
+  })}),
+  Maybe.toUndefined,
+)
+
 type TokensProps = {
   readonly championLevel: number
   readonly tokensEarned: number
