@@ -1,4 +1,5 @@
-/* eslint-disable functional/no-return-void */
+/* eslint-disable functional/no-expression-statement,
+                  functional/no-return-void */
 import { number, ord, readonlySet } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -22,12 +23,14 @@ export const MasteriesFilters = (): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
 
   const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
-  const showLevelsMenu = useCallback(() => setLevelsMenuIsVisible(true), [])
+  const handleMouseEnter = useCallback(() => {
+    if (!levelsMenuIsVisible) setLevelsMenuIsVisible(true)
+  }, [levelsMenuIsVisible])
   const hideLevelsMenu = useCallback(() => setLevelsMenuIsVisible(false), [])
 
   const toggleChecked = useCallback(
     (level: ChampionLevelOrZero) =>
-      (e: React.ChangeEvent<HTMLInputElement>): void =>
+      (e: React.ChangeEvent<HTMLInputElement>): void => {
         updateMasteriesQuery(
           pipe(
             MasteriesQuery.Lens.level,
@@ -37,8 +40,10 @@ export const MasteriesFilters = (): JSX.Element => {
                 : readonlySet.remove(ChampionLevelOrZero.Eq)(level),
             ),
           ),
-        ),
-    [updateMasteriesQuery],
+        )
+        hideLevelsMenu()
+      },
+    [hideLevelsMenu, updateMasteriesQuery],
   )
 
   const SelectLevelsButton = useMemo(
@@ -60,7 +65,7 @@ export const MasteriesFilters = (): JSX.Element => {
         <MasteriesCheckboxes
           checkedLevels={masteriesQuery.level}
           toggleChecked={toggleChecked}
-          onMouseEnter={showLevelsMenu}
+          onMouseEnter={handleMouseEnter}
         />
         <ul
           className={cssClasses(
