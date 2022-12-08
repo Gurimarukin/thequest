@@ -97,13 +97,13 @@ export const MasteriesFilters = (): JSX.Element => {
           {labelValue(
             'desc',
             <IconLabel title="Tri décroissant">
-              <CaretDownOutline className="h-6 fill-current" />
+              <CaretDownOutline className="h-5 fill-current" />
             </IconLabel>,
           )}
           {labelValue(
             'asc',
             <IconLabel title="Tri croissant">
-              <CaretUpOutline className="h-6 fill-current" />
+              <CaretUpOutline className="h-5 fill-current" />
             </IconLabel>,
           )}
         </Radios>
