@@ -72,11 +72,11 @@ export const Register = (): JSX.Element => {
   )
 
   return (
-    <div className="flex flex-col items-center h-full gap-4 p-6">
+    <div className="flex h-full flex-col items-center gap-4 p-6">
       <Link to={appRoutes.index} className="underline">
         Accueil
       </Link>
-      <div className="grow flex flex-col justify-center">
+      <div className="flex grow flex-col justify-center">
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
             <label className="contents">
@@ -107,11 +107,11 @@ export const Register = (): JSX.Element => {
               />
             </label>
           </div>
-          <div className="self-center mt-4 flex flex-col items-center gap-2">
+          <div className="mt-4 flex flex-col items-center gap-2 self-center">
             <button
               type="submit"
               disabled={Either.isLeft(validated)}
-              className="bg-goldenrod text-black py-1 px-4 enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
               Inscription
             </button>

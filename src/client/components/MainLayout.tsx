@@ -131,7 +131,7 @@ const SearchSummoner = (): JSX.Element => {
           />
           <ul
             className={cssClasses(
-              'absolute top-full z-10 bg-zinc-900 border border-goldenrod grid-cols-[auto_auto_auto] items-center gap-y-3 py-2 max-h-[calc(100vh_-_5rem)] overflow-auto',
+              'absolute top-full z-10 max-h-[calc(100vh_-_5rem)] grid-cols-[auto_auto_auto] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
               ['hidden', !showSearches],
               ['grid', showSearches],
             )}

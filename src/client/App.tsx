@@ -6,7 +6,7 @@ import { UserContextProvider } from './contexts/UserContext'
 import { AppRouterComponent } from './router/AppRouterComponent'
 
 export const App = (): JSX.Element => (
-  <div className="bg-landing bg-cover text-wheat h-[100vh] w-[100vw] overflow-hidden font-[lolFont]">
+  <div className="h-[100vh] w-[100vw] overflow-hidden bg-landing bg-cover font-[lolFont] text-wheat">
     <HistoryContextProvider>
       <UserContextProvider>
         <StaticDataContextProvider>

@@ -203,7 +203,7 @@ const MasteriesCheckboxes = ({
             <span
               title={`Niveau ${level}`}
               className={cssClasses(
-                'flex h-10 p-[2px] cursor-pointer group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
+                'flex h-10 cursor-pointer p-[2px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
                 ['bg-zinc-700', !isChecked],
                 ['bg-goldenrod', isChecked],
               )}

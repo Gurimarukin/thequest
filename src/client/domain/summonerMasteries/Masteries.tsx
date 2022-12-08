@@ -118,7 +118,7 @@ const ChampionMasteriesHistogram = ({
   )
 
   return (
-    <div className="self-center w-full max-w-7xl grid grid-cols-[auto_1fr] gap-y-2 pt-4 pb-2">
+    <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-2">
       {champions.map(champion => (
         <Fragment key={ChampionKey.unwrap(champion.championId)}>
           <ChampionMasterySquare champion={champion} />
@@ -173,7 +173,7 @@ const ChampionMasteryHistogram = ({
           maxPoints => {
             const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
             return (
-              <div className="h-7 relative">
+              <div className="relative h-7">
                 {championPointsUntilNextLevel === 0 ? null : (
                   <div
                     title={pointsUntilAndSince}
@@ -183,13 +183,13 @@ const ChampionMasteryHistogram = ({
                 )}
                 <div
                   title={pointsUntilAndSince}
-                  className={`h-full absolute top-0 ${bgColor(championLevel)}`}
+                  className={`absolute top-0 h-full ${bgColor(championLevel)}`}
                   style={{ width: p(championPoints) }}
                 />
                 {championLevel < 2 ? null : (
                   <div
                     title={pointsUntilAndSince}
-                    className={`h-full border-r absolute top-0 ${rulerColor(championLevel)}`}
+                    className={`absolute top-0 h-full border-r ${rulerColor(championLevel)}`}
                     style={{ width: p(championPoints - championPointsSinceLastLevel) }}
                   />
                 )}
@@ -198,7 +198,7 @@ const ChampionMasteryHistogram = ({
           },
         ),
       )}
-      <div className="grow flex items-center p-1 text-sm">
+      <div className="flex grow items-center p-1 text-sm">
         <span title={pointsUntilAndSince}>{championPoints.toLocaleString()}</span>
       </div>
     </div>

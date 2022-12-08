@@ -36,7 +36,7 @@ export const Summoner = ({
   const staticData = useStaticData()
 
   return (
-    <div className="flex-wrap flex items-center gap-6 border-b border-goldenrod">
+    <div className="flex flex-wrap items-center gap-6 border-b border-goldenrod">
       <img
         src={staticData.assets.summonerIcon(profileIconId)}
         alt={`${name}’s icon`}
