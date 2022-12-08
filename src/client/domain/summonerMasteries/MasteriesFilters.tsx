@@ -2,7 +2,7 @@
 import { number, ord, readonlySet } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { NonEmptyArray } from '../../../shared/utils/fp'
@@ -20,6 +20,10 @@ import { cssClasses } from '../../utils/cssClasses'
 
 export const MasteriesFilters = (): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
+
+  const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
+  const showLevelsMenu = useCallback(() => setLevelsMenuIsVisible(true), [])
+  const hideLevelsMenu = useCallback(() => setLevelsMenuIsVisible(false), [])
 
   const toggleChecked = useCallback(
     (level: ChampionLevelOrZero) =>
@@ -41,9 +45,9 @@ export const MasteriesFilters = (): JSX.Element => {
     () =>
       getSelectLevelsButton(
         masteriesQuery.level,
-        flow(MasteriesQuery.Lens.level.set, updateMasteriesQuery),
+        flow(MasteriesQuery.Lens.level.set, updateMasteriesQuery, hideLevelsMenu),
       ),
-    [masteriesQuery.level, updateMasteriesQuery],
+    [hideLevelsMenu, masteriesQuery.level, updateMasteriesQuery],
   )
 
   const setSort = flow(MasteriesQuery.Lens.sort.set, updateMasteriesQuery)
@@ -52,10 +56,18 @@ export const MasteriesFilters = (): JSX.Element => {
 
   return (
     <div className="flex flex-wrap items-center justify-evenly gap-5 py-3">
-      {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
-      <div className="group/masteries relative">
-        <MasteriesCheckboxes checkedLevels={masteriesQuery.level} toggleChecked={toggleChecked} />
-        <ul className="invisible absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black group-hover/masteries:visible">
+      <div onMouseLeave={hideLevelsMenu} className="relative">
+        <MasteriesCheckboxes
+          checkedLevels={masteriesQuery.level}
+          toggleChecked={toggleChecked}
+          onMouseEnter={showLevelsMenu}
+        />
+        <ul
+          className={cssClasses(
+            'absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black',
+            ['invisible', !levelsMenuIsVisible],
+          )}
+        >
           <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
           <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
           <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
@@ -160,13 +172,15 @@ type MasteriesCheckboxesProps = {
   readonly toggleChecked: (
     level: ChampionLevelOrZero,
   ) => (e: React.ChangeEvent<HTMLInputElement>) => void
+  readonly onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
 }
 
 const MasteriesCheckboxes = ({
   checkedLevels,
   toggleChecked,
+  onMouseEnter,
 }: MasteriesCheckboxesProps): JSX.Element => (
-  <div className="flex">
+  <div onMouseEnter={onMouseEnter} className="flex">
     {pipe(
       ChampionLevelOrZero.values,
       List.reverse,
