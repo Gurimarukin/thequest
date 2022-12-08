@@ -35,10 +35,10 @@ export const MainLayout: React.FC = ({ children }) => {
   const { user } = useUser()
 
   return (
-    <div className="h-full flex flex-col">
-      <header className="bg-zinc-900 border-b border-goldenrod flex justify-center">
-        <div className="max-w-7xl px-3 py-2 w-full flex justify-between items-center relative">
-          <div className="flex gap-6 items-center">
+    <div className="flex h-full flex-col">
+      <header className="flex justify-center border-b border-goldenrod bg-zinc-900">
+        <div className="relative flex w-full max-w-7xl items-center justify-between px-3 py-2">
+          <div className="flex items-center gap-6">
             <Link to={appRoutes.index}>
               <img src={Assets.iconYuumi} alt="Home icon (Yuumi)" className="w-12" />
             </Link>
@@ -119,7 +119,7 @@ const SearchSummoner = (): JSX.Element => {
           options={Platform.values}
           value={platform}
           setValue={setPlatform}
-          className="border-l border-y border-goldenrod bg-black pl-1"
+          className="border-y border-l border-goldenrod bg-black pl-1"
         />
         <ClickOutside onClickOutside={hide}>
           <input
@@ -127,7 +127,7 @@ const SearchSummoner = (): JSX.Element => {
             value={summonerName}
             onChange={handleChange}
             onFocus={handleFocus}
-            className="border border-goldenrod bg-transparent px-2 w-52"
+            className="w-52 border border-goldenrod bg-transparent px-2"
           />
           <ul
             className={cssClasses(
@@ -146,7 +146,7 @@ const SearchSummoner = (): JSX.Element => {
           </ul>
         </ClickOutside>
         <button type="submit">
-          <SearchOutlineIcon className="h-6 text-goldenrod -ml-7" />
+          <SearchOutlineIcon className="-ml-7 h-6 text-goldenrod" />
         </button>
       </form>
     </div>
@@ -155,9 +155,9 @@ const SearchSummoner = (): JSX.Element => {
 
 const Hr = (): JSX.Element => (
   <>
-    <div className="border-t border-goldenrod w-[calc(100%_-_1rem)] justify-self-end" />
+    <div className="w-[calc(100%_-_1rem)] justify-self-end border-t border-goldenrod" />
     <div className="border-t border-goldenrod" />
-    <div className="border-t border-goldenrod w-[calc(100%_-_1rem)]" />
+    <div className="w-[calc(100%_-_1rem)] border-t border-goldenrod" />
   </>
 )
 
@@ -193,14 +193,14 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
           case 'favorite':
             return (
               <span className="p-2">
-                <TimeOutlineIcon className="h-4 invisible" />
+                <TimeOutlineIcon className="invisible h-4" />
               </span>
             )
           case 'recent':
             return (
               <button type="button" onClick={handleRemoveRecentClick} className="group p-2">
                 <TimeOutlineIcon className="h-4 text-goldenrod group-hover:hidden" />
-                <CloseFilledIcon className="h-4 fill-red-700 hidden group-hover:flex" />
+                <CloseFilledIcon className="hidden h-4 fill-red-700 group-hover:flex" />
               </button>
             )
         }
@@ -218,7 +218,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
           alt={`${summoner.name}'s icon`}
           className="w-12"
         />
-        <span className="grow ml-2">{summoner.name}</span>
+        <span className="ml-2 grow">{summoner.name}</span>
         <span className="ml-4">{summoner.platform}</span>
       </Link>
       {((): JSX.Element => {
@@ -228,7 +228,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
               <button
                 type="button"
                 onClick={handleRemoveFavoriteClick}
-                className="px-3 pt-2 pb-3 fill-goldenrod hover:fill-red-700"
+                className="fill-goldenrod px-3 pt-2 pb-3 hover:fill-red-700"
               >
                 <StarFilledIcon className="h-5" />
               </button>
@@ -331,11 +331,11 @@ const AccountDisconnected = (): JSX.Element => {
                   />
                 </label>
               </div>
-              <div className="self-center mt-1 flex flex-col items-center gap-2">
+              <div className="mt-1 flex flex-col items-center gap-2 self-center">
                 <button
                   type="submit"
                   disabled={Either.isLeft(validated)}
-                  className="bg-goldenrod text-black py-1 px-4 enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+                  className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
                 >
                   Connexion
                 </button>
@@ -385,12 +385,12 @@ const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
         </button>
         {menuIsVisible ? (
           <Menu>
-            <ul className="gap-[2px] flex flex-col">
+            <ul className="flex flex-col gap-[2px]">
               <li>
                 <button
                   type="button"
                   onClick={disconnect}
-                  className="bg-goldenrod text-black py-1 px-4 hover:bg-goldenrod/75"
+                  className="bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
                 >
                   Déconnexion
                 </button>
@@ -404,7 +404,7 @@ const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
 }
 
 const Menu: React.FC = ({ children }) => (
-  <div className="absolute z-10 right-[1px] top-full bg-zinc-900 border-goldenrod border flex flex-col px-5 py-4 gap-3">
+  <div className="absolute right-[1px] top-full z-10 flex flex-col gap-3 border border-goldenrod bg-zinc-900 px-5 py-4">
     {children}
   </div>
 )
