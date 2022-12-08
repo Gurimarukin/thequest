@@ -8,11 +8,13 @@ import { List } from '../../../shared/utils/fp'
 
 import { Radios, labelValue } from '../../components/Radios'
 import { useHistory } from '../../contexts/HistoryContext'
+import { Assets } from '../../imgs/Assets'
 import { AppsSharp, CaretDownOutline, CaretUpOutline, StatsChartSharp } from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
+import { cssClasses } from '../../utils/cssClasses'
 
 export const MasteriesFilters = (): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
@@ -34,22 +36,38 @@ export const MasteriesFilters = (): JSX.Element => {
   const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
   return (
-    <div className="flex justify-between gap-5 flex-wrap pt-3">
-      <div className="flex gap-3">
-        Maîtrises
+    <div className="flex items-center justify-between gap-5 flex-wrap pt-3">
+      <div className="flex">
         {pipe(
           ChampionLevelOrZero.values,
           List.reverse,
-          List.map(level => (
-            <label key={level} className="flex gap-1">
-              <input
-                type="checkbox"
-                checked={readonlySet.elem(ChampionLevelOrZero.Eq)(level, masteriesQuery.level)}
-                onChange={toggleChecked(level)}
-              />
-              <span>{level}</span>
-            </label>
-          )),
+          List.map(level => {
+            const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, masteriesQuery.level)
+            return (
+              <label key={level} className="group">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={toggleChecked(level)}
+                  className="hidden"
+                />
+                <span
+                  title={`Niveau ${level}`}
+                  className={cssClasses(
+                    'flex h-10 p-[2px] cursor-pointer group-first:rounded-l-md group-last:rounded-r-md',
+                    ['bg-zinc-700', !isChecked],
+                    ['bg-mastery4-brown', isChecked],
+                  )}
+                >
+                  <img
+                    src={Assets.masteries[level]}
+                    alt={`Level ${level} icon`}
+                    className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+                  />
+                </span>
+              </label>
+            )
+          }),
         )}
       </div>
       <div className="flex gap-3">
