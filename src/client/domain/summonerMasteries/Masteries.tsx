@@ -59,7 +59,7 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
   return (
     <>
       <MasteriesFilters />
-      <div className="flex justify-center">
+      <div className="flex justify-center text-sm">
         {filteredAndSortedChampions.length} champion
         {filteredAndSortedChampions.length < 2 ? null : 's'}
       </div>
