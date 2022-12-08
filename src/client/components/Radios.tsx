@@ -41,7 +41,7 @@ export function Radios<A extends Value>({
             />
             <span
               className={cssClasses(
-                'flex group-first:rounded-l-md group-last:rounded-r-md',
+                'flex border-l border-goldenrod group-first:rounded-l-md group-first:border-l-0 group-last:rounded-r-md',
                 ['cursor-pointer bg-zinc-700', !isChecked],
                 ['bg-goldenrod text-black', isChecked],
               )}

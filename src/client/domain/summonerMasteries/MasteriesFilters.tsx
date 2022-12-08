@@ -92,6 +92,7 @@ export const MasteriesFilters = (): JSX.Element => {
         <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
           {labelValue('percents', <TextLabel title="Trier par pourcents">%</TextLabel>)}
           {labelValue('points', <TextLabel title="Trier par points">pts</TextLabel>)}
+          {labelValue('name', <TextLabel title="Trier par nom">nom</TextLabel>)}
         </Radios>
         <Radios<MasteriesQueryOrder> name="order" value={masteriesQuery.order} setValue={setOrder}>
           {labelValue(
@@ -225,7 +226,10 @@ type SpanProps = {
 }
 
 const TextLabel: React.FC<SpanProps> = ({ title, children }) => (
-  <span title={title} className="flex h-6 w-8 items-center justify-center text-sm">
+  <span
+    title={title}
+    className="flex h-6 min-w-[2rem] items-center justify-center px-[2px] text-sm"
+  >
     {children}
   </span>
 )

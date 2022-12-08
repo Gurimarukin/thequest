@@ -2,7 +2,7 @@ import { createEnum } from '../../../shared/utils/createEnum'
 
 type MasteriesQuerySort = typeof e.T
 
-const e = createEnum('percents', 'points')
+const e = createEnum('percents', 'points', 'name')
 
 const default_: MasteriesQuerySort = 'percents'
 

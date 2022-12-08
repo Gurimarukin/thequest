@@ -39,6 +39,8 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
                 reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
                 EnrichedChampionMastery.Ord.byName,
               ]
+            case 'name':
+              return [reverseIfDesc(EnrichedChampionMastery.Ord.byName)]
           }
         })(),
       ),
