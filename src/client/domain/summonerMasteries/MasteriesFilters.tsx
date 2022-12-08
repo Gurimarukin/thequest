@@ -36,7 +36,7 @@ export const MasteriesFilters = (): JSX.Element => {
   const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
   return (
-    <div className="flex items-center justify-between gap-5 flex-wrap pt-3">
+    <div className="flex items-center justify-evenly gap-5 flex-wrap pt-3">
       <div className="flex">
         {pipe(
           ChampionLevelOrZero.values,

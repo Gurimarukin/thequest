@@ -309,7 +309,7 @@ const AccountDisconnected = (): JSX.Element => {
           Compte
         </button>
         {loginIsVisible ? (
-          <div className="absolute z-10 right-[1px] top-full bg-zinc-900 border-goldenrod border flex flex-col px-5 py-4 gap-3">
+          <Menu>
             <form onSubmit={handleSubmit} className="flex flex-col gap-2">
               <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
                 <label className="contents">
@@ -353,7 +353,7 @@ const AccountDisconnected = (): JSX.Element => {
                 Inscription
               </Link>
             </div>
-          </div>
+          </Menu>
         ) : null}
       </div>
     </ClickOutside>
@@ -384,19 +384,27 @@ const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
           <PersonFilledIcon className="h-7 fill-wheat" />
         </button>
         {menuIsVisible ? (
-          <ul className="absolute right-0 top-[calc(100%_+_1px)] p-[2px] gap-[2px] flex flex-col">
-            <li>
-              <button
-                type="button"
-                onClick={disconnect}
-                className="bg-goldenrod text-black py-1 px-4 hover:bg-goldenrod/75"
-              >
-                Déconnexion
-              </button>
-            </li>
-          </ul>
+          <Menu>
+            <ul className="gap-[2px] flex flex-col">
+              <li>
+                <button
+                  type="button"
+                  onClick={disconnect}
+                  className="bg-goldenrod text-black py-1 px-4 hover:bg-goldenrod/75"
+                >
+                  Déconnexion
+                </button>
+              </li>
+            </ul>
+          </Menu>
         ) : null}
       </div>
     </ClickOutside>
   )
 }
+
+const Menu: React.FC = ({ children }) => (
+  <div className="absolute z-10 right-[1px] top-full bg-zinc-900 border-goldenrod border flex flex-col px-5 py-4 gap-3">
+    {children}
+  </div>
+)
