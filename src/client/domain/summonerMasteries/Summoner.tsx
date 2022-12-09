@@ -6,6 +6,7 @@ import type { Dict } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { InformationCircleOutline } from '../../imgs/svgIcons'
 import { NumberUtils } from '../../utils/NumberUtils'
 
 const { round } = NumberUtils
@@ -59,7 +60,10 @@ export const Summoner = ({
             <MasteryImgWithCount level={6} imgClassName="h-16 mt-[-11px] mb-[-2px]" />
             <MasteryImgWithCount level={5} imgClassName="h-16 mt-[-13px] mb-[-5px]" />
           </div>
-          <span className="text-lg underline">Progression : {round(questPercents, 2)}%</span>
+          <span className="flex items-center gap-2 text-lg">
+            <span>Progression : {round(questPercents, 2)}%</span>
+            <InformationCircleOutline className="h-6 fill-current" />
+          </span>
         </div>
         <div className="invisible absolute right-0 top-full z-10 flex flex-col items-center border-2 border-mastery4-brown-secondary bg-black px-5 pt-3 pb-4 peer-hover:visible">
           <div className="flex items-end">

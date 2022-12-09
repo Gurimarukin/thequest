@@ -16,12 +16,12 @@ import { useUser } from '../contexts/UserContext'
 import { useSummonerNameFromLocation } from '../hooks/useSummonerNameFromLocation'
 import { Assets } from '../imgs/Assets'
 import {
-  CloseFilledIcon,
-  PersonFilledIcon,
-  SearchOutlineIcon,
-  StarFilledIcon,
-  StarOutlineIcon,
-  TimeOutlineIcon,
+  CloseFilled,
+  PersonFilled,
+  SearchOutline,
+  StarFilled,
+  StarOutline,
+  TimeOutline,
 } from '../imgs/svgIcons'
 import { MasteriesQuery } from '../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../router/AppRouter'
@@ -146,7 +146,7 @@ const SearchSummoner = (): JSX.Element => {
           </ul>
         </ClickOutside>
         <button type="submit">
-          <SearchOutlineIcon className="-ml-7 h-6 text-goldenrod" />
+          <SearchOutline className="-ml-7 h-6 text-goldenrod" />
         </button>
       </form>
     </div>
@@ -193,14 +193,14 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
           case 'favorite':
             return (
               <span className="p-2">
-                <TimeOutlineIcon className="invisible h-4" />
+                <TimeOutline className="invisible h-4" />
               </span>
             )
           case 'recent':
             return (
               <button type="button" onClick={handleRemoveRecentClick} className="group p-2">
-                <TimeOutlineIcon className="h-4 text-goldenrod group-hover:hidden" />
-                <CloseFilledIcon className="hidden h-4 fill-red-700 group-hover:flex" />
+                <TimeOutline className="h-4 text-goldenrod group-hover:hidden" />
+                <CloseFilled className="hidden h-4 fill-red-700 group-hover:flex" />
               </button>
             )
         }
@@ -230,7 +230,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
                 onClick={handleRemoveFavoriteClick}
                 className="fill-goldenrod px-3 pt-2 pb-3 hover:fill-red-700"
               >
-                <StarFilledIcon className="h-5" />
+                <StarFilled className="h-5" />
               </button>
             )
           case 'recent':
@@ -240,7 +240,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
                 onClick={handleAddFavoriteClick}
                 className="px-3 pt-2 pb-3 text-goldenrod hover:text-wheat"
               >
-                <StarOutlineIcon className="h-5" />
+                <StarOutline className="h-5" />
               </button>
             )
         }
@@ -381,7 +381,7 @@ const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
       <div>
         <button type="button" onClick={toggleMenu} className="flex items-end gap-3 py-2">
           <span>{user.userName}</span>
-          <PersonFilledIcon className="h-7 fill-wheat" />
+          <PersonFilled className="h-7 fill-wheat" />
         </button>
         {menuIsVisible ? (
           <Menu>
