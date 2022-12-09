@@ -65,6 +65,24 @@ export const Summoner = ({
             <span>Progression : {round(questPercents, 2)}%</span>
             {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
             <InformationCircleOutline className="peer/info h-6 fill-current" />
+            <ul className="invisible absolute right-0 top-[calc(100%_+_.75rem)] z-10 list-disc border-2 border-mastery4-brown-secondary bg-black py-4 pr-4 pl-7 text-sm peer-hover/info:visible">
+              <li>
+                De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de
+                maîtrise.
+              </li>
+              <li>Maîtrise 5 = 50 %</li>
+              <li>Chaque fragment = 3 %</li>
+              <li>
+                Chaque jeton pour la maîtrise 6 = 7 % (maîtrise 5, 1 jeton = 57 % ; maîtrise 5, 2
+                jetons = 64 %)
+              </li>
+              <li>Maîtrise 6 = 67 %</li>
+              <li>
+                Chaque jeton pour la maîtrise 7 = 10 % (maîtrise 6, 1 jeton = 77 % ; maîtrise 6, 2
+                jetons = 87 % ; maîtrise 6, 3 jetons = 97 %)
+              </li>
+              <li>Maîtrise 7 = 100 %</li>
+            </ul>
           </span>
           <div className="invisible absolute right-0 top-[calc(100%_+_.75rem)] z-10 flex flex-col items-center gap-2 border-2 border-mastery4-brown-secondary bg-black px-5 pt-3 pb-4 peer-hover/masteries:visible">
             <div className="flex items-end gap-1">
