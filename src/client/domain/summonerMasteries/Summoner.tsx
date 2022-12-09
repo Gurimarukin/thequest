@@ -54,29 +54,30 @@ export const Summoner = ({
             <span className="text-sm">Niveau {summonerLevel}</span>
           </div>
         </div>
-        <div className="peer flex flex-col items-center gap-1">
-          <div className="flex items-end gap-1">
-            <MasteryImgWithCount level={7} imgClassName="h-16 mt-[-10px]" />
-            <MasteryImgWithCount level={6} imgClassName="h-16 mt-[-11px] mb-[-2px]" />
-            <MasteryImgWithCount level={5} imgClassName="h-16 mt-[-13px] mb-[-5px]" />
+        <div className="flex flex-col items-center gap-1">
+          {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+          <div className="peer/masteries flex items-end gap-2">
+            <MasteryImgWithCount level={7} imgClassName="h-16 mt-[-6px]" />
+            <MasteryImgWithCount level={6} imgClassName="h-16 mt-[-7px] mb-[-4px]" />
+            <MasteryImgWithCount level={5} imgClassName="h-16 mt-[-11px] mb-[-6px]" />
           </div>
           <span className="flex items-center gap-2 text-lg">
             <span>Progression : {round(questPercents, 2)}%</span>
-            <InformationCircleOutline className="h-6 fill-current" />
+            {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+            <InformationCircleOutline className="peer/info h-6 fill-current" />
           </span>
-        </div>
-        <div className="invisible absolute right-0 top-full z-10 flex flex-col items-center border-2 border-mastery4-brown-secondary bg-black px-5 pt-3 pb-4 peer-hover:visible">
-          <div className="flex items-end">
-            <MasteryImgWithCount level={4} imgClassName="h-12 mt-[-7px]" />
-            <MasteryImgWithCount level={3} imgClassName="h-12 mt-[-10px] mb-[2px]" />
-            <MasteryImgWithCount level={2} imgClassName="h-12 mt-[-12px] mb-[1px]" />
-            <MasteryImgWithCount level={1} imgClassName="h-12 mt-[-12px] mb-[-4px]" />
-            <MasteryImgWithCount level={0} imgClassName="h-12 mt-[-14px] mb-[-6px]" />
+          <div className="invisible absolute right-0 top-[calc(100%_+_.75rem)] z-10 flex flex-col items-center gap-2 border-2 border-mastery4-brown-secondary bg-black px-5 pt-3 pb-4 peer-hover/masteries:visible">
+            <div className="flex items-end gap-1">
+              <MasteryImgWithCount level={4} imgClassName="h-12 mt-[-6px]" />
+              <MasteryImgWithCount level={3} imgClassName="h-12 mt-[-9px] mb-[-3px]" />
+              <MasteryImgWithCount level={2} imgClassName="h-12 mt-[-10px] mb-[-5px]" />
+              <MasteryImgWithCount level={1} imgClassName="h-12 mt-[-10px] mb-[-8px]" />
+              <MasteryImgWithCount level={0} imgClassName="h-12 mt-[-10px] mb-[-8px]" />
+            </div>
+            <span className="text-sm">Niveau de maîtrise : {totalMasteryLevel}</span>
+            <span className="text-xs">(Nombre total de champions : {totalChampionsCount})</span>
           </div>
-          <span className="text-sm">Niveau de maîtrise : {totalMasteryLevel}</span>
-          <span className="mt-2 text-xs">(Nombre total de champions : {totalChampionsCount})</span>
         </div>
-        {/* <div className="absolute top-[172px] z-40 w-[9999px] border-t border-red-600" /> */}
       </div>
     </div>
   )

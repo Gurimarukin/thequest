@@ -16,8 +16,8 @@ import { MainLayout } from '../../components/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
-import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
+import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { appRoutes } from '../../router/AppRouter'
@@ -177,7 +177,7 @@ const enrichAll = (
   }
 }
 
-// Mastery 4: 50%
+// Mastery 5: 50%
 // Mastery 6 tokens: 7% each
 // Mastery 7 tokens: 10% each
 // Fragments (not based on user's favorites): 3% each

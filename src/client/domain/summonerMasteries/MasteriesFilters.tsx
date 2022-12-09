@@ -149,13 +149,13 @@ const getSelectLevelsButton =
           onClick={handleClick}
           disabled={isSelected}
           className={cssClasses(
-            'flex items-center justify-between gap-1 py-1 pr-2 pl-4 text-left text-sm',
+            'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
             ['hover:bg-zinc-700', !isSelected],
             ['bg-goldenrod text-black', isSelected],
           )}
         >
           <span>{children}</span>
-          <span className="flex">
+          <span className="flex gap-1">
             {pipe(
               levelsSet,
               readonlySet.toReadonlyArray<ChampionLevelOrZero>(ord.reverse(number.Ord)),
@@ -163,7 +163,7 @@ const getSelectLevelsButton =
                 <MasteryImg
                   key={level}
                   level={level}
-                  className={cssClasses('h-6', ['drop-shadow-[0_0_3px_black]', isSelected])}
+                  className={cssClasses('h-5', ['drop-shadow-[0_0_3px_black]', isSelected])}
                 />
               )),
             )}
@@ -204,7 +204,7 @@ const MasteriesCheckboxes = ({
             <span
               title={`Niveau ${level}`}
               className={cssClasses(
-                'flex h-10 cursor-pointer p-[2px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
+                'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
                 ['bg-zinc-700', !isChecked],
                 ['bg-goldenrod', isChecked],
               )}
