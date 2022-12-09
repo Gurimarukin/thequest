@@ -226,10 +226,7 @@ type SpanProps = {
 }
 
 const TextLabel: React.FC<SpanProps> = ({ title, children }) => (
-  <span
-    title={title}
-    className="flex h-6 min-w-[2rem] items-center justify-center px-[2px] text-sm"
-  >
+  <span title={title} className="flex h-6 w-10 items-center justify-center text-sm">
     {children}
   </span>
 )
