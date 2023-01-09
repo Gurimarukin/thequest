@@ -39,21 +39,7 @@ module.exports = {
         allowHigherOrderFunctions: true,
       },
     ],
-    '@typescript-eslint/no-base-to-string': [
-      'error',
-      {
-        ignoredTypeNames: [
-          'APIInteractionDataResolvedChannel',
-          'APIRole',
-          'GuildChannel',
-          'Role',
-          'StageChannel',
-          'TextChannel',
-          'ThreadChannel',
-          'VoiceChannel',
-        ],
-      },
-    ],
+    '@typescript-eslint/no-base-to-string': 'error',
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-namespace': 'warn',
