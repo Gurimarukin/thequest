@@ -12,7 +12,7 @@ import type { SummonerView } from '../../../shared/models/api/summoner/SummonerV
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { MainLayout } from '../../components/MainLayout'
+import { MainLayout } from '../../components/MainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
