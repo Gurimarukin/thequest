@@ -22,6 +22,7 @@ const emptyState: State = { userName: '', password: '' }
 
 export const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
+
 export const AccountDisconnected = (): JSX.Element => {
   const { refreshUser } = useUser()
 
@@ -73,45 +74,13 @@ export const AccountDisconnected = (): JSX.Element => {
         </button>
         {loginIsVisible ? (
           <Menu>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-              <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
-                <label className="contents">
-                  <span>Login :</span>
-                  <input
-                    type="text"
-                    value={state.userName}
-                    onChange={updateUserName}
-                    className="border border-goldenrod bg-transparent"
-                  />
-                </label>
-                <label className="contents">
-                  <span>Mot de passe :</span>
-                  <input
-                    type="password"
-                    value={state.password}
-                    onChange={updatePassword}
-                    className="border border-goldenrod bg-transparent"
-                  />
-                </label>
-              </div>
-              <div className="mt-1 flex flex-col items-center gap-2 self-center">
-                <button
-                  type="submit"
-                  disabled={Either.isLeft(validated)}
-                  className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
-                >
-                  Connexion
-                </button>
-                {pipe(
-                  error,
-                  Maybe.fold(
-                    () => null,
-                    e => <span className="text-red-700">{e}</span>,
-                  ),
-                )}
-              </div>
-            </form>
-            <div className="flex justify-center border-t border-goldenrod pt-3">
+            <Link
+              to={appRoutes.login}
+              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+            >
+              Connexion
+            </Link>
+            <div className="flex justify-center">
               <Link to={appRoutes.register} className="underline">
                 Inscription
               </Link>
