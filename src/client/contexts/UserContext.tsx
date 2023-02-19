@@ -39,9 +39,9 @@ export const UserContextProvider: React.FC = ({ children }) => {
     mutate: refreshUser,
   } = useSWR(
     apiRoutes.user.self.get,
-    (method, url) =>
+    (url, method) =>
       pipe(
-        http([method, url], { retry: 0 }, [UserView.codec, 'UserView']),
+        http([url, method], { retry: 0 }, [UserView.codec, 'UserView']),
         statusesToOption(401, 404), // no token or user not found
         futureMaybe.map(
           pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),

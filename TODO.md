@@ -1,2 +1,3 @@
 - search champion
 - connected menu: containing box
+- discord OAuth2: state

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { MainLayout } from '../components/MainLayout/MainLayout'
+import { MainLayout } from '../components/mainLayout/MainLayout'
 
 export const Home = (): JSX.Element => (
   <MainLayout>

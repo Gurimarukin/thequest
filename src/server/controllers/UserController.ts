@@ -5,7 +5,8 @@ import { Status } from 'hyper-ts'
 
 import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
-import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
+import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
+import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
@@ -17,6 +18,7 @@ import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { UserId } from '../models/user/UserId'
+import type { DiscordService } from '../services/DiscordService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -24,8 +26,25 @@ import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddle
 type UserController = ReturnType<typeof UserController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function UserController(summonerService: SummonerService, userService: UserService) {
-  const login: EndedMiddleware = EndedMiddleware.withBody(LoginPayload.codec)(
+function UserController(
+  discordService: DiscordService,
+  summonerService: SummonerService,
+  userService: UserService,
+) {
+  const loginDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
+    ({ code }) =>
+      pipe(
+        discordService.oauth2.token.post(code),
+        Future.chain(r => discordService.users.me.get(r.access_token)),
+        M.fromTaskEither,
+        M.ichain(res => {
+          console.log('res =', res)
+          return M.sendWithStatus(Status.InternalServerError)('TODO')
+        }),
+      ),
+  )
+
+  const loginPassword: EndedMiddleware = EndedMiddleware.withBody(LoginPasswordPayload.codec)(
     ({ userName, password }) =>
       pipe(
         userService.login(userName, password),
@@ -46,7 +65,7 @@ function UserController(summonerService: SummonerService, userService: UserServi
     M.ichain(() => M.send('')),
   )
 
-  const register: EndedMiddleware = EndedMiddleware.withBody(LoginPayload.codec)(
+  const registerPassword: EndedMiddleware = EndedMiddleware.withBody(LoginPasswordPayload.codec)(
     flow(
       Either.right,
       Either.bind('validatedPassword', ({ password }) => validatePassword(password)),
@@ -112,9 +131,10 @@ function UserController(summonerService: SummonerService, userService: UserServi
       () => 'Summoner search is not in favorites',
     ),
 
-    login,
+    loginDiscord,
+    loginPassword,
     logout,
-    register,
+    registerPassword,
   }
 
   function sendToken(token: Token): EndedMiddleware {

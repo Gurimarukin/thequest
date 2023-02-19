@@ -14,6 +14,7 @@ import { Menu } from './Menu'
 type AccountConnectedProps = {
   readonly user: UserView
 }
+
 export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
   const { refreshUser } = useUser()
 

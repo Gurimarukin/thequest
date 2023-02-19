@@ -3,13 +3,13 @@ import * as C from 'io-ts/Codec'
 import { ClearPassword } from './ClearPassword'
 import { UserName } from './UserName'
 
-type LoginPayload = C.TypeOf<typeof codec>
+type LoginPasswordPayload = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   userName: UserName.codec,
   password: ClearPassword.codec,
 })
 
-const LoginPayload = { codec }
+const LoginPasswordPayload = { codec }
 
-export { LoginPayload }
+export { LoginPasswordPayload }

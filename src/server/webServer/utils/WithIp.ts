@@ -24,24 +24,25 @@ const WithIp = (Logger: LoggerGetter, config: Config): WithIp => {
         remoteAddress: M.decodeHeader('remote-address', maybeStr),
         xRealIp: M.decodeHeader('x-real-ip', maybeStr),
       }),
-      M.ichain(({ xForwardedFor, remoteAddress, xRealIp }) =>
-        pipe(
-          xForwardedFor,
-          Maybe.alt(() => remoteAddress),
-          Maybe.alt(() => xRealIp),
-          Maybe.alt(() => (config.isDev ? Maybe.some('127.0.0.1') : Maybe.none)),
-          Maybe.fold(
-            () =>
-              pipe(
-                logger.error(`Request rejected because ip is required for ${cause}`),
-                M.fromIOEither,
-                M.ichain(() => M.sendWithStatus(Status.BadRequest)('')),
-              ),
-            ip => f(ip),
+      M.matchE(
+        () => M.sendWithStatus(Status.BadRequest)(''),
+        ({ xForwardedFor, remoteAddress, xRealIp }) =>
+          pipe(
+            xForwardedFor,
+            Maybe.alt(() => remoteAddress),
+            Maybe.alt(() => xRealIp),
+            Maybe.alt(() => (config.isDev ? Maybe.some('127.0.0.1') : Maybe.none)),
+            Maybe.fold(
+              () =>
+                pipe(
+                  logger.error(`Request rejected because ip is required for ${cause}`),
+                  M.fromIOEither,
+                  M.ichain(() => M.sendWithStatus(Status.BadRequest)('')),
+                ),
+              ip => f(ip),
+            ),
           ),
-        ),
       ),
-      M.orElse(() => M.sendWithStatus(Status.BadRequest)('')),
     )
 }
 

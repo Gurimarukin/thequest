@@ -9,6 +9,7 @@ import { HealthCheckController } from './controllers/HealthCheckController'
 import { StaticDataController } from './controllers/StaticDataController'
 import { SummonerController } from './controllers/SummonerController'
 import { UserController } from './controllers/UserController'
+import { DiscordService } from './services/DiscordService'
 import { Routes } from './webServer/Routes'
 import { startWebServer } from './webServer/startWebServer'
 import { RateLimiter } from './webServer/utils/RateLimiter'
@@ -18,6 +19,7 @@ import { WithIp } from './webServer/utils/WithIp'
 export const Application = ({
   config,
   Logger,
+  httpClient,
   healthCheckService,
   riotApiService,
   summonerService,
@@ -26,10 +28,12 @@ export const Application = ({
 }: Context): IO<NotUsed> => {
   const logger = Logger('Application')
 
+  const discordService = DiscordService(config.client, httpClient)
+
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(riotApiService)
   const summonerController = SummonerController(summonerService, masteriesService)
-  const userController = UserController(summonerService, userService)
+  const userController = UserController(discordService, summonerService, userService)
 
   const withIp = WithIp(Logger, config)
   const rateLimiter = RateLimiter(Logger, withIp, constants.rateLimiterLifeTime)

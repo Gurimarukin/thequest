@@ -4,13 +4,14 @@ import { lens } from 'monocle-ts'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
-import { LoginPayload } from '../../shared/models/api/user/LoginPayload'
+import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Either, Future, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { apiUserRegisterPost } from '../api'
 import { Link } from '../components/Link'
+import { SimpleMainLayout } from '../components/mainLayout/SimpleMainLayout'
 import { useHistory } from '../contexts/HistoryContext'
 import { appRoutes } from '../router/AppRouter'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
@@ -23,9 +24,9 @@ type State = {
 
 const emptyState: State = { userName: '', password: '', confirmPassword: '' }
 
-export const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
-export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
-export const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
+const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
+const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
+const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 
 export const Register = (): JSX.Element => {
   const { navigate } = useHistory()
@@ -46,7 +47,7 @@ export const Register = (): JSX.Element => {
     setError(Maybe.none)
   }, [])
 
-  const validated = useMemo(() => LoginPayload.codec.decode(state), [state])
+  const validated = useMemo(() => LoginPasswordPayload.codec.decode(state), [state])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -72,10 +73,7 @@ export const Register = (): JSX.Element => {
   )
 
   return (
-    <div className="flex h-full flex-col items-center gap-4 p-6">
-      <Link to={appRoutes.index} className="underline">
-        Accueil
-      </Link>
+    <SimpleMainLayout>
       <div className="flex grow flex-col justify-center">
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
@@ -124,8 +122,10 @@ export const Register = (): JSX.Element => {
             )}
           </div>
         </form>
+        <br />
+        Déjà un compte ? <Link to={appRoutes.login}>Se connecter</Link>
       </div>
-    </div>
+    </SimpleMainLayout>
   )
 }
 

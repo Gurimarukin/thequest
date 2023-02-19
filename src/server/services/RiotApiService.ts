@@ -4,7 +4,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Method } from '../../shared/models/Method'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { Lang } from '../../shared/models/api/Lang'
-import { Platform } from '../../shared/models/api/Platform'
+import type { Platform } from '../../shared/models/api/Platform'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Future, Maybe, Tuple } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
@@ -21,7 +21,7 @@ import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 const { ddragon, ddragonCdn } = DDragonUtils
 
 const platformUrl = (platform: Platform, path: string): string =>
-  `https://${Platform.endpoint[platform]}${path}`
+  `https://${constants.riotApi.plateformEndpoint[platform]}${path}`
 
 type RiotApiService = ReturnType<typeof RiotApiService>
 

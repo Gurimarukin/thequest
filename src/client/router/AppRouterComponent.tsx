@@ -5,12 +5,14 @@ import React, { useEffect, useMemo } from 'react'
 
 import { Maybe, Tuple } from '../../shared/utils/fp'
 
-import { Link } from '../components/Link'
 import { useHistory } from '../contexts/HistoryContext'
 import { Home } from '../domain/Home'
+import { Login } from '../domain/Login'
+import { NotFound } from '../domain/NotFound'
 import { Register } from '../domain/Register'
+import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
-import { appParsers, appRoutes } from './AppRouter'
+import { appParsers } from './AppRouter'
 
 type ElementWithTitle = Tuple<JSX.Element, Maybe<string>>
 
@@ -24,7 +26,9 @@ const titleWithElementParser = zero<ElementWithTitle>()
       t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),
     ),
   )
+  .alt(appParsers.login.map(() => t(<Login />, 'Connexion')))
   .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
+  .alt(appParsers.discordRedirect.map(() => t(<DiscordRedirect />)))
 
 export const AppRouterComponent = (): JSX.Element => {
   const { location } = useHistory()
@@ -52,13 +56,3 @@ export const AppRouterComponent = (): JSX.Element => {
 
   return node
 }
-
-// TODO: move to own file?
-const NotFound = (): JSX.Element => (
-  <div className="flex flex-col items-center gap-4 p-6">
-    <p className="text-xl">Cette page n'existe pas.</p>
-    <Link to={appRoutes.index} className="underline">
-      Accueil
-    </Link>
-  </div>
-)

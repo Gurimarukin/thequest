@@ -16,15 +16,25 @@ import {
   URLFromString,
 } from '../../shared/utils/ioTsUtils'
 
+import { ClientSecret } from '../models/discord/ClientSecret'
+import { DiscordUserId } from '../models/discord/DiscordUserId'
+
 const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
   readonly isDev: boolean
   readonly logLevel: LogLevelOrOff
+  readonly client: ClientConfig
   readonly http: HttpConfig
   readonly db: DbConfig
   readonly riotApiKey: string
   readonly jwtSecret: string
+}
+
+export type ClientConfig = {
+  readonly id: DiscordUserId
+  readonly secret: ClientSecret
+  readonly redirectUri: string
 }
 
 export type HttpConfig = {
@@ -47,6 +57,11 @@ const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
         Either.map(Maybe.getOrElseW(() => false)),
       ),
       logLevel: r(LogLevelOrOff.codec)('LOG_LEVEL'),
+      client: seqS<ClientConfig>({
+        id: r(DiscordUserId.codec)('CLIENT_ID'),
+        secret: r(ClientSecret.codec)('CLIENT_SECRET'),
+        redirectUri: r(D.string)('REDIRECT_URI'),
+      }),
       http: seqS<HttpConfig>({
         port: r(NumberFromString.decoder)('HTTP_PORT'),
         allowedOrigins: r(Maybe.decoder(NonEmptyArrayFromString.decoder(URLFromString.decoder)))(

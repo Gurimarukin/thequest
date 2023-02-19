@@ -32,6 +32,7 @@ type Context = ReturnType<typeof of>
 const of = (
   config: Config,
   Logger: LoggerGetter,
+  httpClient: HttpClient,
   healthCheckPersistence: HealthCheckPersistence,
   userPersistence: UserPersistence,
   riotApiService: RiotApiService,
@@ -46,6 +47,7 @@ const of = (
   return {
     config,
     Logger,
+    httpClient,
     healthCheckService,
     riotApiService,
     summonerService,
@@ -86,6 +88,7 @@ const load = (config: Config): Future<Context> => {
       const context = of(
         config,
         Logger,
+        httpClient,
         healthCheckPersistence,
         userPersistence,
         riotApiService,

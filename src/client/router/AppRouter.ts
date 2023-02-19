@@ -12,7 +12,9 @@ const { codec } = RouterUtils
  */
 
 const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
+const loginMatch = lit('login')
 const registerMatch = lit('register')
+const discordRedirectMatch = lit('discordRedirect')
 
 /**
  * parser
@@ -22,7 +24,9 @@ const registerMatch = lit('register')
 export const appParsers = {
   index: end.parser,
   platformSummonerName: platformSummonerNameMatch.then(end).parser,
+  login: loginMatch.then(end).parser,
   register: registerMatch.then(end).parser,
+  discordRedirect: discordRedirectMatch.then(end).parser,
 }
 
 /**
@@ -41,5 +45,6 @@ export const appRoutes = {
       q === '' ? '' : `?${q}`
     }`
   },
+  login: format(loginMatch.formatter, {}),
   register: format(registerMatch.formatter, {}),
 }
