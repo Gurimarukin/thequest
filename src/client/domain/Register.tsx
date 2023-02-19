@@ -14,6 +14,7 @@ import { Link } from '../components/Link'
 import { SimpleMainLayout } from '../components/mainLayout/SimpleMainLayout'
 import { useHistory } from '../contexts/HistoryContext'
 import { appRoutes } from '../router/AppRouter'
+import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
 type State = {
@@ -111,7 +112,7 @@ export const Register = (): JSX.Element => {
               disabled={Either.isLeft(validated)}
               className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
-              Inscription
+              Créer un compte
             </button>
             {pipe(
               error,
@@ -122,6 +123,9 @@ export const Register = (): JSX.Element => {
             )}
           </div>
         </form>
+        <hr />
+        <a href={discordApiOAuth2Authorize('register')}>REGISTER WITH DISCORD</a>
+        <hr />
         <br />
         Déjà un compte ? <Link to={appRoutes.login}>Se connecter</Link>
       </div>

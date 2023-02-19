@@ -30,7 +30,7 @@ export const AccountDisconnected = (): JSX.Element => {
             </Link>
             <div className="flex justify-center">
               <Link to={appRoutes.register} className="underline">
-                Inscription
+                Créer un compte
               </Link>
             </div>
           </Menu>

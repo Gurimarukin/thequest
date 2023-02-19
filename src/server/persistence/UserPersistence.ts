@@ -22,6 +22,10 @@ const { getPath } = FpCollectionHelpers
 
 const Keys = {
   loginDiscordId: getPath<User<UserLoginDiscord>>()(['login', 'id']),
+  loginPasswordDiscordId: `${getPath<User<UserLoginPassword>>()([
+    'login',
+    'discord',
+  ])}.${getPath<UserDiscordInfos>()(['id'])}`,
   loginPasswordUserName: getPath<User<UserLoginPassword>>()(['login', 'userName']),
 }
 
@@ -40,12 +44,12 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
   return {
     ensureIndexes,
 
-    findByLoginDiscordId: (id: DiscordUserId): Future<Maybe<User<UserLoginDiscord>>> =>
-      collection.findOne(
-        { [Keys.loginDiscordId]: DiscordUserId.codec.encode(id) },
-        {},
-        userLoginDiscordDecoderWithName,
-      ),
+    findByLoginDiscordId: (id: DiscordUserId): Future<Maybe<User<UserLogin>>> => {
+      const encoded = DiscordUserId.codec.encode(id)
+      return collection.findOne({
+        $or: [{ [Keys.loginDiscordId]: encoded }, { [Keys.loginPasswordDiscordId]: encoded }],
+      })
+    },
 
     findByLoginUserName: (userName: UserName): Future<Maybe<User<UserLoginPassword>>> =>
       collection.findOne(
@@ -130,11 +134,6 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
 }
 
 export { UserPersistence }
-
-const userLoginDiscordDecoderWithName: Tuple<
-  Decoder<unknown, User<UserLoginDiscord>>,
-  string
-> = Tuple.of(User.decoder(UserLoginDiscord.codec), 'User<UserLoginDiscord>')
 
 const userLoginPasswordDecoderWithName: Tuple<
   Decoder<unknown, User<UserLoginPassword>>,

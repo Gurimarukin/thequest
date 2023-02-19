@@ -16,7 +16,7 @@ import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
-import { UserLoginPassword } from '../models/user/UserLogin'
+import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 
@@ -29,7 +29,7 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
   const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
     userPersistence
 
-  const createUser = (
+  const createUserPassword = (
     userName: UserName,
     password: ClearPassword,
   ): Future<Maybe<User<UserLoginPassword>>> =>
@@ -73,7 +73,7 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
       password !== confirm
         ? Future.left(Error('Passwords must be the same'))
         : pipe(
-            createUser(UserName.wrap(userName), ClearPassword.wrap(password)),
+            createUserPassword(UserName.wrap(userName), ClearPassword.wrap(password)),
             Future.filterOrElse(Maybe.isSome, () => Error('Failed to create user')),
             Future.map(toNotUsed),
           ),
@@ -81,7 +81,27 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
   )
 
   return {
-    createUser,
+    createUserDiscord: (discord: UserDiscordInfos): Future<Maybe<User<UserLoginDiscord>>> =>
+      pipe(
+        userPersistence.findByLoginDiscordId(discord.id),
+        Future.chain(
+          Maybe.fold(
+            () =>
+              pipe(
+                Future.fromIOEither(UserId.generate),
+                Future.chain(id => {
+                  const user = User.of(id, UserLoginDiscord.of(discord), List.empty)
+                  return pipe(
+                    userPersistence.create(user),
+                    Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
+                  )
+                }),
+              ),
+            () => futureMaybe.none,
+          ),
+        ),
+      ),
+    createUserPassword,
     createUserInteractive,
 
     verifyToken: (token: string): Future<TokenContent> =>

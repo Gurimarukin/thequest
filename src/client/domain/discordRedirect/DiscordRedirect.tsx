@@ -1,6 +1,7 @@
+/* eslint-disable functional/no-expression-statement */
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
-import React from 'react'
+import React, { useEffect } from 'react'
 import useSWR from 'swr'
 
 import type { RouteWithMethod } from '../../../shared/ApiRouter'
@@ -12,6 +13,7 @@ import { Either } from '../../../shared/utils/fp'
 
 import { Link } from '../../components/Link'
 import { useHistory } from '../../contexts/HistoryContext'
+import { useUser } from '../../contexts/UserContext'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -42,6 +44,9 @@ type DiscordRedirectValidatedProps = {
 }
 
 const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps): JSX.Element => {
+  const { navigate } = useHistory()
+  const { refreshUser } = useUser()
+
   const { data, error } = useSWR(
     [...apiRoute[state], code],
     (url, method, code_) =>
@@ -55,6 +60,14 @@ const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps
       shouldRetryOnError: false,
     },
   )
+
+  useEffect(() => {
+    if (data !== undefined) {
+      refreshUser()
+      navigate(appRoutes.index, { replace: true })
+    }
+  }, [data, navigate, refreshUser])
+
   return (
     <>
       {basicAsyncRenderer({ data, error })(() => null)}

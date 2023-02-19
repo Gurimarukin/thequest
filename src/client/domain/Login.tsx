@@ -99,14 +99,7 @@ export const Login = (): JSX.Element => {
         </div>
       </form>
       <hr />
-      <a
-        href={discordApiOAuth2Authorize('login')}
-        // href="https://discord.com/api/oauth2/authorize?client_id=694894023357235211&redirect_uri=http%3A%2F%2Flocalhost%3A1234%2Flogin%2FdiscordCallback&response_type=code&scope=connections&prompt=none"
-        // target="_blank"
-        // rel="noreferrer"
-      >
-        LOGIN WITH DISCORD
-      </a>
+      <a href={discordApiOAuth2Authorize('login')}>LOGIN WITH DISCORD</a>
       <hr />
       <br />
       CONNEXION

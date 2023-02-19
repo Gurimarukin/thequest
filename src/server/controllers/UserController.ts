@@ -10,6 +10,7 @@ import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayl
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
+import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { validatePassword } from '../../shared/validations/validatePassword'
@@ -19,6 +20,7 @@ import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
+import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import type { UserId } from '../models/user/UserId'
 import type { DiscordService } from '../services/DiscordService'
 import type { SummonerService } from '../services/SummonerService'
@@ -36,20 +38,8 @@ function UserController(
   const loginDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
     ({ code }) =>
       pipe(
-        Future.Do,
-        Future.apS('oauth2', discordService.oauth2.token.post(code)),
-        Future.bind('now', () => Future.fromIO(DayJs.now)),
-        Future.bind('user', ({ oauth2 }) => discordService.users.me.get(oauth2.access_token)),
-        Future.chain(({ oauth2, now, user }) =>
-          userService.loginDiscord({
-            id: user.id,
-            username: user.username,
-            discriminator: user.discriminator,
-            accessToken: oauth2.access_token,
-            expiresAt: pipe(now, DayJs.add(oauth2.expires_in)),
-            refreshToken: oauth2.refresh_token,
-          }),
-        ),
+        exchangeCodeAndGetUsersMe(code),
+        Future.chain(userService.loginDiscord),
         M.fromTaskEither,
         M.ichain(
           Maybe.fold(
@@ -81,6 +71,18 @@ function UserController(
     M.ichain(() => M.send('')),
   )
 
+  const registerDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
+    ({ code }) =>
+      pipe(
+        exchangeCodeAndGetUsersMe(code),
+        Future.chain(userService.createUserDiscord),
+        Future.map(Either.fromOption(() => 'Discord account already used')),
+        futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
+        M.fromTaskEither,
+        M.ichain(Either.fold(M.sendWithStatus(Status.BadRequest), sendToken)),
+      ),
+  )
+
   const registerPassword: EndedMiddleware = EndedMiddleware.withBody(LoginPasswordPayload.codec)(
     flow(
       Either.right,
@@ -88,7 +90,7 @@ function UserController(
       Future.right,
       futureEither.chain(({ userName, validatedPassword }) =>
         pipe(
-          userService.createUser(userName, validatedPassword),
+          userService.createUserPassword(userName, validatedPassword),
           Future.map(Either.fromOption(() => 'User name already used')),
         ),
       ),
@@ -150,6 +152,7 @@ function UserController(
     loginDiscord,
     loginPassword,
     logout,
+    registerDiscord,
     registerPassword,
   }
 
@@ -165,6 +168,23 @@ function UserController(
       ),
       M.ichain(() => M.closeHeaders()),
       M.ichain(() => M.send('')),
+    )
+  }
+
+  function exchangeCodeAndGetUsersMe(code: OAuth2Code): Future<UserDiscordInfos> {
+    return pipe(
+      Future.Do,
+      Future.apS('oauth2', discordService.oauth2.token.post(code)),
+      Future.bind('now', () => Future.fromIO(DayJs.now)),
+      Future.bind('user', ({ oauth2 }) => discordService.users.me.get(oauth2.access_token)),
+      Future.map(({ oauth2, now, user }) => ({
+        id: user.id,
+        username: user.username,
+        discriminator: user.discriminator,
+        accessToken: oauth2.access_token,
+        expiresAt: pipe(now, DayJs.add(oauth2.expires_in)),
+        refreshToken: oauth2.refresh_token,
+      })),
     )
   }
 
