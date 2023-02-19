@@ -1,34 +1,56 @@
+import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
+import type { Decoder } from 'io-ts/Decoder'
+import * as D from 'io-ts/Decoder'
+import * as E from 'io-ts/Encoder'
 
 import { UserName } from '../../../shared/models/api/user/UserName'
 import { List } from '../../../shared/utils/fp'
 
 import { PlatformWithPuuid } from '../PlatformWithPuuid'
-import { HashedPassword } from './HashedPassword'
 import { UserId } from './UserId'
+import { UserLogin } from './UserLogin'
 
-type User = C.TypeOf<typeof codec>
-type UserOutput = C.OutputOf<typeof codec>
+type User<A extends UserLogin> = {
+  readonly id: UserId
+  readonly login: A
+  readonly favoriteSearches: List<PlatformWithPuuid>
+}
 
-const codec = C.struct({
+type UserOutput = E.OutputOf<typeof encoder>
+
+const decoder = <A extends UserLogin>(
+  loginDecoder: Decoder<unknown, A>,
+): Decoder<unknown, User<A>> =>
+  D.struct({
+    id: UserId.codec,
+    login: loginDecoder,
+    favoriteSearches: List.codec(PlatformWithPuuid.codec),
+  })
+
+const encoder = E.struct({
   id: UserId.codec,
-  userName: UserName.codec,
-  password: HashedPassword.codec,
-  favoriteSearches: List.codec(PlatformWithPuuid.codec),
+  login: UserLogin.codec,
+  favoriteSearches: List.encoder(PlatformWithPuuid.codec),
 })
 
-const of = (
+const codec: Codec<unknown, UserOutput, User<UserLogin>> = C.make(decoder(UserLogin.codec), encoder)
+
+const of = <A extends UserLogin>(
   id: UserId,
-  userName: UserName,
-  password: HashedPassword,
+  login: A,
   favoriteSearches: List<PlatformWithPuuid>,
-): User => ({
-  id,
-  userName,
-  password,
-  favoriteSearches,
-})
+): User<A> => ({ id, login, favoriteSearches })
 
-const User = { codec, of }
+const userName = (user: User<UserLogin>): string => {
+  switch (user.login.type) {
+    case 'Discord':
+      return user.login.username
+    case 'Password':
+      return UserName.unwrap(user.login.userName)
+  }
+}
+
+const User = { decoder, codec, of, userName }
 
 export { User, UserOutput }

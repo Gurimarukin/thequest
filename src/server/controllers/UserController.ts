@@ -3,6 +3,7 @@ import type { Lazy } from 'fp-ts/function'
 import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
+import { DayJs } from '../../shared/models/DayJs'
 import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
@@ -17,6 +18,7 @@ import { constants } from '../config/constants'
 import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
+import { User } from '../models/user/User'
 import type { UserId } from '../models/user/UserId'
 import type { DiscordService } from '../services/DiscordService'
 import type { SummonerService } from '../services/SummonerService'
@@ -34,20 +36,34 @@ function UserController(
   const loginDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
     ({ code }) =>
       pipe(
-        discordService.oauth2.token.post(code),
-        Future.chain(r => discordService.users.me.get(r.access_token)),
+        Future.Do,
+        Future.apS('oauth2', discordService.oauth2.token.post(code)),
+        Future.bind('now', () => Future.fromIO(DayJs.now)),
+        Future.bind('user', ({ oauth2 }) => discordService.users.me.get(oauth2.access_token)),
+        Future.chain(({ oauth2, now, user }) =>
+          userService.loginDiscord({
+            id: user.id,
+            username: user.username,
+            discriminator: user.discriminator,
+            accessToken: oauth2.access_token,
+            expiresAt: pipe(now, DayJs.add(oauth2.expires_in)),
+            refreshToken: oauth2.refresh_token,
+          }),
+        ),
         M.fromTaskEither,
-        M.ichain(res => {
-          console.log('res =', res)
-          return M.sendWithStatus(Status.InternalServerError)('TODO')
-        }),
+        M.ichain(
+          Maybe.fold(
+            () => M.sendWithStatus(Status.NotFound)('No account for Discord user'),
+            sendToken,
+          ),
+        ),
       ),
   )
 
   const loginPassword: EndedMiddleware = EndedMiddleware.withBody(LoginPasswordPayload.codec)(
     ({ userName, password }) =>
       pipe(
-        userService.login(userName, password),
+        userService.loginPassword(userName, password),
         M.fromTaskEither,
         M.ichain(
           Maybe.fold(
@@ -87,11 +103,11 @@ function UserController(
       pipe(
         userService.findById(user.id),
         Future.map(Either.fromOption(() => 'User not found')),
-        futureEither.chainTaskEitherK(({ userName, favoriteSearches }) =>
+        futureEither.chainTaskEitherK(u =>
           apply.sequenceS(Future.ApplyPar)({
-            userName: Future.right(userName),
+            userName: Future.right(User.userName(u)),
             favoriteSearches: pipe(
-              favoriteSearches,
+              u.favoriteSearches,
               List.traverse(Future.ApplicativePar)(({ platform, puuid }) =>
                 pipe(
                   summonerService.findByPuuid(platform, puuid),

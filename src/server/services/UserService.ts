@@ -14,7 +14,9 @@ import type { JwtHelper } from '../helpers/JwtHelper'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
+import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
+import { UserLoginPassword } from '../models/user/UserLogin'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 
@@ -27,19 +29,35 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
   const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
     userPersistence
 
-  const createUser = (userName: UserName, password: ClearPassword): Future<Maybe<User>> =>
+  const createUser = (
+    userName: UserName,
+    password: ClearPassword,
+  ): Future<Maybe<User<UserLoginPassword>>> =>
     pipe(
-      apply.sequenceS(Future.ApplyPar)({
-        id: Future.fromIOEither(UserId.generate),
-        hashed: PasswordUtils.hash(password),
-      }),
-      Future.chain(({ id, hashed }) => {
-        const user = User.of(id, userName, hashed, List.empty)
-        return pipe(
-          userPersistence.create(user),
-          Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
-        )
-      }),
+      userPersistence.findByLoginUserName(userName),
+      Future.chain(
+        Maybe.fold(
+          () =>
+            pipe(
+              apply.sequenceS(Future.ApplyPar)({
+                id: Future.fromIOEither(UserId.generate),
+                hashed: PasswordUtils.hash(password),
+              }),
+              Future.chain(({ id, hashed }) => {
+                const user = User.of(
+                  id,
+                  UserLoginPassword.of(userName, hashed, Maybe.none),
+                  List.empty,
+                )
+                return pipe(
+                  userPersistence.create(user),
+                  Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
+                )
+              }),
+            ),
+          () => futureMaybe.none,
+        ),
+      ),
     )
 
   const createUserInteractive: Future<NotUsed> = pipe(
@@ -70,12 +88,22 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
       jwtHelper.verify([TokenContent.codec, 'TokenContent'])(token),
 
     signToken,
-    login: (userName: UserName, clearPassword: ClearPassword): Future<Maybe<Token>> =>
+    loginDiscord: (login: UserDiscordInfos): Future<Maybe<Token>> =>
       pipe(
         futureMaybe.Do,
-        futureMaybe.apS('user', userPersistence.findByUserName(userName)),
+        futureMaybe.apS('user', userPersistence.findByLoginDiscordId(login.id)),
+        futureMaybe.bind('updated', ({ user }) =>
+          futureMaybe.fromTaskEither(userPersistence.updateLoginDiscord(user.id, login)),
+        ),
+        futureMaybe.filter(({ updated }) => updated),
+        futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),
+      ),
+    loginPassword: (userName: UserName, clearPassword: ClearPassword): Future<Maybe<Token>> =>
+      pipe(
+        futureMaybe.Do,
+        futureMaybe.apS('user', userPersistence.findByLoginUserName(userName)),
         futureMaybe.bind('validPassword', ({ user }) =>
-          futureMaybe.fromTaskEither(PasswordUtils.check(user.password, clearPassword)),
+          futureMaybe.fromTaskEither(PasswordUtils.check(user.login.password, clearPassword)),
         ),
         futureMaybe.filter(({ validPassword }) => validPassword),
         futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),

@@ -39,7 +39,7 @@ export const FpCollection =
     codecWithName: Tuple<Codec<unknown, OptionalUnlessRequiredId<O>, A>, string>,
   ) =>
   (collection: MongoCollection<O>) => {
-    const [codec, codecName] = codecWithName
+    const [codec] = codecWithName
 
     return {
       collection,
@@ -104,18 +104,7 @@ export const FpCollection =
       count: (filter: Filter<O>): Future<number> =>
         collection.future(c => c.countDocuments(filter)),
 
-      findOne: (
-        filter: Filter<O>,
-        options: WithoutProjection<FindOptions<O>> = {},
-      ): Future<Maybe<A>> =>
-        pipe(
-          collection.future(c => c.findOne(filter, options)),
-          Future.chainFirstIOEitherK(res => logger.trace('Found one', JSON.stringify(res))),
-          Future.map(Maybe.fromNullable),
-          futureMaybe.chainEitherK(u =>
-            pipe(codec.decode(u), Either.mapLeft(decodeError(codecName)(u))),
-          ),
-        ),
+      findOne,
 
       findAll,
 
@@ -136,6 +125,34 @@ export const FpCollection =
           collection.future(c => c.drop()),
           Future.chainFirstIOEitherK(() => logger.trace('Dropped collection')),
         ),
+    }
+
+    function findOne(
+      filter: Filter<O>,
+      options?: WithoutProjection<FindOptions<O>>,
+    ): Future<Maybe<A>>
+    function findOne<B extends A>(
+      filter: Filter<O>,
+      options: WithoutProjection<FindOptions<O>>,
+      decoderWithName: Tuple<Decoder<unknown, B>, string>,
+    ): Future<Maybe<B>>
+
+    function findOne<B extends A>(
+      filter: Filter<O>,
+      options: WithoutProjection<FindOptions<O>> = {},
+      [decoder, name]: Tuple<Decoder<unknown, B>, string> = codecWithName as Tuple<
+        Decoder<unknown, B>,
+        string
+      >,
+    ): Future<Maybe<B>> {
+      return pipe(
+        collection.future(c => c.findOne(filter, options)),
+        Future.chainFirstIOEitherK(res => logger.trace('Found one', JSON.stringify(res))),
+        Future.map(Maybe.fromNullable),
+        futureMaybe.chainEitherK(u =>
+          pipe(decoder.decode(u), Either.mapLeft(decodeError(name)(u))),
+        ),
+      )
     }
 
     function findAll(): (query: Filter<O>, options?: FindOptions<O>) => TObservable<A>

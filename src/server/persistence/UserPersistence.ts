@@ -1,43 +1,78 @@
 import { pipe } from 'fp-ts/function'
+import type { Decoder } from 'io-ts/Decoder'
 import type { PullOperator } from 'mongodb'
 
 import { UserName } from '../../shared/models/api/user/UserName'
 import type { NotUsed } from '../../shared/utils/fp'
-import { Future, Maybe, NonEmptyArray, toNotUsed } from '../../shared/utils/fp'
+import { Future, Maybe, NonEmptyArray, Tuple, toNotUsed } from '../../shared/utils/fp'
 
-import { FpCollection } from '../helpers/FpCollection'
+import { FpCollection, FpCollectionHelpers } from '../helpers/FpCollection'
 import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
+import { DiscordUserId } from '../models/discord/DiscordUserId'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { UserOutput } from '../models/user/User'
 import { User } from '../models/user/User'
+import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
+import type { UserLogin } from '../models/user/UserLogin'
+import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
+
+const { getPath } = FpCollectionHelpers
+
+const Keys = {
+  loginDiscordId: getPath<User<UserLoginDiscord>>()(['login', 'id']),
+  loginPasswordUserName: getPath<User<UserLoginPassword>>()(['login', 'userName']),
+}
 
 type UserPersistence = ReturnType<typeof UserPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) {
   const logger = Logger('UserPersistence')
-  const collection = FpCollection(logger)([User.codec, 'User'])(mongoCollection('user'))
+  const collection = FpCollection(logger)([User.codec, 'User<UserLogin>'])(mongoCollection('user'))
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
     { key: { id: -1 }, unique: true },
-    { key: { userName: -1 }, unique: true },
+    { key: { [Keys.loginPasswordUserName]: -1 } },
   ])
 
   return {
     ensureIndexes,
 
-    findByUserName: (userName: UserName): Future<Maybe<User>> =>
-      collection.findOne({ userName: UserName.codec.encode(userName) }),
+    findByLoginDiscordId: (id: DiscordUserId): Future<Maybe<User<UserLoginDiscord>>> =>
+      collection.findOne(
+        { [Keys.loginDiscordId]: DiscordUserId.codec.encode(id) },
+        {},
+        userLoginDiscordDecoderWithName,
+      ),
 
-    findById: (id: UserId): Future<Maybe<User>> =>
+    findByLoginUserName: (userName: UserName): Future<Maybe<User<UserLoginPassword>>> =>
+      collection.findOne(
+        { [Keys.loginPasswordUserName]: UserName.codec.encode(userName) },
+        {},
+        userLoginPasswordDecoderWithName,
+      ),
+
+    findById: (id: UserId): Future<Maybe<User<UserLogin>>> =>
       collection.findOne({ id: UserId.codec.encode(id) }),
 
-    create: (user: User): Future<boolean> =>
+    create: (user: User<UserLogin>): Future<boolean> =>
       pipe(
         collection.insertOne(user),
         Future.map(r => r.acknowledged),
+      ),
+
+    updateLoginDiscord: (id: UserId, login: UserDiscordInfos): Future<boolean> =>
+      pipe(
+        collection.collection.future(c =>
+          c.updateOne(
+            { id: UserId.codec.encode(id) },
+            { $set: { login: UserLoginDiscord.codec.encode(UserLoginDiscord.of(login)) } },
+          ),
+        ),
+        // TODO: logger.trace
+        Future.map(res => res.acknowledged),
       ),
 
     /**
@@ -95,3 +130,13 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
 }
 
 export { UserPersistence }
+
+const userLoginDiscordDecoderWithName: Tuple<
+  Decoder<unknown, User<UserLoginDiscord>>,
+  string
+> = Tuple.of(User.decoder(UserLoginDiscord.codec), 'User<UserLoginDiscord>')
+
+const userLoginPasswordDecoderWithName: Tuple<
+  Decoder<unknown, User<UserLoginPassword>>,
+  string
+> = Tuple.of(User.decoder(UserLoginPassword.codec), 'User<UserLoginPassword>')

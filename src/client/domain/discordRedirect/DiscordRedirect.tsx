@@ -10,7 +10,9 @@ import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 import type { Dict } from '../../../shared/utils/fp'
 import { Either } from '../../../shared/utils/fp'
 
+import { Link } from '../../components/Link'
 import { useHistory } from '../../contexts/HistoryContext'
+import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
@@ -39,22 +41,33 @@ type DiscordRedirectValidatedProps = {
   readonly state: DiscordRedirectState
 }
 
-const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps): JSX.Element =>
-  basicAsyncRenderer(
-    useSWR(
-      [...apiRoute[state], code],
-      (url, method, code_) =>
-        pipe(
-          http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
-          futureRunUnsafe,
-        ),
-      {
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-        shouldRetryOnError: false,
-      },
-    ),
-  )(u => <pre>{JSON.stringify(u, null, 2)}</pre>)
+const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps): JSX.Element => {
+  const { data, error } = useSWR(
+    [...apiRoute[state], code],
+    (url, method, code_) =>
+      pipe(
+        http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
+        futureRunUnsafe,
+      ),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+    },
+  )
+  return (
+    <>
+      {basicAsyncRenderer({ data, error })(() => null)}
+      {error !== undefined ? (
+        <div className="flex justify-center">
+          <Link to={appRoutes.index} className="mt-4 underline">
+            Accueil
+          </Link>
+        </div>
+      ) : null}
+    </>
+  )
+}
 
 const apiRoute: Dict<DiscordRedirectState, RouteWithMethod> = {
   login: apiRoutes.user.login.discord.post,

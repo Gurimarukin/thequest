@@ -4,12 +4,11 @@ import { lens } from 'monocle-ts'
 
 import { List } from '../../../utils/fp'
 import { SummonerShort } from '../summoner/SummonerShort'
-import { UserName } from './UserName'
 
 type UserView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  userName: UserName.codec,
+  userName: C.string,
   favoriteSearches: List.codec(SummonerShort.codec),
 })
 
