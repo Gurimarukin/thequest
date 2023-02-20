@@ -49,7 +49,7 @@ const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps
 
   const { data, error } = useSWR(
     [...apiRoute[state], code],
-    (url, method, code_) =>
+    ([url, method, code_]) =>
       pipe(
         http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
         futureRunUnsafe,

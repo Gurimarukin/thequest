@@ -39,7 +39,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
     mutate: refreshUser,
   } = useSWR(
     apiRoutes.user.self.get,
-    (url, method) =>
+    ([url, method]) =>
       pipe(
         http([url, method], { retry: 0 }, [UserView.codec, 'UserView']),
         statusesToOption(401, 404), // no token or user not found
