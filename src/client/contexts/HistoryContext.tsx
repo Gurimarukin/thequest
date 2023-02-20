@@ -71,7 +71,7 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
 export const useHistory = (): HistoryContext => {
   const context = useContext(HistoryContext)
   if (context === undefined) {
-    // eslint-disable-next-line functional/no-throw-statement
+    // eslint-disable-next-line functional/no-throw-statements
     throw Error('useHistory must be used within a HistoryContextProvider')
   }
   return context

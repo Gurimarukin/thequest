@@ -39,7 +39,6 @@ const accessControl = {
   exposeHeaders: ['Set-Cookie'],
 }
 
-// eslint-disable-next-line functional/prefer-readonly-type
 type Header = string | string[] | undefined
 
 export const startWebServer = (
@@ -87,7 +86,7 @@ export const startWebServer = (
             Dict.lookup('origin'),
             u => filterOrigin(u),
             Maybe.fold(next, origin => {
-              /* eslint-disable functional/no-expression-statement */
+              /* eslint-disable functional/no-expression-statements */
               res.header({
                 'Access-Control-Allow-Origin': origin,
                 ...(accessControl.allowCredentials
@@ -105,7 +104,7 @@ export const startWebServer = (
               } else {
                 next()
               }
-              /* eslint-enable functional/no-expression-statement */
+              /* eslint-enable functional/no-expression-statements */
             }),
           ),
         ),
@@ -156,7 +155,7 @@ export const startWebServer = (
     )
   }
 
-  function bindUpgrades(server: http.Server): IO<http.Server> {
+  function bindUpgrades(server: Readonly<http.Server>): IO<http.Server> {
     return IO.tryCatch(() =>
       server.on('upgrade', (request, socket, head) =>
         pipe(
@@ -258,10 +257,10 @@ const getStatus = <A>(conn: ExpressConnection<A>): Maybe<Status> =>
 const errorHandler =
   (onError: (error: unknown) => IO<unknown>): ErrorRequestHandler =>
   (err, _req, res) => {
-    /* eslint-disable functional/no-expression-statement */
+    /* eslint-disable functional/no-expression-statements */
     onError(err)()
     res.status(500).end()
-    /* eslint-enable functional/no-expression-statement */
+    /* eslint-enable functional/no-expression-statements */
   }
 
 const headers = (values: List<string>): string => pipe(values, List.mkString(', '))

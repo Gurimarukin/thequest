@@ -27,9 +27,10 @@ export const Tooltip: React.FC<Props> = ({ title, className, children }) => (
 
 type NumberKey = Extract<keyof HTMLElement, 'offsetTop' | 'offsetLeft'>
 
-const getWindowsPos = (key: NumberKey) => (elt: HTMLElement) => getWindowPosRec(key, elt, 0)
+const getWindowsPos = (key: NumberKey) => (elt: Readonly<HTMLElement>) =>
+  getWindowPosRec(key, elt, 0)
 
-const getWindowPosRec = (key: NumberKey, elt: Element | null, acc: number): number => {
+const getWindowPosRec = (key: NumberKey, elt: Readonly<Element | null>, acc: number): number => {
   if (elt === null || !(elt instanceof HTMLElement)) return acc
   return getWindowPosRec(key, elt.offsetParent, acc + elt[key])
 }

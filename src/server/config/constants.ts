@@ -1,7 +1,8 @@
 import { MsDuration } from '../../shared/models/MsDuration'
 import type { Platform } from '../../shared/models/api/Platform'
+import type { Dict } from '../../shared/utils/fp'
 
-const plateformEndpoint: Record<Platform, string> = {
+const plateformEndpoint: Dict<Platform, string> = {
   BR1: 'br1.api.riotgames.com',
   EUN1: 'eun1.api.riotgames.com',
   EUW1: 'euw1.api.riotgames.com',

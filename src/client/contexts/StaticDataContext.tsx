@@ -63,7 +63,7 @@ export const StaticDataContextProvider: React.FC = ({ children }) =>
 export const useStaticData = (): StaticDataContext => {
   const context = useContext(StaticDataContext)
   if (context === undefined) {
-    // eslint-disable-next-line functional/no-throw-statement
+    // eslint-disable-next-line functional/no-throw-statements
     throw Error('useStaticData must be used within a StaticDataContextProvider')
   }
   return context

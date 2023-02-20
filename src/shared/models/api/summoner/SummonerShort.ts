@@ -4,7 +4,7 @@ import * as C from 'io-ts/Codec'
 
 import { Platform } from '../Platform'
 
-type SummonerShort = C.TypeOf<typeof codec>
+type SummonerShort = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   platform: Platform.codec,

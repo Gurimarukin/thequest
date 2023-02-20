@@ -12,5 +12,5 @@ const main: IO<NotUsed> = pipe(
   IO.map(toNotUsed),
 )
 
-// eslint-disable-next-line functional/no-expression-statement
+// eslint-disable-next-line functional/no-expression-statements
 IO.runUnsafe(main)

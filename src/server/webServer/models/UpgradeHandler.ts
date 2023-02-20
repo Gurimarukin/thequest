@@ -7,8 +7,8 @@ import { Either, Future } from '../../../shared/utils/fp'
 import { SimpleHttpResponse } from './SimpleHttpResponse'
 
 type UpgradeHandler = (
-  request: IncomingMessage,
-  socket: Duplex,
+  request: Readonly<IncomingMessage>,
+  socket: Readonly<Duplex>,
   head: Buffer,
 ) => Future<Either<SimpleHttpResponse, void>>
 

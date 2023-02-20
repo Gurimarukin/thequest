@@ -293,18 +293,19 @@ const EndedMiddleware = { withBody }
 
 export { MyMiddleware, EndedMiddleware }
 
-const requestChunks = (req: http.IncomingMessage): Future<List<unknown>> =>
+const requestChunks = (req: Readonly<http.IncomingMessage>): Future<List<unknown>> =>
   Future.tryCatch(
     () =>
       new Promise<List<unknown>>((resolve, reject) => {
-        // eslint-disable-next-line functional/prefer-readonly-type
+        // eslint-disable-next-line functional/prefer-immutable-types
         const body: unknown[] = []
-        /* eslint-disable functional/no-expression-statement */
+
+        /* eslint-disable functional/no-expression-statements */
         // eslint-disable-next-line functional/immutable-data
         req.on('data', chunk => body.push(chunk))
         req.on('end', () => resolve(body))
         req.on('error', e => reject(e))
-        /* eslint-enable functional/no-expression-statement */
+        /* eslint-enable functional/no-expression-statements */
       }),
   )
 

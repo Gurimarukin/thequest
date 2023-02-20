@@ -6,7 +6,7 @@ import { ChampionLevel } from '../../../shared/models/api/ChampionLevel'
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
 import { SummonerId } from './SummonerId'
 
-type RiotChampionMastery = D.TypeOf<typeof decoder>
+type RiotChampionMastery = Readonly<D.TypeOf<typeof decoder>>
 
 const decoder = D.struct({
   championId: ChampionKey.codec,

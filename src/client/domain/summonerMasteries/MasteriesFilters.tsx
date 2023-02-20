@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement,
+/* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { number, ord, readonlySet } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'

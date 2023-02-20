@@ -5,7 +5,7 @@ import type { SWRResponse } from 'swr'
 export function basicAsyncRenderer<A>({
   data,
   error,
-}: Pick<SWRResponse<A, unknown>, 'data' | 'error'>): <B>(
+}: Pick<Readonly<SWRResponse<A, unknown>>, 'data' | 'error'>): <B>(
   renderData: (a: A) => B,
 ) => JSX.Element | B {
   return renderData => {

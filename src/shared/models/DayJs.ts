@@ -12,11 +12,11 @@ import { iso } from 'newtype-ts'
 
 import { MsDuration } from './MsDuration'
 
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 dayjs.extend(customParseFormatPlugin)
 dayjs.extend(utcPlugin)
 dayjs.locale('fr')
-/* eslint-enable functional/no-expression-statement */
+/* eslint-enable functional/no-expression-statements */
 
 export type DayJs = Newtype<{ readonly DayJs: unique symbol }, dayjs.Dayjs>
 
@@ -29,10 +29,10 @@ type OfOptions = {
   readonly locale?: boolean
 }
 
-function of(date: number | Date): DayJs
+function of(date: Readonly<number | Date>): DayJs
 function of(date: string, format?: string, options?: OfOptions): DayJs
 function of(
-  date: number | Date | string,
+  date: Readonly<number | Date | string>,
   format?: string,
   { locale = false }: OfOptions = {},
 ): DayJs {
@@ -74,7 +74,7 @@ const format =
     return (locale ? unwrapped.local() : unwrapped).format(template)
   }
 
-const toDate = (date: DayJs): Date => unwrap(date).toDate()
+const toDate = (date: DayJs): Readonly<Date> => unwrap(date).toDate()
 const toISOString = (date: DayJs): string => unwrap(date).toISOString()
 const unix = (date: DayJs): number => unwrap(date).unix()
 const unixMs = (date: DayJs): MsDuration => MsDuration.wrap(unwrap(date).valueOf())

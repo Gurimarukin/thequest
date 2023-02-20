@@ -3,7 +3,7 @@ import * as C from 'io-ts/Codec'
 import { ChampionKey } from './ChampionKey'
 import { ChampionLevel } from './ChampionLevel'
 
-type ChampionMasteryView = C.TypeOf<typeof codec>
+type ChampionMasteryView = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   championId: ChampionKey.codec,

@@ -16,7 +16,7 @@ type MySignOptions = Omit<jwt.SignOptions, 'expiresIn' | 'notBefore'> & {
 
 type MyVerifyOptions = Omit<jwt.VerifyOptions, 'complete'>
 
-type JwtHelper = ReturnType<typeof JwtHelper>
+type JwtHelper = Readonly<ReturnType<typeof JwtHelper>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const JwtHelper = (secret: string) => ({

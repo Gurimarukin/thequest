@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import React, { useEffect } from 'react'

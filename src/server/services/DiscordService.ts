@@ -11,7 +11,7 @@ import { OAuth2AccessTokenResult } from '../models/discord/OAuth2AccessTokenResu
 
 const apiEndpoint = constants.discord.apiEndpoint
 
-type DiscordService = ReturnType<typeof DiscordService>
+type DiscordService = Readonly<ReturnType<typeof DiscordService>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const DiscordService = (clientConfig: ClientConfig, httpClient: HttpClient) => ({

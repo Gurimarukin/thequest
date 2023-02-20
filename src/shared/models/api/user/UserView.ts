@@ -5,7 +5,7 @@ import { lens } from 'monocle-ts'
 import { List } from '../../../utils/fp'
 import { SummonerShort } from '../summoner/SummonerShort'
 
-type UserView = C.TypeOf<typeof codec>
+type UserView = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   userName: C.string,

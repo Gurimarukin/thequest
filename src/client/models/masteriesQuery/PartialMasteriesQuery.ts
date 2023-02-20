@@ -13,7 +13,7 @@ import { MasteriesQueryOrder } from './MasteriesQueryOrder'
 import { MasteriesQuerySort } from './MasteriesQuerySort'
 import { MasteriesQueryView } from './MasteriesQueryView'
 
-type PartialMasteriesQuery = D.TypeOf<typeof decoder>
+type PartialMasteriesQuery = Readonly<D.TypeOf<typeof decoder>>
 
 const properties = {
   sort: MasteriesQuerySort.codec,

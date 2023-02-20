@@ -13,10 +13,10 @@ import { http } from '../utils/http'
 // only changes of method and url will trigger revalidation
 export const useSWRHttp = <A, O, B>(
   methodWithUrl: Tuple<string, HttpMethod>,
-  httpOptions: Omit<HttpOptions<O, B>, 'redirectOnUnauthorized'>,
+  httpOptions: Omit<Readonly<HttpOptions<O, B>>, 'redirectOnUnauthorized'>,
   decoderWithName: Tuple<Decoder<unknown, A>, string>,
-  swrOptions?: SWRConfiguration<A, unknown, BareFetcher<A>>,
-): SWRResponse<A, unknown> =>
+  swrOptions?: Readonly<SWRConfiguration<A, unknown, BareFetcher<A>>>,
+): Readonly<SWRResponse<A, unknown>> =>
   useSWR<A, unknown, Tuple<string, HttpMethod>>(
     methodWithUrl,
     ([method, url]) => futureRunUnsafe(http([method, url], { ...httpOptions }, decoderWithName)),

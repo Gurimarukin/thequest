@@ -20,7 +20,7 @@ import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 
-type UserService = ReturnType<typeof UserService>
+type UserService = Readonly<ReturnType<typeof UserService>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwtHelper: JwtHelper) {
@@ -151,7 +151,7 @@ const prompt = (label: string): Future<string> =>
       })
       return new Promise<string>(resolve => rl.question(label, answer => resolve(answer))).then(
         res => {
-          // eslint-disable-next-line functional/no-expression-statement
+          // eslint-disable-next-line functional/no-expression-statements
           rl.close()
           return res
         },

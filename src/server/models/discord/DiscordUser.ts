@@ -4,7 +4,7 @@ import { Maybe } from '../../../shared/utils/fp'
 
 import { DiscordUserId } from './DiscordUserId'
 
-type DiscordUser = D.TypeOf<typeof decoder>
+type DiscordUser = Readonly<D.TypeOf<typeof decoder>>
 
 const decoder = D.struct({
   /**

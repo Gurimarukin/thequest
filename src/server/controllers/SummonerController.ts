@@ -11,7 +11,7 @@ import type { SummonerService } from '../services/SummonerService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
-type SummonerController = ReturnType<typeof SummonerController>
+type SummonerController = Readonly<ReturnType<typeof SummonerController>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (

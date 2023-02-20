@@ -6,7 +6,7 @@ import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { Puuid } from '../riot/Puuid'
 import { SummonerId } from '../riot/SummonerId'
 
-type SummonerDb = C.TypeOf<typeof codec>
+type SummonerDb = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   platform: Platform.codec,

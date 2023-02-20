@@ -2,7 +2,7 @@
                   @typescript-eslint/no-explicit-any,
                   @typescript-eslint/strict-boolean-expressions,
                   functional/immutable-data,
-                  functional/no-expression-statement */
+                  functional/no-expression-statements */
 
 /**
  * source: https://github.com/AlexGalays/spacelift/blob/be302c4807b23114de27dda6a90b315c3af56631/src/union.ts
@@ -16,12 +16,14 @@ export type UnionResult<T extends UnionDescription> = {
   readonly T: Union<T>
   readonly is: <NAME extends keyof T>(
     name: NAME,
-  ) => <U extends Union<T>>(other: U) => other is ReturnType<T[NAME]> & { readonly type: NAME }
+  ) => <U extends Union<T>>(
+    other: U,
+  ) => other is Readonly<ReturnType<T[NAME]>> & { readonly type: NAME }
   readonly match: <B>(m: Match<T, B>) => (u: Union<T>) => B
 } & { readonly [K in keyof T]: Factory<T[K], K> & { readonly T: ReturnType<Factory<T[K], K>> } }
 
 type Match<T extends UnionDescription, B> = {
-  readonly [K in keyof T]: (a: Omit<ReturnType<Factory<T[K], K>>, 'type'>) => B
+  readonly [K in keyof T]: (a: Omit<Readonly<ReturnType<Factory<T[K], K>>>, 'type'>) => B
 }
 
 type Factory<F extends (...args: List<any>) => any, TYPE> = (
@@ -32,7 +34,9 @@ type Factory<F extends (...args: List<any>) => any, TYPE> = (
 
 type Union<T extends UnionDescription> = {
   readonly [K in keyof T]: {
-    readonly [K2 in keyof ReturnType<T[K]> | 'type']: K2 extends 'type' ? K : ReturnType<T[K]>[K2]
+    readonly [K2 in keyof Readonly<ReturnType<T[K]>> | 'type']: K2 extends 'type'
+      ? K
+      : Readonly<ReturnType<T[K]>>[K2]
   }
 }[keyof T]
 
@@ -82,5 +86,5 @@ export type UnionKeys<U> = U extends UnionResult<infer _>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UnionTypes<U, K extends UnionKeys<U> = UnionKeys<U>> = U extends UnionResult<infer _>
-  ? ReturnType<U[K]>
+  ? Readonly<ReturnType<U[K]>>
   : never

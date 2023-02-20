@@ -10,7 +10,7 @@ export type TObjectId = Newtype<{ readonly TObjectId: unique symbol }, string>
 
 const { wrap, unwrap } = iso<TObjectId>()
 
-const fromObjectId = (id: ObjectId): TObjectId => wrap(id.toString())
+const fromObjectId = (id: Readonly<ObjectId>): TObjectId => wrap(id.toString())
 
 const decoder: Decoder<unknown, TObjectId> = {
   decode: i => (i instanceof ObjectId ? D.success(fromObjectId(i)) : D.failure(i, 'TObjectId')),

@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement,
+/* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import React, { useCallback } from 'react'
 

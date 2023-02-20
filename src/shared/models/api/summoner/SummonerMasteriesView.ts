@@ -4,7 +4,7 @@ import { List } from '../../../utils/fp'
 import { ChampionMasteryView } from '../ChampionMasteryView'
 import { SummonerView } from './SummonerView'
 
-type SummonerMasteriesView = C.TypeOf<typeof codec>
+type SummonerMasteriesView = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   summoner: SummonerView.codec,

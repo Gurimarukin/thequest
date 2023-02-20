@@ -26,7 +26,7 @@ import { iso } from 'newtype-ts'
 import { MsDuration } from '../models/MsDuration'
 
 export const todo = (...[]: List<unknown>): never => {
-  // eslint-disable-next-line functional/no-throw-statement
+  // eslint-disable-next-line functional/no-throw-statements
   throw Error('Missing implementation')
 }
 
@@ -90,6 +90,7 @@ const neaEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<NonEmptyArray<O>, Non
 
 export const NonEmptyArray = {
   ...readonlyNonEmptyArray,
+  // eslint-disable-next-line functional/prefer-immutable-types
   asMutable: identity as <A>(fa: NonEmptyArray<A>) => nonEmptyArray.NonEmptyArray<A>,
   decoder: neaDecoder,
   encoder: neaEncoder,
@@ -117,7 +118,7 @@ const listEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<List<O>, List<A>> =>
 export const List = {
   ...readonlyArray,
   groupBy: listGroupBy,
-  // eslint-disable-next-line functional/prefer-readonly-type
+  // eslint-disable-next-line functional/prefer-immutable-types
   asMutable: identity as <A>(fa: List<A>) => A[],
   mkString,
   decoder: listDecoder,
@@ -150,7 +151,7 @@ export const Try = {
     pipe(
       t,
       Either.getOrElse<Error, A>(e => {
-        // eslint-disable-next-line functional/no-throw-statement
+        // eslint-disable-next-line functional/no-throw-statements
         throw e
       }),
     ),
@@ -201,7 +202,7 @@ export const IO = {
     (onError: (e: Error) => io.IO<NotUsed>) =>
     (f: Future<NotUsed>): io.IO<NotUsed> =>
     () => {
-      // eslint-disable-next-line functional/no-expression-statement
+      // eslint-disable-next-line functional/no-expression-statements
       pipe(f, Future.run(onError))
       return NotUsed
     },

@@ -2,7 +2,7 @@ import * as C from 'io-ts/Codec'
 
 import { Platform } from '../Platform'
 
-type PlatformWithName = C.TypeOf<typeof codec>
+type PlatformWithName = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   platform: Platform.codec,

@@ -23,7 +23,7 @@ const { ddragon, ddragonCdn } = DDragonUtils
 const platformUrl = (platform: Platform, path: string): string =>
   `https://${constants.riotApi.plateformEndpoint[platform]}${path}`
 
-type RiotApiService = ReturnType<typeof RiotApiService>
+type RiotApiService = Readonly<ReturnType<typeof RiotApiService>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotApiService = (riotApiKey: string, httpClient: HttpClient) => {

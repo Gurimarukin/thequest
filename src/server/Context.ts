@@ -26,7 +26,7 @@ import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
 import { getOnError } from './utils/getOnError'
 
-type Context = ReturnType<typeof of>
+type Context = Readonly<ReturnType<typeof of>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (

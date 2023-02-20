@@ -10,7 +10,7 @@ import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { MigrationCreatedAt, MigrationDb } from '../models/migration/MigrationDb'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 
-type MigrationPersistence = ReturnType<typeof MigrationPersistence>
+type MigrationPersistence = Readonly<ReturnType<typeof MigrationPersistence>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MigrationPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) => {

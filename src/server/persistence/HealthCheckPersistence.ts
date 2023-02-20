@@ -7,7 +7,7 @@ import type { WithDb } from '../models/mongo/WithDb'
 
 const ResultCodec = D.struct({ ok: D.number })
 
-type HealthCheckPersistence = ReturnType<typeof HealthCheckPersistence>
+type HealthCheckPersistence = Readonly<ReturnType<typeof HealthCheckPersistence>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const HealthCheckPersistence = (withDb: WithDb) => ({

@@ -4,7 +4,7 @@ import { List } from '../../utils/fp'
 import { DDragonVersion } from './DDragonVersion'
 import { StaticDataChampion } from './StaticDataChampion'
 
-type StaticData = C.TypeOf<typeof codec>
+type StaticData = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   version: DDragonVersion.codec,

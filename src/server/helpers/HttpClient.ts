@@ -13,11 +13,14 @@ import { decodeError } from '../../shared/utils/ioTsUtils'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { unknownToError } from '../utils/unknownToError'
 
-export type HttpOptions<O, B> = Omit<OptionsOfJSONResponseBody, 'url' | 'method' | 'json'> & {
+export type HttpOptions<O, B> = Omit<
+  Readonly<OptionsOfJSONResponseBody>,
+  'url' | 'method' | 'json'
+> & {
   readonly json?: Tuple<Encoder<O, B>, B>
 }
 
-type HttpClient = ReturnType<typeof HttpClient>
+type HttpClient = Readonly<ReturnType<typeof HttpClient>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const HttpClient = (Logger: LoggerGetter) => {

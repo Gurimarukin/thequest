@@ -18,7 +18,7 @@ import { SummonerDb } from '../models/summoner/SummonerDb'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 // https://www.mongodb.com/docs/manual/reference/collation
-const platformAndNameIndexCollation: CollationOptions = {
+const platformAndNameIndexCollation: Readonly<CollationOptions> = {
   locale: 'en',
 
   // level 1: compare base characters only, ignoring other differences such as diacritics and case
@@ -29,7 +29,7 @@ const platformAndNameIndexCollation: CollationOptions = {
   alternate: 'shifted',
 }
 
-type SummonerPersistence = ReturnType<typeof SummonerPersistence>
+type SummonerPersistence = Readonly<ReturnType<typeof SummonerPersistence>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) => {

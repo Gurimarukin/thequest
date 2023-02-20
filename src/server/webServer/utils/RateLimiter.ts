@@ -24,12 +24,12 @@ const RateLimiter = (Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDuration)
   // eslint-disable-next-line functional/no-let
   let requests: List<RequestsHistory> = []
 
-  /* eslint-disable functional/no-expression-statement */
+  /* eslint-disable functional/no-expression-statements */
   setTimeout(() => {
     requests = []
     setInterval(() => (requests = []), MsDuration.unwrap(lifeTime))
   }, MsDuration.unwrap(lifeTime))
-  /* eslint-enable functional/no-expression-statement */
+  /* eslint-enable functional/no-expression-statements */
 
   return (limit, window) => middleware =>
     withIp('route with rate limiting')(ip =>
@@ -70,7 +70,7 @@ const RateLimiter = (Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDuration)
             ),
           )
 
-          // eslint-disable-next-line functional/no-expression-statement
+          // eslint-disable-next-line functional/no-expression-statements
           requests = newRequests
 
           return result

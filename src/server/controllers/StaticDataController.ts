@@ -8,7 +8,7 @@ import type { RiotApiService } from '../services/RiotApiService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
-type StaticDataController = ReturnType<typeof StaticDataController>
+type StaticDataController = Readonly<ReturnType<typeof StaticDataController>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const StaticDataController = (riotApiService: RiotApiService) => ({

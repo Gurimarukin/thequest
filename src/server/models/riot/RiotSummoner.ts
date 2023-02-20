@@ -5,7 +5,7 @@ import { AccountId } from './AccountId'
 import { Puuid } from './Puuid'
 import { SummonerId } from './SummonerId'
 
-type RiotSummoner = D.TypeOf<typeof decoder>
+type RiotSummoner = Readonly<D.TypeOf<typeof decoder>>
 
 const decoder = D.struct({
   id: SummonerId.codec,

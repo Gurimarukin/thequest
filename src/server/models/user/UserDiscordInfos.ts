@@ -5,7 +5,7 @@ import { AccessToken } from '../discord/AccessToken'
 import { DiscordUserId } from '../discord/DiscordUserId'
 import { RefreshToken } from '../discord/RefreshToken'
 
-type UserDiscordInfos = C.TypeOf<typeof codec>
+type UserDiscordInfos = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
   id: DiscordUserId.codec,

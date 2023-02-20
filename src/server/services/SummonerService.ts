@@ -18,7 +18,7 @@ import type { SummonerPersistence } from '../persistence/SummonerPersistence'
 import { getOnError } from '../utils/getOnError'
 import type { RiotApiService } from './RiotApiService'
 
-type SummonerService = ReturnType<typeof of>
+type SummonerService = Readonly<ReturnType<typeof of>>
 
 const SummonerService = (
   Logger: LoggerGetter,
