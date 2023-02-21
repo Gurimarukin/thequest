@@ -46,7 +46,7 @@ export const Summoner = ({
         <div className="flex items-center gap-4">
           <img
             src={staticData.assets.summonerIcon(profileIconId)}
-            alt={`${name}’s icon`}
+            alt={`Icône de ${name}`}
             className="h-24 w-24"
           />
           <div className="flex flex-col">

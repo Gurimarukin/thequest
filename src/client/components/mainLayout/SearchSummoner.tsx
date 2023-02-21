@@ -173,7 +173,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
       >
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
-          alt={`${summoner.name}'s icon`}
+          alt={`Icône de ${summoner.name}`}
           className="w-12"
         />
         <span className="ml-2 grow">{summoner.name}</span>

@@ -54,7 +54,7 @@ export const ChampionMasterySquare = ({
         <div className="h-12 w-12 overflow-hidden">
           <img
             src={staticData.assets.champion.square(championId)}
-            alt={`${name}'s icon`}
+            alt={`Icône de ${name}`}
             className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
           />
         </div>
@@ -70,7 +70,7 @@ export const ChampionMasterySquare = ({
             title={`${name} - coffre obtenu`}
             className="absolute left-0 bottom-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black"
           >
-            <img src={Assets.chest} alt="Chest icon" className="w-4" />
+            <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
           </div>
         ) : null}
       </div>
@@ -99,7 +99,7 @@ type TokensProps = {
 const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Element | null => {
   const render = useCallback(
     (totalTockens: number, src: string): JSX.Element => {
-      const alt = `Mastery ${championLevel + 1} token`
+      const alt = `Jeton de maîtrise ${championLevel + 1}`
       return (
         <span
           title={title}
@@ -118,7 +118,7 @@ const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Elemen
                 <img
                   key={totalTockens - i}
                   src={src}
-                  alt={`${alt} (not earned)`}
+                  alt={`${alt} (non obtenu)`}
                   className="h-full bg-cover grayscale"
                 />
               )),

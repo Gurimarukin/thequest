@@ -10,7 +10,7 @@ export const SimpleMainLayout: React.FC = ({ children }) => (
       <div className="relative flex w-full max-w-7xl items-center justify-between px-3 py-2">
         <div className="flex items-center gap-6">
           <Link to={appRoutes.index}>
-            <img src={Assets.iconYuumi} alt="Home icon (Yuumi)" className="w-12" />
+            <img src={Assets.iconYuumi} alt="Icône accueil (Yuumi)" className="w-12" />
           </Link>
         </div>
       </div>

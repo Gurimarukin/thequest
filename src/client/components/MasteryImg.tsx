@@ -13,7 +13,7 @@ type Props = {
 export const MasteryImg = ({ level, className }: Props): JSX.Element => (
   <img
     src={Assets.masteries[level]}
-    alt={`Level ${level} icon`}
+    alt={`Icône niveau ${level}`}
     className={cssClasses(['grayscale', level === 0], className)}
   />
 )
