@@ -11,6 +11,7 @@ import { Link } from '../components/Link'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
+import { DiscordLogoTitle } from '../imgs/DiscordLogoTitle'
 import { appRoutes } from '../router/AppRouter'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
@@ -66,7 +67,8 @@ export const Login = (): JSX.Element => {
 
   return (
     <MainLayout>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <div className="flex flex-col items-center gap-12 px-4 py-20">
+        {/* <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
           <label className="contents">
             <span>Login :</span>
@@ -103,14 +105,22 @@ export const Login = (): JSX.Element => {
             ),
           )}
         </div>
-      </form>
-      <hr />
-      <a href={discordApiOAuth2Authorize('login')}>LOGIN WITH DISCORD</a>
-      <hr />
-      <br />
-      CONNEXION
-      <br />
-      Pas de compte ? <Link to={appRoutes.register}>S'inscrire</Link>
+      </form> */}
+        <a
+          href={discordApiOAuth2Authorize('login')}
+          className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
+        >
+          Se connecter avec
+          <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
+        </a>
+        <div className="flex w-full max-w-xl flex-col items-center">
+          <span>Pas de compte ?</span>
+          <Link to={appRoutes.register} className="underline">
+            S’inscrire
+          </Link>
+        </div>
+        <hr className="w-full max-w-xl border-t border-goldenrod" />
+      </div>
     </MainLayout>
   )
 }
