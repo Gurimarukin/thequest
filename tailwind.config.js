@@ -17,6 +17,10 @@ module.exports = {
         'mastery4-brown': '#9e7a39',
         'mastery4-brown-secondary': '#725a34',
         'mastery-beige': '#52525b',
+        'discord-blurple': '#5865f2',
+        'discord-green': '#57f287',
+        'discord-darkgreen': '#248045',
+        'discord-darkgrey': '#2b2d31',
       },
       backgroundImage: {
         landing: "url('./imgs/bg-landing.jpg')",

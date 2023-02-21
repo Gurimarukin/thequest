@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -12,8 +12,12 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 import { apiUserRegisterPost } from '../api'
 import { Link } from '../components/Link'
 import { SimpleMainLayout } from '../components/mainLayout/SimpleMainLayout'
+import { constants } from '../config/constants'
 import { useHistory } from '../contexts/HistoryContext'
+import { DiscordLogoTitle } from '../imgs/DiscordLogoTitle'
+import { CheckMarkSharp } from '../imgs/svgIcons'
 import { appRoutes } from '../router/AppRouter'
+import { cssClasses } from '../utils/cssClasses'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
@@ -75,7 +79,7 @@ export const Register = (): JSX.Element => {
 
   return (
     <SimpleMainLayout>
-      <div className="flex grow flex-col justify-center">
+      {/* 
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
             <label className="contents">
@@ -122,16 +126,133 @@ export const Register = (): JSX.Element => {
               ),
             )}
           </div>
-        </form>
-        <hr />
-        <a href={discordApiOAuth2Authorize('register')}>REGISTER WITH DISCORD</a>
-        <hr />
-        <br />
-        Déjà un compte ? <Link to={appRoutes.login}>Se connecter</Link>
+        </form> */}
+      <div className="flex flex-col items-center gap-12 px-4 py-20">
+        <a
+          href={discordApiOAuth2Authorize('register')}
+          className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
+        >
+          S’inscrire avec
+          <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
+        </a>
+        <div className="flex w-full max-w-xl flex-col items-center">
+          <span>Déjà un compte ?</span>
+          <Link to={appRoutes.login} className="underline">
+            Se connecter
+          </Link>
+        </div>
+        <hr className="w-full max-w-xl border-t border-goldenrod" />
+        <p className="leading-8">
+          Avoir un compte lié à un compte Discord, lui-même lié à un compte Riot Games, permet
+          d’avoir accès à plus de fonctionnalités.
+          <br />
+          Comme Riot Games, c'est tout pourri, il n’est pas possible de lier directement un compte
+          Riot Games. Il faut passer par un compte Discord et que celui-ci soit lié à un compte Riot
+          Games.
+        </p>
+        <table className="grid grid-cols-[auto_repeat(3,1fr)]">
+          <thead className="contents">
+            <tr className="contents">
+              <th />
+              <Th>Sans compte</Th>
+              <Th>Avec un compte NON lié à Riot Games</Th>
+              <Th>Avec un compte lié à Riot Games</Th>
+            </tr>
+          </thead>
+          <tbody className="contents">
+            <tr className="contents">
+              <Td className="border-t border-l border-goldenrod pl-6 pt-12">
+                Accéder à tous les détails d’un invocateur via la recherche
+              </Td>
+              <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
+              <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
+              <Td className="justify-center border-t border-r border-goldenrod pt-12">
+                {greenCheck}
+              </Td>
+            </tr>
+            <tr className="contents">
+              <Td className="border-l border-goldenrod pl-6">
+                Voir les {constants.recentSearches.maxCount} recherches les plus récentes (stockage
+                local du navigateur)
+              </Td>
+              <Td className="justify-center">{greenCheck}</Td>
+              <Td className="justify-center">{greenCheck}</Td>
+              <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+            </tr>
+            <tr className="contents">
+              <Td className="border-l border-goldenrod pl-6">Ajouter des invocateur en favori</Td>
+              <EmptyTd />
+              <Td className="justify-center">{greenCheck}</Td>
+              <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+            </tr>
+            <tr className="contents">
+              <Td className="border-l border-goldenrod pl-6">
+                Garder le compte des fragments de champions (à la main, désolé)
+              </Td>
+              <EmptyTd />
+              <Td className="justify-center">{greenCheck}</Td>
+              <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+            </tr>
+            <tr className="contents">
+              <Td className="border-l border-goldenrod pl-6">
+                Accès rapide au profil d’invocateur lié
+              </Td>
+              <EmptyTd />
+              <EmptyTd />
+              <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+            </tr>
+            <tr className="contents">
+              <Td className="border-l border-b border-goldenrod pl-6 pb-12">
+                Classement au temple de la renommée sur le serveur Discord “
+                {constants.lesQuaisAbattoirs.name}”
+              </Td>
+              <EmptyTd className="border-b border-goldenrod" />
+              <EmptyTd className="border-b border-goldenrod" />
+              <Td className="justify-center border-b border-r border-goldenrod">{greenCheck}</Td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="flex items-center rounded bg-discord-darkgrey px-6 py-5 font-[baloopaaji2] text-white">
+          <img
+            src={constants.lesQuaisAbattoirs.image}
+            alt={`Icône du serveur ${constants.lesQuaisAbattoirs.name}`}
+            className="w-12 rounded-xl"
+          />
+          <span className="ml-4 flex flex-col">
+            <span className="font-bold">{constants.lesQuaisAbattoirs.name}</span>
+            <span className="text-sm text-gray-400">Serveur Discord</span>
+          </span>
+          <a
+            href={constants.lesQuaisAbattoirs.inviteLink}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-8 rounded bg-discord-darkgreen py-2 px-3 text-sm"
+          >
+            Rejoindre
+          </a>
+        </div>
       </div>
     </SimpleMainLayout>
   )
 }
+
+const Th: React.FC = ({ children }) => (
+  <th className="flex items-center justify-center px-2 pb-3 font-normal">{children}</th>
+)
+
+type TdProps = {
+  readonly className?: string
+}
+
+const Td: React.FC<TdProps> = ({ className, children }) => (
+  <td className={cssClasses('flex items-center bg-zinc-900 px-2 py-5', className)}>{children}</td>
+)
+
+const EmptyTd = ({ className }: TdProps): JSX.Element => (
+  <Td className={cssClasses('justify-center text-sm', className)}>—</Td>
+)
+
+const greenCheck = <CheckMarkSharp className="h-6 text-green-600" />
 
 const validateOnSubmit = (
   password: ClearPassword,
