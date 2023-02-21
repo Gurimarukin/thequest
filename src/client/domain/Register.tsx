@@ -36,7 +36,7 @@ const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 
 export const Register = (): JSX.Element => {
   const { navigate } = useHistory()
-  const {user} = useUser()
+  const { user } = useUser()
 
   useEffect(() => {
     if (Maybe.isSome(user)) navigate(appRoutes.index)
@@ -71,7 +71,7 @@ export const Register = (): JSX.Element => {
             Either.foldW(flow(Maybe.some, setError), () =>
               pipe(
                 apiUserRegisterPost(payload),
-                Future.map(() => navigate(appRoutes.index)),
+                Future.map(() => navigate(appRoutes.login)),
                 Future.orElse(() => Future.right(setError(Maybe.some('error')))),
                 futureRunUnsafe,
               ),
@@ -85,69 +85,7 @@ export const Register = (): JSX.Element => {
 
   return (
     <MainLayout>
-      {/* 
-        <form onSubmit={handleSubmit} className="flex flex-col items-center">
-          <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
-            <label className="contents">
-              <span>Login :</span>
-              <input
-                type="text"
-                value={state.userName}
-                onChange={updateUserName}
-                className="border border-goldenrod bg-transparent"
-              />
-            </label>
-            <label className="contents">
-              <span>Mot de passe :</span>
-              <input
-                type="password"
-                value={state.password}
-                onChange={updatePassword}
-                className="border border-goldenrod bg-transparent"
-              />
-            </label>
-            <label className="contents">
-              <span>Confirmation mot de passe :</span>
-              <input
-                type="password"
-                value={state.confirmPassword}
-                onChange={updateConfirmPassword}
-                className="border border-goldenrod bg-transparent"
-              />
-            </label>
-          </div>
-          <div className="mt-4 flex flex-col items-center gap-2 self-center">
-            <button
-              type="submit"
-              disabled={Either.isLeft(validated)}
-              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
-            >
-              Créer un compte
-            </button>
-            {pipe(
-              error,
-              Maybe.fold(
-                () => null,
-                e => <span className="text-red-700">{e}</span>,
-              ),
-            )}
-          </div>
-        </form> */}
       <div className="flex flex-col items-center gap-12 px-4 py-20">
-        <a
-          href={discordApiOAuth2Authorize('register')}
-          className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
-        >
-          S’inscrire avec
-          <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
-        </a>
-        <div className="flex w-full max-w-xl flex-col items-center">
-          <span>Déjà un compte ?</span>
-          <Link to={appRoutes.login} className="underline">
-            Se connecter
-          </Link>
-        </div>
-        <hr className="w-full max-w-xl border-t border-goldenrod" />
         <p className="leading-8">
           Avoir un compte lié à un compte Discord, lui-même lié à un compte Riot Games, permet
           d’avoir accès à plus de fonctionnalités.
@@ -208,34 +146,106 @@ export const Register = (): JSX.Element => {
               <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
             </tr>
             <tr className="contents">
-              <Td className="border-l border-b border-goldenrod pl-6 pb-12">
-                Classement au temple de la renommée sur le serveur Discord “
-                {constants.lesQuaisAbattoirs.name}”
+              <Td className="flex-col gap-3 border-l border-b border-goldenrod pl-6 pb-12">
+                <span className="self-start">
+                  Classement dans le temple de la renommée sur le serveur Discord du capitaine :
+                </span>
+                <div className="flex items-center self-start rounded bg-discord-darkgrey px-6 py-5 font-[baloopaaji2] text-white">
+                  <img
+                    src={constants.lesQuaisAbattoirs.image}
+                    alt={`Icône du serveur ${constants.lesQuaisAbattoirs.name}`}
+                    className="w-12 rounded-xl"
+                  />
+                  <span className="ml-4 flex flex-col">
+                    <span className="font-bold">{constants.lesQuaisAbattoirs.name}</span>
+                    <span className="text-sm text-gray-400">Serveur Discord</span>
+                  </span>
+                  <a
+                    href={constants.lesQuaisAbattoirs.inviteLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ml-8 rounded bg-discord-darkgreen py-2 px-3 text-sm"
+                  >
+                    Rejoindre
+                  </a>
+                </div>
               </Td>
-              <EmptyTd className="border-b border-goldenrod" />
-              <EmptyTd className="border-b border-goldenrod" />
-              <Td className="justify-center border-b border-r border-goldenrod">{greenCheck}</Td>
+              <EmptyTd className="border-b border-goldenrod pb-12" />
+              <EmptyTd className="border-b border-goldenrod pb-12" />
+              <Td className="justify-center border-b border-r border-goldenrod pb-12">
+                {greenCheck}
+              </Td>
             </tr>
           </tbody>
         </table>
-        <div className="flex items-center rounded bg-discord-darkgrey px-6 py-5 font-[baloopaaji2] text-white">
-          <img
-            src={constants.lesQuaisAbattoirs.image}
-            alt={`Icône du serveur ${constants.lesQuaisAbattoirs.name}`}
-            className="w-12 rounded-xl"
-          />
-          <span className="ml-4 flex flex-col">
-            <span className="font-bold">{constants.lesQuaisAbattoirs.name}</span>
-            <span className="text-sm text-gray-400">Serveur Discord</span>
-          </span>
-          <a
-            href={constants.lesQuaisAbattoirs.inviteLink}
-            target="_blank"
-            rel="noreferrer"
-            className="ml-8 rounded bg-discord-darkgreen py-2 px-3 text-sm"
-          >
-            Rejoindre
-          </a>
+
+        <hr className="w-full max-w-xl border-t border-goldenrod" />
+
+        <a
+          href={discordApiOAuth2Authorize('register')}
+          className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
+        >
+          S’inscrire avec
+          <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
+        </a>
+
+        <p>ou</p>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center border border-goldenrod bg-zinc-900 px-12 py-8"
+        >
+          <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
+            <label className="contents">
+              <span>Login :</span>
+              <input
+                type="text"
+                value={state.userName}
+                onChange={updateUserName}
+                className="border border-goldenrod bg-transparent"
+              />
+            </label>
+            <label className="contents">
+              <span>Mot de passe :</span>
+              <input
+                type="password"
+                value={state.password}
+                onChange={updatePassword}
+                className="border border-goldenrod bg-transparent"
+              />
+            </label>
+            <label className="contents">
+              <span>Confirmation mot de passe :</span>
+              <input
+                type="password"
+                value={state.confirmPassword}
+                onChange={updateConfirmPassword}
+                className="border border-goldenrod bg-transparent"
+              />
+            </label>
+          </div>
+          <div className="mt-4 flex flex-col items-center gap-2 self-center">
+            <button
+              type="submit"
+              disabled={Either.isLeft(validated)}
+              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+            >
+              Inscription
+            </button>
+            {pipe(
+              error,
+              Maybe.fold(
+                () => null,
+                e => <span className="text-red-700">{e}</span>,
+              ),
+            )}
+          </div>
+        </form>
+        <div className="flex w-full max-w-xl flex-col items-center">
+          <span>Déjà un compte ?</span>
+          <Link to={appRoutes.login} className="underline">
+            Se connecter
+          </Link>
         </div>
       </div>
     </MainLayout>
