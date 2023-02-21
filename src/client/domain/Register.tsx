@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statements */
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
@@ -14,6 +14,7 @@ import { Link } from '../components/Link'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { constants } from '../config/constants'
 import { useHistory } from '../contexts/HistoryContext'
+import { useUser } from '../contexts/UserContext'
 import { DiscordLogoTitle } from '../imgs/DiscordLogoTitle'
 import { CheckMarkSharp } from '../imgs/svgIcons'
 import { appRoutes } from '../router/AppRouter'
@@ -35,6 +36,11 @@ const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 
 export const Register = (): JSX.Element => {
   const { navigate } = useHistory()
+  const {user} = useUser()
+
+  useEffect(() => {
+    if (Maybe.isSome(user)) navigate(appRoutes.index)
+  }, [navigate, user])
 
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
 

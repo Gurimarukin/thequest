@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statements */
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
@@ -9,6 +9,7 @@ import { Either, Future, Maybe } from '../../shared/utils/fp'
 import { apiUserLoginPasswordPost } from '../api'
 import { Link } from '../components/Link'
 import { MainLayout } from '../components/mainLayout/MainLayout'
+import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
 import { appRoutes } from '../router/AppRouter'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
@@ -24,7 +25,12 @@ export const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
 
 export const Login = (): JSX.Element => {
-  const { refreshUser } = useUser()
+  const { navigate } = useHistory()
+  const { user, refreshUser } = useUser()
+
+  useEffect(() => {
+    if (Maybe.isSome(user)) navigate(appRoutes.index)
+  }, [navigate, user])
 
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
 
