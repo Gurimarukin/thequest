@@ -8,7 +8,7 @@ import { Either, Future, Maybe } from '../../shared/utils/fp'
 
 import { apiUserLoginPasswordPost } from '../api'
 import { Link } from '../components/Link'
-import { SimpleMainLayout } from '../components/mainLayout/SimpleMainLayout'
+import { MainLayout } from '../components/mainLayout/MainLayout'
 import { useUser } from '../contexts/UserContext'
 import { appRoutes } from '../router/AppRouter'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
@@ -59,7 +59,7 @@ export const Login = (): JSX.Element => {
   )
 
   return (
-    <SimpleMainLayout>
+    <MainLayout>
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
           <label className="contents">
@@ -105,6 +105,6 @@ export const Login = (): JSX.Element => {
       CONNEXION
       <br />
       Pas de compte ? <Link to={appRoutes.register}>S'inscrire</Link>
-    </SimpleMainLayout>
+    </MainLayout>
   )
 }

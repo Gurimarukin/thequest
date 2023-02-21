@@ -11,7 +11,7 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { apiUserRegisterPost } from '../api'
 import { Link } from '../components/Link'
-import { SimpleMainLayout } from '../components/mainLayout/SimpleMainLayout'
+import { MainLayout } from '../components/mainLayout/MainLayout'
 import { constants } from '../config/constants'
 import { useHistory } from '../contexts/HistoryContext'
 import { DiscordLogoTitle } from '../imgs/DiscordLogoTitle'
@@ -78,7 +78,7 @@ export const Register = (): JSX.Element => {
   )
 
   return (
-    <SimpleMainLayout>
+    <MainLayout>
       {/* 
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
@@ -232,7 +232,7 @@ export const Register = (): JSX.Element => {
           </a>
         </div>
       </div>
-    </SimpleMainLayout>
+    </MainLayout>
   )
 }
 
