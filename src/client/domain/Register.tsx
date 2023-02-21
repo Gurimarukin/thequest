@@ -193,7 +193,7 @@ export const Register = (): JSX.Element => {
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col items-center border border-goldenrod bg-zinc-900 px-12 py-8"
+          className="flex flex-col items-center gap-8 border border-goldenrod bg-zinc-900 px-12 py-8"
         >
           <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
             <label className="contents">
@@ -224,7 +224,7 @@ export const Register = (): JSX.Element => {
               />
             </label>
           </div>
-          <div className="mt-4 flex flex-col items-center gap-2 self-center">
+          <div className="flex flex-col items-center gap-2 self-center">
             <button
               type="submit"
               disabled={Either.isLeft(validated)}
