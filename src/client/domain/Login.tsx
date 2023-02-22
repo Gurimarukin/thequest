@@ -68,44 +68,6 @@ export const Login = (): JSX.Element => {
   return (
     <MainLayout>
       <div className="flex flex-col items-center gap-12 px-4 py-20">
-        {/* <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-        <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
-          <label className="contents">
-            <span>Login :</span>
-            <input
-              type="text"
-              value={state.userName}
-              onChange={updateUserName}
-              className="border border-goldenrod bg-transparent"
-            />
-          </label>
-          <label className="contents">
-            <span>Mot de passe :</span>
-            <input
-              type="password"
-              value={state.password}
-              onChange={updatePassword}
-              className="border border-goldenrod bg-transparent"
-            />
-          </label>
-        </div>
-        <div className="mt-1 flex flex-col items-center gap-2 self-center">
-          <button
-            type="submit"
-            disabled={Either.isLeft(validated)}
-            className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
-          >
-            Connexion
-          </button>
-          {pipe(
-            error,
-            Maybe.fold(
-              () => null,
-              e => <span className="text-red-700">{e}</span>,
-            ),
-          )}
-        </div>
-      </form> */}
         <a
           href={discordApiOAuth2Authorize('login')}
           className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
@@ -113,13 +75,57 @@ export const Login = (): JSX.Element => {
           Se connecter avec
           <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
         </a>
+
+        <p>ou</p>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center gap-8 border border-goldenrod bg-zinc-900 px-12 py-8"
+        >
+          <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
+            <label className="contents">
+              <span>Login :</span>
+              <input
+                type="text"
+                value={state.userName}
+                onChange={updateUserName}
+                className="border border-goldenrod bg-transparent"
+              />
+            </label>
+            <label className="contents">
+              <span>Mot de passe :</span>
+              <input
+                type="password"
+                value={state.password}
+                onChange={updatePassword}
+                className="border border-goldenrod bg-transparent"
+              />
+            </label>
+          </div>
+          <div className="flex flex-col items-center gap-2 self-center">
+            <button
+              type="submit"
+              disabled={Either.isLeft(validated)}
+              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+            >
+              Connexion
+            </button>
+            {pipe(
+              error,
+              Maybe.fold(
+                () => null,
+                e => <span className="text-red-700">{e}</span>,
+              ),
+            )}
+          </div>
+        </form>
+
         <div className="flex w-full max-w-xl flex-col items-center">
           <span>Pas de compte ?</span>
           <Link to={appRoutes.register} className="underline">
             S’inscrire
           </Link>
         </div>
-        <hr className="w-full max-w-xl border-t border-goldenrod" />
       </div>
     </MainLayout>
   )
