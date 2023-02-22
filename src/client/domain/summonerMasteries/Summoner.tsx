@@ -61,7 +61,7 @@ export const Summoner = ({
             <MasteryImgWithCount level={6} imgClassName="h-16 mt-[-7px] mb-[-4px]" />
             <MasteryImgWithCount level={5} imgClassName="h-16 mt-[-11px] mb-[-6px]" />
           </div>
-          <span className="flex items-center gap-2 text-lg">
+          <span className="flex items-center gap-2">
             <span>Progression : {round(questPercents, 2)}%</span>
             {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
             <InformationCircleOutline className="peer/info h-6 fill-current" />
