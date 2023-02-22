@@ -121,7 +121,8 @@ const enrichAll = (
     List.map(({ key, name }): EnrichedChampionMastery => {
       // TODO: search
       const glow =
-        view === 'compact' && List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc'])
+        view === 'compact' &&
+        List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc', 'Pyke'])
           ? Maybe.some(random.random())
           : Maybe.none
       return pipe(
@@ -185,7 +186,7 @@ const enrichAll = (
 // Mastery 5: 50%
 // Mastery 6 tokens: 7% each
 // Mastery 7 tokens: 10% each
-// Fragments (not based on user's favorites): 3% each
+// Shards (not based on user's favorites): 3% each
 const championPercents = (c: ChampionMasteryView): number => {
   if (c.championLevel === 7) return 100
 

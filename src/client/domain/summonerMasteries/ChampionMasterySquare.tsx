@@ -1,3 +1,4 @@
+import { random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback } from 'react'
 
@@ -6,6 +7,7 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
+import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
 import { NumberUtils } from '../../utils/NumberUtils'
 import { cssClasses } from '../../utils/cssClasses'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -22,8 +24,8 @@ export const ChampionMasterySquare = ({
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
-  const nameLevelTokens = `${name} - niveau ${championLevel}${
-    championLevel === 5 || championLevel === 6 ? ` - ${plural(tokensEarned, 'jeton')}` : ''
+  const nameLevelTokens = `${name} — niveau ${championLevel}${
+    championLevel === 5 || championLevel === 6 ? ` — ${plural(tokensEarned, 'jeton')}` : ''
   }\n${Math.round(percents)}%`
 
   const isGlowing = Maybe.isSome(glow)
@@ -67,12 +69,13 @@ export const ChampionMasterySquare = ({
         <Tokens championLevel={championLevel} tokensEarned={tokensEarned} title={nameLevelTokens} />
         {chestGranted ? (
           <div
-            title={`${name} - coffre obtenu`}
+            title={`${name} — coffre obtenu`}
             className="absolute left-0 bottom-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black"
           >
             <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
           </div>
         ) : null}
+        <Shards name={name} />
       </div>
     </div>
   )
@@ -138,3 +141,41 @@ const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Elemen
 function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
   return pipe([...Array(Math.max(n, 0))], List.mapWithIndex(getA))
 }
+
+type ShardsProps = {
+  name: string
+}
+
+const Shards = ({ name }: Readonly<ShardsProps>): JSX.Element => (
+  <div
+    title={`${name} — fragments`}
+    className="group absolute right-0 bottom-0 flex items-end text-lime-400"
+  >
+    <span className="overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
+      <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
+    </span>
+    <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-[2px] text-xs">
+      <span className="mt-[2px]">{random.randomInt(0, 9)()}</span>
+    </span>
+    <div className="absolute bottom-[calc(-100%_+_3px)] right-[-1px] z-10 hidden h-[39px] w-[14px] flex-col justify-between overflow-hidden rounded-b-[6px] rounded-tl-[6px] group-hover:flex">
+      <span className="mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]">
+        <button
+          type="button"
+          title={`${name} — ajouter un fragment`}
+          className="rounded-t bg-lime-400 text-black"
+        >
+          <AddOutline className="w-full" />
+        </button>
+      </span>
+      <span className="flex bg-black p-[2px]">
+        <button
+          type="button"
+          title={`${name} — enlever un fragment`}
+          className="rounded-b bg-lime-400 text-black"
+        >
+          <RemoveOutline className="w-full" />
+        </button>
+      </span>
+    </div>
+  </div>
+)

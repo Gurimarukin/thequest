@@ -70,7 +70,7 @@ export const MasteriesFilters = (): JSX.Element => {
         <ul
           className={cssClasses(
             'absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black',
-            ['invisible', !levelsMenuIsVisible],
+            ['hidden', !levelsMenuIsVisible],
           )}
         >
           <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>

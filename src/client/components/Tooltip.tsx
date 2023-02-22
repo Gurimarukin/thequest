@@ -10,7 +10,7 @@ type Props = {
 export const Tooltip: React.FC<Props> = ({ title, className, children }) => (
   <div className={cssClasses('group relative', className)}>
     {children}
-    <div className="invisible absolute top-[calc(100%_+_2px)] left-1/2 z-50 opacity-0 blur duration-300 group-hover:visible group-hover:opacity-100 group-hover:blur-0">
+    <div className="absolute top-[calc(100%_+_2px)] left-1/2 z-50 hidden opacity-0 blur duration-300 group-hover:flex group-hover:opacity-100 group-hover:blur-0">
       <div
         ref={elt => {
           if (elt === null) return

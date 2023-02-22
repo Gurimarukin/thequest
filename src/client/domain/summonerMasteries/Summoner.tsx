@@ -63,7 +63,7 @@ export const Summoner = ({
           <span className="flex items-center gap-2">
             <span className="text-sm">Progression : {round(questPercents, 2)}%</span>
             <InformationCircleOutline className="peer/info h-6 fill-current" />
-            <ul className="invisible absolute right-0 top-[calc(100%_+_.75rem)] z-10 list-disc border-2 border-mastery4-brown-secondary bg-black py-4 pr-4 pl-7 text-sm leading-6 peer-hover/info:visible">
+            <ul className="absolute right-0 top-[calc(100%_+_.75rem)] z-10 hidden list-disc border-2 border-mastery4-brown-secondary bg-black py-4 pr-4 pl-7 text-sm leading-6 peer-hover/info:block">
               <li>
                 De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de
                 maîtrise.
@@ -82,7 +82,7 @@ export const Summoner = ({
               <li>Maîtrise 7 = 100 %</li>
             </ul>
           </span>
-          <div className="invisible absolute right-0 top-[calc(100%_+_.75rem)] z-10 flex flex-col items-center gap-2 border-2 border-mastery4-brown-secondary bg-black px-5 pt-3 pb-4 peer-hover/masteries:visible">
+          <div className="absolute right-0 top-[calc(100%_+_.75rem)] z-10 hidden flex-col items-center gap-2 border-2 border-mastery4-brown-secondary bg-black px-5 pt-3 pb-4 peer-hover/masteries:flex">
             <div className="flex items-end gap-1">
               <MasteryImgWithCount level={4} imgClassName="h-12 mt-[-6px]" />
               <MasteryImgWithCount level={3} imgClassName="h-12 mt-[-9px] mb-[-3px]" />
