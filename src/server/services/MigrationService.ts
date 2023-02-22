@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, IO, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -9,6 +10,8 @@ import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { Migration } from '../models/migration/Migration'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { MigrationPersistence } from '../persistence/MigrationPersistence'
+
+const { plural } = StringUtils
 
 export type MigrationService = Readonly<ReturnType<typeof MigrationService>>
 
@@ -25,9 +28,7 @@ export const MigrationService = (
   const applyMigrations: Future<NotUsed> = pipe(
     getUnappliedMigrations(),
     Future.map(NonEmptyArray.fromReadonlyArray),
-    futureMaybe.chainFirstIOEitherK(m =>
-      logger.info(`${m.length} migration${m.length === 1 ? '' : 's'} to apply`),
-    ),
+    futureMaybe.chainFirstIOEitherK(m => logger.info(`${plural(m.length, 'migration')} to apply`)),
     futureMaybe.chainTaskEitherK(
       NonEmptyArray.traverse(Future.ApplicativeSeq)(migration =>
         pipe(

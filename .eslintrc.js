@@ -166,5 +166,6 @@ module.exports = {
     ],
     'space-in-parens': ['warn', 'never'],
     strict: 'warn',
+    'tailwindcss/no-custom-classname': ['warn', { whitelist: ['group/.*' 'peer/.*'] }],
   },
 }

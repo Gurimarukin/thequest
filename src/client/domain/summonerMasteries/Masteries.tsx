@@ -5,13 +5,17 @@ import React, { Fragment, useMemo } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
+import { useStaticData } from '../../contexts/StaticDataContext'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './MasteriesFilters'
+
+const { plural } = StringUtils
 
 type Props = {
   readonly masteries: List<EnrichedChampionMastery>
@@ -19,6 +23,7 @@ type Props = {
 
 export const Masteries = ({ masteries }: Props): JSX.Element => {
   const { masteriesQuery } = useHistory()
+  const { champions } = useStaticData()
 
   const filteredAndSortedChampions = useMemo(() => {
     return pipe(
@@ -59,9 +64,8 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
   return (
     <>
       <MasteriesFilters />
-      <div className="flex justify-center text-sm">
-        {filteredAndSortedChampions.length} champion
-        {filteredAndSortedChampions.length < 2 ? null : 's'}
+      <div className="group relative flex justify-center text-sm">
+        {`${plural(filteredAndSortedChampions.length, 'champion')} / ${champions.length}`}
       </div>
       {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions)}
     </>
@@ -147,10 +151,10 @@ const ChampionMasteryHistogram = ({
 }: ChampionMasteryHistogramProps): JSX.Element => {
   const pointsUntilAndSince = pipe(
     [
-      Maybe.some(pointsStr(championPoints)),
+      Maybe.some(plural(championPoints, 'point')),
       2 < championLevel
         ? Maybe.some(
-            `${pointsStr(championPointsSinceLastLevel)} depuis le niveau ${Math.min(
+            `${plural(championPointsSinceLastLevel, 'point')} depuis le niveau ${Math.min(
               championLevel,
               5,
             )}`,
@@ -158,7 +162,7 @@ const ChampionMasteryHistogram = ({
         : Maybe.none,
       0 < championLevel && championLevel < 5
         ? Maybe.some(
-            `${pointsStr(championPointsUntilNextLevel)} jusqu'au niveau ${championLevel + 1}`,
+            `${plural(championPointsUntilNextLevel, 'point')} jusqu'au niveau ${championLevel + 1}`,
           )
         : Maybe.none,
     ],
@@ -220,5 +224,3 @@ const rulerColor = (level: number): string => {
   if (level === 4) return 'border-gray-400'
   return 'border-gray-500'
 }
-
-const pointsStr = (n: number): string => `${n.toLocaleString()} point${n < 2 ? '' : 's'}`

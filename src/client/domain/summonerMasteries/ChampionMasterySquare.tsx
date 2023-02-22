@@ -1,6 +1,7 @@
 import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback } from 'react'
 
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -10,6 +11,7 @@ import { cssClasses } from '../../utils/cssClasses'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
 const { round } = NumberUtils
+const { plural } = StringUtils
 
 type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMastery
@@ -21,9 +23,7 @@ export const ChampionMasterySquare = ({
   const staticData = useStaticData()
 
   const nameLevelTokens = `${name} - niveau ${championLevel}${
-    championLevel === 5 || championLevel === 6
-      ? ` - ${tokensEarned} jeton${tokensEarned < 2 ? '' : 's'}`
-      : ''
+    championLevel === 5 || championLevel === 6 ? ` - ${plural(tokensEarned, 'jeton')}` : ''
   }\n${Math.round(percents)}%`
 
   const isGlowing = Maybe.isSome(glow)

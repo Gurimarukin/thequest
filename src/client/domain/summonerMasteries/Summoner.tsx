@@ -17,7 +17,7 @@ type Props = {
 
 export type EnrichedSummonerView = SummonerView & {
   readonly questPercents: number
-  readonly totalChampionsCount: number
+  // readonly totalChampionsCount: number
   readonly totalMasteryLevel: number
   readonly masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
 }
@@ -28,7 +28,7 @@ export const Summoner = ({
     profileIconId,
     summonerLevel,
     questPercents,
-    totalChampionsCount,
+    // totalChampionsCount,
     totalMasteryLevel,
     masteriesCount,
   },
@@ -54,16 +54,14 @@ export const Summoner = ({
             <span className="text-sm">Niveau {summonerLevel}</span>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-1">
-          {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+        <div className="flex flex-col items-center gap-3">
           <div className="peer/masteries flex items-end gap-2">
             <MasteryImgWithCount level={7} imgClassName="h-16 mt-[-6px]" />
             <MasteryImgWithCount level={6} imgClassName="h-16 mt-[-7px] mb-[-4px]" />
             <MasteryImgWithCount level={5} imgClassName="h-16 mt-[-11px] mb-[-6px]" />
           </div>
           <span className="flex items-center gap-2">
-            <span>Progression : {round(questPercents, 2)}%</span>
-            {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+            <span className="text-sm">Progression : {round(questPercents, 2)}%</span>
             <InformationCircleOutline className="peer/info h-6 fill-current" />
             <ul className="invisible absolute right-0 top-[calc(100%_+_.75rem)] z-10 list-disc border-2 border-mastery4-brown-secondary bg-black py-4 pr-4 pl-7 text-sm peer-hover/info:visible">
               <li>
@@ -93,7 +91,7 @@ export const Summoner = ({
               <MasteryImgWithCount level={0} imgClassName="h-12 mt-[-10px] mb-[-8px]" />
             </div>
             <span className="text-sm">Niveau de maîtrise : {totalMasteryLevel}</span>
-            <span className="text-xs">(Nombre total de champions : {totalChampionsCount})</span>
+            {/* <span className="text-xs">(Nombre total de champions : {totalChampionsCount})</span> */}
           </div>
         </div>
       </div>

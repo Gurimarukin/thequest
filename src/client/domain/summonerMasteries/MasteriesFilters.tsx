@@ -193,7 +193,6 @@ const MasteriesCheckboxes = ({
       List.map(level => {
         const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
         return (
-          // eslint-disable-next-line tailwindcss/no-custom-classname
           <label key={level} className="group/mastery">
             <input
               type="checkbox"

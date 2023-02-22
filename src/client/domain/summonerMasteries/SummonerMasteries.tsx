@@ -172,7 +172,12 @@ const enrichAll = (
     }),
   )
   return {
-    enrichedSummoner: { questPercents, totalChampionsCount, totalMasteryLevel, masteriesCount },
+    enrichedSummoner: {
+      questPercents,
+      // totalChampionsCount,
+      totalMasteryLevel,
+      masteriesCount,
+    },
     enrichedMasteries: enrichedMasteries_,
   }
 }

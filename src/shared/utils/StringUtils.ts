@@ -19,6 +19,9 @@ const padStart =
 const pad10 = padStart(2)
 const pad100 = padStart(3)
 
+const plural = (n: number, unit: string): string =>
+  `${n.toLocaleString()} ${unit}${n < 2 ? '' : 's'}`
+
 const prettyMs = (ms: MsDuration): string => {
   const date = DayJs.of(MsDuration.unwrap(ms))
   const zero = DayJs.of(0)
@@ -35,4 +38,4 @@ const prettyMs = (ms: MsDuration): string => {
   return `${pad10(s)}.${pad100(ms_)}"`
 }
 
-export const StringUtils = { ellipse, stripMargins, prettyMs }
+export const StringUtils = { ellipse, stripMargins, plural, prettyMs }
