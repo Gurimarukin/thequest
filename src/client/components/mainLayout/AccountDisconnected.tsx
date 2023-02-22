@@ -16,7 +16,7 @@ export const AccountDisconnected = (): JSX.Element => {
         <button
           type="button"
           onClick={toggleLogin}
-          className="border border-goldenrod py-1 px-4 hover:bg-goldenrod/75 hover:text-black"
+          className="border border-goldenrod bg-black py-1 px-4 hover:bg-goldenrod/75 hover:text-black"
         >
           Compte
         </button>

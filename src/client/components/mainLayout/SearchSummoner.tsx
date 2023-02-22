@@ -93,7 +93,7 @@ export const SearchSummoner = (): JSX.Element => {
             value={summonerName}
             onChange={handleChange}
             onFocus={handleFocus}
-            className="w-52 border border-goldenrod bg-transparent px-2"
+            className="w-52 border border-goldenrod bg-black px-2"
           />
           <ul
             className={cssClasses(
