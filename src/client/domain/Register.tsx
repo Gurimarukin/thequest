@@ -139,6 +139,14 @@ export const Register = (): JSX.Element => {
             </tr>
             <tr className="contents">
               <Td className="border-l border-goldenrod pl-6">
+                Personnaliser les champions associés à un rôle
+              </Td>
+              <EmptyTd />
+              <Td className="justify-center">{greenCheck}</Td>
+              <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+            </tr>
+            <tr className="contents">
+              <Td className="border-l border-goldenrod pl-6">
                 Accès rapide au profil d’invocateur lié
               </Td>
               <EmptyTd />
