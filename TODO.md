@@ -1,3 +1,4 @@
 - search champion
 - toaster
+- maybe fix shards hitbox
 - discord OAuth2: proper state
