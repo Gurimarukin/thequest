@@ -8,6 +8,7 @@ import { MasteryImg } from '../../components/MasteryImg'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { InformationCircleOutline } from '../../imgs/svgIcons'
 import { NumberUtils } from '../../utils/NumberUtils'
+import { cssClasses } from '../../utils/cssClasses'
 
 const { round } = NumberUtils
 
@@ -88,7 +89,11 @@ export const Summoner = ({
               <MasteryImgWithCount level={3} imgClassName="h-12 mt-[-9px] mb-[-3px]" />
               <MasteryImgWithCount level={2} imgClassName="h-12 mt-[-10px] mb-[-5px]" />
               <MasteryImgWithCount level={1} imgClassName="h-12 mt-[-10px] mb-[-8px]" />
-              <MasteryImgWithCount level={0} imgClassName="h-12 mt-[-10px] mb-[-8px]" />
+              <MasteryImgWithCount
+                level={0}
+                imgClassName="h-12 mt-[-10px] mb-[-8px]"
+                className="mx-[-10px]"
+              />
             </div>
             <span className="text-sm">Niveau de maîtrise : {totalMasteryLevel}</span>
             {/* <span className="text-xs">(Nombre total de champions : {totalChampionsCount})</span> */}
@@ -102,13 +107,14 @@ export const Summoner = ({
 type MasteryImgWithCountProps = {
   readonly level: ChampionLevelOrZero
   readonly imgClassName?: string
+  readonly className?: string
 }
 
 const getMasteryImgWithCount =
   (masteriesCount: Dict<`${ChampionLevelOrZero}`, number>) =>
-  ({ level, imgClassName }: MasteryImgWithCountProps): JSX.Element =>
+  ({ level, imgClassName, className }: MasteryImgWithCountProps): JSX.Element =>
     (
-      <div className="flex flex-col items-center">
+      <div className={cssClasses('flex flex-col items-center', className)}>
         <span className="text-xs">{masteriesCount[level]}</span>
         <MasteryImg level={level} className={imgClassName} />
       </div>
