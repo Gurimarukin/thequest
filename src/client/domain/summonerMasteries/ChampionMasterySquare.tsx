@@ -188,7 +188,7 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
   )
   return (
     <div title={`${name} — fragments`} className="group absolute right-0 bottom-0 flex items-end">
-      <span className="overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
+      <span className="mr-[-2px] overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
         <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
       </span>
       <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-[2px] text-xs">
