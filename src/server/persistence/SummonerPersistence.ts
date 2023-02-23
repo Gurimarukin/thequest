@@ -1,13 +1,11 @@
-import { ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import type { CollationOptions } from 'mongodb'
 
-import { DayJs } from '../../shared/models/DayJs'
+import type { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, NonEmptyArray } from '../../shared/utils/fp'
-import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { FpCollection } from '../helpers/FpCollection'
 import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
@@ -34,7 +32,7 @@ type SummonerPersistence = Readonly<ReturnType<typeof SummonerPersistence>>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) => {
   const logger = Logger('SummonerPersistence')
-  const collection = FpCollection(logger)([SummonerDb.codec, 'Summoner'])(
+  const collection = FpCollection(logger)([SummonerDb.codec, 'SummonerDb'])(
     mongoCollection('summoner'),
   )
 
@@ -51,15 +49,13 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
       name: string,
       insertedAfter: DayJs,
     ): Future<Maybe<SummonerDb>> =>
-      pipe(
-        collection.findOne(
-          {
-            platform: Platform.codec.encode(platform),
-            name: C.string.encode(name),
-          },
-          { collation: platformAndNameIndexCollation },
-        ),
-        futureMaybe.filter(s => ord.leq(DayJs.Ord)(insertedAfter, s.insertedAt)),
+      collection.findOne(
+        {
+          platform: Platform.codec.encode(platform),
+          name: C.string.encode(name),
+          insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
+        },
+        { collation: platformAndNameIndexCollation },
       ),
 
     findByPuuid: (
@@ -81,7 +77,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
             puuid: Puuid.codec.encode(summoner.puuid),
           },
           summoner,
-          { upsert: true },
+          { upsert: true, collation: platformAndNameIndexCollation },
         ),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),

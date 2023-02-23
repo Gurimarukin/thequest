@@ -14,6 +14,7 @@ import type { CronJobEvent } from './models/event/CronJobEvent'
 import { LoggerGetter } from './models/logger/LoggerGetter'
 import { MongoCollectionGetter } from './models/mongo/MongoCollection'
 import { WithDb } from './models/mongo/WithDb'
+import { ChampionMasteryPersistence } from './persistence/ChampionMasteryPersistence'
 import { ChampionShardPersistence } from './persistence/ChampionShardPersistence'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { MigrationPersistence } from './persistence/MigrationPersistence'
@@ -34,6 +35,7 @@ const of = (
   config: Config,
   Logger: LoggerGetter,
   httpClient: HttpClient,
+  championMasteryPersistence: ChampionMasteryPersistence,
   championShardPersistence: ChampionShardPersistence,
   healthCheckPersistence: HealthCheckPersistence,
   userPersistence: UserPersistence,
@@ -43,7 +45,7 @@ const of = (
   const jwtHelper = JwtHelper(config.jwtSecret)
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
-  const masteriesService = MasteriesService(riotApiService)
+  const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
   const userService = UserService(Logger, championShardPersistence, userPersistence, jwtHelper)
 
   return {
@@ -69,6 +71,7 @@ const load = (config: Config): Future<Context> => {
 
   const mongoCollection: MongoCollectionGetter = MongoCollectionGetter.fromWithDb(withDb)
 
+  const championMasteryPersistence = ChampionMasteryPersistence(Logger, mongoCollection)
   const championShardPersistence = ChampionShardPersistence(Logger, mongoCollection)
   const healthCheckPersistence = HealthCheckPersistence(withDb)
   const migrationPersistence = MigrationPersistence(Logger, mongoCollection)
@@ -92,6 +95,7 @@ const load = (config: Config): Future<Context> => {
         config,
         Logger,
         httpClient,
+        championMasteryPersistence,
         championShardPersistence,
         healthCheckPersistence,
         userPersistence,
@@ -128,6 +132,7 @@ const load = (config: Config): Future<Context> => {
         Future.chain(() => migrationService.applyMigrations),
         Future.chain(() =>
           NonEmptyArray.sequence(Future.ApplicativeSeq)([
+            championMasteryPersistence.ensureIndexes,
             championShardPersistence.ensureIndexes,
             summonerPersistence.ensureIndexes,
             userPersistence.ensureIndexes,

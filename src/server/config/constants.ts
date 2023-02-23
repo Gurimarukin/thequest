@@ -37,7 +37,8 @@ export const constants = {
     regionalHost: 'europe.api.riotgames.com',
     plateformEndpoint,
     cache: {
-      summonerTtl: MsDuration.minutes(10),
+      summonerTtl: MsDuration.minutes(15),
+      masteriesTtl: MsDuration.minutes(5),
     },
   },
 }
