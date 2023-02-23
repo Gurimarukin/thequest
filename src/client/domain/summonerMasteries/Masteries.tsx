@@ -123,7 +123,7 @@ const ChampionMasteriesCompact = ({
   championShards,
   setChampionShards,
 }: ChampionMasteriesCompactProps): JSX.Element => (
-  <div className="flex flex-wrap gap-4 pt-4 pb-2">
+  <div className="flex flex-wrap justify-center gap-4 pt-4 pb-2">
     {champions.map(champion => (
       <ChampionMasterySquare
         key={ChampionKey.unwrap(champion.championId)}
