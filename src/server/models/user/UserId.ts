@@ -8,7 +8,7 @@ import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
 import { UUIDUtils } from '../../utils/UUIDUtils'
 
-type UserId = Newtype<{ readonly WebUserId: unique symbol }, string>
+type UserId = Newtype<{ readonly UserId: unique symbol }, string>
 
 const { wrap, unwrap } = iso<UserId>()
 

@@ -10,8 +10,8 @@ type DDragonChampion = Readonly<D.TypeOf<typeof decoder>>
 
 const decoder = D.struct({
   version: D.string,
-  id: ChampionId.codec,
-  key: pipe(NumberFromString.decoder, D.compose(ChampionKey.codec)),
+  id: ChampionId.codec, // Aatrox
+  key: pipe(NumberFromString.decoder, D.compose(ChampionKey.codec)), // 266
   name: D.string,
   title: D.string,
   blurb: D.string,

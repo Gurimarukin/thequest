@@ -17,17 +17,24 @@ import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
 import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
+import type { ChampionShardPersistence } from '../persistence/ChampionShardPersistence'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 
 type UserService = Readonly<ReturnType<typeof UserService>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwtHelper: JwtHelper) {
+function UserService(
+  Logger: LoggerGetter,
+  championShardPersistence: ChampionShardPersistence,
+  userPersistence: UserPersistence,
+  jwtHelper: JwtHelper,
+) {
   const logger = Logger('UserService')
 
   const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
     userPersistence
+  const { listForSummoner } = championShardPersistence
 
   const createUserPassword = (
     userName: UserName,
@@ -133,6 +140,7 @@ function UserService(Logger: LoggerGetter, userPersistence: UserPersistence, jwt
     addFavoriteSearch,
     removeFavoriteSearch,
     removeAllFavoriteSearches,
+    listChampionShardsForSummoner: listForSummoner,
   }
 
   function signToken(content: TokenContent): Future<Token> {

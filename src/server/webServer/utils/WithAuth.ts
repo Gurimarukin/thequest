@@ -13,19 +13,60 @@ import { MyMiddleware as M } from '../models/MyMiddleware'
 import { SimpleHttpResponse } from '../models/SimpleHttpResponse'
 import type { UpgradeHandler } from '../models/UpgradeHandler'
 
-type WithAuth = {
-  readonly middleware: (f: (user: TokenContent) => EndedMiddleware) => EndedMiddleware
-  readonly upgrade: (f: (user: TokenContent) => UpgradeHandler) => UpgradeHandler
-}
+type WithAuth = Readonly<ReturnType<typeof WithAuth>>
 
-const WithAuth = (userService: UserService): WithAuth => ({
-  middleware: f =>
-    pipe(
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const WithAuth = (userService: UserService) => {
+  return {
+    middleware: (f: (user: TokenContent) => EndedMiddleware): EndedMiddleware =>
+      middlewareMaybe(Maybe.fold(() => M.sendWithStatus(Status.Unauthorized)(''), f)),
+
+    middlewareMaybe,
+
+    upgrade:
+      (f: (user: TokenContent) => UpgradeHandler): UpgradeHandler =>
+      (request, socket, head) =>
+        pipe(
+          futureMaybe.fromNullable(request.headers.cookie),
+          futureMaybe.chainEitherK(cookie => Try.tryCatch(() => parseCookie(cookie))),
+          futureMaybe.chainOptionK(Dict.lookup(constants.account.cookie.name)),
+          Future.chain(
+            Maybe.fold(
+              () => Future.right(Either.left(SimpleHttpResponse.of(Status.Unauthorized, ''))),
+              flow(
+                userService.verifyToken,
+                Future.map(Either.right),
+                Future.orElse(() =>
+                  Future.right(
+                    Either.left(
+                      SimpleHttpResponse.of(Status.Unauthorized, 'Invalid token', {
+                        'Set-Cookie': [
+                          `${constants.account.cookie.name}=`,
+                          'Path=/',
+                          'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+                        ],
+                      }),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Future.chain(
+            Either.fold(flow(Either.left, Future.right), user => f(user)(request, socket, head)),
+          ),
+        ),
+  }
+
+  function middlewareMaybe(
+    f: (maybeUser: Maybe<TokenContent>) => EndedMiddleware,
+  ): EndedMiddleware {
+    return pipe(
       M.getCookies(),
       M.map(Dict.lookup(constants.account.cookie.name)),
       M.ichain(
         Maybe.fold(
-          () => M.sendWithStatus(Status.Unauthorized)(''),
+          () => f(Maybe.none),
           flow(
             userService.verifyToken,
             M.fromTaskEither,
@@ -37,44 +78,13 @@ const WithAuth = (userService: UserService): WithAuth => ({
                   M.ichain(() => M.closeHeaders()),
                   M.ichain(() => M.send('Invalid token')),
                 ),
-              f,
+              flow(Maybe.some, f),
             ),
           ),
         ),
       ),
-    ),
-
-  upgrade: f => (request, socket, head) =>
-    pipe(
-      futureMaybe.fromNullable(request.headers.cookie),
-      futureMaybe.chainEitherK(cookie => Try.tryCatch(() => parseCookie(cookie))),
-      futureMaybe.chainOptionK(Dict.lookup(constants.account.cookie.name)),
-      Future.chain(
-        Maybe.fold(
-          () => Future.right(Either.left(SimpleHttpResponse.of(Status.Unauthorized, ''))),
-          flow(
-            userService.verifyToken,
-            Future.map(Either.right),
-            Future.orElse(() =>
-              Future.right(
-                Either.left(
-                  SimpleHttpResponse.of(Status.Unauthorized, 'Invalid token', {
-                    'Set-Cookie': [
-                      `${constants.account.cookie.name}=`,
-                      'Path=/',
-                      'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
-                    ],
-                  }),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      Future.chain(
-        Either.fold(flow(Either.left, Future.right), user => f(user)(request, socket, head)),
-      ),
-    ),
-})
+    )
+  }
+}
 
 export { WithAuth }

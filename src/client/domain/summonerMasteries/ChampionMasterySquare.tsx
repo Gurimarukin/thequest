@@ -1,9 +1,9 @@
-import { random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback } from 'react'
 
+import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { Dict, List, Maybe } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
@@ -17,10 +17,12 @@ const { plural } = StringUtils
 
 type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMastery
+  readonly championShards: Maybe<Dict<string, number>>
 }
 
 export const ChampionMasterySquare = ({
   champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, glow },
+  championShards,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
@@ -75,7 +77,20 @@ export const ChampionMasterySquare = ({
             <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
           </div>
         ) : null}
-        <Shards name={name} />
+        {pipe(
+          championShards,
+          Maybe.map(
+            flow(
+              Dict.lookup(`${ChampionKey.unwrap(championId)}`),
+              Maybe.getOrElse(() => 0),
+            ),
+          ),
+          // Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // TODO
+          Maybe.fold(
+            () => null,
+            count => <Shards level={championLevel} name={name} shardsCount={count} />,
+          ),
+        )}
       </div>
     </div>
   )
@@ -143,10 +158,12 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 }
 
 type ShardsProps = {
-  name: string
+  readonly level: number
+  readonly name: string
+  readonly shardsCount: number
 }
 
-const Shards = ({ name }: Readonly<ShardsProps>): JSX.Element => (
+const Shards = ({ level, name, shardsCount }: Readonly<ShardsProps>): JSX.Element => (
   <div
     title={`${name} — fragments`}
     className="group absolute right-0 bottom-0 flex items-end text-lime-400"
@@ -155,27 +172,29 @@ const Shards = ({ name }: Readonly<ShardsProps>): JSX.Element => (
       <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
     </span>
     <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-[2px] text-xs">
-      <span className="mt-[2px]">{random.randomInt(0, 9)()}</span>
+      <span className="mt-[2px]">{shardsCount}</span>
     </span>
-    <div className="absolute bottom-[calc(-100%_+_3px)] right-[-1px] z-10 hidden h-[39px] w-[14px] flex-col justify-between overflow-hidden rounded-b-[6px] rounded-tl-[6px] group-hover:flex">
-      <span className="mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]">
-        <button
-          type="button"
-          title={`${name} — ajouter un fragment`}
-          className="rounded-t bg-lime-400 text-black"
-        >
-          <AddOutline className="w-full" />
-        </button>
-      </span>
-      <span className="flex bg-black p-[2px]">
-        <button
-          type="button"
-          title={`${name} — enlever un fragment`}
-          className="rounded-b bg-lime-400 text-black"
-        >
-          <RemoveOutline className="w-full" />
-        </button>
-      </span>
-    </div>
+    {level !== 7 ? (
+      <div className="absolute bottom-[calc(-100%_+_3px)] right-[-1px] z-10 hidden h-[39px] w-[14px] flex-col justify-between overflow-hidden rounded-b-[6px] rounded-tl-[6px] group-hover:flex">
+        <span className="mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]">
+          <button
+            type="button"
+            title={`${name} — ajouter un fragment`}
+            className="rounded-t bg-lime-400 text-black"
+          >
+            <AddOutline className="w-full" />
+          </button>
+        </span>
+        <span className="flex bg-black p-[2px]">
+          <button
+            type="button"
+            title={`${name} — enlever un fragment`}
+            className="rounded-b bg-lime-400 text-black"
+          >
+            <RemoveOutline className="w-full" />
+          </button>
+        </span>
+      </div>
+    ) : null}
   </div>
 )

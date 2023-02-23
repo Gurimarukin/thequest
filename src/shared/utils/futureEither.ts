@@ -78,6 +78,7 @@ const map = eitherT.map(Future.Functor)
 
 export const futureEither = {
   Do,
+  ApplyPar,
   ap,
   apS: apply.apS(ApplyPar),
   bind: fpTsChain.bind(Chain),

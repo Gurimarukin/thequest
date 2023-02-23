@@ -32,7 +32,7 @@ export const Application = ({
 
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(riotApiService)
-  const summonerController = SummonerController(summonerService, masteriesService)
+  const summonerController = SummonerController(summonerService, masteriesService, userService)
   const userController = UserController(discordService, summonerService, userService)
 
   const withIp = WithIp(Logger, config)

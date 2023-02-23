@@ -21,13 +21,13 @@ export const Routes = (
   summonerController: SummonerController,
   userController: UserController,
 ): List<Route> => {
-  const { middleware: withAuth } = withAuth_
+  const { middleware: withAuth, middlewareMaybe: maybeWithAuth } = withAuth_
 
   return [
     m(api.healthcheck.get, () => healthCheckController.check),
     m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
     m(api.platform.summoner.byName.get, ({ platform, summonerName }) =>
-      summonerController.findByName(platform, summonerName),
+      maybeWithAuth(summonerController.findByName(platform, summonerName)),
     ),
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),

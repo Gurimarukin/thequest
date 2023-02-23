@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-expression-statements */
 import { monoid, number, random, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import React, { useEffect, useMemo } from 'react'
@@ -16,6 +17,7 @@ import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
+import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
@@ -32,19 +34,36 @@ type Props = {
   readonly summonerName: string
 }
 
-export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => (
-  <MainLayout>
-    {basicAsyncRenderer(
-      useSWRHttp(
-        apiRoutes.platform.summoner.byName.get(platform, clearSummonerName(summonerName)),
-        {},
-        [SummonerMasteriesView.codec, 'SummonerView'],
-      ),
-    )(({ summoner, masteries }) => (
-      <SummonerViewComponent platform={platform} summoner={summoner} masteries={masteries} />
-    ))}
-  </MainLayout>
-)
+export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
+  const { user } = useUser()
+
+  const { data, error, mutate } = useSWRHttp(
+    apiRoutes.platform.summoner.byName.get(platform, clearSummonerName(summonerName)),
+    {},
+    [SummonerMasteriesView.codec, 'SummonerView'],
+  )
+
+  const previousUser = usePrevious(user)
+
+  useEffect(() => {
+    if (data !== undefined && Maybe.isNone(user) && Maybe.isSome(Maybe.flatten(previousUser))) {
+      mutate({ ...data, championShards: Maybe.none }, { revalidate: false })
+    }
+  }, [data, mutate, previousUser, user])
+
+  return (
+    <MainLayout>
+      {basicAsyncRenderer({ data, error })(({ summoner, masteries, championShards }) => (
+        <SummonerViewComponent
+          platform={platform}
+          summoner={summoner}
+          masteries={masteries}
+          championShards={championShards}
+        />
+      ))}
+    </MainLayout>
+  )
+}
 
 const whiteSpaces = /\s+/g
 const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
@@ -53,12 +72,14 @@ type SummonerViewProps = {
   readonly platform: Platform
   readonly summoner: SummonerView
   readonly masteries: List<ChampionMasteryView>
+  readonly championShards: Maybe<Dict<string, number>>
 }
 
 const SummonerViewComponent = ({
   platform,
   summoner,
   masteries,
+  championShards,
 }: SummonerViewProps): JSX.Element => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
@@ -97,7 +118,7 @@ const SummonerViewComponent = ({
   return (
     <div className="flex flex-col p-2">
       <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
-      <Masteries masteries={enrichedMasteries} />
+      <Masteries masteries={enrichedMasteries} championShards={championShards} />
     </div>
   )
 }

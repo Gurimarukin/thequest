@@ -6,6 +6,7 @@ import React, { Fragment, useMemo } from 'react'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
@@ -19,9 +20,10 @@ const { plural } = StringUtils
 
 type Props = {
   readonly masteries: List<EnrichedChampionMastery>
+  readonly championShards: Maybe<Dict<string, number>>
 }
 
-export const Masteries = ({ masteries }: Props): JSX.Element => {
+export const Masteries = ({ masteries, championShards }: Props): JSX.Element => {
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -67,7 +69,7 @@ export const Masteries = ({ masteries }: Props): JSX.Element => {
       <div className="group relative flex justify-center text-sm">
         {`${plural(filteredAndSortedChampions.length, 'champion')} / ${champions.length}`}
       </div>
-      {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions)}
+      {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions, championShards)}
     </>
   )
 }
@@ -80,33 +82,44 @@ const levelFilterPredicate =
 const renderChampionMasteries = (
   view: MasteriesQueryView,
   champions: List<EnrichedChampionMastery>,
+  championShards: Maybe<Dict<string, number>>,
 ): JSX.Element => {
   switch (view) {
     case 'compact':
-      return <ChampionMasteriesCompact champions={champions} />
+      return <ChampionMasteriesCompact champions={champions} championShards={championShards} />
     case 'histogram':
-      return <ChampionMasteriesHistogram champions={champions} />
+      return <ChampionMasteriesHistogram champions={champions} championShards={championShards} />
   }
 }
 
 type ChampionMasteriesCompactProps = {
   readonly champions: List<EnrichedChampionMastery>
+  readonly championShards: Maybe<Dict<string, number>>
 }
 
-const ChampionMasteriesCompact = ({ champions }: ChampionMasteriesCompactProps): JSX.Element => (
+const ChampionMasteriesCompact = ({
+  champions,
+  championShards,
+}: ChampionMasteriesCompactProps): JSX.Element => (
   <div className="flex flex-wrap gap-4 pt-4 pb-2">
     {champions.map(champion => (
-      <ChampionMasterySquare key={ChampionKey.unwrap(champion.championId)} champion={champion} />
+      <ChampionMasterySquare
+        key={ChampionKey.unwrap(champion.championId)}
+        champion={champion}
+        championShards={championShards}
+      />
     ))}
   </div>
 )
 
 type ChampionMasteriesHistogramProps = {
   readonly champions: List<EnrichedChampionMastery>
+  readonly championShards: Maybe<Dict<string, number>>
 }
 
 const ChampionMasteriesHistogram = ({
   champions,
+  championShards,
 }: ChampionMasteriesHistogramProps): JSX.Element => {
   const maybeMaxPoints = useMemo(
     () =>
@@ -127,7 +140,7 @@ const ChampionMasteriesHistogram = ({
     <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-2">
       {champions.map(champion => (
         <Fragment key={ChampionKey.unwrap(champion.championId)}>
-          <ChampionMasterySquare champion={champion} />
+          <ChampionMasterySquare champion={champion} championShards={championShards} />
           <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
         </Fragment>
       ))}
