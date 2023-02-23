@@ -71,7 +71,13 @@ export const ChampionMasterySquare = ({
           />
         </div>
         <div
-          className="absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-[2px] text-xs"
+          className={cssClasses(
+            'absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-[2px] text-xs font-bold',
+            ['text-blue-500', championLevel === 7],
+            ['text-purple-400', championLevel === 6],
+            ['text-red-700', championLevel === 5],
+            ['text-yellow-600', championLevel === 4],
+          )}
           title={nameLevelTokens}
         >
           <span className="mt-[-2px]">{championLevel}</span>
@@ -181,10 +187,7 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
     [setShardsCount, shardsCount],
   )
   return (
-    <div
-      title={`${name} — fragments`}
-      className="group absolute right-0 bottom-0 flex items-end text-lime-400"
-    >
+    <div title={`${name} — fragments`} className="group absolute right-0 bottom-0 flex items-end">
       <span className="overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
         <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
       </span>
@@ -202,7 +205,7 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
             type="button"
             onClick={addShardCount}
             title={`${name} — ajouter un fragment`}
-            className="rounded-t bg-lime-400 text-black"
+            className="rounded-t bg-goldenrod text-black"
           >
             <AddOutline className="w-full" />
           </button>
@@ -213,7 +216,7 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
               type="button"
               onClick={removeShardCount}
               title={`${name} — enlever un fragment`}
-              className="rounded-b bg-lime-400 text-black"
+              className="rounded-b bg-goldenrod text-black"
             >
               <RemoveOutline className="w-full" />
             </button>
