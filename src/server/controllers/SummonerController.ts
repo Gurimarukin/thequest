@@ -1,4 +1,3 @@
-import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
@@ -31,31 +30,31 @@ const SummonerController = (
         summonerService.findByName(platform, summonerName),
         Future.map(Either.fromOption(() => 'Summoner not found')),
         futureEither.bindTo('summoner'),
-        futureEither.bind('masteriesAndShards', ({ summoner }) =>
-          apply.sequenceS(futureEither.ApplyPar)({
-            masteries: pipe(
-              masteriesService.findBySummoner(platform, summoner.id),
-              Future.map(Either.fromOption(() => 'Masteries not found')),
+        futureEither.bind('masteries', ({ summoner }) =>
+          pipe(
+            masteriesService.findBySummoner(platform, summoner.id),
+            Future.map(Either.fromOption(() => 'Masteries not found')),
+          ),
+        ),
+        futureEither.bind('championShards', ({ summoner }) =>
+          pipe(
+            maybeUser,
+            Maybe.fold(
+              () => Future.right<Maybe<List<ChampionShardsDb>>>(Maybe.none),
+              user =>
+                pipe(
+                  userService.listChampionShardsForSummoner(user.id, summoner.id),
+                  Future.map(Maybe.some),
+                ),
             ),
-            championShards: pipe(
-              maybeUser,
-              Maybe.fold(
-                () => Future.right<Maybe<List<ChampionShardsDb>>>(Maybe.none),
-                user =>
-                  pipe(
-                    userService.listChampionShardsForSummoner(user.id, summoner.id),
-                    Future.map(Maybe.some),
-                  ),
-              ),
-              Future.map(Either.right),
-            ),
-          }),
+            Future.map(a => Either.right<string, Maybe<List<ChampionShardsDb>>>(a)),
+          ),
         ),
         M.fromTaskEither,
         M.ichain(
           Either.fold(
             M.sendWithStatus(Status.NotFound),
-            ({ summoner, masteriesAndShards: { masteries, championShards } }) =>
+            ({ summoner, masteries, championShards }) =>
               M.json(SummonerMasteriesView.codec)({
                 summoner,
                 masteries,
