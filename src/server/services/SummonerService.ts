@@ -52,7 +52,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     findByPuuid: (platform: Platform, encryptedPUUID: Puuid): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
-        insertedAfter => summonerPersistence.findByPuiid(platform, encryptedPUUID, insertedAfter),
+        insertedAfter => summonerPersistence.findByPuuid(platform, encryptedPUUID, insertedAfter),
         riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
       ),
 

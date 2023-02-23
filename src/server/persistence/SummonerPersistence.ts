@@ -62,7 +62,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
         futureMaybe.filter(s => ord.leq(DayJs.Ord)(insertedAfter, s.insertedAt)),
       ),
 
-    findByPuiid: (
+    findByPuuid: (
       platform: Platform,
       puuid: Puuid,
       insertedAfter: DayJs,
