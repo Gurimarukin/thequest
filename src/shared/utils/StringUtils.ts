@@ -2,6 +2,8 @@ import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../models/DayJs'
 import { MsDuration } from '../models/MsDuration'
+import type { Tuple } from './fp'
+import { Maybe } from './fp'
 
 const margin = /^\s*\|/gm
 const stripMargins = (str: string): string => str.replace(margin, '')
@@ -10,6 +12,14 @@ const ellipse =
   (take: number) =>
   (str: string): string =>
     take < str.length && 3 <= take ? `${str.slice(0, take - 3)}...` : str
+
+const matcher =
+  <A>(regex: Readonly<RegExp>, f: (arr: Readonly<RegExpMatchArray>) => A) =>
+  (str: string): Maybe<A> =>
+    pipe(str.match(regex), Maybe.fromNullable, Maybe.map(f))
+
+const matcher2 = (regex: Readonly<RegExp>): ((str: string) => Maybe<Tuple<string, string>>) =>
+  matcher(regex, ([, a, b]) => [a, b] as Tuple<string, string>)
 
 const padStart =
   (maxLength: number) =>
@@ -38,4 +48,4 @@ const prettyMs = (ms: MsDuration): string => {
   return `${pad10(s)}.${pad100(ms_)}"`
 }
 
-export const StringUtils = { ellipse, stripMargins, plural, prettyMs }
+export const StringUtils = { ellipse, matcher2, stripMargins, plural, prettyMs }

@@ -15,8 +15,8 @@ import type { UserOutput } from '../models/user/User'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
-import type { UserLogin } from '../models/user/UserLogin'
-import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
+import type { UserLoginDiscord } from '../models/user/UserLogin'
+import { UserLogin, UserLoginPassword } from '../models/user/UserLogin'
 
 const { getPath } = FpCollectionHelpers
 
@@ -67,12 +67,12 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
         Future.map(r => r.acknowledged),
       ),
 
-    updateLoginDiscord: (id: UserId, login: UserDiscordInfos): Future<boolean> =>
+    updateLoginDiscord: (id: UserId, login: UserLogin): Future<boolean> =>
       pipe(
         collection.collection.future(c =>
           c.updateOne(
             { id: UserId.codec.encode(id) },
-            { $set: { login: UserLoginDiscord.codec.encode(UserLoginDiscord.of(login)) } },
+            { $set: { login: UserLogin.codec.encode(login) } },
           ),
         ),
         // TODO: logger.trace

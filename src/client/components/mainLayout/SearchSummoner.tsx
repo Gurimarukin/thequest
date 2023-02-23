@@ -42,7 +42,7 @@ export const SearchSummoner = (): JSX.Element => {
       Maybe.getOrElse(() => ''),
     ),
   )
-  const [platform, setPlatform] = useState<Platform>('EUW1')
+  const [platform, setPlatform] = useState<Platform>(Platform.defaultPlatform)
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setSummonerName(e.target.value),

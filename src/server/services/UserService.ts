@@ -34,8 +34,13 @@ function UserService(
 ) {
   const logger = Logger('UserService')
 
-  const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
-    userPersistence
+  const {
+    findById,
+    updateLoginDiscord,
+    addFavoriteSearch,
+    removeFavoriteSearch,
+    removeAllFavoriteSearches,
+  } = userPersistence
 
   const createUserPassword = (
     userName: UserName,
@@ -121,7 +126,9 @@ function UserService(
         futureMaybe.Do,
         futureMaybe.apS('user', userPersistence.findByLoginDiscordId(login.id)),
         futureMaybe.bind('updated', ({ user }) =>
-          futureMaybe.fromTaskEither(userPersistence.updateLoginDiscord(user.id, login)),
+          futureMaybe.fromTaskEither(
+            userPersistence.updateLoginDiscord(user.id, UserLoginDiscord.of(login)),
+          ),
         ),
         futureMaybe.filter(({ updated }) => updated),
         futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),
@@ -138,6 +145,7 @@ function UserService(
       ),
 
     findById,
+    updateLoginDiscord,
     addFavoriteSearch,
     removeFavoriteSearch,
     removeAllFavoriteSearches,

@@ -30,8 +30,6 @@ const codec = C.sum('type')({
   Password: passwordCodec,
 })
 
-const UserLogin = { codec }
-
 const UserLoginDiscord = {
   codec: discordCodec,
   of: (discord: UserDiscordInfos): UserLoginDiscord => ({ type: 'Discord', ...discord }),
@@ -44,6 +42,34 @@ const UserLoginPassword = {
     password: HashedPassword,
     discord: Maybe<UserDiscordInfos>,
   ): UserLoginPassword => ({ type: 'Password', userName, password, discord }),
+}
+
+const UserLogin = {
+  codec,
+
+  discordInfos: (login: UserLogin): Maybe<UserDiscordInfos> => {
+    switch (login.type) {
+      case 'Discord':
+        const {
+          type: {},
+          ...discord
+        } = login
+        return Maybe.some(discord)
+      case 'Password':
+        return login.discord
+    }
+  },
+
+  setDiscordInfos:
+    (discord: UserDiscordInfos) =>
+    <A extends UserLogin>(login: A): A => {
+      switch (login.type) {
+        case 'Discord':
+          return UserLoginDiscord.of(discord) as A
+        case 'Password':
+          return UserLoginPassword.of(login.userName, login.password, Maybe.some(discord)) as A
+      }
+    },
 }
 
 export { UserLogin, UserLoginDiscord, UserLoginPassword }

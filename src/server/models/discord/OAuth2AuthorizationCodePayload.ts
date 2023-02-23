@@ -5,7 +5,7 @@ import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 import { ClientSecret } from './ClientSecret'
 import { DiscordUserId } from './DiscordUserId'
 
-type OAuth2AccessTokenPayload = E.TypeOf<typeof encoder>
+type OAuth2AuthorizationCodePayload = Readonly<E.TypeOf<typeof encoder>>
 
 const encoder = E.struct({
   client_id: DiscordUserId.codec,
@@ -15,6 +15,6 @@ const encoder = E.struct({
   redirect_uri: E.id<string>(),
 })
 
-const OAuth2AccessTokenPayload = { encoder }
+const OAuth2AuthorizationCodePayload = { encoder }
 
-export { OAuth2AccessTokenPayload }
+export { OAuth2AuthorizationCodePayload }

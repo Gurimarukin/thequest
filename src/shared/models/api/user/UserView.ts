@@ -2,7 +2,8 @@ import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { lens } from 'monocle-ts'
 
-import { List } from '../../../utils/fp'
+import { List, Maybe } from '../../../utils/fp'
+import { PlatformWithName } from '../summoner/PlatformWithName'
 import { SummonerShort } from '../summoner/SummonerShort'
 
 type UserView = Readonly<C.TypeOf<typeof codec>>
@@ -10,6 +11,7 @@ type UserView = Readonly<C.TypeOf<typeof codec>>
 const codec = C.struct({
   userName: C.string,
   favoriteSearches: List.codec(SummonerShort.codec),
+  linkedRiotAccount: Maybe.codec(PlatformWithName.codec),
 })
 
 const favoriteSearchesLens = pipe(lens.id<UserView>(), lens.prop('favoriteSearches'))
