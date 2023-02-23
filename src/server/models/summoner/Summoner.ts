@@ -1,5 +1,6 @@
+import type { SummonerId } from '../../../shared/models/api/summoner/SummonerId'
+
 import type { Puuid } from '../riot/Puuid'
-import type { SummonerId } from '../riot/SummonerId'
 
 type Summoner = {
   readonly id: SummonerId

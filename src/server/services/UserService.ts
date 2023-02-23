@@ -2,6 +2,8 @@ import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import readline from 'readline'
 
+import type { ChampionKey } from '../../shared/models/api/ChampionKey'
+import type { SummonerId } from '../../shared/models/api/summoner/SummonerId'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
@@ -34,7 +36,6 @@ function UserService(
 
   const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
     userPersistence
-  const { listForSummoner } = championShardPersistence
 
   const createUserPassword = (
     userName: UserName,
@@ -140,7 +141,16 @@ function UserService(
     addFavoriteSearch,
     removeFavoriteSearch,
     removeAllFavoriteSearches,
-    listChampionShardsForSummoner: listForSummoner,
+    listChampionShardsForSummoner: championShardPersistence.listForSummoner,
+    setChampionShardsForSummoner: (
+      user: UserId,
+      summoner: SummonerId,
+      champion: ChampionKey,
+      count: number,
+    ): Future<boolean> =>
+      count === 0
+        ? championShardPersistence.removeForChampion(user, summoner, champion)
+        : championShardPersistence.setForChampion({ user, summoner, champion, count }),
   }
 
   function signToken(content: TokenContent): Future<Token> {

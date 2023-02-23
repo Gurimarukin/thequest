@@ -2,9 +2,12 @@ import { apply } from 'fp-ts'
 import type { Lazy } from 'fp-ts/function'
 import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
+import * as D from 'io-ts/Decoder'
 
 import { DayJs } from '../../shared/models/DayJs'
+import type { ChampionKey } from '../../shared/models/api/ChampionKey'
 import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
+import type { SummonerId } from '../../shared/models/api/summoner/SummonerId'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
@@ -13,6 +16,7 @@ import { UserView } from '../../shared/models/api/user/UserView'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
+import { validateChampionShards } from '../../shared/validations/validateChampionShards'
 import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { constants } from '../config/constants'
@@ -148,6 +152,31 @@ function UserController(
       userService.removeFavoriteSearch,
       () => 'Summoner search is not in favorites',
     ),
+
+    setSummonerChampionShardsCount:
+      (summoner: SummonerId, champion: ChampionKey) =>
+      (user: TokenContent): EndedMiddleware =>
+        EndedMiddleware.withBody(D.number)(count =>
+          pipe(
+            validateChampionShards(count),
+            Either.fold(
+              () => M.sendWithStatus(Status.BadRequest)('Invalid shards count'),
+              validatedCount =>
+                pipe(
+                  userService.setChampionShardsForSummoner(
+                    user.id,
+                    summoner,
+                    champion,
+                    validatedCount,
+                  ),
+                  M.fromTaskEither,
+                  M.ichain(success =>
+                    M.sendWithStatus(success ? Status.NoContent : Status.BadRequest)(''),
+                  ),
+                ),
+            ),
+          ),
+        ),
 
     loginDiscord,
     loginPassword,

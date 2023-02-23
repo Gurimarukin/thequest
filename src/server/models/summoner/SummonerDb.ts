@@ -1,10 +1,10 @@
 import * as C from 'io-ts/Codec'
 
 import { Platform } from '../../../shared/models/api/Platform'
+import { SummonerId } from '../../../shared/models/api/summoner/SummonerId'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { Puuid } from '../riot/Puuid'
-import { SummonerId } from '../riot/SummonerId'
 
 type SummonerDb = Readonly<C.TypeOf<typeof codec>>
 

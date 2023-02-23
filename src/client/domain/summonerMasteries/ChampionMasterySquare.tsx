@@ -1,5 +1,6 @@
+/* eslint-disable functional/no-return-void */
 import { flow, pipe } from 'fp-ts/function'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -18,13 +19,20 @@ const { plural } = StringUtils
 type ChampionMasterySquareProps = {
   readonly champion: EnrichedChampionMastery
   readonly championShards: Maybe<Dict<string, number>>
+  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 export const ChampionMasterySquare = ({
   champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, glow },
   championShards,
+  setChampionShards,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
+
+  const setShardsCount = useMemo(
+    () => setChampionShards(championId),
+    [championId, setChampionShards],
+  )
 
   const nameLevelTokens = `${name} — niveau ${championLevel}${
     championLevel === 5 || championLevel === 6 ? ` — ${plural(tokensEarned, 'jeton')}` : ''
@@ -85,10 +93,10 @@ export const ChampionMasterySquare = ({
               Maybe.getOrElse(() => 0),
             ),
           ),
-          // Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // TODO
+          Maybe.filter(count => (championLevel === 7 ? 0 < count : true)),
           Maybe.fold(
             () => null,
-            count => <Shards level={championLevel} name={name} shardsCount={count} />,
+            count => <Shards name={name} shardsCount={count} setShardsCount={setShardsCount} />,
           ),
         )}
       </div>
@@ -158,43 +166,60 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 }
 
 type ShardsProps = {
-  readonly level: number
   readonly name: string
   readonly shardsCount: number
+  readonly setShardsCount: (count: number) => void
 }
 
-const Shards = ({ level, name, shardsCount }: Readonly<ShardsProps>): JSX.Element => (
-  <div
-    title={`${name} — fragments`}
-    className="group absolute right-0 bottom-0 flex items-end text-lime-400"
-  >
-    <span className="overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
-      <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
-    </span>
-    <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-[2px] text-xs">
-      <span className="mt-[2px]">{shardsCount}</span>
-    </span>
-    {level !== 7 ? (
+const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): JSX.Element => {
+  const addShardCount = useCallback(
+    () => setShardsCount(shardsCount + 1),
+    [setShardsCount, shardsCount],
+  )
+  const removeShardCount = useCallback(
+    () => setShardsCount(shardsCount - 1),
+    [setShardsCount, shardsCount],
+  )
+  return (
+    <div
+      title={`${name} — fragments`}
+      className="group absolute right-0 bottom-0 flex items-end text-lime-400"
+    >
+      <span className="overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
+        <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
+      </span>
+      <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-[2px] text-xs">
+        <span className="mt-[2px]">{shardsCount}</span>
+      </span>
       <div className="absolute bottom-[calc(-100%_+_3px)] right-[-1px] z-10 hidden h-[39px] w-[14px] flex-col justify-between overflow-hidden rounded-b-[6px] rounded-tl-[6px] group-hover:flex">
-        <span className="mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]">
+        <span
+          className={cssClasses('mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]', [
+            'invisible',
+            9 <= shardsCount,
+          ])}
+        >
           <button
             type="button"
+            onClick={addShardCount}
             title={`${name} — ajouter un fragment`}
             className="rounded-t bg-lime-400 text-black"
           >
             <AddOutline className="w-full" />
           </button>
         </span>
-        <span className="flex bg-black p-[2px]">
-          <button
-            type="button"
-            title={`${name} — enlever un fragment`}
-            className="rounded-b bg-lime-400 text-black"
-          >
-            <RemoveOutline className="w-full" />
-          </button>
-        </span>
+        {0 < shardsCount ? (
+          <span className="flex bg-black p-[2px]">
+            <button
+              type="button"
+              onClick={removeShardCount}
+              title={`${name} — enlever un fragment`}
+              className="rounded-b bg-lime-400 text-black"
+            >
+              <RemoveOutline className="w-full" />
+            </button>
+          </span>
+        ) : null}
       </div>
-    ) : null}
-  </div>
-)
+    </div>
+  )
+}

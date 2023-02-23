@@ -4,12 +4,11 @@ import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
-import { SummonerId } from '../server/models/riot/SummonerId'
-
 import type { Method } from './models/Method'
 import { ChampionKey } from './models/api/ChampionKey'
 import { Lang } from './models/api/Lang'
 import { Platform } from './models/api/Platform'
+import { SummonerId } from './models/api/summoner/SummonerId'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
 import { NumberFromString } from './utils/ioTsUtils'
@@ -56,9 +55,9 @@ const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
 const userSelfGet = m(apiUserSelf, 'get')
 const userSelfFavoritesPut = m(apiUserSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(apiUserSelfFavorites, 'delete')
-const apiUserSelfSummonerByIdChampionByKeyShardsCountGet = m(
+const apiUserSelfSummonerByIdChampionByKeyShardsCountPut = m(
   apiUserSelfSummonerByIdChampionByKeyShardsCount,
-  'get',
+  'put',
 )
 const userLoginDiscordPost = m(apiUserLoginDiscord, 'post')
 const userLoginPasswordPost = m(apiUserLoginPassword, 'post')
@@ -87,7 +86,7 @@ export const apiParsers = {
       },
       summoner: {
         champion: {
-          shardsCount: { get: p(apiUserSelfSummonerByIdChampionByKeyShardsCountGet) },
+          shardsCount: { put: p(apiUserSelfSummonerByIdChampionByKeyShardsCountPut) },
         },
       },
     },
@@ -127,8 +126,8 @@ export const apiRoutes = {
       summoner: {
         champion: {
           shardsCount: {
-            get: (summonerId: SummonerId, championKey: ChampionKey) =>
-              r(apiUserSelfSummonerByIdChampionByKeyShardsCountGet, { summonerId, championKey }),
+            put: (summonerId: SummonerId, championKey: ChampionKey) =>
+              r(apiUserSelfSummonerByIdChampionByKeyShardsCountPut, { summonerId, championKey }),
           },
         },
       },

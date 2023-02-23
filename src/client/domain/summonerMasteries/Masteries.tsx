@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-return-void */
 import { number, ord, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
@@ -21,9 +22,10 @@ const { plural } = StringUtils
 type Props = {
   readonly masteries: List<EnrichedChampionMastery>
   readonly championShards: Maybe<Dict<string, number>>
+  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-export const Masteries = ({ masteries, championShards }: Props): JSX.Element => {
+export const Masteries = ({ masteries, championShards, setChampionShards }: Props): JSX.Element => {
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -69,7 +71,12 @@ export const Masteries = ({ masteries, championShards }: Props): JSX.Element => 
       <div className="group relative flex justify-center text-sm">
         {`${plural(filteredAndSortedChampions.length, 'champion')} / ${champions.length}`}
       </div>
-      {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions, championShards)}
+      {renderChampionMasteries(
+        masteriesQuery.view,
+        filteredAndSortedChampions,
+        championShards,
+        setChampionShards,
+      )}
     </>
   )
 }
@@ -83,23 +90,38 @@ const renderChampionMasteries = (
   view: MasteriesQueryView,
   champions: List<EnrichedChampionMastery>,
   championShards: Maybe<Dict<string, number>>,
+  setChampionShards: (champion: ChampionKey) => (count: number) => void,
 ): JSX.Element => {
   switch (view) {
     case 'compact':
-      return <ChampionMasteriesCompact champions={champions} championShards={championShards} />
+      return (
+        <ChampionMasteriesCompact
+          champions={champions}
+          championShards={championShards}
+          setChampionShards={setChampionShards}
+        />
+      )
     case 'histogram':
-      return <ChampionMasteriesHistogram champions={champions} championShards={championShards} />
+      return (
+        <ChampionMasteriesHistogram
+          champions={champions}
+          championShards={championShards}
+          setChampionShards={setChampionShards}
+        />
+      )
   }
 }
 
 type ChampionMasteriesCompactProps = {
   readonly champions: List<EnrichedChampionMastery>
   readonly championShards: Maybe<Dict<string, number>>
+  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const ChampionMasteriesCompact = ({
   champions,
   championShards,
+  setChampionShards,
 }: ChampionMasteriesCompactProps): JSX.Element => (
   <div className="flex flex-wrap gap-4 pt-4 pb-2">
     {champions.map(champion => (
@@ -107,6 +129,7 @@ const ChampionMasteriesCompact = ({
         key={ChampionKey.unwrap(champion.championId)}
         champion={champion}
         championShards={championShards}
+        setChampionShards={setChampionShards}
       />
     ))}
   </div>
@@ -115,11 +138,13 @@ const ChampionMasteriesCompact = ({
 type ChampionMasteriesHistogramProps = {
   readonly champions: List<EnrichedChampionMastery>
   readonly championShards: Maybe<Dict<string, number>>
+  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const ChampionMasteriesHistogram = ({
   champions,
   championShards,
+  setChampionShards,
 }: ChampionMasteriesHistogramProps): JSX.Element => {
   const maybeMaxPoints = useMemo(
     () =>
@@ -140,7 +165,11 @@ const ChampionMasteriesHistogram = ({
     <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-2">
       {champions.map(champion => (
         <Fragment key={ChampionKey.unwrap(champion.championId)}>
-          <ChampionMasterySquare champion={champion} championShards={championShards} />
+          <ChampionMasterySquare
+            champion={champion}
+            championShards={championShards}
+            setChampionShards={setChampionShards}
+          />
           <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
         </Fragment>
       ))}

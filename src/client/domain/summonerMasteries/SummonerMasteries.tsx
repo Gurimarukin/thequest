@@ -1,9 +1,11 @@
-/* eslint-disable functional/no-expression-statements */
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
 import { monoid, number, random, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
@@ -11,8 +13,9 @@ import type { StaticDataChampion } from '../../../shared/models/api/StaticDataCh
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import type { Dict } from '../../../shared/utils/fp'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { apiUserSelfSummonerChampionShardsCountPut } from '../../api'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -24,6 +27,7 @@ import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { EnrichedSummonerView } from './Summoner'
@@ -40,16 +44,54 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
   const { data, error, mutate } = useSWRHttp(
     apiRoutes.platform.summoner.byName.get(platform, clearSummonerName(summonerName)),
     {},
-    [SummonerMasteriesView.codec, 'SummonerView'],
+    [SummonerMasteriesView.codec, 'SummonerMasteriesView'],
   )
 
+  // Remove shards on user disconnect
   const previousUser = usePrevious(user)
-
   useEffect(() => {
     if (data !== undefined && Maybe.isNone(user) && Maybe.isSome(Maybe.flatten(previousUser))) {
       mutate({ ...data, championShards: Maybe.none }, { revalidate: false })
     }
   }, [data, mutate, previousUser, user])
+
+  const setChampionShards = useCallback(
+    (champion: ChampionKey) =>
+      (count: number): void => {
+        if (data === undefined) return
+        return pipe(
+          data.championShards,
+          Maybe.fold(
+            () => undefined,
+            previousChampionShards => {
+              mutate(
+                {
+                  ...data,
+                  championShards: Maybe.some({
+                    ...previousChampionShards,
+                    [ChampionKey.unwrap(champion)]: count,
+                  }),
+                },
+                { revalidate: false },
+              )
+              pipe(
+                apiUserSelfSummonerChampionShardsCountPut(data.summoner.id, champion, count),
+                // TODO: sucess toaster
+                // Future.map(() => {}),
+                Future.orElseW(() => {
+                  mutate(data, { revalidate: false })
+                  // TODO: error toaster
+                  alert('Erreur lors de la modification des fragments')
+                  return Future.right<void>(undefined)
+                }),
+                futureRunUnsafe,
+              )
+            },
+          ),
+        )
+      },
+    [data, mutate],
+  )
 
   return (
     <MainLayout>
@@ -59,6 +101,7 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
           summoner={summoner}
           masteries={masteries}
           championShards={championShards}
+          setChampionShards={setChampionShards}
         />
       ))}
     </MainLayout>
@@ -73,6 +116,7 @@ type SummonerViewProps = {
   readonly summoner: SummonerView
   readonly masteries: List<ChampionMasteryView>
   readonly championShards: Maybe<Dict<string, number>>
+  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const SummonerViewComponent = ({
@@ -80,6 +124,7 @@ const SummonerViewComponent = ({
   summoner,
   masteries,
   championShards,
+  setChampionShards,
 }: SummonerViewProps): JSX.Element => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
@@ -118,7 +163,11 @@ const SummonerViewComponent = ({
   return (
     <div className="flex flex-col p-2">
       <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
-      <Masteries masteries={enrichedMasteries} championShards={championShards} />
+      <Masteries
+        masteries={enrichedMasteries}
+        championShards={championShards}
+        setChampionShards={setChampionShards}
+      />
     </div>
   )
 }

@@ -1,8 +1,8 @@
 import * as C from 'io-ts/Codec'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
+import { SummonerId } from '../../../shared/models/api/summoner/SummonerId'
 
-import { SummonerId } from '../riot/SummonerId'
 import { UserId } from './UserId'
 
 type ChampionShardsDb = Readonly<C.TypeOf<typeof codec>>

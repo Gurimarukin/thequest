@@ -1,9 +1,10 @@
 import * as D from 'io-ts/Decoder'
 
+import { SummonerId } from '../../../shared/models/api/summoner/SummonerId'
+
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
 import { AccountId } from './AccountId'
 import { Puuid } from './Puuid'
-import { SummonerId } from './SummonerId'
 
 type RiotSummoner = Readonly<D.TypeOf<typeof decoder>>
 
