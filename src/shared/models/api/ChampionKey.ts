@@ -14,8 +14,10 @@ const { unwrap } = iso<ChampionKey>()
 
 const codec = fromNewtype<ChampionKey>(C.number)
 
+const stringify: (championKey: ChampionKey) => string = String
+
 const Eq: eq.Eq<ChampionKey> = pipe(number.Eq, eq.contramap(unwrap))
 
-const ChampionKey = { unwrap, codec, Eq }
+const ChampionKey = { unwrap, codec, stringify, Eq }
 
 export { ChampionKey }

@@ -81,7 +81,13 @@ export const futureEither = {
   ApplyPar,
   ap,
   apS: apply.apS(ApplyPar),
-  bind: fpTsChain.bind(Chain),
+  // actually bindW
+  bind: fpTsChain.bind(Chain) as <N extends string, A, E, F, B>(
+    name: Exclude<N, keyof A>,
+    f: (a: A) => Future<Either<F, B>>,
+  ) => (
+    ma: Future<Either<E, A>>,
+  ) => Future<Either<E | F, { readonly [K in N | keyof A]: K extends keyof A ? A[K] : B }>>,
   bindTo: functor.bindTo(Functor),
   chain,
   chainTaskEitherK,

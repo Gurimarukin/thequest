@@ -1,8 +1,7 @@
 import * as D from 'io-ts/Decoder'
 
-import { SummonerId } from '../../../shared/models/api/summoner/SummonerId'
-
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
+import { SummonerId } from '../summoner/SummonerId'
 import { AccountId } from './AccountId'
 import { Puuid } from './Puuid'
 

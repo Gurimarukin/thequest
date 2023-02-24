@@ -118,8 +118,8 @@ const decodeBody = <I = StatusOpen, A = never>(
   pipe(
     M.decodeHeader<I, Error, void>('Content-Type', contentType =>
       contentType === MediaType.applicationJSON
-        ? Either.right(undefined)
-        : Either.left(Error(expectedContentTypeToBeJSON)),
+        ? Try.success(undefined)
+        : Try.failure(Error(expectedContentTypeToBeJSON)),
     ),
     ichain(() => getBodyString()),
     ichain(flow(json.parse, Either.mapLeft(unknownToError), e => fromEither<I, json.Json>(e))),

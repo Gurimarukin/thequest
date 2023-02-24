@@ -39,8 +39,6 @@ const SummonerService = (
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersistence) => {
-  const { deleteByPlatformAndPuuid } = summonerPersistence
-
   return {
     findByName: (platform: Platform, summonerName: string): Future<Maybe<Summoner>> =>
       findAndCache(
@@ -56,7 +54,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
         riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
       ),
 
-    deleteByPlatformAndPuuid,
+    deleteByPlatformAndPuuid: summonerPersistence.deleteByPlatformAndPuuid,
   }
 
   function findAndCache(

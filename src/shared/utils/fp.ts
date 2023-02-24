@@ -49,7 +49,10 @@ type NonIONonNotUsed<A> = A extends NotUsed ? never : NonIO<A>
 export const toNotUsed = <A>(_: NonIONonNotUsed<A>): NotUsed => NotUsed
 
 export type Dict<K extends string, A> = readonlyRecord.ReadonlyRecord<K, A>
-export const Dict = readonlyRecord
+export const Dict = {
+  ...readonlyRecord,
+  empty: <K extends string, A>(): Dict<K, A> => readonlyRecord.empty,
+}
 
 export type Either<E, A> = either.Either<E, A>
 export const Either = {

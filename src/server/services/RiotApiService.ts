@@ -5,7 +5,6 @@ import type { Method } from '../../shared/models/Method'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
-import { SummonerId } from '../../shared/models/api/summoner/SummonerId'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Future, Maybe, Tuple } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
@@ -17,6 +16,7 @@ import { Puuid } from '../models/riot/Puuid'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
+import { SummonerId } from '../models/summoner/SummonerId'
 
 const { ddragon, ddragonCdn } = DDragonUtils
 

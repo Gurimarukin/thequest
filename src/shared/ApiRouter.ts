@@ -8,7 +8,6 @@ import type { Method } from './models/Method'
 import { ChampionKey } from './models/api/ChampionKey'
 import { Lang } from './models/api/Lang'
 import { Platform } from './models/api/Platform'
-import { SummonerId } from './models/api/summoner/SummonerId'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
 import { NumberFromString } from './utils/ioTsUtils'
@@ -28,15 +27,17 @@ const championKeyFromStringCodec: Codec<unknown, string, ChampionKey> = pipe(
 const api = lit('api')
 const apiHealthcheck = api.then(lit('healthcheck'))
 const apiStaticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
-const apiPlatform = api.then(codec('platform', Platform.codec))
-const apiPlatformSummoner = apiPlatform.then(lit('summoner'))
-const apiPlatformSummonerByName = apiPlatformSummoner.then(lit('byName')).then(str('summonerName'))
+const apiSummoner = api
+  .then(lit('summoner'))
+  .then(codec('platform', Platform.codec))
+  .then(str('summonerName'))
 const apiUser = api.then(lit('user'))
 const apiUserSelf = apiUser.then(lit('self'))
 const apiUserSelfFavorites = apiUserSelf.then(lit('favorites'))
-const apiUserSelfSummonerByIdChampionByKeyShardsCount = apiUserSelf
+const apiUserSelfSummonerChampionShardsCount = apiUserSelf
   .then(lit('summoner'))
-  .then(codec('summonerId', SummonerId.codec))
+  .then(codec('platform', Platform.codec))
+  .then(str('summonerName'))
   .then(lit('champion'))
   .then(codec('championKey', championKeyFromStringCodec))
   .then(lit('shardsCount'))
@@ -51,14 +52,11 @@ const apiUserRegisterPassword = apiUserRegister.then(lit('password'))
 // final
 const healthcheckGet = m(apiHealthcheck, 'get')
 const staticDataLangGet = m(apiStaticDataLang, 'get')
-const platformSummonerByNameGet = m(apiPlatformSummonerByName, 'get')
+const summonerGet = m(apiSummoner, 'get')
 const userSelfGet = m(apiUserSelf, 'get')
 const userSelfFavoritesPut = m(apiUserSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(apiUserSelfFavorites, 'delete')
-const apiUserSelfSummonerByIdChampionByKeyShardsCountPut = m(
-  apiUserSelfSummonerByIdChampionByKeyShardsCount,
-  'put',
-)
+const userSelfSummonerChampionShardsCountPut = m(apiUserSelfSummonerChampionShardsCount, 'put')
 const userLoginDiscordPost = m(apiUserLoginDiscord, 'post')
 const userLoginPasswordPost = m(apiUserLoginPassword, 'post')
 const userLogoutPost = m(apiUserLogout, 'post')
@@ -72,11 +70,7 @@ const userRegisterPasswordPost = m(apiUserRegisterPassword, 'post')
 export const apiParsers = {
   healthcheck: { get: p(healthcheckGet) },
   staticData: { lang: { get: p(staticDataLangGet) } },
-  platform: {
-    summoner: {
-      byName: { get: p(platformSummonerByNameGet) },
-    },
-  },
+  summoner: { get: p(summonerGet) },
   user: {
     self: {
       get: p(userSelfGet),
@@ -86,7 +80,7 @@ export const apiParsers = {
       },
       summoner: {
         champion: {
-          shardsCount: { put: p(apiUserSelfSummonerByIdChampionByKeyShardsCountPut) },
+          shardsCount: { put: p(userSelfSummonerChampionShardsCountPut) },
         },
       },
     },
@@ -108,13 +102,8 @@ export const apiParsers = {
 
 export const apiRoutes = {
   staticData: { lang: { get: (lang: Lang) => r(staticDataLangGet, { lang }) } },
-  platform: {
-    summoner: {
-      byName: {
-        get: (platform: Platform, summonerName: string) =>
-          r(platformSummonerByNameGet, { platform, summonerName }),
-      },
-    },
+  summoner: {
+    get: (platform: Platform, summonerName: string) => r(summonerGet, { platform, summonerName }),
   },
   user: {
     self: {
@@ -123,14 +112,13 @@ export const apiRoutes = {
         put: r(userSelfFavoritesPut, {}),
         delete: r(userSelfFavoritesDelete, {}),
       },
-      summoner: {
-        champion: {
+      summoner: (platform: Platform, summonerName: string) => ({
+        champion: (championKey: ChampionKey) => ({
           shardsCount: {
-            put: (summonerId: SummonerId, championKey: ChampionKey) =>
-              r(apiUserSelfSummonerByIdChampionByKeyShardsCountPut, { summonerId, championKey }),
+            put: r(userSelfSummonerChampionShardsCountPut, { platform, summonerName, championKey }),
           },
-        },
-      },
+        }),
+      }),
     },
     login: {
       discord: { post: r(userLoginDiscordPost, {}) },

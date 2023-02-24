@@ -13,6 +13,7 @@ import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { Puuid } from '../models/riot/Puuid'
 import { SummonerDb } from '../models/summoner/SummonerDb'
+import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 // https://www.mongodb.com/docs/manual/reference/collation
@@ -37,6 +38,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
+    { key: { platform: -1, id: -1 }, unique: true },
     { key: { platform: -1, puuid: -1 }, unique: true },
     { key: { platform: -1, name: -1 }, unique: true, collation: platformAndNameIndexCollation },
   ])
@@ -74,7 +76,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
         collection.updateOne(
           {
             platform: Platform.codec.encode(summoner.platform),
-            puuid: Puuid.codec.encode(summoner.puuid),
+            id: SummonerId.codec.encode(summoner.id),
           },
           summoner,
           { upsert: true, collation: platformAndNameIndexCollation },

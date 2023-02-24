@@ -227,7 +227,7 @@ const getAltedMiddlewareRoutes = (
 ): Dict<Method, Parser<EndedMiddleware>> => {
   const init: Dict<Method, Parser<EndedMiddleware>> = pipe(
     Method.values,
-    List.reduce({} as Dict<Method, Parser<EndedMiddleware>>, (acc, method) => ({
+    List.reduce(Dict.empty<Method, Parser<EndedMiddleware>>(), (acc, method) => ({
       ...acc,
       [method]: zero<EndedMiddleware>(),
     })),

@@ -3,10 +3,10 @@ import * as C from 'io-ts/Codec'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevel } from '../../../shared/models/api/ChampionLevel'
 import { Platform } from '../../../shared/models/api/Platform'
-import { SummonerId } from '../../../shared/models/api/summoner/SummonerId'
 import { List } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
+import { SummonerId } from '../summoner/SummonerId'
 
 type ChampionMasteryDb = Readonly<C.TypeOf<typeof codec>>
 type ChampionMasteryDbOutput = Readonly<C.OutputOf<typeof codec>>

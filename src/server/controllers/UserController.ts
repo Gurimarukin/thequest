@@ -5,16 +5,17 @@ import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
 import { DayJs } from '../../shared/models/DayJs'
-import type { ChampionKey } from '../../shared/models/api/ChampionKey'
+import { ChampionKey } from '../../shared/models/api/ChampionKey'
+import type { ChampionLevelOrZero } from '../../shared/models/api/ChampionLevel'
+import type { Platform } from '../../shared/models/api/Platform'
 import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
-import type { SummonerId } from '../../shared/models/api/summoner/SummonerId'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
-import { Either, Future, List, Maybe } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { decodeError } from '../../shared/utils/ioTsUtils'
@@ -30,6 +31,7 @@ import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
 import { UserLogin } from '../models/user/UserLogin'
 import type { DiscordService } from '../services/DiscordService'
+import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -40,6 +42,7 @@ type UserController = Readonly<ReturnType<typeof UserController>>
 function UserController(
   discordService: DiscordService,
   summonerService: SummonerService,
+  masteriesService: MasteriesService,
   userService: UserService,
 ) {
   const loginDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
@@ -134,29 +137,64 @@ function UserController(
     ),
 
     setSummonerChampionShardsCount:
-      (summoner: SummonerId, champion: ChampionKey) =>
+      (platform: Platform, summonerName: string, champion: ChampionKey) =>
       (user: TokenContent): EndedMiddleware =>
-        EndedMiddleware.withBody(D.number)(count =>
-          pipe(
+        EndedMiddleware.withBody(D.number)(count => {
+          const res = pipe(
             validateChampionShards(count),
-            Either.fold(
-              () => M.sendWithStatus(Status.BadRequest)('Invalid shards count'),
-              validatedCount =>
-                pipe(
-                  userService.setChampionShardsForSummoner(
-                    user.id,
-                    summoner,
-                    champion,
-                    validatedCount,
-                  ),
-                  M.fromTaskEither,
-                  M.ichain(success =>
-                    M.sendWithStatus(success ? Status.NoContent : Status.BadRequest)(''),
+            Either.mapLeft(() => Tuple.of(Status.BadRequest, 'Invalid shards count')),
+            Future.right,
+            futureEither.bindTo('validatedCount'),
+            futureEither.bind('summoner', () =>
+              pipe(
+                summonerService.findByName(platform, summonerName),
+                Future.map(
+                  Either.fromOption(() => Tuple.of(Status.NotFound, 'Summoner not found')),
+                ),
+              ),
+            ),
+            futureEither.bind('championLevel', ({ summoner }) =>
+              pipe(
+                masteriesService.findBySummoner(platform, summoner.id),
+                futureMaybe.map(
+                  flow(
+                    List.findFirst(m => ChampionKey.Eq.equals(m.championId, champion)),
+                    Maybe.map(m => m.championLevel),
+                    Maybe.getOrElse<ChampionLevelOrZero>(() => 0),
                   ),
                 ),
+                Future.map(
+                  Either.fromOption(() => Tuple.of(Status.NotFound, 'Masteries not found')),
+                ),
+              ),
             ),
-          ),
-        ),
+            futureEither.chain(({ validatedCount, summoner, championLevel }) =>
+              pipe(
+                userService.setChampionShardsForSummoner(
+                  user.id,
+                  summoner.id,
+                  champion,
+                  validatedCount,
+                  championLevel,
+                ),
+                Future.map(
+                  (success): Either<Tuple<Status, string>, Tuple<Status, string>> =>
+                    success
+                      ? Either.right(Tuple.of(Status.NoContent, ''))
+                      : Either.left(Tuple.of(Status.InternalServerError, '')),
+                ),
+              ),
+            ),
+            M.fromTaskEither,
+            M.ichain(
+              flow(
+                Either.getOrElse(e => e),
+                ([status, message]) => M.sendWithStatus(status)(message),
+              ),
+            ),
+          )
+          return res
+        }),
 
     loginDiscord,
     loginPassword,

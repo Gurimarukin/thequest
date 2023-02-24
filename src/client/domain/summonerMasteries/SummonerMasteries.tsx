@@ -2,6 +2,7 @@
                   functional/no-return-void */
 import { monoid, number, random, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
+import { optional } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
@@ -12,8 +13,7 @@ import type { Platform } from '../../../shared/models/api/Platform'
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
-import type { Dict } from '../../../shared/utils/fp'
-import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Dict, Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionShardsCountPut } from '../../api'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
@@ -42,7 +42,7 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
   const { user } = useUser()
 
   const { data, error, mutate } = useSWRHttp(
-    apiRoutes.platform.summoner.byName.get(platform, clearSummonerName(summonerName)),
+    apiRoutes.summoner.get(platform, clearSummonerName(summonerName)),
     {},
     [SummonerMasteriesView.codec, 'SummonerMasteriesView'],
   )
@@ -58,39 +58,29 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
   const setChampionShards = useCallback(
     (champion: ChampionKey) =>
       (count: number): void => {
-        if (data === undefined) return
-        return pipe(
-          data.championShards,
-          Maybe.fold(
-            () => undefined,
-            previousChampionShards => {
-              mutate(
-                {
-                  ...data,
-                  championShards: Maybe.some({
-                    ...previousChampionShards,
-                    [ChampionKey.unwrap(champion)]: count,
-                  }),
-                },
-                { revalidate: false },
-              )
-              pipe(
-                apiUserSelfSummonerChampionShardsCountPut(data.summoner.id, champion, count),
-                // TODO: sucess toaster
-                // Future.map(() => {}),
-                Future.orElseW(() => {
-                  mutate(data, { revalidate: false })
-                  // TODO: error toaster
-                  alert('Erreur lors de la modification des fragments')
-                  return Future.right<void>(undefined)
-                }),
-                futureRunUnsafe,
-              )
-            },
-          ),
+        if (data === undefined || Maybe.isNone(data.championShards)) return
+
+        mutate(
+          pipe(
+            SummonerMasteriesView.Lens.championShards.counts,
+            optional.modify(Dict.upsertAt(ChampionKey.stringify(champion), count)),
+          )(data),
+          { revalidate: false },
+        )
+        pipe(
+          apiUserSelfSummonerChampionShardsCountPut(platform, data.summoner.name, champion, count),
+          // TODO: sucess toaster
+          // Future.map(() => {}),
+          Future.orElseW(() => {
+            mutate(data, { revalidate: false })
+            // TODO: error toaster
+            alert('Erreur lors de la modification des fragments')
+            return Future.right<void>(undefined)
+          }),
+          futureRunUnsafe,
         )
       },
-    [data, mutate],
+    [data, mutate, platform],
   )
 
   return (
@@ -100,7 +90,10 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
           platform={platform}
           summoner={summoner}
           masteries={masteries}
-          championShards={championShards}
+          championShards={pipe(
+            championShards,
+            Maybe.map(s => s.counts),
+          )}
           setChampionShards={setChampionShards}
         />
       ))}
@@ -237,7 +230,7 @@ const enrichAll = (
   )
   const masteriesCount = pipe(
     ChampionLevelOrZero.values,
-    List.reduce({} as Dict<`${ChampionLevelOrZero}`, number>, (acc, key) => {
+    List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
       const value: number = grouped[key]?.length ?? 0
       return { ...acc, [key]: value }
     }),

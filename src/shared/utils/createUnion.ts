@@ -5,7 +5,7 @@
                   functional/no-expression-statements */
 
 /**
- * source: https://github.com/AlexGalays/spacelift/blob/be302c4807b23114de27dda6a90b315c3af56631/src/union.ts
+ * copypasta from: https://github.com/AlexGalays/spacelift/blob/be302c4807b23114de27dda6a90b315c3af56631/src/union.ts
  */
 import type { EnforceNonEmptyDict } from '../models/EnforceNonEmptyDict'
 import type { Dict, List } from './fp'

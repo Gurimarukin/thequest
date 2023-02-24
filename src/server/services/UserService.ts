@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/function'
 import readline from 'readline'
 
 import type { ChampionKey } from '../../shared/models/api/ChampionKey'
-import type { SummonerId } from '../../shared/models/api/summoner/SummonerId'
+import type { ChampionLevelOrZero } from '../../shared/models/api/ChampionLevel'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
@@ -14,6 +14,7 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { constants } from '../config/constants'
 import type { JwtHelper } from '../helpers/JwtHelper'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
+import type { SummonerId } from '../models/summoner/SummonerId'
 import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
@@ -22,6 +23,7 @@ import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
 import type { ChampionShardPersistence } from '../persistence/ChampionShardPersistence'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
+import type { SummonerService } from './SummonerService'
 
 type UserService = Readonly<ReturnType<typeof UserService>>
 
@@ -30,6 +32,7 @@ function UserService(
   Logger: LoggerGetter,
   championShardPersistence: ChampionShardPersistence,
   userPersistence: UserPersistence,
+  summonerService: SummonerService,
   jwtHelper: JwtHelper,
 ) {
   const logger = Logger('UserService')
@@ -153,12 +156,19 @@ function UserService(
     setChampionShardsForSummoner: (
       user: UserId,
       summoner: SummonerId,
-      champion: ChampionKey,
+      championId: ChampionKey,
       count: number,
+      championLevel: ChampionLevelOrZero,
     ): Future<boolean> =>
       count === 0
-        ? championShardPersistence.removeForChampion(user, summoner, champion)
-        : championShardPersistence.setForChampion({ user, summoner, champion, count }),
+        ? championShardPersistence.removeForChampion(user, summoner, championId)
+        : championShardPersistence.setForChampion({
+            user,
+            summoner,
+            champion: championId,
+            count,
+            updatedWhenChampionLevel: championLevel,
+          }),
   }
 
   function signToken(content: TokenContent): Future<Token> {

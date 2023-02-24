@@ -2,13 +2,13 @@ import { flow, pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
-import type { SummonerId } from '../../shared/models/api/summoner/SummonerId'
 import type { List, Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
+import type { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
 import type { RiotApiService } from './RiotApiService'
 

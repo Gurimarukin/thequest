@@ -2,7 +2,6 @@ import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
-import { SummonerId } from '../../shared/models/api/summoner/SummonerId'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -13,6 +12,7 @@ import type { ChampionMasteryDbOutput } from '../models/championMastery/Champion
 import { ChampionMasteryDb } from '../models/championMastery/ChampionMasteryDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
+import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 type ChampionMasteryPersistence = Readonly<ReturnType<typeof ChampionMasteryPersistence>>

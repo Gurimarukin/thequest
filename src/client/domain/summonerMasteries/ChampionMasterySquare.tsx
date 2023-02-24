@@ -95,7 +95,7 @@ export const ChampionMasterySquare = ({
           championShards,
           Maybe.map(
             flow(
-              Dict.lookup(`${ChampionKey.unwrap(championId)}`),
+              Dict.lookup(ChampionKey.stringify(championId)),
               Maybe.getOrElse(() => 0),
             ),
           ),
