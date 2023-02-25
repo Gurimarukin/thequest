@@ -5,3 +5,4 @@
 - encrypted
 - readonly
 - Future.successful and Future.failed
+- limit favorites
