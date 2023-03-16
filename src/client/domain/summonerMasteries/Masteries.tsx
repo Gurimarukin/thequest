@@ -7,7 +7,6 @@ import React, { Fragment, useMemo } from 'react'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
@@ -21,11 +20,10 @@ const { plural } = StringUtils
 
 type Props = {
   readonly masteries: List<EnrichedChampionMastery>
-  readonly championShards: Maybe<Dict<string, number>>
   readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-export const Masteries = ({ masteries, championShards, setChampionShards }: Props): JSX.Element => {
+export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element => {
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -71,12 +69,7 @@ export const Masteries = ({ masteries, championShards, setChampionShards }: Prop
       <div className="group relative flex justify-center text-sm">
         {`${plural(filteredAndSortedChampions.length, 'champion')} / ${champions.length}`}
       </div>
-      {renderChampionMasteries(
-        masteriesQuery.view,
-        filteredAndSortedChampions,
-        championShards,
-        setChampionShards,
-      )}
+      {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions, setChampionShards)}
     </>
   )
 }
@@ -89,46 +82,34 @@ const levelFilterPredicate =
 const renderChampionMasteries = (
   view: MasteriesQueryView,
   champions: List<EnrichedChampionMastery>,
-  championShards: Maybe<Dict<string, number>>,
   setChampionShards: (champion: ChampionKey) => (count: number) => void,
 ): JSX.Element => {
   switch (view) {
     case 'compact':
       return (
-        <ChampionMasteriesCompact
-          champions={champions}
-          championShards={championShards}
-          setChampionShards={setChampionShards}
-        />
+        <ChampionMasteriesCompact champions={champions} setChampionShards={setChampionShards} />
       )
     case 'histogram':
       return (
-        <ChampionMasteriesHistogram
-          champions={champions}
-          championShards={championShards}
-          setChampionShards={setChampionShards}
-        />
+        <ChampionMasteriesHistogram champions={champions} setChampionShards={setChampionShards} />
       )
   }
 }
 
 type ChampionMasteriesCompactProps = {
   readonly champions: List<EnrichedChampionMastery>
-  readonly championShards: Maybe<Dict<string, number>>
   readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const ChampionMasteriesCompact = ({
   champions,
-  championShards,
   setChampionShards,
 }: ChampionMasteriesCompactProps): JSX.Element => (
   <div className="flex flex-wrap justify-center gap-4 pt-4 pb-2">
     {champions.map(champion => (
       <ChampionMasterySquare
         key={ChampionKey.unwrap(champion.championId)}
-        champion={champion}
-        championShards={championShards}
+        {...champion}
         setChampionShards={setChampionShards}
       />
     ))}
@@ -137,13 +118,11 @@ const ChampionMasteriesCompact = ({
 
 type ChampionMasteriesHistogramProps = {
   readonly champions: List<EnrichedChampionMastery>
-  readonly championShards: Maybe<Dict<string, number>>
   readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const ChampionMasteriesHistogram = ({
   champions,
-  championShards,
   setChampionShards,
 }: ChampionMasteriesHistogramProps): JSX.Element => {
   const maybeMaxPoints = useMemo(
@@ -165,11 +144,7 @@ const ChampionMasteriesHistogram = ({
     <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-2">
       {champions.map(champion => (
         <Fragment key={ChampionKey.unwrap(champion.championId)}>
-          <ChampionMasterySquare
-            champion={champion}
-            championShards={championShards}
-            setChampionShards={setChampionShards}
-          />
+          <ChampionMasterySquare {...champion} setChampionShards={setChampionShards} />
           <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
         </Fragment>
       ))}

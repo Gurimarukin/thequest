@@ -6,7 +6,7 @@ import type { ChampionLevelOrZero } from '../../shared/models/api/ChampionLevel'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
-import { Dict, Either, Future, List, Maybe, NonEmptyArray, Try, Tuple } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe, Try } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
@@ -59,41 +59,34 @@ const SummonerController = (
     user: TokenContent,
     summoner: Summoner,
     masteries: List<ChampionMastery>,
-  ): Future<ChampionShardsView> {
+  ): Future<List<ChampionShardsView>> {
     return pipe(
       userService.listChampionShardsForSummoner(user.id, summoner.id),
       Future.chainEitherK(championShards =>
         pipe(
           championShards,
-          List.traverse(Try.Applicative)(({ champion, updatedWhenChampionLevel }) =>
+          List.traverse(Try.Applicative)(({ champion, count, updatedWhenChampionLevel }) =>
             pipe(
               masteries,
               List.findFirst(m => ChampionKey.Eq.equals(m.championId, champion)),
-              Maybe.fold(
-                (): ChampionLevelOrZero => 0,
-                m => m.championLevel,
-              ),
-              shouldNotifyChampionLeveledUp(updatedWhenChampionLevel),
+              Maybe.map(m => m.championLevel),
+              Maybe.getOrElse((): ChampionLevelOrZero => 0),
+              shouldNotifyChampionLeveledUp(count)(updatedWhenChampionLevel),
               Try.map(
-                Maybe.map(() =>
-                  Tuple.of(ChampionKey.stringify(champion), updatedWhenChampionLevel),
-                ),
+                (maybeShardsToRemove): ChampionShardsView => ({
+                  champion,
+                  count,
+                  shardsToRemoveFromNotification: pipe(
+                    maybeShardsToRemove,
+                    Maybe.map(shardsToRemove => ({
+                      leveledUpFrom: updatedWhenChampionLevel,
+                      shardsToRemove,
+                    })),
+                  ),
+                }),
               ),
             ),
           ),
-          Try.map(leveledUpFromNotifications => ({
-            counts: pipe(
-              championShards,
-              List.map(({ champion, count }) => Tuple.of(ChampionKey.stringify(champion), count)),
-              Dict.fromEntries,
-            ),
-            leveledUpFromNotifications: pipe(
-              leveledUpFromNotifications,
-              List.compact,
-              NonEmptyArray.fromReadonlyArray,
-              Maybe.map(Dict.fromEntries),
-            ),
-          })),
         ),
       ),
     )
@@ -106,6 +99,7 @@ export { SummonerController }
  * @returns shards to remove, if some
  */
 export const shouldNotifyChampionLeveledUp =
+  (shardsCount: number) =>
   (oldLevel: ChampionLevelOrZero) =>
   (newLevel: ChampionLevelOrZero): Try<Maybe<number>> => {
     if (newLevel < oldLevel) {
@@ -113,6 +107,6 @@ export const shouldNotifyChampionLeveledUp =
         Error(`shouldNotifyChampionLeveledUp: oldLevel should be equal to or lower than newLevel`),
       )
     }
-    const diff = newLevel - Math.max(oldLevel, 5)
-    return Try.success(diff <= 0 ? Maybe.none : Maybe.some(Math.min(diff, 2)))
+    const diff = Math.min(shardsCount, newLevel - Math.max(oldLevel, 5))
+    return Try.success(diff <= 0 ? Maybe.none : Maybe.some(diff))
   }

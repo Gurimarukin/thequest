@@ -29,6 +29,11 @@ const padStart =
 const pad10 = padStart(2)
 const pad100 = padStart(3)
 
+/**
+ * @example
+ * assert.deepStrictEqual(plural(1, 'jeton'), '1 jeton')
+ * assert.deepStrictEqual(plural(3, 'jeton'), '3 jetons')
+ */
 const plural = (n: number, unit: string): string =>
   `${n.toLocaleString()} ${unit}${n < 2 ? '' : 's'}`
 

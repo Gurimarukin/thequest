@@ -2,35 +2,48 @@
 import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback, useMemo } from 'react'
 
-import { ChampionKey } from '../../../shared/models/api/ChampionKey'
+import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
+import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { Dict, List, Maybe } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
 import { NumberUtils } from '../../utils/NumberUtils'
 import { cssClasses } from '../../utils/cssClasses'
-import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
 const { round } = NumberUtils
 const { plural } = StringUtils
 
 type ChampionMasterySquareProps = {
-  readonly champion: EnrichedChampionMastery
-  readonly championShards: Maybe<Dict<string, number>>
-  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
+  readonly championId: ChampionKey
+  // eslint-disable-next-line react/boolean-prop-naming
+  readonly chestGranted: boolean
+  readonly tokensEarned: number
+  readonly championLevel: ChampionLevelOrZero
+  readonly name: string
+  readonly percents: number
+  readonly shardsCount: Maybe<number>
+  readonly glow: Maybe<number>
+  readonly setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
 }
 
 export const ChampionMasterySquare = ({
-  champion: { championId, championLevel, chestGranted, tokensEarned, name, percents, glow },
-  championShards,
+  championId,
+  championLevel,
+  chestGranted,
+  tokensEarned,
+  name,
+  percents,
+  shardsCount,
+  glow,
   setChampionShards,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
   const setShardsCount = useMemo(
-    () => setChampionShards(championId),
+    () => (setChampionShards !== null ? setChampionShards(championId) : null),
     [championId, setChampionShards],
   )
 
@@ -92,14 +105,8 @@ export const ChampionMasterySquare = ({
           </div>
         ) : null}
         {pipe(
-          championShards,
-          Maybe.map(
-            flow(
-              Dict.lookup(ChampionKey.stringify(championId)),
-              Maybe.getOrElse(() => 0),
-            ),
-          ),
-          Maybe.filter(count => (championLevel === 7 ? 0 < count : true)),
+          shardsCount,
+          Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
           Maybe.fold(
             () => null,
             count => <Shards name={name} shardsCount={count} setShardsCount={setShardsCount} />,
@@ -174,16 +181,16 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 type ShardsProps = {
   readonly name: string
   readonly shardsCount: number
-  readonly setShardsCount: (count: number) => void
+  readonly setShardsCount: ((count: number) => void) | null
 }
 
 const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): JSX.Element => {
   const addShardCount = useCallback(
-    () => setShardsCount(shardsCount + 1),
+    () => setShardsCount?.(shardsCount + 1),
     [setShardsCount, shardsCount],
   )
   const removeShardCount = useCallback(
-    () => setShardsCount(shardsCount - 1),
+    () => setShardsCount?.(shardsCount - 1),
     [setShardsCount, shardsCount],
   )
   return (
@@ -198,7 +205,7 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
         <span
           className={cssClasses('mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]', [
             'invisible',
-            9 <= shardsCount,
+            setShardsCount === null || 9 <= shardsCount,
           ])}
         >
           <button
@@ -210,7 +217,7 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
             <AddOutline className="w-full" />
           </button>
         </span>
-        {0 < shardsCount ? (
+        {setShardsCount !== null && 0 < shardsCount ? (
           <span className="flex bg-black p-[2px]">
             <button
               type="button"

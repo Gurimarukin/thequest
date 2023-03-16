@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { monoid, number, random, string } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
@@ -11,8 +11,10 @@ import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
+import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
+import { ListUtils } from '../../../shared/utils/ListUtils'
 import { Dict, Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionShardsCountPut } from '../../api'
@@ -30,6 +32,8 @@ import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
+import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
+import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 
@@ -62,8 +66,14 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
 
         mutate(
           pipe(
-            SummonerMasteriesView.Lens.championShards.counts,
-            optional.modify(Dict.upsertAt(ChampionKey.stringify(champion), count)),
+            SummonerMasteriesView.Lens.championShards,
+            optional.modify(
+              ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
+                champion,
+                count,
+                shardsToRemoveFromNotification: Maybe.none,
+              }),
+            ),
           )(data),
           { revalidate: false },
         )
@@ -90,10 +100,7 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
           platform={platform}
           summoner={summoner}
           masteries={masteries}
-          championShards={pipe(
-            championShards,
-            Maybe.map(s => s.counts),
-          )}
+          championShards={championShards}
           setChampionShards={setChampionShards}
         />
       ))}
@@ -108,7 +115,7 @@ type SummonerViewProps = {
   readonly platform: Platform
   readonly summoner: SummonerView
   readonly masteries: List<ChampionMasteryView>
-  readonly championShards: Maybe<Dict<string, number>>
+  readonly championShards: Maybe<List<ChampionShardsView>>
   readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
@@ -149,19 +156,59 @@ const SummonerViewComponent = ({
   )
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
-    () => enrichAll(masteries, masteriesQuery.view, staticData.champions),
-    [masteries, masteriesQuery.view, staticData.champions],
+    () => enrichAll(masteries, championShards, masteriesQuery.view, staticData.champions),
+    [championShards, masteries, masteriesQuery.view, staticData.champions],
+  )
+
+  const notifications = useMemo(
+    (): Maybe<NonEmptyArray<ShardsToRemoveNotification>> =>
+      pipe(
+        championShards,
+        Maybe.map(
+          List.filterMap(({ champion, count, shardsToRemoveFromNotification }) =>
+            pipe(
+              shardsToRemoveFromNotification,
+              Maybe.chain(n =>
+                pipe(
+                  enrichedMasteries,
+                  List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
+                  Maybe.map(
+                    (c): Readonly<ShardsToRemoveNotification> => ({
+                      championId: champion,
+                      name: c.name,
+                      championLevel: c.championLevel,
+                      percents: c.percents,
+                      chestGranted: c.chestGranted,
+                      tokensEarned: c.tokensEarned,
+                      shardsCount: count,
+                      leveledUpFrom: n.leveledUpFrom,
+                      shardsToRemove: n.shardsToRemove,
+                    }),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Maybe.chain(NonEmptyArray.fromReadonlyArray),
+      ),
+    [championShards, enrichedMasteries],
   )
 
   return (
-    <div className="flex flex-col p-2">
-      <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
-      <Masteries
-        masteries={enrichedMasteries}
-        championShards={championShards}
-        setChampionShards={setChampionShards}
-      />
-    </div>
+    <>
+      <div className="flex flex-col p-2">
+        <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
+        <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
+      </div>
+      {pipe(
+        notifications,
+        Maybe.fold(
+          () => null,
+          n => <ShardsToRemoveModal notifications={n} />,
+        ),
+      )}
+    </>
   )
 }
 
@@ -176,21 +223,36 @@ type PartialMasteriesGrouped = Partial<
 
 const enrichAll = (
   masteries: List<ChampionMasteryView>,
+  championShards: Maybe<List<ChampionShardsView>>,
   view: MasteriesQueryView,
   staticDataChampions: List<StaticDataChampion>,
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
     List.map(({ key, name }): EnrichedChampionMastery => {
+      const shardsCount = pipe(
+        championShards,
+        Maybe.map(
+          flow(
+            List.findFirst(s => ChampionKey.Eq.equals(s.champion, key)),
+            Maybe.fold(
+              () => 0,
+              s => s.count,
+            ),
+          ),
+        ),
+      )
+
       // TODO: search
       const glow =
         view === 'compact' &&
         List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc', 'Pyke'])
           ? Maybe.some(random.random())
           : Maybe.none
+
       return pipe(
         masteries,
-        List.findFirst(c => c.championId === key),
+        List.findFirst(c => ChampionKey.Eq.equals(c.championId, key)),
         Maybe.fold(
           (): EnrichedChampionMastery => ({
             championId: key,
@@ -202,9 +264,16 @@ const enrichAll = (
             tokensEarned: 0,
             name,
             percents: 0,
+            shardsCount,
             glow,
           }),
-          champion => ({ ...champion, name, percents: championPercents(champion), glow }),
+          champion => ({
+            ...champion,
+            name,
+            percents: championPercents(champion),
+            shardsCount,
+            glow,
+          }),
         ),
       )
     }),
