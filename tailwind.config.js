@@ -19,6 +19,7 @@ module.exports = {
         'mastery-beige': '#52525b',
         'discord-blurple': '#5865f2',
         'discord-green': '#57f287',
+        'discord-red': '#ed4245',
         'discord-darkgreen': '#248045',
         'discord-darkgrey': '#2b2d31',
       },
