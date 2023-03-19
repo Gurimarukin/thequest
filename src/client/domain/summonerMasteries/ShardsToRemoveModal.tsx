@@ -20,6 +20,7 @@ import { ChampionMasterySquare } from './ChampionMasterySquare'
 
 type Props = {
   readonly notifications: NonEmptyArray<ShardsToRemoveNotification>
+  readonly hide: () => void
 }
 
 export type ShardsToRemoveNotification = {
@@ -53,7 +54,7 @@ const isCheckedLens = pipe(lens.id<IsChecked>(), lens.prop('isChecked'))
 
 const invert = predicate.not<boolean>(identity)
 
-export const ShardsToRemoveModal = ({ notifications }: Props): JSX.Element => {
+export const ShardsToRemoveModal = ({ notifications, hide }: Props): JSX.Element => {
   const toIsChecked = useCallback(
     () =>
       pipe(
@@ -88,7 +89,7 @@ export const ShardsToRemoveModal = ({ notifications }: Props): JSX.Element => {
   return (
     <Modal>
       <div className="flex max-h-full flex-col items-end overflow-auto border border-goldenrod bg-zinc-900 p-2">
-        <button type="button">
+        <button type="button" onClick={hide}>
           <CloseFilled className="w-5 fill-goldenrod" />
         </button>
         <div className="flex flex-col items-center p-4">

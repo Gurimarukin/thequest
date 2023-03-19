@@ -3,7 +3,7 @@
 import { monoid, number, random, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
@@ -160,10 +160,15 @@ const SummonerViewComponent = ({
     [championShards, masteries, masteriesQuery.view, staticData.champions],
   )
 
+  const [isNotificationsHidden, setIsNotificationsHidden] = useState(false)
+
+  const hideNotifications = useCallback(() => setIsNotificationsHidden(true), [])
+
   const notifications = useMemo(
     (): Maybe<NonEmptyArray<ShardsToRemoveNotification>> =>
       pipe(
         championShards,
+        Maybe.filter(() => !isNotificationsHidden),
         Maybe.map(
           List.filterMap(({ champion, count, shardsToRemoveFromNotification }) =>
             pipe(
@@ -192,7 +197,7 @@ const SummonerViewComponent = ({
         ),
         Maybe.chain(NonEmptyArray.fromReadonlyArray),
       ),
-    [championShards, enrichedMasteries],
+    [championShards, enrichedMasteries, isNotificationsHidden],
   )
 
   return (
@@ -205,7 +210,7 @@ const SummonerViewComponent = ({
         notifications,
         Maybe.fold(
           () => null,
-          n => <ShardsToRemoveModal notifications={n} />,
+          n => <ShardsToRemoveModal notifications={n} hide={hideNotifications} />,
         ),
       )}
     </>
