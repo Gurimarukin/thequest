@@ -1,6 +1,7 @@
 /* eslint-disable functional/no-expression-statements,
                 functional/no-return-void */
-import { number, ord, predicate, string } from 'fp-ts'
+import type { io } from 'fp-ts'
+import { number, ord, predicate, string, task } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { identity, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -8,7 +9,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { Future, NotUsed } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
@@ -16,10 +19,14 @@ import { Modal } from '../../components/Modal'
 import { ButtonPrimary, ButtonSecondary } from '../../components/buttons'
 import { ChevronForwardFilled, CloseFilled, ToggleFilled } from '../../imgs/svgIcons'
 import { cssClasses } from '../../utils/cssClasses'
+import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 
 type Props = {
   readonly notifications: NonEmptyArray<ShardsToRemoveNotification>
+  readonly setChampionsShardsBulk: (
+    updates: NonEmptyArray<ChampionShardsPayload>,
+  ) => Future<NotUsed>
   readonly hide: () => void
 }
 
@@ -54,7 +61,11 @@ const isCheckedLens = pipe(lens.id<IsChecked>(), lens.prop('isChecked'))
 
 const invert = predicate.not<boolean>(identity)
 
-export const ShardsToRemoveModal = ({ notifications, hide }: Props): JSX.Element => {
+export const ShardsToRemoveModal = ({
+  notifications,
+  setChampionsShardsBulk,
+  hide,
+}: Props): JSX.Element => {
   const toIsChecked = useCallback(
     () =>
       pipe(
@@ -84,6 +95,54 @@ export const ShardsToRemoveModal = ({ notifications, hide }: Props): JSX.Element
         ),
       ),
     [],
+  )
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const futureWithLoading = useCallback((f: Future<NotUsed>) => {
+    setIsLoading(true)
+    pipe(
+      f,
+      task.chainFirstIOK((): io.IO<void> => () => setIsLoading(false)),
+      futureRunUnsafe,
+    )
+  }, [])
+
+  const noSingleMode = useCallback(() => {
+    const n = NonEmptyArray.head(notifications)
+    pipe(
+      setChampionsShardsBulk([{ championKey: n.championId, shardsCount: n.shardsCount }]),
+      futureWithLoading,
+    )
+  }, [futureWithLoading, notifications, setChampionsShardsBulk])
+
+  const yesSingleMode = useCallback(() => {
+    const n = NonEmptyArray.head(notifications)
+    pipe(
+      setChampionsShardsBulk([
+        { championKey: n.championId, shardsCount: n.shardsCount - n.shardsToRemove },
+      ]),
+      futureWithLoading,
+    )
+  }, [futureWithLoading, notifications, setChampionsShardsBulk])
+
+  const confirmMultipleMode = useCallback(
+    () =>
+      pipe(
+        setChampionsShardsBulk(
+          pipe(
+            notificationsState,
+            NonEmptyArray.map(
+              (n): ChampionShardsPayload => ({
+                championKey: n.championId,
+                shardsCount: n.isChecked ? n.shardsCount - n.shardsToRemove : n.shardsCount,
+              }),
+            ),
+          ),
+        ),
+        futureWithLoading,
+      ),
+    [futureWithLoading, notificationsState, setChampionsShardsBulk],
   )
 
   return (
@@ -139,16 +198,22 @@ export const ShardsToRemoveModal = ({ notifications, hide }: Props): JSX.Element
           </ul>
           {isSingleMode ? (
             <div className="mt-6 flex gap-8">
-              <ButtonSecondary type="button">Non</ButtonSecondary>
-              <ButtonPrimary type="button">Oui</ButtonPrimary>
+              <ButtonSecondary type="button" onClick={noSingleMode} disabled={isLoading}>
+                Non
+              </ButtonSecondary>
+              <ButtonPrimary type="button" onClick={yesSingleMode} disabled={isLoading}>
+                Oui
+              </ButtonPrimary>
             </div>
           ) : (
-            <button
+            <ButtonPrimary
               type="button"
+              onClick={confirmMultipleMode}
+              disabled={isLoading}
               className="mt-6 bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
             >
               Confirmer
-            </button>
+            </ButtonPrimary>
           )}
         </div>
       </div>

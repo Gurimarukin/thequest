@@ -1,7 +1,4 @@
-import * as E from 'io-ts/Encoder'
-
 import { apiRoutes } from '../shared/ApiRouter'
-import type { ChampionKey } from '../shared/models/api/ChampionKey'
 import type { Platform } from '../shared/models/api/Platform'
 import { ChampionShardsPayload } from '../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithName } from '../shared/models/api/summoner/PlatformWithName'
@@ -32,14 +29,4 @@ export const apiUserSelfSummonerChampionsShardsCountPost = (
 ): Future<unknown> =>
   http(apiRoutes.user.self.summoner(platform, summonerName).championsShardsCount.post, {
     json: [NonEmptyArray.encoder(ChampionShardsPayload.codec), championsShards],
-  })
-
-export const apiUserSelfSummonerChampionShardsCountPut = (
-  platform: Platform,
-  summonerName: string,
-  championKey: ChampionKey,
-  shardsCount: number,
-): Future<unknown> =>
-  http(apiRoutes.user.self.summoner(platform, summonerName).champion(championKey).shardsCount.put, {
-    json: [E.id<number>(), shardsCount],
   })

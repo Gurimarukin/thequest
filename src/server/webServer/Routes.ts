@@ -32,9 +32,9 @@ export const Routes = (
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),
     m(api.user.self.favorites.delete, () => withAuth(userController.removeFavoriteSelf)),
-    m(api.user.self.summoner.champion.shardsCount.put, ({ platform, summonerName, championKey }) =>
-      withAuth(userController.setSummonerChampionShardsCount(platform, summonerName, championKey)),
-    ),
+    // m(api.user.self.summoner.champion.shardsCount.put, ({ platform, summonerName, championKey }) =>
+    //   withAuth(userController.setSummonerChampionShardsCount(platform, summonerName, championKey)),
+    // ),
     m(api.user.login.discord.post, () =>
       rateLimiter(2, MsDuration.minute(1))(userController.loginDiscord),
     ),

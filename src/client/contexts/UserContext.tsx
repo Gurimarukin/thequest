@@ -71,7 +71,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
         Maybe.map(newData => {
           refreshUser(Maybe.some(newData), { revalidate: false })
           pipe(
-            apiUserSelfFavoritesPut(summoner),
+            apiUserSelfFavoritesPut(summoner), // TODO: handle error
             Future.map(() => refreshUser()),
             futureRunUnsafe,
           )
@@ -100,7 +100,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
         Maybe.map(newData => {
           refreshUser(Maybe.some(newData), { revalidate: false })
           pipe(
-            apiUserSelfFavoritesDelete(summoner),
+            apiUserSelfFavoritesDelete(summoner), // TODO: handle error
             Future.map(() => refreshUser()),
             futureRunUnsafe,
           )

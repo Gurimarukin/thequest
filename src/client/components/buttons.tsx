@@ -14,7 +14,7 @@ const getButton =
         {...props}
         // eslint-disable-next-line react/button-has-type
         type={type}
-        className={cssClasses(baseClassName, className)}
+        className={cssClasses('disabled:opacity-25', baseClassName, className)}
       >
         {children}
       </button>

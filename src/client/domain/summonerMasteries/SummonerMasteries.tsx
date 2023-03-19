@@ -1,5 +1,4 @@
-/* eslint-disable functional/no-expression-statements,
-                  functional/no-return-void */
+/* eslint-disable functional/no-expression-statements */
 import { monoid, number, random, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
@@ -11,13 +10,15 @@ import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
+import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import { Dict, Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import type { NotUsed } from '../../../shared/utils/fp'
+import { Dict, Future, List, Maybe, NonEmptyArray, toNotUsed } from '../../../shared/utils/fp'
 
-import { apiUserSelfSummonerChampionShardsCountPut } from '../../api'
+import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -36,6 +37,11 @@ import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
 import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
+
+// should mutate data before API response
+type OptimisticMutation = {
+  readonly optimisticMutation: boolean
+}
 
 type Props = {
   readonly platform: Platform
@@ -59,37 +65,48 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
     }
   }, [data, mutate, previousUser, user])
 
-  const setChampionShards = useCallback(
-    (champion: ChampionKey) =>
-      (count: number): void => {
-        if (data === undefined || Maybe.isNone(data.championShards)) return
+  const setChampionsShardsBulk = useCallback(
+    (
+      updates: NonEmptyArray<ChampionShardsPayload>,
+      { optimisticMutation }: OptimisticMutation,
+    ): Future<NotUsed> => {
+      if (data === undefined || Maybe.isNone(data.championShards)) return Future.notUsed
 
+      if (optimisticMutation) {
         mutate(
           pipe(
             SummonerMasteriesView.Lens.championShards,
-            optional.modify(
-              ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
-                champion,
-                count,
-                shardsToRemoveFromNotification: Maybe.none,
-              }),
+            optional.modify(championsShards =>
+              pipe(
+                updates,
+                NonEmptyArray.reduce(championsShards, (acc, { championKey, shardsCount }) =>
+                  pipe(
+                    acc,
+                    ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
+                      champion: championKey,
+                      count: shardsCount,
+                      shardsToRemoveFromNotification: Maybe.none,
+                    }),
+                  ),
+                ),
+              ),
             ),
           )(data),
-          { revalidate: false },
         )
-        pipe(
-          apiUserSelfSummonerChampionShardsCountPut(platform, data.summoner.name, champion, count),
-          // TODO: sucess toaster
-          // Future.map(() => {}),
-          Future.orElseW(() => {
-            mutate(data, { revalidate: false })
-            // TODO: error toaster
-            alert('Erreur lors de la modification des fragments')
-            return Future.right<void>(undefined)
-          }),
-          futureRunUnsafe,
-        )
-      },
+      }
+      return pipe(
+        apiUserSelfSummonerChampionsShardsCountPost(platform, data.summoner.name, updates),
+        Future.map(toNotUsed),
+        // TODO: sucess toaster
+        // Future.map(() => {}),
+        Future.orElse(() => {
+          if (optimisticMutation) mutate(data, { revalidate: false })
+          // TODO: error toaster
+          alert('Erreur lors de la modification des fragments')
+          return Future.notUsed
+        }),
+      )
+    },
     [data, mutate, platform],
   )
 
@@ -101,7 +118,7 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
           summoner={summoner}
           masteries={masteries}
           championShards={championShards}
-          setChampionShards={setChampionShards}
+          setChampionsShardsBulk={setChampionsShardsBulk}
         />
       ))}
     </MainLayout>
@@ -116,7 +133,10 @@ type SummonerViewProps = {
   readonly summoner: SummonerView
   readonly masteries: List<ChampionMasteryView>
   readonly championShards: Maybe<List<ChampionShardsView>>
-  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
+  readonly setChampionsShardsBulk: (
+    updates: NonEmptyArray<ChampionShardsPayload>,
+    { optimisticMutation }: OptimisticMutation,
+  ) => Future<NotUsed>
 }
 
 const SummonerViewComponent = ({
@@ -124,7 +144,7 @@ const SummonerViewComponent = ({
   summoner,
   masteries,
   championShards,
-  setChampionShards,
+  setChampionsShardsBulk,
 }: SummonerViewProps): JSX.Element => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
@@ -168,7 +188,6 @@ const SummonerViewComponent = ({
     (): Maybe<NonEmptyArray<ShardsToRemoveNotification>> =>
       pipe(
         championShards,
-        Maybe.filter(() => !isNotificationsHidden),
         Maybe.map(
           List.filterMap(({ champion, count, shardsToRemoveFromNotification }) =>
             pipe(
@@ -197,7 +216,26 @@ const SummonerViewComponent = ({
         ),
         Maybe.chain(NonEmptyArray.fromReadonlyArray),
       ),
-    [championShards, enrichedMasteries, isNotificationsHidden],
+    [championShards, enrichedMasteries],
+  )
+
+  useEffect(() => {
+    setIsNotificationsHidden(false)
+  }, [notifications])
+
+  const setChampionShards = useCallback(
+    (championKey: ChampionKey) => (shardsCount: number) =>
+      pipe(
+        setChampionsShardsBulk([{ championKey, shardsCount }], { optimisticMutation: true }),
+        futureRunUnsafe,
+      ),
+    [setChampionsShardsBulk],
+  )
+
+  const nonOptimisticSetChampionsShardsBulk = useCallback(
+    (updates: NonEmptyArray<ChampionShardsPayload>): Future<NotUsed> =>
+      setChampionsShardsBulk(updates, { optimisticMutation: false }),
+    [setChampionsShardsBulk],
   )
 
   return (
@@ -208,9 +246,16 @@ const SummonerViewComponent = ({
       </div>
       {pipe(
         notifications,
+        Maybe.filter(() => !isNotificationsHidden),
         Maybe.fold(
           () => null,
-          n => <ShardsToRemoveModal notifications={n} hide={hideNotifications} />,
+          n => (
+            <ShardsToRemoveModal
+              notifications={n}
+              setChampionsShardsBulk={nonOptimisticSetChampionsShardsBulk}
+              hide={hideNotifications}
+            />
+          ),
         ),
       )}
     </>

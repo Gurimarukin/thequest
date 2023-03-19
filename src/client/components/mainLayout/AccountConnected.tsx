@@ -23,7 +23,7 @@ export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element =
   const hideMenu = useCallback(() => setMenuIsVisible(false), [])
 
   const disconnect = useCallback(
-    () => pipe(apiUserLogoutPost, Future.map(refreshUser), futureRunUnsafe),
+    () => pipe(apiUserLogoutPost, Future.map(refreshUser), futureRunUnsafe), // TODO: handle error
     [refreshUser],
   )
 

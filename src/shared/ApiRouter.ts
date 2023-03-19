@@ -1,23 +1,13 @@
 import type { Match, Parser } from 'fp-ts-routing'
 import { end, format, lit, str } from 'fp-ts-routing'
-import { pipe } from 'fp-ts/function'
-import type { Codec } from 'io-ts/Codec'
-import * as C from 'io-ts/Codec'
 
 import type { Method } from './models/Method'
-import { ChampionKey } from './models/api/ChampionKey'
 import { Lang } from './models/api/Lang'
 import { Platform } from './models/api/Platform'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
-import { NumberFromString } from './utils/ioTsUtils'
 
 const { codec } = RouterUtils
-
-const championKeyFromStringCodec: Codec<unknown, string, ChampionKey> = pipe(
-  NumberFromString.codec,
-  C.compose(ChampionKey.codec),
-)
 
 /**
  * matches
@@ -34,15 +24,11 @@ const summoner = api
 const user = api.then(lit('user'))
 const userSelf = user.then(lit('self'))
 const userSelfFavorites = userSelf.then(lit('favorites'))
-const userSelfSummoner = userSelf
+const userSelfSummonerChampionsShardsCount = userSelf
   .then(lit('summoner'))
   .then(codec('platform', Platform.codec))
   .then(str('summonerName'))
-const userSelfSummonerChampionsShardsCount = userSelfSummoner.then(lit('championsShardsCount'))
-const userSelfSummonerChampionShardsCount = userSelfSummoner
-  .then(lit('champion'))
-  .then(codec('championKey', championKeyFromStringCodec))
-  .then(lit('shardsCount'))
+  .then(lit('championsShardsCount'))
 const userLogin = user.then(lit('login'))
 const userLoginDiscord = userLogin.then(lit('discord'))
 const userLoginPassword = userLogin.then(lit('password'))
@@ -59,7 +45,6 @@ const userSelfGet = m(userSelf, 'get')
 const userSelfFavoritesPut = m(userSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(userSelfFavorites, 'delete')
 const userSelfSummonerChampionsShardsCountPost = m(userSelfSummonerChampionsShardsCount, 'post')
-const userSelfSummonerChampionShardsCountPut = m(userSelfSummonerChampionShardsCount, 'put')
 const userLoginDiscordPost = m(userLoginDiscord, 'post')
 const userLoginPasswordPost = m(userLoginPassword, 'post')
 const userLogoutPost = m(userLogout, 'post')
@@ -83,9 +68,6 @@ export const apiParsers = {
       },
       summoner: {
         championsShardsCount: { post: p(userSelfSummonerChampionsShardsCountPost) },
-        champion: {
-          shardsCount: { put: p(userSelfSummonerChampionShardsCountPut) },
-        },
       },
     },
     login: {
@@ -120,11 +102,6 @@ export const apiRoutes = {
         championsShardsCount: {
           post: r(userSelfSummonerChampionsShardsCountPost, { platform, summonerName }),
         },
-        champion: (championKey: ChampionKey) => ({
-          shardsCount: {
-            put: r(userSelfSummonerChampionShardsCountPut, { platform, summonerName, championKey }),
-          },
-        }),
       }),
     },
     login: {
