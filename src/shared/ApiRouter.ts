@@ -25,43 +25,46 @@ const championKeyFromStringCodec: Codec<unknown, string, ChampionKey> = pipe(
 
 // intermediate
 const api = lit('api')
-const apiHealthcheck = api.then(lit('healthcheck'))
-const apiStaticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
-const apiSummoner = api
+const healthcheck = api.then(lit('healthcheck'))
+const staticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
+const summoner = api
   .then(lit('summoner'))
   .then(codec('platform', Platform.codec))
   .then(str('summonerName'))
-const apiUser = api.then(lit('user'))
-const apiUserSelf = apiUser.then(lit('self'))
-const apiUserSelfFavorites = apiUserSelf.then(lit('favorites'))
-const apiUserSelfSummonerChampionShardsCount = apiUserSelf
+const user = api.then(lit('user'))
+const userSelf = user.then(lit('self'))
+const userSelfFavorites = userSelf.then(lit('favorites'))
+const userSelfSummoner = userSelf
   .then(lit('summoner'))
   .then(codec('platform', Platform.codec))
   .then(str('summonerName'))
+const userSelfSummonerChampionsShardsCount = userSelfSummoner.then(lit('championsShardsCount'))
+const userSelfSummonerChampionShardsCount = userSelfSummoner
   .then(lit('champion'))
   .then(codec('championKey', championKeyFromStringCodec))
   .then(lit('shardsCount'))
-const apiUserLogin = apiUser.then(lit('login'))
-const apiUserLoginDiscord = apiUserLogin.then(lit('discord'))
-const apiUserLoginPassword = apiUserLogin.then(lit('password'))
-const apiUserLogout = apiUser.then(lit('logout'))
-const apiUserRegister = apiUser.then(lit('register'))
-const apiUserRegisterDiscord = apiUserRegister.then(lit('discord'))
-const apiUserRegisterPassword = apiUserRegister.then(lit('password'))
+const userLogin = user.then(lit('login'))
+const userLoginDiscord = userLogin.then(lit('discord'))
+const userLoginPassword = userLogin.then(lit('password'))
+const userLogout = user.then(lit('logout'))
+const userRegister = user.then(lit('register'))
+const userRegisterDiscord = userRegister.then(lit('discord'))
+const userRegisterPassword = userRegister.then(lit('password'))
 
 // final
-const healthcheckGet = m(apiHealthcheck, 'get')
-const staticDataLangGet = m(apiStaticDataLang, 'get')
-const summonerGet = m(apiSummoner, 'get')
-const userSelfGet = m(apiUserSelf, 'get')
-const userSelfFavoritesPut = m(apiUserSelfFavorites, 'put')
-const userSelfFavoritesDelete = m(apiUserSelfFavorites, 'delete')
-const userSelfSummonerChampionShardsCountPut = m(apiUserSelfSummonerChampionShardsCount, 'put')
-const userLoginDiscordPost = m(apiUserLoginDiscord, 'post')
-const userLoginPasswordPost = m(apiUserLoginPassword, 'post')
-const userLogoutPost = m(apiUserLogout, 'post')
-const userRegisterDiscordPost = m(apiUserRegisterDiscord, 'post')
-const userRegisterPasswordPost = m(apiUserRegisterPassword, 'post')
+const healthcheckGet = m(healthcheck, 'get')
+const staticDataLangGet = m(staticDataLang, 'get')
+const summonerGet = m(summoner, 'get')
+const userSelfGet = m(userSelf, 'get')
+const userSelfFavoritesPut = m(userSelfFavorites, 'put')
+const userSelfFavoritesDelete = m(userSelfFavorites, 'delete')
+const userSelfSummonerChampionsShardsCountPost = m(userSelfSummonerChampionsShardsCount, 'post')
+const userSelfSummonerChampionShardsCountPut = m(userSelfSummonerChampionShardsCount, 'put')
+const userLoginDiscordPost = m(userLoginDiscord, 'post')
+const userLoginPasswordPost = m(userLoginPassword, 'post')
+const userLogoutPost = m(userLogout, 'post')
+const userRegisterDiscordPost = m(userRegisterDiscord, 'post')
+const userRegisterPasswordPost = m(userRegisterPassword, 'post')
 
 /**
  * parsers
@@ -79,6 +82,7 @@ export const apiParsers = {
         delete: p(userSelfFavoritesDelete),
       },
       summoner: {
+        championsShardsCount: { post: p(userSelfSummonerChampionsShardsCountPost) },
         champion: {
           shardsCount: { put: p(userSelfSummonerChampionShardsCountPut) },
         },
@@ -113,6 +117,9 @@ export const apiRoutes = {
         delete: r(userSelfFavoritesDelete, {}),
       },
       summoner: (platform: Platform, summonerName: string) => ({
+        championsShardsCount: {
+          post: r(userSelfSummonerChampionsShardsCountPost, { platform, summonerName }),
+        },
         champion: (championKey: ChampionKey) => ({
           shardsCount: {
             put: r(userSelfSummonerChampionShardsCountPut, { platform, summonerName, championKey }),

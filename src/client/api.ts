@@ -3,9 +3,11 @@ import * as E from 'io-ts/Encoder'
 import { apiRoutes } from '../shared/ApiRouter'
 import type { ChampionKey } from '../shared/models/api/ChampionKey'
 import type { Platform } from '../shared/models/api/Platform'
+import { ChampionShardsPayload } from '../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithName } from '../shared/models/api/summoner/PlatformWithName'
 import { LoginPasswordPayload } from '../shared/models/api/user/LoginPasswordPayload'
 import type { Future } from '../shared/utils/fp'
+import { NonEmptyArray } from '../shared/utils/fp'
 
 import { http } from './utils/http'
 
@@ -22,6 +24,15 @@ export const apiUserSelfFavoritesPut = (platformWithName: PlatformWithName): Fut
 
 export const apiUserSelfFavoritesDelete = (platformWithName: PlatformWithName): Future<unknown> =>
   http(apiRoutes.user.self.favorites.delete, { json: [PlatformWithName.codec, platformWithName] })
+
+export const apiUserSelfSummonerChampionsShardsCountPost = (
+  platform: Platform,
+  summonerName: string,
+  championsShards: NonEmptyArray<ChampionShardsPayload>,
+): Future<unknown> =>
+  http(apiRoutes.user.self.summoner(platform, summonerName).championsShardsCount.post, {
+    json: [NonEmptyArray.encoder(ChampionShardsPayload.codec), championsShards],
+  })
 
 export const apiUserSelfSummonerChampionShardsCountPut = (
   platform: Platform,
