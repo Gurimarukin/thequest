@@ -20,6 +20,7 @@ import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { MigrationPersistence } from './persistence/MigrationPersistence'
 import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
+import { DDragonService } from './services/DDragonService'
 import { HealthCheckService } from './services/HealthCheckService'
 import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
@@ -44,6 +45,7 @@ const of = (
 ) => {
   const jwtHelper = JwtHelper(config.jwtSecret)
 
+  const ddragonService = DDragonService(riotApiService)
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
   const userService = UserService(Logger, championShardPersistence, userPersistence, jwtHelper)
@@ -52,8 +54,8 @@ const of = (
     config,
     Logger,
     httpClient,
+    ddragonService,
     healthCheckService,
-    riotApiService,
     summonerService,
     masteriesService,
     userService,

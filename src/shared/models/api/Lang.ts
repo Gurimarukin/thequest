@@ -1,3 +1,6 @@
+import type { eq } from 'fp-ts'
+import { string } from 'fp-ts'
+
 import { createEnum } from '../../utils/createEnum'
 
 type Lang = typeof e.T
@@ -32,8 +35,10 @@ const e = createEnum(
   'zh_TW',
 )
 
-const defaultLang: Lang = 'en_US'
+const defaultLang: Lang = 'fr_FR'
 
-const Lang = { codec: e.codec, values: e.values, defaultLang }
+const Eq: eq.Eq<Lang> = string.Eq
+
+const Lang = { codec: e.codec, values: e.values, Eq, defaultLang }
 
 export { Lang }

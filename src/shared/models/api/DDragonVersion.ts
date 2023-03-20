@@ -1,3 +1,5 @@
+import { eq, string } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
@@ -10,6 +12,8 @@ const { unwrap } = iso<DDragonVersion>()
 
 const codec = fromNewtype<DDragonVersion>(C.string)
 
-const DDragonVersion = { unwrap, codec }
+const Eq: eq.Eq<DDragonVersion> = pipe(string.Eq, eq.contramap(unwrap))
+
+const DDragonVersion = { unwrap, codec, Eq }
 
 export { DDragonVersion }

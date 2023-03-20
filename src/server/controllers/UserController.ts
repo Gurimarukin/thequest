@@ -33,9 +33,9 @@ import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
 import { UserLogin } from '../models/user/UserLogin'
+import type { DDragonService } from '../services/DDragonService'
 import type { DiscordService } from '../services/DiscordService'
 import type { MasteriesService } from '../services/MasteriesService'
-import type { RiotApiService } from '../services/RiotApiService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -44,10 +44,10 @@ type UserController = Readonly<ReturnType<typeof UserController>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserController(
+  ddragonService: DDragonService,
   discordService: DiscordService,
   summonerService: SummonerService,
   masteriesService: MasteriesService,
-  riotApiService: RiotApiService,
   userService: UserService,
 ) {
   const loginDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
@@ -373,11 +373,8 @@ function UserController(
     championShards: NonEmptyArray<ChampionShardsPayload>,
   ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShardsPayload>>> {
     return pipe(
-      riotApiService.lol.ddragon.apiVersions,
-      Future.chain(versions =>
-        riotApiService.lol.ddragon.dataChampions(NonEmptyArray.head(versions), Lang.defaultLang),
-      ),
-      Future.map(dataChampions => {
+      ddragonService.latestDataChampions(Lang.defaultLang),
+      Future.map(({ champions: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,
           Dict.toReadonlyArray,

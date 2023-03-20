@@ -27,7 +27,7 @@ const MasteriesService = (
       DayJs.now,
       Future.fromIO,
       Future.chain(
-        flow(DayJs.subtract(constants.riotApi.cache.masteriesTtl), insertedAfter =>
+        flow(DayJs.subtract(constants.riotApi.cacheTtl.masteries), insertedAfter =>
           championMasteryPersistence.findBySummoner(platform, summonerId, insertedAfter),
         ),
       ),

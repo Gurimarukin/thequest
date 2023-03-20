@@ -20,8 +20,8 @@ export const Application = ({
   config,
   Logger,
   httpClient,
+  ddragonService,
   healthCheckService,
-  riotApiService,
   summonerService,
   masteriesService,
   userService,
@@ -31,13 +31,13 @@ export const Application = ({
   const discordService = DiscordService(config.client, httpClient)
 
   const healthCheckController = HealthCheckController(healthCheckService)
-  const staticDataController = StaticDataController(riotApiService)
+  const staticDataController = StaticDataController(ddragonService)
   const summonerController = SummonerController(summonerService, masteriesService, userService)
   const userController = UserController(
+    ddragonService,
     discordService,
     summonerService,
     masteriesService,
-    riotApiService,
     userService,
   )
 

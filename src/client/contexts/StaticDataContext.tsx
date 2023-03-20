@@ -3,7 +3,7 @@ import React, { createContext, useContext } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import type { ChampionKey } from '../../shared/models/api/ChampionKey'
-import type { Lang } from '../../shared/models/api/Lang'
+import { Lang } from '../../shared/models/api/Lang'
 import { StaticData } from '../../shared/models/api/StaticData'
 import type { StaticDataChampion } from '../../shared/models/api/StaticDataChampion'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
@@ -14,7 +14,7 @@ import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 
 const { ddragonCdn } = DDragonUtils
 
-const lang: Lang = 'fr_FR' // TODO: based on browser
+const lang: Lang = Lang.defaultLang // TODO: based on browser
 
 export type StaticDataContext = {
   readonly champions: List<StaticDataChampion>

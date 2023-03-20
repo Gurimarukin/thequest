@@ -57,6 +57,9 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     deleteByPlatformAndPuuid: summonerPersistence.deleteByPlatformAndPuuid,
   }
 
+  /**
+   * If `fromPersistence` is not found (taking cache ttl into account), call `fromApi` and persist result
+   */
   function findAndCache(
     platform: Platform,
     fromPersistence: (insertedAfter: DayJs) => Future<Maybe<SummonerDb>>,
@@ -65,7 +68,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     return pipe(
       DayJs.now,
       Future.fromIO,
-      Future.chain(flow(DayJs.subtract(constants.riotApi.cache.summonerTtl), fromPersistence)),
+      Future.chain(flow(DayJs.subtract(constants.riotApi.cacheTtl.summoner), fromPersistence)),
       futureMaybe.alt<Summoner>(() =>
         pipe(
           fromApi,

@@ -36,9 +36,10 @@ export const constants = {
     xRiotToken: 'X-Riot-Token',
     regionalHost: 'europe.api.riotgames.com',
     plateformEndpoint,
-    cache: {
-      summonerTtl: MsDuration.minutes(15),
-      masteriesTtl: MsDuration.minutes(5),
+    cacheTtl: {
+      ddragonLatestVersion: MsDuration.hour(1),
+      summoner: MsDuration.minutes(15),
+      masteries: MsDuration.minutes(5),
     },
   },
 }
