@@ -15,8 +15,7 @@ import { ChampionShardsView } from '../../../shared/models/api/summoner/Champion
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import type { NotUsed } from '../../../shared/utils/fp'
-import { Dict, Future, List, Maybe, NonEmptyArray, toNotUsed } from '../../../shared/utils/fp'
+import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
@@ -72,31 +71,33 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
     ): Future<NotUsed> => {
       if (data === undefined || Maybe.isNone(data.championShards)) return Future.notUsed
 
-      if (optimisticMutation) {
-        mutate(
+      const newData: SummonerMasteriesView = pipe(
+        SummonerMasteriesView.Lens.championShards,
+        optional.modify(championsShards =>
           pipe(
-            SummonerMasteriesView.Lens.championShards,
-            optional.modify(championsShards =>
+            updates,
+            NonEmptyArray.reduce(championsShards, (acc, { championId, shardsCount }) =>
               pipe(
-                updates,
-                NonEmptyArray.reduce(championsShards, (acc, { championId, shardsCount }) =>
-                  pipe(
-                    acc,
-                    ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
-                      champion: championId,
-                      count: shardsCount,
-                      shardsToRemoveFromNotification: Maybe.none,
-                    }),
-                  ),
-                ),
+                acc,
+                ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
+                  champion: championId,
+                  count: shardsCount,
+                  shardsToRemoveFromNotification: Maybe.none,
+                }),
               ),
             ),
-          )(data),
-        )
-      }
+          ),
+        ),
+      )(data)
+
+      if (optimisticMutation) mutate(newData)
+
       return pipe(
         apiUserSelfSummonerChampionsShardsCountPost(platform, data.summoner.name, updates),
-        Future.map(toNotUsed),
+        Future.map(() => {
+          if (!optimisticMutation) mutate(newData)
+          return NotUsed
+        }),
         // TODO: sucess toaster
         // Future.map(() => {}),
         Future.orElse(() => {
