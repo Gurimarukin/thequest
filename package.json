@@ -63,7 +63,7 @@
     "io-ts": "2.2.20",
     "jsonwebtoken": "9.0.0",
     "ky": "0.33.2",
-    "mongodb": "5.0.1",
+    "mongodb": "5.1.0",
     "monocle-ts": "2.3.13",
     "newtype-ts": "0.3.5",
     "qs": "6.11.0",
