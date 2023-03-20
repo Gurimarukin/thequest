@@ -37,6 +37,7 @@ export const Application = ({
     discordService,
     summonerService,
     masteriesService,
+    riotApiService,
     userService,
   )
 

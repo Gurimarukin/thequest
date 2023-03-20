@@ -76,7 +76,7 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
           ),
         ),
         // TODO: logger.trace
-        Future.map(res => res.acknowledged),
+        Future.map(r => r.modifiedCount <= 1),
       ),
 
     /**

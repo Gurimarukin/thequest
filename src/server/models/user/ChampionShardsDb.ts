@@ -8,6 +8,8 @@ import { UserId } from './UserId'
 
 type ChampionShardsDb = Readonly<C.TypeOf<typeof codec>>
 
+type ChampionShardsDbOutput = Readonly<C.OutputOf<typeof codec>>
+
 const codec = C.struct({
   user: UserId.codec,
   summoner: SummonerId.codec,
@@ -18,4 +20,4 @@ const codec = C.struct({
 
 const ChampionShardsDb = { codec }
 
-export { ChampionShardsDb }
+export { ChampionShardsDb, ChampionShardsDbOutput }

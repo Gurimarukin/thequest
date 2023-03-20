@@ -79,11 +79,11 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
             optional.modify(championsShards =>
               pipe(
                 updates,
-                NonEmptyArray.reduce(championsShards, (acc, { championKey, shardsCount }) =>
+                NonEmptyArray.reduce(championsShards, (acc, { championId, shardsCount }) =>
                   pipe(
                     acc,
                     ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
-                      champion: championKey,
+                      champion: championId,
                       count: shardsCount,
                       shardsToRemoveFromNotification: Maybe.none,
                     }),
@@ -226,7 +226,9 @@ const SummonerViewComponent = ({
   const setChampionShards = useCallback(
     (championKey: ChampionKey) => (shardsCount: number) =>
       pipe(
-        setChampionsShardsBulk([{ championKey, shardsCount }], { optimisticMutation: true }),
+        setChampionsShardsBulk([{ championId: championKey, shardsCount }], {
+          optimisticMutation: true,
+        }),
         futureRunUnsafe,
       ),
     [setChampionsShardsBulk],

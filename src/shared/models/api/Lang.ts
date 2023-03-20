@@ -32,6 +32,8 @@ const e = createEnum(
   'zh_TW',
 )
 
-const Lang = { codec: e.codec, values: e.values }
+const defaultLang: Lang = 'en_US'
+
+const Lang = { codec: e.codec, values: e.values, defaultLang }
 
 export { Lang }

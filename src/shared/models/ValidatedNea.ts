@@ -9,10 +9,7 @@ type ValidatedNea<E, A> = Either<NonEmptyArray<E>, A>
 
 const valid: <E = never, A = never>(a: A) => ValidatedNea<E, A> = Either.right
 
-const invalid: <E = never, A = never>(e: E) => ValidatedNea<E, A> = flow(
-  NonEmptyArray.of,
-  Either.left,
-)
+const invalid: <E = never, A = never>(e: NonEmptyArray<E>) => ValidatedNea<E, A> = Either.left
 
 const fromEither: <E, A>(either: Either<E, A>) => ValidatedNea<E, A> = Either.mapLeft(
   NonEmptyArray.of,

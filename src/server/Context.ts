@@ -46,13 +46,7 @@ const of = (
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
-  const userService = UserService(
-    Logger,
-    championShardPersistence,
-    userPersistence,
-    summonerService,
-    jwtHelper,
-  )
+  const userService = UserService(Logger, championShardPersistence, userPersistence, jwtHelper)
 
   return {
     config,

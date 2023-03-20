@@ -56,12 +56,14 @@ const RateLimiter = (Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDuration)
                 )
 
                 if (limit <= cleaned.length) {
-                  const res = pipe(
-                    logger.warn(`Too many request on route "${url}" with ip "${ip}"`),
-                    M.fromIOEither,
-                    M.ichain(() => M.sendWithStatus(Status.Unauthorized)('Too many requests')),
+                  return Tuple.of(
+                    requests,
+                    pipe(
+                      logger.warn(`Too many request on route "${url}" with ip "${ip}"`),
+                      M.fromIOEither,
+                      M.ichain(() => M.sendWithStatus(Status.Unauthorized)('Too many requests')),
+                    ),
                   )
-                  return Tuple.of(requests, res)
                 }
 
                 const newHistory = RequestsHistory.of(key, pipe(cleaned, List.append(now)))

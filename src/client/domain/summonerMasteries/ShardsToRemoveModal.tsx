@@ -111,7 +111,7 @@ export const ShardsToRemoveModal = ({
   const noSingleMode = useCallback(() => {
     const n = NonEmptyArray.head(notifications)
     pipe(
-      setChampionsShardsBulk([{ championKey: n.championId, shardsCount: n.shardsCount }]),
+      setChampionsShardsBulk([{ championId: n.championId, shardsCount: n.shardsCount }]),
       futureWithLoading,
     )
   }, [futureWithLoading, notifications, setChampionsShardsBulk])
@@ -120,7 +120,7 @@ export const ShardsToRemoveModal = ({
     const n = NonEmptyArray.head(notifications)
     pipe(
       setChampionsShardsBulk([
-        { championKey: n.championId, shardsCount: n.shardsCount - n.shardsToRemove },
+        { championId: n.championId, shardsCount: n.shardsCount - n.shardsToRemove },
       ]),
       futureWithLoading,
     )
@@ -134,7 +134,7 @@ export const ShardsToRemoveModal = ({
             notificationsState,
             NonEmptyArray.map(
               (n): ChampionShardsPayload => ({
-                championKey: n.championId,
+                championId: n.championId,
                 shardsCount: n.isChecked ? n.shardsCount - n.shardsToRemove : n.shardsCount,
               }),
             ),
