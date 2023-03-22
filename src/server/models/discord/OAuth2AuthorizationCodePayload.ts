@@ -1,9 +1,9 @@
 import * as E from 'io-ts/Encoder'
 
+import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 
 import { ClientSecret } from './ClientSecret'
-import { DiscordUserId } from './DiscordUserId'
 
 type OAuth2AuthorizationCodePayload = Readonly<E.TypeOf<typeof encoder>>
 

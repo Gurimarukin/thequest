@@ -3,12 +3,12 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { PullOperator } from 'mongodb'
 
 import { UserName } from '../../shared/models/api/user/UserName'
+import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, Maybe, NonEmptyArray, Tuple, toNotUsed } from '../../shared/utils/fp'
 
 import { FpCollection, FpCollectionHelpers } from '../helpers/FpCollection'
 import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
-import { DiscordUserId } from '../models/discord/DiscordUserId'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { UserOutput } from '../models/user/User'

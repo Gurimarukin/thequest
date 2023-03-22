@@ -4,6 +4,7 @@ import * as D from 'io-ts/Decoder'
 import { lens } from 'monocle-ts'
 
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
+import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { LogLevelOrOff } from '../../shared/models/logger/LogLevel'
 import { loadDotEnv } from '../../shared/utils/config/loadDotEnv'
 import { parseConfig } from '../../shared/utils/config/parseConfig'
@@ -17,7 +18,6 @@ import {
 } from '../../shared/utils/ioTsUtils'
 
 import { ClientSecret } from '../models/discord/ClientSecret'
-import { DiscordUserId } from '../models/discord/DiscordUserId'
 
 const seqS = ValidatedNea.getSeqS<string>()
 

@@ -2,12 +2,11 @@ import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
+import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { parseConfig } from '../../shared/utils/config/parseConfig'
 import type { Dict, Try } from '../../shared/utils/fp'
 import { Either, Maybe } from '../../shared/utils/fp'
 import { BooleanFromString, URLFromString } from '../../shared/utils/ioTsUtils'
-
-import { DiscordUserId } from '../../server/models/discord/DiscordUserId'
 
 const seqS = ValidatedNea.getSeqS<string>()
 

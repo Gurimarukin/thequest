@@ -1,8 +1,7 @@
 import * as D from 'io-ts/Decoder'
 
+import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { Maybe } from '../../../shared/utils/fp'
-
-import { DiscordUserId } from './DiscordUserId'
 
 type DiscordUser = Readonly<D.TypeOf<typeof decoder>>
 

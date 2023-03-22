@@ -1,8 +1,9 @@
 import * as C from 'io-ts/Codec'
 
+import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
+
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { AccessToken } from '../discord/AccessToken'
-import { DiscordUserId } from '../discord/DiscordUserId'
 import { RefreshToken } from '../discord/RefreshToken'
 
 type UserDiscordInfos = Readonly<C.TypeOf<typeof codec>>
