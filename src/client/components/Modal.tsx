@@ -11,5 +11,10 @@ export const Modal: React.FC = ({ children }) => {
     throw Error(`Modal layer not found: #${modalLayerId}`)
   }
 
-  return createPortal(<div className="flex h-screen w-screen items-center justify-center bg-black/50">{children}</div>, modalLayer)
+  return createPortal(
+    <div className="flex h-screen w-screen items-center justify-center bg-black/50">
+      {children}
+    </div>,
+    modalLayer,
+  )
 }
