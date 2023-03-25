@@ -70,30 +70,31 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
         List.concat(
           pipe(
             toUpsert,
-            List.map(
-              ({
-                championId,
-                shardsCount,
-                championLevel,
-              }): Readonly<AnyBulkWriteOperation<ChampionShardsDbOutput>> => ({
+            List.map((c): Readonly<AnyBulkWriteOperation<ChampionShardsDbOutput>> => {
+              const {
+                user: encodedUser,
+                summoner: encodedSummoner,
+                champion: encodedChampion,
+                ...$set
+              } = ChampionShardsDb.codec.encode({
+                user,
+                summoner,
+                champion: c.championId,
+                count: c.shardsCount,
+                updatedWhenChampionLevel: c.championLevel,
+              })
+              return {
                 updateOne: {
                   filter: {
-                    user: UserId.codec.encode(user),
-                    summoner: SummonerId.codec.encode(summoner),
-                    champion: ChampionKey.codec.encode(championId),
+                    user: encodedUser,
+                    summoner: encodedSummoner,
+                    champion: encodedChampion,
                   },
-                  update: {
-                    $set: ((): Readonly<
-                      Omit<ChampionShardsDbOutput, 'user' | 'summoner' | 'champion'>
-                    > => ({
-                      count: shardsCount,
-                      updatedWhenChampionLevel: championLevel,
-                    }))(),
-                  },
+                  update: { $set },
                   upsert: true,
                 },
-              }),
-            ),
+              }
+            }),
           ),
         ),
       )
