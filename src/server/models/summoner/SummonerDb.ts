@@ -1,4 +1,5 @@
 import * as C from 'io-ts/Codec'
+import * as E from 'io-ts/Encoder'
 
 import { Platform } from '../../../shared/models/api/Platform'
 
@@ -9,9 +10,9 @@ import { SummonerId } from './SummonerId'
 type SummonerDb = Readonly<C.TypeOf<typeof codec>>
 
 const codec = C.struct({
-  platform: Platform.codec,
   id: SummonerId.codec,
   puuid: Puuid.codec,
+  platform: Platform.codec,
   name: C.string,
   profileIconId: C.number,
   summonerLevel: C.number,
@@ -20,4 +21,12 @@ const codec = C.struct({
 
 const SummonerDb = { codec }
 
-export { SummonerDb }
+type SummonerDbPuuidOnly = Readonly<C.TypeOf<typeof summonerDbPuuidOnlyEncoder>>
+
+const summonerDbPuuidOnlyEncoder = E.struct({
+  puuid: Puuid.codec,
+})
+
+const SummonerDbPuuidOnly = { encoder: summonerDbPuuidOnlyEncoder }
+
+export { SummonerDb, SummonerDbPuuidOnly }

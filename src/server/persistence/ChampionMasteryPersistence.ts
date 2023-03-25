@@ -1,7 +1,6 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
-import { Platform } from '../../shared/models/api/Platform'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -28,21 +27,19 @@ const ChampionMasteryPersistence = (
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { platform: -1, summonerId: -1 }, unique: true },
+    { key: { summonerId: -1 }, unique: true },
   ])
 
   return {
     ensureIndexes,
 
     findBySummoner: (
-      platform: Platform,
       summonerId: SummonerId,
       insertedAfter: DayJs,
     ): Future<Maybe<ChampionMasteryDb>> =>
       pipe(
         collection.collection.future(c =>
           c.findOne({
-            platform: Platform.codec.encode(platform),
             summonerId: SummonerId.codec.encode(summonerId),
             insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
           }),
@@ -62,10 +59,7 @@ const ChampionMasteryPersistence = (
       return pipe(
         collection.collection.future(c =>
           c.updateOne(
-            {
-              platform: Platform.codec.encode(mastery.platform),
-              summonerId: SummonerId.codec.encode(mastery.summonerId),
-            },
+            { summonerId: SummonerId.codec.encode(mastery.summonerId) },
             { $set: encoded },
             { upsert: true },
           ),

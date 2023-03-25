@@ -194,7 +194,7 @@ function UserController(
           Future.map(
             Maybe.fold<Summoner, Either<PlatformWithPuuid, SummonerShort>>(
               () => Either.left({ platform, puuid }),
-              summoner => Either.right({ ...summoner, platform }),
+              Either.right,
             ),
           ),
         ),

@@ -8,11 +8,10 @@ import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, NonEmptyArray } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
-import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { Puuid } from '../models/riot/Puuid'
-import { SummonerDb } from '../models/summoner/SummonerDb'
+import { SummonerDb, SummonerDbPuuidOnly } from '../models/summoner/SummonerDb'
 import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
@@ -38,8 +37,8 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { platform: -1, id: -1 }, unique: true },
-    { key: { platform: -1, puuid: -1 }, unique: true },
+    { key: { id: -1 }, unique: true },
+    { key: { puuid: -1 }, unique: true },
     { key: { platform: -1, name: -1 }, unique: true, collation: platformAndNameIndexCollation },
   ])
 
@@ -60,37 +59,26 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
         { collation: platformAndNameIndexCollation },
       ),
 
-    findByPuuid: (
-      platform: Platform,
-      puuid: Puuid,
-      insertedAfter: DayJs,
-    ): Future<Maybe<SummonerDb>> =>
+    findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<SummonerDb>> =>
       collection.findOne({
-        platform: Platform.codec.encode(platform),
         puuid: Puuid.codec.encode(puuid),
         insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
       }),
 
     upsert: (summoner: SummonerDb): Future<boolean> =>
       pipe(
-        collection.updateOne(
-          {
-            platform: Platform.codec.encode(summoner.platform),
-            id: SummonerId.codec.encode(summoner.id),
-          },
-          summoner,
-          { upsert: true, collation: platformAndNameIndexCollation },
-        ),
+        collection.updateOne({ id: SummonerId.codec.encode(summoner.id) }, summoner, {
+          upsert: true,
+          collation: platformAndNameIndexCollation,
+        }),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),
 
-    deleteByPlatformAndPuuid: (searches: NonEmptyArray<PlatformWithPuuid>): Future<number> =>
+    deleteByPuuid: (searches: NonEmptyArray<SummonerDbPuuidOnly>): Future<number> =>
       pipe(
         collection.deleteMany({
-          $or: pipe(
-            searches,
-            NonEmptyArray.map(PlatformWithPuuid.codec.encode),
-            NonEmptyArray.asMutable,
+          $or: NonEmptyArray.asMutable(
+            NonEmptyArray.encoder(SummonerDbPuuidOnly.encoder).encode(searches),
           ),
         }),
         Future.map(r => r.deletedCount),

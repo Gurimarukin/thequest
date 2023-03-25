@@ -63,12 +63,12 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
-        insertedAfter => summonerPersistence.findByPuuid(platform, encryptedPUUID, insertedAfter),
+        insertedAfter => summonerPersistence.findByPuuid(encryptedPUUID, insertedAfter),
         riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
         { forceCacheRefresh },
       ),
 
-    deleteByPlatformAndPuuid: summonerPersistence.deleteByPlatformAndPuuid,
+    deleteByPlatformAndPuuid: summonerPersistence.deleteByPuuid,
   }
 
   /**
@@ -92,13 +92,14 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
       futureMaybe.alt<Summoner>(() =>
         pipe(
           fromApi,
+          futureMaybe.let('platform', () => platform),
           futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
           futureMaybe.chainFirstTaskEitherK(
             ({ id, puuid, name, profileIconId, summonerLevel, insertedAt }) =>
               summonerPersistence.upsert({
-                platform,
                 id,
                 puuid,
+                platform,
                 name,
                 profileIconId,
                 summonerLevel,

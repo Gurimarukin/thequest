@@ -122,6 +122,7 @@ export const futureMaybe = {
   apS: apply.apS(ApplyPar),
   bind: fpTsChain.bind(Chain),
   bindTo: functor.bindTo(Functor),
+  let: functor.let(Functor),
   chain,
   chainEitherK,
   chainNullableK,

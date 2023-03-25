@@ -1,15 +1,21 @@
 import * as E from 'io-ts/Encoder'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import { PlatformWithName } from '../../../shared/models/api/summoner/PlatformWithName'
+import { Platform } from '../../../shared/models/api/Platform'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { List } from '../../../shared/utils/fp'
+
+import { SummonerId } from '../summoner/SummonerId'
 
 type TheQuestProgression = Readonly<E.TypeOf<typeof encoder>>
 
 const encoder = E.struct({
   userId: DiscordUserId.codec,
-  summoner: PlatformWithName.codec,
+  summoner: E.struct({
+    id: SummonerId.codec,
+    platform: Platform.codec,
+    name: E.id<string>(),
+  }),
   percents: E.id<number>(),
   totalMasteryLevel: E.id<number>(),
   champions: E.struct({

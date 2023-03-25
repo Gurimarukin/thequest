@@ -73,7 +73,7 @@ const MadosayentisutoController = (
         'staticData',
         futureMaybe.fromTaskEither(ddragonService.latestDataChampions(Lang.defaultLang)),
       ),
-      futureMaybe.map(({ riotAccount, discord, masteries, staticData }): TheQuestProgression => {
+      futureMaybe.map(({ discord, summoner, masteries, staticData }): TheQuestProgression => {
         const percents: List<number> = pipe(
           staticData.champions.data,
           Dict.toReadonlyArray,
@@ -96,7 +96,11 @@ const MadosayentisutoController = (
           )
         return {
           userId: discord.id,
-          summoner: riotAccount,
+          summoner: {
+            id: summoner.id,
+            platform: summoner.platform,
+            name: summoner.name,
+          },
           percents: pipe(percents, monoid.concatAll(number.MonoidSum)) / percents.length,
           totalMasteryLevel: pipe(
             masteries,

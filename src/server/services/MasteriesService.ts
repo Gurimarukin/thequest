@@ -37,7 +37,7 @@ const MasteriesService = (
     return pipe(
       insertedAfterFuture,
       Future.chain(insertedAfter =>
-        championMasteryPersistence.findBySummoner(platform, summonerId, insertedAfter),
+        championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
       ),
       futureMaybe.map(m => m.champions),
       futureMaybe.alt<List<ChampionMastery>>(() =>
@@ -46,7 +46,7 @@ const MasteriesService = (
           futureMaybe.bindTo('champions'),
           futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
           futureMaybe.chainFirstTaskEitherK(({ champions, insertedAt }) =>
-            championMasteryPersistence.upsert({ platform, summonerId, champions, insertedAt }),
+            championMasteryPersistence.upsert({ summonerId, champions, insertedAt }),
           ),
           futureMaybe.map(({ champions }) => champions),
         ),
