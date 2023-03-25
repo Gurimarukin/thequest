@@ -68,7 +68,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
         { forceCacheRefresh },
       ),
 
-    deleteByPlatformAndPuuid: summonerPersistence.deleteByPuuid,
+    deleteByPuuid: summonerPersistence.deleteByPuuid,
   }
 
   /**

@@ -38,6 +38,8 @@ export type TObservable<A> = Omit<Readonly<rxjs.Observable<A>>, 'subscribe'> & {
 
 const fromReadonlyArray: <A>(fa: List<A>) => TObservable<A> = rxjs.from
 
+const empty = <A = never>(): TObservable<A> => fromReadonlyArray([])
+
 const fromSubscribe = <A>(
   subscribe: (subscriber: Readonly<rxjs.Subscriber<A>>) => Readonly<rxjs.TeardownLogic>,
 ): TObservable<A> => new rxjs.Observable<A>(subscribe) as TObservable<A>
@@ -100,6 +102,7 @@ const flatten = observable.flatten as unknown as <A>(
 ) => TObservable<A>
 
 export const TObservable = {
+  empty,
   fromReadonlyArray,
   fromSubscribe,
   fromTaskEither,

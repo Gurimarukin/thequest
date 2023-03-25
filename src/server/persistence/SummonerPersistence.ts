@@ -5,7 +5,7 @@ import type { CollationOptions } from 'mongodb'
 import type { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
-import { Future, NonEmptyArray } from '../../shared/utils/fp'
+import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -74,15 +74,17 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),
 
-    deleteByPuuid: (searches: NonEmptyArray<SummonerDbPuuidOnly>): Future<number> =>
-      pipe(
-        collection.deleteMany({
-          $or: NonEmptyArray.asMutable(
-            NonEmptyArray.encoder(SummonerDbPuuidOnly.encoder).encode(searches),
+    deleteByPuuid: (searches: List<SummonerDbPuuidOnly>): Future<number> =>
+      !List.isNonEmpty(searches)
+        ? Future.right(0)
+        : pipe(
+            collection.deleteMany({
+              $or: NonEmptyArray.asMutable(
+                NonEmptyArray.encoder(SummonerDbPuuidOnly.encoder).encode(searches),
+              ),
+            }),
+            Future.map(r => r.deletedCount),
           ),
-        }),
-        Future.map(r => r.deletedCount),
-      ),
 
     deleteBeforeDate: (date: DayJs): Future<number> =>
       pipe(

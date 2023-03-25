@@ -28,14 +28,14 @@ const MasteriesService = (
     summonerId: SummonerId,
     { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
   ): Future<Maybe<List<ChampionMastery>>> => {
-    const insertedAfterFuture = forceCacheRefresh
+    const futureInsertedAfter = forceCacheRefresh
       ? Future.right(DayJs.of(0))
       : pipe(
           Future.fromIO(DayJs.now),
           Future.map(DayJs.subtract(constants.riotApi.cacheTtl.masteries)),
         )
     return pipe(
-      insertedAfterFuture,
+      futureInsertedAfter,
       Future.chain(insertedAfter =>
         championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
       ),

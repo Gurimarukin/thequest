@@ -4,9 +4,9 @@ import type { PullOperator } from 'mongodb'
 
 import { UserName } from '../../shared/models/api/user/UserName'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import type { TObservable } from '../../shared/models/rx/TObservable'
+import { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
-import { Future, Maybe, NonEmptyArray, Tuple, toNotUsed } from '../../shared/utils/fp'
+import { Future, List, Maybe, NonEmptyArray, Tuple, toNotUsed } from '../../shared/utils/fp'
 
 import { FpCollection, FpCollectionHelpers } from '../helpers/FpCollection'
 import { PlatformWithPuuid } from '../models/PlatformWithPuuid'
@@ -52,9 +52,9 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
       })
     },
 
-    findAllByLoginDiscordId: (
-      users: NonEmptyArray<DiscordUserId>,
-    ): TObservable<User<UserLogin>> => {
+    findAllByLoginDiscordId: (users: List<DiscordUserId>): TObservable<User<UserLogin>> => {
+      if (!List.isNonEmpty(users)) return TObservable.empty()
+
       const inUsers = { $in: NonEmptyArray.encoder(DiscordUserId.codec).encode(users) }
       return collection.findAll()({
         $or: [{ [Keys.loginDiscordId]: inUsers }, { [Keys.loginPasswordDiscordId]: inUsers }],
@@ -123,23 +123,25 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
         ),
       ),
 
-    removeAllFavoriteSearches: (searches: NonEmptyArray<PlatformWithPuuid>): Future<NotUsed> =>
-      pipe(
-        collection.collection.future(c =>
-          c.updateMany(
-            {},
-            {
-              $pull: {
-                favoriteSearches: {
-                  $in: NonEmptyArray.codec(PlatformWithPuuid.codec).encode(searches),
+    removeAllFavoriteSearches: (searches: List<PlatformWithPuuid>): Future<NotUsed> =>
+      !List.isNonEmpty(searches)
+        ? Future.notUsed
+        : pipe(
+            collection.collection.future(c =>
+              c.updateMany(
+                {},
+                {
+                  $pull: {
+                    favoriteSearches: {
+                      $in: NonEmptyArray.codec(PlatformWithPuuid.codec).encode(searches),
+                    },
+                  } as PullOperator<UserOutput>,
                 },
-              } as PullOperator<UserOutput>,
-            },
+              ),
+            ),
+            // TODO: logger.trace
+            Future.map(toNotUsed),
           ),
-        ),
-        // TODO: logger.trace
-        Future.map(toNotUsed),
-      ),
   }
 }
 

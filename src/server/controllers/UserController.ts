@@ -201,11 +201,10 @@ function UserController(
       ),
       Future.chain(eithers => {
         const { left, right } = List.separate(eithers)
-        if (!List.isNonEmpty(left)) return Future.right(right)
         return pipe(
           apply.sequenceT(Future.ApplyPar)(
             userService.removeAllFavoriteSearches(left),
-            summonerService.deleteByPlatformAndPuuid(left),
+            summonerService.deleteByPuuid(left),
           ),
           Future.map(() => right),
         )
