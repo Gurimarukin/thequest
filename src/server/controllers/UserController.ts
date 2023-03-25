@@ -1,4 +1,4 @@
-import { apply, ord } from 'fp-ts'
+import { apply } from 'fp-ts'
 import type { Lazy } from 'fp-ts/function'
 import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
@@ -20,7 +20,6 @@ import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
 import { Dict, Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
-import { decodeError } from '../../shared/utils/ioTsUtils'
 import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { constants } from '../config/constants'
@@ -31,8 +30,7 @@ import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
-import { UserId } from '../models/user/UserId'
-import { UserLogin } from '../models/user/UserLogin'
+import type { UserId } from '../models/user/UserId'
 import type { DDragonService } from '../services/DDragonService'
 import type { DiscordService } from '../services/DiscordService'
 import type { MasteriesService } from '../services/MasteriesService'
@@ -124,7 +122,10 @@ function UserController(
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.right(User.userName(u)),
             favoriteSearches: fetchFavoriteSearches(u.favoriteSearches),
-            linkedRiotAccount: fetchLinkedRiotAccount(u),
+            linkedRiotAccount: pipe(
+              userService.getLinkedRiotAccount(u),
+              futureMaybe.map(a => a.riotAccount),
+            ),
           }),
         ),
         M.fromTaskEither,
@@ -212,22 +213,6 @@ function UserController(
     )
   }
 
-  function fetchLinkedRiotAccount(user: User<UserLogin>): Future<Maybe<PlatformWithName>> {
-    return pipe(
-      withRefreshDiscordToken(user)(discord =>
-        discordService.users.me.connections.get(discord.accessToken),
-      ),
-      Maybe.fold(() => futureMaybe.none, Future.map(Maybe.some)),
-      futureMaybe.chainOptionK(List.findFirst(c => c.type === 'riotgames')),
-      futureMaybe.chainEitherK(c =>
-        pipe(
-          PlatformWithName.fromStringDecoder.decode(c.name),
-          Either.mapLeft(decodeError('PlatformWithNameFromString')(c.name)),
-        ),
-      ),
-    )
-  }
-
   function favoriteSelf(
     updateFavoriteSearch: (id: UserId, search: PlatformWithPuuid) => Future<Maybe<boolean>>,
     uselessActionMessage: Lazy<string>,
@@ -251,63 +236,6 @@ function UserController(
           ),
         ),
       )
-  }
-
-  /**
-   * Refreshes token if needed
-   * @returns none if user hasn't linked to Discord account
-   */
-  function withRefreshDiscordToken(
-    user: User<UserLogin>,
-  ): <A>(f: (discord: UserDiscordInfos) => Future<A>) => Maybe<Future<A>> {
-    return f =>
-      pipe(
-        UserLogin.discordInfos(user.login),
-        Maybe.map(discord =>
-          pipe(
-            DayJs.now,
-            Future.fromIO,
-            Future.chain(now =>
-              ord.lt(DayJs.Ord)(now, discord.expiresAt)
-                ? f(discord)
-                : pipe(refreshToken(user, discord), Future.chain(f)),
-            ),
-          ),
-        ),
-      )
-  }
-
-  function refreshToken(
-    user: User<UserLogin>,
-    discord: UserDiscordInfos,
-  ): Future<UserDiscordInfos> {
-    return pipe(
-      discordService.oauth2.token.post.refreshToken(discord.refreshToken),
-      Future.bindTo('oauth2'),
-      Future.bind('now', () => Future.fromIO(DayJs.now)),
-      Future.map(
-        ({ oauth2, now }): UserDiscordInfos => ({
-          id: discord.id,
-          username: discord.username,
-          discriminator: discord.discriminator,
-          accessToken: oauth2.access_token,
-          expiresAt: pipe(now, DayJs.add(oauth2.expires_in)),
-          refreshToken: oauth2.refresh_token,
-        }),
-      ),
-      Future.chainFirst(newDiscord =>
-        pipe(
-          userService.updateLoginDiscord(
-            user.id,
-            pipe(user.login, UserLogin.setDiscordInfos(newDiscord)),
-          ),
-          Future.filterOrElse(
-            success => success,
-            () => Error(`Couldn't update user's login: ${UserId.unwrap(user.id)}`),
-          ),
-        ),
-      ),
-    )
   }
 
   function setSummonerChampionsShardsCount(

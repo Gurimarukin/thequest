@@ -1,4 +1,4 @@
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
@@ -17,6 +17,10 @@ import type { SummonerDb } from '../models/summoner/SummonerDb'
 import type { SummonerPersistence } from '../persistence/SummonerPersistence'
 import { getOnError } from '../utils/getOnError'
 import type { RiotApiService } from './RiotApiService'
+
+type ForceCacheRefresh = {
+  readonly forceCacheRefresh: boolean
+}
 
 type SummonerService = Readonly<ReturnType<typeof of>>
 
@@ -40,18 +44,28 @@ const SummonerService = (
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersistence) => {
   return {
-    findByName: (platform: Platform, summonerName: string): Future<Maybe<Summoner>> =>
+    findByName: (
+      platform: Platform,
+      summonerName: string,
+      { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+    ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
         insertedAfter => summonerPersistence.findByName(platform, summonerName, insertedAfter),
         riotApiService.lol.summoner.byName(platform, summonerName),
+        { forceCacheRefresh },
       ),
 
-    findByPuuid: (platform: Platform, encryptedPUUID: Puuid): Future<Maybe<Summoner>> =>
+    findByPuuid: (
+      platform: Platform,
+      encryptedPUUID: Puuid,
+      { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+    ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
         insertedAfter => summonerPersistence.findByPuuid(platform, encryptedPUUID, insertedAfter),
         riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
+        { forceCacheRefresh },
       ),
 
     deleteByPlatformAndPuuid: summonerPersistence.deleteByPlatformAndPuuid,
@@ -64,11 +78,17 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     platform: Platform,
     fromPersistence: (insertedAfter: DayJs) => Future<Maybe<SummonerDb>>,
     fromApi: Future<Maybe<RiotSummoner>>,
+    { forceCacheRefresh }: ForceCacheRefresh,
   ): Future<Maybe<Summoner>> {
+    const insertedAfter = forceCacheRefresh
+      ? Future.right(DayJs.of(0))
+      : pipe(
+          Future.fromIO(DayJs.now),
+          Future.map(DayJs.subtract(constants.riotApi.cacheTtl.summoner)),
+        )
     return pipe(
-      DayJs.now,
-      Future.fromIO,
-      Future.chain(flow(DayJs.subtract(constants.riotApi.cacheTtl.summoner), fromPersistence)),
+      insertedAfter,
+      Future.chain(fromPersistence),
       futureMaybe.alt<Summoner>(() =>
         pipe(
           fromApi,

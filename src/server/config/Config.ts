@@ -8,9 +8,10 @@ import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { LogLevelOrOff } from '../../shared/models/logger/LogLevel'
 import { loadDotEnv } from '../../shared/utils/config/loadDotEnv'
 import { parseConfig } from '../../shared/utils/config/parseConfig'
-import type { NonEmptyArray, Try } from '../../shared/utils/fp'
+import type { List, NonEmptyArray, Try } from '../../shared/utils/fp'
 import { Either, IO, Maybe } from '../../shared/utils/fp'
 import {
+  ArrayFromString,
   BooleanFromString,
   NonEmptyArrayFromString,
   NumberFromString,
@@ -29,6 +30,7 @@ export type Config = {
   readonly db: DbConfig
   readonly riotApiKey: string
   readonly jwtSecret: string
+  readonly madosayentisuto: MadosayentisutoConfig
 }
 
 export type ClientConfig = {
@@ -47,6 +49,11 @@ type DbConfig = {
   readonly dbName: string
   readonly user: string
   readonly password: string
+}
+
+export type MadosayentisutoConfig = {
+  readonly whitelistedIps: List<string>
+  readonly token: string
 }
 
 const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
@@ -76,6 +83,10 @@ const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
       }),
       riotApiKey: r(D.string)('RIOT_API_KEY'),
       jwtSecret: r(D.string)('JWT_SECRET'),
+      madosayentisuto: seqS<MadosayentisutoConfig>({
+        whitelistedIps: r(ArrayFromString.decoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
+        token: r(D.string)('MADOSAYENTISUTO_TOKEN'),
+      }),
     }),
   )
 

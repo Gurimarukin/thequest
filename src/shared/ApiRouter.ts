@@ -36,6 +36,11 @@ const userLogout = user.then(lit('logout'))
 const userRegister = user.then(lit('register'))
 const userRegisterDiscord = userRegister.then(lit('discord'))
 const userRegisterPassword = userRegister.then(lit('password'))
+const madosayentisuto = api.then(lit('madosayentisuto'))
+const madosayentisutoStaticData = madosayentisuto.then(lit('staticData'))
+const madosayentisutoUsersGetProgression = madosayentisuto
+  .then(lit('users'))
+  .then(lit('getProgression'))
 
 // final
 const healthcheckGet = m(healthcheck, 'get')
@@ -50,6 +55,8 @@ const userLoginPasswordPost = m(userLoginPassword, 'post')
 const userLogoutPost = m(userLogout, 'post')
 const userRegisterDiscordPost = m(userRegisterDiscord, 'post')
 const userRegisterPasswordPost = m(userRegisterPassword, 'post')
+const madosayentisutoStaticDataGet = m(madosayentisutoStaticData, 'get')
+const madosayentisutoUsersGetProgressionPost = m(madosayentisutoUsersGetProgression, 'post')
 
 /**
  * parsers
@@ -78,6 +85,12 @@ export const apiParsers = {
     register: {
       discord: { post: p(userRegisterDiscordPost) },
       password: { post: p(userRegisterPasswordPost) },
+    },
+  },
+  madosayentisuto: {
+    staticData: { get: p(madosayentisutoStaticDataGet) },
+    users: {
+      getProgression: { post: p(madosayentisutoUsersGetProgressionPost) },
     },
   },
 }

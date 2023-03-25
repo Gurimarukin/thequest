@@ -6,10 +6,10 @@ import { IO } from '../shared/utils/fp'
 import type { Context } from './Context'
 import { constants } from './config/constants'
 import { HealthCheckController } from './controllers/HealthCheckController'
+import { MadosayentisutoController } from './controllers/MadosayentisutoController'
 import { StaticDataController } from './controllers/StaticDataController'
 import { SummonerController } from './controllers/SummonerController'
 import { UserController } from './controllers/UserController'
-import { DiscordService } from './services/DiscordService'
 import { Routes } from './webServer/Routes'
 import { startWebServer } from './webServer/startWebServer'
 import { RateLimiter } from './webServer/utils/RateLimiter'
@@ -19,8 +19,8 @@ import { WithIp } from './webServer/utils/WithIp'
 export const Application = ({
   config,
   Logger,
-  httpClient,
   ddragonService,
+  discordService,
   healthCheckService,
   summonerService,
   masteriesService,
@@ -28,9 +28,17 @@ export const Application = ({
 }: Context): IO<NotUsed> => {
   const logger = Logger('Application')
 
-  const discordService = DiscordService(config.client, httpClient)
+  const withIp = WithIp(Logger, config)
 
   const healthCheckController = HealthCheckController(healthCheckService)
+  const madosayentisutoController = MadosayentisutoController(
+    config.madosayentisuto,
+    withIp,
+    ddragonService,
+    masteriesService,
+    summonerService,
+    userService,
+  )
   const staticDataController = StaticDataController(ddragonService)
   const summonerController = SummonerController(summonerService, masteriesService, userService)
   const userController = UserController(
@@ -41,7 +49,6 @@ export const Application = ({
     userService,
   )
 
-  const withIp = WithIp(Logger, config)
   const rateLimiter = RateLimiter(Logger, withIp, constants.rateLimiterLifeTime)
   const withAuth = WithAuth(userService)
 
@@ -49,6 +56,7 @@ export const Application = ({
     rateLimiter,
     withAuth,
     healthCheckController,
+    madosayentisutoController,
     staticDataController,
     summonerController,
     userController,

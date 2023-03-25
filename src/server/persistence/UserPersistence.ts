@@ -4,6 +4,7 @@ import type { PullOperator } from 'mongodb'
 
 import { UserName } from '../../shared/models/api/user/UserName'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
+import type { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, Maybe, NonEmptyArray, Tuple, toNotUsed } from '../../shared/utils/fp'
 
@@ -48,6 +49,15 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
       const encoded = DiscordUserId.codec.encode(id)
       return collection.findOne({
         $or: [{ [Keys.loginDiscordId]: encoded }, { [Keys.loginPasswordDiscordId]: encoded }],
+      })
+    },
+
+    findAllByLoginDiscordId: (
+      users: NonEmptyArray<DiscordUserId>,
+    ): TObservable<User<UserLogin>> => {
+      const inUsers = { $in: NonEmptyArray.encoder(DiscordUserId.codec).encode(users) }
+      return collection.findAll()({
+        $or: [{ [Keys.loginDiscordId]: inUsers }, { [Keys.loginPasswordDiscordId]: inUsers }],
       })
     },
 

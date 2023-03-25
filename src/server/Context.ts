@@ -21,6 +21,7 @@ import { MigrationPersistence } from './persistence/MigrationPersistence'
 import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
 import { DDragonService } from './services/DDragonService'
+import { DiscordService } from './services/DiscordService'
 import { HealthCheckService } from './services/HealthCheckService'
 import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
@@ -35,11 +36,11 @@ type Context = Readonly<ReturnType<typeof of>>
 const of = (
   config: Config,
   Logger: LoggerGetter,
-  httpClient: HttpClient,
   championMasteryPersistence: ChampionMasteryPersistence,
   championShardPersistence: ChampionShardPersistence,
   healthCheckPersistence: HealthCheckPersistence,
   userPersistence: UserPersistence,
+  discordService: DiscordService,
   riotApiService: RiotApiService,
   summonerService: SummonerService,
 ) => {
@@ -48,13 +49,19 @@ const of = (
   const ddragonService = DDragonService(riotApiService)
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
-  const userService = UserService(Logger, championShardPersistence, userPersistence, jwtHelper)
+  const userService = UserService(
+    Logger,
+    championShardPersistence,
+    userPersistence,
+    jwtHelper,
+    discordService,
+  )
 
   return {
     config,
     Logger,
-    httpClient,
     ddragonService,
+    discordService,
     healthCheckService,
     summonerService,
     masteriesService,
@@ -82,6 +89,7 @@ const load = (config: Config): Future<Context> => {
 
   const httpClient = HttpClient(Logger)
 
+  const discordService = DiscordService(config.client, httpClient)
   const riotApiService = RiotApiService(config.riotApiKey, httpClient)
 
   const cronJobPubSub = PubSub<CronJobEvent>()
@@ -96,11 +104,11 @@ const load = (config: Config): Future<Context> => {
       const context = of(
         config,
         Logger,
-        httpClient,
         championMasteryPersistence,
         championShardPersistence,
         healthCheckPersistence,
         userPersistence,
+        discordService,
         riotApiService,
         summonerService,
       )

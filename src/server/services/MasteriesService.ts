@@ -1,4 +1,4 @@
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
@@ -12,6 +12,10 @@ import type { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
 import type { RiotApiService } from './RiotApiService'
 
+type ForceCacheRefresh = {
+  readonly forceCacheRefresh: boolean
+}
+
 type MasteriesService = Readonly<ReturnType<typeof MasteriesService>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -22,14 +26,18 @@ const MasteriesService = (
   findBySummoner: (
     platform: Platform,
     summonerId: SummonerId,
-  ): Future<Maybe<List<ChampionMastery>>> =>
-    pipe(
-      DayJs.now,
-      Future.fromIO,
-      Future.chain(
-        flow(DayJs.subtract(constants.riotApi.cacheTtl.masteries), insertedAfter =>
-          championMasteryPersistence.findBySummoner(platform, summonerId, insertedAfter),
-        ),
+    { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+  ): Future<Maybe<List<ChampionMastery>>> => {
+    const insertedAfterFuture = forceCacheRefresh
+      ? Future.right(DayJs.of(0))
+      : pipe(
+          Future.fromIO(DayJs.now),
+          Future.map(DayJs.subtract(constants.riotApi.cacheTtl.masteries)),
+        )
+    return pipe(
+      insertedAfterFuture,
+      Future.chain(insertedAfter =>
+        championMasteryPersistence.findBySummoner(platform, summonerId, insertedAfter),
       ),
       futureMaybe.map(m => m.champions),
       futureMaybe.alt<List<ChampionMastery>>(() =>
@@ -43,7 +51,8 @@ const MasteriesService = (
           futureMaybe.map(({ champions }) => champions),
         ),
       ),
-    ),
+    )
+  },
 })
 
 export { MasteriesService }

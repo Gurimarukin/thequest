@@ -1,4 +1,4 @@
-import { json, number, task } from 'fp-ts'
+import { json as fpTsJson, number, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { OptionsOfJSONResponseBody } from 'got'
 import got, { HTTPError } from 'got'
@@ -6,7 +6,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 
 import type { Method } from '../../shared/models/Method'
-import type { NonEmptyArray, Tuple } from '../../shared/utils/fp'
+import type { Dict, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { Either, Future, IO, List, Maybe, Try } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
@@ -40,7 +40,7 @@ const HttpClient = (Logger: LoggerGetter) => {
     options: HttpOptions<O, B> = {},
     decoderWithName?: Tuple<Decoder<unknown, A>, string>,
   ): Future<A> {
-    const body = ((): O | undefined => {
+    const json = ((): O | undefined => {
       if (options.json === undefined) return undefined
       const [encoder, b] = options.json
       return encoder.encode(b)
@@ -51,7 +51,7 @@ const HttpClient = (Logger: LoggerGetter) => {
         got[method](url, {
           ...options,
           method,
-          body: body === undefined ? undefined : JSON.stringify(body),
+          json: json === undefined ? undefined : (json as Dict<string, unknown>),
         }),
       ),
       task.chainFirstIOK(
@@ -64,7 +64,7 @@ const HttpClient = (Logger: LoggerGetter) => {
         ),
       ),
       Future.chainEitherK(res =>
-        pipe(json.parse(res.body as string), Either.mapLeft(unknownToError)),
+        pipe(fpTsJson.parse(res.body as string), Either.mapLeft(unknownToError)),
       ),
       Future.chainEitherK(u => {
         if (decoderWithName === undefined) return Either.right(u as A)

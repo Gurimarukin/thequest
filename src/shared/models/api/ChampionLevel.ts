@@ -11,7 +11,9 @@ type ChampionLevel = typeof e.T
 
 const e = createEnum(1, 2, 3, 4, 5, 6, 7)
 
-const ChampionLevel = { codec: e.codec }
+const Eq: eq.Eq<ChampionLevel> = number.Eq
+
+const ChampionLevel = { codec: e.codec, Eq }
 
 type ChampionLevelOrZero = typeof eOrZero.T
 

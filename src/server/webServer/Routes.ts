@@ -4,6 +4,7 @@ import { MsDuration } from '../../shared/models/MsDuration'
 import type { List } from '../../shared/utils/fp'
 
 import type { HealthCheckController } from '../controllers/HealthCheckController'
+import type { MadosayentisutoController } from '../controllers/MadosayentisutoController'
 import type { StaticDataController } from '../controllers/StaticDataController'
 import type { SummonerController } from '../controllers/SummonerController'
 import type { UserController } from '../controllers/UserController'
@@ -17,6 +18,7 @@ export const Routes = (
   rateLimiter: RateLimiter,
   withAuth_: WithAuth,
   healthCheckController: HealthCheckController,
+  madosayentisutoController: MadosayentisutoController,
   staticDataController: StaticDataController,
   summonerController: SummonerController,
   userController: UserController,
@@ -47,6 +49,10 @@ export const Routes = (
     ),
     m(api.user.register.password.post, () =>
       rateLimiter(2, MsDuration.minute(1))(userController.registerPassword),
+    ),
+    m(
+      api.madosayentisuto.users.getProgression.post,
+      () => madosayentisutoController.getUsersProgression,
     ),
   ]
 }

@@ -64,6 +64,8 @@ const map = observable.map as unknown as <A, B>(
 const chain = observable.chain as unknown as <A, B>(
   f: (a: A) => TObservable<B>,
 ) => (ma: TObservable<A>) => TObservable<B>
+const chainEitherK = <A, B>(f: (a: A) => Try<B>): ((ma: TObservable<A>) => TObservable<B>) =>
+  flow(map(f), flattenTry)
 const chainTaskEitherK = <A, B>(f: (a: A) => Future<B>): ((fa: TObservable<A>) => TObservable<B>) =>
   chain(flow(f, fromTaskEither))
 const chainIOEitherK = <A, B>(f: (a: A) => IO<B>): ((fa: TObservable<A>) => TObservable<B>) =>
@@ -104,6 +106,7 @@ export const TObservable = {
   throwError: (e: Error): TObservable<never> => rxjs.throwError(e),
   map,
   chain,
+  chainEitherK,
   chainTaskEitherK,
   chainIOEitherK,
   chainFirst,
@@ -114,7 +117,6 @@ export const TObservable = {
   filterMap,
   compact,
   flatten,
-  flattenTry,
   concat:
     <B>(fb: TObservable<B>) =>
     <A>(fa: TObservable<A>): TObservable<A | B> =>

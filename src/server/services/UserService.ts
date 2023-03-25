@@ -1,13 +1,16 @@
-import { apply } from 'fp-ts'
+import { apply, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import readline from 'readline'
 
+import { DayJs } from '../../shared/models/DayJs'
+import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
-import { Future, List, Maybe, toNotUsed } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
+import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { constants } from '../config/constants'
 import type { JwtHelper } from '../helpers/JwtHelper'
@@ -18,10 +21,16 @@ import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
-import { UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
+import { UserLogin, UserLoginDiscord, UserLoginPassword } from '../models/user/UserLogin'
 import type { ChampionShardPersistence } from '../persistence/ChampionShardPersistence'
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
+import type { DiscordService } from './DiscordService'
+
+type RiotAccountWithDiscordInfos = {
+  readonly riotAccount: PlatformWithName
+  readonly discord: UserDiscordInfos
+}
 
 type UserService = Readonly<ReturnType<typeof UserService>>
 
@@ -31,12 +40,13 @@ function UserService(
   championShardPersistence: ChampionShardPersistence,
   userPersistence: UserPersistence,
   jwtHelper: JwtHelper,
+  discordService: DiscordService,
 ) {
   const logger = Logger('UserService')
 
   const {
+    findAllByLoginDiscordId,
     findById,
-    updateLoginDiscord,
     addFavoriteSearch,
     removeFavoriteSearch,
     removeAllFavoriteSearches,
@@ -144,8 +154,8 @@ function UserService(
         futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),
       ),
 
+    findAllByLoginDiscordId,
     findById,
-    updateLoginDiscord,
     addFavoriteSearch,
     removeFavoriteSearch,
     removeAllFavoriteSearches,
@@ -161,10 +171,87 @@ function UserService(
       )
       return championShardPersistence.bulkDeleteAndUpsert(user, summoner, { toDelete, toUpsert })
     },
+
+    getLinkedRiotAccount: (user: User<UserLogin>): Future<Maybe<RiotAccountWithDiscordInfos>> =>
+      pipe(
+        withRefreshDiscordToken(user)(discord =>
+          pipe(
+            discordService.users.me.connections.get(discord.accessToken),
+            Future.map(List.findFirst(c => c.type === 'riotgames')),
+            futureMaybe.chainEitherK(c =>
+              pipe(
+                PlatformWithName.fromStringDecoder.decode(c.name),
+                Either.mapLeft(decodeError('PlatformWithNameFromString')(c.name)),
+              ),
+            ),
+            futureMaybe.map(
+              (riotAccount): RiotAccountWithDiscordInfos => ({ riotAccount, discord }),
+            ),
+          ),
+        ),
+        Maybe.getOrElseW(() => futureMaybe.none),
+      ),
   }
 
   function signToken(content: TokenContent): Future<Token> {
     return jwtHelper.sign(TokenContent.codec)(content, { expiresIn: constants.account.tokenTtl })
+  }
+
+  /**
+   * Refreshes token if needed
+   * @returns none if user hasn't linked to Discord account
+   */
+  function withRefreshDiscordToken(
+    user: User<UserLogin>,
+  ): <A>(f: (discord: UserDiscordInfos) => Future<A>) => Maybe<Future<A>> {
+    return f =>
+      pipe(
+        UserLogin.discordInfos(user.login),
+        Maybe.map(discord =>
+          pipe(
+            DayJs.now,
+            Future.fromIO,
+            Future.chain(now =>
+              ord.lt(DayJs.Ord)(now, discord.expiresAt)
+                ? f(discord)
+                : pipe(refreshToken(user, discord), Future.chain(f)),
+            ),
+          ),
+        ),
+      )
+  }
+
+  function refreshToken(
+    user: User<UserLogin>,
+    discord: UserDiscordInfos,
+  ): Future<UserDiscordInfos> {
+    return pipe(
+      discordService.oauth2.token.post.refreshToken(discord.refreshToken),
+      Future.bindTo('oauth2'),
+      Future.bind('now', () => Future.fromIO(DayJs.now)),
+      Future.map(
+        ({ oauth2, now }): UserDiscordInfos => ({
+          id: discord.id,
+          username: discord.username,
+          discriminator: discord.discriminator,
+          accessToken: oauth2.access_token,
+          expiresAt: pipe(now, DayJs.add(oauth2.expires_in)),
+          refreshToken: oauth2.refresh_token,
+        }),
+      ),
+      Future.chainFirst(newDiscord =>
+        pipe(
+          userPersistence.updateLoginDiscord(
+            user.id,
+            pipe(user.login, UserLogin.setDiscordInfos(newDiscord)),
+          ),
+          Future.filterOrElse(
+            success => success,
+            () => Error(`Couldn't update user's login: ${UserId.unwrap(user.id)}`),
+          ),
+        ),
+      ),
+    )
   }
 }
 

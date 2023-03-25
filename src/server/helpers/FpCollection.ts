@@ -214,8 +214,9 @@ const fpCollectionHelpersFindAll =
     const count = Store<number>(0)
     return pipe(
       collection.observable(coll => coll.find(query, options).stream()),
-      TObservable.map(u => pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u)))),
-      TObservable.flattenTry,
+      TObservable.chainEitherK(u =>
+        pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u))),
+      ),
       TObservable.chainFirstIOK(() => count.modify(n => n + 1)),
       TObservable.map(Maybe.some),
       TObservable.concat(

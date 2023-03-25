@@ -2,7 +2,7 @@ import { pipe } from 'fp-ts/function'
 import type { AnyBulkWriteOperation } from 'mongodb'
 
 import { ChampionKey } from '../../shared/models/api/ChampionKey'
-import { Sink } from '../../shared/models/rx/Sink'
+import type { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, List } from '../../shared/utils/fp'
 
@@ -36,14 +36,11 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
   return {
     ensureIndexes,
 
-    listForSummoner: (user: UserId, summoner: SummonerId): Future<List<ChampionShardsDb>> =>
-      pipe(
-        collection.findAll()({
-          user: UserId.codec.encode(user),
-          summoner: SummonerId.codec.encode(summoner),
-        }),
-        Sink.readonlyArray,
-      ),
+    listForSummoner: (user: UserId, summoner: SummonerId): TObservable<ChampionShardsDb> =>
+      collection.findAll()({
+        user: UserId.codec.encode(user),
+        summoner: SummonerId.codec.encode(summoner),
+      }),
 
     bulkDeleteAndUpsert: (
       user: UserId,

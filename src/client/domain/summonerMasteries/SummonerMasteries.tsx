@@ -5,6 +5,7 @@ import { optional } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { Business } from '../../../shared/Business'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
@@ -323,7 +324,7 @@ const enrichAll = (
           champion => ({
             ...champion,
             name,
-            percents: championPercents(champion),
+            percents: Business.championPercents(champion),
             shardsCount,
             glow,
           }),
@@ -366,20 +367,4 @@ const enrichAll = (
     },
     enrichedMasteries: enrichedMasteries_,
   }
-}
-
-// Mastery 5: 50%
-// Mastery 6 tokens: 7% each
-// Mastery 7 tokens: 10% each
-// Shards (not based on user's favorites): 3% each
-const championPercents = (c: ChampionMasteryView): number => {
-  if (c.championLevel === 7) return 100
-
-  // 6-0: 67%, 6-1: 77%, 6-2: 87%, 6-3: 97%
-  if (c.championLevel === 6) return 67 + c.tokensEarned * 10
-
-  // 5-0: 50%, 5-1: 57%, 5-2: 64%
-  if (c.championLevel === 5) return 50 + c.tokensEarned * 7
-
-  return (c.championPoints / 21600) * 50
 }
