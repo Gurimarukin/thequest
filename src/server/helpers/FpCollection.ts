@@ -23,8 +23,8 @@ import type {
 import { Store } from '../../shared/models/Store'
 import type { LoggerType } from '../../shared/models/logger/LoggerType'
 import { TObservable } from '../../shared/models/rx/TObservable'
-import type { NonEmptyArray, NotUsed, Tuple } from '../../shared/utils/fp'
-import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
+import type { NotUsed, Tuple } from '../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, NonEmptyArray, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
@@ -56,7 +56,7 @@ export const FpCollection =
           Future.chain(() =>
             collection.future(c =>
               c.createIndexes(
-                List.asMutable(indexSpecs as NonEmptyArray<MongoIndexDescription>),
+                NonEmptyArray.asMutable(indexSpecs as NonEmptyArray<MongoIndexDescription>),
                 options,
               ),
             ),

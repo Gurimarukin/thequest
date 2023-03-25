@@ -4,7 +4,7 @@ import type { AnyBulkWriteOperation } from 'mongodb'
 import { ChampionKey } from '../../shared/models/api/ChampionKey'
 import type { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
-import { Future, List } from '../../shared/utils/fp'
+import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
@@ -46,11 +46,11 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
       user: UserId,
       summoner: SummonerId,
       { toDelete, toUpsert }: ToDeleteAndToUpsert<ChampionShardsLevel>,
-    ): Future<boolean> =>
-      pipe(
-        collection.collection.future(c =>
-          c.bulkWrite(
-            [
+    ): Future<boolean> => {
+      const operations: List<AnyBulkWriteOperation<ChampionShardsDbOutput>> = pipe(
+        !List.isNonEmpty(toDelete)
+          ? []
+          : [
               {
                 deleteMany: {
                   filter: {
@@ -59,50 +59,58 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
                     champion: {
                       $in: pipe(
                         toDelete,
-                        List.map(a => a.championId),
-                        List.codec(ChampionKey.codec).encode,
+                        NonEmptyArray.map(a => a.championId),
+                        NonEmptyArray.codec(ChampionKey.codec).encode,
                       ),
                     },
                   },
                 },
               },
-              ...pipe(
-                toUpsert,
-                List.map(
-                  ({
-                    championId,
-                    shardsCount,
-                    championLevel,
-                  }): Readonly<AnyBulkWriteOperation<ChampionShardsDbOutput>> => ({
-                    updateOne: {
-                      filter: {
-                        user: UserId.codec.encode(user),
-                        summoner: SummonerId.codec.encode(summoner),
-                        champion: ChampionKey.codec.encode(championId),
-                      },
-                      update: {
-                        $set: ((): Readonly<
-                          Omit<ChampionShardsDbOutput, 'user' | 'summoner' | 'champion'>
-                        > => ({
-                          count: shardsCount,
-                          updatedWhenChampionLevel: championLevel,
-                        }))(),
-                      },
-                      upsert: true,
-                    },
-                  }),
-                ),
-              ),
             ],
-            { ordered: false },
+        List.concat(
+          pipe(
+            toUpsert,
+            List.map(
+              ({
+                championId,
+                shardsCount,
+                championLevel,
+              }): Readonly<AnyBulkWriteOperation<ChampionShardsDbOutput>> => ({
+                updateOne: {
+                  filter: {
+                    user: UserId.codec.encode(user),
+                    summoner: SummonerId.codec.encode(summoner),
+                    champion: ChampionKey.codec.encode(championId),
+                  },
+                  update: {
+                    $set: ((): Readonly<
+                      Omit<ChampionShardsDbOutput, 'user' | 'summoner' | 'champion'>
+                    > => ({
+                      count: shardsCount,
+                      updatedWhenChampionLevel: championLevel,
+                    }))(),
+                  },
+                  upsert: true,
+                },
+              }),
+            ),
           ),
         ),
-        Future.map(
-          r =>
-            r.deletedCount <= toDelete.length &&
-            r.modifiedCount + r.upsertedCount <= toUpsert.length,
-        ),
-      ),
+      )
+
+      return !List.isNonEmpty(operations)
+        ? Future.right(true)
+        : pipe(
+            collection.collection.future(c =>
+              c.bulkWrite(NonEmptyArray.asMutable(operations), { ordered: false }),
+            ),
+            Future.map(
+              r =>
+                r.deletedCount <= toDelete.length &&
+                r.modifiedCount + r.upsertedCount <= toUpsert.length,
+            ),
+          )
+    },
   }
 }
 
