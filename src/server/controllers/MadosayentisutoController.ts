@@ -24,6 +24,7 @@ import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import type { WithIp } from '../webServer/utils/WithIp'
+import type { StaticDataController } from './StaticDataController'
 
 /**
  * `madosayentisuto`: any third party app (needs to be authorized with token)
@@ -39,7 +40,12 @@ const MadosayentisutoController = (
   masteriesService: MasteriesService,
   summonerService: SummonerService,
   userService: UserService,
+  staticDataController: StaticDataController,
 ) => {
+  const getStaticData: EndedMiddleware = withIpAndToken(
+    staticDataController.staticData(Lang.defaultLang),
+  )
+
   const getUsersProgression: EndedMiddleware = withIpAndToken(
     EndedMiddleware.withBody(NonEmptyArray.decoder(DiscordUserId.codec))(
       flow(
@@ -53,7 +59,10 @@ const MadosayentisutoController = (
     ),
   )
 
-  return { getUsersProgression }
+  return {
+    getStaticData,
+    getUsersProgression,
+  }
 
   function toProgression(user: User<UserLogin>): Future<Maybe<TheQuestProgression>> {
     return pipe(
@@ -100,6 +109,7 @@ const MadosayentisutoController = (
             id: summoner.id,
             platform: summoner.platform,
             name: summoner.name,
+            profileIconId: summoner.profileIconId,
           },
           percents: pipe(percents, monoid.concatAll(number.MonoidSum)) / percents.length,
           totalMasteryLevel: pipe(

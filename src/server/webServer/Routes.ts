@@ -50,6 +50,7 @@ export const Routes = (
     m(api.user.register.password.post, () =>
       rateLimiter(2, MsDuration.minute(1))(userController.registerPassword),
     ),
+    m(api.madosayentisuto.staticData.get, () => madosayentisutoController.getStaticData),
     m(
       api.madosayentisuto.users.getProgression.post,
       () => madosayentisutoController.getUsersProgression,

@@ -31,14 +31,6 @@ export const Application = ({
   const withIp = WithIp(Logger, config)
 
   const healthCheckController = HealthCheckController(healthCheckService)
-  const madosayentisutoController = MadosayentisutoController(
-    config.madosayentisuto,
-    withIp,
-    ddragonService,
-    masteriesService,
-    summonerService,
-    userService,
-  )
   const staticDataController = StaticDataController(ddragonService)
   const summonerController = SummonerController(summonerService, masteriesService, userService)
   const userController = UserController(
@@ -47,6 +39,16 @@ export const Application = ({
     summonerService,
     masteriesService,
     userService,
+  )
+
+  const madosayentisutoController = MadosayentisutoController(
+    config.madosayentisuto,
+    withIp,
+    ddragonService,
+    masteriesService,
+    summonerService,
+    userService,
+    staticDataController,
   )
 
   const rateLimiter = RateLimiter(Logger, withIp, constants.rateLimiterLifeTime)

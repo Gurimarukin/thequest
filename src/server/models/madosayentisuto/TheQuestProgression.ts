@@ -15,6 +15,7 @@ const encoder = E.struct({
     id: SummonerId.codec,
     platform: Platform.codec,
     name: E.id<string>(),
+    profileIconId: E.id<number>(),
   }),
   percents: E.id<number>(),
   totalMasteryLevel: E.id<number>(),
