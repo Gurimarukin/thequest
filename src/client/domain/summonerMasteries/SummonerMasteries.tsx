@@ -300,7 +300,9 @@ const enrichAll = (
       // TODO: search
       const glow =
         view === 'compact' &&
-        List.elem(string.Eq)(name, ['Renekton', 'Twitch', 'Vayne', 'LeBlanc', 'Pyke'])
+        List.elem(string.Eq)(name, [
+          /* 'Renekton', 'Twitch', 'Vayne', 'LeBlanc', 'Pyke' */
+        ])
           ? Maybe.some(random.random())
           : Maybe.none
 
