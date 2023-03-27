@@ -1,4 +1,9 @@
+/.docker-data
+/.env
+/.eslintcache
 /.parcel-cache
 /dist
 /node_modules
 /tsbuild
+
+.DS_STORE
