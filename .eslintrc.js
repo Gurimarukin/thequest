@@ -10,7 +10,7 @@ module.exports = {
   plugins: ['functional', 'fp-ts', 'tailwindcss'],
   extends: [
     'plugin:@typescript-eslint/recommended',
-    'plugin:functional/recommended',
+    'plugin:functional/strict',
     'plugin:fp-ts/all',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
@@ -39,21 +39,7 @@ module.exports = {
         allowHigherOrderFunctions: true,
       },
     ],
-    '@typescript-eslint/no-base-to-string': [
-      'error',
-      {
-        ignoredTypeNames: [
-          'APIInteractionDataResolvedChannel',
-          'APIRole',
-          'GuildChannel',
-          'Role',
-          'StageChannel',
-          'TextChannel',
-          'ThreadChannel',
-          'VoiceChannel',
-        ],
-      },
-    ],
+    '@typescript-eslint/no-base-to-string': 'error',
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-namespace': 'warn',
@@ -92,8 +78,8 @@ module.exports = {
         enforceParameterCount: false,
       },
     ],
-    'functional/no-conditional-statement': 'off', // switch aren't bad :/
-    'functional/no-expression-statement': [
+    'functional/no-conditional-statements': 'off', // switch aren't bad :/
+    'functional/no-expression-statements': [
       'warn',
       {
         ignorePattern: [
@@ -107,8 +93,20 @@ module.exports = {
         ],
       },
     ],
-    'functional/no-mixed-type': 'off',
-    'functional/no-return-void': ['error', { ignoreImplicit: true }],
+    'functional/no-mixed-types': 'off',
+    'functional/no-return-void': ['error', { ignoreInferredTypes: true }],
+    'functional/prefer-immutable-types': [
+      'error',
+      {
+        enforcement: 'ReadonlyShallow',
+        ignoreInferredTypes: true,
+        ignoreTypePattern: ['Date', 'Error', 'JSX.Element', 'React\\.*'],
+        parameters: {},
+        returnTypes: {},
+        variables: {},
+      },
+    ],
+    'functional/type-declaration-immutability': 'off',
     'max-len': [
       'warn',
       {
@@ -168,5 +166,6 @@ module.exports = {
     ],
     'space-in-parens': ['warn', 'never'],
     strict: 'warn',
+    'tailwindcss/no-custom-classname': ['warn', { whitelist: ['group/.*', 'peer/.*'] }],
   },
 }

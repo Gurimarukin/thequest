@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: baloopaaji2;
+  src: url('fonts/baloopaaji2.ttf');
+  font-weight: 'normal';
+}
+
+@font-face {
+  font-family: baloopaaji2;
+  src: url('fonts/baloopaaji2-bold.ttf');
+  font-weight: 'bold';
+}
+
+@font-face {
+  font-family: lolFont;
+  src: url('fonts/FrizQuadrataRegular.woff');
+}
