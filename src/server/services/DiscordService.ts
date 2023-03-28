@@ -3,7 +3,6 @@ import type { Future } from '../../shared/utils/fp'
 import { List } from '../../shared/utils/fp'
 
 import type { ClientConfig } from '../config/Config'
-import { constants } from '../config/constants'
 import type { HttpClient } from '../helpers/HttpClient'
 import { AccessToken } from '../models/discord/AccessToken'
 import { DiscordConnection } from '../models/discord/DiscordConnection'
@@ -13,7 +12,7 @@ import { OAuth2AuthorizationCodePayload } from '../models/discord/OAuth2Authoriz
 import { OAuth2RefreshTokenPayload } from '../models/discord/OAuth2RefreshTokenPayload'
 import type { RefreshToken } from '../models/discord/RefreshToken'
 
-const apiEndpoint = constants.discord.apiEndpoint
+const apiEndpoint = 'https://discord.com/api'
 
 type DiscordService = Readonly<ReturnType<typeof DiscordService>>
 
