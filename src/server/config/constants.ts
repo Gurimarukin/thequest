@@ -28,10 +28,6 @@ export const constants = {
     },
   },
 
-  discord: {
-    apiEndpoint: 'https://discord.com/api',
-  },
-
   riotApi: {
     xRiotToken: 'X-Riot-Token',
     regionalHost: 'europe.api.riotgames.com',

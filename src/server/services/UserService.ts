@@ -3,18 +3,20 @@ import { pipe } from 'fp-ts/function'
 import readline from 'readline'
 
 import { DayJs } from '../../shared/models/DayJs'
+import { Platform } from '../../shared/models/api/Platform'
 import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
+import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
 import { Either, Future, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
-import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { constants } from '../config/constants'
 import type { JwtHelper } from '../helpers/JwtHelper'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
+import type { DiscordConnection } from '../models/discord/DiscordConnection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import { TokenContent } from '../models/user/TokenContent'
@@ -177,11 +179,10 @@ function UserService(
         withRefreshDiscordToken(user)(discord =>
           pipe(
             discordService.users.me.connections.get(discord.accessToken),
-            Future.map(List.findFirst(c => c.type === 'riotgames')),
-            futureMaybe.chainEitherK(c =>
+            Future.chain(connections =>
               pipe(
-                PlatformWithName.fromStringDecoder.decode(c.name),
-                Either.mapLeft(decodeError('PlatformWithNameFromString')(c.name)),
+                platformWithNameFromRiotGames(discord, connections),
+                futureMaybe.alt(() => platformWithNameFromLeagueOfLegends(connections)),
               ),
             ),
             futureMaybe.map(
@@ -191,6 +192,54 @@ function UserService(
         ),
         Maybe.getOrElseW(() => futureMaybe.none),
       ),
+  }
+
+  // name can be either `<summonerName>#<platform>` (from LoL) or `<gameName>#<tagLine>` (from Riot account)
+  function platformWithNameFromRiotGames(
+    discord: UserDiscordInfos,
+    connections: List<DiscordConnection>,
+  ): Future<Maybe<PlatformWithName>> {
+    return pipe(
+      connections,
+      List.findFirst(c => c.type === 'riotgames'),
+      futureMaybe.fromOption,
+      futureMaybe.chain(c =>
+        pipe(
+          PlatformWithName.fromStringDecoder.decode(c.name),
+          Either.fold(
+            () =>
+              pipe(
+                logger.warn(
+                  `"riotgames" connection: couldn't decode <summonerName>#<platform> for user ${
+                    discord.username
+                  }#${discord.discriminator} (${DiscordUserId.unwrap(discord.id)}) - value: ${
+                    c.name
+                  }\nFalling back to "leagueoflegends", with default platform ${
+                    Platform.defaultPlatform
+                  }`,
+                ),
+                Future.fromIOEither,
+                Future.map(() => Maybe.none),
+              ),
+            futureMaybe.some,
+          ),
+        ),
+      ),
+    )
+  }
+
+  function platformWithNameFromLeagueOfLegends(
+    connections: List<DiscordConnection>,
+  ): Future<Maybe<PlatformWithName>> {
+    return pipe(
+      connections,
+      List.findFirstMap(c =>
+        c.type === 'riotgames'
+          ? Maybe.some<PlatformWithName>({ platform: Platform.defaultPlatform, name: c.name })
+          : Maybe.none,
+      ),
+      futureMaybe.fromOption,
+    )
   }
 
   function signToken(content: TokenContent): Future<Token> {
