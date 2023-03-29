@@ -18,6 +18,7 @@ import { ChampionMasteryPersistence } from './persistence/ChampionMasteryPersist
 import { ChampionShardPersistence } from './persistence/ChampionShardPersistence'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { MigrationPersistence } from './persistence/MigrationPersistence'
+import { RiotAccountPersistence } from './persistence/RiotAccountPersistence'
 import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
 import { DDragonService } from './services/DDragonService'
@@ -25,6 +26,7 @@ import { DiscordService } from './services/DiscordService'
 import { HealthCheckService } from './services/HealthCheckService'
 import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
+import { RiotAccountService } from './services/RiotAccountService'
 import { RiotApiService } from './services/RiotApiService'
 import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
@@ -39,12 +41,19 @@ const of = (
   championMasteryPersistence: ChampionMasteryPersistence,
   championShardPersistence: ChampionShardPersistence,
   healthCheckPersistence: HealthCheckPersistence,
+  riotAccountPersistence: RiotAccountPersistence,
   userPersistence: UserPersistence,
   discordService: DiscordService,
   riotApiService: RiotApiService,
   summonerService: SummonerService,
 ) => {
   const jwtHelper = JwtHelper(config.jwtSecret)
+
+  const riotAccountService = RiotAccountService(
+    riotAccountPersistence,
+    riotApiService,
+    summonerService,
+  )
 
   const ddragonService = DDragonService(riotApiService)
   const healthCheckService = HealthCheckService(healthCheckPersistence)
@@ -55,6 +64,8 @@ const of = (
     userPersistence,
     jwtHelper,
     discordService,
+    riotAccountService,
+    summonerService,
   )
 
   return {
@@ -84,13 +95,14 @@ const load = (config: Config): Future<Context> => {
   const championShardPersistence = ChampionShardPersistence(Logger, mongoCollection)
   const healthCheckPersistence = HealthCheckPersistence(withDb)
   const migrationPersistence = MigrationPersistence(Logger, mongoCollection)
+  const riotAccountPersistence = RiotAccountPersistence(Logger, mongoCollection)
   const summonerPersistence = SummonerPersistence(Logger, mongoCollection)
   const userPersistence = UserPersistence(Logger, mongoCollection)
 
   const httpClient = HttpClient(Logger)
 
   const discordService = DiscordService(config.client, httpClient)
-  const riotApiService = RiotApiService(config.riotApiKey, httpClient)
+  const riotApiService = RiotApiService(config.riot, httpClient)
 
   const cronJobPubSub = PubSub<CronJobEvent>()
 
@@ -107,6 +119,7 @@ const load = (config: Config): Future<Context> => {
         championMasteryPersistence,
         championShardPersistence,
         healthCheckPersistence,
+        riotAccountPersistence,
         userPersistence,
         discordService,
         riotApiService,
@@ -144,6 +157,7 @@ const load = (config: Config): Future<Context> => {
           NonEmptyArray.sequence(Future.ApplicativeSeq)([
             championMasteryPersistence.ensureIndexes,
             championShardPersistence.ensureIndexes,
+            riotAccountPersistence.ensureIndexes,
             summonerPersistence.ensureIndexes,
             userPersistence.ensureIndexes,
           ]),

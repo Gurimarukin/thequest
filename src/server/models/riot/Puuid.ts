@@ -4,6 +4,8 @@ import { iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
+// encrypted puuid
+
 type Puuid = Newtype<{ readonly Puuid: unique symbol }, string>
 
 const { unwrap } = iso<Puuid>()

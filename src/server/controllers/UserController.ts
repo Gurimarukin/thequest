@@ -123,8 +123,9 @@ function UserController(
             userName: Future.right(User.userName(u)),
             favoriteSearches: fetchFavoriteSearches(u.favoriteSearches),
             linkedRiotAccount: pipe(
-              userService.getLinkedRiotAccount(u),
-              futureMaybe.map(a => a.riotAccount),
+              userService.getLinkedRiotAccount({ forceCacheRefresh: false })(u),
+              futureMaybe.chainOptionK(Maybe.fromEither),
+              futureMaybe.map(a => a.summoner),
             ),
           }),
         ),
