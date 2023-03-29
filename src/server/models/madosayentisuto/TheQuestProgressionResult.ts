@@ -1,28 +1,31 @@
 import * as E from 'io-ts/Encoder'
 
-import { Either } from '../../../shared/utils/fp'
-
 import { TheQuestProgression } from './TheQuestProgression'
+import { TheQuestProgressionError } from './TheQuestProgressionError'
 
 type TheQuestProgressionResult = Readonly<E.TypeOf<typeof encoder>>
 
 const encoder = E.sum('type')({
-  riotAccountNotFound: E.struct({
-    // type: E.id<'riotAccountNotFound'>(),
-    connectionName: E.id<string>(),
+  summonerNotFound: E.struct({
+    type: E.id<'summonerNotFound'>(),
+    error: TheQuestProgressionError.encoder,
   }),
   ok: E.struct({
-    // type: E.id<'riotAccountNotFound'>(),
+    type: E.id<'ok'>(),
     progression: TheQuestProgression.encoder,
   }),
 })
 
-const fromEither: (e: Either<string, TheQuestProgression>) => TheQuestProgressionResult =
-  Either.foldW(
-    connectionName => ({ connectionName }),
-    progression => ({ progression }),
-  )
+const summonerNotFound = (error: TheQuestProgressionError): TheQuestProgressionResult => ({
+  type: 'summonerNotFound',
+  error,
+})
 
-const TheQuestProgressionResult = { encoder, fromEither }
+const ok = (progression: TheQuestProgression): TheQuestProgressionResult => ({
+  type: 'ok',
+  progression,
+})
+
+const TheQuestProgressionResult = { encoder, summonerNotFound, ok }
 
 export { TheQuestProgressionResult }

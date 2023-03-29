@@ -1,5 +1,5 @@
 import { apply, monoid, number, string } from 'fp-ts'
-import { flow, pipe } from 'fp-ts/function'
+import { flow, identity, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
@@ -54,17 +54,12 @@ const MadosayentisutoController = (
           Maybe.fold(
             () => futureMaybe.none,
             Either.fold(
-              flow(Either.left, futureMaybe.some),
-              flow(
-                toProgression,
-                futureMaybe.map<TheQuestProgression, Either<string, TheQuestProgression>>(
-                  Either.right,
-                ),
-              ),
+              flow(TheQuestProgressionResult.summonerNotFound, futureMaybe.some),
+              flow(toProgression, futureMaybe.map(TheQuestProgressionResult.ok)),
             ),
           ),
         ),
-        TObservable.filterMap(Maybe.map(TheQuestProgressionResult.fromEither)),
+        TObservable.filterMap(identity),
         Sink.readonlyArray,
         M.fromTaskEither,
         M.ichain(M.json(List.encoder(TheQuestProgressionResult.encoder))),

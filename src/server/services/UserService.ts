@@ -1,5 +1,6 @@
 import { apply, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
+import { HTTPError } from 'got'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import readline from 'readline'
@@ -20,6 +21,7 @@ import type { JwtHelper } from '../helpers/JwtHelper'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { DiscordConnection } from '../models/discord/DiscordConnection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
+import { TheQuestProgressionError } from '../models/madosayentisuto/TheQuestProgressionError'
 import { TagLine } from '../models/riot/TagLine'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
@@ -194,7 +196,9 @@ const UserService = (
     // Either.left if we couldn't find a valid c.name for existing riotgames connection for discord user
     getLinkedRiotAccount:
       ({ forceCacheRefresh }: ForceCacheRefresh) =>
-      (user: User<UserLogin>): Future<Maybe<Either<string, SummonerWithDiscordInfos>>> =>
+      (
+        user: User<UserLogin>,
+      ): Future<Maybe<Either<TheQuestProgressionError, SummonerWithDiscordInfos>>> =>
         pipe(
           withRefreshDiscordToken(user)(discord =>
             pipe(
@@ -213,7 +217,9 @@ const UserService = (
   function fetchRiotGamesAccount(
     discord: UserDiscordInfos,
     { forceCacheRefresh }: ForceCacheRefresh,
-  ): (riotGamesConnection: DiscordConnection) => Future<Maybe<Either<string, Summoner>>> {
+  ): (
+    riotGamesConnection: DiscordConnection,
+  ) => Future<Maybe<Either<TheQuestProgressionError, Summoner>>> {
     return riotGamesConnection =>
       pipe(
         riotGamesConnectionNameDecoder.decode(riotGamesConnection.name),
@@ -240,6 +246,21 @@ const UserService = (
           ),
         ),
         futureMaybe.map(Either.right),
+        Future.orElse(e =>
+          e instanceof HTTPError && e.response.statusCode === 403
+            ? pipe(
+                logger.warn(
+                  `Got 403 Forbidden from Riot API - accountApiKey might need to be refreshed`,
+                ),
+                Future.fromIOEither,
+                Future.map(() =>
+                  Maybe.some(
+                    Either.left(TheQuestProgressionError.of(discord.id, riotGamesConnection.name)),
+                  ),
+                ),
+              )
+            : Future.left(e),
+        ),
       )
   }
 
