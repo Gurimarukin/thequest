@@ -1,5 +1,5 @@
-import { monoid, number, string } from 'fp-ts'
-import { flow, identity, pipe } from 'fp-ts/function'
+import { apply, monoid, number, string } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
@@ -11,17 +11,16 @@ import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import type { Future } from '../../shared/utils/fp'
-import { Dict, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { Dict, Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { MadosayentisutoConfig } from '../config/Config'
-import { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
-import type { User } from '../models/user/User'
-import type { UserLogin } from '../models/user/UserLogin'
+import type { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
+import { TheQuestProgressionResult } from '../models/madosayentisuto/TheQuestProgressionResult'
 import type { DDragonService } from '../services/DDragonService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
-import type { UserService } from '../services/UserService'
+import type { SummonerWithDiscordInfos, UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import type { WithIp } from '../webServer/utils/WithIp'
 import type { StaticDataController } from './StaticDataController'
@@ -50,11 +49,25 @@ const MadosayentisutoController = (
     EndedMiddleware.withBody(NonEmptyArray.decoder(DiscordUserId.codec))(
       flow(
         userService.findAllByLoginDiscordId,
-        TObservable.chainTaskEitherK(toProgression),
-        TObservable.filterMap(identity),
+        TObservable.chainTaskEitherK(userService.getLinkedRiotAccount({ forceCacheRefresh: true })),
+        TObservable.chainTaskEitherK(
+          Maybe.fold(
+            () => futureMaybe.none,
+            Either.fold(
+              flow(Either.left, futureMaybe.some),
+              flow(
+                toProgression,
+                futureMaybe.map<TheQuestProgression, Either<string, TheQuestProgression>>(
+                  Either.right,
+                ),
+              ),
+            ),
+          ),
+        ),
+        TObservable.filterMap(Maybe.map(TheQuestProgressionResult.fromEither)),
         Sink.readonlyArray,
         M.fromTaskEither,
-        M.ichain(M.json(List.encoder(TheQuestProgression.encoder))),
+        M.ichain(M.json(List.encoder(TheQuestProgressionResult.encoder))),
       ),
     ),
   )
@@ -64,25 +77,21 @@ const MadosayentisutoController = (
     getUsersProgression,
   }
 
-  function toProgression(user: User<UserLogin>): Future<Maybe<TheQuestProgression>> {
+  function toProgression({
+    summoner,
+    discord,
+  }: SummonerWithDiscordInfos): Future<Maybe<TheQuestProgression>> {
     return pipe(
       // TODO: maybe log failed requests below
-      userService.getLinkedRiotAccount(user),
-      futureMaybe.bind('summoner', ({ riotAccount }) =>
-        summonerService.findByName(riotAccount.platform, riotAccount.name, {
+      apply.sequenceS(futureMaybe.ApplyPar)({
+        masteries: masteriesService.findBySummoner(summoner.platform, summoner.id, {
           forceCacheRefresh: true,
         }),
-      ),
-      futureMaybe.bind('masteries', ({ riotAccount, summoner }) =>
-        masteriesService.findBySummoner(riotAccount.platform, summoner.id, {
-          forceCacheRefresh: true,
-        }),
-      ),
-      futureMaybe.apS(
-        'staticData',
-        futureMaybe.fromTaskEither(ddragonService.latestDataChampions(Lang.defaultLang)),
-      ),
-      futureMaybe.map(({ discord, summoner, masteries, staticData }): TheQuestProgression => {
+        staticData: futureMaybe.fromTaskEither(
+          ddragonService.latestDataChampions(Lang.defaultLang),
+        ),
+      }),
+      futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
         const percents: List<number> = pipe(
           staticData.champions.data,
           Dict.toReadonlyArray,

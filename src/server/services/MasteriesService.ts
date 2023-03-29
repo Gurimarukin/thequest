@@ -42,9 +42,9 @@ const MasteriesService = (
       futureMaybe.map(m => m.champions),
       futureMaybe.alt<List<ChampionMastery>>(() =>
         pipe(
-          riotApiService.com.riotgame
-            .api(platform)
-            .lol.championMastery.v4.championMasteries.bySummoner(summonerId),
+          riotApiService.riotgames
+            .platform(platform)
+            .lol.championMasteryV4.championMasteries.bySummoner(summonerId),
           futureMaybe.bindTo('champions'),
           futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
           futureMaybe.chainFirstTaskEitherK(({ champions, insertedAt }) =>

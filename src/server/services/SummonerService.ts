@@ -52,7 +52,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
       findAndCache(
         platform,
         insertedAfter => summonerPersistence.findByName(platform, summonerName, insertedAfter),
-        riotApiService.com.riotgame.api(platform).lol.summoner.v4.summoners.byName(summonerName),
+        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byName(summonerName),
         { forceCacheRefresh },
       ),
 
@@ -64,7 +64,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
       findAndCache(
         platform,
         insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
-        riotApiService.com.riotgame.api(platform).lol.summoner.v4.summoners.byPuuid(puuid),
+        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
         { forceCacheRefresh },
       ),
 

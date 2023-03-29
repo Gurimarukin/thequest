@@ -2,7 +2,7 @@ import * as D from 'io-ts/Decoder'
 
 import { UnencryptedPuuid } from './UnencryptedPuuid'
 
-type Account = Readonly<D.TypeOf<typeof decoder>>
+type RiotAccount = Readonly<D.TypeOf<typeof decoder>>
 
 const decoder = D.struct({
   puuid: UnencryptedPuuid.codec,
@@ -10,6 +10,6 @@ const decoder = D.struct({
   tagLine: D.string,
 })
 
-const Account = { decoder }
+const RiotAccount = { decoder }
 
-export { Account }
+export { RiotAccount }
