@@ -1,16 +1,19 @@
 import { apply, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
+import { HTTPError } from 'got'
+import type { Decoder } from 'io-ts/Decoder'
+import * as D from 'io-ts/Decoder'
 import readline from 'readline'
 
 import { DayJs } from '../../shared/models/DayJs'
-import { Platform } from '../../shared/models/api/Platform'
-import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
+import type { Platform } from '../../shared/models/api/Platform'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
-import { Either, Future, List, Maybe, toNotUsed } from '../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
@@ -18,6 +21,9 @@ import type { JwtHelper } from '../helpers/JwtHelper'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { DiscordConnection } from '../models/discord/DiscordConnection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
+import { TheQuestProgressionError } from '../models/madosayentisuto/TheQuestProgressionError'
+import { TagLine } from '../models/riot/TagLine'
+import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
@@ -28,22 +34,35 @@ import type { ChampionShardPersistence } from '../persistence/ChampionShardPersi
 import type { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 import type { DiscordService } from './DiscordService'
+import type { RiotAccountService } from './RiotAccountService'
+import type { SummonerService } from './SummonerService'
 
-type RiotAccountWithDiscordInfos = {
-  readonly riotAccount: PlatformWithName
+export type SummonerWithDiscordInfos = {
+  readonly summoner: {
+    readonly id: SummonerId
+    readonly platform: Platform
+    readonly name: string
+    readonly profileIconId: number
+  }
   readonly discord: UserDiscordInfos
+}
+
+type ForceCacheRefresh = {
+  readonly forceCacheRefresh: boolean
 }
 
 type UserService = Readonly<ReturnType<typeof UserService>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function UserService(
+const UserService = (
   Logger: LoggerGetter,
   championShardPersistence: ChampionShardPersistence,
   userPersistence: UserPersistence,
   jwtHelper: JwtHelper,
   discordService: DiscordService,
-) {
+  riotAccountService: RiotAccountService,
+  summonerService: SummonerService,
+) => {
   const logger = Logger('UserService')
 
   const {
@@ -174,72 +193,75 @@ function UserService(
       return championShardPersistence.bulkDeleteAndUpsert(user, summoner, { toDelete, toUpsert })
     },
 
-    getLinkedRiotAccount: (user: User<UserLogin>): Future<Maybe<RiotAccountWithDiscordInfos>> =>
-      pipe(
-        withRefreshDiscordToken(user)(discord =>
-          pipe(
-            discordService.users.me.connections.get(discord.accessToken),
-            Future.chain(connections =>
-              pipe(
-                platformWithNameFromRiotGames(discord, connections),
-                futureMaybe.alt(() => platformWithNameFromLeagueOfLegends(connections)),
+    // Either.left if we couldn't find a valid c.name for existing riotgames connection for discord user
+    getLinkedRiotAccount:
+      ({ forceCacheRefresh }: ForceCacheRefresh) =>
+      (
+        user: User<UserLogin>,
+      ): Future<Maybe<Either<TheQuestProgressionError, SummonerWithDiscordInfos>>> =>
+        pipe(
+          withRefreshDiscordToken(user)(discord =>
+            pipe(
+              discordService.users.me.connections.get(discord.accessToken),
+              Future.map(List.findFirst(c => c.type === 'riotgames')),
+              futureMaybe.chain(fetchRiotGamesAccount(discord, { forceCacheRefresh })),
+              futureMaybe.map(
+                Either.map((summoner): SummonerWithDiscordInfos => ({ summoner, discord })),
               ),
             ),
-            futureMaybe.map(
-              (riotAccount): RiotAccountWithDiscordInfos => ({ riotAccount, discord }),
-            ),
           ),
+          Maybe.getOrElseW(() => futureMaybe.none),
         ),
-        Maybe.getOrElseW(() => futureMaybe.none),
-      ),
   }
 
-  // name can be either `<summonerName>#<platform>` (from LoL) or `<gameName>#<tagLine>` (from Riot account)
-  function platformWithNameFromRiotGames(
+  function fetchRiotGamesAccount(
     discord: UserDiscordInfos,
-    connections: List<DiscordConnection>,
-  ): Future<Maybe<PlatformWithName>> {
-    return pipe(
-      connections,
-      List.findFirst(c => c.type === 'riotgames'),
-      futureMaybe.fromOption,
-      futureMaybe.chain(c =>
-        pipe(
-          PlatformWithName.fromStringDecoder.decode(c.name),
-          Either.fold(
-            () =>
-              pipe(
+    { forceCacheRefresh }: ForceCacheRefresh,
+  ): (
+    riotGamesConnection: DiscordConnection,
+  ) => Future<Maybe<Either<TheQuestProgressionError, Summoner>>> {
+    return riotGamesConnection =>
+      pipe(
+        riotGamesConnectionNameDecoder.decode(riotGamesConnection.name),
+        Either.mapLeft(() =>
+          Error(
+            `Couldn't decode RiotGamesConnectionName for user ${discord.username}#${
+              discord.discriminator
+            } (${DiscordUserId.unwrap(discord.id)}) - value: ${riotGamesConnection.name}`,
+          ),
+        ),
+        Future.fromEither,
+        Future.chain(({ gameName, tagLine }) =>
+          riotAccountService.findByGameNameAndTagLine(gameName, tagLine, { forceCacheRefresh }),
+        ),
+        futureMaybe.chain(({ puuid, platform, summonerCacheWasRefreshed }) =>
+          summonerService.findByPuuid(platform, puuid, {
+            forceCacheRefresh: forceCacheRefresh && !summonerCacheWasRefreshed,
+          }),
+        ),
+        Future.chainFirstIOEitherK(
+          Maybe.fold(
+            () => logger.warn(`Summoner not found for account ${riotGamesConnection.name}`),
+            () => IO.notUsed,
+          ),
+        ),
+        futureMaybe.map(Either.right),
+        Future.orElse(e =>
+          e instanceof HTTPError && e.response.statusCode === 403
+            ? pipe(
                 logger.warn(
-                  `"riotgames" connection: couldn't decode <summonerName>#<platform> for user ${
-                    discord.username
-                  }#${discord.discriminator} (${DiscordUserId.unwrap(discord.id)}) - value: ${
-                    c.name
-                  }\nFalling back to "leagueoflegends", with default platform ${
-                    Platform.defaultPlatform
-                  }`,
+                  `Got 403 Forbidden from Riot API - accountApiKey might need to be refreshed`,
                 ),
                 Future.fromIOEither,
-                Future.map(() => Maybe.none),
-              ),
-            futureMaybe.some,
-          ),
+                Future.map(() =>
+                  Maybe.some(
+                    Either.left(TheQuestProgressionError.of(discord.id, riotGamesConnection.name)),
+                  ),
+                ),
+              )
+            : Future.left(e),
         ),
-      ),
-    )
-  }
-
-  function platformWithNameFromLeagueOfLegends(
-    connections: List<DiscordConnection>,
-  ): Future<Maybe<PlatformWithName>> {
-    return pipe(
-      connections,
-      List.findFirstMap(c =>
-        c.type === 'riotgames'
-          ? Maybe.some<PlatformWithName>({ platform: Platform.defaultPlatform, name: c.name })
-          : Maybe.none,
-      ),
-      futureMaybe.fromOption,
-    )
+      )
   }
 
   function signToken(content: TokenContent): Future<Token> {
@@ -305,6 +327,28 @@ function UserService(
 }
 
 export { UserService }
+
+const fromStringRegex = /^(.+)#([^#]+)$/
+
+type GameNameAndTagLine = {
+  readonly gameName: string
+  readonly tagLine: TagLine
+}
+
+// name is `<gameName>#<tagLine>` (from Riot account)
+const riotGamesConnectionNameDecoder: Decoder<string, GameNameAndTagLine> = pipe(
+  D.id<string>(),
+  D.parse(str =>
+    pipe(
+      str,
+      StringUtils.matcher2(fromStringRegex),
+      Maybe.fold(
+        () => D.failure(str, 'TupleFromStringWithHashtag'),
+        ([gameName, tagLine]) => D.success({ gameName, tagLine: TagLine.wrap(tagLine) }),
+      ),
+    ),
+  ),
+)
 
 const prompt = (label: string): Future<string> =>
   pipe(

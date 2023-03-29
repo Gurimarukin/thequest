@@ -22,6 +22,10 @@ type ForceCacheRefresh = {
   readonly forceCacheRefresh: boolean
 }
 
+type UseAccountApiKey = {
+  readonly useAccountApiKey: boolean
+}
+
 type SummonerService = Readonly<ReturnType<typeof of>>
 
 const SummonerService = (
@@ -52,21 +56,31 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
       findAndCache(
         platform,
         insertedAfter => summonerPersistence.findByName(platform, summonerName, insertedAfter),
-        riotApiService.lol.summoner.byName(platform, summonerName),
+        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byName(summonerName),
         { forceCacheRefresh },
       ),
 
     findByPuuid: (
       platform: Platform,
-      encryptedPUUID: Puuid,
-      { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+      puuid: Puuid,
+      {
+        forceCacheRefresh,
+        useAccountApiKey = false,
+      }: ForceCacheRefresh & Partial<UseAccountApiKey> = { forceCacheRefresh: false },
     ): Future<Maybe<Summoner>> =>
-      findAndCache(
-        platform,
-        insertedAfter => summonerPersistence.findByPuuid(encryptedPUUID, insertedAfter),
-        riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
-        { forceCacheRefresh },
-      ),
+      useAccountApiKey
+        ? pipe(
+            riotApiService.riotgames
+              .platform(platform)
+              .lol.summonerV4.summoners.byPuuid(puuid, { useAccountApiKey }),
+            futureMaybe.map(s => ({ ...s, platform })),
+          )
+        : findAndCache(
+            platform,
+            insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
+            riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
+            { forceCacheRefresh },
+          ),
 
     deleteByPuuid: summonerPersistence.deleteByPuuid,
   }

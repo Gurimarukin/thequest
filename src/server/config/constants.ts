@@ -29,13 +29,13 @@ export const constants = {
   },
 
   riotApi: {
-    xRiotToken: 'X-Riot-Token',
     regionalHost: 'europe.api.riotgames.com',
     plateformEndpoint,
     cacheTtl: {
       ddragonLatestVersion: MsDuration.hour(1),
       summoner: MsDuration.minutes(15),
       masteries: MsDuration.minutes(5),
+      account: MsDuration.days(99 * 365),
     },
   },
 }

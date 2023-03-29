@@ -28,7 +28,7 @@ export type Config = {
   readonly client: ClientConfig
   readonly http: HttpConfig
   readonly db: DbConfig
-  readonly riotApiKey: string
+  readonly riot: RiotConfig
   readonly jwtSecret: string
   readonly madosayentisuto: MadosayentisutoConfig
 }
@@ -49,6 +49,11 @@ type DbConfig = {
   readonly dbName: string
   readonly user: string
   readonly password: string
+}
+
+export type RiotConfig = {
+  readonly lolApiKey: string
+  readonly accountApiKey: string // You need a legends of runeterra or valorant app for account-v1
 }
 
 export type MadosayentisutoConfig = {
@@ -81,7 +86,10 @@ const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
         user: r(D.string)('DB_USER'),
         password: r(D.string)('DB_PASSWORD'),
       }),
-      riotApiKey: r(D.string)('RIOT_API_KEY'),
+      riot: seqS<RiotConfig>({
+        lolApiKey: r(D.string)('RIOT_LOL_API_KEY'),
+        accountApiKey: r(D.string)('RIOT_ACCOUNT_API_KEY'),
+      }),
       jwtSecret: r(D.string)('JWT_SECRET'),
       madosayentisuto: seqS<MadosayentisutoConfig>({
         whitelistedIps: r(ArrayFromString.decoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
