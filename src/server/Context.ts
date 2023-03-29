@@ -90,7 +90,7 @@ const load = (config: Config): Future<Context> => {
   const httpClient = HttpClient(Logger)
 
   const discordService = DiscordService(config.client, httpClient)
-  const riotApiService = RiotApiService(config.riotApiKey, httpClient)
+  const riotApiService = RiotApiService(config.riot, httpClient)
 
   const cronJobPubSub = PubSub<CronJobEvent>()
 

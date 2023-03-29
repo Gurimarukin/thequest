@@ -63,7 +63,7 @@ const DDragonService = (riotApiService: RiotApiService) => {
         Maybe.fold(
           () =>
             pipe(
-              riotApiService.lol.ddragon.apiVersions,
+              riotApiService.com.leagueoflegends.ddragon.api.versions,
               Future.map(NonEmptyArray.head),
               Future.chainFirstIOK(value =>
                 latestVersion.set(Maybe.some({ value, storedAt: now })),
@@ -91,7 +91,8 @@ const DDragonService = (riotApiService: RiotApiService) => {
                     Maybe.fold(
                       () =>
                         pipe(
-                          riotApiService.lol.ddragon.dataChampions(version, lang),
+                          riotApiService.com.leagueoflegends.ddragon.cdn(version).data(lang)
+                            .champion,
                           Future.chainFirstIOK(value =>
                             latestDefaultLangDataChampions.set(Maybe.some({ value, version })),
                           ),
@@ -101,7 +102,7 @@ const DDragonService = (riotApiService: RiotApiService) => {
                   ),
                 ),
               )
-            : riotApiService.lol.ddragon.dataChampions(version, lang),
+            : riotApiService.com.leagueoflegends.ddragon.cdn(version).data(lang).champion,
         ),
       ),
   }

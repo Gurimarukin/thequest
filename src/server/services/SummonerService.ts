@@ -52,19 +52,19 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
       findAndCache(
         platform,
         insertedAfter => summonerPersistence.findByName(platform, summonerName, insertedAfter),
-        riotApiService.lol.summoner.byName(platform, summonerName),
+        riotApiService.com.riotgame.api(platform).lol.summoner.v4.summoners.byName(summonerName),
         { forceCacheRefresh },
       ),
 
     findByPuuid: (
       platform: Platform,
-      encryptedPUUID: Puuid,
+      puuid: Puuid,
       { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
     ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
-        insertedAfter => summonerPersistence.findByPuuid(encryptedPUUID, insertedAfter),
-        riotApiService.lol.summoner.byPuuid(platform, encryptedPUUID),
+        insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
+        riotApiService.com.riotgame.api(platform).lol.summoner.v4.summoners.byPuuid(puuid),
         { forceCacheRefresh },
       ),
 

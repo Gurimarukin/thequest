@@ -29,7 +29,6 @@ export const constants = {
   },
 
   riotApi: {
-    xRiotToken: 'X-Riot-Token',
     regionalHost: 'europe.api.riotgames.com',
     plateformEndpoint,
     cacheTtl: {

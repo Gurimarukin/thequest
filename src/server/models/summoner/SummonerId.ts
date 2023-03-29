@@ -6,6 +6,8 @@ import { iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
+// encrypted summoner id
+
 type SummonerId = Newtype<{ readonly SummonerId: unique symbol }, string>
 
 const { unwrap } = iso<SummonerId>()
