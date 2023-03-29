@@ -49,7 +49,11 @@ const of = (
 ) => {
   const jwtHelper = JwtHelper(config.jwtSecret)
 
-  const riotAccountService = RiotAccountService(riotAccountPersistence, riotApiService)
+  const riotAccountService = RiotAccountService(
+    riotAccountPersistence,
+    riotApiService,
+    summonerService,
+  )
 
   const ddragonService = DDragonService(riotApiService)
   const healthCheckService = HealthCheckService(healthCheckPersistence)

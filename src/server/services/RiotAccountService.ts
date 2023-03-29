@@ -12,10 +12,16 @@ import { Shard } from '../models/riot/Shard'
 import type { TagLine } from '../models/riot/TagLine'
 import type { RiotAccountPersistence } from '../persistence/RiotAccountPersistence'
 import type { RiotApiService } from './RiotApiService'
+import type { SummonerService } from './SummonerService'
 
 type PlatformWithPuuid = {
   readonly platform: Platform
   readonly puuid: Puuid
+  readonly summonerCacheWasRefreshed: boolean
+}
+
+type ForceCacheRefresh = {
+  readonly forceCacheRefresh: boolean
 }
 
 type RiotAccountService = Readonly<ReturnType<typeof RiotAccountService>>
@@ -24,10 +30,13 @@ type RiotAccountService = Readonly<ReturnType<typeof RiotAccountService>>
 const RiotAccountService = (
   riotAccountPersistence: RiotAccountPersistence,
   riotApiService: RiotApiService,
+  summonerService: SummonerService,
 ) => ({
   findByGameNameAndTagLine: (
     gameName: string,
     tagLine: TagLine,
+    // should force cache refresh for summmoner (with lolApiKey encrypted puuid)
+    { forceCacheRefresh }: ForceCacheRefresh,
   ): Future<Maybe<PlatformWithPuuid>> =>
     pipe(
       Future.fromIO(DayJs.now),
@@ -35,22 +44,58 @@ const RiotAccountService = (
       Future.chain(insertedAfter =>
         riotAccountPersistence.findByGameNameAndTagLine(gameName, tagLine, insertedAfter),
       ),
-      futureMaybe.map(a => ({ platform: a.platform, puuid: a.puuid })),
+      futureMaybe.map(a => ({
+        platform: a.platform,
+        puuid: a.puuid,
+        summonerCacheWasRefreshed: false,
+      })),
       futureMaybe.alt<PlatformWithPuuid>(() =>
         pipe(
+          // this gives us puuid but encrypted with accountApiKey
           riotApiService.riotgames.regional.riot.accountV1.accounts.byRiotId(gameName)(tagLine),
-          futureMaybe.chain(({ puuid }) =>
-            riotApiService.riotgames.regional.riot.accountV1.activeShards
-              .byGame('lor')
-              .byPuuid(puuid),
+          futureMaybe.map(a => a.puuid),
+          futureMaybe.bindTo('accountApiKeyPuuid'),
+          futureMaybe.bind('platform', ({ accountApiKeyPuuid }) =>
+            // we need to pass a puuid encrypted with accountApiKey aswell
+            pipe(
+              riotApiService.riotgames.regional.riot.accountV1.activeShards
+                .byGame('lor')
+                .byPuuid(accountApiKeyPuuid),
+              futureMaybe.map(a => Shard.platform[a.activeShard]),
+            ),
           ),
-          futureMaybe.bindTo('account'),
-          futureMaybe.let('platform', ({ account }) => Shard.platform[account.activeShard]),
+          futureMaybe.bind('summonerName', ({ platform, accountApiKeyPuuid }) =>
+            pipe(
+              riotApiService.riotgames
+                .platform(platform)
+                .lol.summonerV4.summoners.byPuuid(accountApiKeyPuuid, { useAccountApiKey: true }),
+              futureMaybe.map(s => s.name),
+            ),
+          ),
+          // and finally get puuid but encrypted with lolApiKey
+          futureMaybe.bind('lolApiKeyPuuid', ({ platform, summonerName }) =>
+            pipe(
+              summonerService.findByName(platform, summonerName, { forceCacheRefresh }),
+              futureMaybe.map(s => s.puuid),
+            ),
+          ),
           futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
-          futureMaybe.chainFirstTaskEitherK(({ account: { puuid }, platform, insertedAt }) =>
-            riotAccountPersistence.upsert({ gameName, tagLine, platform, puuid, insertedAt }),
+          futureMaybe.chainFirstTaskEitherK(({ platform, lolApiKeyPuuid, insertedAt }) =>
+            riotAccountPersistence.upsert({
+              gameName,
+              tagLine,
+              platform,
+              puuid: lolApiKeyPuuid,
+              insertedAt,
+            }),
           ),
-          futureMaybe.map(({ account: { puuid }, platform }) => ({ platform, puuid })),
+          futureMaybe.map(
+            ({ platform, lolApiKeyPuuid }): PlatformWithPuuid => ({
+              platform,
+              puuid: lolApiKeyPuuid,
+              summonerCacheWasRefreshed: true,
+            }),
+          ),
         ),
       ),
     ),

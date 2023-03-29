@@ -1,11 +1,11 @@
 import * as D from 'io-ts/Decoder'
 
-import { UnencryptedPuuid } from './UnencryptedPuuid'
+import { Puuid } from './Puuid'
 
 type RiotAccount = Readonly<D.TypeOf<typeof decoder>>
 
 const decoder = D.struct({
-  puuid: UnencryptedPuuid.codec,
+  puuid: Puuid.codec,
   gameName: D.string,
   tagLine: D.string,
 })

@@ -22,6 +22,10 @@ type ForceCacheRefresh = {
   readonly forceCacheRefresh: boolean
 }
 
+type UseAccountApiKey = {
+  readonly useAccountApiKey: boolean
+}
+
 type SummonerService = Readonly<ReturnType<typeof of>>
 
 const SummonerService = (
@@ -59,14 +63,24 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     findByPuuid: (
       platform: Platform,
       puuid: Puuid,
-      { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+      {
+        forceCacheRefresh,
+        useAccountApiKey = false,
+      }: ForceCacheRefresh & Partial<UseAccountApiKey> = { forceCacheRefresh: false },
     ): Future<Maybe<Summoner>> =>
-      findAndCache(
-        platform,
-        insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
-        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
-        { forceCacheRefresh },
-      ),
+      useAccountApiKey
+        ? pipe(
+            riotApiService.riotgames
+              .platform(platform)
+              .lol.summonerV4.summoners.byPuuid(puuid, { useAccountApiKey }),
+            futureMaybe.map(s => ({ ...s, platform })),
+          )
+        : findAndCache(
+            platform,
+            insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
+            riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
+            { forceCacheRefresh },
+          ),
 
     deleteByPuuid: summonerPersistence.deleteByPuuid,
   }

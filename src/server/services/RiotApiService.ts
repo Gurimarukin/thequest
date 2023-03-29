@@ -18,7 +18,6 @@ import { RiotAccount } from '../models/riot/RiotAccount'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
 import { TagLine } from '../models/riot/TagLine'
-import { UnencryptedPuuid } from '../models/riot/UnencryptedPuuid'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { SummonerId } from '../models/summoner/SummonerId'
 
@@ -30,6 +29,10 @@ const regionalUrl = (path: string): string => `https://${constants.riotApi.regio
 
 const platformUrl = (platform: Platform, path: string): string =>
   `https://${constants.riotApi.plateformEndpoint[platform]}${path}`
+
+type UseAccountApiKey = {
+  readonly useAccountApiKey: boolean
+}
 
 type RiotApiService = Readonly<ReturnType<typeof RiotApiService>>
 
@@ -74,7 +77,10 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => ({
                 statusesToOption(404),
               ),
 
-            byPuuid: (puuid: Puuid) =>
+            byPuuid: (
+              puuid: Puuid,
+              { useAccountApiKey }: UseAccountApiKey = { useAccountApiKey: false },
+            ) =>
               pipe(
                 httpClient.http(
                   [
@@ -84,7 +90,11 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => ({
                     ),
                     'get',
                   ],
-                  { headers: { [xRiotToken]: config.lolApiKey } },
+                  {
+                    headers: {
+                      [xRiotToken]: useAccountApiKey ? config.accountApiKey : config.lolApiKey,
+                    },
+                  },
                   [RiotSummoner.decoder, 'RiotSummoner'],
                 ),
                 statusesToOption(404),
@@ -162,12 +172,12 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => ({
 
           activeShards: {
             byGame: (game: Game) => ({
-              byPuuid: (puuid: UnencryptedPuuid) =>
+              byPuuid: (puuid: Puuid) =>
                 pipe(
                   httpClient.http(
                     [
                       regionalUrl(
-                        `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${UnencryptedPuuid.unwrap(
+                        `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${Puuid.unwrap(
                           puuid,
                         )}`,
                       ),

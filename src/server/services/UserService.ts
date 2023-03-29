@@ -226,10 +226,12 @@ const UserService = (
         ),
         Future.fromEither,
         Future.chain(({ gameName, tagLine }) =>
-          riotAccountService.findByGameNameAndTagLine(gameName, tagLine),
+          riotAccountService.findByGameNameAndTagLine(gameName, tagLine, { forceCacheRefresh }),
         ),
-        futureMaybe.chain(({ puuid, platform }) =>
-          summonerService.findByPuuid(platform, puuid, { forceCacheRefresh }),
+        futureMaybe.chain(({ puuid, platform, summonerCacheWasRefreshed }) =>
+          summonerService.findByPuuid(platform, puuid, {
+            forceCacheRefresh: forceCacheRefresh && !summonerCacheWasRefreshed,
+          }),
         ),
         Future.chainFirstIOEitherK(
           Maybe.fold(
