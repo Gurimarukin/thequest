@@ -201,9 +201,9 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
       <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-[2px] text-xs">
         <span className="mt-[2px]">{shardsCount}</span>
       </span>
-      <div className="absolute bottom-[calc(-100%_+_3px)] right-[-1px] z-10 hidden h-[39px] w-[14px] flex-col justify-between overflow-hidden rounded-b-[6px] rounded-tl-[6px] group-hover:flex">
+      <div className="absolute bottom-[calc(-100%_+_3px)] right-0 z-10 hidden h-[41px] w-[14px] flex-col justify-between overflow-hidden rounded-tl-[6px] group-hover:flex">
         <span
-          className={cssClasses('mr-[1px] flex bg-black pr-[1px] pl-[2px] pt-[2px]', [
+          className={cssClasses('flex bg-black pl-[2px] pt-[2px] pb-[3px]', [
             'invisible',
             setShardsCount === null || 9 <= shardsCount,
           ])}
@@ -217,18 +217,21 @@ const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): J
             <AddOutline className="w-full" />
           </button>
         </span>
-        {setShardsCount !== null && 0 < shardsCount ? (
-          <span className="flex bg-black p-[2px]">
-            <button
-              type="button"
-              onClick={removeShardCount}
-              title={`${name} — enlever un fragment`}
-              className="rounded-b bg-goldenrod text-black"
-            >
-              <RemoveOutline className="w-full" />
-            </button>
-          </span>
-        ) : null}
+        <span
+          className={cssClasses('flex bg-black pl-[2px]', [
+            'invisible',
+            setShardsCount === null || shardsCount <= 0,
+          ])}
+        >
+          <button
+            type="button"
+            onClick={removeShardCount}
+            title={`${name} — enlever un fragment`}
+            className="rounded-b bg-goldenrod text-black"
+          >
+            <RemoveOutline className="w-full" />
+          </button>
+        </span>
       </div>
     </div>
   )
