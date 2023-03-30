@@ -91,12 +91,12 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
         ),
       )(data)
 
-      if (optimisticMutation) mutate(newData)
+      if (optimisticMutation) mutate(newData, { revalidate: false })
 
       return pipe(
         apiUserSelfSummonerChampionsShardsCountPost(platform, data.summoner.name, updates),
         Future.map(() => {
-          if (!optimisticMutation) mutate(newData)
+          if (!optimisticMutation) mutate(newData, { revalidate: false })
           return NotUsed
         }),
         // TODO: sucess toaster
