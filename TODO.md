@@ -1,9 +1,11 @@
 - search champion
+- fancy champion tooltip
 - toaster (replace alert)
 - maybe fix shards hitbox
 - discord OAuth2: proper state
 - encrypted
 - readonly
+- debounce setShards
 - Future.successful and Future.failed
 - limit favorites
 - modal: trap focus

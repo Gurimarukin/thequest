@@ -5,7 +5,7 @@ import { pipe } from 'fp-ts/function'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { Maybe } from '../../../shared/utils/fp'
+import { Maybe } from '../../../shared/utils/fp'
 
 type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   readonly championLevel: ChampionLevelOrZero
@@ -25,11 +25,21 @@ const byPoints: Ord<EnrichedChampionMastery> = pipe(
   ord.contramap(c => c.championPoints),
 )
 
+const byShards: Ord<EnrichedChampionMastery> = pipe(
+  number.Ord,
+  ord.contramap(c =>
+    pipe(
+      c.shardsCount,
+      Maybe.getOrElse(() => 0),
+    ),
+  ),
+)
+
 const byName: Ord<EnrichedChampionMastery> = pipe(
   string.Ord,
   ord.contramap(c => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
-const EnrichedChampionMastery = { Ord: { byPercents, byPoints, byName } }
+const EnrichedChampionMastery = { Ord: { byPercents, byPoints, byShards, byName } }
 
 export { EnrichedChampionMastery }
