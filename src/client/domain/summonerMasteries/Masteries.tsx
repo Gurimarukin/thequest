@@ -37,7 +37,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
             case 'percents':
               return [
                 reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
-                /* TODO: ordByShard, */
+                reverseIfDesc(EnrichedChampionMastery.Ord.byShards),
                 reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
                 EnrichedChampionMastery.Ord.byName,
               ]

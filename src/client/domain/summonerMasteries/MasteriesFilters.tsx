@@ -7,11 +7,12 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { NonEmptyArray } from '../../../shared/utils/fp'
-import { List } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
 import { Radios, labelValue } from '../../components/Radios'
 import { useHistory } from '../../contexts/HistoryContext'
+import { useUser } from '../../contexts/UserContext'
 import { AppsSharp, CaretDownOutline, CaretUpOutline, StatsChartSharp } from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
@@ -21,6 +22,7 @@ import { cssClasses } from '../../utils/cssClasses'
 
 export const MasteriesFilters = (): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
+  const { user } = useUser()
 
   const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
   const handleMouseEnter = useCallback(() => {
@@ -90,7 +92,14 @@ export const MasteriesFilters = (): JSX.Element => {
       </div>
       <div className="flex gap-3">
         <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
-          {labelValue('percents', <TextLabel title="Trier par pourcents">%</TextLabel>)}
+          {labelValue(
+            'percents',
+            <TextLabel
+              title={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
+            >
+              %
+            </TextLabel>,
+          )}
           {labelValue('points', <TextLabel title="Trier par points">pts</TextLabel>)}
           {labelValue('name', <TextLabel title="Trier par nom">nom</TextLabel>)}
         </Radios>
