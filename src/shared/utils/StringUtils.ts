@@ -29,6 +29,9 @@ const padStart =
 const pad10 = padStart(2)
 const pad100 = padStart(3)
 
+const cleanUTF8ToASCII = (str: string): string =>
+  str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
 /**
  * @example
  * assert.deepStrictEqual(plural(1, 'jeton'), '1 jeton')
@@ -53,4 +56,4 @@ const prettyMs = (ms: MsDuration): string => {
   return `${pad10(s)}.${pad100(ms_)}"`
 }
 
-export const StringUtils = { ellipse, matcher2, stripMargins, plural, prettyMs }
+export const StringUtils = { ellipse, matcher2, stripMargins, cleanUTF8ToASCII, plural, prettyMs }
