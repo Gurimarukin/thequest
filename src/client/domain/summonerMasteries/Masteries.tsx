@@ -144,7 +144,11 @@ const ChampionMasteriesHistogram = ({
     <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-2">
       {champions.map(champion => (
         <Fragment key={ChampionKey.unwrap(champion.championId)}>
-          <ChampionMasterySquare {...champion} setChampionShards={setChampionShards} />
+          <ChampionMasterySquare
+            {...champion}
+            setChampionShards={setChampionShards}
+            isHistogram={true}
+          />
           <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
         </Fragment>
       ))}

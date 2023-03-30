@@ -27,6 +27,10 @@ type ChampionMasterySquareProps = {
   readonly shardsCount: Maybe<number>
   readonly glow: Maybe<number>
   readonly setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
+  /**
+   * @default false
+   */
+  readonly isHistogram?: boolean
 }
 
 export const ChampionMasterySquare = ({
@@ -39,6 +43,7 @@ export const ChampionMasterySquare = ({
   shardsCount,
   glow,
   setChampionShards,
+  isHistogram = false,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
@@ -67,7 +72,9 @@ export const ChampionMasterySquare = ({
       />
       <div
         className={cssClasses(
-          'relative flex h-16 w-16 items-center justify-center',
+          'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
+          ['rounded-br-xl', isHistogram],
+          ['rounded-tr-xl', !isHistogram],
           ['bg-mastery7-blue', championLevel === 7],
           ['bg-mastery6-violet', championLevel === 6],
           ['bg-mastery5-red', championLevel === 5],
@@ -76,7 +83,13 @@ export const ChampionMasterySquare = ({
         )}
         title={name}
       >
-        <div className="h-12 w-12 overflow-hidden">
+        <div
+          className={cssClasses(
+            'h-12 w-12 overflow-hidden rounded-bl-lg',
+            ['rounded-br-lg', isHistogram],
+            ['rounded-tr-lg', !isHistogram],
+          )}
+        >
           <img
             src={staticData.assets.champion.square(championId)}
             alt={`Icône de ${name}`}
@@ -90,6 +103,7 @@ export const ChampionMasterySquare = ({
             ['text-purple-400', championLevel === 6],
             ['text-red-700', championLevel === 5],
             ['text-yellow-600', championLevel === 4],
+            ['text-neutral-400', championLevel < 4],
           )}
           title={nameLevelTokens}
         >
