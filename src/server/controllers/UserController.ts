@@ -15,7 +15,9 @@ import type { SummonerShort } from '../../shared/models/api/summoner/SummonerSho
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Token } from '../../shared/models/api/user/Token'
+import { UserName } from '../../shared/models/api/user/UserName'
 import { UserView } from '../../shared/models/api/user/UserView'
+import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
 import { Dict, Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
@@ -25,6 +27,7 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 import { constants } from '../config/constants'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
+import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
@@ -42,12 +45,15 @@ type UserController = Readonly<ReturnType<typeof UserController>>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserController(
+  Logger: LoggerGetter,
   ddragonService: DDragonService,
   discordService: DiscordService,
   summonerService: SummonerService,
   masteriesService: MasteriesService,
   userService: UserService,
 ) {
+  const logger = Logger('UserController')
+
   const loginDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
     ({ code }) =>
       pipe(
@@ -67,6 +73,9 @@ function UserController(
     ({ userName, password }) =>
       pipe(
         userService.loginPassword(userName, password),
+        Future.chainFirstIOEitherK(() =>
+          logger.info(`Login/password user created: ${UserName.unwrap(userName)}`),
+        ),
         M.fromTaskEither,
         M.ichain(
           Maybe.fold(
@@ -88,9 +97,20 @@ function UserController(
     ({ code }) =>
       pipe(
         exchangeCodeAndGetUsersMe(code),
-        Future.chain(userService.createUserDiscord),
-        Future.map(Either.fromOption(() => 'Discord account already used')),
-        futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
+        Future.chain(discord =>
+          pipe(
+            userService.createUserDiscord(discord),
+            Future.map(Either.fromOption(() => 'Discord account already used')),
+            futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
+            Future.chainFirstIOEitherK(() =>
+              logger.info(
+                `Discord user created: ${discord.username}#${
+                  discord.discriminator
+                } (${DiscordUserId.unwrap(discord.id)})`,
+              ),
+            ),
+          ),
+        ),
         M.fromTaskEither,
         M.ichain(Either.fold(M.sendWithStatus(Status.BadRequest), sendToken)),
       ),

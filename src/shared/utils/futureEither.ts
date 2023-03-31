@@ -6,6 +6,7 @@ import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
 import { flow, pipe } from 'fp-ts/function'
 
+import type { IO } from './fp'
 import { Either, Future } from './fp'
 
 const URI = 'TaskEitherEither' as const
@@ -60,6 +61,18 @@ const chainTaskEitherK = <A, B>(
     ),
   )
 
+const chainFirst = fpTsChain.chainFirst(Chain)
+
+const chainFirstTaskEitherK = <A, E, B>(
+  f: (a: A) => Future<B>,
+): ((fa: Future<Either<E, A>>) => Future<Either<E, A>>) =>
+  chainFirst(flow(f, Future.map<B, Either<E, B>>(Either.right)))
+
+const chainFirstIOEitherK = <A, E, B>(
+  f: (a: A) => IO<B>,
+): ((fa: Future<Either<E, A>>) => Future<Either<E, A>>) =>
+  chainFirstTaskEitherK(flow(f, Future.fromIOEither))
+
 type FilterOrElse = {
   <A, B extends A, E>(refinement: Refinement<A, B>, onFalse: (a: A) => E): (
     ma: Future<Either<E, A>>,
@@ -91,6 +104,9 @@ export const futureEither = {
   bindTo: functor.bindTo(Functor),
   chain,
   chainTaskEitherK,
+  chainFirst,
+  chainFirstTaskEitherK,
+  chainFirstIOEitherK,
   filterOrElse,
   left,
   map,
