@@ -34,6 +34,7 @@ export const Application = ({
   const staticDataController = StaticDataController(ddragonService)
   const summonerController = SummonerController(summonerService, masteriesService, userService)
   const userController = UserController(
+    Logger,
     ddragonService,
     discordService,
     summonerService,
