@@ -10,3 +10,7 @@
 - limit favorites
 - modal: trap focus
 - userService.getLinkedRiotAccount: return no platform when "leagueoflegends" connection
+
+---
+
+https://leagueoflegends.fandom.com/wiki/Module:ChampionData/data
