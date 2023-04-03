@@ -6,7 +6,7 @@ import qs from 'qs'
 
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { Dict } from '../../../shared/utils/fp'
-import { SetFromString } from '../../../shared/utils/ioTsUtils'
+import { NonEmptyString, SetFromString } from '../../../shared/utils/ioTsUtils'
 
 import { isDefined } from '../../utils/isDefined'
 import { MasteriesQueryOrder } from './MasteriesQueryOrder'
@@ -20,6 +20,7 @@ const properties = {
   order: MasteriesQueryOrder.codec,
   view: MasteriesQueryView.codec,
   level: SetFromString.codec(ChampionLevelOrZero.stringCodec, ChampionLevelOrZero.Eq),
+  search: NonEmptyString.codec,
 }
 
 const decoder = D.partial(properties)

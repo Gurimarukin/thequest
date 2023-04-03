@@ -3,9 +3,10 @@
 import { number, ord, readonlySet } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { NonEmptyArray } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'
 
@@ -13,14 +14,32 @@ import { MasteryImg } from '../../components/MasteryImg'
 import { Radios, labelValue } from '../../components/Radios'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
-import { AppsSharp, CaretDownOutline, CaretUpOutline, StatsChartSharp } from '../../imgs/svgIcons'
+import {
+  AppsSharp,
+  CaretDownOutline,
+  CaretUpOutline,
+  CloseFilled,
+  StatsChartSharp,
+} from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cssClasses } from '../../utils/cssClasses'
 
-export const MasteriesFilters = (): JSX.Element => {
+const { plural } = StringUtils
+
+type Props = {
+  championsCount: number
+  totalChampionsCount: number
+  searchCount: number
+}
+
+export const MasteriesFilters = ({
+  championsCount,
+  totalChampionsCount,
+  searchCount,
+}: Props): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { user } = useUser()
 
@@ -61,76 +80,154 @@ export const MasteriesFilters = (): JSX.Element => {
   const setOrder = flow(MasteriesQuery.Lens.order.set, updateMasteriesQuery)
   const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
+  const searchRef = useRef<HTMLInputElement>(null)
+  const [search, setSearch] = useState(
+    pipe(
+      masteriesQuery.search,
+      Maybe.getOrElse(() => ''),
+    ),
+  )
+
+  const emptySearch = useCallback(() => {
+    setSearch('')
+    searchRef.current?.focus()
+  }, [])
+
+  // const updateSearch = useMemo(
+  //   () =>
+  //     debounce((search_: string) => {
+  //       const trimed = search_.trim()
+  //       updateMasteriesQuery(
+  //         MasteriesQuery.Lens.search.set(trimed === '' ? Maybe.none : Maybe.some(trimed)),
+  //       )
+  //     }, 200),
+  //   [updateMasteriesQuery],
+  // )
+
+  const updateSearch = useCallback(
+    (search_: string) => {
+      const trimed = search_.trim()
+      updateMasteriesQuery(
+        MasteriesQuery.Lens.search.set(trimed === '' ? Maybe.none : Maybe.some(trimed)),
+      )
+    },
+    [updateMasteriesQuery],
+  )
+
+  useEffect(() => {
+    updateSearch(search)
+  }, [updateSearch, search])
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value),
+    [],
+  )
+
   return (
-    <div className="flex flex-wrap items-center justify-evenly gap-5 py-3">
-      <div onMouseLeave={hideLevelsMenu} className="relative">
-        <MasteriesCheckboxes
-          checkedLevels={masteriesQuery.level}
-          toggleChecked={toggleChecked}
-          onMouseEnter={handleMouseEnter}
-        />
-        <ul
-          className={cssClasses(
-            'absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black',
-            ['hidden', !levelsMenuIsVisible],
-          )}
-        >
-          <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
-          <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
-          <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
-          {pipe(
-            ChampionLevelOrZero.values,
-            List.reverse,
-            List.map(level => (
-              <SelectLevelsButton key={level} levels={[level]}>
-                {level}
-              </SelectLevelsButton>
-            )),
-          )}
-          <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
-        </ul>
+    <div className="flex w-full max-w-7xl flex-col flex-wrap self-center px-3 pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-5 py-3">
+        <div onMouseLeave={hideLevelsMenu} className="relative">
+          <MasteriesCheckboxes
+            checkedLevels={masteriesQuery.level}
+            toggleChecked={toggleChecked}
+            onMouseEnter={handleMouseEnter}
+          />
+          <ul
+            className={cssClasses(
+              'absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black',
+              ['hidden', !levelsMenuIsVisible],
+            )}
+          >
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
+            <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
+            {pipe(
+              ChampionLevelOrZero.values,
+              List.reverse,
+              List.map(level => (
+                <SelectLevelsButton key={level} levels={[level]}>
+                  {level}
+                </SelectLevelsButton>
+              )),
+            )}
+            <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
+          </ul>
+        </div>
+        <div className="flex gap-3">
+          <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
+            {labelValue(
+              'percents',
+              <TextLabel
+                title={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
+              >
+                %
+              </TextLabel>,
+            )}
+            {labelValue('points', <TextLabel title="Trier par points">pts</TextLabel>)}
+            {labelValue('name', <TextLabel title="Trier par nom">nom</TextLabel>)}
+          </Radios>
+          <Radios<MasteriesQueryOrder>
+            name="order"
+            value={masteriesQuery.order}
+            setValue={setOrder}
+          >
+            {labelValue(
+              'desc',
+              <IconLabel title="Tri décroissant">
+                <CaretDownOutline className="h-5 fill-current" />
+              </IconLabel>,
+            )}
+            {labelValue(
+              'asc',
+              <IconLabel title="Tri croissant">
+                <CaretUpOutline className="h-5 fill-current" />
+              </IconLabel>,
+            )}
+          </Radios>
+          <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
+            {labelValue(
+              'compact',
+              <IconLabel title="Vue compacte">
+                <AppsSharp className="h-4 fill-current" />
+              </IconLabel>,
+            )}
+            {labelValue(
+              'histogram',
+              <IconLabel title="Vue histogramme">
+                <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
+              </IconLabel>,
+            )}
+          </Radios>
+        </div>
       </div>
-      <div className="flex gap-3">
-        <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
-          {labelValue(
-            'percents',
-            <TextLabel
-              title={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
-            >
-              %
-            </TextLabel>,
-          )}
-          {labelValue('points', <TextLabel title="Trier par points">pts</TextLabel>)}
-          {labelValue('name', <TextLabel title="Trier par nom">nom</TextLabel>)}
-        </Radios>
-        <Radios<MasteriesQueryOrder> name="order" value={masteriesQuery.order} setValue={setOrder}>
-          {labelValue(
-            'desc',
-            <IconLabel title="Tri décroissant">
-              <CaretDownOutline className="h-5 fill-current" />
-            </IconLabel>,
-          )}
-          {labelValue(
-            'asc',
-            <IconLabel title="Tri croissant">
-              <CaretUpOutline className="h-5 fill-current" />
-            </IconLabel>,
-          )}
-        </Radios>
-        <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
-          {labelValue(
-            'compact',
-            <IconLabel title="Vue compacte">
-              <AppsSharp className="h-4 fill-current" />
-            </IconLabel>,
-          )}
-          {labelValue(
-            'histogram',
-            <IconLabel title="Vue histogramme">
-              <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
-            </IconLabel>,
-          )}
-        </Radios>
+      <div className="grid grid-cols-[1fr_auto_1fr] flex-wrap items-center justify-between gap-5">
+        <div className="flex items-center text-xs">
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Rechercher un champion"
+            className={cssClasses(
+              'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
+              ['pr-2', search === ''],
+              ['pr-7', search !== ''],
+            )}
+          />
+          {search !== '' ? (
+            <button type="button" onClick={emptySearch} className="-ml-6 mr-4">
+              <CloseFilled className="h-5 fill-wheat" />
+            </button>
+          ) : null}
+          {Maybe.isSome(masteriesQuery.search) ? (
+            <span className="text-zinc-400">{plural(searchCount, 'résultat')}</span>
+          ) : null}
+        </div>
+        <span className="text-sm">{`${plural(
+          championsCount,
+          'champion',
+        )} / ${totalChampionsCount}`}</span>
+        <span />
       </div>
     </div>
   )
