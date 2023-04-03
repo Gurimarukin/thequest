@@ -24,7 +24,7 @@ export function Radios<A extends Value>({
   value,
   setValue,
   children,
-}: Readonly<RadiosProps<A>>): JSX.Element {
+}: RadiosProps<A>): JSX.Element {
   return (
     <div className="flex">
       {children.map(({ value: val, label }) => {
@@ -55,6 +55,6 @@ export function Radios<A extends Value>({
   )
 }
 
-export function labelValue<A>(value: A, label: React.ReactNode): Readonly<LabelValue<A>> {
+export function labelValue<A>(value: A, label: React.ReactNode): LabelValue<A> {
   return { value, label }
 }

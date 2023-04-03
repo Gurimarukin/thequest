@@ -29,10 +29,10 @@ type OfOptions = {
   locale?: boolean
 }
 
-function of(date: Readonly<number | Date>): DayJs
+function of(date: number | Date): DayJs
 function of(date: string, format?: string, options?: OfOptions): DayJs
 function of(
-  date: Readonly<number | Date | string>,
+  date: number | Date | string,
   format?: string,
   { locale = false }: OfOptions = {},
 ): DayJs {
@@ -74,7 +74,7 @@ const format =
     return (locale ? unwrapped.local() : unwrapped).format(template)
   }
 
-const toDate = (date: DayJs): Readonly<Date> => unwrap(date).toDate()
+const toDate = (date: DayJs): Date => unwrap(date).toDate()
 const toISOString = (date: DayJs): string => unwrap(date).toISOString()
 const unix = (date: DayJs): number => unwrap(date).unix()
 const unixMs = (date: DayJs): MsDuration => MsDuration.wrap(unwrap(date).valueOf())

@@ -5,7 +5,7 @@ import { IO, toNotUsed } from '../../utils/fp'
 import type { TObservable } from './TObservable'
 import type { TSubject } from './TSubject'
 
-type StrongSubject<A> = Omit<Readonly<Subject<A>>, 'next'> & {
+type StrongSubject<A> = Omit<Subject<A>, 'next'> & {
   // eslint-disable-next-line functional/no-return-void
   next: (value: A) => void
 }

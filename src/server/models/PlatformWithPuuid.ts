@@ -4,7 +4,7 @@ import { Platform } from '../../shared/models/api/Platform'
 
 import { Puuid } from './riot/Puuid'
 
-type PlatformWithPuuid = Readonly<C.TypeOf<typeof codec>>
+type PlatformWithPuuid = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   platform: Platform.codec,

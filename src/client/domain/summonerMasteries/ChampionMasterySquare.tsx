@@ -18,7 +18,7 @@ const { plural } = StringUtils
 
 type ChampionMasterySquareProps = {
   championId: ChampionKey
-
+  // eslint-disable-next-line react/boolean-prop-naming
   chestGranted: boolean
   tokensEarned: number
   championLevel: ChampionLevelOrZero
@@ -44,7 +44,7 @@ export const ChampionMasterySquare = ({
   glow,
   setChampionShards,
   isHistogram = false,
-}: Readonly<ChampionMasterySquareProps>): JSX.Element => {
+}: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
   const setShardsCount = useMemo(
@@ -149,11 +149,7 @@ type TokensProps = {
   title?: string
 }
 
-const Tokens = ({
-  championLevel,
-  tokensEarned,
-  title,
-}: Readonly<TokensProps>): JSX.Element | null => {
+const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Element | null => {
   const render = useCallback(
     (totalTockens: number, src: string): JSX.Element => {
       const alt = `Jeton de maîtrise ${championLevel + 1}`
@@ -202,7 +198,7 @@ type ShardsProps = {
   setShardsCount: ((count: number) => void) | null
 }
 
-const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): JSX.Element => {
+const Shards = ({ name, shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
   const addShardCount = useCallback(
     () => setShardsCount?.(shardsCount + 1),
     [setShardsCount, shardsCount],

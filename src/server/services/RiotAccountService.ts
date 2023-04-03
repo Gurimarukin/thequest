@@ -24,7 +24,7 @@ type ForceCacheRefresh = {
   forceCacheRefresh: boolean
 }
 
-type RiotAccountService = Readonly<ReturnType<typeof RiotAccountService>>
+type RiotAccountService = ReturnType<typeof RiotAccountService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotAccountService = (

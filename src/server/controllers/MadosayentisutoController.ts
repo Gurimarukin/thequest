@@ -29,7 +29,7 @@ import type { StaticDataController } from './StaticDataController'
  * `madosayentisuto`: any third party app (needs to be authorized with token)
  */
 
-type MadosayentisutoController = Readonly<ReturnType<typeof MadosayentisutoController>>
+type MadosayentisutoController = ReturnType<typeof MadosayentisutoController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MadosayentisutoController = (

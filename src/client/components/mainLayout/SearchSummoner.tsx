@@ -173,11 +173,7 @@ type SummonerSearchProps = {
   closeSearch: () => void
 }
 
-const SummonerSearch = ({
-  type,
-  summoner,
-  closeSearch,
-}: Readonly<SummonerSearchProps>): JSX.Element => {
+const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): JSX.Element => {
   const { navigate, masteriesQuery } = useHistory()
   const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()

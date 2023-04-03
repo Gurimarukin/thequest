@@ -13,7 +13,7 @@ import { TObservableUtils } from '../../utils/TObservableUtils'
 
 export type WithDb = {
   future: <A>(f: (db: Db) => Promise<A>) => Future<A>
-  observable: (f: (db: Db) => Readonly<Readable>) => TObservable<unknown>
+  observable: (f: (db: Db) => Readable) => TObservable<unknown>
 }
 
 type Of = {

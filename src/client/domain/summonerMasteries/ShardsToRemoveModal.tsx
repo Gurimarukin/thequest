@@ -42,7 +42,7 @@ export type ShardsToRemoveNotification = {
 
 const byPercents: Ord<ShardsToRemoveNotification> = pipe(
   number.Ord,
-  ord.contramap((n: Readonly<ShardsToRemoveNotification>) => n.percents),
+  ord.contramap((n: ShardsToRemoveNotification) => n.percents),
   ord.reverse,
 )
 
@@ -63,7 +63,7 @@ export const ShardsToRemoveModal = ({
   notifications,
   setChampionsShardsBulk,
   hide,
-}: Readonly<Props>): JSX.Element => {
+}: Props): JSX.Element => {
   const toIsChecked = useCallback(
     () =>
       pipe(
@@ -227,7 +227,7 @@ type ForAllButtonProps = {
 const ForAllButton = ({
   notificationsState,
   setNotificationsState,
-}: Readonly<ForAllButtonProps>): JSX.Element => {
+}: ForAllButtonProps): JSX.Element => {
   const yesForAll = notificationsState.some(n => !n.isChecked)
   const forAllClick = useMemo(
     () =>
@@ -253,7 +253,7 @@ type ToggleProps = {
   toggleChecked: () => void
 }
 
-const Toggle = ({ isChecked, toggleChecked }: Readonly<ToggleProps>): JSX.Element => (
+const Toggle = ({ isChecked, toggleChecked }: ToggleProps): JSX.Element => (
   <label className="cursor-pointer">
     <input type="checkbox" checked={isChecked} onChange={toggleChecked} className="hidden" />
     <ToggleFilled

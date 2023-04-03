@@ -4,14 +4,14 @@ import React, { cloneElement, createRef, useCallback, useEffect } from 'react'
 import type { List } from '../../shared/utils/fp'
 
 type Props = {
-  onClickOutside: (e: Readonly<MouseEvent>) => void
+  onClickOutside: (e: MouseEvent) => void
 }
 
 export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {
   const refs = React.Children.map(children, () => createRef<Node>())
 
   const handleClick = useCallback(
-    (e: Readonly<MouseEvent>) => {
+    (e: MouseEvent) => {
       const isOutside = (refs as List<React.RefObject<Node>>).every(
         ref => ref.current !== null && !ref.current.contains(e.target as Node),
       )

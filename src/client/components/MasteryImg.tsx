@@ -11,7 +11,7 @@ type Props = {
   className?: string
 }
 
-export const MasteryImg = ({ level, title, className }: Readonly<Props>): JSX.Element => (
+export const MasteryImg = ({ level, title, className }: Props): JSX.Element => (
   <img
     src={Assets.masteries[level]}
     alt={`Icône niveau ${level}`}

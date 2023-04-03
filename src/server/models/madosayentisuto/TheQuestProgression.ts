@@ -7,7 +7,7 @@ import { List } from '../../../shared/utils/fp'
 
 import { SummonerId } from '../summoner/SummonerId'
 
-type TheQuestProgression = Readonly<E.TypeOf<typeof encoder>>
+type TheQuestProgression = E.TypeOf<typeof encoder>
 
 const encoder = E.struct({
   userId: DiscordUserId.codec,

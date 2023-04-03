@@ -16,7 +16,7 @@ type ForceCacheRefresh = {
   forceCacheRefresh: boolean
 }
 
-type MasteriesService = Readonly<ReturnType<typeof MasteriesService>>
+type MasteriesService = ReturnType<typeof MasteriesService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MasteriesService = (

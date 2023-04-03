@@ -6,7 +6,7 @@ import { DayJsFromDate } from '../utils/ioTsUtils'
 import { Puuid } from './riot/Puuid'
 import { TagLine } from './riot/TagLine'
 
-type RiotAccountDb = Readonly<C.TypeOf<typeof codec>>
+type RiotAccountDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   gameName: C.string,

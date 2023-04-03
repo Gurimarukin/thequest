@@ -20,7 +20,7 @@ type State = {
   userName: string
   password: string
 }
-const emptyState: Readonly<State> = { userName: '', password: '' }
+const emptyState: State = { userName: '', password: '' }
 
 export const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))

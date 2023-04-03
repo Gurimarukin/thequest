@@ -7,8 +7,8 @@ import type { Future } from '../../../shared/utils/fp'
 import type { WithDb } from './WithDb'
 
 export type MongoCollection<O extends MongoDocument> = {
-  future: <A>(f: (coll: Readonly<Collection<O>>) => Promise<A>) => Future<A>
-  observable: (f: (coll: Readonly<Collection<O>>) => Readonly<Readable>) => TObservable<unknown>
+  future: <A>(f: (coll: Collection<O>) => Promise<A>) => Future<A>
+  observable: (f: (coll: Collection<O>) => Readable) => TObservable<unknown>
 }
 
 type MongoCollectionGetter = <O extends MongoDocument>(collName: string) => MongoCollection<O>

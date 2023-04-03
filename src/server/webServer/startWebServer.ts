@@ -155,7 +155,7 @@ export const startWebServer = (
     )
   }
 
-  function bindUpgrades(server: Readonly<http.Server>): IO<http.Server> {
+  function bindUpgrades(server: http.Server): IO<http.Server> {
     return IO.tryCatch(() =>
       server.on('upgrade', (request, socket, head) =>
         pipe(

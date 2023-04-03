@@ -48,7 +48,7 @@ type Props = {
   summonerName: string
 }
 
-export const SummonerMasteries = ({ platform, summonerName }: Readonly<Props>): JSX.Element => {
+export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
   const { user } = useUser()
 
   const { data, error, mutate } = useSWRHttp(
@@ -68,7 +68,7 @@ export const SummonerMasteries = ({ platform, summonerName }: Readonly<Props>): 
   const setChampionsShardsBulk = useCallback(
     (
       updates: NonEmptyArray<ChampionShardsPayload>,
-      { optimisticMutation }: Readonly<OptimisticMutation>,
+      { optimisticMutation }: OptimisticMutation,
     ): Future<NotUsed> => {
       if (data === undefined || Maybe.isNone(data.championShards)) return Future.notUsed
 
@@ -137,7 +137,7 @@ type SummonerViewProps = {
   championShards: Maybe<List<ChampionShardsView>>
   setChampionsShardsBulk: (
     updates: NonEmptyArray<ChampionShardsPayload>,
-    { optimisticMutation }: Readonly<OptimisticMutation>,
+    { optimisticMutation }: OptimisticMutation,
   ) => Future<NotUsed>
 }
 
@@ -147,7 +147,7 @@ const SummonerViewComponent = ({
   masteries,
   championShards,
   setChampionsShardsBulk,
-}: Readonly<SummonerViewProps>): JSX.Element => {
+}: SummonerViewProps): JSX.Element => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
   const staticData = useStaticData()
@@ -199,7 +199,7 @@ const SummonerViewComponent = ({
                   enrichedMasteries,
                   List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
                   Maybe.map(
-                    (c): Readonly<ShardsToRemoveNotification> => ({
+                    (c): ShardsToRemoveNotification => ({
                       championId: champion,
                       name: c.name,
                       championLevel: c.championLevel,
@@ -280,10 +280,10 @@ const enrichAll = (
   championShards: Maybe<List<ChampionShardsView>>,
   view: MasteriesQueryView,
   staticDataChampions: List<StaticDataChampion>,
-): Readonly<EnrichedAll> => {
+): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name }): Readonly<EnrichedChampionMastery> => {
+    List.map(({ key, name }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -310,7 +310,7 @@ const enrichAll = (
         masteries,
         List.findFirst(c => ChampionKey.Eq.equals(c.championId, key)),
         Maybe.fold(
-          (): Readonly<EnrichedChampionMastery> => ({
+          (): EnrichedChampionMastery => ({
             championId: key,
             championLevel: 0,
             championPoints: 0,

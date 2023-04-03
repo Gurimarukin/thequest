@@ -6,7 +6,7 @@ import { ChampionKey } from '../../../../shared/models/api/ChampionKey'
 import { List } from '../../../../shared/utils/fp'
 import { NumberFromString } from '../../../../shared/utils/ioTsUtils'
 
-type DDragonChampion = Readonly<D.TypeOf<typeof decoder>>
+type DDragonChampion = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   version: D.string,

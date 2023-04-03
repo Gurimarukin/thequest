@@ -16,7 +16,7 @@ export function Select<A extends string>({
   value,
   setValue,
   className,
-}: Readonly<Props<A>>): JSX.Element {
+}: Props<A>): JSX.Element {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       setValue(e.target.value as A)

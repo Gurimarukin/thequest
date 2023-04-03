@@ -293,7 +293,7 @@ const EndedMiddleware = { withBody }
 
 export { MyMiddleware, EndedMiddleware }
 
-const requestChunks = (req: Readonly<http.IncomingMessage>): Future<List<unknown>> =>
+const requestChunks = (req: http.IncomingMessage): Future<List<unknown>> =>
   Future.tryCatch(
     () =>
       new Promise<List<unknown>>((resolve, reject) => {

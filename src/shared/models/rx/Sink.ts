@@ -4,7 +4,7 @@ import type { List, NonIO } from '../../utils/fp'
 import { Future, NotUsed } from '../../utils/fp'
 import type { TObservable } from './TObservable'
 
-export type Sink<A, B> = (observable: Readonly<TObservable<A>>) => Future<B>
+export type Sink<A, B> = (observable: TObservable<A>) => Future<B>
 
 const reduce =
   <A, B>(b: B, f: (acc: B, a: A) => B): Sink<A, B> =>
@@ -40,7 +40,7 @@ const reduceTaskEither = <A, B>(b: B, f: (acc: B, a: A) => Future<B>): Sink<A, B
     Future.chain(identity),
   )
 
-const readonlyArray = <A>(obs: Readonly<TObservable<A>>): Future<List<A>> =>
+const readonlyArray = <A>(obs: TObservable<A>): Future<List<A>> =>
   Future.tryCatch(
     () =>
       new Promise<List<A>>((resolve, reject) => {
@@ -59,7 +59,7 @@ const readonlyArray = <A>(obs: Readonly<TObservable<A>>): Future<List<A>> =>
       }),
   )
 
-const toNotUsed = <A>(obs: Readonly<TObservable<NonIO<A>>>): Future<NotUsed> =>
+const toNotUsed = <A>(obs: TObservable<NonIO<A>>): Future<NotUsed> =>
   Future.tryCatch(
     () =>
       new Promise<NotUsed>((resolve, reject) => {

@@ -39,7 +39,7 @@ import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
-type UserController = Readonly<ReturnType<typeof UserController>>
+type UserController = ReturnType<typeof UserController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserController(

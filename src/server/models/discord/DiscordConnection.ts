@@ -25,7 +25,7 @@ const connectionService = createEnum(
 
 const connectionVisibility = createEnum(0, 1)
 
-type DiscordConnection = Readonly<D.TypeOf<typeof decoder>>
+type DiscordConnection = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   /**

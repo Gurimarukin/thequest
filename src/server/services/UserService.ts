@@ -51,7 +51,7 @@ type ForceCacheRefresh = {
   forceCacheRefresh: boolean
 }
 
-type UserService = Readonly<ReturnType<typeof UserService>>
+type UserService = ReturnType<typeof UserService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const UserService = (

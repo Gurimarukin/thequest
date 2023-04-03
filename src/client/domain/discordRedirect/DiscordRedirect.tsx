@@ -43,10 +43,7 @@ type DiscordRedirectValidatedProps = {
   state: DiscordRedirectState
 }
 
-const DiscordRedirectValidated = ({
-  code,
-  state,
-}: Readonly<DiscordRedirectValidatedProps>): JSX.Element => {
+const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps): JSX.Element => {
   const { navigate } = useHistory()
   const { refreshUser } = useUser()
 

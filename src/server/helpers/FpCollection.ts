@@ -31,7 +31,7 @@ import { decodeError } from '../../shared/utils/ioTsUtils'
 import type { MongoCollection } from '../models/mongo/MongoCollection'
 import type { IndexDescription, WithoutProjection } from '../models/mongo/MongoTypings'
 
-export type FpCollection = Readonly<ReturnType<ReturnType<ReturnType<typeof FpCollection>>>>
+export type FpCollection = ReturnType<ReturnType<ReturnType<typeof FpCollection>>>
 
 export const FpCollection =
   (logger: LoggerType) =>
@@ -85,11 +85,7 @@ export const FpCollection =
         )
       },
 
-      updateOne: (
-        filter: Readonly<Filter<O>>,
-        doc: A,
-        options: UpdateOptions = {},
-      ): Future<UpdateResult> => {
+      updateOne: (filter: Filter<O>, doc: A, options: UpdateOptions = {}): Future<UpdateResult> => {
         const encoded = codec.encode(doc)
         return pipe(
           collection.future(c =>
@@ -100,7 +96,7 @@ export const FpCollection =
       },
 
       replaceOne: (
-        filter: Readonly<Filter<O>>,
+        filter: Filter<O>,
         doc: A,
         options: ReplaceOptions = {},
       ): Future<UpdateResult | MongoDocument> => {
@@ -111,23 +107,20 @@ export const FpCollection =
         )
       },
 
-      count: (filter: Readonly<Filter<O>>): Future<number> =>
+      count: (filter: Filter<O>): Future<number> =>
         collection.future(c => c.countDocuments(filter)),
 
       findOne,
 
       findAll,
 
-      deleteOne: (filter: Readonly<Filter<O>>, options: DeleteOptions = {}): Future<DeleteResult> =>
+      deleteOne: (filter: Filter<O>, options: DeleteOptions = {}): Future<DeleteResult> =>
         pipe(
           collection.future(c => c.deleteOne(filter, options)),
           Future.chainFirstIOEitherK(res => logger.trace(`Deleted ${res.deletedCount} documents`)),
         ),
 
-      deleteMany: (
-        filter: Readonly<Filter<O>>,
-        options: DeleteOptions = {},
-      ): Future<DeleteResult> =>
+      deleteMany: (filter: Filter<O>, options: DeleteOptions = {}): Future<DeleteResult> =>
         pipe(
           collection.future(c => c.deleteMany(filter, options)),
           Future.chainFirstIOEitherK(res => logger.trace(`Deleted ${res.deletedCount} documents`)),
@@ -141,17 +134,17 @@ export const FpCollection =
     }
 
     function findOne(
-      filter: Readonly<Filter<O>>,
-      options?: Readonly<WithoutProjection<FindOptions<O>>>,
+      filter: Filter<O>,
+      options?: WithoutProjection<FindOptions<O>>,
     ): Future<Maybe<A>>
     function findOne<B extends A>(
-      filter: Readonly<Filter<O>>,
-      options: Readonly<WithoutProjection<FindOptions<O>>>,
+      filter: Filter<O>,
+      options: WithoutProjection<FindOptions<O>>,
       decoderWithName: Tuple<Decoder<unknown, B>, string>,
     ): Future<Maybe<B>>
 
     function findOne<B extends A>(
-      filter: Readonly<Filter<O>>,
+      filter: Filter<O>,
       options: WithoutProjection<FindOptions<O>> = {},
       [decoder, name]: Tuple<Decoder<unknown, B>, string> = codecWithName as Tuple<
         Decoder<unknown, B>,
@@ -168,17 +161,14 @@ export const FpCollection =
       )
     }
 
-    function findAll(): (
-      query: Readonly<Filter<O>>,
-      options?: Readonly<FindOptions<O>>,
-    ) => TObservable<A>
+    function findAll(): (query: Filter<O>, options?: FindOptions<O>) => TObservable<A>
     function findAll<B>([decoder, decoderName]: Tuple<Decoder<unknown, B>, string>): (
-      query: Readonly<Filter<O>>,
-      options?: Readonly<FindOptions<O>>,
+      query: Filter<O>,
+      options?: FindOptions<O>,
     ) => TObservable<B>
     function findAll<B>(
       [decoder, decoderName] = codecWithName as Tuple<Decoder<unknown, B>, string>,
-    ): (query: Readonly<Filter<O>>, options?: Readonly<FindOptions<O>>) => TObservable<B> {
+    ): (query: Filter<O>, options?: FindOptions<O>) => TObservable<B> {
       return fpCollectionHelpersFindAll(logger, collection, [decoder, decoderName])
     }
   }
@@ -216,7 +206,7 @@ const fpCollectionHelpersFindAll =
     collection: MongoCollection<O>,
     [decoder, decoderName]: Tuple<Decoder<unknown, B>, string>,
   ) =>
-  (query: Readonly<Filter<O>>, options?: Readonly<FindOptions<O>>): TObservable<B> => {
+  (query: Filter<O>, options?: FindOptions<O>): TObservable<B> => {
     const count = Store<number>(0)
     return pipe(
       collection.observable(coll => coll.find(query, options).stream()),

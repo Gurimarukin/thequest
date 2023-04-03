@@ -40,7 +40,7 @@ type VersionWithChampions = {
   champions: DDragonChampions
 }
 
-type DDragonService = Readonly<ReturnType<typeof DDragonService>>
+type DDragonService = ReturnType<typeof DDragonService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const DDragonService = (riotApiService: RiotApiService) => {

@@ -17,7 +17,7 @@ export const Link = ({
   onClick: onClick_,
   className,
   children,
-}: Readonly<Props>): JSX.Element => {
+}: Props): JSX.Element => {
   const { navigate } = useHistory()
 
   const onClick = useCallback(

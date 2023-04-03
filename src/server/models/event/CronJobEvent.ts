@@ -4,7 +4,7 @@ type CronJobEvent = {
   date: DayJs
 }
 
-const of = (date: DayJs): Readonly<CronJobEvent> => ({ date })
+const of = (date: DayJs): CronJobEvent => ({ date })
 
 const CronJobEvent = { of }
 

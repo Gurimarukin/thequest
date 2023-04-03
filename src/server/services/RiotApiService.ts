@@ -34,7 +34,7 @@ type UseAccountApiKey = {
   useAccountApiKey: boolean
 }
 
-type RiotApiService = Readonly<ReturnType<typeof RiotApiService>>
+type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => ({

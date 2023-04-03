@@ -26,7 +26,7 @@ type UseAccountApiKey = {
   useAccountApiKey: boolean
 }
 
-type SummonerService = Readonly<ReturnType<typeof of>>
+type SummonerService = ReturnType<typeof of>
 
 const SummonerService = (
   Logger: LoggerGetter,

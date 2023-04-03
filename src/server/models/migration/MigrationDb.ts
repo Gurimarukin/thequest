@@ -4,7 +4,7 @@ import * as D from 'io-ts/Decoder'
 
 import { DayJsFromISOString } from '../../../shared/utils/ioTsUtils'
 
-type MigrationDb = Readonly<C.TypeOf<typeof codec>>
+type MigrationDb = C.TypeOf<typeof codec>
 
 const createdAtCodec = C.struct({
   createdAt: DayJsFromISOString.codec,

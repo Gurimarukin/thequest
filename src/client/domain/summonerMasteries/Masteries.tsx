@@ -23,7 +23,7 @@ type Props = {
   setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-export const Masteries = ({ masteries, setChampionShards }: Readonly<Props>): JSX.Element => {
+export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element => {
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -76,7 +76,7 @@ export const Masteries = ({ masteries, setChampionShards }: Readonly<Props>): JS
 
 const levelFilterPredicate =
   (levels: ReadonlySet<ChampionLevelOrZero>) =>
-  (c: Readonly<EnrichedChampionMastery>): boolean =>
+  (c: EnrichedChampionMastery): boolean =>
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
 const renderChampionMasteries = (
@@ -104,7 +104,7 @@ type ChampionMasteriesCompactProps = {
 const ChampionMasteriesCompact = ({
   champions,
   setChampionShards,
-}: Readonly<ChampionMasteriesCompactProps>): JSX.Element => (
+}: ChampionMasteriesCompactProps): JSX.Element => (
   <div className="flex max-w-[104rem] flex-wrap justify-center gap-4 self-center pt-4 pb-2">
     {champions.map(champion => (
       <ChampionMasterySquare
@@ -124,7 +124,7 @@ type ChampionMasteriesHistogramProps = {
 const ChampionMasteriesHistogram = ({
   champions,
   setChampionShards,
-}: Readonly<ChampionMasteriesHistogramProps>): JSX.Element => {
+}: ChampionMasteriesHistogramProps): JSX.Element => {
   const maybeMaxPoints = useMemo(
     () =>
       pipe(
@@ -169,7 +169,7 @@ const ChampionMasteryHistogram = ({
     championPointsSinceLastLevel,
     championPointsUntilNextLevel,
   },
-}: Readonly<ChampionMasteryHistogramProps>): JSX.Element => {
+}: ChampionMasteryHistogramProps): JSX.Element => {
   const pointsUntilAndSince = pipe(
     [
       Maybe.some(plural(championPoints, 'point')),

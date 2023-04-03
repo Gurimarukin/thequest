@@ -16,12 +16,12 @@ export type UnionResult<T extends UnionDescription> = {
   T: Union<T>
   is: <NAME extends keyof T>(
     name: NAME,
-  ) => <U extends Union<T>>(other: U) => other is Readonly<ReturnType<T[NAME]>> & { type: NAME }
+  ) => <U extends Union<T>>(other: U) => other is ReturnType<T[NAME]> & { type: NAME }
   match: <B>(m: Match<T, B>) => (u: Union<T>) => B
 } & { [K in keyof T]: Factory<T[K], K> & { T: ReturnType<Factory<T[K], K>> } }
 
 type Match<T extends UnionDescription, B> = {
-  [K in keyof T]: (a: Omit<Readonly<ReturnType<Factory<T[K], K>>>, 'type'>) => B
+  [K in keyof T]: (a: Omit<ReturnType<Factory<T[K], K>>, 'type'>) => B
 }
 
 type Factory<F extends (...args: List<any>) => any, TYPE> = (
@@ -32,9 +32,7 @@ type Factory<F extends (...args: List<any>) => any, TYPE> = (
 
 type Union<T extends UnionDescription> = {
   [K in keyof T]: {
-    [K2 in keyof Readonly<ReturnType<T[K]>> | 'type']: K2 extends 'type'
-      ? K
-      : Readonly<ReturnType<T[K]>>[K2]
+    [K2 in keyof ReturnType<T[K]> | 'type']: K2 extends 'type' ? K : ReturnType<T[K]>[K2]
   }
 }[keyof T]
 
@@ -84,5 +82,5 @@ export type UnionKeys<U> = U extends UnionResult<infer _>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UnionTypes<U, K extends UnionKeys<U> = UnionKeys<U>> = U extends UnionResult<infer _>
-  ? Readonly<ReturnType<U[K]>>
+  ? ReturnType<U[K]>
   : never
