@@ -1,10 +1,11 @@
-/* eslint-disable functional/no-expression-statements */
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -12,6 +13,7 @@ import { useUser } from '../../contexts/UserContext'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import {
   CloseFilled,
+  PersonFilled,
   SearchOutline,
   StarFilled,
   StarOutline,
@@ -29,9 +31,10 @@ export const SearchSummoner = (): JSX.Element => {
   const { user, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
-  const hide = useCallback(() => setIsOpen(false), [])
+  const close = useCallback(() => setIsOpen(false), [])
 
   const summonerNameFromLocation = useSummonerNameFromLocation()
+
   useEffect(() => {
     pipe(summonerNameFromLocation, Maybe.map(setSummonerName))
   }, [summonerNameFromLocation])
@@ -68,15 +71,48 @@ export const SearchSummoner = (): JSX.Element => {
     [masteriesQuery, navigate, platform, summonerName],
   )
 
-  const favoriteSearches = pipe(
-    user,
-    Maybe.fold(
-      () => List.empty,
-      u => u.favoriteSearches,
+  const searches: List<JSX.Element> = List.compact([
+    pipe(
+      user,
+      Maybe.chain(u => u.linkedRiotAccount),
+      // eslint-disable-next-line react/jsx-key
+      Maybe.map(s => <SummonerSearch type="self" summoner={s} closeSearch={close} />),
     ),
-  )
-  const showSearches =
-    isOpen && (List.isNonEmpty(favoriteSearches) || List.isNonEmpty(recentSearches))
+    pipe(
+      user,
+      Maybe.chain(u => NonEmptyArray.fromReadonlyArray(u.favoriteSearches)),
+      Maybe.map(favoriteSearches => (
+        <>
+          {favoriteSearches.map(s => (
+            <SummonerSearch
+              key={`${s.platform}${s.name}`}
+              type="favorite"
+              summoner={s}
+              closeSearch={close}
+            />
+          ))}
+        </>
+      )),
+    ),
+    pipe(
+      recentSearches,
+      NonEmptyArray.fromReadonlyArray,
+      Maybe.map(recentSearches_ => (
+        <>
+          {recentSearches_.map(s => (
+            <SummonerSearch
+              key={`${s.platform}${s.name}`}
+              type="recent"
+              summoner={s}
+              closeSearch={close}
+            />
+          ))}
+        </>
+      )),
+    ),
+  ])
+
+  const showSearches = isOpen && List.isNonEmpty(searches)
 
   return (
     <div>
@@ -87,7 +123,7 @@ export const SearchSummoner = (): JSX.Element => {
           setValue={setPlatform}
           className="border-y border-l border-goldenrod bg-black pl-1"
         />
-        <ClickOutside onClickOutside={hide}>
+        <ClickOutside onClickOutside={close}>
           <input
             type="text"
             value={summonerName}
@@ -97,18 +133,12 @@ export const SearchSummoner = (): JSX.Element => {
           />
           <ul
             className={cssClasses(
-              'absolute top-full z-10 max-h-[calc(100vh_-_5rem)] grid-cols-[auto_auto_auto] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
+              'absolute top-full z-20 max-h-[calc(100vh_-_5rem)] grid-cols-[auto_auto_auto] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
               ['hidden', !showSearches],
               ['grid', showSearches],
             )}
           >
-            {favoriteSearches.map(s => (
-              <SummonerSearch key={`${s.platform}${s.name}`} type="favorite" summoner={s} />
-            ))}
-            {List.isNonEmpty(favoriteSearches) && List.isNonEmpty(recentSearches) ? <Hr /> : null}
-            {recentSearches.map(s => (
-              <SummonerSearch key={`${s.platform}${s.name}`} type="recent" summoner={s} />
-            ))}
+            {concatWithHr(searches)}
           </ul>
         </ClickOutside>
         <button type="submit">
@@ -119,13 +149,32 @@ export const SearchSummoner = (): JSX.Element => {
   )
 }
 
+const concatWithHr = (es: List<JSX.Element>): JSX.Element | null =>
+  pipe(
+    es,
+    NonEmptyArray.fromReadonlyArray,
+    Maybe.fold(
+      () => null,
+      NonEmptyArray.concatAll({
+        concat: (x, y) => (
+          <>
+            {x}
+            <Hr />
+            {y}
+          </>
+        ),
+      }),
+    ),
+  )
+
 type SummonerSearchProps = {
-  readonly type: 'favorite' | 'recent'
+  readonly type: 'self' | 'favorite' | 'recent'
   readonly summoner: SummonerShort
+  readonly closeSearch: () => void
 }
 
-const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element => {
-  const { masteriesQuery } = useHistory()
+const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): JSX.Element => {
+  const { navigate, masteriesQuery } = useHistory()
   const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
@@ -135,8 +184,11 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
   )
 
   const handleAddFavoriteClick = useCallback(
-    () => addFavoriteSearch(summoner),
-    [addFavoriteSearch, summoner],
+    () =>
+      addFavoriteSearch(summoner, () =>
+        navigate(appRoutes.platformSummonerName(summoner.platform, summoner.name, masteriesQuery)),
+      ),
+    [addFavoriteSearch, masteriesQuery, navigate, summoner],
   )
 
   const handleRemoveFavoriteClick = useCallback(
@@ -148,12 +200,10 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
     <li className="contents">
       {((): JSX.Element => {
         switch (type) {
+          case 'self':
+            return <span />
           case 'favorite':
-            return (
-              <span className="p-2">
-                <TimeOutline className="invisible h-4" />
-              </span>
-            )
+            return <span />
           case 'recent':
             return (
               <button type="button" onClick={handleRemoveRecentClick} className="group p-2">
@@ -169,6 +219,7 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
           summoner.name,
           MasteriesQuery.toPartial(masteriesQuery),
         )}
+        onClick={closeSearch}
         className="flex items-center hover:underline"
       >
         <img
@@ -181,6 +232,12 @@ const SummonerSearch = ({ type, summoner }: SummonerSearchProps): JSX.Element =>
       </Link>
       {((): JSX.Element => {
         switch (type) {
+          case 'self':
+            return (
+              <span className="px-3">
+                <PersonFilled className="h-4 fill-goldenrod" />
+              </span>
+            )
           case 'favorite':
             return (
               <button

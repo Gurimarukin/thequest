@@ -87,6 +87,8 @@ type FilterOrElse = {
 
 const filterOrElse = flow(Either.filterOrElse, Future.map) as FilterOrElse
 
+const fromTaskEither: <E, A>(fa: Future<A>) => Future<Either<E, A>> = Future.map(Either.right)
+
 const map = eitherT.map(Future.Functor)
 
 export const futureEither = {
@@ -108,6 +110,7 @@ export const futureEither = {
   chainFirstTaskEitherK,
   chainFirstIOEitherK,
   filterOrElse,
+  fromTaskEither,
   left,
   map,
   right,
