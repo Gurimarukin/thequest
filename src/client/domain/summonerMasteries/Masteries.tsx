@@ -7,7 +7,7 @@ import React, { Fragment, useMemo } from 'react'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -27,8 +27,8 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const filteredAndSortedChampions = useMemo(() => {
-    return pipe(
+  const [filteredAndSortedChampions, searchCount] = useMemo(() => {
+    const filteredAndSortedChampions_ = pipe(
       masteries,
       List.filter(levelFilterPredicate(masteriesQuery.level)),
       List.sortBy(
@@ -53,6 +53,15 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       ),
     )
 
+    return Tuple.of(
+      filteredAndSortedChampions_,
+      pipe(
+        filteredAndSortedChampions_,
+        List.filter(c => Maybe.isSome(c.glow)),
+        List.size,
+      ),
+    )
+
     function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
       switch (masteriesQuery.order) {
         case 'asc':
@@ -68,6 +77,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       <MasteriesFilters
         championsCount={filteredAndSortedChampions.length}
         totalChampionsCount={champions.length}
+        searchCount={searchCount}
       />
       {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions, setChampionShards)}
     </>

@@ -32,9 +32,14 @@ const { plural } = StringUtils
 type Props = {
   championsCount: number
   totalChampionsCount: number
+  searchCount: number
 }
 
-export const MasteriesFilters = ({ championsCount, totalChampionsCount }: Props): JSX.Element => {
+export const MasteriesFilters = ({
+  championsCount,
+  totalChampionsCount,
+  searchCount,
+}: Props): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { user } = useUser()
 
@@ -195,8 +200,8 @@ export const MasteriesFilters = ({ championsCount, totalChampionsCount }: Props)
           </Radios>
         </div>
       </div>
-      <div className="grid grid-cols-[1fr_auto_1fr] flex-wrap items-center justify-between gap-5 text-sm">
-        <div className="flex items-center">
+      <div className="grid grid-cols-[1fr_auto_1fr] flex-wrap items-center justify-between gap-5">
+        <div className="flex items-center text-xs">
           <input
             ref={searchRef}
             type="text"
@@ -204,18 +209,24 @@ export const MasteriesFilters = ({ championsCount, totalChampionsCount }: Props)
             onChange={handleSearchChange}
             placeholder="Rechercher un champion"
             className={cssClasses(
-              'w-[196px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
+              'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
               ['pr-2', search === ''],
               ['pr-7', search !== ''],
             )}
           />
           {search !== '' ? (
-            <button type="button" onClick={emptySearch} className="-ml-6">
+            <button type="button" onClick={emptySearch} className="-ml-6 mr-4">
               <CloseFilled className="h-5 fill-wheat" />
             </button>
           ) : null}
+          {Maybe.isSome(masteriesQuery.search) ? (
+            <span className="text-zinc-400">{plural(searchCount, 'résultat')}</span>
+          ) : null}
         </div>
-        <span>{`${plural(championsCount, 'champion')} / ${totalChampionsCount}`}</span>
+        <span className="text-sm">{`${plural(
+          championsCount,
+          'champion',
+        )} / ${totalChampionsCount}`}</span>
         <span />
       </div>
     </div>
