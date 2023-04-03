@@ -28,7 +28,6 @@ import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -183,15 +182,8 @@ const SummonerViewComponent = ({
   )
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
-    () =>
-      enrichAll(
-        masteries,
-        championShards,
-        masteriesQuery.view,
-        masteriesQuery.search,
-        staticData.champions,
-      ),
-    [championShards, masteries, masteriesQuery.search, masteriesQuery.view, staticData.champions],
+    () => enrichAll(masteries, championShards, masteriesQuery.search, staticData.champions),
+    [championShards, masteries, masteriesQuery.search, staticData.champions],
   )
 
   const [isNotificationsHidden, setIsNotificationsHidden] = useState(false)
@@ -290,7 +282,6 @@ type PartialMasteriesGrouped = Partial<
 const enrichAll = (
   masteries: List<ChampionMasteryView>,
   championShards: Maybe<List<ChampionShardsView>>,
-  view: MasteriesQueryView,
   maybeSearch: Maybe<string>,
   staticDataChampions: List<StaticDataChampion>,
 ): EnrichedAll => {
