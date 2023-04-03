@@ -16,11 +16,11 @@ import { ChampionShardsDb } from '../models/user/ChampionShardsDb'
 import { UserId } from '../models/user/UserId'
 
 type ToDeleteAndToUpsert<A> = {
-  readonly toDelete: List<A>
-  readonly toUpsert: List<A>
+  toDelete: List<A>
+  toUpsert: List<A>
 }
 
-type ChampionShardPersistence = Readonly<ReturnType<typeof ChampionShardPersistence>>
+type ChampionShardPersistence = ReturnType<typeof ChampionShardPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) => {
@@ -70,7 +70,7 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
         List.concat(
           pipe(
             toUpsert,
-            List.map((c): Readonly<AnyBulkWriteOperation<ChampionShardsDbOutput>> => {
+            List.map((c): AnyBulkWriteOperation<ChampionShardsDbOutput> => {
               const {
                 user: encodedUser,
                 summoner: encodedSummoner,

@@ -15,16 +15,16 @@ import type { RiotApiService } from './RiotApiService'
 import type { SummonerService } from './SummonerService'
 
 type PlatformWithPuuid = {
-  readonly platform: Platform
-  readonly puuid: Puuid
-  readonly summonerCacheWasRefreshed: boolean
+  platform: Platform
+  puuid: Puuid
+  summonerCacheWasRefreshed: boolean
 }
 
 type ForceCacheRefresh = {
-  readonly forceCacheRefresh: boolean
+  forceCacheRefresh: boolean
 }
 
-type RiotAccountService = Readonly<ReturnType<typeof RiotAccountService>>
+type RiotAccountService = ReturnType<typeof RiotAccountService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotAccountService = (

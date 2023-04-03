@@ -2,7 +2,7 @@ import * as D from 'io-ts/Decoder'
 
 import { DDragonChampion } from './DDragonChampion'
 
-type DDragonChampions = Readonly<D.TypeOf<typeof decoder>>
+type DDragonChampions = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   type: D.literal('champion'),

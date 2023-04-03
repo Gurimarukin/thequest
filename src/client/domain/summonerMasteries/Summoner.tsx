@@ -13,14 +13,14 @@ import { cssClasses } from '../../utils/cssClasses'
 const { round } = NumberUtils
 
 type Props = {
-  readonly summoner: EnrichedSummonerView
+  summoner: EnrichedSummonerView
 }
 
 export type EnrichedSummonerView = SummonerView & {
-  readonly questPercents: number
-  // readonly totalChampionsCount: number
-  readonly totalMasteryLevel: number
-  readonly masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
+  questPercents: number
+  // totalChampionsCount: number
+  totalMasteryLevel: number
+  masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
 }
 
 export const Summoner = ({
@@ -105,9 +105,9 @@ export const Summoner = ({
 }
 
 type MasteryImgWithCountProps = {
-  readonly level: ChampionLevelOrZero
-  readonly imgClassName?: string
-  readonly className?: string
+  level: ChampionLevelOrZero
+  imgClassName?: string
+  className?: string
 }
 
 const getMasteryImgWithCount =

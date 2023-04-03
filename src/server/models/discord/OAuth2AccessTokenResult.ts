@@ -6,7 +6,7 @@ import { MsDuration } from '../../../shared/models/MsDuration'
 import { AccessToken } from './AccessToken'
 import { RefreshToken } from './RefreshToken'
 
-type OAuth2AccessTokenResult = Readonly<D.TypeOf<typeof decoder>>
+type OAuth2AccessTokenResult = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   access_token: AccessToken.codec,

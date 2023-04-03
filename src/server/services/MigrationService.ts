@@ -13,7 +13,7 @@ import type { MigrationPersistence } from '../persistence/MigrationPersistence'
 
 const { plural } = StringUtils
 
-export type MigrationService = Readonly<ReturnType<typeof MigrationService>>
+export type MigrationService = ReturnType<typeof MigrationService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const MigrationService = (

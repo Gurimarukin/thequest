@@ -38,20 +38,20 @@ import type { RiotAccountService } from './RiotAccountService'
 import type { SummonerService } from './SummonerService'
 
 export type SummonerWithDiscordInfos = {
-  readonly summoner: {
-    readonly id: SummonerId
-    readonly platform: Platform
-    readonly name: string
-    readonly profileIconId: number
+  summoner: {
+    id: SummonerId
+    platform: Platform
+    name: string
+    profileIconId: number
   }
-  readonly discord: UserDiscordInfos
+  discord: UserDiscordInfos
 }
 
 type ForceCacheRefresh = {
-  readonly forceCacheRefresh: boolean
+  forceCacheRefresh: boolean
 }
 
-type UserService = Readonly<ReturnType<typeof UserService>>
+type UserService = ReturnType<typeof UserService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const UserService = (
@@ -331,8 +331,8 @@ export { UserService }
 const fromStringRegex = /^(.+)#([^#]+)$/
 
 type GameNameAndTagLine = {
-  readonly gameName: string
-  readonly tagLine: TagLine
+  gameName: string
+  tagLine: TagLine
 }
 
 // name is `<gameName>#<tagLine>` (from Riot account)

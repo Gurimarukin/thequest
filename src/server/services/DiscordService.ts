@@ -14,7 +14,7 @@ import type { RefreshToken } from '../models/discord/RefreshToken'
 
 const apiEndpoint = 'https://discord.com/api'
 
-type DiscordService = Readonly<ReturnType<typeof DiscordService>>
+type DiscordService = ReturnType<typeof DiscordService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const DiscordService = (clientConfig: ClientConfig, httpClient: HttpClient) => ({

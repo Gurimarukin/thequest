@@ -23,42 +23,42 @@ import { ClientSecret } from '../models/discord/ClientSecret'
 const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
-  readonly isDev: boolean
-  readonly logLevel: LogLevelOrOff
-  readonly client: ClientConfig
-  readonly http: HttpConfig
-  readonly db: DbConfig
-  readonly riot: RiotConfig
-  readonly jwtSecret: string
-  readonly madosayentisuto: MadosayentisutoConfig
+  isDev: boolean
+  logLevel: LogLevelOrOff
+  client: ClientConfig
+  http: HttpConfig
+  db: DbConfig
+  riot: RiotConfig
+  jwtSecret: string
+  madosayentisuto: MadosayentisutoConfig
 }
 
 export type ClientConfig = {
-  readonly id: DiscordUserId
-  readonly secret: ClientSecret
-  readonly redirectUri: string
+  id: DiscordUserId
+  secret: ClientSecret
+  redirectUri: string
 }
 
 export type HttpConfig = {
-  readonly port: number
-  readonly allowedOrigins: Maybe<NonEmptyArray<URL>>
+  port: number
+  allowedOrigins: Maybe<NonEmptyArray<URL>>
 }
 
 type DbConfig = {
-  readonly host: string
-  readonly dbName: string
-  readonly user: string
-  readonly password: string
+  host: string
+  dbName: string
+  user: string
+  password: string
 }
 
 export type RiotConfig = {
-  readonly lolApiKey: string
-  readonly accountApiKey: string // You need a legends of runeterra or valorant app for account-v1
+  lolApiKey: string
+  accountApiKey: string // You need a legends of runeterra or valorant app for account-v1
 }
 
 export type MadosayentisutoConfig = {
-  readonly whitelistedIps: List<string>
-  readonly token: string
+  whitelistedIps: List<string>
+  token: string
 }
 
 const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>

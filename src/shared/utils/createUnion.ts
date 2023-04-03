@@ -13,30 +13,26 @@ import type { Dict, List } from './fp'
 export type UnionDescription = Dict<string, (...args: List<any>) => any>
 
 export type UnionResult<T extends UnionDescription> = {
-  readonly T: Union<T>
-  readonly is: <NAME extends keyof T>(
+  T: Union<T>
+  is: <NAME extends keyof T>(
     name: NAME,
-  ) => <U extends Union<T>>(
-    other: U,
-  ) => other is Readonly<ReturnType<T[NAME]>> & { readonly type: NAME }
-  readonly match: <B>(m: Match<T, B>) => (u: Union<T>) => B
-} & { readonly [K in keyof T]: Factory<T[K], K> & { readonly T: ReturnType<Factory<T[K], K>> } }
+  ) => <U extends Union<T>>(other: U) => other is ReturnType<T[NAME]> & { type: NAME }
+  match: <B>(m: Match<T, B>) => (u: Union<T>) => B
+} & { [K in keyof T]: Factory<T[K], K> & { T: ReturnType<Factory<T[K], K>> } }
 
 type Match<T extends UnionDescription, B> = {
-  readonly [K in keyof T]: (a: Omit<Readonly<ReturnType<Factory<T[K], K>>>, 'type'>) => B
+  [K in keyof T]: (a: Omit<ReturnType<Factory<T[K], K>>, 'type'>) => B
 }
 
 type Factory<F extends (...args: List<any>) => any, TYPE> = (
   ...args: Parameters<F>
 ) => F extends (...args_: List<any>) => infer R
-  ? { readonly [K in keyof R | 'type']: K extends 'type' ? TYPE : R[K & keyof R] }
+  ? { [K in keyof R | 'type']: K extends 'type' ? TYPE : R[K & keyof R] }
   : (...args_: List<any>) => any
 
 type Union<T extends UnionDescription> = {
-  readonly [K in keyof T]: {
-    readonly [K2 in keyof Readonly<ReturnType<T[K]>> | 'type']: K2 extends 'type'
-      ? K
-      : Readonly<ReturnType<T[K]>>[K2]
+  [K in keyof T]: {
+    [K2 in keyof ReturnType<T[K]> | 'type']: K2 extends 'type' ? K : ReturnType<T[K]>[K2]
   }
 }[keyof T]
 
@@ -86,5 +82,5 @@ export type UnionKeys<U> = U extends UnionResult<infer _>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UnionTypes<U, K extends UnionKeys<U> = UnionKeys<U>> = U extends UnionResult<infer _>
-  ? Readonly<ReturnType<U[K]>>
+  ? ReturnType<U[K]>
   : never

@@ -8,7 +8,7 @@ import type { DDragonService } from '../services/DDragonService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
-type StaticDataController = Readonly<ReturnType<typeof StaticDataController>>
+type StaticDataController = ReturnType<typeof StaticDataController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const StaticDataController = (ddragonService: DDragonService) => ({

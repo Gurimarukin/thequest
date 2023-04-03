@@ -7,7 +7,7 @@ import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { Puuid } from '../riot/Puuid'
 import { SummonerId } from './SummonerId'
 
-type SummonerDb = Readonly<C.TypeOf<typeof codec>>
+type SummonerDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   id: SummonerId.codec,
@@ -21,7 +21,7 @@ const codec = C.struct({
 
 const SummonerDb = { codec }
 
-type SummonerDbPuuidOnly = Readonly<C.TypeOf<typeof summonerDbPuuidOnlyEncoder>>
+type SummonerDbPuuidOnly = C.TypeOf<typeof summonerDbPuuidOnlyEncoder>
 
 const summonerDbPuuidOnlyEncoder = E.struct({
   puuid: Puuid.codec,

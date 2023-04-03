@@ -12,28 +12,28 @@ import type { TObserver } from './TObserver'
 
 /* eslint-disable functional/no-return-void */
 type TNextObserver<A> = {
-  readonly closed?: boolean
-  readonly next: (value: A) => void
-  readonly error?: (err: unknown) => void
-  readonly complete?: () => void
+  closed?: boolean
+  next: (value: A) => void
+  error?: (err: unknown) => void
+  complete?: () => void
 }
 type TErrorObserver<A> = {
-  readonly closed?: boolean
-  readonly next?: (value: A) => void
-  readonly error: (err: unknown) => void
-  readonly complete?: () => void
+  closed?: boolean
+  next?: (value: A) => void
+  error: (err: unknown) => void
+  complete?: () => void
 }
 type TCompletionObserver<A> = {
-  readonly closed?: boolean
-  readonly next?: (value: A) => void
-  readonly error?: (err: unknown) => void
-  readonly complete: () => void
+  closed?: boolean
+  next?: (value: A) => void
+  error?: (err: unknown) => void
+  complete: () => void
 }
 /* eslint-enable functional/no-return-void */
 type TPartialObserver<T> = TNextObserver<T> | TErrorObserver<T> | TCompletionObserver<T>
 
-export type TObservable<A> = Omit<Readonly<rxjs.Observable<A>>, 'subscribe'> & {
-  readonly subscribe: (subscriber: TPartialObserver<A>) => Readonly<rxjs.Subscription>
+export type TObservable<A> = Omit<rxjs.Observable<A>, 'subscribe'> & {
+  subscribe: (subscriber: TPartialObserver<A>) => rxjs.Subscription
 }
 
 const fromReadonlyArray: <A>(fa: List<A>) => TObservable<A> = rxjs.from
@@ -41,7 +41,7 @@ const fromReadonlyArray: <A>(fa: List<A>) => TObservable<A> = rxjs.from
 const empty = <A = never>(): TObservable<A> => fromReadonlyArray([])
 
 const fromSubscribe = <A>(
-  subscribe: (subscriber: Readonly<rxjs.Subscriber<A>>) => Readonly<rxjs.TeardownLogic>,
+  subscribe: (subscriber: rxjs.Subscriber<A>) => rxjs.TeardownLogic,
 ): TObservable<A> => new rxjs.Observable<A>(subscribe) as TObservable<A>
 
 const flattenTry = <A>(obs: TObservable<Try<A>>): TObservable<A> =>
@@ -133,7 +133,7 @@ export const TObservable = {
   subscribe:
     (onError: (e: Error) => io.IO<NotUsed>) =>
     <A>(observer: TObserver<A>) =>
-    (fa: TObservable<A>): IO<Readonly<rxjs.Subscription>> =>
+    (fa: TObservable<A>): IO<rxjs.Subscription> =>
       IO.tryCatch(() =>
         fa.subscribe({
           next: flow(observer.next, Future.run(onError)),

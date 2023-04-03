@@ -13,10 +13,10 @@ import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryP
 import type { RiotApiService } from './RiotApiService'
 
 type ForceCacheRefresh = {
-  readonly forceCacheRefresh: boolean
+  forceCacheRefresh: boolean
 }
 
-type MasteriesService = Readonly<ReturnType<typeof MasteriesService>>
+type MasteriesService = ReturnType<typeof MasteriesService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MasteriesService = (

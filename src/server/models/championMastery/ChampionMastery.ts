@@ -3,14 +3,14 @@ import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import type { ChampionLevel } from '../../../shared/models/api/ChampionLevel'
 
 type ChampionMastery = {
-  readonly championId: ChampionKey
-  readonly championLevel: ChampionLevel
-  readonly championPoints: number
-  readonly lastPlayTime: DayJs
-  readonly championPointsSinceLastLevel: number
-  readonly championPointsUntilNextLevel: number
-  readonly chestGranted: boolean
-  readonly tokensEarned: number
+  championId: ChampionKey
+  championLevel: ChampionLevel
+  championPoints: number
+  lastPlayTime: DayJs
+  championPointsSinceLastLevel: number
+  championPointsUntilNextLevel: number
+  chestGranted: boolean
+  tokensEarned: number
 }
 
 export { ChampionMastery }

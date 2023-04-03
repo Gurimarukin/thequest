@@ -23,23 +23,21 @@ import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 
 type Props = {
-  readonly notifications: NonEmptyArray<ShardsToRemoveNotification>
-  readonly setChampionsShardsBulk: (
-    updates: NonEmptyArray<ChampionShardsPayload>,
-  ) => Future<NotUsed>
-  readonly hide: () => void
+  notifications: NonEmptyArray<ShardsToRemoveNotification>
+  setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShardsPayload>) => Future<NotUsed>
+  hide: () => void
 }
 
 export type ShardsToRemoveNotification = {
-  readonly championId: ChampionKey
-  readonly name: string
-  readonly championLevel: ChampionLevelOrZero
-  readonly percents: number
-  readonly chestGranted: boolean
-  readonly tokensEarned: number
-  readonly shardsCount: number
-  readonly leveledUpFrom: ChampionLevelOrZero
-  readonly shardsToRemove: number
+  championId: ChampionKey
+  name: string
+  championLevel: ChampionLevelOrZero
+  percents: number
+  chestGranted: boolean
+  tokensEarned: number
+  shardsCount: number
+  leveledUpFrom: ChampionLevelOrZero
+  shardsToRemove: number
 }
 
 const byPercents: Ord<ShardsToRemoveNotification> = pipe(
@@ -54,7 +52,7 @@ const byName: Ord<ShardsToRemoveNotification> = pipe(
 )
 
 type IsChecked = ShardsToRemoveNotification & {
-  readonly isChecked: boolean
+  isChecked: boolean
 }
 
 const isCheckedLens = pipe(lens.id<IsChecked>(), lens.prop('isChecked'))
@@ -222,8 +220,8 @@ export const ShardsToRemoveModal = ({
 }
 
 type ForAllButtonProps = {
-  readonly notificationsState: NonEmptyArray<IsChecked>
-  readonly setNotificationsState: React.Dispatch<React.SetStateAction<NonEmptyArray<IsChecked>>>
+  notificationsState: NonEmptyArray<IsChecked>
+  setNotificationsState: React.Dispatch<React.SetStateAction<NonEmptyArray<IsChecked>>>
 }
 
 const ForAllButton = ({
@@ -251,8 +249,8 @@ const ForAllButton = ({
 }
 
 type ToggleProps = {
-  readonly isChecked: boolean
-  readonly toggleChecked: () => void
+  isChecked: boolean
+  toggleChecked: () => void
 }
 
 const Toggle = ({ isChecked, toggleChecked }: ToggleProps): JSX.Element => (

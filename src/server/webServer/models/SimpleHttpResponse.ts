@@ -5,9 +5,9 @@ import type { NonEmptyArray } from '../../../shared/utils/fp'
 import { Dict, List } from '../../../shared/utils/fp'
 
 type SimpleHttpResponse = {
-  readonly status: Status
-  readonly body: string
-  readonly headers: Dict<string, NonEmptyArray<string>>
+  status: Status
+  body: string
+  headers: Dict<string, NonEmptyArray<string>>
 }
 
 const of = (

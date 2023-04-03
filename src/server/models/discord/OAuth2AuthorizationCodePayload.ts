@@ -5,7 +5,7 @@ import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 
 import { ClientSecret } from './ClientSecret'
 
-type OAuth2AuthorizationCodePayload = Readonly<E.TypeOf<typeof encoder>>
+type OAuth2AuthorizationCodePayload = E.TypeOf<typeof encoder>
 
 const encoder = E.struct({
   client_id: DiscordUserId.codec,

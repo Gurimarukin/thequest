@@ -17,8 +17,8 @@ import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
 type State = {
-  readonly userName: string
-  readonly password: string
+  userName: string
+  password: string
 }
 const emptyState: State = { userName: '', password: '' }
 

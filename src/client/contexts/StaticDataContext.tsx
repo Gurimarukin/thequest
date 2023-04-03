@@ -17,11 +17,11 @@ const { ddragonCdn } = DDragonUtils
 const lang: Lang = Lang.defaultLang // TODO: based on browser
 
 export type StaticDataContext = {
-  readonly champions: List<StaticDataChampion>
-  readonly assets: {
-    readonly summonerIcon: (iconId: number) => string
-    readonly champion: {
-      readonly square: (champion: ChampionKey) => string
+  champions: List<StaticDataChampion>
+  assets: {
+    summonerIcon: (iconId: number) => string
+    champion: {
+      square: (champion: ChampionKey) => string
     }
   }
 }

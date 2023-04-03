@@ -2,7 +2,7 @@ import * as C from 'io-ts/Codec'
 
 import { ChampionLevelOrZero } from '../ChampionLevel'
 
-type ShardsToRemoveFromNotification = Readonly<C.TypeOf<typeof codec>>
+type ShardsToRemoveFromNotification = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   leveledUpFrom: ChampionLevelOrZero.codec,

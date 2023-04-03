@@ -12,16 +12,16 @@ import { decodeError } from '../../shared/utils/ioTsUtils'
 import { config } from '../config/unsafe'
 
 export type HttpOptions<O, B> = Omit<Options, 'method' | 'json'> & {
-  readonly json?: Tuple<Encoder<O, B>, B>
+  json?: Tuple<Encoder<O, B>, B>
 }
 
 function http<O, B>(
   methodWithUrl: Tuple<string, HttpMethod>,
-  options?: Readonly<HttpOptions<O, B>>,
+  options?: HttpOptions<O, B>,
 ): Future<unknown>
 function http<A, O, B>(
   methodWithUrl: Tuple<string, HttpMethod>,
-  options: Readonly<HttpOptions<O, B>>,
+  options: HttpOptions<O, B>,
   decoderWithName: Tuple<Decoder<unknown, A>, string>,
 ): Future<A>
 function http<A, O, B>(

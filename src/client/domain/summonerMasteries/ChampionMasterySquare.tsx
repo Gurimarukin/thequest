@@ -17,20 +17,20 @@ const { round } = NumberUtils
 const { plural } = StringUtils
 
 type ChampionMasterySquareProps = {
-  readonly championId: ChampionKey
+  championId: ChampionKey
   // eslint-disable-next-line react/boolean-prop-naming
-  readonly chestGranted: boolean
-  readonly tokensEarned: number
-  readonly championLevel: ChampionLevelOrZero
-  readonly name: string
-  readonly percents: number
-  readonly shardsCount: Maybe<number>
-  readonly glow: Maybe<number>
-  readonly setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
+  chestGranted: boolean
+  tokensEarned: number
+  championLevel: ChampionLevelOrZero
+  name: string
+  percents: number
+  shardsCount: Maybe<number>
+  glow: Maybe<number>
+  setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
   /**
    * @default false
    */
-  readonly isHistogram?: boolean
+  isHistogram?: boolean
 }
 
 export const ChampionMasterySquare = ({
@@ -144,9 +144,9 @@ const animationDelay: (glow: Maybe<number>) => React.CSSProperties | undefined =
 )
 
 type TokensProps = {
-  readonly championLevel: number
-  readonly tokensEarned: number
-  readonly title?: string
+  championLevel: number
+  tokensEarned: number
+  title?: string
 }
 
 const Tokens = ({ championLevel, tokensEarned, title }: TokensProps): JSX.Element | null => {
@@ -193,12 +193,12 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 }
 
 type ShardsProps = {
-  readonly name: string
-  readonly shardsCount: number
-  readonly setShardsCount: ((count: number) => void) | null
+  name: string
+  shardsCount: number
+  setShardsCount: ((count: number) => void) | null
 }
 
-const Shards = ({ name, shardsCount, setShardsCount }: Readonly<ShardsProps>): JSX.Element => {
+const Shards = ({ name, shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
   const addShardCount = useCallback(
     () => setShardsCount?.(shardsCount + 1),
     [setShardsCount, shardsCount],

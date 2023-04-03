@@ -13,16 +13,16 @@ type NavigateOptions = {
   /**
    * @default false
    */
-  readonly replace?: boolean
+  replace?: boolean
 }
 
 type HistoryContext = {
-  readonly location: history.Location
-  readonly navigate: (to: string, options?: NavigateOptions) => void
-  readonly query: qs.ParsedQs
+  location: history.Location
+  navigate: (to: string, options?: NavigateOptions) => void
+  query: qs.ParsedQs
 
-  readonly masteriesQuery: MasteriesQuery
-  readonly updateMasteriesQuery: (f: (q: MasteriesQuery) => MasteriesQuery) => void
+  masteriesQuery: MasteriesQuery
+  updateMasteriesQuery: (f: (q: MasteriesQuery) => MasteriesQuery) => void
 }
 
 const HistoryContext = createContext<HistoryContext | undefined>(undefined)

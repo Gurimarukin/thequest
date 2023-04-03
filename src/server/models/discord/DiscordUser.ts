@@ -3,7 +3,7 @@ import * as D from 'io-ts/Decoder'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { Maybe } from '../../../shared/utils/fp'
 
-type DiscordUser = Readonly<D.TypeOf<typeof decoder>>
+type DiscordUser = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   /**

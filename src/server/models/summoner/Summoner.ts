@@ -4,12 +4,12 @@ import type { Puuid } from '../riot/Puuid'
 import type { SummonerId } from './SummonerId'
 
 type Summoner = {
-  readonly id: SummonerId
-  readonly puuid: Puuid
-  readonly platform: Platform
-  readonly name: string
-  readonly profileIconId: number
-  readonly summonerLevel: number
+  id: SummonerId
+  puuid: Puuid
+  platform: Platform
+  name: string
+  profileIconId: number
+  summonerLevel: number
 }
 
 export { Summoner }

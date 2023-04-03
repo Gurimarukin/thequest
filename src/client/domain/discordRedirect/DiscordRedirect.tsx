@@ -39,8 +39,8 @@ export const DiscordRedirect = (): JSX.Element => {
 }
 
 type DiscordRedirectValidatedProps = {
-  readonly code: OAuth2Code
-  readonly state: DiscordRedirectState
+  code: OAuth2Code
+  state: DiscordRedirectState
 }
 
 const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps): JSX.Element => {
