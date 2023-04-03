@@ -45,7 +45,7 @@ export const Summoner = ({
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={`Icône de ${name}`}
-          className="h-24 w-24"
+          className="h-24 w-24 rounded border border-goldenrod-secondary"
         />
         <div className="flex flex-col">
           <span className="text-lg text-goldenrod">{name}</span>

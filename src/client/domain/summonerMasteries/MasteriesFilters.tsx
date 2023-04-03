@@ -12,6 +12,7 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
 import { Radios, labelValue } from '../../components/Radios'
+import { Tooltip } from '../../components/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import {
@@ -147,13 +148,13 @@ export const MasteriesFilters = ({
             {labelValue(
               'percents',
               <TextLabel
-                title={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
+                tooltip={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
               >
                 %
               </TextLabel>,
             )}
-            {labelValue('points', <TextLabel title="Trier par points">pts</TextLabel>)}
-            {labelValue('name', <TextLabel title="Trier par nom">nom</TextLabel>)}
+            {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
+            {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
           </Radios>
           <Radios<MasteriesQueryOrder>
             name="order"
@@ -162,13 +163,13 @@ export const MasteriesFilters = ({
           >
             {labelValue(
               'desc',
-              <IconLabel title="Tri décroissant">
+              <IconLabel tooltip="Tri décroissant">
                 <CaretDownOutline className="h-5 fill-current" />
               </IconLabel>,
             )}
             {labelValue(
               'asc',
-              <IconLabel title="Tri croissant">
+              <IconLabel tooltip="Tri croissant">
                 <CaretUpOutline className="h-5 fill-current" />
               </IconLabel>,
             )}
@@ -176,13 +177,13 @@ export const MasteriesFilters = ({
           <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
             {labelValue(
               'compact',
-              <IconLabel title="Vue compacte">
+              <IconLabel tooltip="Vue compacte">
                 <AppsSharp className="h-4 fill-current" />
               </IconLabel>,
             )}
             {labelValue(
               'histogram',
-              <IconLabel title="Vue histogramme">
+              <IconLabel tooltip="Vue histogramme">
                 <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
               </IconLabel>,
             )}
@@ -246,7 +247,7 @@ const getSelectLevelsButton =
           className={cssClasses(
             'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
             ['hover:bg-zinc-700', !isSelected],
-            ['bg-goldenrod text-black', isSelected],
+            ['bg-goldenrod-secondary text-black', isSelected],
           )}
         >
           <span>{children}</span>
@@ -298,7 +299,7 @@ const MasteriesCheckboxes = ({
               className={cssClasses(
                 'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
                 ['bg-zinc-700', !isChecked],
-                ['bg-goldenrod', isChecked],
+                ['bg-goldenrod-secondary', isChecked],
               )}
             >
               <MasteryImg
@@ -314,17 +315,17 @@ const MasteriesCheckboxes = ({
 )
 
 type SpanProps = {
-  title?: string
+  tooltip: React.ReactNode
 }
 
-const TextLabel: React.FC<SpanProps> = ({ title, children }) => (
-  <span title={title} className="flex h-6 w-10 items-center justify-center text-sm">
-    {children}
-  </span>
+const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => (
+  <Tooltip tooltip={tooltip}>
+    <span className="flex h-6 w-10 items-center justify-center text-sm">{children}</span>
+  </Tooltip>
 )
 
-const IconLabel: React.FC<SpanProps> = ({ title, children }) => (
-  <span title={title} className="flex h-6 w-6 items-center justify-center">
-    {children}
-  </span>
+const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => (
+  <Tooltip tooltip={tooltip}>
+    <span className="flex h-6 w-6 items-center justify-center">{children}</span>
+  </Tooltip>
 )

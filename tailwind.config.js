@@ -7,6 +7,7 @@ module.exports = {
     extend: {
       colors: {
         goldenrod: 'goldenrod',
+        'goldenrod-secondary': '#b58703',
         wheat: 'wheat',
         'mastery7-blue': '#204b85',
         'mastery7-blue-secondary': '#043c88',
