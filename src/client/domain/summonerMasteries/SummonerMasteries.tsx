@@ -1,5 +1,5 @@
 /* eslint-disable functional/no-expression-statements */
-import { monoid, number, random, string } from 'fp-ts'
+import { monoid, number, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -16,6 +16,7 @@ import { ChampionShardsView } from '../../../shared/models/api/summoner/Champion
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
@@ -27,7 +28,6 @@ import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -130,6 +130,10 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
 const whiteSpaces = /\s+/g
 const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
+const nonAZ = /[^a-z]/g
+const clearChampionName = (name: string): string =>
+  StringUtils.cleanUTF8ToASCII(name).toLowerCase().replaceAll(nonAZ, '')
+
 type SummonerViewProps = {
   platform: Platform
   summoner: SummonerView
@@ -178,8 +182,8 @@ const SummonerViewComponent = ({
   )
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
-    () => enrichAll(masteries, championShards, masteriesQuery.view, staticData.champions),
-    [championShards, masteries, masteriesQuery.view, staticData.champions],
+    () => enrichAll(masteries, championShards, masteriesQuery.search, staticData.champions),
+    [championShards, masteries, masteriesQuery.search, staticData.champions],
   )
 
   const [isNotificationsHidden, setIsNotificationsHidden] = useState(false)
@@ -278,7 +282,7 @@ type PartialMasteriesGrouped = Partial<
 const enrichAll = (
   masteries: List<ChampionMasteryView>,
   championShards: Maybe<List<ChampionShardsView>>,
-  view: MasteriesQueryView,
+  maybeSearch: Maybe<string>,
   staticDataChampions: List<StaticDataChampion>,
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
@@ -297,14 +301,11 @@ const enrichAll = (
         ),
       )
 
-      // TODO: search
-      const glow =
-        view === 'compact' &&
-        List.elem(string.Eq)(name, [
-          /* 'Renekton', 'Twitch', 'Vayne', 'LeBlanc', 'Pyke' */
-        ])
-          ? Maybe.some(random.random())
-          : Maybe.none
+      const glow = pipe(
+        maybeSearch,
+        Maybe.filter(search => clearChampionName(name).includes(clearChampionName(search))),
+        Maybe.map(() => random.random()),
+      )
 
       return pipe(
         masteries,
@@ -363,7 +364,6 @@ const enrichAll = (
   return {
     enrichedSummoner: {
       questPercents,
-      // totalChampionsCount,
       totalMasteryLevel,
       masteriesCount,
     },
