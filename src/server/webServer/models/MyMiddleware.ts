@@ -162,7 +162,7 @@ const matchE =
 const getRequest =
   <I = StatusOpen>(): MyMiddleware<I, I, http.IncomingMessage> =>
   conn =>
-    Future.right(Tuple.of(conn.getRequest(), conn))
+    Future.successful(Tuple.of(conn.getRequest(), conn))
 
 const getBodyChunks = <I = StatusOpen>(): MyMiddleware<I, I, List<unknown>> =>
   pipe(getRequest<I>(), ichain(flow(requestChunks, f => M.fromTaskEither(f))))

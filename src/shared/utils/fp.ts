@@ -155,10 +155,15 @@ export const Try = {
 
 const futureNotUsed: Future<NotUsed> = taskEither.right(NotUsed)
 export type Future<A> = task.Task<Try<A>>
+const {
+  right: {},
+  left: {},
+  ...futureMethods
+} = taskEither
 export const Future = {
-  ...taskEither,
-  right: taskEither.right as <A>(a: A) => Future<A>,
-  left: taskEither.left as <A = never>(e: Error) => Future<A>,
+  ...futureMethods,
+  successful: taskEither.right as <A>(a: A) => Future<A>,
+  failed: taskEither.left as <A = never>(e: Error) => Future<A>,
   chainFirstIOEitherK: <A, B>(f: (a: A) => IO<B>): ((fa: Future<A>) => Future<A>) =>
     taskEither.chainFirst(flow(f, taskEither.fromIOEither)),
   orElseEitherK: <A>(f: (e: Error) => Try<A>): ((fa: Future<A>) => Future<A>) =>
@@ -188,9 +193,15 @@ const ioRun =
   (ioA: IO<NotUsed>): NotUsed =>
     pipe(ioA, io.chain(either.fold(onError, io.of)))()
 export type IO<A> = io.IO<Try<A>>
+const {
+  right: {},
+  left: {},
+  ...ioMethods
+} = ioEither
 export const IO = {
-  ...ioEither,
-  right: ioEither.right as <A>(a: A) => IO<A>,
+  ...ioMethods,
+  successful: ioEither.right as <A>(a: A) => IO<A>,
+  failed: ioEither.left as <A = never>(e: Error) => IO<A>,
   tryCatch: <A>(a: Lazy<A>): IO<A> => ioEither.tryCatch(a, Either.toError),
   fromIO: ioFromIO,
   notUsed: ioNotUsed,

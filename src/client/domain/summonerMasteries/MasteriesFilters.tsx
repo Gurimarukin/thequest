@@ -93,17 +93,6 @@ export const MasteriesFilters = ({
     searchRef.current?.focus()
   }, [])
 
-  // const updateSearch = useMemo(
-  //   () =>
-  //     debounce((search_: string) => {
-  //       const trimed = search_.trim()
-  //       updateMasteriesQuery(
-  //         MasteriesQuery.Lens.search.set(trimed === '' ? Maybe.none : Maybe.some(trimed)),
-  //       )
-  //     }, 200),
-  //   [updateMasteriesQuery],
-  // )
-
   const updateSearch = useCallback(
     (search_: string) => {
       const trimed = search_.trim()
