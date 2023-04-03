@@ -30,7 +30,7 @@ const Keys = {
   loginPasswordUserName: getPath<User<UserLoginPassword>>()(['login', 'userName']),
 }
 
-type UserPersistence = Readonly<ReturnType<typeof UserPersistence>>
+type UserPersistence = ReturnType<typeof UserPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) {

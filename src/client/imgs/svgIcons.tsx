@@ -1,6 +1,6 @@
 import React from 'react'
 
-type SVGIcon = (props: { readonly className?: string }) => JSX.Element
+type SVGIcon = (props: { className?: string }) => JSX.Element
 
 export const AddOutline: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>

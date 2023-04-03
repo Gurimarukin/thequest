@@ -21,13 +21,13 @@ import { http, statusesToOption } from '../utils/http'
 const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<SummonerShort>')
 
 type UserContext = {
-  readonly refreshUser: () => void
-  readonly user: Maybe<UserView>
-  readonly addFavoriteSearch: (summoner: SummonerShort, onNotFound: () => void) => void
-  readonly removeFavoriteSearch: (summoner: SummonerShort) => void
-  readonly recentSearches: List<SummonerShort>
-  readonly addRecentSearch: (summoner: SummonerShort) => void
-  readonly removeRecentSearch: (summoner: SummonerShort) => void
+  refreshUser: () => void
+  user: Maybe<UserView>
+  addFavoriteSearch: (summoner: SummonerShort, onNotFound: () => void) => void
+  removeFavoriteSearch: (summoner: SummonerShort) => void
+  recentSearches: List<SummonerShort>
+  addRecentSearch: (summoner: SummonerShort) => void
+  removeRecentSearch: (summoner: SummonerShort) => void
 }
 
 const UserContext = createContext<UserContext | undefined>(undefined)

@@ -5,10 +5,10 @@ import React, { useCallback } from 'react'
 import type { List } from '../../shared/utils/fp'
 
 type Props<A extends string> = {
-  readonly options: List<A>
-  readonly value: A
-  readonly setValue: (a: A) => void
-  readonly className?: string
+  options: List<A>
+  value: A
+  setValue: (a: A) => void
+  className?: string
 }
 
 export function Select<A extends string>({

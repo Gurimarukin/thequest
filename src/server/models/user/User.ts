@@ -14,9 +14,9 @@ import { UserId } from './UserId'
 import { UserLogin } from './UserLogin'
 
 type User<A extends UserLogin> = {
-  readonly id: UserId
-  readonly login: A
-  readonly favoriteSearches: List<PlatformWithPuuid>
+  id: UserId
+  login: A
+  favoriteSearches: List<PlatformWithPuuid>
 }
 
 type UserOutput = E.OutputOf<typeof encoder>

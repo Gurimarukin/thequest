@@ -9,11 +9,11 @@ import type { Literal } from 'io-ts/Schemable'
 import { NonEmptyArray } from './fp'
 
 type Enum<A extends NonEmptyArray<Literal>> = {
-  readonly values: A
-  readonly decoder: Decoder<unknown, A[number]>
-  readonly encoder: Encoder<A[number], A[number]>
-  readonly codec: Codec<unknown, A[number], A[number]>
-  readonly T: A[number]
+  values: A
+  decoder: Decoder<unknown, A[number]>
+  encoder: Encoder<A[number], A[number]>
+  codec: Codec<unknown, A[number], A[number]>
+  T: A[number]
 }
 
 export const createEnum = <A extends NonEmptyArray<Literal>>(...values: A): Enum<A> => {

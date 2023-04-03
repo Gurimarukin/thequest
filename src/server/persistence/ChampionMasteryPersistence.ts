@@ -14,7 +14,7 @@ import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
-type ChampionMasteryPersistence = Readonly<ReturnType<typeof ChampionMasteryPersistence>>
+type ChampionMasteryPersistence = ReturnType<typeof ChampionMasteryPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const ChampionMasteryPersistence = (

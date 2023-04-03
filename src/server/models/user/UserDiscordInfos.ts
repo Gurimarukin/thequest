@@ -6,7 +6,7 @@ import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { AccessToken } from '../discord/AccessToken'
 import { RefreshToken } from '../discord/RefreshToken'
 
-type UserDiscordInfos = Readonly<C.TypeOf<typeof codec>>
+type UserDiscordInfos = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   id: DiscordUserId.codec,

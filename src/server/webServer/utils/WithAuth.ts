@@ -13,7 +13,7 @@ import { MyMiddleware as M } from '../models/MyMiddleware'
 import { SimpleHttpResponse } from '../models/SimpleHttpResponse'
 import type { UpgradeHandler } from '../models/UpgradeHandler'
 
-type WithAuth = Readonly<ReturnType<typeof WithAuth>>
+type WithAuth = ReturnType<typeof WithAuth>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const WithAuth = (userService: UserService) => {

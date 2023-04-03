@@ -6,9 +6,9 @@ import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { SummonerId } from '../summoner/SummonerId'
 import { UserId } from './UserId'
 
-type ChampionShardsDb = Readonly<C.TypeOf<typeof codec>>
+type ChampionShardsDb = C.TypeOf<typeof codec>
 
-type ChampionShardsDbOutput = Readonly<C.OutputOf<typeof codec>>
+type ChampionShardsDbOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
   user: UserId.codec,

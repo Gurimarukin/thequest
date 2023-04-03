@@ -19,8 +19,8 @@ import { MasteriesFilters } from './MasteriesFilters'
 const { plural } = StringUtils
 
 type Props = {
-  readonly masteries: List<EnrichedChampionMastery>
-  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
+  masteries: List<EnrichedChampionMastery>
+  setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element => {
@@ -97,8 +97,8 @@ const renderChampionMasteries = (
 }
 
 type ChampionMasteriesCompactProps = {
-  readonly champions: List<EnrichedChampionMastery>
-  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
+  champions: List<EnrichedChampionMastery>
+  setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const ChampionMasteriesCompact = ({
@@ -117,8 +117,8 @@ const ChampionMasteriesCompact = ({
 )
 
 type ChampionMasteriesHistogramProps = {
-  readonly champions: List<EnrichedChampionMastery>
-  readonly setChampionShards: (champion: ChampionKey) => (count: number) => void
+  champions: List<EnrichedChampionMastery>
+  setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
 const ChampionMasteriesHistogram = ({
@@ -157,8 +157,8 @@ const ChampionMasteriesHistogram = ({
 }
 
 type ChampionMasteryHistogramProps = {
-  readonly maybeMaxPoints: Maybe<number>
-  readonly champion: EnrichedChampionMastery
+  maybeMaxPoints: Maybe<number>
+  champion: EnrichedChampionMastery
 }
 
 const ChampionMasteryHistogram = ({

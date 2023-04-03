@@ -5,7 +5,7 @@ import type { HealthCheckService } from '../services/HealthCheckService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
-type HealthCheckController = Readonly<ReturnType<typeof HealthCheckController>>
+type HealthCheckController = ReturnType<typeof HealthCheckController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const HealthCheckController = (healthCheckService: HealthCheckService) => {

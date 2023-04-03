@@ -14,11 +14,11 @@ const ellipse =
     take < str.length && 3 <= take ? `${str.slice(0, take - 3)}...` : str
 
 const matcher =
-  <A>(regex: Readonly<RegExp>, f: (arr: Readonly<RegExpMatchArray>) => A) =>
+  <A>(regex: RegExp, f: (arr: RegExpMatchArray) => A) =>
   (str: string): Maybe<A> =>
     pipe(str.match(regex), Maybe.fromNullable, Maybe.map(f))
 
-const matcher2 = (regex: Readonly<RegExp>): ((str: string) => Maybe<Tuple<string, string>>) =>
+const matcher2 = (regex: RegExp): ((str: string) => Maybe<Tuple<string, string>>) =>
   matcher(regex, ([, a, b]) => [a, b] as Tuple<string, string>)
 
 const padStart =

@@ -23,9 +23,9 @@ import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
 type State = {
-  readonly userName: string
-  readonly password: string
-  readonly confirmPassword: string
+  userName: string
+  password: string
+  confirmPassword: string
 }
 
 const emptyState: State = { userName: '', password: '', confirmPassword: '' }
@@ -265,7 +265,7 @@ const Th: React.FC = ({ children }) => (
 )
 
 type TdProps = {
-  readonly className?: string
+  className?: string
 }
 
 const Td: React.FC<TdProps> = ({ className, children }) => (

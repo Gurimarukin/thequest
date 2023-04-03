@@ -7,8 +7,8 @@ import { List } from '../../../shared/utils/fp'
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { SummonerId } from '../summoner/SummonerId'
 
-type ChampionMasteryDb = Readonly<C.TypeOf<typeof codec>>
-type ChampionMasteryDbOutput = Readonly<C.OutputOf<typeof codec>>
+type ChampionMasteryDb = C.TypeOf<typeof codec>
+type ChampionMasteryDbOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
   summonerId: SummonerId.codec,

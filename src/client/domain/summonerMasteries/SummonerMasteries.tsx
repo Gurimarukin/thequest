@@ -40,12 +40,12 @@ import { Summoner } from './Summoner'
 
 // should mutate data before API response
 type OptimisticMutation = {
-  readonly optimisticMutation: boolean
+  optimisticMutation: boolean
 }
 
 type Props = {
-  readonly platform: Platform
-  readonly summonerName: string
+  platform: Platform
+  summonerName: string
 }
 
 export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
@@ -131,11 +131,11 @@ const whiteSpaces = /\s+/g
 const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 type SummonerViewProps = {
-  readonly platform: Platform
-  readonly summoner: SummonerView
-  readonly masteries: List<ChampionMasteryView>
-  readonly championShards: Maybe<List<ChampionShardsView>>
-  readonly setChampionsShardsBulk: (
+  platform: Platform
+  summoner: SummonerView
+  masteries: List<ChampionMasteryView>
+  championShards: Maybe<List<ChampionShardsView>>
+  setChampionsShardsBulk: (
     updates: NonEmptyArray<ChampionShardsPayload>,
     { optimisticMutation }: OptimisticMutation,
   ) => Future<NotUsed>
@@ -199,7 +199,7 @@ const SummonerViewComponent = ({
                   enrichedMasteries,
                   List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
                   Maybe.map(
-                    (c): Readonly<ShardsToRemoveNotification> => ({
+                    (c): ShardsToRemoveNotification => ({
                       championId: champion,
                       name: c.name,
                       championLevel: c.championLevel,
@@ -267,8 +267,8 @@ const SummonerViewComponent = ({
 }
 
 type EnrichedAll = {
-  readonly enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
-  readonly enrichedMasteries: List<EnrichedChampionMastery>
+  enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
+  enrichedMasteries: List<EnrichedChampionMastery>
 }
 
 type PartialMasteriesGrouped = Partial<

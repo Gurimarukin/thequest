@@ -84,8 +84,8 @@ const RateLimiter = (Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDuration)
 export { RateLimiter }
 
 type RequestsHistory = {
-  readonly key: Key
-  readonly history: List<DayJs>
+  key: Key
+  history: List<DayJs>
 }
 
 const RequestsHistory = {
@@ -93,8 +93,8 @@ const RequestsHistory = {
 }
 
 type Key = {
-  readonly url: string
-  readonly ip: string
+  url: string
+  ip: string
 }
 
 const keyEq: Eq<Key> = eq.struct({

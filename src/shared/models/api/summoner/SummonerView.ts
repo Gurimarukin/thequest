@@ -1,6 +1,6 @@
 import * as C from 'io-ts/Codec'
 
-type SummonerView = Readonly<C.TypeOf<typeof codec>>
+type SummonerView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   name: C.string,

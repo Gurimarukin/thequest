@@ -7,9 +7,9 @@ import { Maybe } from '../../../shared/utils/fp'
 import { HashedPassword } from './HashedPassword'
 import { UserDiscordInfos } from './UserDiscordInfos'
 
-type UserLogin = Readonly<C.TypeOf<typeof codec>>
-type UserLoginDiscord = Readonly<C.TypeOf<typeof discordCodec>>
-type UserLoginPassword = Readonly<C.TypeOf<typeof passwordCodec>>
+type UserLogin = C.TypeOf<typeof codec>
+type UserLoginDiscord = C.TypeOf<typeof discordCodec>
+type UserLoginPassword = C.TypeOf<typeof passwordCodec>
 
 const discordCodec = pipe(
   C.struct({

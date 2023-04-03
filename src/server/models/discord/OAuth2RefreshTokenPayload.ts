@@ -5,7 +5,7 @@ import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { ClientSecret } from './ClientSecret'
 import { RefreshToken } from './RefreshToken'
 
-type OAuth2RefreshTokenPayload = Readonly<E.TypeOf<typeof encoder>>
+type OAuth2RefreshTokenPayload = E.TypeOf<typeof encoder>
 
 const encoder = E.struct({
   client_id: DiscordUserId.codec,

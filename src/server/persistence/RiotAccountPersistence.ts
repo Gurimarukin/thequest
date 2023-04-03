@@ -13,7 +13,7 @@ import { Puuid } from '../models/riot/Puuid'
 import { TagLine } from '../models/riot/TagLine'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
-type RiotAccountPersistence = Readonly<ReturnType<typeof RiotAccountPersistence>>
+type RiotAccountPersistence = ReturnType<typeof RiotAccountPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotAccountPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) => {

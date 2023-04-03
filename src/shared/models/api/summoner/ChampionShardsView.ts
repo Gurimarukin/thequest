@@ -7,7 +7,7 @@ import { Maybe } from '../../../utils/fp'
 import { ChampionKey } from '../ChampionKey'
 import { ShardsToRemoveFromNotification } from './ShardsToRemoveFromNotification'
 
-type ChampionShardsView = Readonly<C.TypeOf<typeof codec>>
+type ChampionShardsView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   champion: ChampionKey.codec,

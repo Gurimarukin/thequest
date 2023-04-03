@@ -168,9 +168,9 @@ const concatWithHr = (es: List<JSX.Element>): JSX.Element | null =>
   )
 
 type SummonerSearchProps = {
-  readonly type: 'self' | 'favorite' | 'recent'
-  readonly summoner: SummonerShort
-  readonly closeSearch: () => void
+  type: 'self' | 'favorite' | 'recent'
+  summoner: SummonerShort
+  closeSearch: () => void
 }
 
 const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): JSX.Element => {

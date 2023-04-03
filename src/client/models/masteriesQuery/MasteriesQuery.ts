@@ -11,10 +11,10 @@ import { MasteriesQueryView } from './MasteriesQueryView'
 import type { PartialMasteriesQuery } from './PartialMasteriesQuery'
 
 type MasteriesQuery = {
-  readonly sort: MasteriesQuerySort
-  readonly order: MasteriesQueryOrder
-  readonly view: MasteriesQueryView
-  readonly level: ReadonlySet<ChampionLevelOrZero>
+  sort: MasteriesQuerySort
+  order: MasteriesQueryOrder
+  view: MasteriesQueryView
+  level: ReadonlySet<ChampionLevelOrZero>
 }
 
 const queryLevelDefault: ReadonlySet<ChampionLevelOrZero> = new Set(
@@ -34,7 +34,7 @@ const fromPartial = (partial: PartialMasteriesQuery): MasteriesQuery => ({
 
 const toPartial = (query: MasteriesQuery): PartialMasteriesQuery => {
   type MyPartial = {
-    readonly [K in keyof Required<PartialMasteriesQuery>]: PartialMasteriesQuery[K] | undefined
+    [K in keyof Required<PartialMasteriesQuery>]: PartialMasteriesQuery[K] | undefined
   }
 
   const res: MyPartial = {

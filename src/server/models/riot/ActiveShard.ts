@@ -4,7 +4,7 @@ import { Game } from './Game'
 import { Puuid } from './Puuid'
 import { Shard } from './Shard'
 
-type ActiveShards = Readonly<D.TypeOf<typeof decoder>>
+type ActiveShards = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   puuid: Puuid.codec,

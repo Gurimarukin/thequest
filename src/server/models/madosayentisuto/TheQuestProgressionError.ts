@@ -2,7 +2,7 @@ import * as E from 'io-ts/Encoder'
 
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 
-type TheQuestProgressionError = Readonly<E.TypeOf<typeof encoder>>
+type TheQuestProgressionError = E.TypeOf<typeof encoder>
 
 const encoder = E.struct({
   user: DiscordUserId.codec,
