@@ -6,19 +6,27 @@ import { useHistory } from '../contexts/HistoryContext'
 type Props = {
   readonly to: string
   readonly target?: string
+  readonly onClick?: React.MouseEventHandler<HTMLAnchorElement>
   readonly className?: string
   readonly children?: React.ReactNode
 }
 
-export const Link = ({ to, target, className, children }: Props): JSX.Element => {
+export const Link = ({
+  to,
+  target,
+  onClick: onClick_,
+  className,
+  children,
+}: Props): JSX.Element => {
   const { navigate } = useHistory()
 
   const onClick = useCallback(
-    (e: React.MouseEvent) => {
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault()
+      onClick_?.(e)
       navigate(to)
     },
-    [navigate, to],
+    [navigate, onClick_, to],
   )
 
   return (
