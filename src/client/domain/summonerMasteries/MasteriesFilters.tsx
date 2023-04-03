@@ -3,7 +3,7 @@
 import { number, ord, readonlySet } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -14,7 +14,13 @@ import { MasteryImg } from '../../components/MasteryImg'
 import { Radios, labelValue } from '../../components/Radios'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
-import { AppsSharp, CaretDownOutline, CaretUpOutline, StatsChartSharp } from '../../imgs/svgIcons'
+import {
+  AppsSharp,
+  CaretDownOutline,
+  CaretUpOutline,
+  CloseFilled,
+  StatsChartSharp,
+} from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
@@ -69,12 +75,18 @@ export const MasteriesFilters = ({ championsCount, totalChampionsCount }: Props)
   const setOrder = flow(MasteriesQuery.Lens.order.set, updateMasteriesQuery)
   const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
+  const searchRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState(
     pipe(
       masteriesQuery.search,
       Maybe.getOrElse(() => ''),
     ),
   )
+
+  const emptySearch = useCallback(() => {
+    setSearch('')
+    searchRef.current?.focus()
+  }, [])
 
   // const updateSearch = useMemo(
   //   () =>
@@ -184,14 +196,25 @@ export const MasteriesFilters = ({ championsCount, totalChampionsCount }: Props)
         </div>
       </div>
       <div className="grid grid-cols-[1fr_auto_1fr] flex-wrap items-center justify-between gap-5 text-sm">
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearchChange}
-          // onFocus={handleFocus}
-          placeholder="Rechercher un champion"
-          className="w-[196px] justify-self-start rounded-sm border border-zinc-700 bg-transparent px-2 py-1"
-        />
+        <div className="flex items-center">
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Rechercher un champion"
+            className={cssClasses(
+              'w-[196px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
+              ['pr-2', search === ''],
+              ['pr-7', search !== ''],
+            )}
+          />
+          {search !== '' ? (
+            <button type="button" onClick={emptySearch} className="-ml-6">
+              <CloseFilled className="h-5 fill-wheat" />
+            </button>
+          ) : null}
+        </div>
         <span>{`${plural(championsCount, 'champion')} / ${totalChampionsCount}`}</span>
         <span />
       </div>

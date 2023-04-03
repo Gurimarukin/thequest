@@ -129,7 +129,7 @@ export const SearchSummoner = (): JSX.Element => {
             value={summonerName}
             onChange={handleChange}
             onFocus={handleFocus}
-            className="w-52 border border-goldenrod bg-black px-2"
+            className="w-52 border border-goldenrod bg-black pl-2 pr-8"
           />
           <ul
             className={cssClasses(
@@ -141,8 +141,8 @@ export const SearchSummoner = (): JSX.Element => {
             {concatWithHr(searches)}
           </ul>
         </ClickOutside>
-        <button type="submit">
-          <SearchOutline className="-ml-7 h-6 text-goldenrod" />
+        <button type="submit" className="-ml-7">
+          <SearchOutline className="h-6 text-goldenrod" />
         </button>
       </form>
     </div>
