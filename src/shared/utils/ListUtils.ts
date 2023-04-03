@@ -9,7 +9,7 @@ const updateOrAppend =
   (as: List<A>): List<A> =>
     updateOrAppendRec(as, eq, a, [])
 
-function updateOrAppendRec<A>(as: List<A>, eq: Eq<A>, a: A, acc: List<A>): List<A> {
+const updateOrAppendRec = <A>(as: List<A>, eq: Eq<A>, a: A, acc: List<A>): List<A> => {
   const [head, ...tail] = as
   if (head === undefined) return pipe(acc, List.append(a))
 

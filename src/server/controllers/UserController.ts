@@ -1,5 +1,4 @@
 import { apply } from 'fp-ts'
-import type { Lazy } from 'fp-ts/function'
 import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
@@ -29,11 +28,10 @@ import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { Summoner } from '../models/summoner/Summoner'
-import type { SummonerId } from '../models/summoner/SummonerId'
+import { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
-import type { UserId } from '../models/user/UserId'
 import type { DDragonService } from '../services/DDragonService'
 import type { DiscordService } from '../services/DiscordService'
 import type { MasteriesService } from '../services/MasteriesService'
@@ -153,15 +151,78 @@ function UserController(
         M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(UserView.codec))),
       ),
 
-    addFavoriteSelf: favoriteSelf(
-      userService.addFavoriteSearch,
-      () => 'Summoner search is already in favorites',
-    ),
+    addFavoriteSelf: (user_: TokenContent): EndedMiddleware =>
+      EndedMiddleware.withBody(PlatformWithName.codec)(({ platform, name }) =>
+        pipe(
+          userService.findById(user_.id),
+          Future.map(Either.fromOption(() => 'User not found')),
+          futureEither.chainTaskEitherK(
+            flow(
+              userService.getLinkedRiotAccount({ forceCacheRefresh: false }),
+              futureMaybe.chainOptionK(Maybe.fromEither),
+            ),
+          ),
+          futureEither.bindTo('linkedRiotAccount'),
+          futureEither.bind('summonerToFavorite', () =>
+            pipe(
+              summonerService.findByName(platform, name),
+              Future.map(Either.fromOption(() => 'Summoner not found')),
+            ),
+          ),
+          futureEither.chain(({ linkedRiotAccount, summonerToFavorite }) => {
+            const addFavoriteSearch = futureEither.fromTaskEither<string, Maybe<boolean>>(
+              userService.addFavoriteSearch(user_.id, {
+                platform: summonerToFavorite.platform,
+                puuid: summonerToFavorite.puuid,
+              }),
+            )
+            return pipe(
+              linkedRiotAccount,
+              Maybe.fold(
+                () => addFavoriteSearch,
+                ({ summoner: summonerSelf }) =>
+                  SummonerId.Eq.equals(summonerToFavorite.id, summonerSelf.id)
+                    ? futureEither.left('')
+                    : addFavoriteSearch,
+              ),
+            )
+          }),
+          Future.map(Either.chain(Either.fromOption(() => 'User not found'))),
+          M.fromTaskEither,
+          M.ichain(
+            Either.fold(M.sendWithStatus(Status.NotFound), removed =>
+              removed
+                ? M.noContent()
+                : M.sendWithStatus(Status.BadRequest)('Summoner search is already in favorites'),
+            ),
+          ),
+        ),
+      ),
 
-    removeFavoriteSelf: favoriteSelf(
-      userService.removeFavoriteSearch,
-      () => 'Summoner search is not in favorites',
-    ),
+    removeFavoriteSelf: (user: TokenContent): EndedMiddleware =>
+      EndedMiddleware.withBody(PlatformWithName.codec)(({ platform, name }) =>
+        pipe(
+          summonerService.findByName(platform, name),
+          Future.map(Either.fromOption(() => 'Summoner not found')),
+          futureEither.chain(summoner =>
+            pipe(
+              userService.removeFavoriteSearch(user.id, {
+                platform: summoner.platform,
+                puuid: summoner.puuid,
+              }),
+              Future.map(Either.fromOption(() => 'User not found')),
+            ),
+          ),
+          M.fromTaskEither,
+          M.ichain(
+            Either.fold(M.sendWithStatus(Status.NotFound), removed =>
+              removed
+                ? M.noContent()
+                : M.sendWithStatus(Status.BadRequest)('Summoner search is not in favorites'),
+            ),
+          ),
+        ),
+      ),
 
     setSummonerChampionsShardsCount,
 
@@ -231,31 +292,6 @@ function UserController(
         )
       }),
     )
-  }
-
-  function favoriteSelf(
-    updateFavoriteSearch: (id: UserId, search: PlatformWithPuuid) => Future<Maybe<boolean>>,
-    uselessActionMessage: Lazy<string>,
-  ): (user: TokenContent) => EndedMiddleware {
-    return user =>
-      EndedMiddleware.withBody(PlatformWithName.codec)(({ platform, name }) =>
-        pipe(
-          summonerService.findByName(platform, name),
-          Future.map(Either.fromOption(() => 'Summoner not found')),
-          futureEither.chain(({ puuid }) =>
-            pipe(
-              updateFavoriteSearch(user.id, { platform, puuid }),
-              Future.map(Either.fromOption(() => 'User not found')),
-            ),
-          ),
-          M.fromTaskEither,
-          M.ichain(
-            Either.fold(M.sendWithStatus(Status.NotFound), removed =>
-              removed ? M.noContent() : M.sendWithStatus(Status.BadRequest)(uselessActionMessage()),
-            ),
-          ),
-        ),
-      )
   }
 
   function setSummonerChampionsShardsCount(

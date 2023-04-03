@@ -9,7 +9,7 @@ import useSWR from 'swr'
 import { apiRoutes } from '../../shared/ApiRouter'
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { Future, List, Maybe, Tuple } from '../../shared/utils/fp'
+import { Future, List, Maybe, Tuple, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
@@ -23,7 +23,7 @@ const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<Summ
 type UserContext = {
   readonly refreshUser: () => void
   readonly user: Maybe<UserView>
-  readonly addFavoriteSearch: (summoner: SummonerShort) => void
+  readonly addFavoriteSearch: (summoner: SummonerShort, onNotFound: () => void) => void
   readonly removeFavoriteSearch: (summoner: SummonerShort) => void
   readonly recentSearches: List<SummonerShort>
   readonly addRecentSearch: (summoner: SummonerShort) => void
@@ -52,7 +52,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
   )
 
   const addFavoriteSearch = useCallback(
-    (summoner: SummonerShort): Maybe<void> =>
+    (summoner: SummonerShort, onNotFound: () => void): Maybe<void> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
@@ -62,17 +62,29 @@ export const UserContextProvider: React.FC = ({ children }) => {
             predicate.not(List.elem(SummonerShort.byPlatformAndNameEq)(summoner)),
           ),
         ),
-        Maybe.map(
-          pipe(
+        Maybe.map(oldData => {
+          const newData = pipe(
             UserView.Lens.favoriteSearches,
             lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
-          ),
-        ),
-        Maybe.map(newData => {
+          )(oldData)
+
           refreshUser(Maybe.some(newData), { revalidate: false })
+          // setLoading(true) // TODO
           pipe(
-            apiUserSelfFavoritesPut(summoner), // TODO: handle error
-            Future.map(() => refreshUser()),
+            apiUserSelfFavoritesPut(summoner),
+            statusesToOption(404),
+            Future.map(
+              Maybe.fold(() => {
+                refreshUser(Maybe.some(oldData), { revalidate: false })
+                onNotFound()
+              }, toNotUsed),
+            ),
+            Future.orElseW(() => {
+              refreshUser(Maybe.some(oldData), { revalidate: false })
+              alert("Erreur lors de l'ajout du favori") // TODO: toaster
+              return Future.notUsed
+            }),
+            // Future.map(() => setLoading(false)), // TODO
             futureRunUnsafe,
           )
         }),
@@ -91,17 +103,22 @@ export const UserContextProvider: React.FC = ({ children }) => {
             List.elem(SummonerShort.byPlatformAndNameEq)(summoner),
           ),
         ),
-        Maybe.map(
-          pipe(
+        Maybe.map(oldData => {
+          const newData = pipe(
             UserView.Lens.favoriteSearches,
-            lens.modify(List.filter(s => !SummonerShort.byPlatformAndNameEq.equals(s, summoner))),
-          ),
-        ),
-        Maybe.map(newData => {
+            lens.modify(List.difference(SummonerShort.byPlatformAndNameEq)([summoner])),
+          )(oldData)
+
           refreshUser(Maybe.some(newData), { revalidate: false })
+          // setLoading(true) // TODO
           pipe(
             apiUserSelfFavoritesDelete(summoner), // TODO: handle error
-            Future.map(() => refreshUser()),
+            Future.orElseW(() => {
+              refreshUser(Maybe.some(oldData), { revalidate: false })
+              alert('Erreur lors de la suppression du favori') // TODO: toaster
+              return Future.notUsed
+            }),
+            // Future.map(() => setLoading(false)), // TODO
             futureRunUnsafe,
           )
         }),
@@ -114,6 +131,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
     recentSearchesCodec,
     List.empty,
   )
+
   const addRecentSearch = useCallback(
     (summoner: SummonerShort) =>
       setRecentSearches_(
@@ -125,9 +143,10 @@ export const UserContextProvider: React.FC = ({ children }) => {
       ),
     [setRecentSearches_],
   )
+
   const removeRecentSearch = useCallback(
     (summoner: SummonerShort) =>
-      setRecentSearches_(List.filter(s => !SummonerShort.byPlatformAndNameEq.equals(s, summoner))),
+      setRecentSearches_(List.difference(SummonerShort.byPlatformAndNameEq)([summoner])),
     [setRecentSearches_],
   )
 
@@ -141,11 +160,15 @@ export const UserContextProvider: React.FC = ({ children }) => {
 
   const user = pipe(Maybe.fromNullable(data), Maybe.flatten)
   const recentSearches = pipe(
-    user,
-    Maybe.fold(
-      () => recentSearches_,
-      ({ favoriteSearches }) =>
-        pipe(recentSearches_, List.difference(SummonerShort.byPlatformAndNameEq)(favoriteSearches)),
+    recentSearches_,
+    List.difference(SummonerShort.byPlatformAndNameEq)(
+      pipe(
+        user,
+        List.fromOption,
+        List.chain(u =>
+          pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
+        ),
+      ),
     ),
   )
 
