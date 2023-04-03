@@ -65,10 +65,10 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
 
   return (
     <>
-      <MasteriesFilters />
-      <div className="group relative flex justify-center text-sm">
-        {`${plural(filteredAndSortedChampions.length, 'champion')} / ${champions.length}`}
-      </div>
+      <MasteriesFilters
+        championsCount={filteredAndSortedChampions.length}
+        totalChampionsCount={champions.length}
+      />
       {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions, setChampionShards)}
     </>
   )

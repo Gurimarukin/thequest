@@ -186,7 +186,13 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
   const handleAddFavoriteClick = useCallback(
     () =>
       addFavoriteSearch(summoner, () =>
-        navigate(appRoutes.platformSummonerName(summoner.platform, summoner.name, masteriesQuery)),
+        navigate(
+          appRoutes.platformSummonerName(
+            summoner.platform,
+            summoner.name,
+            MasteriesQuery.toPartial(masteriesQuery),
+          ),
+        ),
       ),
     [addFavoriteSearch, masteriesQuery, navigate, summoner],
   )
