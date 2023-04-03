@@ -95,17 +95,7 @@ module.exports = {
     ],
     'functional/no-mixed-types': 'off',
     'functional/no-return-void': ['error', { ignoreInferredTypes: true }],
-    'functional/prefer-immutable-types': [
-      'error',
-      {
-        enforcement: 'ReadonlyShallow',
-        ignoreInferredTypes: true,
-        ignoreTypePattern: ['Date', 'Error', 'JSX.Element', 'React\\.*'],
-        parameters: {},
-        returnTypes: {},
-        variables: {},
-      },
-    ],
+    'functional/prefer-immutable-types': 'off',
     'functional/type-declaration-immutability': 'off',
     'max-len': [
       'warn',

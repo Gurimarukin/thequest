@@ -29,7 +29,7 @@ type URI = typeof URI
 declare module 'fp-ts/HKT' {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface URItoKind2<E, A> {
-    readonly [URI]: MyMiddleware<E, E, A>
+    [URI]: MyMiddleware<E, E, A>
   }
 }
 
@@ -83,7 +83,7 @@ const orElse = M.orElse as <I, O, A>(
 ) => (ma: MyMiddleware<I, O, A>) => MyMiddleware<I, O, A>
 
 type MyCookieOptions = Omit<CookieOptions, 'maxAge'> & {
-  readonly maxAge?: MsDuration
+  maxAge?: MsDuration
 }
 
 const cookie = (
@@ -297,7 +297,6 @@ const requestChunks = (req: Readonly<http.IncomingMessage>): Future<List<unknown
   Future.tryCatch(
     () =>
       new Promise<List<unknown>>((resolve, reject) => {
-        // eslint-disable-next-line functional/prefer-immutable-types
         const body: unknown[] = []
 
         /* eslint-disable functional/no-expression-statements */

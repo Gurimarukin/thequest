@@ -19,11 +19,11 @@ import { getOnError } from '../utils/getOnError'
 import type { RiotApiService } from './RiotApiService'
 
 type ForceCacheRefresh = {
-  readonly forceCacheRefresh: boolean
+  forceCacheRefresh: boolean
 }
 
 type UseAccountApiKey = {
-  readonly useAccountApiKey: boolean
+  useAccountApiKey: boolean
 }
 
 type SummonerService = Readonly<ReturnType<typeof of>>

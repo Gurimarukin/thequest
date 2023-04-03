@@ -8,15 +8,15 @@ import { cssClasses } from '../utils/cssClasses'
 type Value = string | number | null
 
 type RadiosProps<A extends Value> = {
-  readonly name: string
-  readonly value: A
-  readonly setValue: (a: A) => void
-  readonly children: NonEmptyArray<LabelValue<A>>
+  name: string
+  value: A
+  setValue: (a: A) => void
+  children: NonEmptyArray<LabelValue<A>>
 }
 
 type LabelValue<A> = {
-  readonly value: A
-  readonly label: React.ReactNode
+  value: A
+  label: React.ReactNode
 }
 
 export function Radios<A extends Value>({
@@ -24,7 +24,7 @@ export function Radios<A extends Value>({
   value,
   setValue,
   children,
-}: RadiosProps<A>): JSX.Element {
+}: Readonly<RadiosProps<A>>): JSX.Element {
   return (
     <div className="flex">
       {children.map(({ value: val, label }) => {
@@ -55,6 +55,6 @@ export function Radios<A extends Value>({
   )
 }
 
-export function labelValue<A>(value: A, label: React.ReactNode): LabelValue<A> {
+export function labelValue<A>(value: A, label: React.ReactNode): Readonly<LabelValue<A>> {
   return { value, label }
 }

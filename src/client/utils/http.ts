@@ -12,7 +12,7 @@ import { decodeError } from '../../shared/utils/ioTsUtils'
 import { config } from '../config/unsafe'
 
 export type HttpOptions<O, B> = Omit<Options, 'method' | 'json'> & {
-  readonly json?: Tuple<Encoder<O, B>, B>
+  json?: Tuple<Encoder<O, B>, B>
 }
 
 function http<O, B>(

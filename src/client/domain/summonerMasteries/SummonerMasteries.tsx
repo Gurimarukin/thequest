@@ -40,15 +40,15 @@ import { Summoner } from './Summoner'
 
 // should mutate data before API response
 type OptimisticMutation = {
-  readonly optimisticMutation: boolean
+  optimisticMutation: boolean
 }
 
 type Props = {
-  readonly platform: Platform
-  readonly summonerName: string
+  platform: Platform
+  summonerName: string
 }
 
-export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
+export const SummonerMasteries = ({ platform, summonerName }: Readonly<Props>): JSX.Element => {
   const { user } = useUser()
 
   const { data, error, mutate } = useSWRHttp(
@@ -68,7 +68,7 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
   const setChampionsShardsBulk = useCallback(
     (
       updates: NonEmptyArray<ChampionShardsPayload>,
-      { optimisticMutation }: OptimisticMutation,
+      { optimisticMutation }: Readonly<OptimisticMutation>,
     ): Future<NotUsed> => {
       if (data === undefined || Maybe.isNone(data.championShards)) return Future.notUsed
 
@@ -131,13 +131,13 @@ const whiteSpaces = /\s+/g
 const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 type SummonerViewProps = {
-  readonly platform: Platform
-  readonly summoner: SummonerView
-  readonly masteries: List<ChampionMasteryView>
-  readonly championShards: Maybe<List<ChampionShardsView>>
-  readonly setChampionsShardsBulk: (
+  platform: Platform
+  summoner: SummonerView
+  masteries: List<ChampionMasteryView>
+  championShards: Maybe<List<ChampionShardsView>>
+  setChampionsShardsBulk: (
     updates: NonEmptyArray<ChampionShardsPayload>,
-    { optimisticMutation }: OptimisticMutation,
+    { optimisticMutation }: Readonly<OptimisticMutation>,
   ) => Future<NotUsed>
 }
 
@@ -147,7 +147,7 @@ const SummonerViewComponent = ({
   masteries,
   championShards,
   setChampionsShardsBulk,
-}: SummonerViewProps): JSX.Element => {
+}: Readonly<SummonerViewProps>): JSX.Element => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
   const staticData = useStaticData()
@@ -267,8 +267,8 @@ const SummonerViewComponent = ({
 }
 
 type EnrichedAll = {
-  readonly enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
-  readonly enrichedMasteries: List<EnrichedChampionMastery>
+  enrichedSummoner: Omit<EnrichedSummonerView, keyof SummonerView>
+  enrichedMasteries: List<EnrichedChampionMastery>
 }
 
 type PartialMasteriesGrouped = Partial<
@@ -280,10 +280,10 @@ const enrichAll = (
   championShards: Maybe<List<ChampionShardsView>>,
   view: MasteriesQueryView,
   staticDataChampions: List<StaticDataChampion>,
-): EnrichedAll => {
+): Readonly<EnrichedAll> => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name }): EnrichedChampionMastery => {
+    List.map(({ key, name }): Readonly<EnrichedChampionMastery> => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -310,7 +310,7 @@ const enrichAll = (
         masteries,
         List.findFirst(c => ChampionKey.Eq.equals(c.championId, key)),
         Maybe.fold(
-          (): EnrichedChampionMastery => ({
+          (): Readonly<EnrichedChampionMastery> => ({
             championId: key,
             championLevel: 0,
             championPoints: 0,

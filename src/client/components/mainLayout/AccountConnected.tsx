@@ -12,10 +12,10 @@ import { ClickOutside } from '../ClickOutside'
 import { Menu } from './Menu'
 
 type AccountConnectedProps = {
-  readonly user: UserView
+  user: UserView
 }
 
-export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
+export const AccountConnected = ({ user }: Readonly<AccountConnectedProps>): JSX.Element => {
   const { refreshUser } = useUser()
 
   const [menuIsVisible, setMenuIsVisible] = useState(false)

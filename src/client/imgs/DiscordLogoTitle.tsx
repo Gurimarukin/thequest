@@ -1,7 +1,7 @@
 import React from 'react'
 
 type Props = {
-  readonly className?: string
+  className?: string
 }
 
 export const DiscordLogoTitle = ({ className }: Props): JSX.Element => (

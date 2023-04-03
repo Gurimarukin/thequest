@@ -17,10 +17,10 @@ import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
 type State = {
-  readonly userName: string
-  readonly password: string
+  userName: string
+  password: string
 }
-const emptyState: State = { userName: '', password: '' }
+const emptyState: Readonly<State> = { userName: '', password: '' }
 
 export const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))

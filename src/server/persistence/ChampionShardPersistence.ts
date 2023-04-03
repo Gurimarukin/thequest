@@ -16,8 +16,8 @@ import { ChampionShardsDb } from '../models/user/ChampionShardsDb'
 import { UserId } from '../models/user/UserId'
 
 type ToDeleteAndToUpsert<A> = {
-  readonly toDelete: List<A>
-  readonly toUpsert: List<A>
+  toDelete: List<A>
+  toUpsert: List<A>
 }
 
 type ChampionShardPersistence = Readonly<ReturnType<typeof ChampionShardPersistence>>

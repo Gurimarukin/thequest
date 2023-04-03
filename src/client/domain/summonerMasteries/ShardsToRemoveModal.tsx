@@ -23,28 +23,26 @@ import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 
 type Props = {
-  readonly notifications: NonEmptyArray<ShardsToRemoveNotification>
-  readonly setChampionsShardsBulk: (
-    updates: NonEmptyArray<ChampionShardsPayload>,
-  ) => Future<NotUsed>
-  readonly hide: () => void
+  notifications: NonEmptyArray<ShardsToRemoveNotification>
+  setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShardsPayload>) => Future<NotUsed>
+  hide: () => void
 }
 
 export type ShardsToRemoveNotification = {
-  readonly championId: ChampionKey
-  readonly name: string
-  readonly championLevel: ChampionLevelOrZero
-  readonly percents: number
-  readonly chestGranted: boolean
-  readonly tokensEarned: number
-  readonly shardsCount: number
-  readonly leveledUpFrom: ChampionLevelOrZero
-  readonly shardsToRemove: number
+  championId: ChampionKey
+  name: string
+  championLevel: ChampionLevelOrZero
+  percents: number
+  chestGranted: boolean
+  tokensEarned: number
+  shardsCount: number
+  leveledUpFrom: ChampionLevelOrZero
+  shardsToRemove: number
 }
 
 const byPercents: Ord<ShardsToRemoveNotification> = pipe(
   number.Ord,
-  ord.contramap((n: ShardsToRemoveNotification) => n.percents),
+  ord.contramap((n: Readonly<ShardsToRemoveNotification>) => n.percents),
   ord.reverse,
 )
 
@@ -54,7 +52,7 @@ const byName: Ord<ShardsToRemoveNotification> = pipe(
 )
 
 type IsChecked = ShardsToRemoveNotification & {
-  readonly isChecked: boolean
+  isChecked: boolean
 }
 
 const isCheckedLens = pipe(lens.id<IsChecked>(), lens.prop('isChecked'))
@@ -65,7 +63,7 @@ export const ShardsToRemoveModal = ({
   notifications,
   setChampionsShardsBulk,
   hide,
-}: Props): JSX.Element => {
+}: Readonly<Props>): JSX.Element => {
   const toIsChecked = useCallback(
     () =>
       pipe(
@@ -222,14 +220,14 @@ export const ShardsToRemoveModal = ({
 }
 
 type ForAllButtonProps = {
-  readonly notificationsState: NonEmptyArray<IsChecked>
-  readonly setNotificationsState: React.Dispatch<React.SetStateAction<NonEmptyArray<IsChecked>>>
+  notificationsState: NonEmptyArray<IsChecked>
+  setNotificationsState: React.Dispatch<React.SetStateAction<NonEmptyArray<IsChecked>>>
 }
 
 const ForAllButton = ({
   notificationsState,
   setNotificationsState,
-}: ForAllButtonProps): JSX.Element => {
+}: Readonly<ForAllButtonProps>): JSX.Element => {
   const yesForAll = notificationsState.some(n => !n.isChecked)
   const forAllClick = useMemo(
     () =>
@@ -251,11 +249,11 @@ const ForAllButton = ({
 }
 
 type ToggleProps = {
-  readonly isChecked: boolean
-  readonly toggleChecked: () => void
+  isChecked: boolean
+  toggleChecked: () => void
 }
 
-const Toggle = ({ isChecked, toggleChecked }: ToggleProps): JSX.Element => (
+const Toggle = ({ isChecked, toggleChecked }: Readonly<ToggleProps>): JSX.Element => (
   <label className="cursor-pointer">
     <input type="checkbox" checked={isChecked} onChange={toggleChecked} className="hidden" />
     <ToggleFilled

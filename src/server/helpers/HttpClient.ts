@@ -17,7 +17,7 @@ export type HttpOptions<O, B> = Omit<
   Readonly<OptionsOfJSONResponseBody>,
   'url' | 'method' | 'json'
 > & {
-  readonly json?: Tuple<Encoder<O, B>, B>
+  json?: Tuple<Encoder<O, B>, B>
 }
 
 type HttpClient = Readonly<ReturnType<typeof HttpClient>>

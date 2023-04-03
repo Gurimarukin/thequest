@@ -13,8 +13,8 @@ import type { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import type { RiotApiService } from './RiotApiService'
 
 type StoredAt<A> = {
-  readonly value: A
-  readonly storedAt: DayJs
+  value: A
+  storedAt: DayJs
 }
 
 const StoredAt = {
@@ -31,13 +31,13 @@ const StoredAt = {
 }
 
 type WithVersion<A> = {
-  readonly value: A
-  readonly version: DDragonVersion
+  value: A
+  version: DDragonVersion
 }
 
 type VersionWithChampions = {
-  readonly version: DDragonVersion
-  readonly champions: DDragonChampions
+  version: DDragonVersion
+  champions: DDragonChampions
 }
 
 type DDragonService = Readonly<ReturnType<typeof DDragonService>>

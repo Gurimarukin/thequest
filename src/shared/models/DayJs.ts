@@ -26,7 +26,7 @@ const modify = identity as (f: Endomorphism<dayjs.Dayjs>) => Endomorphism<DayJs>
 // constructors
 
 type OfOptions = {
-  readonly locale?: boolean
+  locale?: boolean
 }
 
 function of(date: Readonly<number | Date>): DayJs
@@ -63,7 +63,7 @@ const startOf = (unit: dayjs.OpUnitType): Endomorphism<DayJs> => modify(d => d.s
 // outputs
 
 type FormatOptions = {
-  readonly locale?: boolean
+  locale?: boolean
 }
 
 const format =

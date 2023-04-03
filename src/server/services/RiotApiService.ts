@@ -31,7 +31,7 @@ const platformUrl = (platform: Platform, path: string): string =>
   `https://${constants.riotApi.plateformEndpoint[platform]}${path}`
 
 type UseAccountApiKey = {
-  readonly useAccountApiKey: boolean
+  useAccountApiKey: boolean
 }
 
 type RiotApiService = Readonly<ReturnType<typeof RiotApiService>>

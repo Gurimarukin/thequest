@@ -11,10 +11,10 @@ import { BooleanFromString, URLFromString } from '../../shared/utils/ioTsUtils'
 const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
-  readonly isDev: boolean
-  readonly apiHost: URL
-  readonly clientId: DiscordUserId
-  readonly redirectUri: string
+  isDev: boolean
+  apiHost: URL
+  clientId: DiscordUserId
+  redirectUri: string
 }
 
 const parse = (rawConfig: Dict<string, string | undefined>): Try<Config> =>

@@ -44,7 +44,6 @@ const readonlyArray = <A>(obs: Readonly<TObservable<A>>): Future<List<A>> =>
   Future.tryCatch(
     () =>
       new Promise<List<A>>((resolve, reject) => {
-        // eslint-disable-next-line functional/prefer-immutable-types
         const acc: A[] = []
         const subscription = obs.subscribe({
           // eslint-disable-next-line functional/immutable-data

@@ -1,9 +1,9 @@
 import type { ChampionLevelOrZero } from './models/api/ChampionLevel'
 
 type SimpleChampion = {
-  readonly championLevel: ChampionLevelOrZero
-  readonly championPoints: number
-  readonly tokensEarned: number
+  championLevel: ChampionLevelOrZero
+  championPoints: number
+  tokensEarned: number
 }
 
 // Mastery 5: 50%

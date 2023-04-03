@@ -13,7 +13,7 @@ import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryP
 import type { RiotApiService } from './RiotApiService'
 
 type ForceCacheRefresh = {
-  readonly forceCacheRefresh: boolean
+  forceCacheRefresh: boolean
 }
 
 type MasteriesService = Readonly<ReturnType<typeof MasteriesService>>

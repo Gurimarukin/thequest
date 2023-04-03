@@ -137,7 +137,7 @@ export const MasteriesFilters = (): JSX.Element => {
 }
 
 type SelectLevelsButtonProps = {
-  readonly levels: NonEmptyArray<ChampionLevelOrZero>
+  levels: NonEmptyArray<ChampionLevelOrZero>
 }
 
 const getSelectLevelsButton =
@@ -183,11 +183,9 @@ const getSelectLevelsButton =
   }
 
 type MasteriesCheckboxesProps = {
-  readonly checkedLevels: ReadonlySet<ChampionLevelOrZero>
-  readonly toggleChecked: (
-    level: ChampionLevelOrZero,
-  ) => (e: React.ChangeEvent<HTMLInputElement>) => void
-  readonly onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
+  checkedLevels: ReadonlySet<ChampionLevelOrZero>
+  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
+  onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
 }
 
 const MasteriesCheckboxes = ({
@@ -230,7 +228,7 @@ const MasteriesCheckboxes = ({
 )
 
 type SpanProps = {
-  readonly title?: string
+  title?: string
 }
 
 const TextLabel: React.FC<SpanProps> = ({ title, children }) => (

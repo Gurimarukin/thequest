@@ -4,11 +4,11 @@ import React, { useCallback } from 'react'
 import { useHistory } from '../contexts/HistoryContext'
 
 type Props = {
-  readonly to: string
-  readonly target?: string
-  readonly onClick?: React.MouseEventHandler<HTMLAnchorElement>
-  readonly className?: string
-  readonly children?: React.ReactNode
+  to: string
+  target?: string
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>
+  className?: string
+  children?: React.ReactNode
 }
 
 export const Link = ({
@@ -17,7 +17,7 @@ export const Link = ({
   onClick: onClick_,
   className,
   children,
-}: Props): JSX.Element => {
+}: Readonly<Props>): JSX.Element => {
   const { navigate } = useHistory()
 
   const onClick = useCallback(

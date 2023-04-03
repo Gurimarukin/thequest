@@ -23,12 +23,12 @@ import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
 type State = {
-  readonly userName: string
-  readonly password: string
-  readonly confirmPassword: string
+  userName: string
+  password: string
+  confirmPassword: string
 }
 
-const emptyState: State = { userName: '', password: '', confirmPassword: '' }
+const emptyState: Readonly<State> = { userName: '', password: '', confirmPassword: '' }
 
 const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
@@ -265,14 +265,14 @@ const Th: React.FC = ({ children }) => (
 )
 
 type TdProps = {
-  readonly className?: string
+  className?: string
 }
 
 const Td: React.FC<TdProps> = ({ className, children }) => (
   <td className={cssClasses('flex items-center bg-zinc-900 px-2 py-5', className)}>{children}</td>
 )
 
-const EmptyTd = ({ className }: TdProps): JSX.Element => (
+const EmptyTd = ({ className }: Readonly<TdProps>): JSX.Element => (
   <Td className={cssClasses('justify-center text-sm', className)}>—</Td>
 )
 
