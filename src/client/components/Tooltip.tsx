@@ -1,15 +1,26 @@
 /* eslint-disable functional/no-expression-statements */
 import React, { useCallback, useRef, useState } from 'react'
 
+import { CaretUpSharp } from '../imgs/svgIcons'
 import { cssClasses } from '../utils/cssClasses'
 
 type Props = {
   tooltip: React.ReactNode
+  /**
+   * @default 'bottom'
+   */
+  position?: 'bottom' | 'top'
   childrenClassName?: string
   className?: string
 }
 
-export const Tooltip: React.FC<Props> = ({ tooltip, childrenClassName, className, children }) => {
+export const Tooltip: React.FC<Props> = ({
+  tooltip,
+  position = 'bottom',
+  childrenClassName,
+  className,
+  children,
+}) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const [style, setStyle] = useState<React.CSSProperties>({})
@@ -25,12 +36,25 @@ export const Tooltip: React.FC<Props> = ({ tooltip, childrenClassName, className
       </span>
       <div
         ref={ref}
-        className="absolute top-full left-1/2 z-50 hidden opacity-0 blur duration-300 peer-hover:flex peer-hover:opacity-100 peer-hover:blur-0"
+        className={cssClasses(
+          // opacity-0 blur duration-300 peer-hover:opacity-100 peer-hover:blur-0
+          'absolute left-1/2 z-50 hidden peer-hover:flex',
+          ['bottom-full', position === 'top'],
+        )}
       >
-        <span className="-ml-1 flex h-1 w-1 border-r-[6px] border-t-[6px] border-r-mastery4-brown-secondary border-t-transparent" />
-        <span className="flex h-1 w-1 border-l-[6px] border-t-[6px] border-l-mastery4-brown-secondary border-t-transparent" />
+        <CaretUpSharp
+          className={cssClasses(
+            'absolute left-[-7px] h-[14px] fill-mastery4-brown-secondary',
+            ['top-[-3px]', position === 'bottom'],
+            ['bottom-[-3px] rotate-180', position === 'top'],
+          )}
+        />
         <div
-          className="relative top-[6px] whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat"
+          className={cssClasses(
+            'relative whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat',
+            ['top-[7px]', position === 'bottom'],
+            ['bottom-[7px]', position === 'top'],
+          )}
           style={style}
         >
           {tooltip}

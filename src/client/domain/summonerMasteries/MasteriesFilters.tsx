@@ -294,19 +294,20 @@ const MasteriesCheckboxes = ({
               onChange={toggleChecked(level)}
               className="hidden"
             />
-            <span
-              title={`Niveau ${level}`}
-              className={cssClasses(
-                'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
-                ['bg-zinc-700', !isChecked],
-                ['bg-goldenrod-secondary', isChecked],
-              )}
-            >
-              <MasteryImg
-                level={level}
-                className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
-              />
-            </span>
+            <Tooltip tooltip={`Niveau ${level}`} position="top">
+              <span
+                className={cssClasses(
+                  'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
+                  ['bg-zinc-700', !isChecked],
+                  ['bg-goldenrod-secondary', isChecked],
+                )}
+              >
+                <MasteryImg
+                  level={level}
+                  className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+                />
+              </span>
+            </Tooltip>
           </label>
         )
       }),
