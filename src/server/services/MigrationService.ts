@@ -18,7 +18,7 @@ export type MigrationService = ReturnType<typeof MigrationService>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const MigrationService = (
   Logger: LoggerGetter,
-  mongoCollection: MongoCollectionGetter,
+  mongoCollection: MongoCollectionGetter, // TODO: unused?
   migrationPersistence: MigrationPersistence,
 ) => {
   const logger = Logger('MigrationService')
@@ -28,7 +28,7 @@ export const MigrationService = (
   const applyMigrations: Future<NotUsed> = pipe(
     getUnappliedMigrations(),
     Future.map(NonEmptyArray.fromReadonlyArray),
-    futureMaybe.chainFirstIOEitherK(m => logger.info(`${plural(m.length, 'migration')} to apply`)),
+    futureMaybe.chainFirstIOEitherK(m => logger.info(`${plural('migration')(m.length)} to apply`)),
     futureMaybe.chainTaskEitherK(
       NonEmptyArray.traverse(Future.ApplicativeSeq)(migration =>
         pipe(

@@ -207,6 +207,8 @@ const SummonerViewComponent = ({
                       championId: champion,
                       name: c.name,
                       championLevel: c.championLevel,
+                      championPoints: c.championPoints,
+                      championPointsUntilNextLevel: c.championPointsUntilNextLevel,
                       percents: c.percents,
                       chestGranted: c.chestGranted,
                       tokensEarned: c.tokensEarned,

@@ -12,7 +12,8 @@ import { List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { ChampionMasterySquare } from './ChampionMasterySquare'
+import { cssClasses } from '../../utils/cssClasses'
+import { ChampionMasterySquare, bgGradientMastery } from './ChampionMasterySquare'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './MasteriesFilters'
 
@@ -115,7 +116,7 @@ const ChampionMasteriesCompact = ({
   champions,
   setChampionShards,
 }: ChampionMasteriesCompactProps): JSX.Element => (
-  <div className="flex max-w-[104rem] flex-wrap justify-center gap-4 self-center pt-4 pb-2">
+  <div className="flex max-w-[104rem] flex-wrap justify-center gap-4 self-center pt-4 pb-24">
     {champions.map(champion => (
       <ChampionMasterySquare
         key={ChampionKey.unwrap(champion.championId)}
@@ -151,7 +152,7 @@ const ChampionMasteriesHistogram = ({
   )
 
   return (
-    <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-2">
+    <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-24">
       {champions.map(champion => (
         <Fragment key={ChampionKey.unwrap(champion.championId)}>
           <ChampionMasterySquare
@@ -182,10 +183,10 @@ const ChampionMasteryHistogram = ({
 }: ChampionMasteryHistogramProps): JSX.Element => {
   const pointsUntilAndSince = pipe(
     [
-      Maybe.some(plural(championPoints, 'point')),
+      Maybe.some(plural('point')(championPoints)),
       2 < championLevel
         ? Maybe.some(
-            `${plural(championPointsSinceLastLevel, 'point')} depuis le niveau ${Math.min(
+            `${plural('point')(championPointsSinceLastLevel)} depuis le niveau ${Math.min(
               championLevel,
               5,
             )}`,
@@ -193,12 +194,12 @@ const ChampionMasteryHistogram = ({
         : Maybe.none,
       0 < championLevel && championLevel < 5
         ? Maybe.some(
-            `${plural(championPointsUntilNextLevel, 'point')} jusqu'au niveau ${championLevel + 1}`,
+            `${plural('point')(championPointsUntilNextLevel)} jusqu'au niveau ${championLevel + 1}`,
           )
         : Maybe.none,
     ],
     List.compact,
-    List.mkString(' - '),
+    List.mkString(' — '),
   )
 
   return (
@@ -220,7 +221,7 @@ const ChampionMasteryHistogram = ({
                 )}
                 <div
                   title={pointsUntilAndSince}
-                  className={`absolute top-0 h-full ${bgColor(championLevel)}`}
+                  className={cssClasses('absolute top-0 h-full', bgGradientMastery(championLevel))}
                   style={{ width: p(championPoints) }}
                 />
                 {championLevel < 2 ? null : (
@@ -240,14 +241,6 @@ const ChampionMasteryHistogram = ({
       </div>
     </div>
   )
-}
-
-const bgColor = (level: number): string => {
-  if (level === 7) return 'bg-gradient-to-r from-mastery7-blue to-mastery7-blue-secondary'
-  if (level === 6) return 'bg-gradient-to-r from-mastery6-violet to-mastery6-violet-secondary'
-  if (level === 5) return 'bg-gradient-to-r from-mastery5-red to-mastery5-red-secondary'
-  if (level === 4) return 'bg-gradient-to-r from-mastery4-brown to-mastery4-brown-secondary'
-  return 'bg-mastery-beige'
 }
 
 const rulerColor = (level: number): string => {

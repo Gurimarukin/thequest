@@ -210,12 +210,11 @@ export const MasteriesFilters = ({
             </button>
           ) : null}
           {Maybe.isSome(masteriesQuery.search) ? (
-            <span className="text-zinc-400">{plural(searchCount, 'résultat')}</span>
+            <span className="text-zinc-400">{plural('résultat')(searchCount)}</span>
           ) : null}
         </div>
-        <span className="text-sm">{`${plural(
+        <span className="text-sm">{`${plural('champion')(
           championsCount,
-          'champion',
         )} / ${totalChampionsCount}`}</span>
         <span />
       </div>

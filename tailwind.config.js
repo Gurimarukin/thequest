@@ -27,6 +27,12 @@ module.exports = {
       backgroundImage: {
         landing: "url('./imgs/bg-landing.jpg')",
       },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
+      },
+      boxShadow: {
+        even: '0 0 8px 0 var(--tw-shadow-color)',
+      },
       textShadow: {
         DEFAULT: '0 0 5px var(--tw-shadow-color)',
       },

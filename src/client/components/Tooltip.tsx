@@ -11,6 +11,7 @@ type Props = {
    */
   position?: 'bottom' | 'top'
   childrenClassName?: string
+  tooltipClassName?: string
   className?: string
 }
 
@@ -18,6 +19,7 @@ export const Tooltip: React.FC<Props> = ({
   tooltip,
   position = 'bottom',
   childrenClassName,
+  tooltipClassName,
   className,
   children,
 }) => {
@@ -42,6 +44,17 @@ export const Tooltip: React.FC<Props> = ({
           ['bottom-full', position === 'top'],
         )}
       >
+        <div
+          className={cssClasses(
+            'relative whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat shadow-even shadow-black',
+            ['top-[7px]', position === 'bottom'],
+            ['bottom-[7px]', position === 'top'],
+            tooltipClassName,
+          )}
+          style={style}
+        >
+          {tooltip}
+        </div>
         <CaretUpSharp
           className={cssClasses(
             'absolute left-[-7px] h-[14px] fill-mastery4-brown-secondary',
@@ -49,16 +62,6 @@ export const Tooltip: React.FC<Props> = ({
             ['bottom-[-3px] rotate-180', position === 'top'],
           )}
         />
-        <div
-          className={cssClasses(
-            'relative whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat',
-            ['top-[7px]', position === 'bottom'],
-            ['bottom-[7px]', position === 'top'],
-          )}
-          style={style}
-        >
-          {tooltip}
-        </div>
       </div>
     </div>
   )
@@ -73,7 +76,7 @@ const getStyles = (elt: HTMLElement): React.CSSProperties => {
 
   const halfWidth = Math.round(eltRect.width / 2)
   const diffRight = docRect.width - tooltipMargin - (eltRect.left + halfWidth)
-  const diffLeft = eltRect.left - halfWidth
+  const diffLeft = -tooltipMargin + eltRect.left - halfWidth
 
   return { left: -Math.min(diffLeft, 0) - halfWidth + Math.min(diffRight, 0) }
 }

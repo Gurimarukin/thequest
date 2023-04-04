@@ -22,6 +22,8 @@ import { cssClasses } from '../../utils/cssClasses'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 
+const { plural } = StringUtils
+
 type Props = {
   notifications: NonEmptyArray<ShardsToRemoveNotification>
   setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShardsPayload>) => Future<NotUsed>
@@ -32,6 +34,8 @@ export type ShardsToRemoveNotification = {
   championId: ChampionKey
   name: string
   championLevel: ChampionLevelOrZero
+  championPoints: number
+  championPointsUntilNextLevel: number
   percents: number
   chestGranted: boolean
   tokensEarned: number
@@ -186,7 +190,7 @@ export const ShardsToRemoveModal = ({
                   <MasteryImg level={n.championLevel} className="h-6" />
                 </span>
                 <span className="justify-self-end pl-12 pr-4 text-sm">
-                  enlever {StringUtils.plural(n.shardsToRemove, 'fragment')}
+                  enlever {plural('fragment')(n.shardsToRemove)}
                 </span>
                 {isSingleMode ? null : (
                   <Toggle isChecked={n.isChecked} toggleChecked={toggleChecked(n.championId)} />

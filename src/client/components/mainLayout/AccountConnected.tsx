@@ -36,7 +36,7 @@ export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element =
         </button>
         {menuIsVisible ? (
           <Menu>
-            <ul className="flex flex-col gap-[2px]">
+            <ul className="flex flex-col gap-0.5">
               <li>
                 <button
                   type="button"
