@@ -97,100 +97,103 @@ export const ChampionMasterySquare = ({
         )}
         style={animationDelay(glow)}
       />
-      <Tooltip
-        tooltip={
-          <>
-            <div className="relative flex overflow-hidden">
-              <span
-                className={cssClasses(
-                  'grow py-0.5 pr-3 pl-2 text-center font-bold shadow-black text-shadow',
-                  bgGradientMastery(championLevel),
-                )}
-              >
-                {name}
-              </span>
-              {/* hitbox */}
-              {percentsElement}
-              <div className="absolute right-0">
-                <span className="absolute -left-2 -top-2 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
-                {percentsElement}
-              </div>
-            </div>
-            <p className="border-b border-mastery4-brown-secondary px-2 py-1 text-center text-2xs">
-              {`${championPoints.toLocaleString()}${
-                0 < championLevel && championLevel < 5
-                  ? ` / ${(championPoints + championPointsUntilNextLevel).toLocaleString()}`
-                  : ''
-              }  pts`}
-            </p>
-            <div className="flex flex-col items-center gap-1 py-1 px-2 text-2xs">
-              {pipe(
-                tokenShards,
-                Maybe.fold(
-                  () => null,
-                  nea => <div className="flex items-center gap-2">{nea}</div>,
-                ),
-              )}
-              <div className="flex items-center gap-2">
-                <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
-              </div>
-            </div>
-          </>
-        }
-        tooltipClassName="pt-0 pr-0 pb-0 pl-0 flex flex-col"
+      <div
+        className={cssClasses(
+          'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
+          ['rounded-br-xl', isHistogram],
+          ['rounded-tr-xl', !isHistogram],
+          ['bg-mastery7-blue', championLevel === 7],
+          ['bg-mastery6-violet', championLevel === 6],
+          ['bg-mastery5-red', championLevel === 5],
+          ['bg-mastery4-brown', championLevel === 4],
+          ['bg-mastery-beige', championLevel < 4],
+        )}
       >
         <div
           className={cssClasses(
-            'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
-            ['rounded-br-xl', isHistogram],
-            ['rounded-tr-xl', !isHistogram],
-            ['bg-mastery7-blue', championLevel === 7],
-            ['bg-mastery6-violet', championLevel === 6],
-            ['bg-mastery5-red', championLevel === 5],
-            ['bg-mastery4-brown', championLevel === 4],
-            ['bg-mastery-beige', championLevel < 4],
+            'h-12 w-12 overflow-hidden rounded-bl-lg',
+            ['rounded-br-lg', isHistogram],
+            ['rounded-tr-lg', !isHistogram],
           )}
         >
-          <div
-            className={cssClasses(
-              'h-12 w-12 overflow-hidden rounded-bl-lg',
-              ['rounded-br-lg', isHistogram],
-              ['rounded-tr-lg', !isHistogram],
-            )}
-          >
-            <img
-              src={staticData.assets.champion.square(championId)}
-              alt={`Icône de ${name}`}
-              className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
-            />
-          </div>
-          <div
-            className={cssClasses(
-              'absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
-              ['text-blue-500', championLevel === 7],
-              ['text-purple-400', championLevel === 6],
-              ['text-red-700', championLevel === 5],
-              ['text-yellow-600', championLevel === 4],
-              ['text-neutral-400', championLevel < 4],
-            )}
-          >
-            <span className="mt-[-2px]">{championLevel}</span>
-          </div>
-          <Tokens championLevel={championLevel} tokensEarned={tokensEarned} />
-          {chestGranted ? (
-            <div className="absolute left-0 bottom-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
-              <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
-            </div>
-          ) : null}
-          {pipe(
-            filteredShardsCount,
-            Maybe.fold(
-              () => null,
-              shards => <Shards name={name} shardsCount={shards} setShardsCount={setShardsCount} />,
-            ),
-          )}
+          <img
+            src={staticData.assets.champion.square(championId)}
+            alt={`Icône de ${name}`}
+            className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
+          />
         </div>
-      </Tooltip>
+        <div
+          className={cssClasses(
+            'absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
+            ['text-blue-500', championLevel === 7],
+            ['text-purple-400', championLevel === 6],
+            ['text-red-700', championLevel === 5],
+            ['text-yellow-600', championLevel === 4],
+            ['text-neutral-400', championLevel < 4],
+          )}
+        >
+          <span className="mt-[-2px]">{championLevel}</span>
+        </div>
+        <Tokens championLevel={championLevel} tokensEarned={tokensEarned} />
+        {chestGranted ? (
+          <div className="absolute left-0 bottom-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
+            <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
+          </div>
+        ) : null}
+        <Tooltip
+          tooltip={
+            <>
+              <div className="relative flex overflow-hidden">
+                <span
+                  className={cssClasses(
+                    'grow py-0.5 pr-4 pl-2 text-center font-bold shadow-black text-shadow',
+                    bgGradientMastery(championLevel),
+                  )}
+                >
+                  {name}
+                </span>
+                {/* hitbox */}
+                {percentsElement}
+                <div className="absolute right-0">
+                  <span className="absolute -left-2 -top-2 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
+                  {percentsElement}
+                </div>
+              </div>
+              <p className="border-b border-mastery4-brown-secondary px-2 py-1 text-center text-2xs">
+                {`${championPoints.toLocaleString()}${
+                  0 < championLevel && championLevel < 5
+                    ? ` / ${(championPoints + championPointsUntilNextLevel).toLocaleString()}`
+                    : ''
+                }  pts`}
+              </p>
+              <div className="flex flex-col items-center gap-1 py-1 px-2 text-2xs">
+                {pipe(
+                  tokenShards,
+                  Maybe.fold(
+                    () => null,
+                    nea => <div className="flex items-center gap-2">{nea}</div>,
+                  ),
+                )}
+                <div className="flex items-center gap-2">
+                  <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
+                </div>
+              </div>
+            </>
+          }
+          tooltipContainerClassName="top-full"
+          tooltipClassName="pt-0 pr-0 pb-0 pl-0 flex flex-col"
+          className="!absolute top-0 left-0 h-full w-full"
+        >
+          <div className="absolute h-full w-full" />
+        </Tooltip>
+        {pipe(
+          filteredShardsCount,
+          Maybe.fold(
+            () => null,
+            shards => <Shards name={name} shardsCount={shards} setShardsCount={setShardsCount} />,
+          ),
+        )}
+      </div>
     </div>
   )
 }

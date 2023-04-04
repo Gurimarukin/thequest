@@ -11,6 +11,7 @@ type Props = {
    */
   position?: 'bottom' | 'top'
   childrenClassName?: string
+  tooltipContainerClassName?: string
   tooltipClassName?: string
   className?: string
 }
@@ -19,6 +20,7 @@ export const Tooltip: React.FC<Props> = ({
   tooltip,
   position = 'bottom',
   childrenClassName,
+  tooltipContainerClassName,
   tooltipClassName,
   className,
   children,
@@ -42,6 +44,7 @@ export const Tooltip: React.FC<Props> = ({
           // opacity-0 blur duration-300 peer-hover:opacity-100 peer-hover:blur-0
           'absolute left-1/2 z-50 hidden peer-hover:flex',
           ['bottom-full', position === 'top'],
+          tooltipContainerClassName,
         )}
       >
         <div

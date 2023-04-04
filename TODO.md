@@ -7,6 +7,7 @@
 - limit favorites
 - modal: trap focus
 - userService.getLinkedRiotAccount: return no platform when "leagueoflegends" connection
+- level=all in query?
 
 ---
 
