@@ -100,38 +100,6 @@ export const ChampionMasterySquare = ({
       <Tooltip
         tooltip={
           <>
-            {/* <div className="grid grid-cols-[2rem_1fr] items-start gap-2 pl-1 ">
-              <span
-                className={cssClasses(
-                  'relative mt-1',
-                  ['h-[28px]', championLevel === 7],
-                  ['h-[25px]', championLevel === 6],
-                  ['h-[24px]', championLevel === 5],
-                  ['h-[22px]', championLevel === 4],
-                  ['h-[20px]', championLevel === 3],
-                  ['h-[17px]', championLevel === 2],
-                  ['h-[14px]', championLevel === 1],
-                  ['h-[14px]', championLevel === 0],
-                )}
-              >
-                <MasteryImg
-                  level={championLevel}
-                  className={cssClasses(
-                    'absolute w-[32px]',
-                    ['left-[-2px] top-[-1px]', championLevel === 6],
-                    ['left-[-2px] top-[-2px]', championLevel === 5],
-                    ['left-[-4px] top-[-3px]', championLevel === 4],
-                    ['left-[-5px] top-[-4px]', championLevel === 3],
-                    ['left-[-6px] top-[-6px]', championLevel === 2],
-                    ['left-[-8px] top-[-7px]', championLevel === 1],
-                    ['left-[-12px] top-[-7px]', championLevel === 0],
-                  )}
-                />
-              </span>
-              <span className="justify-self-end border-b border-l border-mastery4-brown-secondary px-1 pt-0.5">
-                {Math.round(percents)}%
-              </span>
-            </div> */}
             <div className="relative flex overflow-hidden">
               <span
                 className={cssClasses(
