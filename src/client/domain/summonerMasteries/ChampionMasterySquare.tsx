@@ -64,7 +64,7 @@ export const ChampionMasterySquare = ({
     Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
   )
 
-  const anchoRef = useRef<HTMLDivElement>(null)
+  const anchorRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className="relative">
@@ -82,6 +82,7 @@ export const ChampionMasterySquare = ({
 
       {/* container, color background */}
       <div
+        ref={anchorRef}
         className={cssClasses(
           'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
           ['rounded-br-xl', isHistogram],
@@ -132,21 +133,6 @@ export const ChampionMasterySquare = ({
           </div>
         ) : null}
 
-        {/* tooltip */}
-        <div ref={anchoRef} className="absolute h-full w-full" />
-        <Tooltip anchorRef={anchoRef} className="flex flex-col !p-0">
-          <ChampionTooltip
-            chestGranted={chestGranted}
-            tokensEarned={tokensEarned}
-            championLevel={championLevel}
-            championPoints={championPoints}
-            championPointsUntilNextLevel={championPointsUntilNextLevel}
-            name={name}
-            percents={percents}
-            filteredShardsCount={filteredShardsCount}
-          />
-        </Tooltip>
-
         {/* shards bottom right */}
         {pipe(
           filteredShardsCount,
@@ -156,6 +142,19 @@ export const ChampionMasterySquare = ({
           ),
         )}
       </div>
+
+      <Tooltip anchorRef={anchorRef} placement="top" className="flex flex-col !p-0">
+        <ChampionTooltip
+          chestGranted={chestGranted}
+          tokensEarned={tokensEarned}
+          championLevel={championLevel}
+          championPoints={championPoints}
+          championPointsUntilNextLevel={championPointsUntilNextLevel}
+          name={name}
+          percents={percents}
+          filteredShardsCount={filteredShardsCount}
+        />
+      </Tooltip>
     </div>
   )
 }
@@ -351,7 +350,7 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
           >
             <AddOutline className="w-full" />
           </button>
-          <Tooltip anchorRef={addButtonRef} placement="right" className="!text-2xs">
+          <Tooltip anchorRef={addButtonRef} placement="right" className="z-10 !text-2xs">
             Ajouter un fragment
           </Tooltip>
         </span>
@@ -369,7 +368,7 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
           >
             <RemoveOutline className="w-full" />
           </button>
-          <Tooltip anchorRef={removeButtonRef} placement="right" className="!text-2xs">
+          <Tooltip anchorRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
             Enlever un fragment
           </Tooltip>
         </span>
