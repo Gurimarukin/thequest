@@ -335,18 +335,13 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
       <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-0.5 text-xs">
         <span className="mt-0.5">{shardsCount}</span>
       </span>
-      <div className="absolute bottom-[calc(-100%_+_3px)] right-0 z-10 hidden h-[41px] w-[14px] flex-col justify-between overflow-hidden rounded-tl-[6px] group-hover:flex">
-        <span
-          className={cssClasses('flex bg-black pl-0.5 pt-0.5 pb-[3px]', [
-            'invisible',
-            setShardsCount === null || 9 <= shardsCount,
-          ])}
-        >
+      <div className="absolute bottom-[-14px] right-[-1px] z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
+        <span className="flex bg-black p-[1px] pb-0.5">
           <button
             ref={addButtonRef}
             type="button"
             onClick={addShardCount}
-            className="rounded-t bg-goldenrod text-black"
+            className="w-3 rounded-t bg-goldenrod text-black"
           >
             <AddOutline className="w-full" />
           </button>
@@ -354,17 +349,13 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
             Ajouter un fragment
           </Tooltip>
         </span>
-        <span
-          className={cssClasses('flex bg-black pl-0.5', [
-            'invisible',
-            setShardsCount === null || shardsCount <= 0,
-          ])}
-        >
+        <span className="h-[12px] w-[1px] bg-black" />
+        <span className="flex bg-black p-[1px]">
           <button
             ref={removeButtonRef}
             type="button"
             onClick={removeShardCount}
-            className="rounded-b bg-goldenrod text-black"
+            className="w-3 rounded-b bg-goldenrod text-black"
           >
             <RemoveOutline className="w-full" />
           </button>
