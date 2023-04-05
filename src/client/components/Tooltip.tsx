@@ -96,8 +96,7 @@ export const Tooltip: React.FC<Props> = ({
       >
         <CaretUpSharp
           className={cssClasses(
-            'h-[14px] fill-mastery4-brown-secondary',
-            'group-data-popper-top:rotate-180',
+            'h-[14px] fill-mastery4-brown-secondary group-data-popper-top:rotate-180',
             ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
             [
               'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',

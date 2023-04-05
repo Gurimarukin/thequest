@@ -152,7 +152,7 @@ export const ChampionMasterySquare = ({
           filteredShardsCount,
           Maybe.fold(
             () => null,
-            shards => <Shards name={name} shardsCount={shards} setShardsCount={setShardsCount} />,
+            shards => <Shards shardsCount={shards} setShardsCount={setShardsCount} />,
           ),
         )}
       </div>
@@ -311,12 +311,14 @@ const ChampionTooltip = ({
 }
 
 type ShardsProps = {
-  name: string
   shardsCount: number
   setShardsCount: ((count: number) => void) | null
 }
 
-const Shards = ({ name, shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
+const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
+  const addButtonRef = useRef<HTMLButtonElement>(null)
+  const removeButtonRef = useRef<HTMLButtonElement>(null)
+
   const addShardCount = useCallback(
     () => setShardsCount?.(shardsCount + 1),
     [setShardsCount, shardsCount],
@@ -325,8 +327,9 @@ const Shards = ({ name, shardsCount, setShardsCount }: ShardsProps): JSX.Element
     () => setShardsCount?.(shardsCount - 1),
     [setShardsCount, shardsCount],
   )
+
   return (
-    <div title={`${name} — fragments`} className="group absolute right-0 bottom-0 flex items-end">
+    <div className="group absolute right-0 bottom-0 flex items-end">
       <span className="mr-[-2px] overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
         <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
       </span>
@@ -341,13 +344,16 @@ const Shards = ({ name, shardsCount, setShardsCount }: ShardsProps): JSX.Element
           ])}
         >
           <button
+            ref={addButtonRef}
             type="button"
             onClick={addShardCount}
-            title={`${name} — ajouter un fragment`}
             className="rounded-t bg-goldenrod text-black"
           >
             <AddOutline className="w-full" />
           </button>
+          <Tooltip anchorRef={addButtonRef} placement="right" className="!text-2xs">
+            Ajouter un fragment
+          </Tooltip>
         </span>
         <span
           className={cssClasses('flex bg-black pl-0.5', [
@@ -356,13 +362,16 @@ const Shards = ({ name, shardsCount, setShardsCount }: ShardsProps): JSX.Element
           ])}
         >
           <button
+            ref={removeButtonRef}
             type="button"
             onClick={removeShardCount}
-            title={`${name} — enlever un fragment`}
             className="rounded-b bg-goldenrod text-black"
           >
             <RemoveOutline className="w-full" />
           </button>
+          <Tooltip anchorRef={removeButtonRef} placement="right" className="!text-2xs">
+            Enlever un fragment
+          </Tooltip>
         </span>
       </div>
     </div>
