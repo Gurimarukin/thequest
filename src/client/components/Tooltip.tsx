@@ -80,9 +80,9 @@ export const Tooltip: React.FC<Props> = ({
     <div
       ref={tooltipRef}
       className={cssClasses(
-        'group whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat shadow-even shadow-black',
-        ['visible', shouldDisplay],
-        ['invisible', !shouldDisplay],
+        'group whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat shadow-even shadow-black transition-opacity duration-300',
+        ['visible opacity-100', shouldDisplay],
+        ['invisible opacity-0', !shouldDisplay],
         className,
       )}
       style={styles['popper']}
