@@ -283,49 +283,83 @@ const MasteriesCheckboxes = ({
     {pipe(
       ChampionLevelOrZero.values,
       List.reverse,
-      List.map(level => {
-        const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
-        return (
-          <label key={level} className="group/mastery">
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={toggleChecked(level)}
-              className="hidden"
-            />
-            <Tooltip tooltip={`Niveau ${level}`} position="top">
-              <span
-                className={cssClasses(
-                  'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
-                  ['bg-zinc-700', !isChecked],
-                  ['bg-goldenrod-secondary', isChecked],
-                )}
-              >
-                <MasteryImg
-                  level={level}
-                  className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
-                />
-              </span>
-            </Tooltip>
-          </label>
-        )
-      }),
+      List.map(level => (
+        <LabelCheckbox
+          key={level}
+          checkedLevels={checkedLevels}
+          level={level}
+          toggleChecked={toggleChecked}
+        />
+      )),
     )}
   </div>
 )
+
+type LabelCheckboxProps = {
+  checkedLevels: ReadonlySet<ChampionLevelOrZero>
+  level: ChampionLevelOrZero
+  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+const LabelCheckbox = ({
+  checkedLevels,
+  level,
+  toggleChecked,
+}: LabelCheckboxProps): JSX.Element => {
+  const anchorRef = useRef<HTMLSpanElement>(null)
+  const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
+  return (
+    <label className="group/mastery">
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={toggleChecked(level)}
+        className="hidden"
+      />
+      <span
+        ref={anchorRef}
+        className={cssClasses(
+          'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
+          ['bg-zinc-700', !isChecked],
+          ['bg-goldenrod-secondary', isChecked],
+        )}
+      >
+        <MasteryImg
+          level={level}
+          className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+        />
+      </span>
+      <Tooltip anchorRef={anchorRef} placement="top">
+        Niveau {level}
+      </Tooltip>
+    </label>
+  )
+}
 
 type SpanProps = {
   tooltip: React.ReactNode
 }
 
-const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => (
-  <Tooltip tooltip={tooltip}>
-    <span className="flex h-6 w-10 items-center justify-center text-sm">{children}</span>
-  </Tooltip>
-)
+const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
+  const anchorRef = useRef<HTMLSpanElement>(null)
+  return (
+    <>
+      <span ref={anchorRef} className="flex h-6 w-10 items-center justify-center text-sm">
+        {children}
+      </span>
+      <Tooltip anchorRef={anchorRef}>{tooltip}</Tooltip>
+    </>
+  )
+}
 
-const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => (
-  <Tooltip tooltip={tooltip}>
-    <span className="flex h-6 w-6 items-center justify-center">{children}</span>
-  </Tooltip>
-)
+const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
+  const anchorRef = useRef<HTMLSpanElement>(null)
+  return (
+    <>
+      <span ref={anchorRef} className="flex h-6 w-6 items-center justify-center">
+        {children}
+      </span>
+      <Tooltip anchorRef={anchorRef}>{tooltip}</Tooltip>
+    </>
+  )
+}

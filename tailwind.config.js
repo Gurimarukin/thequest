@@ -5,6 +5,12 @@ module.exports = {
   content: ['./src/client/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      data: {
+        'popper-top': "popper-placement^='top'",
+        'popper-bottom': "popper-placement^='bottom'",
+        'popper-left': "popper-placement^='left'",
+        'popper-right': "popper-placement^='right'",
+      },
       colors: {
         goldenrod: 'goldenrod',
         'goldenrod-secondary': '#b58703',

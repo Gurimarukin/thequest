@@ -61,7 +61,7 @@ export const Summoner = ({
         <span className="flex items-center gap-2">
           <span className="text-sm">Progression : {round(questPercents, 2)} %</span>
           <InformationCircleOutline className="peer/info h-6 fill-current" />
-          <ul className="absolute right-0 top-[calc(100%_+_.75rem)] z-10 hidden list-disc border-2 border-mastery4-brown-secondary bg-black py-4 pr-4 pl-7 text-sm leading-6 peer-hover/info:block">
+          <ul className="absolute right-0 top-[calc(100%_+_.75rem)] z-10 hidden list-disc border-2 border-mastery4-brown-secondary bg-black py-3 pr-3 pl-6 text-xs leading-6 peer-hover/info:block">
             <li>
               De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de maîtrise.
             </li>

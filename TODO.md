@@ -1,4 +1,3 @@
-- fancy champion tooltip
 - toaster (replace alert)
 - maybe fix shards hitbox
 - discord OAuth2: proper state

@@ -1,85 +1,182 @@
-/* eslint-disable functional/no-expression-statements */
-import React, { useCallback, useRef, useState } from 'react'
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
+import type { Placement } from '@popperjs/core'
+import type { MutableRefObject, RefObject } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
+import { MsDuration } from '../../shared/models/MsDuration'
+
+import { useForceRender } from '../hooks/useForceRender'
+import type { ReactPopperParams } from '../hooks/useVisiblePopper'
+import { useVisiblePopper } from '../hooks/useVisiblePopper'
 import { CaretUpSharp } from '../imgs/svgIcons'
 import { cssClasses } from '../utils/cssClasses'
 
+export const tooltipLayerId = 'tooltip-layer'
+
 type Props = {
-  tooltip: React.ReactNode
+  anchorRef: RefObject<Element>
   /**
-   * @default 'bottom'
+   * Time spent open by the tooltip after the user navigates away from it / the anchor (tablet).
    */
-  position?: 'bottom' | 'top'
-  childrenClassName?: string
-  tooltipContainerClassName?: string
-  tooltipClassName?: string
+  openedDuration?: MsDuration
+  placement?: Placement
   className?: string
 }
 
 export const Tooltip: React.FC<Props> = ({
-  tooltip,
-  position = 'bottom',
-  childrenClassName,
-  tooltipContainerClassName,
-  tooltipClassName,
+  anchorRef,
+  openedDuration = MsDuration.seconds(3),
+  placement = 'bottom',
   className,
   children,
 }) => {
-  const ref = useRef<HTMLDivElement>(null)
+  const tooltipLayer = document.getElementById(tooltipLayerId)
 
-  const [style, setStyle] = useState<React.CSSProperties>({})
+  if (tooltipLayer === null) {
+    // eslint-disable-next-line functional/no-throw-statements
+    throw Error(`Tooltip layer not found: #${tooltipLayerId}`)
+  }
 
-  const handleMouseEnter = useCallback(() => {
-    if (ref.current !== null) setStyle(getStyles(ref.current))
-  }, [])
+  const shouldDisplayRef = useRef(false)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const arrowRef = useRef<HTMLDivElement>(null)
 
-  return (
-    <div className={cssClasses('relative', className)}>
-      <span onMouseEnter={handleMouseEnter} className={cssClasses('peer', childrenClassName)}>
-        {children}
-      </span>
+  const shouldDisplay = shouldDisplayRef.current
+
+  const [eventListenersEnabled, setEventListenersEnabled] = useState(false)
+  const options = useMemo(
+    (): ReactPopperParams[2] => ({
+      placement,
+      modifiers: [
+        { name: 'arrow', options: { element: arrowRef.current } },
+        { name: 'offset', options: { offset: [0, 8] } },
+        { name: 'preventOverflow', options: { padding: 8 } },
+        // { name: 'flip', options: { padding: 8 } },
+        { name: 'eventListeners', enabled: eventListenersEnabled },
+      ],
+    }),
+    [eventListenersEnabled, placement],
+  )
+  const { styles, attributes } = useVisiblePopper(
+    shouldDisplay,
+    anchorRef.current,
+    tooltipRef.current,
+    options,
+  )
+
+  const setupHoverClickListeners = useSetupHoverClickListeners(
+    anchorRef,
+    shouldDisplayRef,
+    openedDuration,
+    setEventListenersEnabled,
+  )
+
+  // Set hover / click listeners to display or hide the tooltip.
+  useEffect(setupHoverClickListeners, [setupHoverClickListeners])
+
+  return createPortal(
+    <div
+      ref={tooltipRef}
+      className={cssClasses(
+        'group whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat shadow-even shadow-black',
+        ['visible', shouldDisplay],
+        ['invisible', !shouldDisplay],
+        className,
+      )}
+      style={styles['popper']}
+      {...attributes['popper']}
+    >
+      {children}
       <div
-        ref={ref}
-        className={cssClasses(
-          // opacity-0 blur duration-300 peer-hover:opacity-100 peer-hover:blur-0
-          'absolute left-1/2 z-50 hidden peer-hover:flex',
-          ['bottom-full', position === 'top'],
-          tooltipContainerClassName,
-        )}
+        ref={arrowRef}
+        className="group-data-popper-top:bottom-[-11px] group-data-popper-bottom:top-[-11px] group-data-popper-left:right-[-11px] group-data-popper-right:left-[-11px]"
+        style={styles['arrow']}
       >
-        <div
-          className={cssClasses(
-            'relative whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 py-1 px-2 text-xs text-wheat shadow-even shadow-black',
-            ['top-[7px]', position === 'bottom'],
-            ['bottom-[7px]', position === 'top'],
-            tooltipClassName,
-          )}
-          style={style}
-        >
-          {tooltip}
-        </div>
         <CaretUpSharp
           className={cssClasses(
-            'absolute left-[-7px] h-[14px] fill-mastery4-brown-secondary',
-            ['top-[-3px]', position === 'bottom'],
-            ['bottom-[-3px] rotate-180', position === 'top'],
+            'h-[14px] fill-mastery4-brown-secondary',
+            'group-data-popper-top:rotate-180',
+            ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
+            [
+              'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
+              placement.startsWith('right'),
+            ],
+            [
+              'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
+              placement.startsWith('left'),
+            ],
           )}
         />
       </div>
-    </div>
+    </div>,
+    tooltipLayer,
   )
 }
 
-// add some spacing to the tooltip if close to edge
-const tooltipMargin = 12 // px
+/**
+ * Returns a function that adds 'click' and 'mouseover/mouseleave' event listeners on 'anchorRef'.
+ * Those listeners will mutate `shouldDisplayRef` inner value to control whether or not the tooltip should be displayed.
+ */
+const useSetupHoverClickListeners = (
+  anchorRef: RefObject<Element | null>,
+  shouldDisplayRef: MutableRefObject<boolean>,
+  openedDuration: MsDuration,
+  setEventListenersEnabled: React.Dispatch<React.SetStateAction<boolean>>,
+): (() => void) => {
+  const forceRender = useForceRender()
 
-const getStyles = (elt: HTMLElement): React.CSSProperties => {
-  const eltRect = elt.getBoundingClientRect()
-  const docRect = window.document.documentElement.getBoundingClientRect()
+  return useCallback(() => {
+    const anchor = anchorRef.current
+    if (anchor === null) return
 
-  const halfWidth = Math.round(eltRect.width / 2)
-  const diffRight = docRect.width - tooltipMargin - (eltRect.left + halfWidth)
-  const diffLeft = -tooltipMargin + eltRect.left - halfWidth
+    // eslint-disable-next-line functional/no-let
+    let timer: number | undefined
 
-  return { left: -Math.min(diffLeft, 0) - halfWidth + Math.min(diffRight, 0) }
+    function showTooltip(): void {
+      if (anchor === null) return
+      window.clearTimeout(timer)
+      setEventListenersEnabled(true)
+
+      // eslint-disable-next-line functional/immutable-data
+      if (!shouldDisplayRef.current) shouldDisplayRef.current = true
+
+      forceRender()
+    }
+
+    function hideTooltip(): void {
+      window.clearTimeout(timer)
+      setEventListenersEnabled(false)
+
+      if (!shouldDisplayRef.current) return
+
+      // eslint-disable-next-line functional/immutable-data
+      shouldDisplayRef.current = false
+      forceRender()
+    }
+
+    function clickTooltip(): void {
+      showTooltip()
+
+      // And hide it afterwards.
+      timer = window.setTimeout(() => {
+        hideTooltip()
+      }, MsDuration.unwrap(openedDuration))
+    }
+
+    // React to hover in / out for desktop users.
+    anchor.addEventListener('mouseover', showTooltip, true)
+    anchor.addEventListener('mouseleave', hideTooltip, true)
+
+    // React to click / tap for tablet users.
+    anchor.addEventListener('click', clickTooltip, true)
+
+    return () => {
+      window.clearTimeout(timer)
+      anchor.removeEventListener('click', clickTooltip, true)
+      anchor.removeEventListener('mouseover', showTooltip, true)
+      anchor.removeEventListener('mouseleave', hideTooltip, true)
+    }
+  }, [anchorRef, forceRender, openedDuration, setEventListenersEnabled, shouldDisplayRef])
 }

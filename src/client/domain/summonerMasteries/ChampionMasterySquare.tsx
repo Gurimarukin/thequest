@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-return-void */
 import { flow, pipe } from 'fp-ts/function'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
@@ -64,29 +64,11 @@ export const ChampionMasterySquare = ({
     Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
   )
 
-  const tokenShards = pipe(
-    [
-      championLevel === 5 || championLevel === 6
-        ? Maybe.some(<span>{plural('jeton')(tokensEarned)}</span>)
-        : Maybe.none,
-      pipe(
-        filteredShardsCount,
-        // eslint-disable-next-line react/jsx-key
-        Maybe.map(shards => <span>{plural('fragment')(shards)}</span>),
-      ),
-    ],
-    List.compact,
-    NonEmptyArray.fromReadonlyArray,
-  )
-
-  const percentsElement = (
-    <span className="relative flex items-center py-0.5 pr-1 shadow-black text-shadow">
-      {Math.round(percents)} %
-    </span>
-  )
+  const anchoRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className="relative">
+      {/* glow */}
       <div
         className={cssClasses(
           ['hidden', !isGlowing],
@@ -97,6 +79,8 @@ export const ChampionMasterySquare = ({
         )}
         style={animationDelay(glow)}
       />
+
+      {/* container, color background */}
       <div
         className={cssClasses(
           'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
@@ -109,6 +93,7 @@ export const ChampionMasterySquare = ({
           ['bg-mastery-beige', championLevel < 4],
         )}
       >
+        {/* champion image */}
         <div
           className={cssClasses(
             'h-12 w-12 overflow-hidden rounded-bl-lg',
@@ -122,6 +107,8 @@ export const ChampionMasterySquare = ({
             className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
           />
         </div>
+
+        {/* champion level top left */}
         <div
           className={cssClasses(
             'absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
@@ -134,58 +121,33 @@ export const ChampionMasterySquare = ({
         >
           <span className="mt-[-2px]">{championLevel}</span>
         </div>
+
+        {/* tokens next to champion level */}
         <Tokens championLevel={championLevel} tokensEarned={tokensEarned} />
+
+        {/* chest bottom left */}
         {chestGranted ? (
           <div className="absolute left-0 bottom-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
             <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
           </div>
         ) : null}
-        <Tooltip
-          tooltip={
-            <>
-              <div className="relative flex overflow-hidden">
-                <span
-                  className={cssClasses(
-                    'grow py-0.5 pr-4 pl-2 text-center font-bold shadow-black text-shadow',
-                    bgGradientMastery(championLevel),
-                  )}
-                >
-                  {name}
-                </span>
-                {/* hitbox */}
-                {percentsElement}
-                <div className="absolute right-0">
-                  <span className="absolute -left-2 -top-2 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
-                  {percentsElement}
-                </div>
-              </div>
-              <p className="border-b border-mastery4-brown-secondary px-2 py-1 text-center text-2xs">
-                {`${championPoints.toLocaleString()}${
-                  0 < championLevel && championLevel < 5
-                    ? ` / ${(championPoints + championPointsUntilNextLevel).toLocaleString()}`
-                    : ''
-                }  pts`}
-              </p>
-              <div className="flex flex-col items-center gap-1 py-1 px-2 text-2xs">
-                {pipe(
-                  tokenShards,
-                  Maybe.fold(
-                    () => null,
-                    nea => <div className="flex items-center gap-2">{nea}</div>,
-                  ),
-                )}
-                <div className="flex items-center gap-2">
-                  <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
-                </div>
-              </div>
-            </>
-          }
-          tooltipContainerClassName="top-full"
-          tooltipClassName="pt-0 pr-0 pb-0 pl-0 flex flex-col"
-          className="!absolute top-0 left-0 h-full w-full"
-        >
-          <div className="absolute h-full w-full" />
+
+        {/* tooltip */}
+        <div ref={anchoRef} className="absolute h-full w-full" />
+        <Tooltip anchorRef={anchoRef} className="flex flex-col !p-0">
+          <ChampionTooltip
+            chestGranted={chestGranted}
+            tokensEarned={tokensEarned}
+            championLevel={championLevel}
+            championPoints={championPoints}
+            championPointsUntilNextLevel={championPointsUntilNextLevel}
+            name={name}
+            percents={percents}
+            filteredShardsCount={filteredShardsCount}
+          />
         </Tooltip>
+
+        {/* shards bottom right */}
         {pipe(
           filteredShardsCount,
           Maybe.fold(
@@ -263,6 +225,89 @@ const Tokens = ({ championLevel, tokensEarned }: TokensProps): JSX.Element | nul
 
 function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
   return pipe([...Array(Math.max(n, 0))], List.mapWithIndex(getA))
+}
+
+type ChampionTooltipProps = {
+  // eslint-disable-next-line react/boolean-prop-naming
+  chestGranted: boolean
+  tokensEarned: number
+  championLevel: ChampionLevelOrZero
+  championPoints: number
+  championPointsUntilNextLevel: number
+  name: string
+  percents: number
+  filteredShardsCount: Maybe<number>
+}
+
+const ChampionTooltip = ({
+  championLevel,
+  percents,
+  championPoints,
+  championPointsUntilNextLevel,
+  name,
+  chestGranted,
+  tokensEarned,
+  filteredShardsCount,
+}: ChampionTooltipProps): JSX.Element => {
+  const percentsElement = (
+    <span className="relative flex items-center py-0.5 pr-1 shadow-black text-shadow">
+      {Math.round(percents)} %
+    </span>
+  )
+
+  const tokenShards = pipe(
+    [
+      championLevel === 5 || championLevel === 6
+        ? Maybe.some(<span key="tokens">{plural('jeton')(tokensEarned)}</span>)
+        : Maybe.none,
+      pipe(
+        filteredShardsCount,
+        Maybe.map(shards => <span key="shards">{plural('fragment')(shards)}</span>),
+      ),
+    ],
+    List.compact,
+    NonEmptyArray.fromReadonlyArray,
+  )
+
+  return (
+    <>
+      <div className="relative flex overflow-hidden">
+        <span
+          className={cssClasses(
+            'grow py-0.5 pr-4 pl-2 text-center font-bold shadow-black text-shadow',
+            bgGradientMastery(championLevel),
+          )}
+        >
+          {name}
+        </span>
+        {/* "hitbox" */}
+        {percentsElement}
+        <div className="absolute right-0">
+          <span className="absolute -left-2 -top-2 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
+          {percentsElement}
+        </div>
+      </div>
+      <p className="border-b border-mastery4-brown-secondary px-2 py-1 text-center text-2xs">
+        {`${championPoints.toLocaleString()}${
+          0 < championLevel && championLevel < 5
+            ? ` / ${(championPoints + championPointsUntilNextLevel).toLocaleString()}`
+            : ''
+        }  pts`}
+      </p>
+      <div className="flex flex-col items-center gap-1 py-1 px-2 text-2xs">
+        {pipe(
+          tokenShards,
+          Maybe.fold(
+            () => null,
+            nea => <div className="flex items-center gap-2">{nea}</div>,
+          ),
+        )}
+        <div className="flex items-center gap-2">
+          <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
+        </div>
+      </div>
+    </>
+  )
 }
 
 type ShardsProps = {
