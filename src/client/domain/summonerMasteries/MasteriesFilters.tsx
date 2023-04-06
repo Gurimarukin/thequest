@@ -306,7 +306,7 @@ const LabelCheckbox = ({
   level,
   toggleChecked,
 }: LabelCheckboxProps): JSX.Element => {
-  const anchorRef = useRef<HTMLSpanElement>(null)
+  const hoverRef = useRef<HTMLSpanElement>(null)
   const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
   return (
     <label className="group/mastery">
@@ -317,7 +317,7 @@ const LabelCheckbox = ({
         className="hidden"
       />
       <span
-        ref={anchorRef}
+        ref={hoverRef}
         className={cssClasses(
           'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
           ['bg-zinc-700', !isChecked],
@@ -329,7 +329,7 @@ const LabelCheckbox = ({
           className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
         />
       </span>
-      <Tooltip anchorRef={anchorRef} placement="top">
+      <Tooltip hoverRef={hoverRef} placement="top">
         Niveau {level}
       </Tooltip>
     </label>
@@ -341,25 +341,25 @@ type SpanProps = {
 }
 
 const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
-  const anchorRef = useRef<HTMLSpanElement>(null)
+  const hoverRef = useRef<HTMLSpanElement>(null)
   return (
     <>
-      <span ref={anchorRef} className="flex h-6 w-10 items-center justify-center text-sm">
+      <span ref={hoverRef} className="flex h-6 w-10 items-center justify-center text-sm">
         {children}
       </span>
-      <Tooltip anchorRef={anchorRef}>{tooltip}</Tooltip>
+      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
     </>
   )
 }
 
 const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
-  const anchorRef = useRef<HTMLSpanElement>(null)
+  const hoverRef = useRef<HTMLSpanElement>(null)
   return (
     <>
-      <span ref={anchorRef} className="flex h-6 w-6 items-center justify-center">
+      <span ref={hoverRef} className="flex h-6 w-6 items-center justify-center">
         {children}
       </span>
-      <Tooltip anchorRef={anchorRef}>{tooltip}</Tooltip>
+      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
     </>
   )
 }

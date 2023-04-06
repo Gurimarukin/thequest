@@ -2,13 +2,14 @@
 import { number, ord, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
-import React, { Fragment, useMemo } from 'react'
+import React, { Fragment, useMemo, useRef } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
 
+import { Tooltip } from '../../components/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
@@ -181,9 +182,11 @@ const ChampionMasteryHistogram = ({
     championPointsUntilNextLevel,
   },
 }: ChampionMasteryHistogramProps): JSX.Element => {
+  const hoverRef = useRef<HTMLDivElement>(null)
+  const placementRef = useRef<HTMLSpanElement>(null)
+
   const pointsUntilAndSince = pipe(
     [
-      Maybe.some(plural('point')(championPoints)),
       2 < championLevel
         ? Maybe.some(
             `${plural('point')(championPointsSinceLastLevel)} depuis le niveau ${Math.min(
@@ -199,47 +202,66 @@ const ChampionMasteryHistogram = ({
         : Maybe.none,
     ],
     List.compact,
-    List.mkString(' — '),
+    NonEmptyArray.fromReadonlyArray,
+    Maybe.map(List.mkString(' — ')),
   )
 
   return (
-    <div className="flex flex-col">
+    <>
+      <div ref={hoverRef} className="flex flex-col">
+        {pipe(
+          maybeMaxPoints,
+          Maybe.fold(
+            () => null,
+            maxPoints => {
+              const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
+              return (
+                <div className="relative h-7">
+                  {championPointsUntilNextLevel === 0 ? null : (
+                    <div
+                      className="h-full bg-gray-600 opacity-50"
+                      style={{ width: p(championPoints + championPointsUntilNextLevel) }}
+                    />
+                  )}
+                  <div
+                    className={cssClasses(
+                      'absolute top-0 h-full',
+                      bgGradientMastery(championLevel),
+                    )}
+                    style={{ width: p(championPoints) }}
+                  />
+                  {championLevel < 2 ? null : (
+                    <div
+                      className={`absolute top-0 h-full border-r ${rulerColor(championLevel)}`}
+                      style={{ width: p(championPoints - championPointsSinceLastLevel) }}
+                    />
+                  )}
+                </div>
+              )
+            },
+          ),
+        )}
+        <div className="flex grow items-center p-1 text-sm">
+          <span ref={placementRef}>{championPoints.toLocaleString()}</span>
+        </div>
+      </div>
       {pipe(
-        maybeMaxPoints,
+        pointsUntilAndSince,
         Maybe.fold(
           () => null,
-          maxPoints => {
-            const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
-            return (
-              <div className="relative h-7">
-                {championPointsUntilNextLevel === 0 ? null : (
-                  <div
-                    title={pointsUntilAndSince}
-                    className="h-full bg-gray-600 opacity-50"
-                    style={{ width: p(championPoints + championPointsUntilNextLevel) }}
-                  />
-                )}
-                <div
-                  title={pointsUntilAndSince}
-                  className={cssClasses('absolute top-0 h-full', bgGradientMastery(championLevel))}
-                  style={{ width: p(championPoints) }}
-                />
-                {championLevel < 2 ? null : (
-                  <div
-                    title={pointsUntilAndSince}
-                    className={`absolute top-0 h-full border-r ${rulerColor(championLevel)}`}
-                    style={{ width: p(championPoints - championPointsSinceLastLevel) }}
-                  />
-                )}
-              </div>
-            )
-          },
+          tooltip => (
+            <Tooltip
+              hoverRef={hoverRef}
+              placementRef={placementRef}
+              placement="bottom-start"
+              className="!text-2xs"
+            >
+              {tooltip}
+            </Tooltip>
+          ),
         ),
       )}
-      <div className="flex grow items-center p-1 text-sm">
-        <span title={pointsUntilAndSince}>{championPoints.toLocaleString()}</span>
-      </div>
-    </div>
+    </>
   )
 }
 

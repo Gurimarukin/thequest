@@ -16,9 +16,14 @@ import { cssClasses } from '../utils/cssClasses'
 export const tooltipLayerId = 'tooltip-layer'
 
 type Props = {
-  anchorRef: RefObject<Element>
+  hoverRef: RefObject<Element>
   /**
-   * Time spent open by the tooltip after the user navigates away from it / the anchor (tablet).
+   * Place the tooltip from this element.
+   * @default hoverRef
+   */
+  placementRef?: RefObject<Element>
+  /**
+   * Time spent open by the tooltip after the user navigates away from it / the hover (tablet).
    */
   openedDuration?: MsDuration
   placement?: Placement
@@ -26,7 +31,8 @@ type Props = {
 }
 
 export const Tooltip: React.FC<Props> = ({
-  anchorRef,
+  hoverRef,
+  placementRef = hoverRef,
   openedDuration = MsDuration.seconds(3),
   placement = 'bottom',
   className,
@@ -61,13 +67,13 @@ export const Tooltip: React.FC<Props> = ({
   )
   const { styles, attributes } = useVisiblePopper(
     shouldDisplay,
-    anchorRef.current,
+    placementRef.current,
     tooltipRef.current,
     options,
   )
 
   const setupHoverClickListeners = useSetupHoverClickListeners(
-    anchorRef,
+    hoverRef,
     shouldDisplayRef,
     openedDuration,
     setEventListenersEnabled,
@@ -115,11 +121,11 @@ export const Tooltip: React.FC<Props> = ({
 }
 
 /**
- * Returns a function that adds 'click' and 'mouseover/mouseleave' event listeners on 'anchorRef'.
+ * Returns a function that adds 'click' and 'mouseover/mouseleave' event listeners on 'hoverRef'.
  * Those listeners will mutate `shouldDisplayRef` inner value to control whether or not the tooltip should be displayed.
  */
 const useSetupHoverClickListeners = (
-  anchorRef: RefObject<Element | null>,
+  hoverRef: RefObject<Element | null>,
   shouldDisplayRef: MutableRefObject<boolean>,
   openedDuration: MsDuration,
   setEventListenersEnabled: React.Dispatch<React.SetStateAction<boolean>>,
@@ -127,14 +133,14 @@ const useSetupHoverClickListeners = (
   const forceRender = useForceRender()
 
   return useCallback(() => {
-    const anchor = anchorRef.current
-    if (anchor === null) return
+    const hover = hoverRef.current
+    if (hover === null) return
 
     // eslint-disable-next-line functional/no-let
     let timer: number | undefined
 
     function showTooltip(): void {
-      if (anchor === null) return
+      if (hover === null) return
       window.clearTimeout(timer)
       setEventListenersEnabled(true)
 
@@ -165,17 +171,17 @@ const useSetupHoverClickListeners = (
     }
 
     // React to hover in / out for desktop users.
-    anchor.addEventListener('mouseover', showTooltip, true)
-    anchor.addEventListener('mouseleave', hideTooltip, true)
+    hover.addEventListener('mouseover', showTooltip, true)
+    hover.addEventListener('mouseleave', hideTooltip, true)
 
     // React to click / tap for tablet users.
-    anchor.addEventListener('click', clickTooltip, true)
+    hover.addEventListener('click', clickTooltip, true)
 
     return () => {
       window.clearTimeout(timer)
-      anchor.removeEventListener('click', clickTooltip, true)
-      anchor.removeEventListener('mouseover', showTooltip, true)
-      anchor.removeEventListener('mouseleave', hideTooltip, true)
+      hover.removeEventListener('click', clickTooltip, true)
+      hover.removeEventListener('mouseover', showTooltip, true)
+      hover.removeEventListener('mouseleave', hideTooltip, true)
     }
-  }, [anchorRef, forceRender, openedDuration, setEventListenersEnabled, shouldDisplayRef])
+  }, [hoverRef, forceRender, openedDuration, setEventListenersEnabled, shouldDisplayRef])
 }

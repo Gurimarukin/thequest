@@ -4,15 +4,15 @@ import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
-import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 
 import { Tooltip } from '../../components/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
-import { NumberUtils } from '../../utils/NumberUtils'
 import { cssClasses } from '../../utils/cssClasses'
+import { NumberUtils } from '../../utils/NumberUtils'
 
 const { round } = NumberUtils
 const { plural } = StringUtils
@@ -64,7 +64,7 @@ export const ChampionMasterySquare = ({
     Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
   )
 
-  const anchorRef = useRef<HTMLDivElement>(null)
+  const hoverRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className="relative">
@@ -82,7 +82,7 @@ export const ChampionMasterySquare = ({
 
       {/* container, color background */}
       <div
-        ref={anchorRef}
+        ref={hoverRef}
         className={cssClasses(
           'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
           ['rounded-br-xl', isHistogram],
@@ -143,7 +143,7 @@ export const ChampionMasterySquare = ({
         )}
       </div>
 
-      <Tooltip anchorRef={anchorRef} placement="top" className="flex flex-col !p-0">
+      <Tooltip hoverRef={hoverRef} placement="top" className="flex flex-col !p-0">
         <ChampionTooltip
           chestGranted={chestGranted}
           tokensEarned={tokensEarned}
@@ -345,7 +345,7 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
           >
             <AddOutline className="w-full" />
           </button>
-          <Tooltip anchorRef={addButtonRef} placement="right" className="z-10 !text-2xs">
+          <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
             Ajouter un fragment
           </Tooltip>
         </span>
@@ -359,7 +359,7 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
           >
             <RemoveOutline className="w-full" />
           </button>
-          <Tooltip anchorRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
+          <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
             Enlever un fragment
           </Tooltip>
         </span>
