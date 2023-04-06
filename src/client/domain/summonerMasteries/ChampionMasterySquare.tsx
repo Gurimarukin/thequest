@@ -4,15 +4,15 @@ import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { Tooltip } from '../../components/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
-import { cssClasses } from '../../utils/cssClasses'
 import { NumberUtils } from '../../utils/NumberUtils'
+import { cssClasses } from '../../utils/cssClasses'
 
 const { round } = NumberUtils
 const { plural } = StringUtils
