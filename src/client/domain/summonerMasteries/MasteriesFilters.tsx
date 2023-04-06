@@ -279,7 +279,7 @@ const MasteriesCheckboxes = ({
   toggleChecked,
   onMouseEnter,
 }: MasteriesCheckboxesProps): JSX.Element => (
-  <div onMouseEnter={onMouseEnter} className="flex">
+  <div onMouseEnter={onMouseEnter} className="flex flex-wrap">
     {pipe(
       ChampionLevelOrZero.values,
       List.reverse,
@@ -319,7 +319,7 @@ const LabelCheckbox = ({
       <span
         ref={hoverRef}
         className={cssClasses(
-          'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
+          'flex h-10 shrink-0 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
           ['bg-zinc-700', !isChecked],
           ['bg-goldenrod-secondary', isChecked],
         )}
