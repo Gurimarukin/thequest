@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { MsDuration } from '../../shared/models/MsDuration'
+import { NonEmptyArray } from '../../shared/utils/fp'
 
 import { useForceRender } from '../hooks/useForceRender'
 import type { ReactPopperParams } from '../hooks/useVisiblePopper'
@@ -16,7 +17,7 @@ import { cssClasses } from '../utils/cssClasses'
 export const tooltipLayerId = 'tooltip-layer'
 
 type Props = {
-  hoverRef: RefObject<Element>
+  hoverRef: RefObject<Element> | NonEmptyArray<RefObject<Element>>
   /**
    * Place the tooltip from this element.
    * @default hoverRef
@@ -31,8 +32,8 @@ type Props = {
 }
 
 export const Tooltip: React.FC<Props> = ({
-  hoverRef,
-  placementRef = hoverRef,
+  hoverRef: hoverRef_,
+  placementRef: maybePlacementRef,
   openedDuration = MsDuration.seconds(3),
   placement = 'bottom',
   className,
@@ -44,6 +45,11 @@ export const Tooltip: React.FC<Props> = ({
     // eslint-disable-next-line functional/no-throw-statements
     throw Error(`Tooltip layer not found: #${tooltipLayerId}`)
   }
+
+  const hoverRefs_ = isArray(hoverRef_) ? hoverRef_ : NonEmptyArray.of(hoverRef_)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const hoverRefs = useMemo(() => hoverRefs_, hoverRefs_)
+  const placementRef_ = maybePlacementRef ?? NonEmptyArray.head(hoverRefs)
 
   const shouldDisplayRef = useRef(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -67,13 +73,13 @@ export const Tooltip: React.FC<Props> = ({
   )
   const { styles, attributes } = useVisiblePopper(
     shouldDisplay,
-    placementRef.current,
+    placementRef_.current,
     tooltipRef.current,
     options,
   )
 
   const setupHoverClickListeners = useSetupHoverClickListeners(
-    hoverRef,
+    hoverRefs,
     shouldDisplayRef,
     openedDuration,
     setEventListenersEnabled,
@@ -125,7 +131,7 @@ export const Tooltip: React.FC<Props> = ({
  * Those listeners will mutate `shouldDisplayRef` inner value to control whether or not the tooltip should be displayed.
  */
 const useSetupHoverClickListeners = (
-  hoverRef: RefObject<Element | null>,
+  hoverRefs: NonEmptyArray<RefObject<Element>>,
   shouldDisplayRef: MutableRefObject<boolean>,
   openedDuration: MsDuration,
   setEventListenersEnabled: React.Dispatch<React.SetStateAction<boolean>>,
@@ -133,14 +139,13 @@ const useSetupHoverClickListeners = (
   const forceRender = useForceRender()
 
   return useCallback(() => {
-    const hover = hoverRef.current
-    if (hover === null) return
+    const hovers = hoverRefs.map(r => r.current)
 
     // eslint-disable-next-line functional/no-let
     let timer: number | undefined
 
     function showTooltip(): void {
-      if (hover === null) return
+      if (hovers.every(h => h === null)) return
       window.clearTimeout(timer)
       setEventListenersEnabled(true)
 
@@ -170,18 +175,30 @@ const useSetupHoverClickListeners = (
       }, MsDuration.unwrap(openedDuration))
     }
 
-    // React to hover in / out for desktop users.
-    hover.addEventListener('mouseover', showTooltip, true)
-    hover.addEventListener('mouseleave', hideTooltip, true)
+    hovers.forEach(hover => {
+      if (hover === null) return
 
-    // React to click / tap for tablet users.
-    hover.addEventListener('click', clickTooltip, true)
+      // React to hover in / out for desktop users.
+      hover.addEventListener('mouseover', showTooltip, true)
+      hover.addEventListener('mouseleave', hideTooltip, true)
+
+      // React to click / tap for tablet users.
+      hover.addEventListener('click', clickTooltip, true)
+    })
 
     return () => {
       window.clearTimeout(timer)
-      hover.removeEventListener('click', clickTooltip, true)
-      hover.removeEventListener('mouseover', showTooltip, true)
-      hover.removeEventListener('mouseleave', hideTooltip, true)
+      hovers.forEach(hover => {
+        if (hover === null) return
+
+        hover.removeEventListener('click', clickTooltip, true)
+        hover.removeEventListener('mouseover', showTooltip, true)
+        hover.removeEventListener('mouseleave', hideTooltip, true)
+      })
     }
-  }, [hoverRef, forceRender, openedDuration, setEventListenersEnabled, shouldDisplayRef])
+  }, [forceRender, hoverRefs, openedDuration, setEventListenersEnabled, shouldDisplayRef])
+}
+
+function isArray<A>(a: A | NonEmptyArray<A>): a is NonEmptyArray<A> {
+  return Array.isArray(a)
 }

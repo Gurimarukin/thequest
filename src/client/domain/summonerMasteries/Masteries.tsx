@@ -182,7 +182,9 @@ const ChampionMasteryHistogram = ({
     championPointsUntilNextLevel,
   },
 }: ChampionMasteryHistogramProps): JSX.Element => {
-  const hoverRef = useRef<HTMLDivElement>(null)
+  const hoverRef1 = useRef<HTMLDivElement>(null)
+  const hoverRef2 = useRef<HTMLDivElement>(null)
+  const hoverRef3 = useRef<HTMLDivElement>(null)
   const placementRef = useRef<HTMLSpanElement>(null)
 
   const pointsUntilAndSince = pipe(
@@ -208,7 +210,7 @@ const ChampionMasteryHistogram = ({
 
   return (
     <>
-      <div ref={hoverRef} className="flex flex-col">
+      <div className="flex flex-col">
         {pipe(
           maybeMaxPoints,
           Maybe.fold(
@@ -219,11 +221,13 @@ const ChampionMasteryHistogram = ({
                 <div className="relative h-7">
                   {championPointsUntilNextLevel === 0 ? null : (
                     <div
+                      ref={hoverRef1}
                       className="h-full bg-gray-600 opacity-50"
                       style={{ width: p(championPoints + championPointsUntilNextLevel) }}
                     />
                   )}
                   <div
+                    ref={hoverRef2}
                     className={cssClasses(
                       'absolute top-0 h-full',
                       bgGradientMastery(championLevel),
@@ -232,6 +236,7 @@ const ChampionMasteryHistogram = ({
                   />
                   {championLevel < 2 ? null : (
                     <div
+                      ref={hoverRef3}
                       className={`absolute top-0 h-full border-r ${rulerColor(championLevel)}`}
                       style={{ width: p(championPoints - championPointsSinceLastLevel) }}
                     />
@@ -251,8 +256,8 @@ const ChampionMasteryHistogram = ({
           () => null,
           tooltip => (
             <Tooltip
-              hoverRef={hoverRef}
-              placementRef={placementRef}
+              hoverRef={[placementRef, hoverRef1, hoverRef2, hoverRef3]}
+              // placementRef={placementRef} // or NonEmptyArray.head(hoverRef) if not defined
               placement="bottom-start"
               className="!text-2xs"
             >
