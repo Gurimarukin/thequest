@@ -13,7 +13,7 @@ type UpgradeHandler = (
 ) => Future<Either<SimpleHttpResponse, void>>
 
 const NotFound: UpgradeHandler = () =>
-  Future.right(Either.left(SimpleHttpResponse.of(Status.NotFound, '')))
+  Future.successful(Either.left(SimpleHttpResponse.of(Status.NotFound, '')))
 
 const UpgradeHandler = { NotFound }
 

@@ -47,6 +47,12 @@ export const CaretUpOutline: SVGIcon = ({ className }) => (
   </svg>
 )
 
+export const CaretUpSharp: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+    <path d="M448 368L256 144 64 368h384z" />
+  </svg>
+)
+
 export const CheckMarkSharp: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
     <title>Checkmark</title>

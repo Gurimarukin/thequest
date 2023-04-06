@@ -5,7 +5,7 @@ import { Future } from '../../shared/utils/fp'
 export const futureRunUnsafe: <A>(fa: Future<A>) => Promise<A> = flow(
   Future.orElse(e => {
     console.error(e)
-    return Future.left(e)
+    return Future.failed(e)
   }),
   Future.runUnsafe,
 )

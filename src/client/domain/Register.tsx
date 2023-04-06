@@ -72,7 +72,7 @@ export const Register = (): JSX.Element => {
               pipe(
                 apiUserRegisterPost(payload),
                 Future.map(() => navigate(appRoutes.login)),
-                Future.orElse(() => Future.right(setError(Maybe.some('error')))),
+                Future.orElse(() => Future.successful(setError(Maybe.some('error')))),
                 futureRunUnsafe,
               ),
             ),

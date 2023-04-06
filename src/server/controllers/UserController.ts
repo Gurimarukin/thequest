@@ -118,7 +118,7 @@ function UserController(
     flow(
       Either.right,
       Either.bind('validatedPassword', ({ password }) => validatePassword(password)),
-      Future.right,
+      Future.successful,
       futureEither.chain(({ userName, validatedPassword }) =>
         pipe(
           userService.createUserPassword(userName, validatedPassword),
@@ -138,7 +138,7 @@ function UserController(
         Future.map(Either.fromOption(() => 'User not found')),
         futureEither.chainTaskEitherK(u =>
           apply.sequenceS(Future.ApplyPar)({
-            userName: Future.right(User.userName(u)),
+            userName: Future.successful(User.userName(u)),
             favoriteSearches: fetchFavoriteSearches(u.favoriteSearches),
             linkedRiotAccount: pipe(
               userService.getLinkedRiotAccount({ forceCacheRefresh: false })(u),

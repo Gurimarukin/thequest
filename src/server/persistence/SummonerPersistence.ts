@@ -76,7 +76,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
 
     deleteByPuuid: (searches: List<SummonerDbPuuidOnly>): Future<number> =>
       !List.isNonEmpty(searches)
-        ? Future.right(0)
+        ? Future.successful(0)
         : pipe(
             collection.deleteMany({
               $or: NonEmptyArray.asMutable(

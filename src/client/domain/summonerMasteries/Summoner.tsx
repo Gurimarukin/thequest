@@ -45,7 +45,7 @@ export const Summoner = ({
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={`Icône de ${name}`}
-          className="h-24 w-24"
+          className="h-24 w-24 rounded border border-goldenrod-secondary"
         />
         <div className="flex flex-col">
           <span className="text-lg text-goldenrod">{name}</span>
@@ -59,9 +59,9 @@ export const Summoner = ({
           <MasteryImgWithCount level={5} imgClassName="h-16 mt-[-11px] mb-[-6px]" />
         </div>
         <span className="flex items-center gap-2">
-          <span className="text-sm">Progression : {round(questPercents, 2)}%</span>
+          <span className="text-sm">Progression : {round(questPercents, 2)} %</span>
           <InformationCircleOutline className="peer/info h-6 fill-current" />
-          <ul className="absolute right-0 top-[calc(100%_+_.75rem)] z-10 hidden list-disc border-2 border-mastery4-brown-secondary bg-black py-4 pr-4 pl-7 text-sm leading-6 peer-hover/info:block">
+          <ul className="absolute right-0 top-[calc(100%_+_.75rem)] z-10 hidden list-disc border-2 border-mastery4-brown-secondary bg-black py-3 pr-3 pl-6 text-xs leading-6 peer-hover/info:block">
             <li>
               De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de maîtrise.
             </li>

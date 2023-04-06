@@ -56,7 +56,7 @@ export const Login = (): JSX.Element => {
           flow(
             apiUserLoginPasswordPost,
             Future.map(refreshUser),
-            Future.orElse(() => Future.right(setError(Maybe.some('error')))),
+            Future.orElse(() => Future.successful(setError(Maybe.some('error')))),
             futureRunUnsafe,
           ),
         ),

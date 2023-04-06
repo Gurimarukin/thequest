@@ -207,6 +207,8 @@ const SummonerViewComponent = ({
                       championId: champion,
                       name: c.name,
                       championLevel: c.championLevel,
+                      championPoints: c.championPoints,
+                      championPointsUntilNextLevel: c.championPointsUntilNextLevel,
                       percents: c.percents,
                       chestGranted: c.chestGranted,
                       tokensEarned: c.tokensEarned,
@@ -248,7 +250,7 @@ const SummonerViewComponent = ({
 
   return (
     <>
-      <div className="flex flex-col p-2">
+      <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-2">
         <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
         <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
       </div>

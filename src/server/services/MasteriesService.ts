@@ -29,7 +29,7 @@ const MasteriesService = (
     { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
   ): Future<Maybe<List<ChampionMastery>>> => {
     const futureInsertedAfter = forceCacheRefresh
-      ? Future.right(DayJs.of(0))
+      ? Future.successful(DayJs.of(0))
       : pipe(
           Future.fromIO(DayJs.now),
           Future.map(DayJs.subtract(constants.riotApi.cacheTtl.masteries)),
