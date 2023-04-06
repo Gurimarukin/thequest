@@ -7,12 +7,11 @@ import React, { Fragment, useMemo, useRef } from 'react'
 import { ChampionKey } from '../../../shared/models/api/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { Tooltip } from '../../components/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cssClasses } from '../../utils/cssClasses'
 import { ChampionMasterySquare, bgGradientMastery } from './ChampionMasterySquare'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -29,7 +28,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const [filteredAndSortedChampions, searchCount] = useMemo(() => {
+  const { filteredAndSortedChampions, searchCount, maybeMaxPoints } = useMemo(() => {
     const filteredAndSortedChampions_ = pipe(
       masteries,
       List.filter(levelFilterPredicate(masteriesQuery.level)),
@@ -55,14 +54,24 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       ),
     )
 
-    return Tuple.of(
-      filteredAndSortedChampions_,
-      pipe(
+    return {
+      filteredAndSortedChampions: filteredAndSortedChampions_,
+      searchCount: pipe(
         filteredAndSortedChampions_,
         List.filter(c => Maybe.isSome(c.glow)),
         List.size,
       ),
-    )
+      maybeMaxPoints: pipe(
+        filteredAndSortedChampions_,
+        NonEmptyArray.fromReadonlyArray,
+        Maybe.map(
+          flow(
+            NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
+            NonEmptyArray.max(number.Ord),
+          ),
+        ),
+      ),
+    }
 
     function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
       switch (masteriesQuery.order) {
@@ -81,7 +90,29 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
         totalChampionsCount={champions.length}
         searchCount={searchCount}
       />
-      {renderChampionMasteries(masteriesQuery.view, filteredAndSortedChampions, setChampionShards)}
+      <div
+        className={cssClasses(
+          'self-center pt-4 pb-24',
+          ['flex max-w-[104rem] flex-wrap justify-center gap-4', masteriesQuery.view === 'compact'],
+          [
+            'grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2',
+            masteriesQuery.view === 'histogram',
+          ],
+        )}
+      >
+        {filteredAndSortedChampions.map(champion => (
+          <Fragment key={ChampionKey.unwrap(champion.championId)}>
+            <ChampionMasterySquare
+              {...champion}
+              setChampionShards={setChampionShards}
+              isHistogram={true}
+            />
+            {masteriesQuery.view === 'histogram' ? (
+              <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
+            ) : null}
+          </Fragment>
+        ))}
+      </div>
     </>
   )
 }
@@ -90,83 +121,6 @@ const levelFilterPredicate =
   (levels: ReadonlySet<ChampionLevelOrZero>) =>
   (c: EnrichedChampionMastery): boolean =>
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
-
-const renderChampionMasteries = (
-  view: MasteriesQueryView,
-  champions: List<EnrichedChampionMastery>,
-  setChampionShards: (champion: ChampionKey) => (count: number) => void,
-): JSX.Element => {
-  switch (view) {
-    case 'compact':
-      return (
-        <ChampionMasteriesCompact champions={champions} setChampionShards={setChampionShards} />
-      )
-    case 'histogram':
-      return (
-        <ChampionMasteriesHistogram champions={champions} setChampionShards={setChampionShards} />
-      )
-  }
-}
-
-type ChampionMasteriesCompactProps = {
-  champions: List<EnrichedChampionMastery>
-  setChampionShards: (champion: ChampionKey) => (count: number) => void
-}
-
-const ChampionMasteriesCompact = ({
-  champions,
-  setChampionShards,
-}: ChampionMasteriesCompactProps): JSX.Element => (
-  <div className="flex max-w-[104rem] flex-wrap justify-center gap-4 self-center pt-4 pb-24">
-    {champions.map(champion => (
-      <ChampionMasterySquare
-        key={ChampionKey.unwrap(champion.championId)}
-        {...champion}
-        setChampionShards={setChampionShards}
-      />
-    ))}
-  </div>
-)
-
-type ChampionMasteriesHistogramProps = {
-  champions: List<EnrichedChampionMastery>
-  setChampionShards: (champion: ChampionKey) => (count: number) => void
-}
-
-const ChampionMasteriesHistogram = ({
-  champions,
-  setChampionShards,
-}: ChampionMasteriesHistogramProps): JSX.Element => {
-  const maybeMaxPoints = useMemo(
-    () =>
-      pipe(
-        champions,
-        NonEmptyArray.fromReadonlyArray,
-        Maybe.map(
-          flow(
-            NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
-            NonEmptyArray.max(number.Ord),
-          ),
-        ),
-      ),
-    [champions],
-  )
-
-  return (
-    <div className="grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2 self-center pt-4 pb-24">
-      {champions.map(champion => (
-        <Fragment key={ChampionKey.unwrap(champion.championId)}>
-          <ChampionMasterySquare
-            {...champion}
-            setChampionShards={setChampionShards}
-            isHistogram={true}
-          />
-          <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
-        </Fragment>
-      ))}
-    </div>
-  )
-}
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
