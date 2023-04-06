@@ -32,12 +32,12 @@ const WithAuth = (userService: UserService) => {
           futureMaybe.chainOptionK(Dict.lookup(constants.account.cookie.name)),
           Future.chain(
             Maybe.fold(
-              () => Future.right(Either.left(SimpleHttpResponse.of(Status.Unauthorized, ''))),
+              () => Future.successful(Either.left(SimpleHttpResponse.of(Status.Unauthorized, ''))),
               flow(
                 userService.verifyToken,
                 Future.map(Either.right),
                 Future.orElse(() =>
-                  Future.right(
+                  Future.successful(
                     Either.left(
                       SimpleHttpResponse.of(Status.Unauthorized, 'Invalid token', {
                         'Set-Cookie': [
@@ -53,7 +53,9 @@ const WithAuth = (userService: UserService) => {
             ),
           ),
           Future.chain(
-            Either.fold(flow(Either.left, Future.right), user => f(user)(request, socket, head)),
+            Either.fold(flow(Either.left, Future.successful), user =>
+              f(user)(request, socket, head),
+            ),
           ),
         ),
   }

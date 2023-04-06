@@ -5,8 +5,15 @@ module.exports = {
   content: ['./src/client/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      data: {
+        'popper-top': "popper-placement^='top'",
+        'popper-bottom': "popper-placement^='bottom'",
+        'popper-left': "popper-placement^='left'",
+        'popper-right': "popper-placement^='right'",
+      },
       colors: {
         goldenrod: 'goldenrod',
+        'goldenrod-secondary': '#b58703',
         wheat: 'wheat',
         'mastery7-blue': '#204b85',
         'mastery7-blue-secondary': '#043c88',
@@ -25,6 +32,12 @@ module.exports = {
       },
       backgroundImage: {
         landing: "url('./imgs/bg-landing.jpg')",
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
+      },
+      boxShadow: {
+        even: '0 0 8px 0 var(--tw-shadow-color)',
       },
       textShadow: {
         DEFAULT: '0 0 5px var(--tw-shadow-color)',

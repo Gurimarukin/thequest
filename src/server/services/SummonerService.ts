@@ -95,7 +95,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
     { forceCacheRefresh }: ForceCacheRefresh,
   ): Future<Maybe<Summoner>> {
     const insertedAfter = forceCacheRefresh
-      ? Future.right(DayJs.of(0))
+      ? Future.successful(DayJs.of(0))
       : pipe(
           Future.fromIO(DayJs.now),
           Future.map(DayJs.subtract(constants.riotApi.cacheTtl.summoner)),

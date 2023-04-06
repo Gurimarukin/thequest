@@ -8,9 +8,9 @@ export const loadDotEnv: IO<Dict<string, string>> = pipe(
   IO.tryCatch(() => dotenv.config()),
   IO.chain(result =>
     result.parsed !== undefined
-      ? IO.right(result.parsed)
+      ? IO.successful(result.parsed)
       : result.error !== undefined
-      ? IO.left(result.error)
-      : IO.left(Error('result.error was undefined')),
+      ? IO.failed(result.error)
+      : IO.failed(Error('result.error was undefined')),
   ),
 )

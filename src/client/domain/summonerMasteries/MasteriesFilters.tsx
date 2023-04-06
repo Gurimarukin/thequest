@@ -12,6 +12,7 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
 import { Radios, labelValue } from '../../components/Radios'
+import { Tooltip } from '../../components/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import {
@@ -93,17 +94,6 @@ export const MasteriesFilters = ({
     searchRef.current?.focus()
   }, [])
 
-  // const updateSearch = useMemo(
-  //   () =>
-  //     debounce((search_: string) => {
-  //       const trimed = search_.trim()
-  //       updateMasteriesQuery(
-  //         MasteriesQuery.Lens.search.set(trimed === '' ? Maybe.none : Maybe.some(trimed)),
-  //       )
-  //     }, 200),
-  //   [updateMasteriesQuery],
-  // )
-
   const updateSearch = useCallback(
     (search_: string) => {
       const trimed = search_.trim()
@@ -158,13 +148,13 @@ export const MasteriesFilters = ({
             {labelValue(
               'percents',
               <TextLabel
-                title={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
+                tooltip={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
               >
                 %
               </TextLabel>,
             )}
-            {labelValue('points', <TextLabel title="Trier par points">pts</TextLabel>)}
-            {labelValue('name', <TextLabel title="Trier par nom">nom</TextLabel>)}
+            {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
+            {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
           </Radios>
           <Radios<MasteriesQueryOrder>
             name="order"
@@ -173,13 +163,13 @@ export const MasteriesFilters = ({
           >
             {labelValue(
               'desc',
-              <IconLabel title="Tri décroissant">
+              <IconLabel tooltip="Tri décroissant">
                 <CaretDownOutline className="h-5 fill-current" />
               </IconLabel>,
             )}
             {labelValue(
               'asc',
-              <IconLabel title="Tri croissant">
+              <IconLabel tooltip="Tri croissant">
                 <CaretUpOutline className="h-5 fill-current" />
               </IconLabel>,
             )}
@@ -187,13 +177,13 @@ export const MasteriesFilters = ({
           <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
             {labelValue(
               'compact',
-              <IconLabel title="Vue compacte">
+              <IconLabel tooltip="Vue compacte">
                 <AppsSharp className="h-4 fill-current" />
               </IconLabel>,
             )}
             {labelValue(
               'histogram',
-              <IconLabel title="Vue histogramme">
+              <IconLabel tooltip="Vue histogramme">
                 <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
               </IconLabel>,
             )}
@@ -220,12 +210,11 @@ export const MasteriesFilters = ({
             </button>
           ) : null}
           {Maybe.isSome(masteriesQuery.search) ? (
-            <span className="text-zinc-400">{plural(searchCount, 'résultat')}</span>
+            <span className="text-zinc-400">{plural('résultat')(searchCount)}</span>
           ) : null}
         </div>
-        <span className="text-sm">{`${plural(
+        <span className="text-sm">{`${plural('champion')(
           championsCount,
-          'champion',
         )} / ${totalChampionsCount}`}</span>
         <span />
       </div>
@@ -257,7 +246,7 @@ const getSelectLevelsButton =
           className={cssClasses(
             'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
             ['hover:bg-zinc-700', !isSelected],
-            ['bg-goldenrod text-black', isSelected],
+            ['bg-goldenrod-secondary text-black', isSelected],
           )}
         >
           <span>{children}</span>
@@ -294,48 +283,83 @@ const MasteriesCheckboxes = ({
     {pipe(
       ChampionLevelOrZero.values,
       List.reverse,
-      List.map(level => {
-        const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
-        return (
-          <label key={level} className="group/mastery">
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={toggleChecked(level)}
-              className="hidden"
-            />
-            <span
-              title={`Niveau ${level}`}
-              className={cssClasses(
-                'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
-                ['bg-zinc-700', !isChecked],
-                ['bg-goldenrod', isChecked],
-              )}
-            >
-              <MasteryImg
-                level={level}
-                className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
-              />
-            </span>
-          </label>
-        )
-      }),
+      List.map(level => (
+        <LabelCheckbox
+          key={level}
+          checkedLevels={checkedLevels}
+          level={level}
+          toggleChecked={toggleChecked}
+        />
+      )),
     )}
   </div>
 )
 
-type SpanProps = {
-  title?: string
+type LabelCheckboxProps = {
+  checkedLevels: ReadonlySet<ChampionLevelOrZero>
+  level: ChampionLevelOrZero
+  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-const TextLabel: React.FC<SpanProps> = ({ title, children }) => (
-  <span title={title} className="flex h-6 w-10 items-center justify-center text-sm">
-    {children}
-  </span>
-)
+const LabelCheckbox = ({
+  checkedLevels,
+  level,
+  toggleChecked,
+}: LabelCheckboxProps): JSX.Element => {
+  const hoverRef = useRef<HTMLSpanElement>(null)
+  const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
+  return (
+    <label className="group/mastery">
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={toggleChecked(level)}
+        className="hidden"
+      />
+      <span
+        ref={hoverRef}
+        className={cssClasses(
+          'flex h-10 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
+          ['bg-zinc-700', !isChecked],
+          ['bg-goldenrod-secondary', isChecked],
+        )}
+      >
+        <MasteryImg
+          level={level}
+          className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+        />
+      </span>
+      <Tooltip hoverRef={hoverRef} placement="top">
+        Niveau {level}
+      </Tooltip>
+    </label>
+  )
+}
 
-const IconLabel: React.FC<SpanProps> = ({ title, children }) => (
-  <span title={title} className="flex h-6 w-6 items-center justify-center">
-    {children}
-  </span>
-)
+type SpanProps = {
+  tooltip: React.ReactNode
+}
+
+const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
+  const hoverRef = useRef<HTMLSpanElement>(null)
+  return (
+    <>
+      <span ref={hoverRef} className="flex h-6 w-10 items-center justify-center text-sm">
+        {children}
+      </span>
+      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
+    </>
+  )
+}
+
+const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
+  const hoverRef = useRef<HTMLSpanElement>(null)
+  return (
+    <>
+      <span ref={hoverRef} className="flex h-6 w-6 items-center justify-center">
+        {children}
+      </span>
+      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
+    </>
+  )
+}

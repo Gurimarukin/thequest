@@ -100,7 +100,7 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
       )
 
       return !List.isNonEmpty(operations)
-        ? Future.right(true)
+        ? Future.successful(true)
         : pipe(
             collection.collection.future(c =>
               c.bulkWrite(NonEmptyArray.asMutable(operations), { ordered: false }),

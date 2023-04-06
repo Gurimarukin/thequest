@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { modalLayerId } from './components/Modal'
+import { tooltipLayerId } from './components/Tooltip'
 import { HistoryContextProvider } from './contexts/HistoryContext'
 import { StaticDataContextProvider } from './contexts/StaticDataContext'
 import { UserContextProvider } from './contexts/UserContext'
@@ -16,5 +17,6 @@ export const App = (): JSX.Element => (
       </UserContextProvider>
     </HistoryContextProvider>
     <div id={modalLayerId} className="absolute top-0" />
+    <div id={tooltipLayerId} className="absolute top-0" />
   </div>
 )

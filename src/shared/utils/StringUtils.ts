@@ -34,11 +34,13 @@ const cleanUTF8ToASCII = (str: string): string =>
 
 /**
  * @example
- * assert.deepStrictEqual(plural(1, 'jeton'), '1 jeton')
- * assert.deepStrictEqual(plural(3, 'jeton'), '3 jetons')
+ * assert.deepStrictEqual(plural('jeton')(1), '1 jeton')
+ * assert.deepStrictEqual(plural('jeton')(3), '3 jetons')
  */
-const plural = (n: number, unit: string): string =>
-  `${n.toLocaleString()} ${unit}${n < 2 ? '' : 's'}`
+const plural =
+  (unit: string) =>
+  (n: number): string =>
+    `${n.toLocaleString()} ${unit}${n < 2 ? '' : 's'}`
 
 const prettyMs = (ms: MsDuration): string => {
   const date = DayJs.of(MsDuration.unwrap(ms))
