@@ -1,3 +1,4 @@
+- use Tooltip for Summoner hovers
 - toaster (replace alert)
 - maybe fix shards hitbox
 - discord OAuth2: proper state
