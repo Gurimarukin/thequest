@@ -5,14 +5,14 @@ import type { MutableRefObject, RefObject } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { MsDuration } from '../../shared/models/MsDuration'
-import { NonEmptyArray } from '../../shared/utils/fp'
+import { MsDuration } from '../../../shared/models/MsDuration'
+import { NonEmptyArray } from '../../../shared/utils/fp'
 
-import { useForceRender } from '../hooks/useForceRender'
-import type { ReactPopperParams } from '../hooks/useVisiblePopper'
-import { useVisiblePopper } from '../hooks/useVisiblePopper'
-import { CaretUpSharp } from '../imgs/svgIcons'
-import { cssClasses } from '../utils/cssClasses'
+import { useForceRender } from '../../hooks/useForceRender'
+import type { ReactPopperParams } from '../../hooks/useVisiblePopper'
+import { useVisiblePopper } from '../../hooks/useVisiblePopper'
+import { CaretUpSharp } from '../../imgs/svgIcons'
+import { cssClasses } from '../../utils/cssClasses'
 
 export const tooltipLayerId = 'tooltip-layer'
 

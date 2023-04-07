@@ -9,7 +9,7 @@ import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { Tooltip } from '../../components/Tooltip'
+import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { cssClasses } from '../../utils/cssClasses'

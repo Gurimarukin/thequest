@@ -12,7 +12,7 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
 import { Radios, labelValue } from '../../components/Radios'
-import { Tooltip } from '../../components/Tooltip'
+import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import {

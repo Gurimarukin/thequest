@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { modalLayerId } from './components/Modal'
-import { tooltipLayerId } from './components/Tooltip'
+import { tooltipLayerId } from './components/tooltip/Tooltip'
 import { HistoryContextProvider } from './contexts/HistoryContext'
 import { StaticDataContextProvider } from './contexts/StaticDataContext'
 import { UserContextProvider } from './contexts/UserContext'
