@@ -27,19 +27,18 @@ const MasteriesService = (
     platform: Platform,
     summonerId: SummonerId,
     { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
-  ): Future<Maybe<List<ChampionMastery>>> => {
-    const futureInsertedAfter = forceCacheRefresh
-      ? Future.successful(DayJs.of(0))
-      : pipe(
-          Future.fromIO(DayJs.now),
-          Future.map(DayJs.subtract(constants.riotApi.cacheTtl.masteries)),
-        )
-    return pipe(
-      futureInsertedAfter,
-      Future.chain(insertedAfter =>
-        championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
-      ),
-      futureMaybe.map(m => m.champions),
+  ): Future<Maybe<List<ChampionMastery>>> =>
+    pipe(
+      forceCacheRefresh
+        ? futureMaybe.none
+        : pipe(
+            Future.fromIO(DayJs.now),
+            Future.map(DayJs.subtract(constants.riotApi.cacheTtl.masteries)),
+            Future.chain(insertedAfter =>
+              championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
+            ),
+            futureMaybe.map(m => m.champions),
+          ),
       futureMaybe.alt<List<ChampionMastery>>(() =>
         pipe(
           riotApiService.riotgames
@@ -53,8 +52,7 @@ const MasteriesService = (
           futureMaybe.map(({ champions }) => champions),
         ),
       ),
-    )
-  },
+    ),
 })
 
 export { MasteriesService }
