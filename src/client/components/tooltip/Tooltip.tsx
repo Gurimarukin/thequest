@@ -35,6 +35,7 @@ type Props = {
    */
   openedDuration?: MsDuration
   placement?: Placement
+  alwaysVisible?: boolean
   className?: string
 }
 
@@ -43,6 +44,7 @@ export const Tooltip: React.FC<Props> = ({
   placementRef: maybePlacementRef,
   openedDuration = MsDuration.seconds(3),
   placement = 'bottom',
+  alwaysVisible = false,
   className,
   children,
 }) => {
@@ -55,7 +57,7 @@ export const Tooltip: React.FC<Props> = ({
   const tooltipRef = useRef<HTMLDivElement>(null)
   const arrowRef = useRef<HTMLDivElement>(null)
 
-  const shouldDisplay = shouldDisplayRef.current
+  const shouldDisplay = alwaysVisible || shouldDisplayRef.current
 
   const [eventListenersEnabled, setEventListenersEnabled] = useState(false)
   const options = useMemo(
