@@ -58,9 +58,9 @@ export const Summoner = ({
       </div>
       <div className="flex flex-col items-center gap-3">
         <div ref={masteriesRef} className="flex items-end gap-2">
-          <MasteryImgWithCount level={7} imgClassName="w-[72px] mt-[-6px]" />
-          <MasteryImgWithCount level={6} imgClassName="w-[72px] mt-[-7px] mb-[-4px]" />
-          <MasteryImgWithCount level={5} imgClassName="w-[72px] mt-[-11px] mb-[-6px]" />
+          <MasteryImgWithCount level={7} imgClassName="!w-[72px] mt-[-6px]" />
+          <MasteryImgWithCount level={6} imgClassName="!w-[72px] mt-[-7px] mb-[-4px]" />
+          <MasteryImgWithCount level={5} imgClassName="!w-[72px] mt-[-11px] mb-[-6px]" />
         </div>
         <Tooltip
           hoverRef={masteriesRef}
