@@ -1,4 +1,3 @@
-- use Tooltip for Summoner hovers
 - toaster (replace alert)
 - account menu
 - roles
