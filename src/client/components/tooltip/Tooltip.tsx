@@ -5,16 +5,23 @@ import type { MutableRefObject, RefObject } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { MsDuration } from '../../shared/models/MsDuration'
-import { NonEmptyArray } from '../../shared/utils/fp'
+import { MsDuration } from '../../../shared/models/MsDuration'
+import { NonEmptyArray } from '../../../shared/utils/fp'
 
-import { useForceRender } from '../hooks/useForceRender'
-import type { ReactPopperParams } from '../hooks/useVisiblePopper'
-import { useVisiblePopper } from '../hooks/useVisiblePopper'
-import { CaretUpSharp } from '../imgs/svgIcons'
-import { cssClasses } from '../utils/cssClasses'
+import { useForceRender } from '../../hooks/useForceRender'
+import type { ReactPopperParams } from '../../hooks/useVisiblePopper'
+import { useVisiblePopper } from '../../hooks/useVisiblePopper'
+import { CaretUpSharp } from '../../imgs/svgIcons'
+import { cssClasses } from '../../utils/cssClasses'
 
-export const tooltipLayerId = 'tooltip-layer'
+const tooltipLayerId = 'tooltip-layer'
+
+const tooltipLayer = document.getElementById(tooltipLayerId)
+
+if (tooltipLayer === null) {
+  // eslint-disable-next-line functional/no-throw-statements
+  throw Error(`Tooltip layer not found: #${tooltipLayerId}`)
+}
 
 type Props = {
   hoverRef: RefObject<Element> | NonEmptyArray<RefObject<Element>>
@@ -28,6 +35,7 @@ type Props = {
    */
   openedDuration?: MsDuration
   placement?: Placement
+  alwaysVisible?: boolean
   className?: string
 }
 
@@ -36,16 +44,10 @@ export const Tooltip: React.FC<Props> = ({
   placementRef: maybePlacementRef,
   openedDuration = MsDuration.seconds(3),
   placement = 'bottom',
+  alwaysVisible = false,
   className,
   children,
 }) => {
-  const tooltipLayer = document.getElementById(tooltipLayerId)
-
-  if (tooltipLayer === null) {
-    // eslint-disable-next-line functional/no-throw-statements
-    throw Error(`Tooltip layer not found: #${tooltipLayerId}`)
-  }
-
   const hoverRefs_ = isArray(hoverRef_) ? hoverRef_ : NonEmptyArray.of(hoverRef_)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const hoverRefs = useMemo(() => hoverRefs_, hoverRefs_)
@@ -55,7 +57,7 @@ export const Tooltip: React.FC<Props> = ({
   const tooltipRef = useRef<HTMLDivElement>(null)
   const arrowRef = useRef<HTMLDivElement>(null)
 
-  const shouldDisplay = shouldDisplayRef.current
+  const shouldDisplay = alwaysVisible || shouldDisplayRef.current
 
   const [eventListenersEnabled, setEventListenersEnabled] = useState(false)
   const options = useMemo(
