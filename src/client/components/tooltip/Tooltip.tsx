@@ -14,7 +14,14 @@ import { useVisiblePopper } from '../../hooks/useVisiblePopper'
 import { CaretUpSharp } from '../../imgs/svgIcons'
 import { cssClasses } from '../../utils/cssClasses'
 
-export const tooltipLayerId = 'tooltip-layer'
+const tooltipLayerId = 'tooltip-layer'
+
+const tooltipLayer = document.getElementById(tooltipLayerId)
+
+if (tooltipLayer === null) {
+  // eslint-disable-next-line functional/no-throw-statements
+  throw Error(`Tooltip layer not found: #${tooltipLayerId}`)
+}
 
 type Props = {
   hoverRef: RefObject<Element> | NonEmptyArray<RefObject<Element>>
@@ -39,13 +46,6 @@ export const Tooltip: React.FC<Props> = ({
   className,
   children,
 }) => {
-  const tooltipLayer = document.getElementById(tooltipLayerId)
-
-  if (tooltipLayer === null) {
-    // eslint-disable-next-line functional/no-throw-statements
-    throw Error(`Tooltip layer not found: #${tooltipLayerId}`)
-  }
-
   const hoverRefs_ = isArray(hoverRef_) ? hoverRef_ : NonEmptyArray.of(hoverRef_)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const hoverRefs = useMemo(() => hoverRefs_, hoverRefs_)
