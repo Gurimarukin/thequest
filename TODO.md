@@ -1,6 +1,7 @@
 - toaster (replace alert)
 - account menu
 - roles
+- admin bo
 - maybe fix shards hitbox
 - discord OAuth2: proper state
 - encrypted
