@@ -82,6 +82,23 @@ export const MasteriesFilters = ({
   const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
   const searchRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const onKeyup = (e: KeyboardEvent): void => {
+      if (
+        (e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) ||
+        e.key === '/' ||
+        e.key === 'F3'
+      ) {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyup, true)
+    return () => document.removeEventListener('keydown', onKeyup, true)
+  }, [])
+
   const [search, setSearch] = useState(
     pipe(
       masteriesQuery.search,
