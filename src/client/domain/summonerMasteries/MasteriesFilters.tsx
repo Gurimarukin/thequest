@@ -111,6 +111,13 @@ export const MasteriesFilters = ({
     searchRef.current?.focus()
   }, [])
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setSearch('')
+      searchRef.current?.blur()
+    }
+  }, [])
+
   const updateSearch = useCallback(
     (search_: string) => {
       const trimed = search_.trim()
@@ -214,6 +221,7 @@ export const MasteriesFilters = ({
             type="text"
             value={search}
             onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
             placeholder="Rechercher un champion"
             className={cssClasses(
               'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
