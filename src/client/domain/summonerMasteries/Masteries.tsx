@@ -83,6 +83,8 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
     }
   }, [masteries, masteriesQuery.level, masteriesQuery.order, masteriesQuery.sort])
 
+  const isHistogram = masteriesQuery.view === 'histogram'
+
   return (
     <>
       <MasteriesFilters
@@ -96,7 +98,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
           ['flex max-w-[104rem] flex-wrap justify-center gap-4', masteriesQuery.view === 'compact'],
           [
             'grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2',
-            masteriesQuery.view === 'histogram',
+            isHistogram,
           ],
         )}
       >
@@ -105,9 +107,9 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
             <ChampionMasterySquare
               {...champion}
               setChampionShards={setChampionShards}
-              isHistogram={true}
+              isHistogram={isHistogram}
             />
-            {masteriesQuery.view === 'histogram' ? (
+            {isHistogram ? (
               <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
             ) : null}
           </Fragment>
