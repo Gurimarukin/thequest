@@ -2,7 +2,7 @@ import { readonlySet } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { Dict, List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteriesQueryOrder } from './MasteriesQueryOrder'

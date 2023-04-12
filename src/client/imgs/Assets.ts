@@ -1,4 +1,4 @@
-import type { ChampionLevelOrZero } from '../../shared/models/api/ChampionLevel'
+import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { Dict } from '../../shared/utils/fp'
 
 const masteries: Dict<`${ChampionLevelOrZero}`, string> = {

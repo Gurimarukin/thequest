@@ -4,7 +4,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { Dict } from '../../../shared/utils/fp'
 import { NonEmptyString, SetFromString } from '../../../shared/utils/ioTsUtils'
 

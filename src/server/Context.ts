@@ -28,6 +28,7 @@ import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
 import { RiotAccountService } from './services/RiotAccountService'
 import { RiotApiService } from './services/RiotApiService'
+import { StaticDataService } from './services/StaticDataService'
 import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
 import { getOnError } from './utils/getOnError'
@@ -56,8 +57,10 @@ const of = (
   )
 
   const ddragonService = DDragonService(riotApiService)
+
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
+  const staticDataService = StaticDataService(Logger, ddragonService)
   const userService = UserService(
     Logger,
     championShardPersistence,
@@ -76,6 +79,7 @@ const of = (
     healthCheckService,
     summonerService,
     masteriesService,
+    staticDataService,
     userService,
   }
 }

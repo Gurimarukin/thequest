@@ -2,8 +2,8 @@ import { number, ord, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 
-import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
+import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Maybe } from '../../../shared/utils/fp'
 

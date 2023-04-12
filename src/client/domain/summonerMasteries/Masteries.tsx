@@ -4,8 +4,8 @@ import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import React, { Fragment, useMemo, useRef } from 'react'
 
-import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -96,10 +96,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
         className={cssClasses(
           'self-center pt-4 pb-24',
           ['flex max-w-[104rem] flex-wrap justify-center gap-4', masteriesQuery.view === 'compact'],
-          [
-            'grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2',
-            isHistogram,
-          ],
+          ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
         )}
       >
         {filteredAndSortedChampions.map(champion => (

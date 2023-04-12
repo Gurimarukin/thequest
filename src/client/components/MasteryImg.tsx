@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { ChampionLevelOrZero } from '../../shared/models/api/ChampionLevel'
+import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 
 import { Assets } from '../imgs/Assets'
 import { cssClasses } from '../utils/cssClasses'

@@ -1,7 +1,7 @@
 - toaster (replace alert)
 - account menu
-- roles
 - admin bo
+- shards styling
 - maybe fix shards hitbox
 - discord OAuth2: proper state
 - encrypted
@@ -14,7 +14,3 @@
   ```ts
   lazy(() => Promise.resolve({ default: () => <pre>TOTO</pre> }))
   ```
-
----
-
-https://leagueoflegends.fandom.com/wiki/Module:ChampionData/data

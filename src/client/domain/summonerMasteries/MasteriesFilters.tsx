@@ -5,7 +5,7 @@ import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { NonEmptyArray } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'

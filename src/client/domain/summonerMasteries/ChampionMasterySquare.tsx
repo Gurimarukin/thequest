@@ -2,8 +2,8 @@
 import { flow, pipe } from 'fp-ts/function'
 import React, { useCallback, useMemo, useRef } from 'react'
 
-import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 

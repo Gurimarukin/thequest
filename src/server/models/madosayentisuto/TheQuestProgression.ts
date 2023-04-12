@@ -1,6 +1,6 @@
 import * as E from 'io-ts/Encoder'
 
-import { ChampionKey } from '../../../shared/models/api/ChampionKey'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { Platform } from '../../../shared/models/api/Platform'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { List } from '../../../shared/utils/fp'

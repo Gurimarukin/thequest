@@ -2,10 +2,10 @@ import { flow, pipe } from 'fp-ts/function'
 import React, { createContext, useContext } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
-import type { ChampionKey } from '../../shared/models/api/ChampionKey'
 import { Lang } from '../../shared/models/api/Lang'
 import { StaticData } from '../../shared/models/api/StaticData'
 import type { StaticDataChampion } from '../../shared/models/api/StaticDataChampion'
+import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import { List, Maybe } from '../../shared/utils/fp'
 
