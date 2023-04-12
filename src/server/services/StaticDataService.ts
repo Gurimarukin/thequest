@@ -26,6 +26,7 @@ import {
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { constants } from '../config/constants'
+import type { HttpClient } from '../helpers/HttpClient'
 import { StoredAt } from '../models/StoredAt'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../models/riot/ddragon/DDragonChampion'
@@ -41,7 +42,11 @@ const mwCodeClassName = '.mw-code'
 type StaticDataService = ReturnType<typeof StaticDataService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const StaticDataService = (Logger: LoggerGetter, ddragonService: DDragonService) => {
+const StaticDataService = (
+  Logger: LoggerGetter,
+  httpClient: HttpClient,
+  ddragonService: DDragonService,
+) => {
   const logger = Logger('StaticDataService')
 
   const latestDefaultLangData = Store<Maybe<StoredAt<StaticData>>>(Maybe.none)
@@ -67,7 +72,8 @@ const StaticDataService = (Logger: LoggerGetter, ddragonService: DDragonService)
     )
 
   const fetchWikiaChampionData: Future<WikiaChampions> = pipe(
-    Future.tryCatch(() => JSDOM.fromURL(championDataUrl)),
+    httpClient.text([championDataUrl, 'get']),
+    Future.chainEitherK(body => Try.tryCatch(() => new JSDOM(body))),
     Future.chainEitherK(jsdom => {
       const mwCodes = jsdom.window.document.querySelectorAll(mwCodeClassName)
 

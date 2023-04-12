@@ -44,8 +44,10 @@ const of = (
   healthCheckPersistence: HealthCheckPersistence,
   riotAccountPersistence: RiotAccountPersistence,
   userPersistence: UserPersistence,
+  ddragonService: DDragonService,
   discordService: DiscordService,
   riotApiService: RiotApiService,
+  staticDataService: StaticDataService,
   summonerService: SummonerService,
 ) => {
   const jwtHelper = JwtHelper(config.jwtSecret)
@@ -56,11 +58,8 @@ const of = (
     summonerService,
   )
 
-  const ddragonService = DDragonService(riotApiService)
-
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
-  const staticDataService = StaticDataService(Logger, ddragonService)
   const userService = UserService(
     Logger,
     championShardPersistence,
@@ -108,6 +107,10 @@ const load = (config: Config): Future<Context> => {
   const discordService = DiscordService(config.client, httpClient)
   const riotApiService = RiotApiService(config.riot, httpClient)
 
+  const ddragonService = DDragonService(riotApiService)
+
+  const staticDataService = StaticDataService(Logger, httpClient, ddragonService)
+
   const cronJobPubSub = PubSub<CronJobEvent>()
 
   return pipe(
@@ -125,8 +128,10 @@ const load = (config: Config): Future<Context> => {
         healthCheckPersistence,
         riotAccountPersistence,
         userPersistence,
+        ddragonService,
         discordService,
         riotApiService,
+        staticDataService,
         summonerService,
       )
       const { healthCheckService } = context
