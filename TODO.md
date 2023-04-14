@@ -9,7 +9,6 @@
 - limit favorites
 - modal: trap focus
 - clean old cache entries
-- level=all in query?
 - Suspense, lazy, requestAnimationFrame
   ```ts
   lazy(() => Promise.resolve({ default: () => <pre>TOTO</pre> }))
