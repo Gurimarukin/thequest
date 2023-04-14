@@ -91,7 +91,8 @@ export const ChampionMasterySquare = ({
           ['bg-mastery6-violet', championLevel === 6],
           ['bg-mastery5-red', championLevel === 5],
           ['bg-mastery4-brown', championLevel === 4],
-          ['bg-mastery-beige', championLevel < 4],
+          ['bg-mastery-beige', 1 <= championLevel && championLevel <= 3],
+          ['bg-black', championLevel === 0],
         )}
       >
         {/* champion image */}
@@ -176,6 +177,7 @@ export const bgGradientMastery = (level: ChampionLevelOrZero): string => {
   if (level === 6) return 'bg-gradient-to-r from-mastery6-violet to-mastery6-violet-secondary'
   if (level === 5) return 'bg-gradient-to-r from-mastery5-red to-mastery5-red-secondary'
   if (level === 4) return 'bg-gradient-to-r from-mastery4-brown to-mastery4-brown-secondary'
+  if (level === 0) return 'bg-black'
   return 'bg-mastery-beige'
 }
 
