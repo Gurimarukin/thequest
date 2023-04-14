@@ -1,6 +1,7 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { number, ord, readonlySet } from 'fp-ts'
+import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -54,20 +55,10 @@ export const MasteriesFilters = ({
   const hideLevelsMenu = useCallback(() => setLevelsMenuIsVisible(false), [])
 
   const toggleMasteryChecked = useCallback(
-    (level: ChampionLevelOrZero) =>
-      (e: React.ChangeEvent<HTMLInputElement>): void => {
-        updateMasteriesQuery(
-          pipe(
-            MasteriesQuery.Lens.level,
-            lens.modify(
-              e.target.checked
-                ? readonlySet.insert(ChampionLevelOrZero.Eq)(level)
-                : readonlySet.remove(ChampionLevelOrZero.Eq)(level),
-            ),
-          ),
-        )
-        hideLevelsMenu()
-      },
+    (f: Endomorphism<ReadonlySet<ChampionLevelOrZero>>): void => {
+      updateMasteriesQuery(pipe(MasteriesQuery.Lens.level, lens.modify(f)))
+      hideLevelsMenu()
+    },
     [hideLevelsMenu, updateMasteriesQuery],
   )
 
@@ -81,18 +72,8 @@ export const MasteriesFilters = ({
   )
 
   const toggleLaneChecked = useCallback(
-    (lane: Lane) =>
-      (e: React.ChangeEvent<HTMLInputElement>): void =>
-        updateMasteriesQuery(
-          pipe(
-            MasteriesQuery.Lens.lane,
-            lens.modify(
-              e.target.checked
-                ? readonlySet.insert(Lane.Eq)(lane)
-                : readonlySet.remove(Lane.Eq)(lane),
-            ),
-          ),
-        ),
+    (f: Endomorphism<ReadonlySet<Lane>>): void =>
+      updateMasteriesQuery(pipe(MasteriesQuery.Lens.lane, lens.modify(f))),
     [updateMasteriesQuery],
   )
 

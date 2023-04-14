@@ -1,9 +1,10 @@
 /* eslint-disable functional/no-return-void */
 import type { Placement } from '@popperjs/core'
 import { readonlySet } from 'fp-ts'
+import type { Endomorphism } from 'fp-ts/Endomorphism'
 import type { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
-import React, { useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 
 import { List } from '../../../../shared/utils/fp'
 
@@ -19,7 +20,7 @@ type Props<A> = {
     label: React.ReactNode
   }>
   checked: ReadonlySet<A>
-  toggleChecked: (a: A) => (e: React.ChangeEvent<HTMLInputElement>) => void
+  toggleChecked: (f: Endomorphism<ReadonlySet<A>>) => void
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
   tooltipPlacement?: Placement
   iconClassName?: string
@@ -62,7 +63,7 @@ type LabelCheckboxProps<A> = {
   icon: (isChecked: boolean) => React.ReactNode
   label: React.ReactNode
   checked: ReadonlySet<A>
-  toggleChecked: (a: A) => (e: React.ChangeEvent<HTMLInputElement>) => void
+  toggleChecked: (f: Endomorphism<ReadonlySet<A>>) => void
   tooltipPlacement: Placement | undefined
   iconClassName: string | undefined
 }
@@ -79,14 +80,18 @@ function LabelCheckbox<A>({
 }: LabelCheckboxProps<A>): JSX.Element {
   const hoverRef = useRef<HTMLSpanElement>(null)
   const isChecked = readonlySet.elem(eq)(value, checked)
+
+  const toggleChecked_ = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      toggleChecked(
+        e.target.checked ? readonlySet.insert(eq)(value) : readonlySet.remove(eq)(value),
+      ),
+    [eq, toggleChecked, value],
+  )
+
   return (
     <label className="group/checkbox">
-      <input
-        type="checkbox"
-        checked={isChecked}
-        onChange={toggleChecked(value)}
-        className="hidden"
-      />
+      <input type="checkbox" checked={isChecked} onChange={toggleChecked_} className="hidden" />
       <span
         ref={hoverRef}
         className={cssClasses(
