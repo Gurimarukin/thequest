@@ -225,7 +225,7 @@ const enrichChampions =
     )
 
 const wikiaMissingOpPosisions: Dict<string, NonEmptyArray<Lane>> = {
-  147: ['middle', 'bottom', 'support'], // Seraphine
-  526: ['support'], // Rell
-  777: ['top', 'middle', 'bottom'], // Yone
+  147: ['mid', 'bot', 'sup'], // Seraphine
+  526: ['sup'], // Rell
+  777: ['top', 'mid', 'bot'], // Yone
 }

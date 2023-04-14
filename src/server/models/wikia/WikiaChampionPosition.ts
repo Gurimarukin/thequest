@@ -8,10 +8,10 @@ const e = createEnum('Top', 'Jungle', 'Middle', 'Bottom', 'Support')
 
 const lane: Dict<WikiaChampionPosition, Lane> = {
   Top: 'top',
-  Jungle: 'jungle',
-  Middle: 'middle',
-  Bottom: 'bottom',
-  Support: 'support',
+  Jungle: 'jun',
+  Middle: 'mid',
+  Bottom: 'bot',
+  Support: 'sup',
 }
 
 const WikiaChampionPosition = { ...e, lane }
