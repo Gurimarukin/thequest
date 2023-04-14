@@ -29,6 +29,7 @@ import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/Masteri
 import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../../models/masteriesQuery/MasteriesQueryView'
 import { cssClasses } from '../../../utils/cssClasses'
+import { Checkboxes } from './Checkboxes'
 
 const { plural } = StringUtils
 
@@ -160,10 +161,28 @@ export const MasteriesFilters = ({
       <div className="flex flex-wrap items-center justify-between gap-5 py-3">
         <div className="flex items-center gap-3">
           <div onMouseLeave={hideLevelsMenu} className="relative">
-            <MasteriesCheckboxes
-              checkedLevels={masteriesQuery.level}
+            <Checkboxes<ChampionLevelOrZero>
+              eq={ChampionLevelOrZero.Eq}
+              values={pipe(
+                ChampionLevelOrZero.values,
+                List.reverse,
+                List.map(level => ({
+                  key: level,
+                  value: level,
+                  icon: isChecked => (
+                    <MasteryImg
+                      level={level}
+                      className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+                    />
+                  ),
+                  label: `Niveau ${level}`,
+                })),
+              )}
+              checked={masteriesQuery.level}
               toggleChecked={toggleMasteryChecked}
               onMouseEnter={handleMasteriesMouseEnter}
+              tooltipPlacement="top"
+              iconClassName="px-[5px] pt-1 pb-0.5"
             />
             <ul
               className={cssClasses(
@@ -186,7 +205,29 @@ export const MasteriesFilters = ({
               <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
             </ul>
           </div>
-          <LanesCheckboxes checkedLanes={masteriesQuery.lane} toggleChecked={toggleLaneChecked} />
+          <Checkboxes<Lane>
+            eq={Lane.Eq}
+            values={pipe(
+              Lane.values,
+              List.map(lane => ({
+                key: lane,
+                value: lane,
+                icon: isChecked => (
+                  <LaneImg
+                    lane={lane}
+                    className={cssClasses('h-full', [
+                      'brightness-150 contrast-200 grayscale invert',
+                      isChecked,
+                    ])}
+                  />
+                ),
+                label: Lane.label[lane],
+              })),
+            )}
+            checked={masteriesQuery.lane}
+            toggleChecked={toggleLaneChecked}
+            iconClassName="p-[6px]"
+          />
         </div>
         <div className="flex gap-3">
           <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
@@ -313,137 +354,6 @@ const getSelectLevelsButton =
       </li>
     )
   }
-
-type MasteriesCheckboxesProps = {
-  checkedLevels: ReadonlySet<ChampionLevelOrZero>
-  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
-  onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
-}
-
-const MasteriesCheckboxes = ({
-  checkedLevels,
-  toggleChecked,
-  onMouseEnter,
-}: MasteriesCheckboxesProps): JSX.Element => (
-  <div onMouseEnter={onMouseEnter} className="flex flex-wrap">
-    {pipe(
-      ChampionLevelOrZero.values,
-      List.reverse,
-      List.map(level => (
-        <MasteriesLabelCheckbox
-          key={level}
-          checkedLevels={checkedLevels}
-          level={level}
-          toggleChecked={toggleChecked}
-        />
-      )),
-    )}
-  </div>
-)
-
-type MasteriesLabelCheckboxProps = {
-  checkedLevels: ReadonlySet<ChampionLevelOrZero>
-  level: ChampionLevelOrZero
-  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
-}
-
-const MasteriesLabelCheckbox = ({
-  checkedLevels,
-  level,
-  toggleChecked,
-}: MasteriesLabelCheckboxProps): JSX.Element => {
-  const hoverRef = useRef<HTMLSpanElement>(null)
-  const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
-  return (
-    <label className="group/mastery">
-      <input
-        type="checkbox"
-        checked={isChecked}
-        onChange={toggleChecked(level)}
-        className="hidden"
-      />
-      <span
-        ref={hoverRef}
-        className={cssClasses(
-          'flex h-9 shrink-0 cursor-pointer  px-[5px] pt-1 pb-0.5 group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
-          ['bg-zinc-700', !isChecked],
-          ['bg-goldenrod-secondary', isChecked],
-        )}
-      >
-        <MasteryImg
-          level={level}
-          className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
-        />
-      </span>
-      <Tooltip hoverRef={hoverRef} placement="top">
-        Niveau {level}
-      </Tooltip>
-    </label>
-  )
-}
-
-type LanesCheckboxesProps = {
-  checkedLanes: ReadonlySet<Lane>
-  toggleChecked: (lane: Lane) => (e: React.ChangeEvent<HTMLInputElement>) => void
-}
-
-const LanesCheckboxes = ({ checkedLanes, toggleChecked }: LanesCheckboxesProps): JSX.Element => (
-  <div className="flex flex-wrap">
-    {pipe(
-      Lane.values,
-      List.map(lane => (
-        <LanesLabelCheckbox
-          key={lane}
-          checkedLanes={checkedLanes}
-          lane={lane}
-          toggleChecked={toggleChecked}
-        />
-      )),
-    )}
-  </div>
-)
-
-type LanesLabelCheckboxProps = {
-  checkedLanes: ReadonlySet<Lane>
-  lane: Lane
-  toggleChecked: (lane: Lane) => (e: React.ChangeEvent<HTMLInputElement>) => void
-}
-
-const LanesLabelCheckbox = ({
-  checkedLanes,
-  lane,
-  toggleChecked,
-}: LanesLabelCheckboxProps): JSX.Element => {
-  const hoverRef = useRef<HTMLSpanElement>(null)
-  const isChecked = readonlySet.elem(Lane.Eq)(lane, checkedLanes)
-  return (
-    <label className="group/lane">
-      <input
-        type="checkbox"
-        checked={isChecked}
-        onChange={toggleChecked(lane)}
-        className="hidden"
-      />
-      <span
-        ref={hoverRef}
-        className={cssClasses(
-          'flex h-9 shrink-0 cursor-pointer p-[6px] group-first/lane:rounded-l-md group-last/lane:rounded-r-md',
-          ['bg-zinc-700', !isChecked],
-          ['bg-goldenrod-secondary', isChecked],
-        )}
-      >
-        <LaneImg
-          lane={lane}
-          className={cssClasses('h-full', [
-            'brightness-150 contrast-200 grayscale invert',
-            isChecked,
-          ])}
-        />
-      </span>
-      <Tooltip hoverRef={hoverRef}>{Lane.label[lane]}</Tooltip>
-    </label>
-  )
-}
 
 type SpanProps = {
   tooltip: React.ReactNode
