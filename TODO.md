@@ -14,3 +14,7 @@
   ```ts
   lazy(() => Promise.resolve({ default: () => <pre>TOTO</pre> }))
   ```
+
+---
+
+https://raw.githubusercontent.com/tbocquet/the-quest/master/the-quest-front/src/champion.json

@@ -4,6 +4,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
+import { Lane } from '../../../shared/models/api/Lane'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { Dict } from '../../../shared/utils/fp'
 import { NonEmptyString, SetFromString } from '../../../shared/utils/ioTsUtils'
@@ -20,6 +21,7 @@ const properties = {
   order: MasteriesQueryOrder.codec,
   view: MasteriesQueryView.codec,
   level: SetFromString.codec(ChampionLevelOrZero.stringCodec, ChampionLevelOrZero.Eq),
+  lane: SetFromString.codec(Lane.codec, Lane.Eq),
   search: NonEmptyString.codec,
 }
 
