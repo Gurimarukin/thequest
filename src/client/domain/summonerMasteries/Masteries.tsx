@@ -15,7 +15,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { cssClasses } from '../../utils/cssClasses'
 import { ChampionMasterySquare, bgGradientMastery } from './ChampionMasterySquare'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
-import { MasteriesFilters } from './MasteriesFilters'
+import { MasteriesFilters } from './filters/MasteriesFilters'
 
 const { plural } = StringUtils
 

@@ -5,30 +5,30 @@ import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Lane } from '../../../shared/models/api/Lane'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { NonEmptyArray } from '../../../shared/utils/fp'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { Lane } from '../../../../shared/models/api/Lane'
+import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
+import { StringUtils } from '../../../../shared/utils/StringUtils'
+import type { NonEmptyArray } from '../../../../shared/utils/fp'
+import { List, Maybe } from '../../../../shared/utils/fp'
 
-import { LaneImg } from '../../components/LaneImg'
-import { MasteryImg } from '../../components/MasteryImg'
-import { Radios, labelValue } from '../../components/Radios'
-import { Tooltip } from '../../components/tooltip/Tooltip'
-import { useHistory } from '../../contexts/HistoryContext'
-import { useUser } from '../../contexts/UserContext'
+import { LaneImg } from '../../../components/LaneImg'
+import { MasteryImg } from '../../../components/MasteryImg'
+import { Radios, labelValue } from '../../../components/Radios'
+import { Tooltip } from '../../../components/tooltip/Tooltip'
+import { useHistory } from '../../../contexts/HistoryContext'
+import { useUser } from '../../../contexts/UserContext'
 import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
   CloseFilled,
   StatsChartSharp,
-} from '../../imgs/svgIcons'
-import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
-import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { cssClasses } from '../../utils/cssClasses'
+} from '../../../imgs/svgIcons'
+import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
+import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
+import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
+import type { MasteriesQueryView } from '../../../models/masteriesQuery/MasteriesQueryView'
+import { cssClasses } from '../../../utils/cssClasses'
 
 const { plural } = StringUtils
 
