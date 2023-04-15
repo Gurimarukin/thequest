@@ -29,80 +29,86 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
   const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const { filteredAndSortedChampions, searchCount, maybeMaxPoints } = useMemo(() => {
-    const filterPredicate = pipe(
-      levelFilterPredicate(masteriesQuery.level),
-      predicate.and(laneFilterPredicate(masteriesQuery.lane)),
-    )
+  const { filteredAndSortedMasteries, championsCount, searchCount, maybeMaxPoints } =
+    useMemo(() => {
+      const filterPredicate = pipe(
+        levelFilterPredicate(masteriesQuery.level),
+        predicate.and(laneFilterPredicate(masteriesQuery.lane)),
+      )
 
-    const filteredAndSortedChampions_ = pipe(
-      masteries,
-      List.map(m =>
-        filterPredicate(m) ? m : pipe(m, EnrichedChampionMastery.Lens.isHidden.set(true)),
-      ),
-      List.sortBy(
-        ((): List<Ord<EnrichedChampionMastery>> => {
-          switch (masteriesQuery.sort) {
-            case 'percents':
-              return [
-                reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
-                reverseIfDesc(EnrichedChampionMastery.Ord.byShards),
-                reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
-                EnrichedChampionMastery.Ord.byName,
-              ]
-            case 'points':
-              return [
-                reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
-                EnrichedChampionMastery.Ord.byName,
-              ]
-            case 'name':
-              return [reverseIfDesc(EnrichedChampionMastery.Ord.byName)]
-          }
-        })(),
-      ),
-    )
+      const filteredAndSortedMasteries_ = pipe(
+        masteries,
+        List.map(m =>
+          filterPredicate(m) ? m : pipe(m, EnrichedChampionMastery.Lens.isHidden.set(true)),
+        ),
+        List.sortBy(
+          ((): List<Ord<EnrichedChampionMastery>> => {
+            switch (masteriesQuery.sort) {
+              case 'percents':
+                return [
+                  reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
+                  reverseIfDesc(EnrichedChampionMastery.Ord.byShards),
+                  reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
+                  EnrichedChampionMastery.Ord.byName,
+                ]
+              case 'points':
+                return [
+                  reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
+                  EnrichedChampionMastery.Ord.byName,
+                ]
+              case 'name':
+                return [reverseIfDesc(EnrichedChampionMastery.Ord.byName)]
+            }
+          })(),
+        ),
+      )
 
-    return {
-      filteredAndSortedChampions: filteredAndSortedChampions_,
-      searchCount: pipe(
-        filteredAndSortedChampions_,
-        List.filter(c => Maybe.isSome(c.glow)),
-        List.size,
-      ),
-      maybeMaxPoints: pipe(
-        filteredAndSortedChampions_,
-        NonEmptyArray.fromReadonlyArray,
-        Maybe.map(
-          flow(
-            NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
-            NonEmptyArray.max(number.Ord),
+      return {
+        filteredAndSortedMasteries: filteredAndSortedMasteries_,
+        championsCount: pipe(
+          filteredAndSortedMasteries_,
+          List.filter(c => !c.isHidden),
+          List.size,
+        ),
+        searchCount: pipe(
+          filteredAndSortedMasteries_,
+          List.filter(c => Maybe.isSome(c.glow)),
+          List.size,
+        ),
+        maybeMaxPoints: pipe(
+          filteredAndSortedMasteries_,
+          NonEmptyArray.fromReadonlyArray,
+          Maybe.map(
+            flow(
+              NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
+              NonEmptyArray.max(number.Ord),
+            ),
           ),
         ),
-      ),
-    }
-
-    function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
-      switch (masteriesQuery.order) {
-        case 'asc':
-          return o
-        case 'desc':
-          return ord.reverse(o)
       }
-    }
-  }, [
-    masteries,
-    masteriesQuery.level,
-    masteriesQuery.lane,
-    masteriesQuery.order,
-    masteriesQuery.sort,
-  ])
+
+      function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
+        switch (masteriesQuery.order) {
+          case 'asc':
+            return o
+          case 'desc':
+            return ord.reverse(o)
+        }
+      }
+    }, [
+      masteries,
+      masteriesQuery.level,
+      masteriesQuery.lane,
+      masteriesQuery.order,
+      masteriesQuery.sort,
+    ])
 
   const isHistogram = masteriesQuery.view === 'histogram'
 
   return (
     <>
       <MasteriesFilters
-        championsCount={filteredAndSortedChampions.length}
+        championsCount={championsCount}
         totalChampionsCount={champions.length}
         searchCount={searchCount}
       />
@@ -113,7 +119,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
           ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
         )}
       >
-        {filteredAndSortedChampions.map(champion => (
+        {filteredAndSortedMasteries.map(champion => (
           <Fragment key={ChampionKey.unwrap(champion.championId)}>
             <ChampionMasterySquare
               {...champion}
