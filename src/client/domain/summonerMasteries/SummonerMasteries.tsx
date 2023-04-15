@@ -326,6 +326,7 @@ const enrichAll = (
             shardsCount,
             glow,
             lanes,
+            isHidden: false,
           }),
           champion => ({
             ...champion,
@@ -334,6 +335,7 @@ const enrichAll = (
             shardsCount,
             glow,
             lanes,
+            isHidden: false,
           }),
         ),
       )

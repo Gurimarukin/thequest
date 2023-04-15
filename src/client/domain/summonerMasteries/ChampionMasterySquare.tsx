@@ -34,6 +34,7 @@ type ChampionMasterySquareProps = {
    * @default false
    */
   isHistogram?: boolean
+  className?: string
 }
 
 export const ChampionMasterySquare = ({
@@ -49,6 +50,7 @@ export const ChampionMasterySquare = ({
   glow,
   setChampionShards,
   isHistogram = false,
+  className,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
 
@@ -67,7 +69,7 @@ export const ChampionMasterySquare = ({
   const hoverRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className="relative">
+    <div className={cssClasses('relative', className)}>
       {/* glow */}
       <div
         className={cssClasses(

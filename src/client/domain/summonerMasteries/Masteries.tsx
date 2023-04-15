@@ -30,13 +30,15 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
   const { champions } = useStaticData()
 
   const { filteredAndSortedChampions, searchCount, maybeMaxPoints } = useMemo(() => {
+    const filterPredicate = pipe(
+      levelFilterPredicate(masteriesQuery.level),
+      predicate.and(laneFilterPredicate(masteriesQuery.lane)),
+    )
+
     const filteredAndSortedChampions_ = pipe(
       masteries,
-      List.filter(
-        pipe(
-          levelFilterPredicate(masteriesQuery.level),
-          predicate.and(laneFilterPredicate(masteriesQuery.lane)),
-        ),
+      List.map(m =>
+        filterPredicate(m) ? m : pipe(m, EnrichedChampionMastery.Lens.isHidden.set(true)),
       ),
       List.sortBy(
         ((): List<Ord<EnrichedChampionMastery>> => {
@@ -117,10 +119,13 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
               {...champion}
               setChampionShards={setChampionShards}
               isHistogram={isHistogram}
+              className={cssClasses(['hidden', champion.isHidden])}
             />
-            {isHistogram ? (
-              <ChampionMasteryHistogram maybeMaxPoints={maybeMaxPoints} champion={champion} />
-            ) : null}
+            <ChampionMasteryHistogram
+              maybeMaxPoints={maybeMaxPoints}
+              champion={champion}
+              className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
+            />
           </Fragment>
         ))}
       </div>
@@ -144,6 +149,7 @@ const laneFilterPredicate =
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
   champion: EnrichedChampionMastery
+  className?: string
 }
 
 const ChampionMasteryHistogram = ({
@@ -154,6 +160,7 @@ const ChampionMasteryHistogram = ({
     championPointsSinceLastLevel,
     championPointsUntilNextLevel,
   },
+  className,
 }: ChampionMasteryHistogramProps): JSX.Element => {
   const hoverRef1 = useRef<HTMLDivElement>(null)
   const hoverRef2 = useRef<HTMLDivElement>(null)
@@ -183,7 +190,7 @@ const ChampionMasteryHistogram = ({
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className={cssClasses('flex flex-col', className)}>
         {pipe(
           maybeMaxPoints,
           Maybe.fold(
