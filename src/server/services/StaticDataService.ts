@@ -6,7 +6,6 @@ import * as luainjs from 'lua-in-js'
 import { DayJs } from '../../shared/models/DayJs'
 import { Store } from '../../shared/models/Store'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
-import type { Lane } from '../../shared/models/api/Lane'
 import { Lang } from '../../shared/models/api/Lang'
 import type { StaticData } from '../../shared/models/api/StaticData'
 import type { StaticDataChampion } from '../../shared/models/api/StaticDataChampion'
@@ -200,15 +199,9 @@ const enrichChampions =
             Either.fromOption(() => 'not found'),
             Either.chain(c_ =>
               pipe(
-                c_.op_positions,
+                c_.positions,
                 Maybe.map(NonEmptyArray.map(p => WikiaChampionPosition.lane[p])),
-                Maybe.alt(() =>
-                  pipe(
-                    wikiaMissingOpPosisions,
-                    Dict.lookup(ChampionKey.fromStringCodec.encode(c.key)),
-                  ),
-                ),
-                Either.fromOption(() => `empty op_positions`),
+                Either.fromOption(() => `empty positions`),
               ),
             ),
             Either.bimap(
@@ -223,9 +216,3 @@ const enrichChampions =
           ),
       ),
     )
-
-const wikiaMissingOpPosisions: Dict<string, NonEmptyArray<Lane>> = {
-  147: ['mid', 'bot', 'sup'], // Seraphine
-  526: ['sup'], // Rell
-  777: ['top', 'mid', 'bot'], // Yone
-}
