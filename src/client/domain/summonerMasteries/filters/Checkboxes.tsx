@@ -124,7 +124,7 @@ function LabelCheckbox<A>({
       <span
         ref={hoverRef}
         className={cssClasses(
-          'flex h-9 shrink-0 cursor-pointer',
+          'flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center',
           isMenuVisible === true
             ? 'group-first/checkbox:rounded-tl-md group-last/checkbox:rounded-tr-md'
             : 'group-first/checkbox:rounded-l-md group-last/checkbox:rounded-r-md',

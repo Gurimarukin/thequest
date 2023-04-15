@@ -198,10 +198,12 @@ export const MasteriesFilters = ({
                 icon: isChecked => (
                   <ChampionPositionImg
                     position={position}
-                    className={cssClasses('h-full', [
-                      'brightness-150 contrast-200 grayscale invert',
-                      isChecked,
-                    ])}
+                    className={cssClasses(
+                      'h-full',
+                      ['h-[calc(100%_-_4px)]', position === 'jun'],
+                      ['mt-0.5 h-[calc(100%_-_4px)]', position === 'sup'],
+                      ['brightness-150 contrast-200 grayscale invert', isChecked],
+                    )}
                   />
                 ),
                 label: ChampionPosition.label[position],
