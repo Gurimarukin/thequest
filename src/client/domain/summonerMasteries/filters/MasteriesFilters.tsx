@@ -48,7 +48,7 @@ export const MasteriesFilters = ({
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { user } = useUser()
 
-  const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
+  const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(true)
   const handleMasteriesMouseEnter = useCallback(() => {
     if (!levelsMenuIsVisible) setLevelsMenuIsVisible(true)
   }, [levelsMenuIsVisible])
@@ -161,13 +161,15 @@ export const MasteriesFilters = ({
               )}
               checked={masteriesQuery.level}
               toggleChecked={toggleMasteryChecked}
+              isMenuVisible={levelsMenuIsVisible}
               onMouseEnter={handleMasteriesMouseEnter}
               tooltipPlacement="top"
               iconClassName="px-[5px] pt-1 pb-0.5"
+              className="relative z-20"
             />
             <ul
               className={cssClasses(
-                'absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black',
+                'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
                 ['hidden', !levelsMenuIsVisible],
               )}
             >
@@ -313,7 +315,7 @@ const getSelectLevelsButton =
           disabled={isSelected}
           className={cssClasses(
             'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
-            ['hover:bg-zinc-700', !isSelected],
+            ['hover:bg-black', !isSelected],
             ['bg-goldenrod-secondary text-black', isSelected],
           )}
         >

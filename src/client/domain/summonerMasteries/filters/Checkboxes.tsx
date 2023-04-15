@@ -21,9 +21,11 @@ type Props<A> = {
   }>
   checked: ReadonlySet<A>
   toggleChecked: (f: Endomorphism<ReadonlySet<A>>) => void
+  isMenuVisible?: boolean
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
   tooltipPlacement?: Placement
   iconClassName?: string
+  className?: string
 }
 
 export function Checkboxes<A>({
@@ -31,9 +33,11 @@ export function Checkboxes<A>({
   values,
   checked,
   toggleChecked,
+  isMenuVisible,
   onMouseEnter,
   tooltipPlacement,
   iconClassName,
+  className,
 }: Props<A>): JSX.Element {
   const toggleChecked_ = useCallback(
     (value: A) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -59,7 +63,7 @@ export function Checkboxes<A>({
   )
 
   return (
-    <div onMouseEnter={onMouseEnter} className="flex flex-wrap">
+    <div onMouseEnter={onMouseEnter} className={cssClasses('flex flex-wrap', className)}>
       {pipe(
         values,
         List.map(({ key, value, icon, label }) => (
@@ -72,6 +76,7 @@ export function Checkboxes<A>({
             label={label}
             checked={checked}
             toggleChecked={toggleChecked_}
+            isMenuVisible={isMenuVisible}
             tooltipPlacement={tooltipPlacement}
             iconClassName={iconClassName}
           />
@@ -89,6 +94,7 @@ type LabelCheckboxProps<A> = {
   label: React.ReactNode
   checked: ReadonlySet<A>
   toggleChecked: (value: A) => (e: React.ChangeEvent<HTMLInputElement>) => void
+  isMenuVisible: boolean | undefined
   tooltipPlacement: Placement | undefined
   iconClassName: string | undefined
 }
@@ -101,6 +107,7 @@ function LabelCheckbox<A>({
   label,
   checked,
   toggleChecked,
+  isMenuVisible,
   tooltipPlacement,
   iconClassName,
 }: LabelCheckboxProps<A>): JSX.Element {
@@ -117,7 +124,10 @@ function LabelCheckbox<A>({
       <span
         ref={hoverRef}
         className={cssClasses(
-          'flex h-9 shrink-0 cursor-pointer group-first/checkbox:rounded-l-md group-last/checkbox:rounded-r-md',
+          'flex h-9 shrink-0 cursor-pointer',
+          isMenuVisible === true
+            ? 'group-first/checkbox:rounded-tl-md group-last/checkbox:rounded-tr-md'
+            : 'group-first/checkbox:rounded-l-md group-last/checkbox:rounded-r-md',
           ['bg-zinc-700', !isChecked],
           ['bg-goldenrod-secondary', isChecked],
           iconClassName,
