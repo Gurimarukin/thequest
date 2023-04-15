@@ -9,9 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { Future, NotUsed } from '../../../shared/utils/fp'
+import type { Future, List, NotUsed } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { MasteryImg } from '../../components/MasteryImg'
@@ -40,6 +41,7 @@ export type ShardsToRemoveNotification = {
   chestGranted: boolean
   tokensEarned: number
   shardsCount: number
+  positions: List<ChampionPosition>
   leveledUpFrom: ChampionLevelOrZero
   shardsToRemove: number
 }
