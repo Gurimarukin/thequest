@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 
 import { SummonerId } from '../summoner/SummonerId'
 import { UserId } from './UserId'

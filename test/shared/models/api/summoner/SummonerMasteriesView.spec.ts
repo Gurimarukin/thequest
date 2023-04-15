@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 
-import type { ChampionKey } from '../../../../../src/shared/models/api/ChampionKey'
+import type { ChampionKey } from '../../../../../src/shared/models/api/champion/ChampionKey'
 import { ChampionShardsView } from '../../../../../src/shared/models/api/summoner/ChampionShardsView'
 import { SummonerMasteriesView } from '../../../../../src/shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../../../src/shared/models/api/summoner/SummonerView'

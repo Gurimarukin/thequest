@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 import type { AnyBulkWriteOperation } from 'mongodb'
 
-import { ChampionKey } from '../../shared/models/api/ChampionKey'
+import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, List, NonEmptyArray } from '../../shared/utils/fp'

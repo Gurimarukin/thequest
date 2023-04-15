@@ -1,10 +1,15 @@
+import { readonlySet } from 'fp-ts'
+import type { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
+import type { Codec } from 'io-ts/Codec'
+import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { Dict } from '../../../shared/utils/fp'
 import { NonEmptyString, SetFromString } from '../../../shared/utils/ioTsUtils'
 
@@ -19,7 +24,16 @@ const properties = {
   sort: MasteriesQuerySort.codec,
   order: MasteriesQueryOrder.codec,
   view: MasteriesQueryView.codec,
-  level: SetFromString.codec(ChampionLevelOrZero.stringCodec, ChampionLevelOrZero.Eq),
+  level: setFromStringOrAllCodec(
+    ChampionLevelOrZero.stringCodec,
+    ChampionLevelOrZero.Eq,
+    new Set(ChampionLevelOrZero.values),
+  ),
+  position: setFromStringOrAllCodec(
+    ChampionPosition.codec,
+    ChampionPosition.Eq,
+    new Set(ChampionPosition.values),
+  ),
   search: NonEmptyString.codec,
 }
 
@@ -29,8 +43,27 @@ type Out = Partial<Dict<keyof PartialMasteriesQuery, string>>
 const encoder: Encoder<Out, PartialMasteriesQuery> = E.partial(properties)
 
 const qsStringify = (query: PartialMasteriesQuery): string =>
-  pipe(query, Dict.filter(isDefined), PartialMasteriesQuery.encoder.encode, qs.stringify)
+  pipe(query, Dict.filter(isDefined), encoder.encode, qs.stringify)
 
-const PartialMasteriesQuery = { decoder, encoder, qsStringify }
+const PartialMasteriesQuery = { decoder, qsStringify }
 
 export { PartialMasteriesQuery }
+
+function setFromStringOrAllCodec<A>(
+  codec: Codec<unknown, string, A>,
+  eq_: Eq<A>,
+  allValues: ReadonlySet<A>,
+): Codec<unknown, string, ReadonlySet<A>> {
+  const setCodec = SetFromString.codec(codec, eq_)
+  const setEq = readonlySet.getEq(eq_)
+  return C.make(
+    D.union(
+      pipe(
+        D.literal('all'),
+        D.map(() => allValues),
+      ),
+      setCodec,
+    ),
+    { encode: set => (setEq.equals(set, allValues) ? 'all' : setCodec.encode(set)) },
+  )
+}

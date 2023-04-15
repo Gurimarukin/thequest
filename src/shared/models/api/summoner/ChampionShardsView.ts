@@ -4,7 +4,7 @@ import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
 import { Maybe } from '../../../utils/fp'
-import { ChampionKey } from '../ChampionKey'
+import { ChampionKey } from '../champion/ChampionKey'
 import { ShardsToRemoveFromNotification } from './ShardsToRemoveFromNotification'
 
 type ChampionShardsView = C.TypeOf<typeof codec>

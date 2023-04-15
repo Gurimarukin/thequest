@@ -207,9 +207,9 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
       {((): JSX.Element => {
         switch (type) {
           case 'self':
-            return <span />
+            return <span className="w-3" />
           case 'favorite':
-            return <span />
+            return <span className="w-3" />
           case 'recent':
             return (
               <button type="button" onClick={handleRemoveRecentClick} className="group p-2">

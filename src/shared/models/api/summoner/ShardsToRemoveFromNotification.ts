@@ -1,6 +1,6 @@
 import * as C from 'io-ts/Codec'
 
-import { ChampionLevelOrZero } from '../ChampionLevel'
+import { ChampionLevelOrZero } from '../champion/ChampionLevel'
 
 type ShardsToRemoveFromNotification = C.TypeOf<typeof codec>
 

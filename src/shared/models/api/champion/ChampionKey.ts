@@ -6,7 +6,7 @@ import * as D from 'io-ts/Decoder'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
 
-import { NumberFromString, fromNewtype } from '../../utils/ioTsUtils'
+import { NumberFromString, fromNewtype } from '../../../utils/ioTsUtils'
 
 // Champion's number id
 

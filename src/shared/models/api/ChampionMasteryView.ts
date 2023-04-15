@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { ChampionKey } from './ChampionKey'
-import { ChampionLevel } from './ChampionLevel'
+import { ChampionKey } from './champion/ChampionKey'
+import { ChampionLevel } from './champion/ChampionLevel'
 
 type ChampionMasteryView = C.TypeOf<typeof codec>
 

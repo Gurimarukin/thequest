@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react'
 
-import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
+import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import type { Dict } from '../../../shared/utils/fp'
 
