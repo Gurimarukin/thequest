@@ -4,9 +4,11 @@ import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { ChampionPositionImg } from '../../components/ChampionPositionImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
@@ -29,6 +31,7 @@ type ChampionMasterySquareProps = {
   percents: number
   shardsCount: Maybe<number>
   glow: Maybe<number>
+  positions: List<ChampionPosition>
   setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
   /**
    * @default false
@@ -48,6 +51,7 @@ export const ChampionMasterySquare = ({
   percents,
   shardsCount,
   glow,
+  positions,
   setChampionShards,
   isHistogram = false,
   className,
@@ -156,6 +160,7 @@ export const ChampionMasterySquare = ({
           name={name}
           percents={percents}
           filteredShardsCount={filteredShardsCount}
+          positions={positions}
         />
       </Tooltip>
     </div>
@@ -240,6 +245,7 @@ type ChampionTooltipProps = {
   name: string
   percents: number
   filteredShardsCount: Maybe<number>
+  positions: List<ChampionPosition>
 }
 
 const ChampionTooltip = ({
@@ -251,6 +257,7 @@ const ChampionTooltip = ({
   chestGranted,
   tokensEarned,
   filteredShardsCount,
+  positions,
 }: ChampionTooltipProps): JSX.Element => {
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pr-1 shadow-black text-shadow">
@@ -308,6 +315,20 @@ const ChampionTooltip = ({
         <div className="flex items-center gap-2">
           <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
         </div>
+        {List.isNonEmpty(positions) ? (
+          <div className="flex">
+            {pipe(
+              positions,
+              NonEmptyArray.map(position => (
+                <ChampionPositionImg
+                  key={position}
+                  position={position}
+                  className="w-6 shrink-0 p-0.5"
+                />
+              )),
+            )}
+          </div>
+        ) : null}
       </div>
     </>
   )
