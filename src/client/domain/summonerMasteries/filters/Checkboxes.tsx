@@ -35,6 +35,29 @@ export function Checkboxes<A>({
   tooltipPlacement,
   iconClassName,
 }: Props<A>): JSX.Element {
+  const toggleChecked_ = useCallback(
+    (value: A) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      toggleChecked(prev => {
+        const isAllChecked = readonlySet.size(prev) === List.size(values)
+        if (isAllChecked) return new Set([value])
+
+        const isChecked = readonlySet.elem(eq)(value, prev)
+        if (isChecked && readonlySet.size(prev) === 1) {
+          return pipe(
+            values,
+            List.map(v => v.value),
+            readonlySet.fromReadonlyArray(eq),
+          )
+        }
+
+        return pipe(
+          prev,
+          (e.target.checked ? readonlySet.insert(eq) : readonlySet.remove(eq))(value),
+        )
+      }),
+    [eq, toggleChecked, values],
+  )
+
   return (
     <div onMouseEnter={onMouseEnter} className="flex flex-wrap">
       {pipe(
@@ -43,11 +66,12 @@ export function Checkboxes<A>({
           <LabelCheckbox<A>
             key={key}
             eq={eq}
+            isAllChecked={readonlySet.size(checked) === List.size(values)}
             value={value}
             icon={icon}
             label={label}
             checked={checked}
-            toggleChecked={toggleChecked}
+            toggleChecked={toggleChecked_}
             tooltipPlacement={tooltipPlacement}
             iconClassName={iconClassName}
           />
@@ -59,17 +83,19 @@ export function Checkboxes<A>({
 
 type LabelCheckboxProps<A> = {
   eq: Eq<A>
+  isAllChecked: boolean
   value: A
   icon: (isChecked: boolean) => React.ReactNode
   label: React.ReactNode
   checked: ReadonlySet<A>
-  toggleChecked: (f: Endomorphism<ReadonlySet<A>>) => void
+  toggleChecked: (value: A) => (e: React.ChangeEvent<HTMLInputElement>) => void
   tooltipPlacement: Placement | undefined
   iconClassName: string | undefined
 }
 
 function LabelCheckbox<A>({
   eq,
+  isAllChecked,
   value,
   icon,
   label,
@@ -79,19 +105,15 @@ function LabelCheckbox<A>({
   iconClassName,
 }: LabelCheckboxProps<A>): JSX.Element {
   const hoverRef = useRef<HTMLSpanElement>(null)
-  const isChecked = readonlySet.elem(eq)(value, checked)
-
-  const toggleChecked_ = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      toggleChecked(
-        e.target.checked ? readonlySet.insert(eq)(value) : readonlySet.remove(eq)(value),
-      ),
-    [eq, toggleChecked, value],
-  )
-
+  const isChecked = isAllChecked ? false : readonlySet.elem(eq)(value, checked)
   return (
     <label className="group/checkbox">
-      <input type="checkbox" checked={isChecked} onChange={toggleChecked_} className="hidden" />
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={toggleChecked(value)}
+        className="hidden"
+      />
       <span
         ref={hoverRef}
         className={cssClasses(
