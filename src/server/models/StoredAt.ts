@@ -1,5 +1,6 @@
 import { ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
+
 import { DayJs } from '../../shared/models/DayJs'
 import type { MsDuration } from '../../shared/models/MsDuration'
 
