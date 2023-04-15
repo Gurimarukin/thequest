@@ -8,8 +8,8 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
-import { Lane } from '../../../shared/models/api/Lane'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { Dict } from '../../../shared/utils/fp'
 import { NonEmptyString, SetFromString } from '../../../shared/utils/ioTsUtils'
 
@@ -29,7 +29,11 @@ const properties = {
     ChampionLevelOrZero.Eq,
     new Set(ChampionLevelOrZero.values),
   ),
-  lane: setFromStringOrAllCodec(Lane.codec, Lane.Eq, new Set(Lane.values)),
+  position: setFromStringOrAllCodec(
+    ChampionPosition.codec,
+    ChampionPosition.Eq,
+    new Set(ChampionPosition.values),
+  ),
   search: NonEmptyString.codec,
 }
 

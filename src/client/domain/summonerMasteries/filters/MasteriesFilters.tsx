@@ -6,13 +6,13 @@ import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Lane } from '../../../../shared/models/api/Lane'
 import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
+import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../../shared/utils/StringUtils'
 import type { NonEmptyArray } from '../../../../shared/utils/fp'
 import { List, Maybe } from '../../../../shared/utils/fp'
 
-import { LaneImg } from '../../../components/LaneImg'
+import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
 import { MasteryImg } from '../../../components/MasteryImg'
 import { Radios, labelValue } from '../../../components/Radios'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
@@ -72,8 +72,8 @@ export const MasteriesFilters = ({
   )
 
   const toggleLaneChecked = useCallback(
-    (f: Endomorphism<ReadonlySet<Lane>>): void =>
-      updateMasteriesQuery(pipe(MasteriesQuery.Lens.lane, lens.modify(f))),
+    (f: Endomorphism<ReadonlySet<ChampionPosition>>): void =>
+      updateMasteriesQuery(pipe(MasteriesQuery.Lens.position, lens.modify(f))),
     [updateMasteriesQuery],
   )
 
@@ -188,26 +188,26 @@ export const MasteriesFilters = ({
               <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
             </ul>
           </div>
-          <Checkboxes<Lane>
-            eq={Lane.Eq}
+          <Checkboxes<ChampionPosition>
+            eq={ChampionPosition.Eq}
             values={pipe(
-              Lane.values,
-              List.map(lane => ({
-                key: lane,
-                value: lane,
+              ChampionPosition.values,
+              List.map(position => ({
+                key: position,
+                value: position,
                 icon: isChecked => (
-                  <LaneImg
-                    lane={lane}
+                  <ChampionPositionImg
+                    position={position}
                     className={cssClasses('h-full', [
                       'brightness-150 contrast-200 grayscale invert',
                       isChecked,
                     ])}
                   />
                 ),
-                label: Lane.label[lane],
+                label: ChampionPosition.label[position],
               })),
             )}
-            checked={masteriesQuery.lane}
+            checked={masteriesQuery.position}
             toggleChecked={toggleLaneChecked}
             iconClassName="p-[6px]"
           />

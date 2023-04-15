@@ -1,4 +1,4 @@
-import type { Lane } from '../../../shared/models/api/Lane'
+import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { createEnum } from '../../../shared/utils/createEnum'
 import type { Dict } from '../../../shared/utils/fp'
 
@@ -6,7 +6,7 @@ type WikiaChampionPosition = typeof e.T
 
 const e = createEnum('Top', 'Jungle', 'Middle', 'Bottom', 'Support')
 
-const lane: Dict<WikiaChampionPosition, Lane> = {
+const position: Dict<WikiaChampionPosition, ChampionPosition> = {
   Top: 'top',
   Jungle: 'jun',
   Middle: 'mid',
@@ -14,6 +14,6 @@ const lane: Dict<WikiaChampionPosition, Lane> = {
   Support: 'sup',
 }
 
-const WikiaChampionPosition = { ...e, lane }
+const WikiaChampionPosition = { ...e, position }
 
 export { WikiaChampionPosition }

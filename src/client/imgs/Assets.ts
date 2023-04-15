@@ -1,5 +1,5 @@
-import type { Lane } from '../../shared/models/api/Lane'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { Dict } from '../../shared/utils/fp'
 
 const masteries: Dict<`${ChampionLevelOrZero}`, string> = {
@@ -13,12 +13,12 @@ const masteries: Dict<`${ChampionLevelOrZero}`, string> = {
   7: new URL('./masteries/mastery-7.png', import.meta.url).toString(),
 }
 
-const lanes: Dict<Lane, string> = {
-  top: new URL('./lanes/top.png', import.meta.url).toString(),
-  jun: new URL('./lanes/jun.png', import.meta.url).toString(),
-  mid: new URL('./lanes/mid.png', import.meta.url).toString(), 
-  bot: new URL('./lanes/bot.png', import.meta.url).toString(),
-  sup: new URL('./lanes/sup.png', import.meta.url).toString(),
+const positions: Dict<ChampionPosition, string> = {
+  top: new URL('./positions/top.png', import.meta.url).toString(),
+  jun: new URL('./positions/jun.png', import.meta.url).toString(),
+  mid: new URL('./positions/mid.png', import.meta.url).toString(),
+  bot: new URL('./positions/bot.png', import.meta.url).toString(),
+  sup: new URL('./positions/sup.png', import.meta.url).toString(),
 }
 
 export const Assets = {
@@ -27,5 +27,5 @@ export const Assets = {
   token5: new URL('./tokens/token-5.png', import.meta.url).toString(),
   token6: new URL('./tokens/token-6.png', import.meta.url).toString(),
   masteries,
-  lanes,
+  positions,
 }

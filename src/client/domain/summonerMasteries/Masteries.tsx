@@ -4,9 +4,9 @@ import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import React, { Fragment, useMemo, useRef } from 'react'
 
-import { Lane } from '../../../shared/models/api/Lane'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -33,7 +33,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
     useMemo(() => {
       const filterPredicate = pipe(
         levelFilterPredicate(masteriesQuery.level),
-        predicate.and(laneFilterPredicate(masteriesQuery.lane)),
+        predicate.and(positionFilterPredicate(masteriesQuery.position)),
       )
 
       const filteredAndSortedMasteries_ = pipe(
@@ -98,7 +98,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
     }, [
       masteries,
       masteriesQuery.level,
-      masteriesQuery.lane,
+      masteriesQuery.position,
       masteriesQuery.order,
       masteriesQuery.sort,
     ])
@@ -144,12 +144,12 @@ const levelFilterPredicate =
   (c: EnrichedChampionMastery): boolean =>
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
-const laneFilterPredicate =
-  (lanes: ReadonlySet<Lane>) =>
+const positionFilterPredicate =
+  (positions: ReadonlySet<ChampionPosition>) =>
   (c: EnrichedChampionMastery): boolean =>
     pipe(
-      c.lanes,
-      List.some(lane => readonlySet.elem(Lane.Eq)(lane, lanes)),
+      c.positions,
+      List.some(position => readonlySet.elem(ChampionPosition.Eq)(position, positions)),
     )
 
 type ChampionMasteryHistogramProps = {

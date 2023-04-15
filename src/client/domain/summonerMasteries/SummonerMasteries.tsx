@@ -289,7 +289,7 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name, lanes }): EnrichedChampionMastery => {
+    List.map(({ key, name, positions }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -325,7 +325,7 @@ const enrichAll = (
             percents: 0,
             shardsCount,
             glow,
-            lanes,
+            positions,
             isHidden: false,
           }),
           champion => ({
@@ -334,7 +334,7 @@ const enrichAll = (
             percents: Business.championPercents(champion),
             shardsCount,
             glow,
-            lanes,
+            positions,
             isHidden: false,
           }),
         ),

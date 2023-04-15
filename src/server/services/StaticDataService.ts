@@ -170,7 +170,7 @@ const StaticDataService = (
                 id: c.id,
                 key: c.key,
                 name: c.name,
-                lanes: [],
+                positions: [],
               }),
             ),
           ),
@@ -200,17 +200,17 @@ const enrichChampions =
             Either.chain(c_ =>
               pipe(
                 c_.positions,
-                Maybe.map(NonEmptyArray.map(p => WikiaChampionPosition.lane[p])),
+                Maybe.map(NonEmptyArray.map(p => WikiaChampionPosition.position[p])),
                 Either.fromOption(() => `empty positions`),
               ),
             ),
             Either.bimap(
               e => Tuple.of(c, e),
-              (lanes): StaticDataChampion => ({
+              (positions): StaticDataChampion => ({
                 id: c.id,
                 key: c.key,
                 name: c.name,
-                lanes,
+                positions,
               }),
             ),
           ),
