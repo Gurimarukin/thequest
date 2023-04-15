@@ -48,7 +48,7 @@ export const MasteriesFilters = ({
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { user } = useUser()
 
-  const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(true)
+  const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
   const handleMasteriesMouseEnter = useCallback(() => {
     if (!levelsMenuIsVisible) setLevelsMenuIsVisible(true)
   }, [levelsMenuIsVisible])
