@@ -1,8 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
-import { ChampionId } from '../../../../shared/models/api/ChampionId'
-import { ChampionKey } from '../../../../shared/models/api/ChampionKey'
+import { ChampionId } from '../../../../shared/models/api/champion/ChampionId'
+import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import { List } from '../../../../shared/utils/fp'
 import { NumberFromString } from '../../../../shared/utils/ioTsUtils'
 

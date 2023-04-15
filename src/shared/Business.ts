@@ -1,4 +1,4 @@
-import type { ChampionLevelOrZero } from './models/api/ChampionLevel'
+import type { ChampionLevelOrZero } from './models/api/champion/ChampionLevel'
 
 type SimpleChampion = {
   championLevel: ChampionLevelOrZero

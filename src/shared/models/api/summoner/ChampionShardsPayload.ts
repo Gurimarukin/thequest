@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { ChampionKey } from '../ChampionKey'
 import { ShardsCount } from '../ShardsCount'
+import { ChampionKey } from '../champion/ChampionKey'
 
 type ChampionShardsPayload = C.TypeOf<typeof codec>
 

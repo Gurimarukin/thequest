@@ -28,6 +28,7 @@ import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
 import { RiotAccountService } from './services/RiotAccountService'
 import { RiotApiService } from './services/RiotApiService'
+import { StaticDataService } from './services/StaticDataService'
 import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
 import { getOnError } from './utils/getOnError'
@@ -43,8 +44,10 @@ const of = (
   healthCheckPersistence: HealthCheckPersistence,
   riotAccountPersistence: RiotAccountPersistence,
   userPersistence: UserPersistence,
+  ddragonService: DDragonService,
   discordService: DiscordService,
   riotApiService: RiotApiService,
+  staticDataService: StaticDataService,
   summonerService: SummonerService,
 ) => {
   const jwtHelper = JwtHelper(config.jwtSecret)
@@ -55,7 +58,6 @@ const of = (
     summonerService,
   )
 
-  const ddragonService = DDragonService(riotApiService)
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
   const userService = UserService(
@@ -76,6 +78,7 @@ const of = (
     healthCheckService,
     summonerService,
     masteriesService,
+    staticDataService,
     userService,
   }
 }
@@ -104,6 +107,10 @@ const load = (config: Config): Future<Context> => {
   const discordService = DiscordService(config.client, httpClient)
   const riotApiService = RiotApiService(config.riot, httpClient)
 
+  const ddragonService = DDragonService(riotApiService)
+
+  const staticDataService = StaticDataService(Logger, httpClient, ddragonService)
+
   const cronJobPubSub = PubSub<CronJobEvent>()
 
   return pipe(
@@ -121,8 +128,10 @@ const load = (config: Config): Future<Context> => {
         healthCheckPersistence,
         riotAccountPersistence,
         userPersistence,
+        ddragonService,
         discordService,
         riotApiService,
+        staticDataService,
         summonerService,
       )
       const { healthCheckService } = context

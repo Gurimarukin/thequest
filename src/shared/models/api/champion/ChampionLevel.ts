@@ -4,8 +4,8 @@ import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
-import { createEnum } from '../../utils/createEnum'
-import { NumberFromString } from '../../utils/ioTsUtils'
+import { createEnum } from '../../../utils/createEnum'
+import { NumberFromString } from '../../../utils/ioTsUtils'
 
 type ChampionLevel = typeof e.T
 

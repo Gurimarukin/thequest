@@ -23,7 +23,7 @@ export const MainLayout: React.FC = ({ children }) => {
               <img
                 src={Assets.iconYuumi}
                 alt="Icône accueil (Yuumi)"
-                className="w-12 rounded-sm border border-mastery4-brown-secondary"
+                className="w-12 rounded-sm bg-black"
               />
             </Link>
             <SearchSummoner />

@@ -1,9 +1,9 @@
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
-import { ChampionKey } from '../../shared/models/api/ChampionKey'
-import type { ChampionLevelOrZero } from '../../shared/models/api/ChampionLevel'
 import type { Platform } from '../../shared/models/api/Platform'
+import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
+import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { Sink } from '../../shared/models/rx/Sink'

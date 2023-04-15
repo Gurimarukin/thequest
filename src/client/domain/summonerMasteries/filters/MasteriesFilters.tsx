@@ -1,32 +1,36 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { number, ord, readonlySet } from 'fp-ts'
+import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
-import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { NonEmptyArray } from '../../../shared/utils/fp'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
+import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
+import { StringUtils } from '../../../../shared/utils/StringUtils'
+import type { NonEmptyArray } from '../../../../shared/utils/fp'
+import { List, Maybe } from '../../../../shared/utils/fp'
 
-import { MasteryImg } from '../../components/MasteryImg'
-import { Radios, labelValue } from '../../components/Radios'
-import { Tooltip } from '../../components/tooltip/Tooltip'
-import { useHistory } from '../../contexts/HistoryContext'
-import { useUser } from '../../contexts/UserContext'
+import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
+import { MasteryImg } from '../../../components/MasteryImg'
+import { Radios, labelValue } from '../../../components/Radios'
+import { Tooltip } from '../../../components/tooltip/Tooltip'
+import { useHistory } from '../../../contexts/HistoryContext'
+import { useUser } from '../../../contexts/UserContext'
 import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
   CloseFilled,
   StatsChartSharp,
-} from '../../imgs/svgIcons'
-import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
-import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { cssClasses } from '../../utils/cssClasses'
+} from '../../../imgs/svgIcons'
+import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
+import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
+import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
+import type { MasteriesQueryView } from '../../../models/masteriesQuery/MasteriesQueryView'
+import { cssClasses } from '../../../utils/cssClasses'
+import { Checkboxes } from './Checkboxes'
 
 const { plural } = StringUtils
 
@@ -45,26 +49,16 @@ export const MasteriesFilters = ({
   const { user } = useUser()
 
   const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
-  const handleMouseEnter = useCallback(() => {
+  const handleMasteriesMouseEnter = useCallback(() => {
     if (!levelsMenuIsVisible) setLevelsMenuIsVisible(true)
   }, [levelsMenuIsVisible])
   const hideLevelsMenu = useCallback(() => setLevelsMenuIsVisible(false), [])
 
-  const toggleChecked = useCallback(
-    (level: ChampionLevelOrZero) =>
-      (e: React.ChangeEvent<HTMLInputElement>): void => {
-        updateMasteriesQuery(
-          pipe(
-            MasteriesQuery.Lens.level,
-            lens.modify(
-              e.target.checked
-                ? readonlySet.insert(ChampionLevelOrZero.Eq)(level)
-                : readonlySet.remove(ChampionLevelOrZero.Eq)(level),
-            ),
-          ),
-        )
-        hideLevelsMenu()
-      },
+  const toggleMasteryChecked = useCallback(
+    (f: Endomorphism<ReadonlySet<ChampionLevelOrZero>>): void => {
+      updateMasteriesQuery(pipe(MasteriesQuery.Lens.level, lens.modify(f)))
+      hideLevelsMenu()
+    },
     [hideLevelsMenu, updateMasteriesQuery],
   )
 
@@ -75,6 +69,12 @@ export const MasteriesFilters = ({
         flow(MasteriesQuery.Lens.level.set, updateMasteriesQuery, hideLevelsMenu),
       ),
     [hideLevelsMenu, masteriesQuery.level, updateMasteriesQuery],
+  )
+
+  const toggleLaneChecked = useCallback(
+    (f: Endomorphism<ReadonlySet<ChampionPosition>>): void =>
+      updateMasteriesQuery(pipe(MasteriesQuery.Lens.position, lens.modify(f))),
+    [updateMasteriesQuery],
   )
 
   const setSort = flow(MasteriesQuery.Lens.sort.set, updateMasteriesQuery)
@@ -111,6 +111,13 @@ export const MasteriesFilters = ({
     searchRef.current?.focus()
   }, [])
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setSearch('')
+      searchRef.current?.blur()
+    }
+  }, [])
+
   const updateSearch = useCallback(
     (search_: string) => {
       const trimed = search_.trim()
@@ -133,32 +140,79 @@ export const MasteriesFilters = ({
   return (
     <div className="flex w-full max-w-7xl flex-col flex-wrap self-center px-3 pt-1">
       <div className="flex flex-wrap items-center justify-between gap-5 py-3">
-        <div onMouseLeave={hideLevelsMenu} className="relative">
-          <MasteriesCheckboxes
-            checkedLevels={masteriesQuery.level}
-            toggleChecked={toggleChecked}
-            onMouseEnter={handleMouseEnter}
+        <div className="flex items-center gap-3">
+          <div onMouseLeave={hideLevelsMenu} className="relative">
+            <Checkboxes<ChampionLevelOrZero>
+              eq={ChampionLevelOrZero.Eq}
+              values={pipe(
+                ChampionLevelOrZero.values,
+                List.reverse,
+                List.map(level => ({
+                  key: level,
+                  value: level,
+                  icon: isChecked => (
+                    <MasteryImg
+                      level={level}
+                      className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+                    />
+                  ),
+                  label: `Niveau ${level}`,
+                })),
+              )}
+              checked={masteriesQuery.level}
+              toggleChecked={toggleMasteryChecked}
+              isMenuVisible={levelsMenuIsVisible}
+              onMouseEnter={handleMasteriesMouseEnter}
+              tooltipPlacement="top"
+              iconClassName="px-[5px] pt-1 pb-0.5"
+              className="relative z-20"
+            />
+            <ul
+              className={cssClasses(
+                'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
+                ['hidden', !levelsMenuIsVisible],
+              )}
+            >
+              <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
+              <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
+              <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
+              {pipe(
+                ChampionLevelOrZero.values,
+                List.reverse,
+                List.map(level => (
+                  <SelectLevelsButton key={level} levels={[level]}>
+                    {level}
+                  </SelectLevelsButton>
+                )),
+              )}
+              <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
+            </ul>
+          </div>
+          <Checkboxes<ChampionPosition>
+            eq={ChampionPosition.Eq}
+            values={pipe(
+              ChampionPosition.values,
+              List.map(position => ({
+                key: position,
+                value: position,
+                icon: isChecked => (
+                  <ChampionPositionImg
+                    position={position}
+                    className={cssClasses(
+                      'h-full',
+                      ['h-[calc(100%_-_4px)]', position === 'jun'],
+                      ['mt-0.5 h-[calc(100%_-_4px)]', position === 'sup'],
+                      ['brightness-150 contrast-200 grayscale invert', isChecked],
+                    )}
+                  />
+                ),
+                label: ChampionPosition.label[position],
+              })),
+            )}
+            checked={masteriesQuery.position}
+            toggleChecked={toggleLaneChecked}
+            iconClassName="p-[6px]"
           />
-          <ul
-            className={cssClasses(
-              'absolute z-10 flex w-full flex-col border-2 border-mastery4-brown-secondary bg-black',
-              ['hidden', !levelsMenuIsVisible],
-            )}
-          >
-            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
-            <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
-            <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
-            {pipe(
-              ChampionLevelOrZero.values,
-              List.reverse,
-              List.map(level => (
-                <SelectLevelsButton key={level} levels={[level]}>
-                  {level}
-                </SelectLevelsButton>
-              )),
-            )}
-            <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
-          </ul>
         </div>
         <div className="flex gap-3">
           <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
@@ -214,6 +268,7 @@ export const MasteriesFilters = ({
             type="text"
             value={search}
             onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
             placeholder="Rechercher un champion"
             className={cssClasses(
               'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
@@ -262,7 +317,7 @@ const getSelectLevelsButton =
           disabled={isSelected}
           className={cssClasses(
             'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
-            ['hover:bg-zinc-700', !isSelected],
+            ['hover:bg-black', !isSelected],
             ['bg-goldenrod-secondary text-black', isSelected],
           )}
         >
@@ -284,74 +339,6 @@ const getSelectLevelsButton =
       </li>
     )
   }
-
-type MasteriesCheckboxesProps = {
-  checkedLevels: ReadonlySet<ChampionLevelOrZero>
-  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
-  onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
-}
-
-const MasteriesCheckboxes = ({
-  checkedLevels,
-  toggleChecked,
-  onMouseEnter,
-}: MasteriesCheckboxesProps): JSX.Element => (
-  <div onMouseEnter={onMouseEnter} className="flex flex-wrap">
-    {pipe(
-      ChampionLevelOrZero.values,
-      List.reverse,
-      List.map(level => (
-        <LabelCheckbox
-          key={level}
-          checkedLevels={checkedLevels}
-          level={level}
-          toggleChecked={toggleChecked}
-        />
-      )),
-    )}
-  </div>
-)
-
-type LabelCheckboxProps = {
-  checkedLevels: ReadonlySet<ChampionLevelOrZero>
-  level: ChampionLevelOrZero
-  toggleChecked: (level: ChampionLevelOrZero) => (e: React.ChangeEvent<HTMLInputElement>) => void
-}
-
-const LabelCheckbox = ({
-  checkedLevels,
-  level,
-  toggleChecked,
-}: LabelCheckboxProps): JSX.Element => {
-  const hoverRef = useRef<HTMLSpanElement>(null)
-  const isChecked = readonlySet.elem(ChampionLevelOrZero.Eq)(level, checkedLevels)
-  return (
-    <label className="group/mastery">
-      <input
-        type="checkbox"
-        checked={isChecked}
-        onChange={toggleChecked(level)}
-        className="hidden"
-      />
-      <span
-        ref={hoverRef}
-        className={cssClasses(
-          'flex h-10 shrink-0 cursor-pointer py-1 px-[6px] group-first/mastery:rounded-l-md group-last/mastery:rounded-r-md',
-          ['bg-zinc-700', !isChecked],
-          ['bg-goldenrod-secondary', isChecked],
-        )}
-      >
-        <MasteryImg
-          level={level}
-          className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
-        />
-      </span>
-      <Tooltip hoverRef={hoverRef} placement="top">
-        Niveau {level}
-      </Tooltip>
-    </label>
-  )
-}
 
 type SpanProps = {
   tooltip: React.ReactNode

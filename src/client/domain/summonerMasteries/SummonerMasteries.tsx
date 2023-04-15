@@ -6,11 +6,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
-import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
@@ -289,7 +289,7 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name }): EnrichedChampionMastery => {
+    List.map(({ key, name, positions }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -325,6 +325,8 @@ const enrichAll = (
             percents: 0,
             shardsCount,
             glow,
+            positions,
+            isHidden: false,
           }),
           champion => ({
             ...champion,
@@ -332,6 +334,8 @@ const enrichAll = (
             percents: Business.championPercents(champion),
             shardsCount,
             glow,
+            positions,
+            isHidden: false,
           }),
         ),
       )

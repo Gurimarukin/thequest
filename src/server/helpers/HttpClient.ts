@@ -33,10 +33,25 @@ const HttpClient = (Logger: LoggerGetter) => {
     decoderWithName: Tuple<Decoder<unknown, A>, string>,
   ): Future<A>
   function http<A, O, B>(
-    [url, method]: Tuple<string, Method>,
-    options: HttpOptions<O, B> = {},
+    methodWithUrl: Tuple<string, Method>,
+    options?: HttpOptions<O, B>,
     decoderWithName?: Tuple<Decoder<unknown, A>, string>,
   ): Future<A> {
+    return pipe(
+      text(methodWithUrl, options),
+      Future.chainEitherK(flow(fpTsJson.parse, Either.mapLeft(unknownToError))),
+      Future.chainEitherK(u => {
+        if (decoderWithName === undefined) return Either.right(u as A)
+        const [decoder, decoderName] = decoderWithName
+        return pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u)))
+      }),
+    )
+  }
+
+  const text = <O, B>(
+    [url, method]: Tuple<string, Method>,
+    options: HttpOptions<O, B> = {},
+  ): Future<string> => {
     const json = ((): O | undefined => {
       if (options.json === undefined) return undefined
       const [encoder, b] = options.json
@@ -60,18 +75,11 @@ const HttpClient = (Logger: LoggerGetter) => {
           Maybe.fold(() => IO.notUsed, flow(formatRequest(method, url), logger.trace)),
         ),
       ),
-      Future.chainEitherK(res =>
-        pipe(fpTsJson.parse(res.body as string), Either.mapLeft(unknownToError)),
-      ),
-      Future.chainEitherK(u => {
-        if (decoderWithName === undefined) return Either.right(u as A)
-        const [decoder, decoderName] = decoderWithName
-        return pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u)))
-      }),
+      Future.map(res => res.body as string),
     )
   }
 
-  return { http }
+  return { http, text }
 }
 
 export const statusesToOption = (

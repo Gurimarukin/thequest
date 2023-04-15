@@ -1,41 +1,23 @@
-import { apply, io, ord } from 'fp-ts'
+import { apply, io } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
-import type { MsDuration } from '../../shared/models/MsDuration'
 import { Store } from '../../shared/models/Store'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import { Lang } from '../../shared/models/api/Lang'
 import { Future, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { constants } from '../config/constants'
+import { StoredAt } from '../models/StoredAt'
 import type { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import type { RiotApiService } from './RiotApiService'
-
-type StoredAt<A> = {
-  value: A
-  storedAt: DayJs
-}
-
-const StoredAt = {
-  /**
-   *                 ttl
-   *  <-------------------------------->
-   * |----------------|-----------------|
-   * now - ttl     storedAt           now
-   */
-  isStillValid:
-    (ttl: MsDuration, now: DayJs) =>
-    <A>({ storedAt }: StoredAt<A>): boolean =>
-      ord.leq(DayJs.Ord)(pipe(now, DayJs.subtract(ttl)), storedAt),
-}
 
 type WithVersion<A> = {
   value: A
   version: DDragonVersion
 }
 
-type VersionWithChampions = {
+export type VersionWithChampions = {
   version: DDragonVersion
   champions: DDragonChampions
 }

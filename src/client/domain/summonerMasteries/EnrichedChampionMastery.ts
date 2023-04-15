@@ -1,10 +1,13 @@
 import { number, ord, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
+import { lens } from 'monocle-ts'
 
-import type { ChampionLevelOrZero } from '../../../shared/models/api/ChampionLevel'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
+import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
@@ -13,6 +16,8 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   percents: number
   shardsCount: Maybe<number>
   glow: Maybe<number> // animation delay (in seconds) if is glowing
+  positions: List<ChampionPosition>
+  isHidden: boolean
 }
 
 const byPercents: Ord<EnrichedChampionMastery> = pipe(
@@ -40,6 +45,10 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
   ord.contramap(c => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
-const EnrichedChampionMastery = { Ord: { byPercents, byPoints, byShards, byName } }
+const Lens = {
+  isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
+}
+
+const EnrichedChampionMastery = { Ord: { byPercents, byPoints, byShards, byName }, Lens }
 
 export { EnrichedChampionMastery }

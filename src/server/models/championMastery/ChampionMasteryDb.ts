@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import { ChampionLevel } from '../../../shared/models/api/ChampionLevel'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { List } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'

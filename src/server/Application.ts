@@ -24,6 +24,7 @@ export const Application = ({
   healthCheckService,
   summonerService,
   masteriesService,
+  staticDataService,
   userService,
 }: Context): IO<NotUsed> => {
   const logger = Logger('Application')
@@ -31,7 +32,7 @@ export const Application = ({
   const withIp = WithIp(Logger, config)
 
   const healthCheckController = HealthCheckController(healthCheckService)
-  const staticDataController = StaticDataController(ddragonService)
+  const staticDataController = StaticDataController(ddragonService, staticDataService)
   const summonerController = SummonerController(summonerService, masteriesService, userService)
   const userController = UserController(
     Logger,

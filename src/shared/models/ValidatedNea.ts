@@ -30,6 +30,11 @@ const fromEmptyErrors: <A>(either: Either<List<string>, A>) => ValidatedNea<stri
   'Got empty Errors from codec',
 )
 
+const bimap = <E, G, A, B>(
+  f: (e: E) => G,
+  g: (a: A) => B,
+): ((fa: ValidatedNea<E, A>) => ValidatedNea<G, B>) => Either.bimap(NonEmptyArray.map(f), g)
+
 const getValidation = <E = never>(): Applicative2C<'Either', NonEmptyArray<E>> =>
   Either.getApplicativeValidation(NonEmptyArray.getSemigroup<E>())
 
@@ -48,6 +53,7 @@ const ValidatedNea = {
   fromOption,
   fromEmptyE,
   fromEmptyErrors,
+  bimap,
   getValidation,
   getSeqS,
 }

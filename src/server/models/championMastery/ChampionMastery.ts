@@ -1,6 +1,6 @@
 import type { DayJs } from '../../../shared/models/DayJs'
-import type { ChampionKey } from '../../../shared/models/api/ChampionKey'
-import type { ChampionLevel } from '../../../shared/models/api/ChampionLevel'
+import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 
 type ChampionMastery = {
   championId: ChampionKey

@@ -28,6 +28,7 @@ export const constants = {
     },
   },
 
+  staticDataCacheTtl: MsDuration.hours(2),
   riotApi: {
     regionalHost: 'europe.api.riotgames.com',
     plateformEndpoint,
