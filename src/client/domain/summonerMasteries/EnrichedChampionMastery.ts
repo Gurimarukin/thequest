@@ -3,8 +3,10 @@ import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
+import type { Lane } from '../../../shared/models/api/Lane'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
@@ -13,6 +15,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   percents: number
   shardsCount: Maybe<number>
   glow: Maybe<number> // animation delay (in seconds) if is glowing
+  lanes: List<Lane>
 }
 
 const byPercents: Ord<EnrichedChampionMastery> = pipe(

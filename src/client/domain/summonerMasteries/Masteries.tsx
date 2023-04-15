@@ -1,9 +1,10 @@
 /* eslint-disable functional/no-return-void */
-import { number, ord, readonlySet } from 'fp-ts'
+import { number, ord, predicate, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import React, { Fragment, useMemo, useRef } from 'react'
 
+import { Lane } from '../../../shared/models/api/Lane'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -31,7 +32,12 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
   const { filteredAndSortedChampions, searchCount, maybeMaxPoints } = useMemo(() => {
     const filteredAndSortedChampions_ = pipe(
       masteries,
-      List.filter(levelFilterPredicate(masteriesQuery.level)),
+      List.filter(
+        pipe(
+          levelFilterPredicate(masteriesQuery.level),
+          predicate.and(laneFilterPredicate(masteriesQuery.lane)),
+        ),
+      ),
       List.sortBy(
         ((): List<Ord<EnrichedChampionMastery>> => {
           switch (masteriesQuery.sort) {
@@ -81,7 +87,13 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
           return ord.reverse(o)
       }
     }
-  }, [masteries, masteriesQuery.level, masteriesQuery.order, masteriesQuery.sort])
+  }, [
+    masteries,
+    masteriesQuery.level,
+    masteriesQuery.lane,
+    masteriesQuery.order,
+    masteriesQuery.sort,
+  ])
 
   const isHistogram = masteriesQuery.view === 'histogram'
 
@@ -120,6 +132,14 @@ const levelFilterPredicate =
   (levels: ReadonlySet<ChampionLevelOrZero>) =>
   (c: EnrichedChampionMastery): boolean =>
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
+
+const laneFilterPredicate =
+  (lanes: ReadonlySet<Lane>) =>
+  (c: EnrichedChampionMastery): boolean =>
+    pipe(
+      c.lanes,
+      List.some(lane => readonlySet.elem(Lane.Eq)(lane, lanes)),
+    )
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
