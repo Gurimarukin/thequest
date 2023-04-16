@@ -7,6 +7,9 @@ import { cssClasses } from '../utils/cssClasses'
 
 type Props = {
   position: ChampionPosition
+  /**
+   * Should define a fixed width and height
+   */
   className?: string
 }
 
