@@ -107,14 +107,10 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
 
   return (
     <>
-      <MasteriesFilters
-        championsCount={championsCount}
-        totalChampionsCount={champions.length}
-        searchCount={searchCount}
-      />
+      <MasteriesFilters searchCount={searchCount} />
       <div
         className={cssClasses(
-          'self-center pt-4 pb-24',
+          'self-center',
           ['flex max-w-[104rem] flex-wrap justify-center gap-4', masteriesQuery.view === 'compact'],
           ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
         )}
@@ -135,6 +131,9 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
           </Fragment>
         ))}
       </div>
+      <div className="self-center text-sm">{`${plural('champion')(championsCount)} / ${
+        champions.length
+      }`}</div>
     </>
   )
 }
