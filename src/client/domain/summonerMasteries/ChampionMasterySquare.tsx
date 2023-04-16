@@ -323,7 +323,7 @@ const ChampionTooltip = ({
                 <ChampionPositionImg
                   key={position}
                   position={position}
-                  className="w-6 shrink-0 p-0.5"
+                  className="h-6 w-6 shrink-0 p-0.5"
                 />
               )),
             )}
