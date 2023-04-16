@@ -171,6 +171,9 @@ const StaticDataService = (
                 key: c.key,
                 name: c.name,
                 positions: [],
+                aram: {
+                  stats: Maybe.none,
+                },
               }),
             ),
           ),
@@ -192,27 +195,30 @@ const enrichChampions =
       ddragonChampions.data,
       Dict.toReadonlyArray,
       List.map(
-        ([, c]): Either<Tuple<DDragonChampion, string>, StaticDataChampion> =>
+        ([, champion]): Either<Tuple<DDragonChampion, string>, StaticDataChampion> =>
           pipe(
             wikiaChampions,
-            List.findFirst(c_ => ChampionKey.Eq.equals(c_.id, c.key)),
+            List.findFirst(c => ChampionKey.Eq.equals(c.id, champion.key)),
             Either.fromOption(() => 'not found'),
-            Either.chain(c_ =>
+            Either.chain(c =>
               pipe(
-                c_.positions,
+                c.positions,
                 Maybe.map(NonEmptyArray.map(p => WikiaChampionPosition.position[p])),
                 Either.fromOption(() => `empty positions`),
+                Either.map(
+                  (positions): StaticDataChampion => ({
+                    id: champion.id,
+                    key: champion.key,
+                    name: champion.name,
+                    positions,
+                    aram: {
+                      stats: c.stats.aram,
+                    },
+                  }),
+                ),
               ),
             ),
-            Either.bimap(
-              e => Tuple.of(c, e),
-              (positions): StaticDataChampion => ({
-                id: c.id,
-                key: c.key,
-                name: c.name,
-                positions,
-              }),
-            ),
+            Either.mapLeft(e => Tuple.of(champion, e)),
           ),
       ),
     )
