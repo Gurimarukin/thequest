@@ -21,7 +21,7 @@ export const getOnError =
               DayJs.now,
               io.map(
                 flow(
-                  consoleLogFormat('LogUtils', 'error', util.format(e)),
+                  consoleLogFormat('LogUtils', 'error', util.inspect(e)),
                   console.error,
                   toNotUsed,
                 ),
