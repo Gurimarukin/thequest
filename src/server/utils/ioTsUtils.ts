@@ -5,6 +5,7 @@ import * as C from 'io-ts/Codec'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
+import * as E from 'io-ts/Encoder'
 
 import { DayJs } from '../../shared/models/DayJs'
 import { Dict, List, Maybe } from '../../shared/utils/fp'
@@ -101,4 +102,24 @@ const strictPartialDecoder = <A>(properties: { [K in keyof A]: Decoder<unknown, 
     ),
   )
 
-export const StrictPartial = { decoder: strictPartialDecoder }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const strictPartialCodec = <P extends Dict<string, Codec<unknown, any, any>>>(
+  properties: P,
+): Codec<
+  unknown,
+  Partial<{
+    [K in keyof P]: C.OutputOf<P[K]>
+  }>,
+  Partial<{
+    [K in keyof P]: C.TypeOf<P[K]>
+  }>
+> =>
+  C.make(
+    strictPartialDecoder(properties) as Decoder<
+      unknown,
+      Partial<{ [K in keyof P]: C.TypeOf<P[K]> }>
+    >,
+    E.partial(properties),
+  )
+
+export const StrictPartial = { decoder: strictPartialDecoder, codec: strictPartialCodec }

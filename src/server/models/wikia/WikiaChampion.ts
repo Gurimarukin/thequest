@@ -5,11 +5,12 @@ import * as D from 'io-ts/Decoder'
 import { ChampionId } from '../../../shared/models/api/champion/ChampionId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionType } from '../../../shared/models/api/champion/ChampionType'
+import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { createEnum } from '../../../shared/utils/createEnum'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { DayJsFromISOString } from '../../../shared/utils/ioTsUtils'
 
-import { StrictPartial, StrictStruct } from '../../utils/ioTsUtils'
+import { StrictStruct } from '../../utils/ioTsUtils'
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
 type WikiaChampion = D.TypeOf<typeof decoder>
@@ -70,19 +71,6 @@ const altTypeDecoder: Decoder<unknown, Maybe<ChampionType>> = D.union(
 
 const AdaptiveType = createEnum('Magic', 'Physical')
 
-const StatsBalance = StrictPartial.decoder({
-  dmg_dealt: D.number,
-  dmg_taken: D.number,
-  attack_speed: D.number,
-  energy_regen: D.number,
-  healing: D.number,
-  shield: D.number,
-  shielding: D.number,
-  ability_haste: D.number,
-  tenacity: D.number,
-  movement_speed: D.number,
-})
-
 const decoder = StrictStruct.decoder({
   id: ChampionKey.codec,
   apiname: ChampionId.codec,
@@ -127,11 +115,11 @@ const decoder = StrictStruct.decoder({
     missile_speed: Maybe.decoder(D.number),
     windup_modifier: Maybe.decoder(D.number),
     crit_mod: Maybe.decoder(D.number),
-    aram: Maybe.decoder(StatsBalance),
-    nb: Maybe.decoder(StatsBalance),
-    ofa: Maybe.decoder(StatsBalance),
-    urf: Maybe.decoder(StatsBalance),
-    usb: Maybe.decoder(StatsBalance),
+    aram: Maybe.decoder(WikiaStatsBalance.codec),
+    nb: Maybe.decoder(WikiaStatsBalance.codec),
+    ofa: Maybe.decoder(WikiaStatsBalance.codec),
+    urf: Maybe.decoder(WikiaStatsBalance.codec),
+    usb: Maybe.decoder(WikiaStatsBalance.codec),
   }),
   fullname: Maybe.decoder(D.string),
   nickname: Maybe.decoder(D.string),
