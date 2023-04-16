@@ -260,33 +260,40 @@ export const MasteriesFilters = ({
         </div>
       </div>
       <div className="grid grid-cols-[1fr_auto_1fr] flex-wrap items-center justify-between gap-5">
-        <div className="flex items-center text-xs">
-          <input
-            ref={searchRef}
-            type="text"
-            value={search}
-            onChange={handleSearchChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Rechercher un champion"
-            className={cssClasses(
-              'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
-              ['pr-2', search === ''],
-              ['pr-7', search !== ''],
-            )}
-          />
-          {search !== '' ? (
-            <button type="button" onClick={emptySearch} className="-ml-6 mr-4">
-              <CloseFilled className="h-5 fill-wheat" />
-            </button>
-          ) : null}
-          {Maybe.isSome(masteriesQuery.search) ? (
-            <span className="text-zinc-400">{plural('résultat')(searchCount)}</span>
-          ) : null}
-        </div>
-        <span className="text-sm">{`${plural('champion')(
+        <div />
+        <div className="text-sm">{`${plural('champion')(
           championsCount,
-        )} / ${totalChampionsCount}`}</span>
-        <span />
+        )} / ${totalChampionsCount}`}</div>
+        <div className="flex items-center gap-3 justify-self-end text-xs">
+          <span
+            className={cssClasses('min-w-[76px] shrink-0 text-zinc-400', [
+              'hidden',
+              Maybe.isNone(masteriesQuery.search),
+            ])}
+          >
+            {plural('résultat')(searchCount)}
+          </span>
+          <span className="flex items-center">
+            <input
+              ref={searchRef}
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Rechercher un champion"
+              className={cssClasses(
+                'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
+                ['pr-2', search === ''],
+                ['pr-7', search !== ''],
+              )}
+            />
+            {search !== '' ? (
+              <button type="button" onClick={emptySearch} className="-ml-6">
+                <CloseFilled className="h-5 fill-wheat" />
+              </button>
+            ) : null}
+          </span>
+        </div>
       </div>
     </div>
   )
