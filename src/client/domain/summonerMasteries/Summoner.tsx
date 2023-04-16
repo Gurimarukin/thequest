@@ -44,7 +44,7 @@ export const Summoner = ({
   )
 
   return (
-    <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-6 self-center px-3 pt-1">
+    <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-6 self-center">
       <div className="flex items-center gap-4">
         <img
           src={staticData.assets.summonerIcon(profileIconId)}

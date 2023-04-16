@@ -35,16 +35,10 @@ import { Checkboxes } from './Checkboxes'
 const { plural } = StringUtils
 
 type Props = {
-  championsCount: number
-  totalChampionsCount: number
   searchCount: number
 }
 
-export const MasteriesFilters = ({
-  championsCount,
-  totalChampionsCount,
-  searchCount,
-}: Props): JSX.Element => {
+export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { user } = useUser()
 
@@ -138,142 +132,84 @@ export const MasteriesFilters = ({
   )
 
   return (
-    <div className="flex w-full max-w-7xl flex-col flex-wrap self-center px-3 pt-1">
-      <div className="flex flex-wrap items-center justify-between gap-5 py-3">
-        <div className="flex items-center gap-3">
-          <div onMouseLeave={hideLevelsMenu} className="relative">
-            <Checkboxes<ChampionLevelOrZero>
-              eq={ChampionLevelOrZero.Eq}
-              values={pipe(
-                ChampionLevelOrZero.values,
-                List.reverse,
-                List.map(level => ({
-                  key: level,
-                  value: level,
-                  icon: isChecked => (
-                    <MasteryImg
-                      level={level}
-                      className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
-                    />
-                  ),
-                  label: `Niveau ${level}`,
-                })),
-              )}
-              checked={masteriesQuery.level}
-              toggleChecked={toggleMasteryChecked}
-              isMenuVisible={levelsMenuIsVisible}
-              onMouseEnter={handleMasteriesMouseEnter}
-              tooltipPlacement="top"
-              iconClassName="px-[5px] pt-1 pb-0.5"
-              className="relative z-20"
-            />
-            <ul
-              className={cssClasses(
-                'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
-                ['hidden', !levelsMenuIsVisible],
-              )}
-            >
-              <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
-              <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
-              <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
-              {pipe(
-                ChampionLevelOrZero.values,
-                List.reverse,
-                List.map(level => (
-                  <SelectLevelsButton key={level} levels={[level]}>
-                    {level}
-                  </SelectLevelsButton>
-                )),
-              )}
-              <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
-            </ul>
-          </div>
-          <Checkboxes<ChampionPosition>
-            eq={ChampionPosition.Eq}
+    <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 self-center">
+      <div className="flex flex-wrap items-center gap-3">
+        <div onMouseLeave={hideLevelsMenu} className="relative">
+          <Checkboxes<ChampionLevelOrZero>
+            eq={ChampionLevelOrZero.Eq}
             values={pipe(
-              ChampionPosition.values,
-              List.map(position => ({
-                key: position,
-                value: position,
+              ChampionLevelOrZero.values,
+              List.reverse,
+              List.map(level => ({
+                key: level,
+                value: level,
                 icon: isChecked => (
-                  <ChampionPositionImg
-                    position={position}
-                    className={cssClasses('w-[24px]', [
-                      'brightness-150 contrast-200 grayscale invert',
-                      isChecked,
-                    ])}
+                  <MasteryImg
+                    level={level}
+                    className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
                   />
                 ),
-                label: ChampionPosition.label[position],
+                label: `Niveau ${level}`,
               })),
             )}
-            checked={masteriesQuery.position}
-            toggleChecked={toggleLaneChecked}
-            iconClassName="p-[6px]"
+            checked={masteriesQuery.level}
+            toggleChecked={toggleMasteryChecked}
+            isMenuVisible={levelsMenuIsVisible}
+            onMouseEnter={handleMasteriesMouseEnter}
+            tooltipPlacement="top"
+            iconClassName="px-[5px] pt-1 pb-0.5"
+            className="relative z-20"
           />
-        </div>
-        <div className="flex gap-3">
-          <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
-            {labelValue(
-              'percents',
-              <TextLabel
-                tooltip={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
-              >
-                %
-              </TextLabel>,
+          <ul
+            className={cssClasses(
+              'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
+              ['hidden', !levelsMenuIsVisible],
             )}
-            {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
-            {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
-          </Radios>
-          <Radios<MasteriesQueryOrder>
-            name="order"
-            value={masteriesQuery.order}
-            setValue={setOrder}
           >
-            {labelValue(
-              'desc',
-              <IconLabel tooltip="Tri décroissant">
-                <CaretDownOutline className="h-5 fill-current" />
-              </IconLabel>,
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
+            <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
+            {pipe(
+              ChampionLevelOrZero.values,
+              List.reverse,
+              List.map(level => (
+                <SelectLevelsButton key={level} levels={[level]}>
+                  {level}
+                </SelectLevelsButton>
+              )),
             )}
-            {labelValue(
-              'asc',
-              <IconLabel tooltip="Tri croissant">
-                <CaretUpOutline className="h-5 fill-current" />
-              </IconLabel>,
-            )}
-          </Radios>
-          <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
-            {labelValue(
-              'compact',
-              <IconLabel tooltip="Vue compacte">
-                <AppsSharp className="h-4 fill-current" />
-              </IconLabel>,
-            )}
-            {labelValue(
-              'histogram',
-              <IconLabel tooltip="Vue histogramme">
-                <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
-              </IconLabel>,
-            )}
-          </Radios>
+            <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
+          </ul>
         </div>
+
+        <Checkboxes<ChampionPosition>
+          eq={ChampionPosition.Eq}
+          values={pipe(
+            ChampionPosition.values,
+            List.map(position => ({
+              key: position,
+              value: position,
+              icon: isChecked => (
+                <ChampionPositionImg
+                  position={position}
+                  className={cssClasses('w-[24px]', [
+                    'brightness-150 contrast-200 grayscale invert',
+                    isChecked,
+                  ])}
+                />
+              ),
+              label: ChampionPosition.label[position],
+            })),
+          )}
+          checked={masteriesQuery.position}
+          toggleChecked={toggleLaneChecked}
+          iconClassName="p-[6px]"
+        />
       </div>
-      <div className="grid grid-cols-[1fr_auto_1fr] flex-wrap items-center justify-between gap-5">
-        <div />
-        <div className="text-sm">{`${plural('champion')(
-          championsCount,
-        )} / ${totalChampionsCount}`}</div>
-        <div className="flex items-center gap-3 justify-self-end text-xs">
-          <span
-            className={cssClasses('min-w-[76px] shrink-0 text-zinc-400', [
-              'hidden',
-              Maybe.isNone(masteriesQuery.search),
-            ])}
-          >
-            {plural('résultat')(searchCount)}
-          </span>
-          <span className="flex items-center">
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex flex-col items-center text-xs">
+          <div className="flex items-center">
             <input
               ref={searchRef}
               type="text"
@@ -292,8 +228,59 @@ export const MasteriesFilters = ({
                 <CloseFilled className="h-5 fill-wheat" />
               </button>
             ) : null}
+          </div>
+          <span
+            className={cssClasses('absolute top-full pt-0.5 text-zinc-400', [
+              'hidden',
+              Maybe.isNone(masteriesQuery.search),
+            ])}
+          >
+            {plural('résultat')(searchCount)}
           </span>
         </div>
+
+        <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
+          {labelValue(
+            'percents',
+            <TextLabel
+              tooltip={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
+            >
+              %
+            </TextLabel>,
+          )}
+          {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
+          {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
+        </Radios>
+
+        <Radios<MasteriesQueryOrder> name="order" value={masteriesQuery.order} setValue={setOrder}>
+          {labelValue(
+            'desc',
+            <IconLabel tooltip="Tri décroissant">
+              <CaretDownOutline className="h-5 fill-current" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'asc',
+            <IconLabel tooltip="Tri croissant">
+              <CaretUpOutline className="h-5 fill-current" />
+            </IconLabel>,
+          )}
+        </Radios>
+
+        <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
+          {labelValue(
+            'compact',
+            <IconLabel tooltip="Vue compacte">
+              <AppsSharp className="h-4 fill-current" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'histogram',
+            <IconLabel tooltip="Vue histogramme">
+              <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
+            </IconLabel>,
+          )}
+        </Radios>
       </div>
     </div>
   )
