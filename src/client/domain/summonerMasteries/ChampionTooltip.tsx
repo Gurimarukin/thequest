@@ -1,12 +1,14 @@
-import { flow, pipe } from 'fp-ts/function'
-import React, { Fragment } from 'react'
+import type { eq } from 'fp-ts'
+import { string } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
+import React from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
-import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
+import { PercentsStats, WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Dict, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { ChampionPositionImg } from '../../components/ChampionPositionImg'
 import { cssClasses } from '../../utils/cssClasses'
@@ -86,15 +88,15 @@ export const ChampionTooltip = ({
       </p>
       {pipe(
         aram.stats,
-        Maybe.chain(
-          flow(
-            WikiaStatsBalance.toReadonlyArray,
-            List.map(([key, val]) => (
-              <Fragment key={key}>
-                <span className="font-mono">{key}</span>
-                <span className="font-mono">{val}</span>
-              </Fragment>
-            )),
+        Maybe.chain(stats =>
+          pipe(
+            WikiaStatsBalance.keys,
+            List.filterMap(key =>
+              pipe(
+                Dict.lookup(key, stats),
+                Maybe.map(val => <Stat key={key} name={key} value={val} />),
+              ),
+            ),
             NonEmptyArray.fromReadonlyArray,
           ),
         ),
@@ -103,7 +105,7 @@ export const ChampionTooltip = ({
           nea => (
             <div className="row-span-2 flex flex-col items-center justify-center gap-1 border-l border-mastery4-brown-secondary p-1 text-2xs">
               <span>ARAM</span>
-              <div className="grid grid-cols-[auto_auto] gap-x-2">{nea}</div>
+              <div className="grid grid-cols-[auto_auto] gap-x-[6px]">{nea}</div>
             </div>
           ),
         ),
@@ -137,3 +139,47 @@ export const ChampionTooltip = ({
     </>
   )
 }
+
+type StatProps = {
+  name: keyof WikiaStatsBalance
+  value: Exclude<WikiaStatsBalance[keyof WikiaStatsBalance], undefined>
+}
+
+const Stat = ({ name, value }: StatProps): JSX.Element => {
+  const n = WikiaStatsBalance.isPercentsStats(name) ? (value * 1000 - 1000) / 10 : value
+  const isMalusStat = List.elem(keysEq)(name, malusStats)
+  const maybeUnit = List.elem(keysEq)(name, percentsUnits) ? Maybe.some('%') : Maybe.none
+  return (
+    <>
+      <span className="font-mono">{WikiaStatsBalance.label[name]}</span>
+      <span
+        className={cssClasses(
+          'flex gap-0.5 justify-self-end font-mono',
+          ['text-green-600', isMalusStat ? n < 0 : 0 < n],
+          ['text-red-600', isMalusStat ? 0 < n : n < 0],
+        )}
+      >
+        <span>
+          {n < 0 ? '' : '+'}
+          {n.toLocaleString()}
+        </span>
+        {pipe(
+          maybeUnit,
+          Maybe.fold(
+            () => null,
+            u => <span>{u}</span>,
+          ),
+        )}
+      </span>
+    </>
+  )
+}
+
+const keysEq: eq.Eq<keyof WikiaStatsBalance> = string.Eq
+
+const malusStats: List<keyof WikiaStatsBalance> = ['dmg_taken']
+
+const percentsUnits: List<keyof WikiaStatsBalance> = pipe(
+  PercentsStats.values,
+  List.difference(keysEq)(['tenacity']),
+)
