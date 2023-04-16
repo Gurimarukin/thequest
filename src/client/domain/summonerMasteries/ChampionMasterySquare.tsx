@@ -357,7 +357,7 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
       <span className="mr-[-2px] overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
         <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
       </span>
-      <span className="flex h-4 w-[14px] justify-center rounded-tl-lg bg-black pl-0.5 text-xs">
+      <span className="flex h-4 w-[14px] justify-end rounded-tl-lg bg-black pl-0.5 text-xs">
         <span className="mt-0.5">{shardsCount}</span>
       </span>
       <div className="absolute bottom-[-14px] right-[-1px] z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
