@@ -1,10 +1,12 @@
 /* eslint-disable functional/no-return-void */
 import { flow, pipe } from 'fp-ts/function'
-import React, { useCallback, useMemo, useRef } from 'react'
+import React, { Fragment, useCallback, useMemo, useRef } from 'react'
 
+import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -32,6 +34,7 @@ type ChampionMasterySquareProps = {
   shardsCount: Maybe<number>
   glow: Maybe<number>
   positions: List<ChampionPosition>
+  aram: AramData
   setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
   /**
    * @default false
@@ -52,6 +55,7 @@ export const ChampionMasterySquare = ({
   shardsCount,
   glow,
   positions,
+  aram,
   setChampionShards,
   isHistogram = false,
   className,
@@ -150,7 +154,7 @@ export const ChampionMasterySquare = ({
         )}
       </div>
 
-      <Tooltip hoverRef={hoverRef} placement="top" className="flex flex-col !p-0">
+      <Tooltip hoverRef={hoverRef} placement="top" className="grid grid-cols-[1fr_auto] !p-0">
         <ChampionTooltip
           chestGranted={chestGranted}
           tokensEarned={tokensEarned}
@@ -161,6 +165,7 @@ export const ChampionMasterySquare = ({
           percents={percents}
           filteredShardsCount={filteredShardsCount}
           positions={positions}
+          aram={aram}
         />
       </Tooltip>
     </div>
@@ -246,6 +251,7 @@ type ChampionTooltipProps = {
   percents: number
   filteredShardsCount: Maybe<number>
   positions: List<ChampionPosition>
+  aram: AramData
 }
 
 const ChampionTooltip = ({
@@ -258,9 +264,10 @@ const ChampionTooltip = ({
   tokensEarned,
   filteredShardsCount,
   positions,
+  aram,
 }: ChampionTooltipProps): JSX.Element => {
   const percentsElement = (
-    <span className="relative flex items-center py-0.5 pr-1 shadow-black text-shadow">
+    <span className="relative flex items-center py-0.5 pl-[6px] shadow-black text-shadow">
       {Math.round(percents)} %
     </span>
   )
@@ -281,21 +288,21 @@ const ChampionTooltip = ({
 
   return (
     <>
-      <div className="relative flex overflow-hidden">
+      <div className="relative col-span-2 flex overflow-hidden">
+        {/* "hitbox" */}
+        {percentsElement}
+        <div className="absolute left-0">
+          <span className="absolute -right-2 -top-4 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
+          {percentsElement}
+        </div>
         <span
           className={cssClasses(
-            'grow py-0.5 pr-4 pl-2 text-center font-bold shadow-black text-shadow',
+            'grow py-0.5 pr-2 pl-4 text-center font-bold shadow-black text-shadow',
             bgGradientMastery(championLevel),
           )}
         >
           {name}
         </span>
-        {/* "hitbox" */}
-        {percentsElement}
-        <div className="absolute right-0">
-          <span className="absolute -left-2 -top-2 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
-          {percentsElement}
-        </div>
       </div>
       <p className="border-b border-mastery4-brown-secondary px-2 py-1 text-center text-2xs">
         {`${championPoints.toLocaleString()}${
@@ -304,7 +311,31 @@ const ChampionTooltip = ({
             : ''
         }  pts`}
       </p>
-      <div className="flex flex-col items-center gap-1 py-1 px-2 text-2xs">
+      {pipe(
+        aram.stats,
+        Maybe.chain(
+          flow(
+            WikiaStatsBalance.toReadonlyArray,
+            List.map(([key, val]) => (
+              <Fragment key={key}>
+                <span className="font-mono">{key}</span>
+                <span className="font-mono">{val}</span>
+              </Fragment>
+            )),
+            NonEmptyArray.fromReadonlyArray,
+          ),
+        ),
+        Maybe.fold(
+          () => <div className="row-span-2" />,
+          nea => (
+            <div className="row-span-2 flex flex-col items-center justify-center gap-1 border-l border-mastery4-brown-secondary p-1 text-2xs">
+              <span>ARAM</span>
+              <div className="grid grid-cols-[auto_auto] gap-x-2">{nea}</div>
+            </div>
+          ),
+        ),
+      )}
+      <div className="flex flex-col items-center justify-center gap-1 py-1 px-2 text-2xs">
         {pipe(
           tokenShards,
           Maybe.fold(

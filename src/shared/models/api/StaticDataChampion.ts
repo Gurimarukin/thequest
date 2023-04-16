@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { List, Maybe } from '../../utils/fp'
-import { WikiaStatsBalance } from '../wikia/WikiaStatsBalance'
+import { List } from '../../utils/fp'
+import { AramData } from './AramData'
 import { ChampionId } from './champion/ChampionId'
 import { ChampionKey } from './champion/ChampionKey'
 import { ChampionPosition } from './champion/ChampionPosition'
@@ -13,9 +13,7 @@ const codec = C.struct({
   key: ChampionKey.codec,
   name: C.string,
   positions: List.codec(ChampionPosition.codec),
-  aram: C.struct({
-    stats: Maybe.codec(WikiaStatsBalance.codec),
-  }),
+  aram: AramData.codec,
 })
 
 const StaticDataChampion = { codec }
