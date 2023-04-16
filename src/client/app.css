@@ -18,3 +18,7 @@
   font-family: lolFont;
   src: url('fonts/FrizQuadrataRegular.woff');
 }
+
+html {
+  overflow: hidden;
+}
