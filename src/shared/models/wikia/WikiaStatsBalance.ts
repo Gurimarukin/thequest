@@ -4,11 +4,10 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 
-import { StrictPartial } from '../../../server/utils/ioTsUtils'
-
 import { createEnum } from '../../utils/createEnum'
 import type { Tuple } from '../../utils/fp'
 import { Dict, List } from '../../utils/fp'
+import { StrictPartial } from '../../utils/ioTsUtils'
 
 type WikiaStatsBalance = C.TypeOf<typeof rawCodec>
 

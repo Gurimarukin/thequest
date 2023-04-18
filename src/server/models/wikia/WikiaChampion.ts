@@ -8,9 +8,8 @@ import { ChampionType } from '../../../shared/models/api/champion/ChampionType'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { createEnum } from '../../../shared/utils/createEnum'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
-import { DayJsFromISOString } from '../../../shared/utils/ioTsUtils'
+import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtils'
 
-import { StrictStruct } from '../../utils/ioTsUtils'
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
 type WikiaChampion = D.TypeOf<typeof decoder>
