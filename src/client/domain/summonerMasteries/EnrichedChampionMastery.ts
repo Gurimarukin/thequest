@@ -48,6 +48,7 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
 )
 
 const Lens = {
+  shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
   isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
 }
 

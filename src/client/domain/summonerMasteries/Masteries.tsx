@@ -2,6 +2,7 @@
 import { number, ord, predicate, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
+import { optional } from 'monocle-ts'
 import React, { Fragment, useMemo, useRef } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -48,7 +49,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
               case 'percents':
                 return [
                   reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
-                  reverseIfDesc(EnrichedChampionMastery.Ord.byShards),
+                  reverseIfDesc(ordByShardsWithLevel),
                   reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
                   EnrichedChampionMastery.Ord.byName,
                 ]
@@ -151,6 +152,23 @@ const positionFilterPredicate =
       c.positions,
       List.some(position => readonlySet.elem(ChampionPosition.Eq)(position, positions)),
     )
+
+// At level 7, shards doesn't matter
+// At level 6, more than 1 shard doesn't matter
+// At level 5 and less, more than 2 shards doesn't matter
+const ordByShardsWithLevel: Ord<EnrichedChampionMastery> = pipe(
+  EnrichedChampionMastery.Ord.byShards,
+  ord.contramap(c =>
+    pipe(
+      EnrichedChampionMastery.Lens.shardsCount,
+      optional.modify(shardsCount => {
+        if (c.championLevel === 7) return Math.min(shardsCount, 0)
+        if (c.championLevel === 6) return Math.min(shardsCount, 1)
+        return Math.min(shardsCount, 2)
+      }),
+    )(c),
+  ),
+)
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
