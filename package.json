@@ -66,7 +66,7 @@
     "jsonwebtoken": "9.0.0",
     "ky": "0.33.2",
     "lodash.debounce": "4.0.8",
-    "lua-in-js" : "2.2.0",
+    "lua-in-js": "2.2.0",
     "mongodb": "5.1.0",
     "monocle-ts": "2.3.13",
     "newtype-ts": "0.3.5",
