@@ -164,7 +164,7 @@ export const ShardsToRemoveModal = ({
         </button>
         <div className="flex flex-col items-center p-4">
           <p className="text-sm">
-            Changement{s} de niveau detécté{s} depuis la dernière modification de fragments.
+            Changement{s} de niveau detecté{s} depuis la dernière modification de fragments.
             <br />
             Peut-être en avez-vous utilisés (des fragments) ?
           </p>
