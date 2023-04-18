@@ -6,6 +6,7 @@ import React, { useEffect, useMemo } from 'react'
 import { Maybe, Tuple } from '../../shared/utils/fp'
 
 import { useHistory } from '../contexts/HistoryContext'
+import { Aram } from '../domain/Aram'
 import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { NotFound } from '../domain/NotFound'
@@ -26,6 +27,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
       t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),
     ),
   )
+  .alt(appParsers.aram.map(() => t(<Aram />, 'ARAM')))
   .alt(appParsers.login.map(() => t(<Login />, 'Connexion')))
   .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
   .alt(appParsers.discordRedirect.map(() => t(<DiscordRedirect />)))
