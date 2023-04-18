@@ -62,7 +62,7 @@ export const ChampionTooltip = ({
 
   return (
     <>
-      <div className="relative col-span-2 flex overflow-hidden">
+      <div className="relative col-span-2 flex overflow-hidden border-b border-mastery4-brown-secondary">
         {/* "hitbox" */}
         {percentsElement}
         <div className="absolute left-0">
