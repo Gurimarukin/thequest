@@ -214,6 +214,7 @@ const SummonerViewComponent = ({
                       tokensEarned: c.tokensEarned,
                       shardsCount: count,
                       positions: c.positions,
+                      aram: c.aram,
                       leveledUpFrom: n.leveledUpFrom,
                       shardsToRemove: n.shardsToRemove,
                     }),
@@ -290,7 +291,7 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name, positions }): EnrichedChampionMastery => {
+    List.map(({ key, name, positions, aram }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -327,6 +328,7 @@ const enrichAll = (
             shardsCount,
             glow,
             positions,
+            aram,
             isHidden: false,
           }),
           champion => ({
@@ -336,6 +338,7 @@ const enrichAll = (
             shardsCount,
             glow,
             positions,
+            aram,
             isHidden: false,
           }),
         ),

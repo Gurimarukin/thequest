@@ -12,7 +12,7 @@ if (modalLayer === null) {
 
 export const Modal: React.FC = ({ children }) =>
   createPortal(
-    <div className="flex h-screen w-screen items-center justify-center bg-black/50">
+    <div className="absolute top-0 flex h-screen w-screen items-center justify-center bg-black/50">
       {children}
     </div>,
     modalLayer,
