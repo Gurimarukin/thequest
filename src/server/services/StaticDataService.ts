@@ -431,8 +431,8 @@ const parsoidParse = (input: string): Future<string> =>
               usePHPPreProcessor: true, // true,
             },
             envOptions: {
-              domain: 'en.wikipedia.org',
-              prefix: null,
+              domain: 'leagueoflegends.fandom.com', // wiki
+              prefix: 'fandomwiki',
               pageName: '',
               scrubWikitext: false,
               pageBundle: false,

@@ -297,6 +297,23 @@ const strictTupleDecoder = <A extends List<unknown>>(
     D.compose(D.fromTuple(...components) as any),
   )
 
+// const strictTupleDecoder = <A extends List<unknown>>(
+//   ...components: { [K in keyof A]: Decoder<unknown, A[K]> }
+// ): Decoder<unknown, A> => {
+//   const decoder = D.tuple(...components) as unknown as Decoder<unknown, A>
+//   return {
+//     decode: u =>
+//       pipe(
+//         decoder,
+//         D.parse(tuple =>
+//           (u as List<unknown>).length === components.length
+//             ? D.success<A>(tuple)
+//             : D.failure(u, `ArrayOfLength${components.length}`),
+//         ),
+//       ).decode(u),
+//   }
+// }
+
 export const StrictTuple = { decoder: strictTupleDecoder }
 
 const refinementFromPredicate = identity as <A>(f: Predicate<A>) => Refinement<A, A>
