@@ -3,6 +3,7 @@ import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
+import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
@@ -17,6 +18,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   shardsCount: Maybe<number>
   glow: Maybe<number> // animation delay (in seconds) if is glowing
   positions: List<ChampionPosition>
+  aram: AramData
   isHidden: boolean
 }
 
@@ -46,6 +48,7 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
 )
 
 const Lens = {
+  shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
   isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
 }
 
