@@ -57,6 +57,7 @@ export const Dict = {
 export type Either<E, A> = either.Either<E, A>
 export const Either = {
   ...either,
+  exists: either.exists as <A>(predicate: Predicate<A>) => <E>(ma: either.Either<E, A>) => boolean,
 }
 
 export type Maybe<A> = option.Option<A>

@@ -18,7 +18,7 @@ type AramData = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   stats: Maybe.codec(WikiaStatsBalance.codec),
-  spells: Maybe.codec(C.struct(spellsProperties)),
+  spells: Maybe.codec(C.partial(spellsProperties)),
 })
 
 const AramData = { codec }

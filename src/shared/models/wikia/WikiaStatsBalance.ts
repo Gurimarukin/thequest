@@ -42,7 +42,7 @@ const PercentsStats = createEnum(
 
 // Type check that PercentsStats only contains keys of WikiaStatsBalance
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-type TestPercentsStats = WikiaStatsBalance[PercentsStats]
+type TestPercentsStatsAreBalanceKeys = WikiaStatsBalance[PercentsStats]
 
 const isPercentsStats = (stat: keyof WikiaStatsBalance): stat is PercentsStats =>
   List.elem(string.Eq)(stat, PercentsStats.values)
