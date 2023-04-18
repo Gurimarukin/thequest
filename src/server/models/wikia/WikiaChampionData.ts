@@ -12,7 +12,7 @@ import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtil
 
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
-type WikiaChampion = D.TypeOf<typeof decoder>
+type WikiaChampionData = D.TypeOf<typeof decoder>
 
 const Resource = createEnum(
   'Blood Well',
@@ -146,6 +146,6 @@ const decoder = StrictStruct.decoder({
   skills: Maybe.decoder(NonEmptyArray.decoder(D.string)),
 })
 
-const WikiaChampion = { decoder }
+const WikiaChampionData = { decoder }
 
-export { WikiaChampion }
+export { WikiaChampionData }
