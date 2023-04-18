@@ -263,35 +263,37 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
       <span className="flex h-4 w-[14px] justify-end rounded-tl-lg bg-black pl-0.5 text-xs">
         <span className="mt-0.5">{shardsCount}</span>
       </span>
-      <div className="absolute bottom-[-14px] right-[-1px] z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
-        <span className="flex bg-black p-[1px] pb-0.5">
-          <button
-            ref={addButtonRef}
-            type="button"
-            onClick={addShardCount}
-            className="w-3 rounded-t bg-goldenrod text-black"
-          >
-            <AddOutline className="w-full" />
-          </button>
-          <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
-            Ajouter un fragment
-          </Tooltip>
-        </span>
-        <span className="h-[12px] w-[1px] bg-black" />
-        <span className="flex bg-black p-[1px]">
-          <button
-            ref={removeButtonRef}
-            type="button"
-            onClick={removeShardCount}
-            className="w-3 rounded-b bg-goldenrod text-black"
-          >
-            <RemoveOutline className="w-full" />
-          </button>
-          <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
-            Enlever un fragment
-          </Tooltip>
-        </span>
-      </div>
+      {setShardsCount !== null ? (
+        <div className="absolute bottom-[-14px] right-[-1px] z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
+          <span className="flex bg-black p-[1px] pb-0.5">
+            <button
+              ref={addButtonRef}
+              type="button"
+              onClick={addShardCount}
+              className="w-3 rounded-t bg-goldenrod text-black"
+            >
+              <AddOutline className="w-full" />
+            </button>
+            <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
+              Ajouter un fragment
+            </Tooltip>
+          </span>
+          <span className="h-[12px] w-[1px] bg-black" />
+          <span className="flex bg-black p-[1px]">
+            <button
+              ref={removeButtonRef}
+              type="button"
+              onClick={removeShardCount}
+              className="w-3 rounded-b bg-goldenrod text-black"
+            >
+              <RemoveOutline className="w-full" />
+            </button>
+            <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
+              Enlever un fragment
+            </Tooltip>
+          </span>
+        </div>
+      ) : null}
     </div>
   )
 }
