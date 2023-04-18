@@ -5,7 +5,7 @@ import { number, ord, predicate, string, task } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { identity, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -19,6 +19,7 @@ import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Modal } from '../../components/Modal'
 import { ButtonPrimary, ButtonSecondary } from '../../components/buttons'
+import { Tooltip } from '../../components/tooltip/Tooltip'
 import { ChevronForwardFilled, CloseFilled, ToggleFilled } from '../../imgs/svgIcons'
 import { cssClasses } from '../../utils/cssClasses'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -151,6 +152,10 @@ export const ShardsToRemoveModal = ({
     [futureWithLoading, notificationsState, setChampionsShardsBulk],
   )
 
+  const masteriesRef = useRef<HTMLSpanElement>(null)
+
+  const s = notificationsState.length < 2 ? '' : 's'
+
   return (
     <Modal>
       <div className="flex max-h-full flex-col items-end overflow-auto border border-goldenrod bg-zinc-900 p-2">
@@ -159,8 +164,7 @@ export const ShardsToRemoveModal = ({
         </button>
         <div className="flex flex-col items-center p-4">
           <p className="text-sm">
-            Changement{notificationsState.length < 2 ? '' : 's'} de niveau depuis la dernière
-            modification de fragments.
+            Changement{s} de niveau detécté{s} depuis la dernière modification de fragments.
             <br />
             Peut-être en avez-vous utilisés (des fragments) ?
           </p>
@@ -185,14 +189,14 @@ export const ShardsToRemoveModal = ({
                   glow={Maybe.none}
                   setChampionShards={null}
                 />
-                <span
-                  className="flex items-center"
-                  title={`Maîtrise ${n.championLevel} — précédemment maîtrise ${n.leveledUpFrom}`}
-                >
+                <span ref={masteriesRef} className="flex items-center">
                   <MasteryImg level={n.leveledUpFrom} className="h-6" />
                   <ChevronForwardFilled className="h-4" />
                   <MasteryImg level={n.championLevel} className="h-6" />
                 </span>
+                <Tooltip hoverRef={masteriesRef}>
+                  Changement de maîtrise {n.leveledUpFrom} à {n.championLevel}
+                </Tooltip>
                 <span className="justify-self-end pl-12 pr-4 text-sm">
                   enlever {plural('fragment')(n.shardsToRemove)}
                 </span>
