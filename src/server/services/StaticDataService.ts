@@ -27,7 +27,7 @@ import {
   Try,
   Tuple,
 } from '../../shared/utils/fp'
-import { decodeError } from '../../shared/utils/ioTsUtils'
+import { StrictTuple, decodeError } from '../../shared/utils/ioTsUtils'
 
 import { constants } from '../config/constants'
 import type { HttpClient } from '../helpers/HttpClient'
@@ -136,7 +136,7 @@ const StaticDataService = (
     ),
     Future.chain(data =>
       pipe(
-        NonEmptyArray.head(data.parts).template.params,
+        data.parts[0].template.params,
         Dict.toReadonlyArray,
         List.filterMap(([key, param]) =>
           pipe(
@@ -389,7 +389,7 @@ const decodeChampionSpell = (raw: string): Maybe<Tuple<string, Spell>> =>
   pipe(raw, StringUtils.matcher2(spellRegex)) as Maybe<Tuple<string, Spell>>
 
 const dataMwDecoder = StrictStruct.decoder({
-  parts: NonEmptyArray.decoder(
+  parts: StrictTuple.decoder(
     StrictStruct.decoder({
       template: StrictStruct.decoder({
         target: StrictStruct.decoder({

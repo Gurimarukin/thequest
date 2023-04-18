@@ -1,6 +1,8 @@
 import { json, ord, predicate, readonlySet, string } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
-import { flow, pipe } from 'fp-ts/function'
+import type { Predicate } from 'fp-ts/Predicate'
+import type { Refinement } from 'fp-ts/Refinement'
+import { flow, identity, pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import type { DecodeError, Decoder } from 'io-ts/Decoder'
@@ -45,7 +47,9 @@ const nonEmptyStringDecoder: Decoder<unknown, string> = pipe(
   D.string,
   D.refine((str): str is string => !string.isEmpty(str), 'NonEmptyString'),
 )
+
 const nonEmptyStringEncoder: Encoder<string, string> = E.id<string>()
+
 const nonEmptyStringCodec: Codec<unknown, string, string> = C.make(
   nonEmptyStringDecoder,
   nonEmptyStringEncoder,
@@ -275,3 +279,24 @@ const strictPartialCodec = <P extends Dict<string, Codec<unknown, any, any>>>(
   )
 
 export const StrictPartial = { decoder: strictPartialDecoder, codec: strictPartialCodec }
+
+/**
+ * StrictTuple
+ */
+
+const strictTupleDecoder = <A extends List<unknown>>(
+  ...components: { [K in keyof A]: Decoder<unknown, A[K]> }
+): Decoder<unknown, A> =>
+  pipe(
+    D.UnknownArray,
+    D.refine(
+      refinementFromPredicate(us => us.length === components.length),
+      `ArrayOfLength${components.length}`,
+    ),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    D.compose(D.fromTuple(...components) as any),
+  )
+
+export const StrictTuple = { decoder: strictTupleDecoder }
+
+const refinementFromPredicate = identity as <A>(f: Predicate<A>) => Refinement<A, A>
