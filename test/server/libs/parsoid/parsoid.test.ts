@@ -2,7 +2,6 @@ import { task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
-import qs from 'qs'
 import util from 'util'
 import * as xml2js from 'xml2js'
 
@@ -35,24 +34,42 @@ describe('toto', () => {
   it(
     'should toto',
     () => {
-      const params = {
-        action: 'parse',
-        format: 'json',
-        prop: 'parsetree',
-        // page: 'Template:Map changes/data/aram',
-        pageid: 1399551,
-      }
-
       const future = pipe(
         httpClient.http(
-          [`https://leagueoflegends.fandom.com/api.php?${qs.stringify(params)}`, 'get'],
-          {},
-          [parseTreeResultDecoder, 'ParseTreeResult'],
+          ['https://leagueoflegends.fandom.com/api.php', 'get'],
+          {
+            searchParams: {
+              action: 'parse',
+              format: 'json',
+              prop: 'parsetree',
+              // page: 'Template:Map changes/data/aram',
+              pageid: 1399551,
+            },
+          },
+          [aramChangesPageParseTreeResultDecoder, 'AramChangesPageParseTreeResult'],
         ),
         Future.chain(a =>
-          pipe(a.parse.parsetree['*'], parseXML(parseTreeXMLDecoder, 'ParseTreeXML')),
+          pipe(
+            a.parse.parsetree['*'],
+            parseXML(aramChangesPageParseTreeXMLDecoder, 'AramChangesPageParseTreeXML'),
+          ),
         ),
-        Future.chain(a => pipe(a.root.ignore[0], parseXML(includeonlyDecoder, 'IncludeOnly'))),
+        Future.chain(a =>
+          pipe(a.root.ignore[0], parseXML(includeOnlyXMLDecoder, 'IncludeOnlyXML')),
+        ),
+        Future.chain(a =>
+          httpClient.http(['https://leagueoflegends.fandom.com/api.php', 'post'], {
+            searchParams: {
+              action: 'parse',
+              format: 'json',
+              prop: 'parsetree',
+            },
+            body: a.includeonly,
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+          }),
+        ),
         Future.map(JSON.stringify),
         task.map(res => {
           // console.log('res =', JSON.stringify(res))
@@ -73,13 +90,12 @@ const parseXML =
     pipe(
       Future.tryCatch<unknown>(() => xml2js.parseStringPromise(xml)),
       Future.map(flow(JSON.stringify, JSON.parse)),
-      Future.chainEitherK(u => {
-        console.log('u =', JSON.stringify(pipe(u, Either.mapLeft(D.draw))))
-        return pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u)))
-      }),
+      Future.chainEitherK(u =>
+        pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u))),
+      ),
     )
 
-const parseTreeResultDecoder = D.struct({
+const aramChangesPageParseTreeResultDecoder = D.struct({
   parse: D.struct({
     parsetree: D.struct({
       '*': D.string,
@@ -87,12 +103,14 @@ const parseTreeResultDecoder = D.struct({
   }),
 })
 
-const parseTreeXMLDecoder = D.struct({
+const aramChangesPageParseTreeXMLDecoder = D.struct({
   root: D.struct({
     ignore: D.tuple(D.string),
   }),
 })
 
-const includeonlyDecoder = D.struct({
+const includeOnlyXMLDecoder = D.struct({
   includeonly: D.string,
 })
+
+const includeOnlyParseTreeDecoder = D.struct({})
