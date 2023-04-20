@@ -1,6 +1,7 @@
 - z index recherches récentes
 - recherches récentes : stocker l'id côté serveur
 - useless qs.stringify?
+- random champion
 - toaster (replace alert)
 - account menu
 - admin bo
