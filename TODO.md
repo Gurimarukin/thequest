@@ -1,3 +1,6 @@
+- z index recherches récentes
+- recherches récentes : stocker l'id côté serveur
+- useless qs.stringify?
 - toaster (replace alert)
 - account menu
 - admin bo

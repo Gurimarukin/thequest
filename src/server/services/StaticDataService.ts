@@ -1,10 +1,11 @@
 import { apply, io, string } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
 import { flow, identity, pipe } from 'fp-ts/function'
+import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import { JSDOM } from 'jsdom'
 import * as luainjs from 'lua-in-js'
-import parsoid from 'parsoid'
+import * as xml2js from 'xml2js'
 
 import { DayJs } from '../../shared/models/DayJs'
 import { Store } from '../../shared/models/Store'
@@ -17,7 +18,6 @@ import { ChampionId } from '../../shared/models/api/champion/ChampionId'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
-import type { Tuple3 } from '../../shared/utils/fp'
 import {
   Dict,
   Either,
@@ -29,7 +29,7 @@ import {
   Try,
   Tuple,
 } from '../../shared/utils/fp'
-import { StrictStruct, StrictTuple, decodeError } from '../../shared/utils/ioTsUtils'
+import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { constants } from '../config/constants'
 import type { HttpClient } from '../helpers/HttpClient'
@@ -45,9 +45,7 @@ import type { DDragonService, VersionWithChampions } from './DDragonService'
 const championDataUrl = 'https://leagueoflegends.fandom.com/wiki/Module:ChampionData/data'
 const mwCodeClassName = '.mw-code'
 
-const aramMapChangesUrl =
-  'https://leagueoflegends.fandom.com/wiki/Template:Map_changes/data/aram?action=edit'
-const dataMwAttribute = 'data-mw'
+const lolFandomApiPhpUrl = 'https://leagueoflegends.fandom.com/api.php'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
@@ -107,45 +105,67 @@ const StaticDataService = (
   )
 
   const fetchWikiaAramChanges: Future<Dict<string, Partial<Dict<Spell, string>>>> = pipe(
-    httpClient.text([aramMapChangesUrl, 'get']),
-    Future.chainEitherK(body => Try.tryCatch(() => new JSDOM(body))),
-    Future.chainEitherK(pageDom =>
+    httpClient.http(
+      [lolFandomApiPhpUrl, 'get'],
+      {
+        searchParams: {
+          action: 'parse',
+          format: 'json',
+          prop: 'parsetree',
+          // page: 'Template:Map changes/data/aram',
+          pageid: 1399551,
+        },
+      },
+      [parseParseTreeDecoder, 'ParseParseTree'],
+    ),
+    Future.chain(a =>
       pipe(
-        pageDom.window.document,
-        querySelectorEnsureOne('#wpTextbox1', pageDom.window.HTMLTextAreaElement),
-        Either.chain(textArea => {
-          const textAreaDom = new JSDOM(textArea.value)
-          return pipe(textAreaDom.window.document, querySelectorEnsureOne('includeonly'))
-        }),
-        Either.mapLeft(toErrorWithUrl(aramMapChangesUrl)),
+        a.parse.parsetree['*'],
+        parseXML(aramChangesPageParseTreeXMLDecoder, 'AramChangesPageParseTreeXML'),
       ),
     ),
-    Future.chain(includeonly => parsoidParse(includeonly.innerHTML)),
-    Future.chainEitherK(html =>
+    Future.chain(a => pipe(a.root.ignore[0], parseXML(includeOnlyXMLDecoder, 'IncludeOnlyXML'))),
+    Future.chain(a =>
       pipe(
-        new JSDOM(html).window.document,
-        querySelectorEnsureOne('span'),
-        Either.chainNullableK(`Missing attribute ${dataMwAttribute}`)(span =>
-          span.getAttribute(dataMwAttribute),
-        ),
-        Either.mapLeft(toErrorWithUrl(aramMapChangesUrl)),
-      ),
-    ),
-    Future.map<string, unknown>(JSON.parse),
-    Future.chainEitherK(u =>
-      pipe(dataMwDecoder.decode(u), Either.mapLeft(decodeError('DataMw')(u))),
-    ),
-    Future.chain(data =>
-      pipe(
-        data.parts[0].template.params,
-        Dict.toReadonlyArray,
-        List.filterMap(([key, param]) =>
-          pipe(
-            decodeChampionSpell(key),
-            Maybe.map(([champion, spell]) =>
+        a.includeonly,
+        string.split('\n'),
+        NonEmptyArray.init,
+        List.mkString('\n'),
+        string.split('\n|'),
+        NonEmptyArray.tail,
+        List.filterMap(
+          flow(
+            StringUtils.matcher3(nameSpellValueRegex),
+            Maybe.map(([englishName, spell, value]) =>
               pipe(
-                parsoidParse(param.wt),
-                Future.map(html => [champion, spell, html] as const),
+                httpClient.http(
+                  [lolFandomApiPhpUrl, 'get'],
+                  {
+                    searchParams: {
+                      action: 'parse',
+                      format: 'json',
+                      contentmodel: 'wikitext',
+                      text: value,
+                    },
+                  },
+                  [parseTextDecoder, 'ParseText'],
+                ),
+                Future.chainEitherK(res =>
+                  pipe(
+                    new JSDOM(res.parse.text['*']).window.document,
+                    querySelectorEnsureOne('div.mw-parser-output > *:first-child'),
+                    Either.mapLeft(message =>
+                      Error(`${englishName} ${spell}:\n${message}\nValue:\n${value}`),
+                    ),
+                  ),
+                ),
+                Future.map(
+                  (html): ChampionNameSpellHtml => ({
+                    englishName,
+                    spell: spell as Spell,
+                    html: html.outerHTML,
+                  }),
+                ),
               ),
             ),
           ),
@@ -155,17 +175,17 @@ const StaticDataService = (
     ),
     Future.map(
       flow(
-        listGroupByChampion,
+        listGroupByName,
         Dict.map(
           flow(
-            NonEmptyArray.groupBy(([, spell]) => spell),
+            NonEmptyArray.groupBy(c => c.spell),
             Dict.map(
               flow(
-                NonEmptyArray.map(([, , html]) => html),
-                List.mkString('\n'),
+                NonEmptyArray.map(c => c.html),
+                List.mkString(''),
               ),
             ),
-          ) as (as: List<ChampSpellHtml>) => Partial<Dict<Spell, string>>,
+          ) as (as: List<ChampionNameSpellHtml>) => Partial<Dict<Spell, string>>,
         ),
       ),
     ),
@@ -373,11 +393,15 @@ const toErrorWithUrl =
   (e: string): Error =>
     Error(`[${url}] ${e}`)
 
-type ChampSpellHtml = Tuple3<string, Spell, string>
+type ChampionNameSpellHtml = {
+  englishName: string
+  spell: Spell
+  html: string
+}
 
-const listGroupByChampion = List.groupBy<ChampSpellHtml, string>(([champion]) => champion) as (
-  as: List<ChampSpellHtml>,
-) => Dict<string, NonEmptyArray<ChampSpellHtml>>
+const listGroupByName = List.groupBy<ChampionNameSpellHtml, string>(c => c.englishName) as (
+  as: List<ChampionNameSpellHtml>,
+) => Dict<string, NonEmptyArray<ChampionNameSpellHtml>>
 
 type Constructor<E> = {
   new (): E
@@ -410,65 +434,41 @@ function querySelectorEnsureOne<E extends Element>(
   }
 }
 
-const parsoidParse = (input: string): Future<string> =>
-  Future.tryCatch(
-    () =>
-      new Promise<string>(resolve =>
-        parsoid
-          .parse({
-            input,
-            mode: 'wt2html',
-            parsoidOptions: {
-              linting: false,
-              loadWMF: true, // true,
-              useWorker: false,
-              fetchConfig: true, // true,
-              fetchTemplates: true, // true,
-              fetchImageInfo: true, // true,
-              expandExtensions: true, // true,
-              rtTestMode: false,
-              addHTMLTemplateParameters: false,
-              usePHPPreProcessor: true, // true,
-            },
-            envOptions: {
-              domain: 'leagueoflegends.fandom.com', // wiki
-              prefix: 'fandomwiki',
-              pageName: '',
-              scrubWikitext: false,
-              pageBundle: false,
-              wrapSections: false,
-              logLevels: ['fatal', 'error', 'warn'],
-            },
-            oldid: null,
-            contentmodel: null,
-            outputContentVersion: '2.1.0',
-            body_only: true,
-          })
-          .then((res: { html: string }) => resolve(res.html))
-          .done(),
+const nameSpellValueRegex = RegExp(`^(.*)\\s+([${Spell.values.join('')}])\\s+=\\s*\\n(.*)$`, 's')
+
+const parseXML =
+  <A>(decoder: Decoder<unknown, A>, decoderName: string, options?: xml2js.ParserOptions) =>
+  (xml: string): Future<A> =>
+    pipe(
+      Future.tryCatch<unknown>(() => xml2js.parseStringPromise(xml, options)),
+      Future.map(flow(JSON.stringify, JSON.parse)),
+      Future.chainEitherK(u =>
+        pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u))),
       ),
-  )
+    )
 
-const spellRegex = RegExp(`^(.*) ([${Spell.values.join('')}])$`)
-
-const decodeChampionSpell = (raw: string): Maybe<Tuple<string, Spell>> =>
-  pipe(raw, StringUtils.matcher2(spellRegex)) as Maybe<Tuple<string, Spell>>
-
-const dataMwDecoder = StrictStruct.decoder({
-  parts: StrictTuple.decoder(
-    StrictStruct.decoder({
-      template: StrictStruct.decoder({
-        target: StrictStruct.decoder({
-          wt: D.string,
-          function: D.literal('switch'),
-        }),
-        params: D.record(
-          StrictStruct.decoder({
-            wt: D.string,
-          }),
-        ),
-        i: D.number,
-      }),
+const parseParseTreeDecoder = D.struct({
+  parse: D.struct({
+    parsetree: D.struct({
+      '*': D.string,
     }),
-  ),
+  }),
+})
+
+const aramChangesPageParseTreeXMLDecoder = D.struct({
+  root: D.struct({
+    ignore: D.tuple(D.string),
+  }),
+})
+
+const includeOnlyXMLDecoder = D.struct({
+  includeonly: D.string,
+})
+
+const parseTextDecoder = D.struct({
+  parse: D.struct({
+    text: D.struct({
+      '*': D.string,
+    }),
+  }),
 })
