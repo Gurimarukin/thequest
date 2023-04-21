@@ -1,9 +1,10 @@
-import { string } from 'fp-ts'
+import { apply, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import xml2js from 'xml2js'
 
+import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { Spell } from '../../../shared/models/api/Spell'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Tuple3 } from '../../../shared/utils/fp'
@@ -18,15 +19,16 @@ import {
 } from '../../../shared/utils/fp'
 import { decodeError } from '../../../shared/utils/ioTsUtils'
 
+import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 
-const lolFandomApiPhpUrl = 'https://leagueoflegends.fandom.com/api.php'
+const lolFandomApiPhpUrl = `${constants.lolWikiaDomain}/api.php`
 
-export const getFetchWikiaAramChanges = (
-  httpClient: HttpClient,
-): Future<Dict<string, Partial<Dict<Spell, string>>>> =>
-  pipe(
+type WikiaAramChanges = Dict<string, PartialDict<Spell, ChampionSpellHtml>>
+
+export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAramChanges> => {
+  return pipe(
     httpClient.http(
       [lolFandomApiPhpUrl, 'get'],
       {
@@ -60,7 +62,7 @@ export const getFetchWikiaAramChanges = (
             StringUtils.matcher3(nameSpellValueRegex) as (
               str: string,
             ) => Maybe<Tuple3<string, Spell, string>>,
-            Maybe.map(parseChampionChanges(httpClient)),
+            Maybe.map(parseChampionChanges),
           ),
         ),
         List.sequence(Future.ApplicativePar),
@@ -69,15 +71,18 @@ export const getFetchWikiaAramChanges = (
     Future.map(
       flow(
         List.groupByStr(c => c.englishName),
-        Dict.map(nea =>
-          pipe(
-            nea,
+        Dict.map(
+          flow(
             List.groupBy(c => c.spell),
             PartialDict.map(
-              flow(
-                NonEmptyArray.map(c => c.html),
-                List.mkString(''),
-              ),
+              (nea): ChampionSpellHtml => ({
+                spell: NonEmptyArray.head(nea).html.spell,
+                description: pipe(
+                  nea,
+                  NonEmptyArray.map(c => c.html.description),
+                  List.mkString(''),
+                ),
+              }),
             ),
           ),
         ),
@@ -85,10 +90,22 @@ export const getFetchWikiaAramChanges = (
     ),
   )
 
-const parseChampionChanges =
-  (httpClient: HttpClient) =>
-  ([englishName, spell, value]: Tuple3<string, Spell, string>): Future<ChampionNameSpellHtml> =>
-    pipe(
+  function parseChampionChanges([englishName, spell, value]: Tuple3<
+    string,
+    Spell,
+    string
+  >): Future<ChampionSpellHtmlDescription> {
+    return pipe(
+      apply.sequenceS(Future.ApplyPar)({
+        spell: parseSpellWikiText(englishName, spell, `{{ai|${spell}|${englishName}}}`),
+        description: parseSpellWikiText(englishName, spell, value),
+      }),
+      Future.map((html): ChampionSpellHtmlDescription => ({ englishName, spell, html })),
+    )
+  }
+
+  function parseSpellWikiText(englishName: string, spell: Spell, value: string): Future<string> {
+    return pipe(
       httpClient.http(
         [lolFandomApiPhpUrl, 'get'],
         {
@@ -109,26 +126,43 @@ const parseChampionChanges =
           Either.bimap(
             message => Error(`${englishName} ${spell}:\n${message}\nValue:\n${value}`),
             firstChild => {
-              // eslint-disable-next-line functional/no-expression-statements
+              /* eslint-disable functional/no-expression-statements */
               firstChild.querySelectorAll('script').forEach(e => e.remove())
+
+              firstChild.querySelectorAll('img').forEach(e =>
+                pipe(
+                  e.src,
+                  StringUtils.matcher1(imageRegex),
+                  Maybe.fold(
+                    () => undefined,
+                    newStr => e.setAttribute('src', newStr),
+                  ),
+                ),
+              )
+
+              firstChild.querySelectorAll('a').forEach(e => {
+                e.setAttribute('href', new URL(e.href, constants.lolWikiaDomain).toString())
+                e.setAttribute('target', '_blank')
+                e.setAttribute('rel', 'noreferrer')
+              })
+
+              firstChild.querySelectorAll('*').forEach(e => e.removeAttribute('style'))
+              /* eslint-enable functional/no-expression-statements */
+
               return firstChild
             },
           ),
         ),
       ),
-      Future.map(
-        (firstChild): ChampionNameSpellHtml => ({
-          englishName,
-          spell,
-          html: firstChild.outerHTML,
-        }),
-      ),
+      Future.map(firstChild => firstChild.outerHTML),
     )
+  }
+}
 
-type ChampionNameSpellHtml = {
+type ChampionSpellHtmlDescription = {
   englishName: string
   spell: Spell
-  html: string
+  html: ChampionSpellHtml
 }
 
 const parseXML =
@@ -142,7 +176,11 @@ const parseXML =
       ),
     )
 
+// Akshan Q = \n* Scoundrel duration reduced to 25 seconds.
 const nameSpellValueRegex = RegExp(`^(.*)\\s+([${Spell.values.join('')}])\\s+=\\s*\\n(.*)$`, 's')
+
+// https://static.wikia.nocookie.net/leagueoflegends/images/e/e9/Akshan_Going_Rogue.png/revision/latest/scale-to-width-down/20?cb=20210827174804
+const imageRegex = /^(.*\.png).*$/
 
 const parseParseTreeDecoder = D.struct({
   parse: D.struct({

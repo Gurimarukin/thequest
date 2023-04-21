@@ -4,11 +4,12 @@ import * as luainjs from 'lua-in-js'
 import { Either, Future, Try } from '../../../shared/utils/fp'
 import { decodeError } from '../../../shared/utils/ioTsUtils'
 
+import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { WikiaChampionsData } from '../../models/wikia/WikiaChampionsData'
 
-const championDataUrl = 'https://leagueoflegends.fandom.com/wiki/Module:ChampionData/data'
+const championDataUrl = `${constants.lolWikiaDomain}/wiki/Module:ChampionData/data`
 
 const mwCodeClassName = '.mw-code'
 

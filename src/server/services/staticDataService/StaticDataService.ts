@@ -4,6 +4,7 @@ import { flow, identity, pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { Store } from '../../../shared/models/Store'
+import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { Lang } from '../../../shared/models/api/Lang'
 import type { Spell } from '../../../shared/models/api/Spell'
@@ -12,6 +13,7 @@ import { StaticDataChampion } from '../../../shared/models/api/StaticDataChampio
 import { ChampionId } from '../../../shared/models/api/champion/ChampionId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import type { PartialDict } from '../../../shared/utils/fp'
 import {
   Dict,
   Either,
@@ -188,7 +190,7 @@ const ChampionError = {
 const enrichChampions = (
   langDDragonChampions: DDragonChampions,
   wikiaChampions: List<Tuple<EnglishName, WikiaChampionData>>,
-  aramChanges: Dict<EnglishName, Partial<Dict<Spell, string>>>,
+  aramChanges: Dict<EnglishName, PartialDict<Spell, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
   const withoutAramChanges: List<Either<ChampionError, Tuple<EnglishName, StaticDataChampion>>> =
     pipe(

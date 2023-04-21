@@ -250,7 +250,7 @@ const ChampionMasteryHistogram = ({
             },
           ),
         )}
-        <div className="flex items-center p-[6px] text-sm">
+        <div className="flex items-center p-1.5 text-sm">
           <span ref={placementRef}>{championPoints.toLocaleString()}</span>
         </div>
       </div>

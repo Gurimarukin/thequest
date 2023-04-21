@@ -2,10 +2,11 @@ import { predicate } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import React from 'react'
 
-import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import { Dict, List, Maybe } from '../../shared/utils/fp'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { Dict, List, Maybe } from '../../../shared/utils/fp'
 
-import { useStaticData } from '../contexts/StaticDataContext'
+import { useStaticData } from '../../contexts/StaticDataContext'
+import './Aram.css'
 
 export const Aram = (): JSX.Element => {
   const { champions } = useStaticData()
@@ -25,10 +26,19 @@ export const Aram = (): JSX.Element => {
                   <ul className="list-disc pl-8">
                     {pipe(
                       Object.entries(spells),
-                      List.map(([spell, __html]) => (
+                      List.map(([spellName, { spell, description }]) => (
                         <li key={spell}>
-                          <span>{spell}:</span>
-                          <div dangerouslySetInnerHTML={{ __html }} />
+                          <div className="flex items-end gap-1.5">
+                            <span>{spellName}</span>
+                            <div
+                              dangerouslySetInnerHTML={{ __html: spell }}
+                              className="wikia-container"
+                            />
+                          </div>
+                          <div
+                            dangerouslySetInnerHTML={{ __html: description }}
+                            className="wikia-container"
+                          />
                         </li>
                       )),
                     )}

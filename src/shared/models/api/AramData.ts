@@ -6,12 +6,23 @@ import { Dict, List, Maybe } from '../../utils/fp'
 import { WikiaStatsBalance } from '../wikia/WikiaStatsBalance'
 import { Spell } from './Spell'
 
-const spellsProperties: Dict<Spell, Codec<unknown, string, string>> = pipe(
+type ChampionSpellHtml = C.TypeOf<typeof championSpellHtmlCodec>
+type ChampionSpellHtmlOutput = C.OutputOf<typeof championSpellHtmlCodec>
+
+const championSpellHtmlCodec = C.struct({
+  spell: C.string,
+  description: C.string,
+})
+
+const spellsProperties: Dict<
+  Spell,
+  Codec<unknown, ChampionSpellHtmlOutput, ChampionSpellHtmlOutput>
+> = pipe(
   Spell.values,
-  List.reduce(Dict.empty<Spell, Codec<unknown, string, string>>(), (acc, spell) => ({
-    ...acc,
-    [spell]: C.string,
-  })),
+  List.reduce(
+    Dict.empty<Spell, Codec<unknown, ChampionSpellHtmlOutput, ChampionSpellHtml>>(),
+    (acc, spell) => ({ ...acc, [spell]: championSpellHtmlCodec }),
+  ),
 )
 
 type AramData = C.TypeOf<typeof codec>
@@ -23,4 +34,4 @@ const codec = C.struct({
 
 const AramData = { codec }
 
-export { AramData }
+export { AramData, ChampionSpellHtml }

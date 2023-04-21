@@ -1,0 +1,7 @@
+.wikia-container * {
+  display: inline;
+}
+
+.wikia-container .border {
+  border: none;
+}

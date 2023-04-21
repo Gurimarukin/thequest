@@ -203,7 +203,7 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
           )}
           checked={masteriesQuery.position}
           toggleChecked={toggleLaneChecked}
-          iconClassName="p-[6px]"
+          iconClassName="p-1.5"
         />
       </div>
 
@@ -308,7 +308,7 @@ const getSelectLevelsButton =
           onClick={handleClick}
           disabled={isSelected}
           className={cssClasses(
-            'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
+            'flex items-center justify-between gap-1 py-1.5 pr-2 pl-4 text-left text-sm',
             ['hover:bg-black', !isSelected],
             ['bg-goldenrod-secondary text-black', isSelected],
           )}

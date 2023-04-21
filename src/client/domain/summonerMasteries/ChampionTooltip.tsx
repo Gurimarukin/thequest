@@ -41,7 +41,7 @@ export const ChampionTooltip = ({
   aram,
 }: ChampionTooltipProps): JSX.Element => {
   const percentsElement = (
-    <span className="relative flex items-center py-0.5 pl-[6px] shadow-black text-shadow">
+    <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
       {Math.round(percents)} %
     </span>
   )
@@ -104,7 +104,7 @@ export const ChampionTooltip = ({
           nea => (
             <div className="row-span-2 flex flex-col items-center justify-center gap-1 border-l border-mastery4-brown-secondary p-1 text-2xs">
               <span>ARAM</span>
-              <div className="grid grid-cols-[auto_auto] gap-x-[6px]">{nea}</div>
+              <div className="grid grid-cols-[auto_auto] gap-x-1.5">{nea}</div>
             </div>
           ),
         ),
