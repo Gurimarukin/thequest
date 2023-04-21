@@ -17,6 +17,7 @@ import { SummonerMasteriesView } from '../../../shared/models/api/summoner/Summo
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { PartialDict } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
@@ -279,8 +280,9 @@ type EnrichedAll = {
   enrichedMasteries: List<EnrichedChampionMastery>
 }
 
-type PartialMasteriesGrouped = Partial<
-  Dict<`${ChampionLevelOrZero}`, NonEmptyArray<EnrichedChampionMastery>>
+type PartialMasteriesGrouped = PartialDict<
+  `${ChampionLevelOrZero}`,
+  NonEmptyArray<EnrichedChampionMastery>
 >
 
 const enrichAll = (

@@ -7,7 +7,15 @@ import xml2js from 'xml2js'
 import { Spell } from '../../../shared/models/api/Spell'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Tuple3 } from '../../../shared/utils/fp'
-import { Dict, Either, Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import {
+  Dict,
+  Either,
+  Future,
+  List,
+  Maybe,
+  NonEmptyArray,
+  PartialDict,
+} from '../../../shared/utils/fp'
 import { decodeError } from '../../../shared/utils/ioTsUtils'
 
 import { DomHandler } from '../../helpers/DomHandler'
@@ -60,17 +68,18 @@ export const getFetchWikiaAramChanges = (
     ),
     Future.map(
       flow(
-        listGroupByName,
-        Dict.map(
-          flow(
-            NonEmptyArray.groupBy(c => c.spell),
-            Dict.map(
+        List.groupByStr(c => c.englishName),
+        Dict.map(nea =>
+          pipe(
+            nea,
+            List.groupBy(c => c.spell),
+            PartialDict.map(
               flow(
                 NonEmptyArray.map(c => c.html),
                 List.mkString(''),
               ),
             ),
-          ) as (as: List<ChampionNameSpellHtml>) => Partial<Dict<Spell, string>>,
+          ),
         ),
       ),
     ),
@@ -121,10 +130,6 @@ type ChampionNameSpellHtml = {
   spell: Spell
   html: string
 }
-
-const listGroupByName = List.groupBy<ChampionNameSpellHtml, string>(c => c.englishName) as (
-  as: List<ChampionNameSpellHtml>,
-) => Dict<string, NonEmptyArray<ChampionNameSpellHtml>>
 
 const parseXML =
   <A>(decoder: Decoder<unknown, A>, decoderName: string, options?: xml2js.ParserOptions) =>

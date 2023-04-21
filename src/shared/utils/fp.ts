@@ -38,6 +38,7 @@ export const inspect =
   }
 
 export type NotUsed = Newtype<{ readonly NotUsed: unique symbol }, void>
+
 export const NotUsed = iso<NotUsed>().wrap(undefined)
 
 // a Future is an IO
@@ -49,27 +50,40 @@ type NonIONonNotUsed<A> = A extends NotUsed ? never : NonIO<A>
 export const toNotUsed = <A>(_: NonIONonNotUsed<A>): NotUsed => NotUsed
 
 export type Dict<K extends string, A> = readonlyRecord.ReadonlyRecord<K, A>
+
 export const Dict = {
   ...readonlyRecord,
   empty: <K extends string, A>(): Dict<K, A> => readonlyRecord.empty,
 }
 
+export type PartialDict<K extends string, A> = Partial<Dict<K, A>>
+
+export const PartialDict = {
+  map: readonlyRecord.map as <A, B>(
+    f: (a: A) => B,
+  ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
+}
+
 export type Either<E, A> = either.Either<E, A>
+
 export const Either = {
   ...either,
   exists: either.exists as <A>(predicate: Predicate<A>) => <E>(ma: either.Either<E, A>) => boolean,
 }
 
 export type Maybe<A> = option.Option<A>
+
 const maybeDecoder = <I, A>(decoder: Decoder<I, A>): Decoder<I | null | undefined, Maybe<A>> => ({
   decode: u =>
     u === null || u === undefined
       ? D.success(option.none)
       : pipe(decoder.decode(u), either.map(option.some)),
 })
+
 const maybeEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<O | null, Maybe<A>> => ({
   encode: flow(option.map(encoder.encode), option.toNullable),
 })
+
 export const Maybe = {
   ...option,
   every: <A>(predicate: Predicate<A>): ((fa: Maybe<A>) => boolean) =>
@@ -81,14 +95,21 @@ export const Maybe = {
 }
 
 export type NonEmptyArray<A> = readonlyNonEmptyArray.ReadonlyNonEmptyArray<A>
+
 const neaDecoder = <A>(decoder: Decoder<unknown, A>): Decoder<unknown, NonEmptyArray<A>> =>
   pipe(D.array(decoder), D.refine<List<A>, NonEmptyArray<A>>(List.isNonEmpty, 'NonEmptyArray'))
+
 const neaEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<NonEmptyArray<O>, NonEmptyArray<A>> => ({
   encode: NonEmptyArray.map(encoder.encode),
 })
 
+const {
+  groupBy: {},
+  ...neaMethods
+} = readonlyNonEmptyArray
+
 export const NonEmptyArray = {
-  ...readonlyNonEmptyArray,
+  ...neaMethods,
   asMutable: identity as <A>(fa: NonEmptyArray<A>) => nonEmptyArray.NonEmptyArray<A>,
   decoder: neaDecoder,
   encoder: neaEncoder,
@@ -97,10 +118,7 @@ export const NonEmptyArray = {
 }
 
 export type List<A> = ReadonlyArray<A>
-const listGroupBy = <A, K extends string>(
-  f: (a: A) => K,
-): ((as: List<A>) => Partial<Dict<K, NonEmptyArray<A>>>) =>
-  readonlyArray.match(() => readonlyRecord.empty, readonlyNonEmptyArray.groupBy(f))
+
 function mkString(sep: string): (list: List<string>) => string
 function mkString(start: string, sep: string, end: string): (list: List<string>) => string
 function mkString(startOrSep: string, sep?: string, end?: string): (list: List<string>) => string {
@@ -109,13 +127,19 @@ function mkString(startOrSep: string, sep?: string, end?: string): (list: List<s
       ? `${startOrSep}${list.join(sep)}${end}`
       : list.join(startOrSep)
 }
+
 const listDecoder: <A>(decoder: Decoder<unknown, A>) => Decoder<unknown, List<A>> = D.array
+
 const listEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<List<O>, List<A>> => ({
   encode: readonlyArray.map(encoder.encode),
 })
+
 export const List = {
   ...readonlyArray,
-  groupBy: listGroupBy,
+  groupBy: readonlyNonEmptyArray.groupBy as <A, K extends string>(
+    f: (a: A) => K,
+  ) => (as: List<A>) => Partial<Dict<K, NonEmptyArray<A>>>,
+  groupByStr: readonlyNonEmptyArray.groupBy,
   asMutable: identity as <A>(fa: List<A>) => A[],
   mkString,
   decoder: listDecoder,
@@ -125,6 +149,7 @@ export const List = {
 }
 
 export type Tuple<A, B> = readonly [A, B]
+
 export const Tuple = {
   ...readonlyTuple,
   of: tuple,
@@ -133,11 +158,13 @@ export const Tuple = {
 export type Tuple3<A, B, C> = readonly [A, B, C]
 
 export type Try<A> = Either<Error, A>
+
 const {
   right: {},
   left: {},
   ...tryMethods
 } = either
+
 export const Try = {
   ...tryMethods,
   success: either.right as <A>(a: A) => Try<A>,
@@ -154,8 +181,10 @@ export const Try = {
     ),
 }
 
-const futureNotUsed: Future<NotUsed> = taskEither.right(NotUsed)
 export type Future<A> = task.Task<Try<A>>
+
+const futureNotUsed: Future<NotUsed> = taskEither.right(NotUsed)
+
 const {
   right: {},
   left: {},
@@ -187,18 +216,23 @@ export const Future = {
       pipe(future, task.delay(MsDuration.unwrap(ms))),
 }
 
+export type IO<A> = io.IO<Try<A>>
+
 const ioNotUsed: IO<NotUsed> = ioEither.right(NotUsed)
+
 const ioFromIO: <A>(fa: io.IO<A>) => IO<A> = ioEither.fromIO
+
 const ioRun =
   (onError: (e: Error) => io.IO<NotUsed>) =>
   (ioA: IO<NotUsed>): NotUsed =>
     pipe(ioA, io.chain(either.fold(onError, io.of)))()
-export type IO<A> = io.IO<Try<A>>
+
 const {
   right: {},
   left: {},
   ...ioMethods
 } = ioEither
+
 export const IO = {
   ...ioMethods,
   successful: ioEither.right as <A>(a: A) => IO<A>,
