@@ -74,15 +74,15 @@ const isPercentsStat = (stat: Key): boolean => List.elem(Eq)(stat, percentsStats
 const isMalusStat = (stat: Key): boolean => List.elem(Eq)(stat, malusStats)
 
 const label: Dict<Key, string> = {
-  dmg_dealt: 'dmg_dealt',
-  dmg_taken: 'dmg_taken',
-  healing: 'healing',
-  shielding: 'shielding',
-  ability_haste: 'ability_haste',
-  energy_regen: 'energy_regen',
-  attack_speed: 'attack_speed',
-  movement_speed: 'movement_speed',
-  tenacity: 'tenacity',
+  dmg_dealt: 'Damage dealt',
+  dmg_taken: 'Damage taken',
+  healing: 'Healing',
+  shielding: 'Shielding',
+  ability_haste: 'Ability haste',
+  energy_regen: 'Energy regeneration',
+  attack_speed: 'Attack speed',
+  movement_speed: 'Movement speed',
+  tenacity: 'Tenacity',
 }
 
 const WikiaStatsBalance = {

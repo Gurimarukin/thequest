@@ -146,7 +146,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
                 e.setAttribute('rel', 'noreferrer')
               })
 
-              firstChild.querySelectorAll('*').forEach(e => e.removeAttribute('style'))
+              firstChild.querySelectorAll('.inline-image').forEach(e => e.removeAttribute('style'))
               /* eslint-enable functional/no-expression-statements */
 
               return firstChild

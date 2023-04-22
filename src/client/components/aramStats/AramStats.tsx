@@ -76,23 +76,24 @@ export const getAramStats =
 
     return (
       <>
-        <div className={cssClasses('flex flex-col', className1)}>{children1}</div>
-        {List.isNonEmpty(children2) ? (
-          <div className={cssClasses('flex flex-col', className2)}>{children2}</div>
-        ) : null}
+        <ul className={className1}>{children1}</ul>
+        {List.isNonEmpty(children2) ? <ul className={className2}>{children2}</ul> : null}
       </>
     )
   }
 
-export const renderStatIcon = (name: WikiaStatsBalanceKey): JSX.Element => (
+export const renderStatIcon = (name: WikiaStatsBalanceKey, className?: string): JSX.Element => (
   <img
     src={Assets.stats[name]}
     alt={`Icône stat ${WikiaStatsBalance.label[name]}`}
-    className="h-2.5 w-2.5 bg-contain brightness-75 sepia"
+    className={cssClasses('bg-contain brightness-75 sepia', className)}
   />
 )
 
-export const renderStatValue = (name: WikiaStatsBalanceKey): ((value: number) => JSX.Element) => {
+export const renderStatValue = (
+  name: WikiaStatsBalanceKey,
+  className?: string,
+): ((value: number) => JSX.Element) => {
   const isMalusStat = WikiaStatsBalance.isMalusStat(name)
   const maybeUnit = WikiaStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
   return value => {
@@ -103,6 +104,7 @@ export const renderStatValue = (name: WikiaStatsBalanceKey): ((value: number) =>
           'flex gap-0.5 justify-self-end font-mono',
           ['text-green-600', isMalusStat ? n < 0 : 0 < n],
           ['text-red-600', isMalusStat ? 0 < n : n < 0],
+          className,
         )}
       >
         <span>

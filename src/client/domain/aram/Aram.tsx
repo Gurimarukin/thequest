@@ -1,6 +1,6 @@
 import { monoid, number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef } from 'react'
 
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -8,7 +8,9 @@ import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalanc
 import type { NonEmptyArray } from '../../../shared/utils/fp'
 import { List, Maybe, PartialDict } from '../../../shared/utils/fp'
 
-import { AramStatsShort } from '../../components/aramStats/AramStatsShort'
+import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
+import { AramStatsFull } from '../../components/aramStats/AramStatsFull'
+import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { cssClasses } from '../../utils/cssClasses'
 import './Aram.css'
@@ -66,51 +68,6 @@ export const Aram = (): JSX.Element => {
   )
 }
 
-type ChampionsProps = {
-  title: React.ReactNode
-  className?: string
-  children: NonEmptyArray<StaticDataChampion> | undefined
-}
-
-const commonClassName = 'gap-y-[1px]'
-
-const Champions = ({ title, className, children }: ChampionsProps): JSX.Element => {
-  const { assets } = useStaticData()
-
-  return (
-    <div className={cssClasses('flex flex-wrap content-start items-center gap-3 p-3', className)}>
-      <h2 className="w-full">{title}</h2>
-      {children !== undefined
-        ? pipe(
-            children,
-            List.map(c => (
-              <div
-                key={ChampionKey.unwrap(c.key)}
-                className={cssClasses(
-                  commonClassName,
-                  'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] gap-x-1.5 overflow-hidden rounded-tr-xl rounded-bl-xl border border-goldenrod bg-zinc-900 text-2xs',
-                )}
-              >
-                <div className="h-12 w-12 overflow-hidden">
-                  <img
-                    src={assets.champion.square(c.key)}
-                    alt={`Icône de ${c.name}`}
-                    className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
-                  />
-                </div>
-                <AramStatsShort
-                  aram={c.aram}
-                  className1={cssClasses(commonClassName, 'row-span-2 self-center py-0.5 pr-1.5')}
-                  className2={cssClasses(commonClassName, 'self-start py-0.5 pl-1.5')}
-                />
-              </div>
-            )),
-          )
-        : null}
-    </div>
-  )
-}
-
 const normalizeStats = (stats: WikiaStatsBalance): number =>
   pipe(
     stats,
@@ -125,3 +82,66 @@ const normalizeStats = (stats: WikiaStatsBalance): number =>
     }),
     monoid.concatAll(number.MonoidSum),
   )
+
+type ChampionsProps = {
+  title: React.ReactNode
+  className?: string
+  children: NonEmptyArray<StaticDataChampion> | undefined
+}
+
+const commonClassName = 'gap-y-[1px]'
+
+const Champions = ({ title, className, children }: ChampionsProps): JSX.Element => (
+  <div className={cssClasses('flex flex-wrap content-start items-center gap-1 p-3', className)}>
+    <h2 className="w-full text-sm">{title}</h2>
+    {children !== undefined
+      ? pipe(
+          children,
+          List.map(c => <Champion key={ChampionKey.unwrap(c.key)} champion={c} />),
+        )
+      : null}
+  </div>
+)
+
+type ChampionProps = {
+  champion: StaticDataChampion
+}
+
+const Champion = ({ champion }: ChampionProps): JSX.Element => {
+  const { assets } = useStaticData()
+  const hoverRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <>
+      <div
+        ref={hoverRef}
+        className={cssClasses(
+          commonClassName,
+          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] gap-x-1.5 overflow-hidden rounded-tr-xl rounded-bl-xl border border-goldenrod bg-zinc-900 text-2xs',
+        )}
+      >
+        <div className="h-12 w-12 overflow-hidden">
+          <img
+            src={assets.champion.square(champion.key)}
+            alt={`Icône de ${champion.name}`}
+            className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
+          />
+        </div>
+        <AramStatsCompact
+          aram={champion.aram}
+          className1={cssClasses(
+            commonClassName,
+            'row-span-2 self-center flex flex-col py-0.5 pr-1.5',
+          )}
+          className2={cssClasses(commonClassName, 'self-start flex flex-col py-0.5 pl-1.5')}
+        />
+      </div>
+      <Tooltip hoverRef={hoverRef} className="max-w-md">
+        <AramStatsFull
+          aram={champion.aram}
+          className1="grid grid-cols-[auto_auto_1fr] items-center gap-x-2 gap-y-1"
+        />
+      </Tooltip>
+    </>
+  )
+}

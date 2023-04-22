@@ -2,6 +2,7 @@
 - recherches récentes : stocker l'id côté serveur
 - useless qs.stringify?
 - random champion
+- tailwind colors
 - toaster (replace alert)
 - account menu
 - admin bo

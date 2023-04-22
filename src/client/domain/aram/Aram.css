@@ -1,9 +1,35 @@
 .wikia * {
   display: inline;
+  white-space: normal;
 }
 
 .wikia .border {
   border: none;
+}
+
+.wikia a {
+  pointer-events: none;
+  cursor: default;
+}
+
+.wikia ul {
+  display: block;
+  list-style-type: disc;
+}
+
+.wikia li {
+  display: list-item;
+}
+
+.wikia ul {
+  padding-left: 0.75rem;
+}
+
+.wikia .inline-image {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
 }
 
 .wikia.compact .inline-image > span:not(.border) {
