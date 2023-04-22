@@ -62,6 +62,9 @@ export const PartialDict = {
   map: readonlyRecord.map as <A, B>(
     f: (a: A) => B,
   ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
+  toReadonlyArray: readonlyRecord.toReadonlyArray as <K extends string, A>(
+    r: PartialDict<K, A>,
+  ) => List<Tuple<K, A | undefined>>,
 }
 
 export type Either<E, A> = either.Either<E, A>
@@ -138,7 +141,7 @@ export const List = {
   ...readonlyArray,
   groupBy: readonlyNonEmptyArray.groupBy as <A, K extends string>(
     f: (a: A) => K,
-  ) => (as: List<A>) => Partial<Dict<K, NonEmptyArray<A>>>,
+  ) => (as: List<A>) => PartialDict<K, NonEmptyArray<A>>,
   groupByStr: readonlyNonEmptyArray.groupBy,
   asMutable: identity as <A>(fa: List<A>) => A[],
   mkString,

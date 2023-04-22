@@ -1,7 +1,11 @@
-.wikia-container * {
+.wikia * {
   display: inline;
 }
 
-.wikia-container .border {
+.wikia .border {
   border: none;
+}
+
+.wikia.compact .inline-image > span:not(.border) {
+  display: none;
 }

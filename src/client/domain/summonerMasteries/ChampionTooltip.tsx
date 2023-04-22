@@ -1,12 +1,11 @@
-import type { eq } from 'fp-ts'
-import { string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import React from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
-import { PercentsStats, WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
+import type { WikiaStatsBalanceKey } from '../../../shared/models/wikia/WikiaStatsBalance'
+import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Dict, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -149,14 +148,14 @@ export const bgGradientMastery = (level: ChampionLevelOrZero): string => {
 }
 
 type StatProps = {
-  name: keyof WikiaStatsBalance
-  value: Exclude<WikiaStatsBalance[keyof WikiaStatsBalance], undefined>
+  name: WikiaStatsBalanceKey
+  value: Exclude<WikiaStatsBalance[WikiaStatsBalanceKey], undefined>
 }
 
 const Stat = ({ name, value }: StatProps): JSX.Element => {
-  const n = WikiaStatsBalance.isPercentsStats(name) ? (value * 1000 - 1000) / 10 : value
-  const isMalusStat = List.elem(keysEq)(name, malusStats)
-  const maybeUnit = List.elem(keysEq)(name, percentsUnits) ? Maybe.some('%') : Maybe.none
+  const n = WikiaStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
+  const isMalusStat = WikiaStatsBalance.isMalusStat(name)
+  const maybeUnit = WikiaStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
   return (
     <>
       <span className="font-mono">{WikiaStatsBalance.label[name]}</span>
@@ -182,12 +181,3 @@ const Stat = ({ name, value }: StatProps): JSX.Element => {
     </>
   )
 }
-
-const keysEq: eq.Eq<keyof WikiaStatsBalance> = string.Eq
-
-const malusStats: List<keyof WikiaStatsBalance> = ['dmg_taken']
-
-const percentsUnits: List<keyof WikiaStatsBalance> = pipe(
-  PercentsStats.values,
-  List.difference(keysEq)(['tenacity']),
-)
