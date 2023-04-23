@@ -1,6 +1,7 @@
 import { separated } from 'fp-ts'
+import type { Separated } from 'fp-ts/Separated'
 import { flow, identity, pipe } from 'fp-ts/function'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import type { AramData, ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { Spell } from '../../../shared/models/api/Spell'
@@ -14,20 +15,59 @@ import { partitionStats } from './partitionStats'
 
 export type AramStatsProps = {
   aram: AramData
-  className1?: string
-  className2?: string
+  splitAt?: number
+  /**
+   * @default false
+   */
+  simpleStatsSpellsSplit?: boolean
+  /**
+   * @prop renderChildren
+   * Called only if isSome(aram.stats) or isSome(aram.spells).
+   */
+  children: (children1: List<JSX.Element>, children2: List<JSX.Element>) => JSX.Element
 }
 
-export const getAramStats =
-  (
-    renderStat: (name: WikiaStatsBalanceKey) => (value: number) => JSX.Element,
-    renderSpell: (spell: Spell) => (html: ChampionSpellHtml) => JSX.Element,
-    splitAt: number,
-  ) =>
-  ({ aram, className1, className2 }: AramStatsProps): JSX.Element | null => {
-    if (Maybe.isNone(aram.stats) && Maybe.isNone(aram.spells)) return null
+type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => JSX.Element
+type RenderSpell = (spell: Spell) => (html: ChampionSpellHtml) => JSX.Element
 
-    const [children1_, children2_] = pipe(
+export const getAramStats = (
+  renderStat: RenderStat,
+  renderSpell: RenderSpell,
+  defaultSplitAt: number,
+): ((props: AramStatsProps) => JSX.Element | null) => {
+  const separateChildren = getSeparateChildren(renderStat, renderSpell)
+  return ({
+    aram,
+    splitAt = defaultSplitAt,
+    simpleStatsSpellsSplit = false,
+    children: renderChildren,
+  }) => {
+    const maybeChildren = useMemo(
+      () =>
+        Maybe.isNone(aram.stats) && Maybe.isNone(aram.spells)
+          ? Maybe.none
+          : Maybe.some(separateChildren(aram, splitAt, simpleStatsSpellsSplit)),
+      [aram, simpleStatsSpellsSplit, splitAt],
+    )
+
+    return pipe(
+      maybeChildren,
+      Maybe.fold(
+        () => null,
+        ({ left: children2, right: children1 }) => renderChildren(children1, children2),
+      ),
+    )
+  }
+}
+
+const getSeparateChildren =
+  (renderStat: RenderStat, renderSpell: RenderSpell) =>
+  (
+    aram: AramData,
+    splitAt: number,
+    simpleStatsSpellsSplit: boolean,
+  ): Separated<List<JSX.Element>, List<JSX.Element>> => {
+    const eithers = pipe(
       [
         pipe(
           aram.stats,
@@ -64,21 +104,19 @@ export const getAramStats =
       ],
       List.compact,
       List.chain(identity),
-      List.splitAt(splitAt),
     )
 
-    const { left: children2, right: children1 } = pipe(
-      partitionStats(children2_),
+    if (simpleStatsSpellsSplit) {
+      return List.separate(eithers)
+    }
+
+    const [children1, children2] = pipe(eithers, List.splitAt(splitAt))
+
+    return pipe(
+      partitionStats(children2),
       separated.map(tail =>
-        pipe(children1_, List.map(Either.getOrElse(identity)), List.concat(tail)),
+        pipe(children1, List.map(Either.getOrElse(identity)), List.concat(tail)),
       ),
-    )
-
-    return (
-      <>
-        <ul className={className1}>{children1}</ul>
-        {List.isNonEmpty(children2) ? <ul className={className2}>{children2}</ul> : null}
-      </>
     )
   }
 

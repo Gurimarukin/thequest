@@ -13,7 +13,7 @@ export const AramStatsFull: (props: AramStatsProps) => JSX.Element | null = getA
     const renderStatValue_ = renderStatValue(name, 'pt-1')
     return value => (
       <li key={name} className="contents">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pr-2">
           <span>{icon}</span>
           <span className="grow">{label}</span>
         </div>

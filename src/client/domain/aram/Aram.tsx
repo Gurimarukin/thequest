@@ -130,21 +130,33 @@ const Champion = ({ champion }: ChampionProps): JSX.Element => {
             className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
           />
         </div>
-        <AramStatsCompact
-          aram={champion.aram}
-          className1={cssClasses(
-            commonClassName,
-            'row-span-2 self-center flex flex-col py-0.5 pr-1.5',
-          )}
-          className2={cssClasses(commonClassName, 'self-start flex flex-col py-0.5 pl-1.5')}
-        />
+        <AramStatsCompact aram={champion.aram}>{renderChildrenCompact}</AramStatsCompact>
       </div>
       <Tooltip hoverRef={hoverRef} className="max-w-md">
-        <AramStatsFull
-          aram={champion.aram}
-          className1="grid grid-cols-[auto_auto_1fr] items-center gap-x-2 gap-y-1"
-        />
+        <AramStatsFull aram={champion.aram}>{renderChildrenFull}</AramStatsFull>
       </Tooltip>
     </>
   )
 }
+
+const renderChildrenCompact = (
+  children1: List<JSX.Element>,
+  children2: List<JSX.Element>,
+): JSX.Element => (
+  <>
+    <ul
+      className={cssClasses(commonClassName, 'row-span-2 flex flex-col self-center py-0.5 pr-1.5')}
+    >
+      {children1}
+    </ul>
+    {List.isNonEmpty(children2) ? (
+      <ul className={cssClasses(commonClassName, 'flex flex-col self-start py-0.5 pl-1.5')}>
+        {children2}
+      </ul>
+    ) : null}
+  </>
+)
+
+const renderChildrenFull = (children1: List<JSX.Element>): JSX.Element => (
+  <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>
+)
