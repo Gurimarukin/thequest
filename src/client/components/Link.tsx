@@ -22,9 +22,11 @@ export const Link = ({
 
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault()
-      onClick_?.(e)
-      navigate(to)
+      if (!e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        onClick_?.(e)
+        navigate(to)
+      }
     },
     [navigate, onClick_, to],
   )
