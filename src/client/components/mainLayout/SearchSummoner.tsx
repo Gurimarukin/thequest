@@ -129,6 +129,7 @@ export const SearchSummoner = (): JSX.Element => {
             value={summonerName}
             onChange={handleChange}
             onFocus={handleFocus}
+            placeholder="Rechercher invocateur"
             className="w-52 border border-goldenrod bg-black pl-2 pr-8"
           />
           <ul
