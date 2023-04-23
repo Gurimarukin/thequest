@@ -10,6 +10,7 @@ import { List, Maybe, PartialDict } from '../../../shared/utils/fp'
 
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { AramStatsFull } from '../../components/aramStats/AramStatsFull'
+import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { cssClasses } from '../../utils/cssClasses'
@@ -48,23 +49,25 @@ export const Aram = (): JSX.Element => {
   )
 
   return (
-    <div className="h-full w-full overflow-y-auto">
-      <div className="grid grid-cols-2 p-3">
-        <Champions title="Champions buffés">{categories.buffed}</Champions>
-        <Champions title="Champions nerfés" className="border-l border-goldenrod">
-          {categories.nerfed}
-        </Champions>
-        <Champions title="Autres" className="col-span-2 border-t border-goldenrod">
-          {categories.other}
-        </Champions>
-        <Champions
-          title="Champions parfaitement équilibrés"
-          className="col-span-2 border-t border-goldenrod"
-        >
-          {categories.balanced}
-        </Champions>
+    <MainLayout>
+      <div className="h-full w-full overflow-y-auto">
+        <div className="grid grid-cols-2 p-3">
+          <Champions title="Champions buffés">{categories.buffed}</Champions>
+          <Champions title="Champions nerfés" className="border-l border-goldenrod">
+            {categories.nerfed}
+          </Champions>
+          <Champions title="Autres" className="col-span-2 border-t border-goldenrod">
+            {categories.other}
+          </Champions>
+          <Champions
+            title="Champions parfaitement équilibrés"
+            className="col-span-2 border-t border-goldenrod"
+          >
+            {categories.balanced}
+          </Champions>
+        </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }
 
@@ -117,7 +120,7 @@ const Champion = ({ champion }: ChampionProps): JSX.Element => {
         ref={hoverRef}
         className={cssClasses(
           commonClassName,
-          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] gap-x-1.5 overflow-hidden rounded-tr-xl rounded-bl-xl border border-goldenrod bg-zinc-900 text-2xs',
+          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] gap-x-1.5 overflow-hidden rounded-tr-xl rounded-bl-xl border-b border-r border-goldenrod-secondary bg-zinc-900 text-2xs',
         )}
       >
         <div className="h-12 w-12 overflow-hidden">

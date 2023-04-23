@@ -47,6 +47,7 @@ export const appRoutes = {
       q === '' ? '' : `?${q}`
     }`
   },
+  aram: format(aramMatch.formatter, {}),
   login: format(loginMatch.formatter, {}),
   register: format(registerMatch.formatter, {}),
 }
