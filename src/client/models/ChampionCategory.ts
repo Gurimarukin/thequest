@@ -4,7 +4,7 @@ import { pipe } from 'fp-ts/function'
 import type { AramData } from '../../shared/models/api/AramData'
 import { WikiaStatsBalance } from '../../shared/models/wikia/WikiaStatsBalance'
 import { createEnum } from '../../shared/utils/createEnum'
-import type { NonEmptyArray } from '../../shared/utils/fp'
+import type { Dict, NonEmptyArray } from '../../shared/utils/fp'
 import { List, Maybe, PartialDict } from '../../shared/utils/fp'
 
 type ChampionCategory = typeof e.T
@@ -56,11 +56,18 @@ const normalizeStats = (stats: WikiaStatsBalance): number =>
     monoid.concatAll(number.MonoidSum),
   )
 
+const label: Dict<ChampionCategory, string> = {
+  buffed: 'Champions buffés',
+  nerfed: 'Champions nerfés',
+  other: 'Autres',
+  balanced: 'Champions parfaitement équilibrés',
+}
+
 const Ord: ord.Ord<ChampionCategory> = pipe(
   number.Ord,
   ord.contramap(category => e.values.findIndex(c => e.Eq.equals(c, category))),
 )
 
-const ChampionCategory = { groupChampions, fromAramData, Eq: e.Eq, Ord }
+const ChampionCategory = { groupChampions, fromAramData, label, Eq: e.Eq, Ord }
 
 export { ChampionCategory }

@@ -3,7 +3,7 @@ import React, { useMemo, useRef } from 'react'
 
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { NonEmptyArray } from '../../../shared/utils/fp'
+import type { NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 import { List } from '../../../shared/utils/fp'
 
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
@@ -20,23 +20,16 @@ export const Aram = (): JSX.Element => {
 
   const categories = useMemo(() => ChampionCategory.groupChampions(champions), [champions])
 
+  const Champions = useMemo(() => getChampions(categories), [categories])
+
   return (
     <MainLayout>
       <div className="h-full w-full overflow-y-auto">
         <div className="grid grid-cols-2 p-3">
-          <Champions title="Champions buffés">{categories.buffed}</Champions>
-          <Champions title="Champions nerfés" className="border-l border-goldenrod">
-            {categories.nerfed}
-          </Champions>
-          <Champions title="Autres" className="col-span-2 border-t border-goldenrod">
-            {categories.other}
-          </Champions>
-          <Champions
-            title="Champions parfaitement équilibrés"
-            className="col-span-2 border-t border-goldenrod"
-          >
-            {categories.balanced}
-          </Champions>
+          <Champions category="buffed" />
+          <Champions category="nerfed" className="border-l border-goldenrod" />
+          <Champions category="other" className="col-span-2 border-t border-goldenrod" />
+          <Champions category="balanced" className="col-span-2 border-t border-goldenrod" />
         </div>
       </div>
     </MainLayout>
@@ -44,22 +37,26 @@ export const Aram = (): JSX.Element => {
 }
 
 type ChampionsProps = {
-  title: React.ReactNode
+  category: ChampionCategory
   className?: string
-  children: NonEmptyArray<StaticDataChampion> | undefined
 }
 
-const Champions = ({ title, className, children }: ChampionsProps): JSX.Element => (
-  <div className={cssClasses('flex flex-wrap content-start items-center gap-1 p-3', className)}>
-    <h2 className="w-full text-sm">{title}</h2>
-    {children !== undefined
-      ? pipe(
-          children,
-          List.map(c => <Champion key={ChampionKey.unwrap(c.key)} champion={c} />),
-        )
-      : null}
-  </div>
-)
+const getChampions =
+  (categories: PartialDict<ChampionCategory, NonEmptyArray<StaticDataChampion>>) =>
+  ({ category, className }: ChampionsProps): JSX.Element => {
+    const champions = categories[category]
+    return (
+      <div className={cssClasses('flex flex-wrap content-start items-center gap-1 p-3', className)}>
+        <h2 className="w-full text-sm">{ChampionCategory.label[category]}</h2>
+        {champions !== undefined
+          ? pipe(
+              champions,
+              List.map(c => <Champion key={ChampionKey.unwrap(c.key)} champion={c} />),
+            )
+          : null}
+      </div>
+    )
+  }
 
 type ChampionProps = {
   champion: StaticDataChampion
