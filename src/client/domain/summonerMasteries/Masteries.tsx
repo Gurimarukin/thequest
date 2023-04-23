@@ -113,7 +113,10 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       <div
         className={cssClasses(
           'self-center',
-          ['flex max-w-[104rem] flex-wrap justify-center gap-4', masteriesQuery.view === 'compact'],
+          [
+            'flex max-w-[104rem] flex-wrap justify-center gap-4',
+            masteriesQuery.view === 'compact' || masteriesQuery.view === 'aram',
+          ],
           ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
         )}
       >

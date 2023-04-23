@@ -18,6 +18,7 @@ import { Radios, labelValue } from '../../../components/Radios'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
+import { HowlingAbyssSimple } from '../../../imgs/HowlingAbyss'
 import {
   AppsSharp,
   CaretDownOutline,
@@ -278,6 +279,12 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
             'histogram',
             <IconLabel tooltip="Vue histogramme">
               <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'aram',
+            <IconLabel tooltip="Vue ARAM">
+              <HowlingAbyssSimple className="h-[18px]" />
             </IconLabel>,
           )}
         </Radios>
