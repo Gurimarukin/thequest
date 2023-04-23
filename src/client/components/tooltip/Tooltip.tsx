@@ -27,7 +27,7 @@ type Props = {
   hoverRef: RefObject<Element> | NonEmptyArray<RefObject<Element>>
   /**
    * Place the tooltip from this element.
-   * @default hoverRef
+   * @default hoverRef or NonEmptyArray.head(hoverRef)
    */
   placementRef?: RefObject<Element>
   /**
