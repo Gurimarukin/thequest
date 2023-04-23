@@ -21,6 +21,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   glow: Maybe<number> // animation delay (in seconds) if is glowing
   positions: List<ChampionPosition>
   aram: AramData
+  category: ChampionCategory
   isHidden: boolean
 }
 
@@ -51,7 +52,7 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
 
 const byAramCategory: Ord<EnrichedChampionMastery> = pipe(
   ChampionCategory.Ord,
-  ord.contramap(c => ChampionCategory.fromAramData(c.aram)),
+  ord.contramap(c => c.category),
 )
 
 const Lens = {

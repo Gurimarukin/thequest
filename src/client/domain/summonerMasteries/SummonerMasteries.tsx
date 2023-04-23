@@ -28,6 +28,7 @@ import { useUser } from '../../contexts/UserContext'
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
+import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
@@ -331,6 +332,7 @@ const enrichAll = (
             glow,
             positions,
             aram,
+            category: ChampionCategory.fromAramData(aram),
             isHidden: false,
           }),
           champion => ({
@@ -341,6 +343,7 @@ const enrichAll = (
             glow,
             positions,
             aram,
+            category: ChampionCategory.fromAramData(aram),
             isHidden: false,
           }),
         ),

@@ -4,6 +4,32 @@ import { pipe } from 'fp-ts/function'
 
 import { List, Maybe, Tuple } from './fp'
 
+const findFirstWithIndex =
+  <A>(predicate: Predicate<A>) =>
+  (as: List<A>): Maybe<Tuple<number, A>> =>
+    pipe(
+      as,
+      List.findIndex(predicate),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      Maybe.map(i => Tuple.of(i, as[i]!)),
+    )
+
+const mapWithPrevious =
+  <A, B>(f: (prev: Maybe<A>, a: A) => B) =>
+  (as: List<A>): List<B> => {
+    // eslint-disable-next-line functional/no-let
+    let prev: Maybe<A> = Maybe.none
+    return pipe(
+      as,
+      List.map(a => {
+        const res = f(prev, a)
+        // eslint-disable-next-line functional/no-expression-statements
+        prev = Maybe.some(a)
+        return res
+      }),
+    )
+  }
+
 const updateOrAppend =
   <A>(eq: Eq<A>) =>
   (a: A) =>
@@ -17,14 +43,4 @@ const updateOrAppend =
       ),
     )
 
-const findFirstWithIndex =
-  <A>(predicate: Predicate<A>) =>
-  (as: List<A>): Maybe<Tuple<number, A>> =>
-    pipe(
-      as,
-      List.findIndex(predicate),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      Maybe.map(i => Tuple.of(i, as[i]!)),
-    )
-
-export const ListUtils = { updateOrAppend, findFirstWithIndex }
+export const ListUtils = { findFirstWithIndex, mapWithPrevious, updateOrAppend }

@@ -3,12 +3,13 @@ import { number, ord, predicate, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
-import React, { Fragment, useCallback, useMemo, useRef } from 'react'
+import React, { Fragment, useMemo, useRef } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -16,6 +17,7 @@ import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { ChampionCategory } from '../../models/ChampionCategory'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
@@ -83,10 +85,9 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       masteriesQuery.view,
     ])
 
-  const isView = useCallback(
-    (view: MasteriesQueryView): boolean => masteriesQuery.view === view,
-    [masteriesQuery.view],
-  )
+  const isCompact = masteriesQuery.view === 'compact'
+  const isHistogram = masteriesQuery.view === 'histogram'
+  const isAram = masteriesQuery.view === 'aram'
 
   return (
     <>
@@ -94,38 +95,52 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       <div
         className={cssClasses(
           'self-center',
-          [
-            'flex max-w-[104rem] flex-wrap items-start justify-center gap-4',
-            isView('compact') || isView('aram'),
-          ],
-          ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isView('histogram')],
+          ['flex max-w-[104rem] flex-wrap items-start gap-4', isCompact || isAram],
+          ['justify-center', isCompact],
+          ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
         )}
       >
-        {filteredAndSortedMasteries.map(champion => (
-          <Fragment key={ChampionKey.unwrap(champion.championId)}>
-            <div
-              className={cssClasses(
-                'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-900 text-2xs',
-                ['hidden', champion.isHidden],
+        {pipe(
+          filteredAndSortedMasteries,
+          ListUtils.mapWithPrevious((maybePrev, champion) => (
+            <Fragment key={ChampionKey.unwrap(champion.championId)}>
+              {pipe(
+                maybePrev,
+                Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
+                Maybe.fold(
+                  () =>
+                    isAram ? (
+                      <h2 className="w-full text-sm">
+                        {ChampionCategory.label[champion.category]}
+                      </h2>
+                    ) : null,
+                  () => null,
+                ),
               )}
-            >
-              <ChampionMasterySquare
-                {...champion}
-                setChampionShards={setChampionShards}
-                isHistogram={isView('histogram')}
+              <div
+                className={cssClasses(
+                  'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-900 text-2xs',
+                  ['hidden', champion.isHidden],
+                )}
+              >
+                <ChampionMasterySquare
+                  {...champion}
+                  setChampionShards={setChampionShards}
+                  isHistogram={isHistogram}
+                />
+                <ChampionMasteryAram
+                  aram={champion.aram}
+                  className={cssClasses(['hidden', !isAram])}
+                />
+              </div>
+              <ChampionMasteryHistogram
+                maybeMaxPoints={maybeMaxPoints}
+                champion={champion}
+                className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
               />
-              <ChampionMasteryAram
-                aram={champion.aram}
-                className={cssClasses(['hidden', !isView('aram')])}
-              />
-            </div>
-            <ChampionMasteryHistogram
-              maybeMaxPoints={maybeMaxPoints}
-              champion={champion}
-              className={cssClasses(['hidden', !isView('histogram') || champion.isHidden])}
-            />
-          </Fragment>
-        ))}
+            </Fragment>
+          )),
+        )}
       </div>
       <div className="self-center text-sm">{`${plural('champion')(championsCount)} / ${
         champions.length
