@@ -1,3 +1,4 @@
+import { eq } from 'fp-ts'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import type { Decoder } from 'io-ts/Decoder'
@@ -13,6 +14,7 @@ type Enum<A extends NonEmptyArray<Literal>> = {
   decoder: Decoder<unknown, A[number]>
   encoder: Encoder<A[number], A[number]>
   codec: Codec<unknown, A[number], A[number]>
+  Eq: eq.Eq<A[number]>
   T: A[number]
 }
 
@@ -22,6 +24,6 @@ export const createEnum = <A extends NonEmptyArray<Literal>>(...values: A): Enum
   const encoder = E.id<A[number]>()
   const codec = C.make(decoder, encoder)
 
-  const res: Omit<Enum<A>, 'T'> = { values, decoder, encoder, codec }
+  const res: Omit<Enum<A>, 'T'> = { values, decoder, encoder, codec, Eq: eq.eqStrict }
   return res as Enum<A>
 }

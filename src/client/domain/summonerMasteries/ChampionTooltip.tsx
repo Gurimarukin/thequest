@@ -125,9 +125,7 @@ const renderAramChildren = (
   <div className="grid grid-rows-[auto_1fr] items-center gap-1 border-l border-goldenrod-secondary px-2 pt-1 pb-1.5">
     <h4 className="text-center font-bold">ARAM</h4>
     <div className="flex items-center gap-2">
-      {List.isNonEmpty(children1) ? (
-        <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>
-      ) : null}
+      <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>
       {List.isNonEmpty(children2) ? (
         <ul className="grid max-w-xs grid-cols-[auto_auto_1fr] items-center gap-y-1">
           {children2}

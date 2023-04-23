@@ -1,6 +1,3 @@
-import type { eq } from 'fp-ts'
-import { string } from 'fp-ts'
-
 import { createEnum } from '../../utils/createEnum'
 import type { Dict } from '../../utils/fp'
 
@@ -41,8 +38,6 @@ const defaultLang = 'fr_FR' as const
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type TestDefaultLangIsLang = Pick<Dict<Lang, string>, typeof defaultLang>
 
-const Eq: eq.Eq<Lang> = string.Eq
-
-const Lang = { codec: e.codec, values: e.values, Eq, defaultLang }
+const Lang = { codec: e.codec, values: e.values, Eq: e.Eq, defaultLang }
 
 export { Lang }
