@@ -1,3 +1,4 @@
+import { predicate } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
@@ -7,12 +8,12 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionType } from '../../../shared/models/api/champion/ChampionType'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { createEnum } from '../../../shared/utils/createEnum'
-import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtils'
 
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
-type WikiaChampion = D.TypeOf<typeof decoder>
+type WikiaChampionData = D.TypeOf<typeof decoder>
 
 const Resource = createEnum(
   'Blood Well',
@@ -68,6 +69,11 @@ const altTypeDecoder: Decoder<unknown, Maybe<ChampionType>> = D.union(
   Maybe.decoder(ChampionType.decoder),
 )
 
+const maybeBalanceDecoder = pipe(
+  Maybe.decoder(WikiaStatsBalance.codec),
+  D.map(Maybe.filter(predicate.not(Dict.isEmpty))),
+)
+
 const AdaptiveType = createEnum('Magic', 'Physical')
 
 const decoder = StrictStruct.decoder({
@@ -114,11 +120,11 @@ const decoder = StrictStruct.decoder({
     missile_speed: Maybe.decoder(D.number),
     windup_modifier: Maybe.decoder(D.number),
     crit_mod: Maybe.decoder(D.number),
-    aram: Maybe.decoder(WikiaStatsBalance.codec),
-    nb: Maybe.decoder(WikiaStatsBalance.codec),
-    ofa: Maybe.decoder(WikiaStatsBalance.codec),
-    urf: Maybe.decoder(WikiaStatsBalance.codec),
-    usb: Maybe.decoder(WikiaStatsBalance.codec),
+    aram: maybeBalanceDecoder,
+    nb: maybeBalanceDecoder,
+    ofa: maybeBalanceDecoder,
+    urf: maybeBalanceDecoder,
+    usb: maybeBalanceDecoder,
   }),
   fullname: Maybe.decoder(D.string),
   nickname: Maybe.decoder(D.string),
@@ -146,6 +152,6 @@ const decoder = StrictStruct.decoder({
   skills: Maybe.decoder(NonEmptyArray.decoder(D.string)),
 })
 
-const WikiaChampion = { decoder }
+const WikiaChampionData = { decoder }
 
-export { WikiaChampion }
+export { WikiaChampionData }

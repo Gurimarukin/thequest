@@ -28,9 +28,9 @@ import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
 import { RiotAccountService } from './services/RiotAccountService'
 import { RiotApiService } from './services/RiotApiService'
-import { StaticDataService } from './services/StaticDataService'
 import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
+import { StaticDataService } from './services/staticDataService/StaticDataService'
 import { getOnError } from './utils/getOnError'
 
 type Context = ReturnType<typeof of>

@@ -1,3 +1,8 @@
+- aram search
+- recherches récentes : stocker l'id côté client
+- useless qs.stringify?
+- random champion
+- tailwind colors
 - toaster (replace alert)
 - account menu
 - admin bo

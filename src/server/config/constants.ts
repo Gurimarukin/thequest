@@ -28,6 +28,8 @@ export const constants = {
     },
   },
 
+  lolWikiaDomain: 'https://leagueoflegends.fandom.com',
+
   staticDataCacheTtl: MsDuration.hours(2),
   riotApi: {
     regionalHost: 'europe.api.riotgames.com',

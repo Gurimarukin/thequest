@@ -3,17 +3,24 @@ import { number, ord, predicate, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
-import React, { Fragment, useMemo, useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 
+import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { ChampionCategory } from '../../models/ChampionCategory'
+import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
+import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
+import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cssClasses } from '../../utils/cssClasses'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 import { bgGradientMastery } from './ChampionTooltip'
@@ -43,26 +50,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
         List.map(m =>
           filterPredicate(m) ? m : pipe(m, EnrichedChampionMastery.Lens.isHidden.set(true)),
         ),
-        List.sortBy(
-          ((): List<Ord<EnrichedChampionMastery>> => {
-            switch (masteriesQuery.sort) {
-              case 'percents':
-                return [
-                  reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
-                  reverseIfDesc(ordByShardsWithLevel),
-                  reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
-                  EnrichedChampionMastery.Ord.byName,
-                ]
-              case 'points':
-                return [
-                  reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
-                  EnrichedChampionMastery.Ord.byName,
-                ]
-              case 'name':
-                return [reverseIfDesc(EnrichedChampionMastery.Ord.byName)]
-            }
-          })(),
-        ),
+        List.sortBy(getSortBy(masteriesQuery.sort, masteriesQuery.order, masteriesQuery.view)),
       )
 
       return {
@@ -88,56 +76,87 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
           ),
         ),
       }
-
-      function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
-        switch (masteriesQuery.order) {
-          case 'asc':
-            return o
-          case 'desc':
-            return ord.reverse(o)
-        }
-      }
     }, [
       masteries,
       masteriesQuery.level,
-      masteriesQuery.position,
       masteriesQuery.order,
+      masteriesQuery.position,
       masteriesQuery.sort,
+      masteriesQuery.view,
     ])
 
+  const isCompact = masteriesQuery.view === 'compact'
   const isHistogram = masteriesQuery.view === 'histogram'
+  const isAram = masteriesQuery.view === 'aram'
 
   return (
     <>
       <MasteriesFilters searchCount={searchCount} />
       <div
         className={cssClasses(
-          'self-center',
-          ['flex max-w-[104rem] flex-wrap justify-center gap-4', masteriesQuery.view === 'compact'],
-          ['grid w-full max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
+          'w-full self-center',
+          ['grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4', isCompact],
+          ['grid max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
+          [
+            'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
+            isAram,
+          ],
         )}
       >
-        {filteredAndSortedMasteries.map(champion => (
-          <Fragment key={ChampionKey.unwrap(champion.championId)}>
-            <ChampionMasterySquare
-              {...champion}
-              setChampionShards={setChampionShards}
-              isHistogram={isHistogram}
-              className={cssClasses(['hidden', champion.isHidden])}
-            />
-            <ChampionMasteryHistogram
+        {pipe(
+          filteredAndSortedMasteries,
+          ListUtils.mapWithPrevious((maybePrev, champion) => (
+            <Champion
+              key={ChampionKey.unwrap(champion.championId)}
               maybeMaxPoints={maybeMaxPoints}
+              maybePrev={maybePrev}
               champion={champion}
-              className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
+              setChampionShards={setChampionShards}
             />
-          </Fragment>
-        ))}
+          )),
+        )}
       </div>
       <div className="self-center text-sm">{`${plural('champion')(championsCount)} / ${
         champions.length
       }`}</div>
     </>
   )
+}
+
+const getSortBy = (
+  sort: MasteriesQuerySort,
+  order: MasteriesQueryOrder,
+  view: MasteriesQueryView,
+): List<Ord<EnrichedChampionMastery>> => {
+  const aramSort =
+    view === 'aram' ? EnrichedChampionMastery.Ord.byAramCategory : ord.fromCompare(() => 0)
+  switch (sort) {
+    case 'percents':
+      return [
+        aramSort,
+        reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
+        reverseIfDesc(ordByShardsWithLevel),
+        reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
+        EnrichedChampionMastery.Ord.byName,
+      ]
+    case 'points':
+      return [
+        aramSort,
+        reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
+        EnrichedChampionMastery.Ord.byName,
+      ]
+    case 'name':
+      return [aramSort, reverseIfDesc(EnrichedChampionMastery.Ord.byName)]
+  }
+
+  function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
+    switch (order) {
+      case 'asc':
+        return o
+      case 'desc':
+        return ord.reverse(o)
+    }
+  }
 }
 
 const levelFilterPredicate =
@@ -169,6 +188,72 @@ const ordByShardsWithLevel: Ord<EnrichedChampionMastery> = pipe(
     )(c),
   ),
 )
+
+type ChampionProps = {
+  maybeMaxPoints: Maybe<number>
+  maybePrev: Maybe<EnrichedChampionMastery>
+  champion: EnrichedChampionMastery
+  setChampionShards: (champion: ChampionKey) => (count: number) => void
+}
+
+const Champion = ({
+  maybeMaxPoints,
+  maybePrev,
+  champion,
+  setChampionShards,
+}: ChampionProps): JSX.Element => {
+  const { masteriesQuery } = useHistory()
+
+  const hoverRef = useRef<HTMLInputElement>(null)
+
+  const isHistogram = masteriesQuery.view === 'histogram'
+  const isAram = masteriesQuery.view === 'aram'
+
+  return (
+    <>
+      {pipe(
+        maybePrev,
+        Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
+        Maybe.fold(
+          () =>
+            isAram ? (
+              <h2
+                className={cssClasses('col-span-full w-full pb-1 text-sm', [
+                  'pt-4',
+                  Maybe.isSome(maybePrev),
+                ])}
+              >
+                {ChampionCategory.label[champion.category]}
+              </h2>
+            ) : null,
+          () => null,
+        ),
+      )}
+      <div
+        ref={hoverRef}
+        className={cssClasses(
+          'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-800 text-2xs',
+          ['hidden', champion.isHidden],
+          [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
+        )}
+      >
+        <ChampionMasterySquare
+          {...champion}
+          aram={masteriesQuery.view === 'aram' ? Maybe.some(champion.aram) : Maybe.none}
+          setChampionShards={setChampionShards}
+          roundedBrInsteadOfTr={isHistogram}
+          hoverRef={hoverRef}
+        />
+        <ChampionMasteryAram aram={champion.aram} className={cssClasses(['hidden', !isAram])} />
+      </div>
+      <ChampionMasteryHistogram
+        maybeMaxPoints={maybeMaxPoints}
+        champion={champion}
+        className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
+      />
+    </>
+  )
+}
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
@@ -250,7 +335,7 @@ const ChampionMasteryHistogram = ({
             },
           ),
         )}
-        <div className="flex items-center p-[6px] text-sm">
+        <div className="flex items-center p-1.5 text-sm">
           <span ref={placementRef}>{championPoints.toLocaleString()}</span>
         </div>
       </div>
@@ -261,9 +346,7 @@ const ChampionMasteryHistogram = ({
           tooltip => (
             <Tooltip
               hoverRef={[placementRef, hoverRef1, hoverRef2, hoverRef3]}
-              // placementRef={placementRef} // or NonEmptyArray.head(hoverRef) if not defined
               placement="bottom-start"
-              className="!text-2xs"
             >
               {tooltip}
             </Tooltip>
@@ -279,3 +362,22 @@ const rulerColor = (level: number): string => {
   if (level === 4) return 'border-gray-400'
   return 'border-gray-500'
 }
+
+type ChampionMasteryAramProps = {
+  aram: AramData
+  className?: string
+}
+
+const ChampionMasteryAram = ({ aram, className }: ChampionMasteryAramProps): JSX.Element => {
+  const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(className), [className])
+  return (
+    <AramStatsCompact aram={aram} splitAt={Infinity}>
+      {renderChildrenCompact}
+    </AramStatsCompact>
+  )
+}
+
+const getRenderChildrenCompact =
+  (className: string | undefined) =>
+  (children1: List<JSX.Element>): JSX.Element =>
+    <ul className={cssClasses('flex flex-col items-start py-1 px-1.5', className)}>{children1}</ul>

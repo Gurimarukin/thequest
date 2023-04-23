@@ -10,6 +10,7 @@ import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { NotFound } from '../domain/NotFound'
 import { Register } from '../domain/Register'
+import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
 import { appParsers } from './AppRouter'
@@ -26,6 +27,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
       t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),
     ),
   )
+  .alt(appParsers.aram.map(() => t(<Aram />, 'ARAM')))
   .alt(appParsers.login.map(() => t(<Login />, 'Connexion')))
   .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
   .alt(appParsers.discordRedirect.map(() => t(<DiscordRedirect />)))

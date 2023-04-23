@@ -1,6 +1,3 @@
-import type { eq } from 'fp-ts'
-import { string } from 'fp-ts'
-
 import { createEnum } from '../../../utils/createEnum'
 import type { Dict } from '../../../utils/fp'
 
@@ -16,8 +13,6 @@ const label: Dict<ChampionPosition, string> = {
   sup: 'Support',
 }
 
-const Eq: eq.Eq<ChampionPosition> = string.Eq
-
-const ChampionPosition = { ...e, label, Eq }
+const ChampionPosition = { ...e, label }
 
 export { ChampionPosition }

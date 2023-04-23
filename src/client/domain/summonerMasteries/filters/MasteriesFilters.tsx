@@ -18,6 +18,7 @@ import { Radios, labelValue } from '../../../components/Radios'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
+import { HowlingAbyssSimple } from '../../../imgs/HowlingAbyss'
 import {
   AppsSharp,
   CaretDownOutline,
@@ -203,7 +204,7 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
           )}
           checked={masteriesQuery.position}
           toggleChecked={toggleLaneChecked}
-          iconClassName="p-[6px]"
+          iconClassName="p-1.5"
         />
       </div>
 
@@ -216,9 +217,9 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
               value={search}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
-              placeholder="Rechercher un champion"
+              placeholder="Rechercher champion"
               className={cssClasses(
-                'w-[171px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
+                'w-[151px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
                 ['pr-2', search === ''],
                 ['pr-7', search !== ''],
               )}
@@ -280,6 +281,12 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
               <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
             </IconLabel>,
           )}
+          {labelValue(
+            'aram',
+            <IconLabel tooltip="Vue ARAM">
+              <HowlingAbyssSimple className="h-[18px]" />
+            </IconLabel>,
+          )}
         </Radios>
       </div>
     </div>
@@ -308,7 +315,7 @@ const getSelectLevelsButton =
           onClick={handleClick}
           disabled={isSelected}
           className={cssClasses(
-            'flex items-center justify-between gap-1 py-[6px] pr-2 pl-4 text-left text-sm',
+            'flex items-center justify-between gap-1 py-1.5 pr-2 pl-4 text-left text-sm',
             ['hover:bg-black', !isSelected],
             ['bg-goldenrod-secondary text-black', isSelected],
           )}
