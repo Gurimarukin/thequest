@@ -97,7 +97,10 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
           'w-full self-center',
           ['grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] gap-4', isCompact],
           ['grid max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
-          ['flex max-w-[104rem] flex-wrap items-start justify-start gap-x-4 gap-y-1', isAram],
+          [
+            'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-center gap-x-4 gap-y-1',
+            isAram,
+          ],
         )}
       >
         {pipe(
@@ -110,7 +113,12 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
                 Maybe.fold(
                   () =>
                     isAram ? (
-                      <h2 className="w-full text-sm">
+                      <h2
+                        className={cssClasses('col-span-full w-full pb-1 text-sm', [
+                          'pt-4',
+                          Maybe.isSome(maybePrev),
+                        ])}
+                      >
                         {ChampionCategory.label[champion.category]}
                       </h2>
                     ) : null,
@@ -119,8 +127,9 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
               )}
               <div
                 className={cssClasses(
-                  'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-900 text-2xs',
+                  'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-800 text-2xs',
                   ['hidden', champion.isHidden],
+                  [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
                 )}
               >
                 <ChampionMasterySquare
@@ -332,7 +341,7 @@ type ChampionMasteryAramProps = {
 const ChampionMasteryAram = ({ aram, className }: ChampionMasteryAramProps): JSX.Element => {
   const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(className), [className])
   return (
-    <AramStatsCompact aram={aram} splitAt={5}>
+    <AramStatsCompact aram={aram} splitAt={Infinity}>
       {renderChildrenCompact}
     </AramStatsCompact>
   )
@@ -340,12 +349,5 @@ const ChampionMasteryAram = ({ aram, className }: ChampionMasteryAramProps): JSX
 
 const getRenderChildrenCompact =
   (className: string | undefined) =>
-  (children1: List<JSX.Element>, children2: List<JSX.Element>): JSX.Element =>
-    (
-      <>
-        <ul className={cssClasses('flex flex-col py-1 px-1.5', className)}>{children1}</ul>
-        {List.isNonEmpty(children2) ? (
-          <ul className={cssClasses('flex flex-col py-1 pr-1.5', className)}>{children2}</ul>
-        ) : null}
-      </>
-    )
+  (children1: List<JSX.Element>): JSX.Element =>
+    <ul className={cssClasses('flex flex-col items-start py-1 px-1.5', className)}>{children1}</ul>
