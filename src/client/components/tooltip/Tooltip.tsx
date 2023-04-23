@@ -11,7 +11,7 @@ import { NonEmptyArray } from '../../../shared/utils/fp'
 import { useForceRender } from '../../hooks/useForceRender'
 import type { ReactPopperParams } from '../../hooks/useVisiblePopper'
 import { useVisiblePopper } from '../../hooks/useVisiblePopper'
-import { CaretUpSharp } from '../../imgs/svgIcons'
+import { CaretUpSharpCropped } from '../../imgs/svgIcons'
 import { cssClasses } from '../../utils/cssClasses'
 
 const tooltipLayerId = 'tooltip-layer'
@@ -65,7 +65,7 @@ export const Tooltip: React.FC<Props> = ({
       placement,
       modifiers: [
         { name: 'arrow', options: { element: arrowRef.current } },
-        { name: 'offset', options: { offset: [0, 8] } },
+        { name: 'offset', options: { offset: [0, 7] } },
         { name: 'preventOverflow', options: { padding: 8 } },
         // { name: 'flip', options: { padding: 8 } },
         { name: 'eventListeners', enabled: eventListenersEnabled },
@@ -105,12 +105,12 @@ export const Tooltip: React.FC<Props> = ({
       {children}
       <div
         ref={arrowRef}
-        className="group-data-popper-top:bottom-[-11px] group-data-popper-bottom:top-[-11px] group-data-popper-left:right-[-11px] group-data-popper-right:left-[-11px]"
+        className="h-1.5 w-2.5 group-data-popper-top:-bottom-1.5 group-data-popper-bottom:-top-1.5 group-data-popper-left:-right-2 group-data-popper-right:-left-2"
         style={styles['arrow']}
       >
-        <CaretUpSharp
+        <CaretUpSharpCropped
           className={cssClasses(
-            'h-[14px] fill-mastery4-brown-secondary group-data-popper-top:rotate-180',
+            'fill-mastery4-brown-secondary group-data-popper-top:rotate-180',
             ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
             [
               'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
