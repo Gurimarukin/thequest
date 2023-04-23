@@ -1,12 +1,12 @@
+import type { eq } from 'fp-ts'
 import { string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 
-import { createEnum } from '../../utils/createEnum'
-import type { Tuple } from '../../utils/fp'
-import { Dict, List } from '../../utils/fp'
+import type { Dict } from '../../utils/fp'
+import { List, PartialDict } from '../../utils/fp'
 import { StrictPartial } from '../../utils/ioTsUtils'
 
 type WikiaStatsBalance = C.TypeOf<typeof rawCodec>
@@ -25,41 +25,19 @@ const properties = {
 
 const rawCodec = StrictPartial.codec(properties)
 
-const keys = Dict.keys(properties)
-
-type PercentsStats = typeof PercentsStats.T
-
-const PercentsStats = createEnum(
-  'dmg_dealt',
-  'dmg_taken',
-  'healing',
-  'shielding',
-  'energy_regen',
-  'attack_speed',
-  'movement_speed',
-  'tenacity',
-)
-
-// Type check that PercentsStats only contains keys of WikiaStatsBalance
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type TestPercentsStats = WikiaStatsBalance[PercentsStats]
-
-const isPercentsStats = (stat: keyof WikiaStatsBalance): stat is PercentsStats =>
-  List.elem(string.Eq)(stat, PercentsStats.values)
-
-const toReadonlyArray = Dict.toReadonlyArray as (
-  stats: WikiaStatsBalance,
-) => List<Tuple<keyof WikiaStatsBalance, WikiaStatsBalance[keyof WikiaStatsBalance]>>
-
 const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiaStatsBalance> = C.make(
   pipe(
     rawCodec,
     D.map(
       flow(
-        toReadonlyArray,
+        PartialDict.toReadonlyArray,
         List.reduce({} as WikiaStatsBalance, (acc, [key, val]) => {
           if (val === undefined) return acc
-          if (isPercentsStats(key) && val === 1) return acc
+          if (isModifierStat(key)) {
+            if (val === 1) return acc
+          } else {
+            if (val === 0) return acc
+          }
           return { ...acc, [key]: val }
         }),
       ),
@@ -68,18 +46,53 @@ const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiaStatsBalance> = C.
   rawCodec,
 )
 
-const label: Dict<keyof WikiaStatsBalance, string> = {
-  dmg_dealt: 'dmg_dealt',
-  dmg_taken: 'dmg_taken',
-  healing: 'healing',
-  shielding: 'shielding',
-  ability_haste: 'ability_haste',
-  energy_regen: 'energy_regen',
-  attack_speed: 'attack_speed',
-  movement_speed: 'movement_speed',
-  tenacity: 'tenacity',
+const Eq: eq.Eq<Key> = string.Eq
+
+type Key = keyof WikiaStatsBalance
+
+const keys = Object.keys(properties) as List<Key>
+
+const modifierStats: List<Key> = [
+  'dmg_dealt',
+  'dmg_taken',
+  'healing',
+  'shielding',
+  'energy_regen',
+  'attack_speed',
+  'movement_speed',
+  'tenacity',
+]
+
+const percentsStats: List<Key> = pipe(modifierStats, List.difference(Eq)(['tenacity']))
+
+const malusStats: List<Key> = ['dmg_taken']
+
+const isModifierStat = (stat: Key): boolean => List.elem(Eq)(stat, modifierStats)
+
+const isPercentsStat = (stat: Key): boolean => List.elem(Eq)(stat, percentsStats)
+
+const isMalusStat = (stat: Key): boolean => List.elem(Eq)(stat, malusStats)
+
+const label: Dict<Key, string> = {
+  dmg_dealt: 'Damage dealt',
+  dmg_taken: 'Damage taken',
+  healing: 'Healing',
+  shielding: 'Shielding',
+  ability_haste: 'Ability haste',
+  energy_regen: 'Energy regeneration',
+  attack_speed: 'Attack speed',
+  movement_speed: 'Movement speed',
+  tenacity: 'Tenacity',
 }
 
-const WikiaStatsBalance = { keys, codec, isPercentsStats, toReadonlyArray, label }
+const WikiaStatsBalance = {
+  keys,
+  codec,
+  isModifierStat,
+  isPercentsStat,
+  isMalusStat,
+  label,
+  Eq,
+}
 
-export { WikiaStatsBalance, PercentsStats }
+export { WikiaStatsBalance, type Key as WikiaStatsBalanceKey }

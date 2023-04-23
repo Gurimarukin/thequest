@@ -17,6 +17,7 @@ import { SummonerMasteriesView } from '../../../shared/models/api/summoner/Summo
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { PartialDict } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
@@ -27,6 +28,7 @@ import { useUser } from '../../contexts/UserContext'
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
+import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
@@ -214,7 +216,6 @@ const SummonerViewComponent = ({
                       tokensEarned: c.tokensEarned,
                       shardsCount: count,
                       positions: c.positions,
-                      aram: c.aram,
                       leveledUpFrom: n.leveledUpFrom,
                       shardsToRemove: n.shardsToRemove,
                     }),
@@ -279,8 +280,9 @@ type EnrichedAll = {
   enrichedMasteries: List<EnrichedChampionMastery>
 }
 
-type PartialMasteriesGrouped = Partial<
-  Dict<`${ChampionLevelOrZero}`, NonEmptyArray<EnrichedChampionMastery>>
+type PartialMasteriesGrouped = PartialDict<
+  `${ChampionLevelOrZero}`,
+  NonEmptyArray<EnrichedChampionMastery>
 >
 
 const enrichAll = (
@@ -329,6 +331,7 @@ const enrichAll = (
             glow,
             positions,
             aram,
+            category: ChampionCategory.fromAramData(aram),
             isHidden: false,
           }),
           champion => ({
@@ -339,6 +342,7 @@ const enrichAll = (
             glow,
             positions,
             aram,
+            category: ChampionCategory.fromAramData(aram),
             isHidden: false,
           }),
         ),

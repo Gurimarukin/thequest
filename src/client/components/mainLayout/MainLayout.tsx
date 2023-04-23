@@ -3,15 +3,18 @@ import React from 'react'
 
 import { Maybe } from '../../../shared/utils/fp'
 
+import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
-import { appRoutes } from '../../router/AppRouter'
+import { appParsers, appRoutes } from '../../router/AppRouter'
+import { cssClasses } from '../../utils/cssClasses'
 import { Link } from '../Link'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { SearchSummoner } from './SearchSummoner'
 
 export const MainLayout: React.FC = ({ children }) => {
+  const { matchesLocation } = useHistory()
   const { user } = useUser()
 
   return (
@@ -27,6 +30,15 @@ export const MainLayout: React.FC = ({ children }) => {
               />
             </Link>
             <SearchSummoner />
+            <Link
+              to={appRoutes.aram}
+              className={cssClasses('text-sm', [
+                'border-b border-goldenrod',
+                matchesLocation(appParsers.aram),
+              ])}
+            >
+              ARAM
+            </Link>
           </div>
           {pipe(
             user,

@@ -3,9 +3,9 @@ import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import { Table } from 'lua-in-js'
 
-import { WikiaChampion } from './WikiaChampion'
+import { WikiaChampionData } from './WikiaChampionData'
 
-type WikiaChampions = D.TypeOf<typeof decoder>
+type WikiaChampionsData = D.TypeOf<typeof decoder>
 
 const tableDecoder: Decoder<unknown, unknown[] | Record<string, unknown>> = pipe(
   D.id<unknown>(),
@@ -13,8 +13,8 @@ const tableDecoder: Decoder<unknown, unknown[] | Record<string, unknown>> = pipe
   D.map(t => t.toObject()),
 )
 
-const decoder = pipe(tableDecoder, D.compose(D.record(WikiaChampion.decoder)))
+const decoder = pipe(tableDecoder, D.compose(D.record(WikiaChampionData.decoder)))
 
-const WikiaChampions = { decoder }
+const WikiaChampionsData = { decoder }
 
-export { WikiaChampions }
+export { WikiaChampionsData }

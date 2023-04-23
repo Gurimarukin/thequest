@@ -1,4 +1,6 @@
 /* eslint-disable functional/no-return-void */
+import type { Parser } from 'fp-ts-routing'
+import { Route, parse } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import * as history from 'history'
 import qs from 'qs'
@@ -20,6 +22,7 @@ type HistoryContext = {
   location: history.Location
   navigate: (to: string, options?: NavigateOptions) => void
   query: qs.ParsedQs
+  matchesLocation: <A>(parser: Parser<A>) => boolean
 
   masteriesQuery: MasteriesQuery
   updateMasteriesQuery: (f: (q: MasteriesQuery) => MasteriesQuery) => void
@@ -40,6 +43,17 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
   )
 
   const query = useMemo(() => qs.parse(location.search.slice(1)), [location.search])
+
+  const matchesLocation = useCallback(
+    function <A>(parser: Parser<A>) {
+      return parse(
+        parser.map(() => true),
+        Route.parse(location.pathname),
+        false,
+      )
+    },
+    [location.pathname],
+  )
 
   const masteriesQuery = useMemo(
     () =>
@@ -63,7 +77,14 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
     [h, masteriesQuery],
   )
 
-  const value: HistoryContext = { location, navigate, query, masteriesQuery, updateMasteriesQuery }
+  const value: HistoryContext = {
+    location,
+    navigate,
+    query,
+    matchesLocation,
+    masteriesQuery,
+    updateMasteriesQuery,
+  }
 
   return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>
 }

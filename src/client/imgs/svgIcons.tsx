@@ -53,6 +53,14 @@ export const CaretUpSharp: SVGIcon = ({ className }) => (
   </svg>
 )
 
+export const CaretUpSharpCropped: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 224" className={className}>
+    <g transform="translate(-64,-144)">
+      <path d="M448 368L256 144 64 368h384z" />
+    </g>
+  </svg>
+)
+
 export const CheckMarkSharp: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
     <title>Checkmark</title>

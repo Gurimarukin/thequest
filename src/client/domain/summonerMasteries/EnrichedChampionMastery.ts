@@ -11,6 +11,8 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
+import { ChampionCategory } from '../../models/ChampionCategory'
+
 type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   championLevel: ChampionLevelOrZero
   name: string
@@ -19,6 +21,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   glow: Maybe<number> // animation delay (in seconds) if is glowing
   positions: List<ChampionPosition>
   aram: AramData
+  category: ChampionCategory
   isHidden: boolean
 }
 
@@ -47,11 +50,19 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
   ord.contramap(c => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
+const byAramCategory: Ord<EnrichedChampionMastery> = pipe(
+  ChampionCategory.Ord,
+  ord.contramap(c => c.category),
+)
+
 const Lens = {
   shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
   isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
 }
 
-const EnrichedChampionMastery = { Ord: { byPercents, byPoints, byShards, byName }, Lens }
+const EnrichedChampionMastery = {
+  Ord: { byPercents, byPoints, byShards, byName, byAramCategory },
+  Lens,
+}
 
 export { EnrichedChampionMastery }

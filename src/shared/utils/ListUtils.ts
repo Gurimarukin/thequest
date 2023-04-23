@@ -1,21 +1,46 @@
 import type { Eq } from 'fp-ts/Eq'
+import type { Predicate } from 'fp-ts/Predicate'
 import { pipe } from 'fp-ts/function'
 
-import { List } from './fp'
+import { List, Maybe, Tuple } from './fp'
+
+const findFirstWithIndex =
+  <A>(predicate: Predicate<A>) =>
+  (as: List<A>): Maybe<Tuple<number, A>> =>
+    pipe(
+      as,
+      List.findIndex(predicate),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      Maybe.map(i => Tuple.of(i, as[i]!)),
+    )
+
+const mapWithPrevious =
+  <A, B>(f: (prev: Maybe<A>, a: A) => B) =>
+  (as: List<A>): List<B> => {
+    // eslint-disable-next-line functional/no-let
+    let prev: Maybe<A> = Maybe.none
+    return pipe(
+      as,
+      List.map(a => {
+        const res = f(prev, a)
+        // eslint-disable-next-line functional/no-expression-statements
+        prev = Maybe.some(a)
+        return res
+      }),
+    )
+  }
 
 const updateOrAppend =
   <A>(eq: Eq<A>) =>
   (a: A) =>
   (as: List<A>): List<A> =>
-    updateOrAppendRec(as, eq, a, [])
+    pipe(
+      as,
+      List.findIndex(a_ => eq.equals(a_, a)),
+      Maybe.fold(
+        () => pipe(as, List.append(a)),
+        i => List.unsafeUpdateAt(i, a, as),
+      ),
+    )
 
-const updateOrAppendRec = <A>(as: List<A>, eq: Eq<A>, a: A, acc: List<A>): List<A> => {
-  const [head, ...tail] = as
-  if (head === undefined) return pipe(acc, List.append(a))
-
-  if (eq.equals(head, a)) return pipe(acc, List.append(a), List.concat(tail))
-
-  return updateOrAppendRec(tail, eq, a, pipe(acc, List.append<A>(head)))
-}
-
-export const ListUtils = { updateOrAppend }
+export const ListUtils = { findFirstWithIndex, mapWithPrevious, updateOrAppend }

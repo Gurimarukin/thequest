@@ -1,4 +1,6 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
+import { lens } from 'monocle-ts'
 
 import { List } from '../../utils/fp'
 import { AramData } from './AramData'
@@ -16,6 +18,10 @@ const codec = C.struct({
   aram: AramData.codec,
 })
 
-const StaticDataChampion = { codec }
+const Lens = {
+  aramSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('aram'), lens.prop('spells')),
+}
+
+const StaticDataChampion = { codec, Lens }
 
 export { StaticDataChampion }

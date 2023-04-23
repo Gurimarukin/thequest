@@ -4,7 +4,7 @@ import type { Lang } from '../../shared/models/api/Lang'
 import { StaticData } from '../../shared/models/api/StaticData'
 
 import type { DDragonService } from '../services/DDragonService'
-import type { StaticDataService } from '../services/StaticDataService'
+import type { StaticDataService } from '../services/staticDataService/StaticDataService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 

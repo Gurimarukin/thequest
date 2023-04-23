@@ -20,7 +20,6 @@ const { round } = NumberUtils
 
 type ChampionMasterySquareProps = {
   championId: ChampionKey
-  // eslint-disable-next-line react/boolean-prop-naming
   chestGranted: boolean
   tokensEarned: number
   championLevel: ChampionLevelOrZero
@@ -31,12 +30,13 @@ type ChampionMasterySquareProps = {
   shardsCount: Maybe<number>
   glow: Maybe<number>
   positions: List<ChampionPosition>
-  aram: AramData
+  aram: Maybe<AramData>
   setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
   /**
    * @default false
    */
-  isHistogram?: boolean
+  roundedBrInsteadOfTr?: boolean
+  hoverRef?: React.RefObject<HTMLDivElement>
   className?: string
 }
 
@@ -54,7 +54,8 @@ export const ChampionMasterySquare = ({
   positions,
   aram,
   setChampionShards,
-  isHistogram = false,
+  roundedBrInsteadOfTr = false,
+  hoverRef: overrideHoverRef,
   className,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
@@ -71,7 +72,8 @@ export const ChampionMasterySquare = ({
     Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
   )
 
-  const hoverRef = useRef<HTMLDivElement>(null)
+  const hoverRef_ = useRef<HTMLDivElement>(null)
+  const hoverRef = overrideHoverRef ?? hoverRef_
 
   return (
     <div className={cssClasses('relative', className)}>
@@ -80,7 +82,7 @@ export const ChampionMasterySquare = ({
         className={cssClasses(
           ['hidden', !isGlowing],
           [
-            'absolute left-[-6px] top-[-6px] h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm',
+            'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm',
             isGlowing,
           ],
         )}
@@ -92,8 +94,7 @@ export const ChampionMasterySquare = ({
         ref={hoverRef}
         className={cssClasses(
           'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
-          ['rounded-br-xl', isHistogram],
-          ['rounded-tr-xl', !isHistogram],
+          roundedBrInsteadOfTr ? 'rounded-br-xl' : 'rounded-tr-xl',
           ['bg-mastery7-blue', championLevel === 7],
           ['bg-mastery6-violet', championLevel === 6],
           ['bg-mastery5-red', championLevel === 5],
@@ -106,8 +107,8 @@ export const ChampionMasterySquare = ({
         <div
           className={cssClasses(
             'h-12 w-12 overflow-hidden rounded-bl-lg',
-            ['rounded-br-lg', isHistogram],
-            ['rounded-tr-lg', !isHistogram],
+            ['rounded-br-lg', roundedBrInsteadOfTr],
+            ['rounded-tr-lg', !roundedBrInsteadOfTr],
           )}
         >
           <img
@@ -151,7 +152,7 @@ export const ChampionMasterySquare = ({
         )}
       </div>
 
-      <Tooltip hoverRef={hoverRef} placement="top" className="grid grid-cols-[1fr_auto] !p-0">
+      <Tooltip hoverRef={hoverRef} className="grid grid-cols-[auto_auto] !p-0">
         <ChampionTooltip
           chestGranted={chestGranted}
           tokensEarned={tokensEarned}

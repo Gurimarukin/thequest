@@ -125,7 +125,6 @@ module.exports = {
     'object-shorthand': 'warn',
     'prettier/prettier': 'off',
     quotes: ['warn', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
-    'react/boolean-prop-naming': ['warn', { validateNested: true }],
     'react/button-has-type': 'warn',
     'react/display-name': 'off',
     'react/hook-use-state': 'warn',
