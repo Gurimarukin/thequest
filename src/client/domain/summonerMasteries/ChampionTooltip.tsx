@@ -13,7 +13,7 @@ import { cssClasses } from '../../utils/cssClasses'
 
 const { plural } = StringUtils
 
-type ChampionTooltipProps = {
+type Props = {
   // eslint-disable-next-line react/boolean-prop-naming
   chestGranted: boolean
   tokensEarned: number
@@ -26,6 +26,7 @@ type ChampionTooltipProps = {
   positions: List<ChampionPosition>
   aram: AramData
 }
+
 export const ChampionTooltip = ({
   championLevel,
   percents,
@@ -37,7 +38,7 @@ export const ChampionTooltip = ({
   filteredShardsCount,
   positions,
   aram,
-}: ChampionTooltipProps): JSX.Element => {
+}: Props): JSX.Element => {
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
       {Math.round(percents)} %

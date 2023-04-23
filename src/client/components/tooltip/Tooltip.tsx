@@ -1,7 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import type { Placement } from '@popperjs/core'
-import type { MutableRefObject, RefObject } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -24,12 +23,12 @@ if (tooltipLayer === null) {
 }
 
 type Props = {
-  hoverRef: RefObject<Element> | NonEmptyArray<RefObject<Element>>
+  hoverRef: React.RefObject<Element> | NonEmptyArray<React.RefObject<Element>>
   /**
    * Place the tooltip from this element.
    * @default hoverRef or NonEmptyArray.head(hoverRef)
    */
-  placementRef?: RefObject<Element>
+  placementRef?: React.RefObject<Element>
   /**
    * Time spent open by the tooltip after the user navigates away from it / the hover (tablet).
    */
@@ -133,8 +132,8 @@ export const Tooltip: React.FC<Props> = ({
  * Those listeners will mutate `shouldDisplayRef` inner value to control whether or not the tooltip should be displayed.
  */
 const useSetupHoverClickListeners = (
-  hoverRefs: NonEmptyArray<RefObject<Element>>,
-  shouldDisplayRef: MutableRefObject<boolean>,
+  hoverRefs: NonEmptyArray<React.RefObject<Element>>,
+  shouldDisplayRef: React.MutableRefObject<boolean>,
   openedDuration: MsDuration,
   setEventListenersEnabled: React.Dispatch<React.SetStateAction<boolean>>,
 ): (() => void) => {

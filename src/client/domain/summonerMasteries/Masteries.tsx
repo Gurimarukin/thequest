@@ -3,7 +3,7 @@ import { number, ord, predicate, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
-import React, { Fragment, useMemo, useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -106,48 +106,13 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
         {pipe(
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
-            <Fragment key={ChampionKey.unwrap(champion.championId)}>
-              {pipe(
-                maybePrev,
-                Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
-                Maybe.fold(
-                  () =>
-                    isAram ? (
-                      <h2
-                        className={cssClasses('col-span-full w-full pb-1 text-sm', [
-                          'pt-4',
-                          Maybe.isSome(maybePrev),
-                        ])}
-                      >
-                        {ChampionCategory.label[champion.category]}
-                      </h2>
-                    ) : null,
-                  () => null,
-                ),
-              )}
-              <div
-                className={cssClasses(
-                  'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-800 text-2xs',
-                  ['hidden', champion.isHidden],
-                  [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
-                )}
-              >
-                <ChampionMasterySquare
-                  {...champion}
-                  setChampionShards={setChampionShards}
-                  isHistogram={isHistogram}
-                />
-                <ChampionMasteryAram
-                  aram={champion.aram}
-                  className={cssClasses(['hidden', !isAram])}
-                />
-              </div>
-              <ChampionMasteryHistogram
-                maybeMaxPoints={maybeMaxPoints}
-                champion={champion}
-                className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
-              />
-            </Fragment>
+            <Champion
+              key={ChampionKey.unwrap(champion.championId)}
+              maybeMaxPoints={maybeMaxPoints}
+              maybePrev={maybePrev}
+              champion={champion}
+              setChampionShards={setChampionShards}
+            />
           )),
         )}
       </div>
@@ -223,6 +188,71 @@ const ordByShardsWithLevel: Ord<EnrichedChampionMastery> = pipe(
     )(c),
   ),
 )
+
+type ChampionProps = {
+  maybeMaxPoints: Maybe<number>
+  maybePrev: Maybe<EnrichedChampionMastery>
+  champion: EnrichedChampionMastery
+  setChampionShards: (champion: ChampionKey) => (count: number) => void
+}
+
+const Champion = ({
+  maybeMaxPoints,
+  maybePrev,
+  champion,
+  setChampionShards,
+}: ChampionProps): JSX.Element => {
+  const { masteriesQuery } = useHistory()
+
+  const hoverRef = useRef<HTMLInputElement>(null)
+
+  const isHistogram = masteriesQuery.view === 'histogram'
+  const isAram = masteriesQuery.view === 'aram'
+
+  return (
+    <>
+      {pipe(
+        maybePrev,
+        Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
+        Maybe.fold(
+          () =>
+            isAram ? (
+              <h2
+                className={cssClasses('col-span-full w-full pb-1 text-sm', [
+                  'pt-4',
+                  Maybe.isSome(maybePrev),
+                ])}
+              >
+                {ChampionCategory.label[champion.category]}
+              </h2>
+            ) : null,
+          () => null,
+        ),
+      )}
+      <div
+        ref={hoverRef}
+        className={cssClasses(
+          'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-800 text-2xs',
+          ['hidden', champion.isHidden],
+          [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
+        )}
+      >
+        <ChampionMasterySquare
+          {...champion}
+          setChampionShards={setChampionShards}
+          isHistogram={isHistogram}
+          hoverRef={hoverRef}
+        />
+        <ChampionMasteryAram aram={champion.aram} className={cssClasses(['hidden', !isAram])} />
+      </div>
+      <ChampionMasteryHistogram
+        maybeMaxPoints={maybeMaxPoints}
+        champion={champion}
+        className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
+      />
+    </>
+  )
+}
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>

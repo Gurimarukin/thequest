@@ -37,6 +37,7 @@ type ChampionMasterySquareProps = {
    * @default false
    */
   isHistogram?: boolean
+  hoverRef?: React.RefObject<HTMLDivElement>
   className?: string
 }
 
@@ -55,6 +56,7 @@ export const ChampionMasterySquare = ({
   aram,
   setChampionShards,
   isHistogram = false,
+  hoverRef: overrideHoverRef,
   className,
 }: ChampionMasterySquareProps): JSX.Element => {
   const staticData = useStaticData()
@@ -71,7 +73,8 @@ export const ChampionMasterySquare = ({
     Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
   )
 
-  const hoverRef = useRef<HTMLDivElement>(null)
+  const hoverRef_ = useRef<HTMLDivElement>(null)
+  const hoverRef = overrideHoverRef ?? hoverRef_
 
   return (
     <div className={cssClasses('relative', className)}>
@@ -80,7 +83,7 @@ export const ChampionMasterySquare = ({
         className={cssClasses(
           ['hidden', !isGlowing],
           [
-            'absolute left-[-6px] top-[-6px] h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm',
+            'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm',
             isGlowing,
           ],
         )}
@@ -92,8 +95,7 @@ export const ChampionMasterySquare = ({
         ref={hoverRef}
         className={cssClasses(
           'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
-          ['rounded-br-xl', isHistogram],
-          ['rounded-tr-xl', !isHistogram],
+          isHistogram ? 'rounded-br-xl' : 'rounded-tr-xl',
           ['bg-mastery7-blue', championLevel === 7],
           ['bg-mastery6-violet', championLevel === 6],
           ['bg-mastery5-red', championLevel === 5],
