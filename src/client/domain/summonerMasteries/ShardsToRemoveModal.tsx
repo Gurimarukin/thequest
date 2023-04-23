@@ -7,7 +7,6 @@ import { identity, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
@@ -44,7 +43,6 @@ export type ShardsToRemoveNotification = {
   tokensEarned: number
   shardsCount: number
   positions: List<ChampionPosition>
-  aram: AramData
   leveledUpFrom: ChampionLevelOrZero
   shardsToRemove: number
 }
@@ -187,6 +185,7 @@ export const ShardsToRemoveModal = ({
                   {...n}
                   shardsCount={Maybe.some(n.shardsCount)}
                   glow={Maybe.none}
+                  aram={Maybe.none}
                   setChampionShards={null}
                 />
                 <span ref={masteriesRef} className="flex items-center">

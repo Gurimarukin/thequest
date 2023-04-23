@@ -216,7 +216,6 @@ const SummonerViewComponent = ({
                       tokensEarned: c.tokensEarned,
                       shardsCount: count,
                       positions: c.positions,
-                      aram: c.aram,
                       leveledUpFrom: n.leveledUpFrom,
                       shardsToRemove: n.shardsToRemove,
                     }),

@@ -14,7 +14,6 @@ import { cssClasses } from '../../utils/cssClasses'
 const { plural } = StringUtils
 
 type Props = {
-  // eslint-disable-next-line react/boolean-prop-naming
   chestGranted: boolean
   tokensEarned: number
   championLevel: ChampionLevelOrZero
@@ -24,7 +23,7 @@ type Props = {
   percents: number
   filteredShardsCount: Maybe<number>
   positions: List<ChampionPosition>
-  aram: AramData
+  aram: Maybe<AramData>
 }
 
 export const ChampionTooltip = ({
@@ -112,9 +111,17 @@ export const ChampionTooltip = ({
           ) : null}
         </div>
       </div>
-      <AramStatsFull aram={aram} simpleStatsSpellsSplit={true}>
-        {renderAramChildren}
-      </AramStatsFull>
+      {pipe(
+        aram,
+        Maybe.fold(
+          () => null,
+          a => (
+            <AramStatsFull aram={a} simpleStatsSpellsSplit={true}>
+              {renderAramChildren}
+            </AramStatsFull>
+          ),
+        ),
+      )}
     </>
   )
 }

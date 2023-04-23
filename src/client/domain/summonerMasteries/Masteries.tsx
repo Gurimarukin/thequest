@@ -239,8 +239,9 @@ const Champion = ({
       >
         <ChampionMasterySquare
           {...champion}
+          aram={masteriesQuery.view === 'aram' ? Maybe.some(champion.aram) : Maybe.none}
           setChampionShards={setChampionShards}
-          isHistogram={isHistogram}
+          roundedBrInsteadOfTr={isHistogram}
           hoverRef={hoverRef}
         />
         <ChampionMasteryAram aram={champion.aram} className={cssClasses(['hidden', !isAram])} />
@@ -346,7 +347,6 @@ const ChampionMasteryHistogram = ({
             <Tooltip
               hoverRef={[placementRef, hoverRef1, hoverRef2, hoverRef3]}
               placement="bottom-start"
-              className="!text-2xs"
             >
               {tooltip}
             </Tooltip>
