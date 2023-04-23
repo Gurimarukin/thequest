@@ -232,7 +232,7 @@ const Champion = ({
       <div
         ref={hoverRef}
         className={cssClasses(
-          'grid grid-cols-[auto_auto_auto] items-center rounded-xl bg-zinc-800 text-2xs',
+          'grid grid-cols-[auto_auto] rounded-xl bg-zinc-800 text-2xs',
           ['hidden', champion.isHidden],
           [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
         )}
@@ -380,4 +380,8 @@ const ChampionMasteryAram = ({ aram, className }: ChampionMasteryAramProps): JSX
 const getRenderChildrenCompact =
   (className: string | undefined) =>
   (children1: List<JSX.Element>): JSX.Element =>
-    <ul className={cssClasses('flex flex-col items-start py-1 px-1.5', className)}>{children1}</ul>
+    (
+      <ul className={cssClasses('flex flex-col items-start self-center py-1 px-1.5', className)}>
+        {children1}
+      </ul>
+    )
