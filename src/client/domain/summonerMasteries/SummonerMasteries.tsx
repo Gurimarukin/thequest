@@ -253,7 +253,7 @@ const SummonerViewComponent = ({
 
   return (
     <>
-      <div className="flex h-full flex-col gap-6 overflow-y-auto overflow-x-hidden px-2 pb-24 pt-3">
+      <div className="flex h-full flex-col items-center gap-6 overflow-y-auto overflow-x-hidden px-2 pb-24 pt-3">
         <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
         <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
       </div>
