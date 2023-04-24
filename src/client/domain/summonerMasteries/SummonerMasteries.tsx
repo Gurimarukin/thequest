@@ -40,6 +40,8 @@ import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 
+const { cleanChampionName } = StringUtils
+
 // should mutate data before API response
 type OptimisticMutation = {
   optimisticMutation: boolean
@@ -131,10 +133,6 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
 
 const whiteSpaces = /\s+/g
 const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
-
-const nonAZ = /[^a-z]/g
-const clearChampionName = (name: string): string =>
-  StringUtils.cleanUTF8ToASCII(name).toLowerCase().replaceAll(nonAZ, '')
 
 type SummonerViewProps = {
   platform: Platform
@@ -309,7 +307,7 @@ const enrichAll = (
 
       const glow = pipe(
         maybeSearch,
-        Maybe.filter(search => clearChampionName(name).includes(clearChampionName(search))),
+        Maybe.filter(search => cleanChampionName(name).includes(cleanChampionName(search))),
         Maybe.map(() => random.random()),
       )
 

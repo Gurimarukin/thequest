@@ -1,66 +1,112 @@
-import { pipe } from 'fp-ts/function'
-import React, { useMemo, useRef } from 'react'
+/* eslint-disable functional/no-return-void */
+import { ord } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
+import React, { Fragment, useMemo, useRef } from 'react'
 
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
-import { List } from '../../../shared/utils/fp'
+import { ListUtils } from '../../../shared/utils/ListUtils'
+import { StringUtils } from '../../../shared/utils/StringUtils'
+import { List, Maybe } from '../../../shared/utils/fp'
 
+import { SearchChampion } from '../../components/SearchChampion'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { AramStatsFull } from '../../components/aramStats/AramStatsFull'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
+import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionCategory } from '../../models/ChampionCategory'
+import { AramQuery } from '../../models/aramQuery/AramQuery'
 import { cssClasses } from '../../utils/cssClasses'
 import './Aram.css'
 
+const { cleanChampionName } = StringUtils
+
+type EnrichedStaticDataChampion = StaticDataChampion & {
+  highlight: boolean
+  category: ChampionCategory
+}
+
 export const Aram = (): JSX.Element => {
+  const { aramQuery, updateAramQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const categories = useMemo(() => ChampionCategory.groupChampions(champions), [champions])
+  const { filteredAndSortedChampions, searchCount } = useMemo(() => {
+    const filteredAndSortedChampions_ = pipe(
+      champions,
+      List.map(
+        (c): EnrichedStaticDataChampion => ({
+          ...c,
+          highlight: pipe(
+            aramQuery.search,
+            Maybe.exists(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
+          ),
+          category: ChampionCategory.fromAramData(c.aram),
+        }),
+      ),
+      List.sort(
+        pipe(
+          ChampionCategory.Ord,
+          ord.contramap((c: EnrichedStaticDataChampion) => c.category),
+        ),
+      ),
+    )
 
-  const Champions = useMemo(() => getChampions(categories), [categories])
+    return {
+      filteredAndSortedChampions: filteredAndSortedChampions_,
+      searchCount: pipe(
+        filteredAndSortedChampions_,
+        List.filter(c => c.highlight),
+        List.size,
+      ),
+    }
+  }, [aramQuery.search, champions])
+
+  const onSearchChange = useMemo(
+    (): ((search_: Maybe<string>) => void) => flow(AramQuery.Lens.search.set, updateAramQuery),
+    [updateAramQuery],
+  )
 
   return (
     <MainLayout>
-      <div className="flex h-full w-full flex-col items-center overflow-y-auto px-2 pb-24 pt-3">
+      <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
+        <SearchChampion
+          searchCount={searchCount}
+          defaultSearch={aramQuery.search}
+          onChange={onSearchChange}
+          className="self-center"
+        />
         <div className="grid w-full grid-cols-[repeat(auto-fit,48px)] items-start gap-x-4 gap-y-1">
-          <Champions category="buffed" />
-          <Champions category="nerfed" />
-          <Champions category="other" />
-          <Champions category="balanced" />
+          {pipe(
+            filteredAndSortedChampions,
+            ListUtils.mapWithPrevious((maybePrev, c) => (
+              <Fragment key={ChampionKey.unwrap(c.key)}>
+                {pipe(
+                  maybePrev,
+                  Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, c.category)),
+                  Maybe.fold(
+                    () => (
+                      <h2 className="peer col-span-full w-full pt-4 pb-1 text-sm">
+                        {ChampionCategory.label[c.category]}
+                      </h2>
+                    ),
+                    () => null,
+                  ),
+                )}
+
+                <Champion champion={c} />
+              </Fragment>
+            )),
+          )}
         </div>
       </div>
     </MainLayout>
   )
 }
 
-type ChampionsProps = {
-  category: ChampionCategory
-}
-
-const getChampions =
-  (categories: PartialDict<ChampionCategory, NonEmptyArray<StaticDataChampion>>) =>
-  ({ category }: ChampionsProps): JSX.Element => {
-    const champions = categories[category]
-    return (
-      <div className="contents">
-        <h2 className="peer col-span-full w-full pt-4 pb-1 text-sm">
-          {ChampionCategory.label[category]}
-        </h2>
-        {champions !== undefined
-          ? pipe(
-              champions,
-              List.map(c => <Champion key={ChampionKey.unwrap(c.key)} champion={c} />),
-            )
-          : null}
-      </div>
-    )
-  }
-
 type ChampionProps = {
-  champion: StaticDataChampion
+  champion: EnrichedStaticDataChampion
 }
 
 const Champion = ({ champion }: ChampionProps): JSX.Element => {
@@ -74,6 +120,7 @@ const Champion = ({ champion }: ChampionProps): JSX.Element => {
         className={cssClasses(
           'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-zinc-800 text-2xs',
           ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-2' : 'col-span-1',
+          ['outline outline-pink-500', champion.highlight],
         )}
       >
         <div className="h-12 w-12 overflow-hidden">

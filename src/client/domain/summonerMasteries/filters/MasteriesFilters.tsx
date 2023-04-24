@@ -4,17 +4,17 @@ import { number, ord, readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 
 import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
-import { StringUtils } from '../../../../shared/utils/StringUtils'
 import type { NonEmptyArray } from '../../../../shared/utils/fp'
 import { List, Maybe } from '../../../../shared/utils/fp'
 
 import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
 import { MasteryImg } from '../../../components/MasteryImg'
 import { Radios, labelValue } from '../../../components/Radios'
+import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
@@ -23,7 +23,6 @@ import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
-  CloseFilled,
   StatsChartSharp,
 } from '../../../imgs/svgIcons'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
@@ -32,8 +31,6 @@ import type { MasteriesQuerySort } from '../../../models/masteriesQuery/Masterie
 import type { MasteriesQueryView } from '../../../models/masteriesQuery/MasteriesQueryView'
 import { cssClasses } from '../../../utils/cssClasses'
 import { Checkboxes } from './Checkboxes'
-
-const { plural } = StringUtils
 
 type Props = {
   searchCount: number
@@ -76,60 +73,10 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
   const setOrder = flow(MasteriesQuery.Lens.order.set, updateMasteriesQuery)
   const setView = flow(MasteriesQuery.Lens.view.set, updateMasteriesQuery)
 
-  const searchRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    const onKeyup = (e: KeyboardEvent): void => {
-      if (
-        (e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) ||
-        e.key === '/' ||
-        e.key === 'F3'
-      ) {
-        e.preventDefault()
-        searchRef.current?.focus()
-      }
-    }
-
-    document.addEventListener('keydown', onKeyup, true)
-    return () => document.removeEventListener('keydown', onKeyup, true)
-  }, [])
-
-  const [search, setSearch] = useState(
-    pipe(
-      masteriesQuery.search,
-      Maybe.getOrElse(() => ''),
-    ),
-  )
-
-  const emptySearch = useCallback(() => {
-    setSearch('')
-    searchRef.current?.focus()
-  }, [])
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setSearch('')
-      searchRef.current?.blur()
-    }
-  }, [])
-
-  const updateSearch = useCallback(
-    (search_: string) => {
-      const trimed = search_.trim()
-      updateMasteriesQuery(
-        MasteriesQuery.Lens.search.set(trimed === '' ? Maybe.none : Maybe.some(trimed)),
-      )
-    },
+  const setQuerySearch = useMemo(
+    (): ((search_: Maybe<string>) => void) =>
+      flow(MasteriesQuery.Lens.search.set, updateMasteriesQuery),
     [updateMasteriesQuery],
-  )
-
-  useEffect(() => {
-    updateSearch(search)
-  }, [updateSearch, search])
-
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value),
-    [],
   )
 
   return (
@@ -209,36 +156,11 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex flex-col items-center text-xs">
-          <div className="flex items-center">
-            <input
-              ref={searchRef}
-              type="text"
-              value={search}
-              onChange={handleSearchChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Rechercher champion"
-              className={cssClasses(
-                'w-[151px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
-                ['pr-2', search === ''],
-                ['pr-7', search !== ''],
-              )}
-            />
-            {search !== '' ? (
-              <button type="button" onClick={emptySearch} className="-ml-6">
-                <CloseFilled className="h-5 fill-wheat" />
-              </button>
-            ) : null}
-          </div>
-          <span
-            className={cssClasses('absolute top-full pt-0.5 text-zinc-400', [
-              'hidden',
-              Maybe.isNone(masteriesQuery.search),
-            ])}
-          >
-            {plural('résultat')(searchCount)}
-          </span>
-        </div>
+        <SearchChampion
+          searchCount={searchCount}
+          defaultSearch={masteriesQuery.search}
+          onChange={setQuerySearch}
+        />
 
         <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
           {labelValue(

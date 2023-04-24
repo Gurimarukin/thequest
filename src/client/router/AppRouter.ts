@@ -3,6 +3,7 @@ import { end, format, lit, str } from 'fp-ts-routing'
 import { Platform } from '../../shared/models/api/Platform'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 
+import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
 
 const { codec } = RouterUtils
@@ -37,17 +38,14 @@ export const appParsers = {
 
 export const appRoutes = {
   index: format(end.formatter, {}),
-  platformSummonerName: (
-    platform: Platform,
-    summonerName: string,
-    query: PartialMasteriesQuery,
-  ) => {
-    const q = PartialMasteriesQuery.qsStringify(query)
-    return `${format(platformSummonerNameMatch.formatter, { platform, summonerName })}${
-      q === '' ? '' : `?${q}`
-    }`
-  },
-  aram: format(aramMatch.formatter, {}),
+  platformSummonerName: (platform: Platform, summonerName: string, query: PartialMasteriesQuery) =>
+    `${format(platformSummonerNameMatch.formatter, { platform, summonerName })}${q(
+      PartialMasteriesQuery.qsStringify(query),
+    )}`,
+  aram: (query: PartialAramQuery) =>
+    `${format(aramMatch.formatter, {})}${q(PartialAramQuery.qsStringify(query))}`,
   login: format(loginMatch.formatter, {}),
   register: format(registerMatch.formatter, {}),
 }
+
+const q = (query: string): string => (query === '' ? '' : `?${query}`)

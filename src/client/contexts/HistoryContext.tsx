@@ -8,6 +8,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { Either } from '../../shared/utils/fp'
 
+import { AramQuery } from '../models/aramQuery/AramQuery'
+import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
 import { MasteriesQuery } from '../models/masteriesQuery/MasteriesQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
 
@@ -26,6 +28,9 @@ type HistoryContext = {
 
   masteriesQuery: MasteriesQuery
   updateMasteriesQuery: (f: (q: MasteriesQuery) => MasteriesQuery) => void
+
+  aramQuery: AramQuery
+  updateAramQuery: (f: (q: AramQuery) => AramQuery) => void
 }
 
 const HistoryContext = createContext<HistoryContext | undefined>(undefined)
@@ -77,6 +82,22 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
     [h, masteriesQuery],
   )
 
+  const aramQuery = useMemo(
+    () =>
+      pipe(
+        PartialAramQuery.decoder.decode(query),
+        Either.getOrElse(() => ({})),
+        MasteriesQuery.fromPartial,
+      ),
+    [query],
+  )
+
+  const updateAramQuery = useCallback(
+    (f: (q: AramQuery) => AramQuery) =>
+      h.push({ search: pipe(f(aramQuery), AramQuery.toPartial, PartialAramQuery.qsStringify) }),
+    [aramQuery, h],
+  )
+
   const value: HistoryContext = {
     location,
     navigate,
@@ -84,6 +105,8 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
     matchesLocation,
     masteriesQuery,
     updateMasteriesQuery,
+    aramQuery,
+    updateAramQuery,
   }
 
   return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>

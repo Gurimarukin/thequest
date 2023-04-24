@@ -1,7 +1,8 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
+import type { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
@@ -20,14 +21,14 @@ import {
   TimeOutline,
 } from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import { appRoutes } from '../../router/AppRouter'
+import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cssClasses } from '../../utils/cssClasses'
 import { ClickOutside } from '../ClickOutside'
 import { Link } from '../Link'
 import { Select } from '../Select'
 
 export const SearchSummoner = (): JSX.Element => {
-  const { navigate, masteriesQuery } = useHistory()
+  const { navigate, matchesLocation, masteriesQuery } = useHistory()
   const { user, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
@@ -57,18 +58,18 @@ export const SearchSummoner = (): JSX.Element => {
     setIsOpen(true)
   }, [])
 
+  // with current masteriesQuery
+  const platformSummonerName = useMemo(
+    () => getPlatformSummonerName(matchesLocation, masteriesQuery),
+    [masteriesQuery, matchesLocation],
+  )
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      navigate(
-        appRoutes.platformSummonerName(
-          platform,
-          summonerName,
-          MasteriesQuery.toPartial(masteriesQuery),
-        ),
-      )
+      navigate(platformSummonerName(platform, summonerName))
     },
-    [masteriesQuery, navigate, platform, summonerName],
+    [navigate, platform, platformSummonerName, summonerName],
   )
 
   const searches: List<JSX.Element> = List.compact([
@@ -175,9 +176,15 @@ type SummonerSearchProps = {
 }
 
 const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): JSX.Element => {
-  const { navigate, masteriesQuery } = useHistory()
+  const { navigate, matchesLocation, masteriesQuery } = useHistory()
   const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
+
+  // with current masteriesQuery
+  const platformSummonerName = useMemo(
+    () => getPlatformSummonerName(matchesLocation, masteriesQuery),
+    [masteriesQuery, matchesLocation],
+  )
 
   const handleRemoveRecentClick = useCallback(
     () => removeRecentSearch(summoner),
@@ -187,15 +194,9 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
   const handleAddFavoriteClick = useCallback(
     () =>
       addFavoriteSearch(summoner, () =>
-        navigate(
-          appRoutes.platformSummonerName(
-            summoner.platform,
-            summoner.name,
-            MasteriesQuery.toPartial(masteriesQuery),
-          ),
-        ),
+        navigate(platformSummonerName(summoner.platform, summoner.name)),
       ),
-    [addFavoriteSearch, masteriesQuery, navigate, summoner],
+    [addFavoriteSearch, navigate, platformSummonerName, summoner],
   )
 
   const handleRemoveFavoriteClick = useCallback(
@@ -221,11 +222,7 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
         }
       })()}
       <Link
-        to={appRoutes.platformSummonerName(
-          summoner.platform,
-          summoner.name,
-          MasteriesQuery.toPartial(masteriesQuery),
-        )}
+        to={platformSummonerName(summoner.platform, summoner.name)}
         onClick={closeSearch}
         className="flex items-center hover:underline"
       >
@@ -278,3 +275,12 @@ const Hr = (): JSX.Element => (
     <div className="w-[calc(100%_-_1rem)] border-t border-goldenrod" />
   </>
 )
+
+const getPlatformSummonerName =
+  (matchesLocation: <A>(parser: Parser<A>) => boolean, query: MasteriesQuery) =>
+  (platform: Platform, summonerName: string): string =>
+    appRoutes.platformSummonerName(
+      platform,
+      summonerName,
+      matchesLocation(appParsers.platformSummonerName) ? MasteriesQuery.toPartial(query) : {},
+    )
