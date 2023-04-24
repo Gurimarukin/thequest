@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { number, ord, readonlySet } from 'fp-ts'
+import { io, number, ord, readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -14,6 +14,7 @@ import { List, Maybe } from '../../../../shared/utils/fp'
 import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
 import { MasteryImg } from '../../../components/MasteryImg'
 import { Radios, labelValue } from '../../../components/Radios'
+import type { SearchChampionRef } from '../../../components/SearchChampion'
 import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
@@ -23,6 +24,7 @@ import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
+  DiceFilled,
   StatsChartSharp,
 } from '../../../imgs/svgIcons'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
@@ -34,9 +36,10 @@ import { Checkboxes } from './Checkboxes'
 
 type Props = {
   searchCount: number
+  randomChampion: Maybe<io.IO<string>>
 }
 
-export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
+export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { user } = useUser()
 
@@ -78,6 +81,20 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
       flow(MasteriesQuery.Lens.search.set, updateMasteriesQuery),
     [updateMasteriesQuery],
   )
+
+  const searchRef = useRef<SearchChampionRef>(null)
+
+  const handleRandomClick = useMemo(
+    () =>
+      pipe(
+        randomChampion,
+        Maybe.map(io.map(name => searchRef.current?.setSearch(name))),
+        Maybe.toUndefined,
+      ),
+    [randomChampion],
+  )
+
+  const randomButtonRef = useRef<HTMLButtonElement>(null)
 
   return (
     <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3">
@@ -157,10 +174,22 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
 
       <div className="flex flex-wrap items-center gap-3">
         <SearchChampion
+          ref={searchRef}
           searchCount={searchCount}
-          defaultSearch={masteriesQuery.search}
+          initialSearch={masteriesQuery.search}
           onChange={setQuerySearch}
         />
+
+        <button
+          ref={randomButtonRef}
+          type="button"
+          onClick={handleRandomClick}
+          disabled={Maybe.isNone(randomChampion)}
+          className="group overflow-hidden py-0.5 disabled:opacity-30"
+        >
+          <DiceFilled className="h-7 fill-wheat transition-transform duration-300 group-enabled:group-hover:animate-dice" />
+        </button>
+        <Tooltip hoverRef={randomButtonRef}>Champion aléatoire</Tooltip>
 
         <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
           {labelValue(

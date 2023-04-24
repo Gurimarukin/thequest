@@ -1,5 +1,6 @@
 const plugin = require('tailwindcss/plugin')
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   mode: 'jit',
   content: ['./src/client/**/*.{html,js,ts,jsx,tsx}'],
@@ -47,6 +48,7 @@ module.exports = {
       },
       animation: {
         glow: 'glow 1s ease-in-out infinite',
+        dice: 'dice 2s ease-in-out infinite',
       },
       keyframes: {
         glow: {
@@ -59,19 +61,17 @@ module.exports = {
           '100%': {
             transform: 'scale(1) rotate(360deg)',
           },
-          /* ping and spin */
-          //   '0%': {
-          //     transform: 'scale(1) rotate(0deg)',
-          //     opacity: 1,
-          //   },
-          //   '75%': {
-          //     transform: 'scale(1.2) rotate(270deg)',
-          //     opacity: 0,
-          //   },
-          //   '100%': {
-          //     transform: 'scale(1.2) rotate(360deg)',
-          //     opacity: 0,
-          //   },
+        },
+        dice: {
+          '0%': {
+            transform: 'rotate(0deg)',
+          },
+          '33%': {
+            transform: 'rotate(0deg)',
+          },
+          '100%': {
+            transform: 'rotate(720deg)',
+          },
         },
       },
     },

@@ -73,7 +73,7 @@ export const Aram = (): JSX.Element => {
       <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
-          defaultSearch={aramQuery.search}
+          initialSearch={aramQuery.search}
           onChange={onSearchChange}
           className="self-center"
         />
