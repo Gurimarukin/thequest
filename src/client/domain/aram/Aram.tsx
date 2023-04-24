@@ -24,12 +24,12 @@ export const Aram = (): JSX.Element => {
 
   return (
     <MainLayout>
-      <div className="h-full w-full overflow-y-auto">
-        <div className="grid grid-cols-2 gap-3 p-3">
+      <div className="flex h-full w-full flex-col items-center overflow-y-auto px-2 pb-24 pt-3">
+        <div className="grid w-full grid-cols-[repeat(auto-fit,48px)] items-start gap-x-4 gap-y-1">
           <Champions category="buffed" />
           <Champions category="nerfed" />
-          <Champions category="other" className="col-span-2" />
-          <Champions category="balanced" className="col-span-2" />
+          <Champions category="other" />
+          <Champions category="balanced" />
         </div>
       </div>
     </MainLayout>
@@ -38,21 +38,17 @@ export const Aram = (): JSX.Element => {
 
 type ChampionsProps = {
   category: ChampionCategory
-  className?: string
 }
 
 const getChampions =
   (categories: PartialDict<ChampionCategory, NonEmptyArray<StaticDataChampion>>) =>
-  ({ category, className }: ChampionsProps): JSX.Element => {
+  ({ category }: ChampionsProps): JSX.Element => {
     const champions = categories[category]
     return (
-      <div
-        className={cssClasses(
-          'grid w-full grid-cols-[repeat(auto-fit,48px)] content-start items-start gap-x-4 gap-y-1',
-          className,
-        )}
-      >
-        <h2 className="col-span-full w-full pb-1 text-sm">{ChampionCategory.label[category]}</h2>
+      <div className="contents">
+        <h2 className="peer col-span-full w-full pt-4 pb-1 text-sm">
+          {ChampionCategory.label[category]}
+        </h2>
         {champions !== undefined
           ? pipe(
               champions,

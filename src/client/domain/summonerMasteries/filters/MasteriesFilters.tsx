@@ -133,7 +133,7 @@ export const MasteriesFilters = ({ searchCount }: Props): JSX.Element => {
   )
 
   return (
-    <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 self-center">
+    <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-3">
         <div onMouseLeave={hideLevelsMenu} className="relative">
           <Checkboxes<ChampionLevelOrZero>

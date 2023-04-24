@@ -94,7 +94,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       <MasteriesFilters searchCount={searchCount} />
       <div
         className={cssClasses(
-          'w-full self-center',
+          'w-full',
           ['grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4', isCompact],
           ['grid max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
           [
