@@ -38,6 +38,10 @@ const pad100 = padStart(3)
 const cleanUTF8ToASCII = (str: string): string =>
   str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
+const nonAZ = /[^a-z]/g
+const cleanChampionName = (name: string): string =>
+  StringUtils.cleanUTF8ToASCII(name).toLowerCase().replaceAll(nonAZ, '')
+
 /**
  * @example
  * assert.deepStrictEqual(plural('jeton')(1), '1 jeton')
@@ -71,6 +75,7 @@ export const StringUtils = {
   matcher3,
   stripMargins,
   cleanUTF8ToASCII,
+  cleanChampionName,
   plural,
   prettyMs,
 }

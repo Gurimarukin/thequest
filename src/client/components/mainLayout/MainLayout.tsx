@@ -31,7 +31,7 @@ export const MainLayout: React.FC = ({ children }) => {
             </Link>
             <SearchSummoner />
             <Link
-              to={appRoutes.aram}
+              to={appRoutes.aram({})}
               className={cssClasses('text-sm', [
                 'border-b border-goldenrod',
                 matchesLocation(appParsers.aram),
