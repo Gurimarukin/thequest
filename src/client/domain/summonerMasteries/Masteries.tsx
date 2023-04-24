@@ -1,5 +1,6 @@
-/* eslint-disable functional/no-return-void */
-import { number, ord, predicate, readonlySet } from 'fp-ts'
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
+import { io, number, ord, predicate, random, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
@@ -18,6 +19,7 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionCategory } from '../../models/ChampionCategory'
+import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
@@ -35,7 +37,7 @@ type Props = {
 }
 
 export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element => {
-  const { masteriesQuery } = useHistory()
+  const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
   const { filteredAndSortedMasteries, championsCount, searchCount, maybeMaxPoints } =
@@ -85,21 +87,39 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       masteriesQuery.view,
     ])
 
-  const isCompact = masteriesQuery.view === 'compact'
-  const isHistogram = masteriesQuery.view === 'histogram'
-  const isAram = masteriesQuery.view === 'aram'
+  const randomChampion = useMemo(
+    () =>
+      pipe(
+        filteredAndSortedMasteries,
+        List.filter(m => !m.isHidden),
+        NonEmptyArray.fromReadonlyArray,
+        Maybe.map(
+          flow(
+            random.randomElem,
+            io.map(m => {
+              updateMasteriesQuery(MasteriesQuery.Lens.search.set(Maybe.some(m.name)))
+              return m.name
+            }),
+          ),
+        ),
+      ),
+    [filteredAndSortedMasteries, updateMasteriesQuery],
+  )
 
   return (
     <>
-      <MasteriesFilters searchCount={searchCount} />
+      <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
       <div
         className={cssClasses(
           'w-full',
-          ['grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4', isCompact],
-          ['grid max-w-7xl grid-cols-[auto_1fr] gap-y-2', isHistogram],
+          [
+            'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
+            masteriesQuery.view === 'compact',
+          ],
+          ['grid max-w-7xl grid-cols-[auto_1fr] gap-y-2', masteriesQuery.view === 'histogram'],
           [
             'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
-            isAram,
+            masteriesQuery.view === 'aram',
           ],
         )}
       >
