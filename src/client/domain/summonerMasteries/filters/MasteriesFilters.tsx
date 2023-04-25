@@ -185,7 +185,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
           type="button"
           onClick={handleRandomClick}
           disabled={Maybe.isNone(randomChampion)}
-          className="group overflow-hidden py-0.5 disabled:opacity-30"
+          className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
         >
           <DiceFilled className="h-7 fill-wheat transition-transform duration-300 group-enabled:group-hover:animate-dice" />
         </button>
