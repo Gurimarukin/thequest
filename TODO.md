@@ -1,4 +1,3 @@
-- recherches récentes : stocker l'id côté client
 - useless qs.stringify?
 - tailwind colors
 - toaster (replace alert)
