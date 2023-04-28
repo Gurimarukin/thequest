@@ -1,8 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { Platform } from '../../shared/models/api/Platform'
-
-import { Puuid } from './riot/Puuid'
+import { Platform } from '../Platform'
+import { Puuid } from './Puuid'
 
 type PlatformWithPuuid = C.TypeOf<typeof codec>
 

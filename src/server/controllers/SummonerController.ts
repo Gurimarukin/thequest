@@ -5,6 +5,7 @@ import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
@@ -30,31 +31,44 @@ const SummonerController = (
   userService: UserService,
 ) => {
   return {
+    findByPuuid:
+      (platform: Platform, puuid: Puuid) =>
+      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
+        pipe(summonerService.findByPuuid(platform, puuid), find(platform, maybeUser)),
+
     findByName:
       (platform: Platform, summonerName: string) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(
-          summonerService.findByName(platform, summonerName),
-          Future.map(Either.fromOption(() => 'Summoner not found')),
-          futureEither.bindTo('summoner'),
-          futureEither.bind('masteries', ({ summoner }) =>
-            pipe(
-              masteriesService.findBySummoner(platform, summoner.id),
-              Future.map(Either.fromOption(() => 'Masteries not found')),
-            ),
-          ),
-          futureEither.bind('championShards', ({ summoner, masteries }) =>
-            pipe(
-              futureMaybe.fromOption(maybeUser),
-              futureMaybe.chainTaskEitherK(user => findChampionShards(user, summoner, masteries)),
-              Future.map(Either.right),
-            ),
-          ),
-          M.fromTaskEither,
-          M.ichain(
-            Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerMasteriesView.codec)),
+        pipe(summonerService.findByName(platform, summonerName), find(platform, maybeUser)),
+  }
+
+  function find(
+    platform: Platform,
+    maybeUser: Maybe<TokenContent>,
+  ): (futureSummoner: Future<Maybe<Summoner>>) => EndedMiddleware {
+    return futureSummoner =>
+      pipe(
+        futureSummoner,
+        Future.map(Either.fromOption(() => 'Summoner not found')),
+        futureEither.bindTo('summoner'),
+        futureEither.bind('masteries', ({ summoner }) =>
+          pipe(
+            masteriesService.findBySummoner(platform, summoner.id),
+            Future.map(Either.fromOption(() => 'Masteries not found')),
           ),
         ),
+        futureEither.bind('championShards', ({ summoner, masteries }) =>
+          pipe(
+            futureMaybe.fromOption(maybeUser),
+            futureMaybe.chainTaskEitherK(user => findChampionShards(user, summoner, masteries)),
+            Future.map(Either.right),
+          ),
+        ),
+        M.fromTaskEither,
+        M.ichain(
+          Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerMasteriesView.codec)),
+        ),
+      )
   }
 
   function findChampionShards(

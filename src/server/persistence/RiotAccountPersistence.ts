@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import * as E from 'io-ts/Encoder'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 
@@ -9,7 +10,6 @@ import { FpCollection } from '../helpers/FpCollection'
 import { RiotAccountDb } from '../models/RiotAccountDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
-import { Puuid } from '../models/riot/Puuid'
 import { TagLine } from '../models/riot/TagLine'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 

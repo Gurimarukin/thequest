@@ -4,11 +4,13 @@ import type { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { MsDuration } from '../../../shared/models/MsDuration'
 import { Platform } from '../../../shared/models/api/Platform'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { useHistory } from '../../contexts/HistoryContext'
+import { apiSummonerByPuuidGet } from '../../api'
+import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
@@ -23,8 +25,8 @@ import {
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cssClasses } from '../../utils/cssClasses'
+import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
-import { Link } from '../Link'
 import { Select } from '../Select'
 
 export const SearchSummoner = (): JSX.Element => {
@@ -36,16 +38,17 @@ export const SearchSummoner = (): JSX.Element => {
 
   const summonerNameFromLocation = useSummonerNameFromLocation()
 
-  useEffect(() => {
-    pipe(summonerNameFromLocation, Maybe.map(setSummonerName))
-  }, [summonerNameFromLocation])
-
   const [summonerName, setSummonerName] = useState(
     pipe(
       summonerNameFromLocation,
       Maybe.getOrElse(() => ''),
     ),
   )
+
+  useEffect(() => {
+    pipe(summonerNameFromLocation, Maybe.map(setSummonerName))
+  }, [summonerNameFromLocation])
+
   const [platform, setPlatform] = useState<Platform>(Platform.defaultPlatform)
 
   const handleChange = useCallback(
@@ -176,7 +179,12 @@ type SummonerSearchProps = {
 }
 
 const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): JSX.Element => {
-  const { navigate, matchesLocation, masteriesQuery } = useHistory()
+  const {
+    modifyHistoryStateRef: setHistoryState,
+    navigate,
+    matchesLocation,
+    masteriesQuery,
+  } = useHistory()
   const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
@@ -184,6 +192,38 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
   const platformSummonerName = useMemo(
     () => getPlatformSummonerName(matchesLocation, masteriesQuery),
     [masteriesQuery, matchesLocation],
+  )
+
+  const handleClick = useCallback(
+    () =>
+      pipe(
+        apiSummonerByPuuidGet(summoner.platform, summoner.puuid),
+        Future.chain(summonerMasteries => {
+          closeSearch()
+          setHistoryState(HistoryState.Lens.summonerMasteries.set(Maybe.some(summonerMasteries)))
+          return pipe(
+            Future.fromIO(() =>
+              navigate(platformSummonerName(summoner.platform, summonerMasteries.summoner.name), {
+                replace: true,
+              }),
+            ),
+            Future.delay(MsDuration.wrap(100)),
+          )
+        }),
+        Future.orElseW(() => {
+          alert("Erreur en récupérant le nom de l'invocateur")
+          return Future.notUsed
+        }),
+        futureRunUnsafe,
+      ),
+    [
+      closeSearch,
+      navigate,
+      platformSummonerName,
+      setHistoryState,
+      summoner.platform,
+      summoner.puuid,
+    ],
   )
 
   const handleRemoveRecentClick = useCallback(
@@ -221,11 +261,7 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
             )
         }
       })()}
-      <Link
-        to={platformSummonerName(summoner.platform, summoner.name)}
-        onClick={closeSearch}
-        className="flex items-center hover:underline"
-      >
+      <button type="button" onClick={handleClick} className="flex items-center hover:underline">
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
           alt={`Icône de ${summoner.name}`}
@@ -233,7 +269,7 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
         />
         <span className="ml-2 grow">{summoner.name}</span>
         <span className="ml-4">{summoner.platform}</span>
-      </Link>
+      </button>
       {((): JSX.Element => {
         switch (type) {
           case 'self':

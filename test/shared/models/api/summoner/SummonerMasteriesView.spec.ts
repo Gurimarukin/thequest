@@ -3,6 +3,7 @@ import { optional } from 'monocle-ts'
 
 import type { ChampionKey } from '../../../../../src/shared/models/api/champion/ChampionKey'
 import { ChampionShardsView } from '../../../../../src/shared/models/api/summoner/ChampionShardsView'
+import type { Puuid } from '../../../../../src/shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../../../../src/shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../../../src/shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../../../src/shared/utils/ListUtils'
@@ -13,6 +14,7 @@ import { expectT } from '../../../../expectT'
 describe('SummonerMasteriesView.Lens.championShards.counts', () => {
   it('should lens', () => {
     const summoner: SummonerView = {
+      puuid: '' as unknown as Puuid,
       name: '',
       profileIconId: 0,
       summonerLevel: 0,

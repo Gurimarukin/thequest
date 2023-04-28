@@ -2,9 +2,9 @@ import * as C from 'io-ts/Codec'
 import * as E from 'io-ts/Encoder'
 
 import { Platform } from '../../../shared/models/api/Platform'
+import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { Puuid } from '../riot/Puuid'
 import { SummonerId } from './SummonerId'
 
 type SummonerDb = C.TypeOf<typeof codec>

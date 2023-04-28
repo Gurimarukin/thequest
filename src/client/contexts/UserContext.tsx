@@ -59,7 +59,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
         Maybe.filter(
           flow(
             UserView.Lens.favoriteSearches.get,
-            predicate.not(List.elem(SummonerShort.byPlatformAndNameEq)(summoner)),
+            predicate.not(List.elem(SummonerShort.byPuuidEq)(summoner)),
           ),
         ),
         Maybe.map(oldData => {
@@ -98,15 +98,12 @@ export const UserContextProvider: React.FC = ({ children }) => {
         Maybe.fromNullable(data),
         Maybe.flatten,
         Maybe.filter(
-          flow(
-            UserView.Lens.favoriteSearches.get,
-            List.elem(SummonerShort.byPlatformAndNameEq)(summoner),
-          ),
+          flow(UserView.Lens.favoriteSearches.get, List.elem(SummonerShort.byPuuidEq)(summoner)),
         ),
         Maybe.map(oldData => {
           const newData = pipe(
             UserView.Lens.favoriteSearches,
-            lens.modify(List.difference(SummonerShort.byPlatformAndNameEq)([summoner])),
+            lens.modify(List.difference(SummonerShort.byPuuidEq)([summoner])),
           )(oldData)
 
           refreshUser(Maybe.some(newData), { revalidate: false })
@@ -137,7 +134,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
       setRecentSearches_(
         flow(
           List.prepend(summoner),
-          List.uniq(SummonerShort.byPlatformAndNameEq),
+          List.uniq(SummonerShort.byPuuidEq),
           List.takeLeft(constants.recentSearches.maxCount),
         ),
       ),
@@ -146,7 +143,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
 
   const removeRecentSearch = useCallback(
     (summoner: SummonerShort) =>
-      setRecentSearches_(List.difference(SummonerShort.byPlatformAndNameEq)([summoner])),
+      setRecentSearches_(List.difference(SummonerShort.byPuuidEq)([summoner])),
     [setRecentSearches_],
   )
 
@@ -161,7 +158,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
   const user = pipe(Maybe.fromNullable(data), Maybe.flatten)
   const recentSearches = pipe(
     recentSearches_,
-    List.difference(SummonerShort.byPlatformAndNameEq)(
+    List.difference(SummonerShort.byPuuidEq)(
       pipe(
         user,
         List.fromOption,

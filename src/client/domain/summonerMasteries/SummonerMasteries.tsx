@@ -1,8 +1,10 @@
 /* eslint-disable functional/no-expression-statements */
 import { monoid, number, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import type { HttpMethod } from 'ky/distribution/types/options'
 import { optional } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import useSWR from 'swr'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
@@ -17,22 +19,23 @@ import { SummonerMasteriesView } from '../../../shared/models/api/summoner/Summo
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { PartialDict } from '../../../shared/utils/fp'
+import type { PartialDict, Tuple } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
-import { useHistory } from '../../contexts/HistoryContext'
+import { config } from '../../config/unsafe'
+import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePrevious } from '../../hooks/usePrevious'
-import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
+import { http } from '../../utils/http'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
@@ -53,12 +56,27 @@ type Props = {
 }
 
 export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
+  const { historyStateRef, modifyHistoryStateRef } = useHistory()
   const { user } = useUser()
 
-  const { data, error, mutate } = useSWRHttp(
-    apiRoutes.summoner.get(platform, clearSummonerName(summonerName)),
-    {},
-    [SummonerMasteriesView.codec, 'SummonerMasteriesView'],
+  const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
+    apiRoutes.summoner.byName.get(platform, clearSummonerName(summonerName)),
+    methodWithUrl =>
+      pipe(
+        historyStateRef.current.summonerMasteries,
+        Maybe.fold(
+          () => http(methodWithUrl, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
+          flow(
+            Future.successful,
+            Future.chainFirstIOK(
+              () => () =>
+                modifyHistoryStateRef(HistoryState.Lens.summonerMasteries.set(Maybe.none)),
+            ),
+          ),
+        ),
+        futureRunUnsafe,
+      ),
+    { revalidateOnFocus: !config.isDev },
   )
 
   // Remove shards on user disconnect
@@ -160,16 +178,22 @@ const SummonerViewComponent = ({
     () =>
       addRecentSearch({
         platform,
+        puuid: summoner.puuid,
         name: summoner.name,
         profileIconId: summoner.profileIconId,
       }),
-    [addRecentSearch, platform, summoner.name, summoner.profileIconId],
+    [addRecentSearch, platform, summoner.name, summoner.profileIconId, summoner.puuid],
   )
 
   const summonerNameFromLocation = useSummonerNameFromLocation()
   // Correct case of summoner's name in url
-  useEffect(
-    () =>
+  useEffect(() => {
+    if (
+      pipe(
+        summonerNameFromLocation,
+        Maybe.every(n => n !== summoner.name),
+      )
+    ) {
       navigate(
         appRoutes.platformSummonerName(
           platform,
@@ -177,9 +201,9 @@ const SummonerViewComponent = ({
           MasteriesQuery.toPartial(masteriesQuery),
         ),
         { replace: true },
-      ),
-    [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name],
-  )
+      )
+    }
+  }, [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name])
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
     () => enrichAll(masteries, championShards, masteriesQuery.search, staticData.champions),

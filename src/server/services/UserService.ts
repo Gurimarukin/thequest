@@ -7,6 +7,7 @@ import readline from 'readline'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
@@ -41,6 +42,7 @@ export type SummonerWithDiscordInfos = {
   summoner: {
     id: SummonerId
     platform: Platform
+    puuid: Puuid
     name: string
     profileIconId: number
   }
