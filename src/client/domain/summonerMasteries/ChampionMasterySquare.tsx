@@ -113,11 +113,11 @@ export const ChampionMasterySquare = ({
         {/* champion level top left */}
         <div
           className={cssClasses(
-            'absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
+            'absolute top-0 left-0 flex h-4 w-3.5 justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
             championLevelNumberColor(championLevel),
           )}
         >
-          <span className="mt-[-2px]">{championLevel}</span>
+          <span className="-mt-0.5">{championLevel}</span>
         </div>
 
         {/* tokens next to champion level */}
@@ -199,9 +199,9 @@ const Tokens = ({ championLevel, tokensEarned }: TokensProps): JSX.Element | nul
       return (
         <span
           className={cssClasses(
-            'absolute left-[13px] top-0 flex h-[10px] rounded-br bg-black pl-0.5',
-            ['gap-0.5 pt-[1px] pb-0.5 pr-0.5', championLevel === 5],
-            ['gap-[3px] pb-[1px] pr-[3px]', championLevel === 6],
+            'absolute left-[13px] top-0 flex h-2.5 rounded-br bg-black pl-0.5',
+            ['gap-0.5 pt-px pb-0.5 pr-0.5', championLevel === 5],
+            ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
           )}
         >
           {pipe(
@@ -254,15 +254,15 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
 
   return (
     <div className="group absolute right-0 bottom-0 flex items-end">
-      <span className="mr-[-2px] overflow-hidden rounded-tl bg-black pl-[1px] pt-[1px]">
-        <SparklesSharp className="h-[10px] w-[10px] rotate-180 fill-current" />
+      <span className="-mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
+        <SparklesSharp className="h-2.5 w-2.5 rotate-180 fill-current" />
       </span>
-      <span className="flex h-4 w-[14px] justify-end rounded-tl-lg bg-black pl-0.5 text-xs">
+      <span className="flex h-4 w-3.5 justify-end rounded-tl-lg bg-black pl-0.5 text-xs">
         <span className="mt-0.5">{shardsCount}</span>
       </span>
       {setShardsCount !== null ? (
-        <div className="absolute bottom-[-14px] right-[-1px] z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
-          <span className="flex bg-black p-[1px] pb-0.5">
+        <div className="absolute -bottom-3.5 -right-px z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
+          <span className="flex bg-black p-px pb-0.5">
             <button
               ref={addButtonRef}
               type="button"
@@ -275,8 +275,8 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
               Ajouter un fragment
             </Tooltip>
           </span>
-          <span className="h-[12px] w-[1px] bg-black" />
-          <span className="flex bg-black p-[1px]">
+          <span className="h-3 w-px bg-black" />
+          <span className="flex bg-black p-px">
             <button
               ref={removeButtonRef}
               type="button"
