@@ -9,7 +9,7 @@ import useSWR from 'swr'
 import { apiRoutes } from '../../shared/ApiRouter'
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { Future, List, Maybe, Tuple, toNotUsed } from '../../shared/utils/fp'
+import { Future, List, Maybe, NotUsed, Tuple } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
@@ -23,8 +23,8 @@ const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<Summ
 type UserContext = {
   refreshUser: () => void
   user: Maybe<UserView>
-  addFavoriteSearch: (summoner: SummonerShort, onNotFound: () => void) => void
-  removeFavoriteSearch: (summoner: SummonerShort) => void
+  addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
+  removeFavoriteSearch: (summoner: SummonerShort) => Future<NotUsed>
   recentSearches: List<SummonerShort>
   addRecentSearch: (summoner: SummonerShort) => void
   removeRecentSearch: (summoner: SummonerShort) => void
@@ -52,7 +52,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
   )
 
   const addFavoriteSearch = useCallback(
-    (summoner: SummonerShort, onNotFound: () => void): Maybe<void> =>
+    (summoner: SummonerShort): Future<Maybe<NotUsed>> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
@@ -62,62 +62,62 @@ export const UserContextProvider: React.FC = ({ children }) => {
             predicate.not(List.elem(SummonerShort.byPuuidEq)(summoner)),
           ),
         ),
-        Maybe.map(oldData => {
-          const newData = pipe(
-            UserView.Lens.favoriteSearches,
-            lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
-          )(oldData)
-
-          refreshUser(Maybe.some(newData), { revalidate: false })
-          // setLoading(true) // TODO
+        Maybe.map(oldData =>
           pipe(
             apiUserSelfFavoritesPut(summoner),
             statusesToOption(404),
-            Future.map(
-              Maybe.fold(() => {
-                refreshUser(Maybe.some(oldData), { revalidate: false })
-                onNotFound()
-              }, toNotUsed),
-            ),
-            Future.orElseW(() => {
-              refreshUser(Maybe.some(oldData), { revalidate: false })
-              alert("Erreur lors de l'ajout du favori") // TODO: toaster
-              return Future.notUsed
+            futureMaybe.map(() => {
+              refreshUser(
+                Maybe.some(
+                  pipe(
+                    UserView.Lens.favoriteSearches,
+                    lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
+                  )(oldData),
+                ),
+                { revalidate: false },
+              )
+              return NotUsed
             }),
-            // Future.map(() => setLoading(false)), // TODO
-            futureRunUnsafe,
-          )
+          ),
+        ),
+        Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
+        Future.orElse(() => {
+          alert("Erreur lors de l'ajout du favori") // TODO: toaster
+          return futureMaybe.some(NotUsed)
         }),
       ),
     [data, refreshUser],
   )
 
   const removeFavoriteSearch = useCallback(
-    (summoner: SummonerShort): Maybe<void> =>
+    (summoner: SummonerShort): Future<NotUsed> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
         Maybe.filter(
           flow(UserView.Lens.favoriteSearches.get, List.elem(SummonerShort.byPuuidEq)(summoner)),
         ),
-        Maybe.map(oldData => {
-          const newData = pipe(
-            UserView.Lens.favoriteSearches,
-            lens.modify(List.difference(SummonerShort.byPuuidEq)([summoner])),
-          )(oldData)
-
-          refreshUser(Maybe.some(newData), { revalidate: false })
-          // setLoading(true) // TODO
+        Maybe.map(oldData =>
           pipe(
-            apiUserSelfFavoritesDelete(summoner), // TODO: handle error
-            Future.orElseW(() => {
-              refreshUser(Maybe.some(oldData), { revalidate: false })
-              alert('Erreur lors de la suppression du favori') // TODO: toaster
-              return Future.notUsed
+            apiUserSelfFavoritesDelete(summoner),
+            Future.map(() => {
+              refreshUser(
+                Maybe.some(
+                  pipe(
+                    UserView.Lens.favoriteSearches,
+                    lens.modify(List.difference(SummonerShort.byPuuidEq)([summoner])),
+                  )(oldData),
+                ),
+                { revalidate: false },
+              )
+              return NotUsed
             }),
-            // Future.map(() => setLoading(false)), // TODO
-            futureRunUnsafe,
-          )
+          ),
+        ),
+        Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
+        Future.orElse(() => {
+          alert('Erreur lors de la suppression du favori') // TODO: toaster
+          return Future.notUsed
         }),
       ),
     [data, refreshUser],

@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { apiSummonerByPuuidGet } from '../../api'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
@@ -24,7 +24,9 @@ import {
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cssClasses } from '../../utils/cssClasses'
+import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
+import { Loading } from '../Loading'
 import { Select } from '../Select'
 
 export const SearchSummoner = (): JSX.Element => {
@@ -137,8 +139,7 @@ export const SearchSummoner = (): JSX.Element => {
           <ul
             className={cssClasses(
               'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] grid-cols-[auto_auto_auto] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
-              ['hidden', !showSearches],
-              ['grid', showSearches],
+              showSearches ? 'grid' : 'hidden',
             )}
           >
             {concatWithHr(searches)}
@@ -192,7 +193,7 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
     [masteriesQuery, matchesLocation],
   )
 
-  const handleClick = useCallback(() => {
+  const navigateToSummonerByPuuid = useCallback(() => {
     pipe(
       apiSummonerByPuuidGet(summoner.platform, summoner.puuid),
       Maybe.some,
@@ -213,42 +214,55 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
     summoner.puuid,
   ])
 
-  const handleRemoveRecentClick = useCallback(
+  const removeRecent = useCallback(
     () => removeRecentSearch(summoner),
     [removeRecentSearch, summoner],
   )
 
-  const handleAddFavoriteClick = useCallback(
-    () =>
-      addFavoriteSearch(summoner, () =>
-        navigate(platformSummonerName(summoner.platform, summoner.name)),
-      ),
-    [addFavoriteSearch, navigate, platformSummonerName, summoner],
+  const [favoriteIsLoading, setFavoriteIsLoading] = useState(false)
+
+  const addFavorite = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setFavoriteIsLoading(true)
+      pipe(
+        // error is already handled in UserContext
+        addFavoriteSearch(summoner),
+        // on not found
+        Future.map(
+          Maybe.fold(
+            () => navigateToSummonerByPuuid(),
+            () => setFavoriteIsLoading(false),
+          ),
+        ),
+        futureRunUnsafe,
+      )
+    },
+    [addFavoriteSearch, navigateToSummonerByPuuid, summoner],
   )
 
-  const handleRemoveFavoriteClick = useCallback(
-    () => removeFavoriteSearch(summoner),
+  const removeFavorite = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setFavoriteIsLoading(true)
+      pipe(
+        // error is already handled in UserContext
+        removeFavoriteSearch(summoner),
+        Future.map(() => setFavoriteIsLoading(false)),
+        futureRunUnsafe,
+      )
+    },
     [removeFavoriteSearch, summoner],
   )
 
   return (
     <li className="contents">
-      {((): JSX.Element => {
-        switch (type) {
-          case 'self':
-            return <span className="w-3" />
-          case 'favorite':
-            return <span className="w-3" />
-          case 'recent':
-            return (
-              <button type="button" onClick={handleRemoveRecentClick} className="group p-2">
-                <TimeOutline className="h-4 text-goldenrod group-hover:hidden" />
-                <CloseFilled className="hidden h-4 fill-red-700 group-hover:flex" />
-              </button>
-            )
-        }
-      })()}
-      <button type="button" onClick={handleClick} className="flex items-center hover:underline">
+      {renderRecent(type, removeRecent)}
+      <button
+        type="button"
+        onClick={navigateToSummonerByPuuid}
+        className="flex items-center hover:underline"
+      >
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
           alt={`Icône de ${summoner.name}`}
@@ -257,38 +271,67 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
         <span className="ml-2 grow">{summoner.name}</span>
         <span className="ml-4">{summoner.platform}</span>
       </button>
-      {((): JSX.Element => {
-        switch (type) {
-          case 'self':
-            return (
-              <span className="px-3">
-                <PersonFilled className="h-4 fill-goldenrod" />
-              </span>
-            )
-          case 'favorite':
-            return (
-              <button
-                type="button"
-                onClick={handleRemoveFavoriteClick}
-                className="fill-goldenrod px-3 pt-2 pb-3 hover:fill-red-700"
-              >
-                <StarFilled className="h-5" />
-              </button>
-            )
-          case 'recent':
-            return (
-              <button
-                type="button"
-                onClick={handleAddFavoriteClick}
-                className="px-3 pt-2 pb-3 text-goldenrod hover:text-wheat"
-              >
-                <StarOutline className="h-5" />
-              </button>
-            )
-        }
-      })()}
+      {renderFavorite(type, favoriteIsLoading, addFavorite, removeFavorite)}
     </li>
   )
+}
+
+const renderRecent = (type: SummonerSearchProps['type'], removeRecent: () => void): JSX.Element => {
+  switch (type) {
+    case 'self':
+      return <span className="w-3" />
+
+    case 'favorite':
+      return <span className="w-3" />
+
+    case 'recent':
+      return (
+        <button type="button" onClick={removeRecent} className="group p-2">
+          <TimeOutline className="h-4 text-goldenrod group-hover:hidden" />
+          <CloseFilled className="hidden h-4 fill-red-700 group-hover:flex" />
+        </button>
+      )
+  }
+}
+
+const renderFavorite = (
+  type: SummonerSearchProps['type'],
+  isLoading: boolean,
+  addFavorite: (e: React.MouseEvent) => void,
+  removeFavorite: (e: React.MouseEvent) => void,
+): JSX.Element => {
+  switch (type) {
+    case 'self':
+      return (
+        <span className="px-3">
+          <PersonFilled className="h-4 fill-goldenrod" />
+        </span>
+      )
+
+    case 'favorite':
+      return (
+        <button
+          type="button"
+          onClick={removeFavorite}
+          disabled={isLoading}
+          className="fill-goldenrod px-3 pt-2 pb-3 enabled:hover:fill-red-700"
+        >
+          {isLoading ? <Loading className="h-5" /> : <StarFilled className="h-5" />}
+        </button>
+      )
+
+    case 'recent':
+      return (
+        <button
+          type="button"
+          onClick={addFavorite}
+          disabled={isLoading}
+          className="px-3 pt-2 pb-3 text-goldenrod enabled:hover:text-wheat"
+        >
+          {isLoading ? <Loading className="h-5" /> : <StarOutline className="h-5" />}
+        </button>
+      )
+  }
 }
 
 const Hr = (): JSX.Element => (
