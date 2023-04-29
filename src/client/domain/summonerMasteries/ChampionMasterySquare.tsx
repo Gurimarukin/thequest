@@ -152,7 +152,7 @@ export const ChampionMasterySquare = ({
         )}
       </div>
 
-      <Tooltip hoverRef={hoverRef} className="grid grid-cols-[auto_auto] !p-0">
+      <Tooltip hoverRef={hoverRef} placement="top" className="grid grid-cols-[auto_auto] !p-0">
         <ChampionTooltip
           chestGranted={chestGranted}
           tokensEarned={tokensEarned}

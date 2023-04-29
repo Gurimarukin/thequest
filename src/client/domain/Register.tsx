@@ -1,4 +1,5 @@
 /* eslint-disable functional/no-expression-statements */
+import { task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -11,6 +12,7 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { apiUserRegisterPost } from '../api'
 import { Link } from '../components/Link'
+import { Loading } from '../components/Loading'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { constants } from '../config/constants'
 import { useHistory } from '../contexts/HistoryContext'
@@ -36,12 +38,13 @@ const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 
 export const Register = (): JSX.Element => {
   const { navigate } = useHistory()
-  const { user } = useUser()
+  const { maybeUser } = useUser()
 
   useEffect(() => {
-    if (Maybe.isSome(user)) navigate(appRoutes.index)
-  }, [navigate, user])
+    if (Maybe.isSome(maybeUser)) navigate(appRoutes.index)
+  }, [navigate, maybeUser])
 
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
 
   const [state, setState] = useState(emptyState)
@@ -68,14 +71,16 @@ export const Register = (): JSX.Element => {
         Either.map(payload => {
           pipe(
             validateOnSubmit(payload.password, state.confirmPassword),
-            Either.foldW(flow(Maybe.some, setError), () =>
-              pipe(
+            Either.foldW(flow(Maybe.some, setError), () => {
+              setIsLoading(true)
+              return pipe(
                 apiUserRegisterPost(payload),
                 Future.map(() => navigate(appRoutes.login)),
                 Future.orElse(() => Future.successful(setError(Maybe.some('error')))),
+                task.chainFirstIOK(() => () => setIsLoading(false)),
                 futureRunUnsafe,
-              ),
-            ),
+              )
+            }),
           )
         }),
       )
@@ -235,10 +240,10 @@ export const Register = (): JSX.Element => {
           <div className="flex flex-col items-center gap-2 self-center">
             <button
               type="submit"
-              disabled={Either.isLeft(validated)}
-              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              disabled={isLoading || Either.isLeft(validated)}
+              className="flex items-center gap-2 bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
-              Inscription
+              Inscription {isLoading ? <Loading className="h-4" /> : null}
             </button>
             {pipe(
               error,

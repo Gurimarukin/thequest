@@ -1,6 +1,6 @@
 import * as D from 'io-ts/Decoder'
 
-import { Puuid } from './Puuid'
+import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 
 type RiotAccount = D.TypeOf<typeof decoder>
 

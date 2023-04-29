@@ -1,8 +1,10 @@
+import { eq, string } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
 
-import { fromNewtype } from '../../../shared/utils/ioTsUtils'
+import { fromNewtype } from '../../../utils/ioTsUtils'
 
 // encrypted puuid
 
@@ -12,6 +14,8 @@ const { unwrap } = iso<Puuid>()
 
 const codec = fromNewtype<Puuid>(C.string)
 
-const Puuid = { unwrap, codec }
+const Eq: eq.Eq<Puuid> = pipe(string.Eq, eq.contramap(unwrap))
+
+const Puuid = { unwrap, codec, Eq }
 
 export { Puuid }

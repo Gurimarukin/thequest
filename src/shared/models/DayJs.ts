@@ -77,7 +77,7 @@ const format =
 const toDate = (date: DayJs): Date => unwrap(date).toDate()
 const toISOString = (date: DayJs): string => unwrap(date).toISOString()
 const unix = (date: DayJs): number => unwrap(date).unix()
-const unixMs = (date: DayJs): MsDuration => MsDuration.wrap(unwrap(date).valueOf())
+const unixMs = (date: DayJs): MsDuration => MsDuration.ms(unwrap(date).valueOf())
 
 function diff(b: DayJs): (a: DayJs) => MsDuration
 function diff(b: DayJs, unit: dayjs.QUnitType | dayjs.OpUnitType): (a: DayJs) => number
@@ -86,9 +86,7 @@ function diff(
   unit?: dayjs.QUnitType | dayjs.OpUnitType,
 ): (a: DayJs) => MsDuration | number {
   return a =>
-    unit === undefined
-      ? MsDuration.wrap(unwrap(a).diff(unwrap(b)))
-      : unwrap(a).diff(unwrap(b), unit)
+    unit === undefined ? MsDuration.ms(unwrap(a).diff(unwrap(b))) : unwrap(a).diff(unwrap(b), unit)
 }
 
 // Ord

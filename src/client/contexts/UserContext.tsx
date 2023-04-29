@@ -3,28 +3,30 @@
 import { predicate } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { createContext, useCallback, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useMemo } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { Future, List, Maybe, Tuple, toNotUsed } from '../../shared/utils/fp'
+import { Future, List, Maybe, NotUsed, Tuple } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
+import { AsyncState } from '../models/AsyncState'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
 
 const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<SummonerShort>')
 
 type UserContext = {
-  refreshUser: () => void
-  user: Maybe<UserView>
-  addFavoriteSearch: (summoner: SummonerShort, onNotFound: () => void) => void
-  removeFavoriteSearch: (summoner: SummonerShort) => void
+  refreshUser: Future<Maybe<UserView> | undefined>
+  user: AsyncState<unknown, Maybe<UserView>>
+  maybeUser: Maybe<UserView>
+  addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
+  removeFavoriteSearch: (summoner: SummonerShort) => Future<NotUsed>
   recentSearches: List<SummonerShort>
   addRecentSearch: (summoner: SummonerShort) => void
   removeRecentSearch: (summoner: SummonerShort) => void
@@ -33,11 +35,7 @@ type UserContext = {
 const UserContext = createContext<UserContext | undefined>(undefined)
 
 export const UserContextProvider: React.FC = ({ children }) => {
-  const {
-    data,
-    error,
-    mutate: refreshUser,
-  } = useSWR(
+  const { data, error, mutate } = useSWR(
     apiRoutes.user.self.get,
     ([url, method]) =>
       pipe(
@@ -46,84 +44,85 @@ export const UserContextProvider: React.FC = ({ children }) => {
         futureMaybe.map(
           pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),
         ),
+        Future.orElse(e => {
+          alert("Erreur lors de la récupération l'utilisateur") // TODO: toaster
+          return Future.failed(e)
+        }),
         futureRunUnsafe,
       ),
     { revalidateOnFocus: false },
   )
 
   const addFavoriteSearch = useCallback(
-    (summoner: SummonerShort, onNotFound: () => void): Maybe<void> =>
+    (summoner: SummonerShort): Future<Maybe<NotUsed>> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
         Maybe.filter(
           flow(
             UserView.Lens.favoriteSearches.get,
-            predicate.not(List.elem(SummonerShort.byPlatformAndNameEq)(summoner)),
+            predicate.not(List.elem(SummonerShort.byPuuidEq)(summoner)),
           ),
         ),
-        Maybe.map(oldData => {
-          const newData = pipe(
-            UserView.Lens.favoriteSearches,
-            lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
-          )(oldData)
-
-          refreshUser(Maybe.some(newData), { revalidate: false })
-          // setLoading(true) // TODO
+        Maybe.map(oldData =>
           pipe(
             apiUserSelfFavoritesPut(summoner),
             statusesToOption(404),
-            Future.map(
-              Maybe.fold(() => {
-                refreshUser(Maybe.some(oldData), { revalidate: false })
-                onNotFound()
-              }, toNotUsed),
-            ),
-            Future.orElseW(() => {
-              refreshUser(Maybe.some(oldData), { revalidate: false })
-              alert("Erreur lors de l'ajout du favori") // TODO: toaster
-              return Future.notUsed
+            futureMaybe.map(() => {
+              mutate(
+                Maybe.some(
+                  pipe(
+                    UserView.Lens.favoriteSearches,
+                    lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
+                  )(oldData),
+                ),
+                { revalidate: false },
+              )
+              return NotUsed
             }),
-            // Future.map(() => setLoading(false)), // TODO
-            futureRunUnsafe,
-          )
+          ),
+        ),
+        Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
+        Future.orElse(() => {
+          alert("Erreur lors de l'ajout du favori") // TODO: toaster
+          return futureMaybe.some(NotUsed)
         }),
       ),
-    [data, refreshUser],
+    [data, mutate],
   )
 
   const removeFavoriteSearch = useCallback(
-    (summoner: SummonerShort): Maybe<void> =>
+    (summoner: SummonerShort): Future<NotUsed> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
         Maybe.filter(
-          flow(
-            UserView.Lens.favoriteSearches.get,
-            List.elem(SummonerShort.byPlatformAndNameEq)(summoner),
+          flow(UserView.Lens.favoriteSearches.get, List.elem(SummonerShort.byPuuidEq)(summoner)),
+        ),
+        Maybe.map(oldData =>
+          pipe(
+            apiUserSelfFavoritesDelete(summoner),
+            Future.map(() => {
+              mutate(
+                Maybe.some(
+                  pipe(
+                    UserView.Lens.favoriteSearches,
+                    lens.modify(List.difference(SummonerShort.byPuuidEq)([summoner])),
+                  )(oldData),
+                ),
+                { revalidate: false },
+              )
+              return NotUsed
+            }),
           ),
         ),
-        Maybe.map(oldData => {
-          const newData = pipe(
-            UserView.Lens.favoriteSearches,
-            lens.modify(List.difference(SummonerShort.byPlatformAndNameEq)([summoner])),
-          )(oldData)
-
-          refreshUser(Maybe.some(newData), { revalidate: false })
-          // setLoading(true) // TODO
-          pipe(
-            apiUserSelfFavoritesDelete(summoner), // TODO: handle error
-            Future.orElseW(() => {
-              refreshUser(Maybe.some(oldData), { revalidate: false })
-              alert('Erreur lors de la suppression du favori') // TODO: toaster
-              return Future.notUsed
-            }),
-            // Future.map(() => setLoading(false)), // TODO
-            futureRunUnsafe,
-          )
+        Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
+        Future.orElse(() => {
+          alert('Erreur lors de la suppression du favori') // TODO: toaster
+          return Future.notUsed
         }),
       ),
-    [data, refreshUser],
+    [data, mutate],
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(
@@ -137,7 +136,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
       setRecentSearches_(
         flow(
           List.prepend(summoner),
-          List.uniq(SummonerShort.byPlatformAndNameEq),
+          List.uniq(SummonerShort.byPuuidEq),
           List.takeLeft(constants.recentSearches.maxCount),
         ),
       ),
@@ -146,8 +145,36 @@ export const UserContextProvider: React.FC = ({ children }) => {
 
   const removeRecentSearch = useCallback(
     (summoner: SummonerShort) =>
-      setRecentSearches_(List.difference(SummonerShort.byPlatformAndNameEq)([summoner])),
+      setRecentSearches_(List.difference(SummonerShort.byPuuidEq)([summoner])),
     [setRecentSearches_],
+  )
+
+  const refreshUser = useMemo(
+    (): Future<Maybe<UserView> | undefined> =>
+      Future.tryCatch(() => mutate(() => Promise.resolve(undefined))),
+    [mutate],
+  )
+
+  const user = useMemo(() => AsyncState.fromSWR({ data, error }), [data, error])
+  const maybeUser = useMemo(() => pipe(user, AsyncState.toOption, Maybe.flatten), [user])
+
+  const recentSearches = useMemo(
+    () =>
+      pipe(
+        recentSearches_,
+        List.difference(SummonerShort.byPuuidEq)(
+          pipe(
+            user,
+            AsyncState.toOption,
+            Maybe.flatten,
+            List.fromOption,
+            List.chain(u =>
+              pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
+            ),
+          ),
+        ),
+      ),
+    [recentSearches_, user],
   )
 
   if (error !== undefined) {
@@ -158,23 +185,10 @@ export const UserContextProvider: React.FC = ({ children }) => {
     )
   }
 
-  const user = pipe(Maybe.fromNullable(data), Maybe.flatten)
-  const recentSearches = pipe(
-    recentSearches_,
-    List.difference(SummonerShort.byPlatformAndNameEq)(
-      pipe(
-        user,
-        List.fromOption,
-        List.chain(u =>
-          pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
-        ),
-      ),
-    ),
-  )
-
   const value: UserContext = {
-    refreshUser: () => refreshUser(),
+    refreshUser,
     user,
+    maybeUser,
     addFavoriteSearch,
     removeFavoriteSearch,
     recentSearches,

@@ -1,6 +1,6 @@
 import type { Platform } from '../../../shared/models/api/Platform'
+import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 
-import type { Puuid } from '../riot/Puuid'
 import type { SummonerId } from './SummonerId'
 
 type Summoner = {

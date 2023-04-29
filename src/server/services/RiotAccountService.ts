@@ -2,12 +2,12 @@ import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
-import type { Puuid } from '../models/riot/Puuid'
 import { Shard } from '../models/riot/Shard'
 import type { TagLine } from '../models/riot/TagLine'
 import type { RiotAccountPersistence } from '../persistence/RiotAccountPersistence'

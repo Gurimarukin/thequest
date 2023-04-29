@@ -1,4 +1,5 @@
 /* eslint-disable functional/no-expression-statements */
+import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import React, { useEffect } from 'react'
@@ -63,14 +64,17 @@ const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps
 
   useEffect(() => {
     if (data !== undefined) {
-      refreshUser()
-      navigate(appRoutes.index, { replace: true })
+      pipe(
+        refreshUser,
+        task.chainFirstIOK(() => () => navigate(appRoutes.index, { replace: true })),
+        futureRunUnsafe,
+      )
     }
   }, [data, navigate, refreshUser])
 
   return (
     <>
-      {basicAsyncRenderer({ data, error })(() => null)}
+      {basicAsyncRenderer({ data: undefined, error })(() => null)}
       {error !== undefined ? (
         <div className="flex justify-center">
           <Link to={appRoutes.index} className="mt-4 underline">
