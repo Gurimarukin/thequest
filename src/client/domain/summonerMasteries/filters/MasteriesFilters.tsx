@@ -157,7 +157,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
               icon: isChecked => (
                 <ChampionPositionImg
                   position={position}
-                  className={cssClasses('w-[24px]', [
+                  className={cssClasses('w-6', [
                     'brightness-150 contrast-200 grayscale invert',
                     isChecked,
                   ])}
@@ -234,7 +234,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
           {labelValue(
             'histogram',
             <IconLabel tooltip="Vue histogramme">
-              <StatsChartSharp className="h-5 rotate-90 scale-x-[-1] fill-current" />
+              <StatsChartSharp className="h-5 rotate-90 -scale-x-100 fill-current" />
             </IconLabel>,
           )}
           {labelValue(

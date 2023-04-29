@@ -18,10 +18,7 @@ export const ChampionPositionImg = ({ position, className }: Props): JSX.Element
     <img
       src={Assets.positions[position]}
       alt={`Icône position ${ChampionPosition.label[position]}`}
-      className={cssClasses([
-        'mx-[8.33%] h-[83.33%] w-[83.33%]',
-        position === 'jun' || position === 'sup',
-      ])}
+      className={cssClasses(['mx-[8.33%] h-5/6 w-5/6', position === 'jun' || position === 'sup'])}
     />
   </div>
 )
