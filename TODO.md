@@ -5,8 +5,7 @@
 - admin bo
 - shards styling
 - discord OAuth2: proper state
-- encrypted
-- debounce setShards
+- debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
 - clean old cache entries
