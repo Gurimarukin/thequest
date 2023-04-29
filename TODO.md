@@ -3,7 +3,6 @@
 - toaster (replace alert)
 - account menu
 - admin bo
-- shards styling
 - discord OAuth2: proper state
 - debounce setShards and add Loading
 - limit favorites
