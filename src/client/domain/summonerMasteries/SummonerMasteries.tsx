@@ -57,7 +57,7 @@ type Props = {
 
 export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
-  const { user } = useUser()
+  const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
     apiRoutes.summoner.byName.get(platform, clearSummonerName(summonerName)),
@@ -77,12 +77,16 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
   )
 
   // Remove shards on user disconnect
-  const previousUser = usePrevious(user)
+  const previousUser = usePrevious(maybeUser)
   useEffect(() => {
-    if (data !== undefined && Maybe.isNone(user) && Maybe.isSome(Maybe.flatten(previousUser))) {
+    if (
+      data !== undefined &&
+      Maybe.isNone(maybeUser) &&
+      Maybe.isSome(Maybe.flatten(previousUser))
+    ) {
       mutate({ ...data, championShards: Maybe.none }, { revalidate: false })
     }
-  }, [data, mutate, previousUser, user])
+  }, [data, maybeUser, mutate, previousUser])
 
   const setChampionsShardsBulk = useCallback(
     (

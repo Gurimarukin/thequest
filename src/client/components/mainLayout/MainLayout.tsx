@@ -6,9 +6,11 @@ import { Maybe } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
+import { AsyncState } from '../../models/AsyncState'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cssClasses } from '../../utils/cssClasses'
 import { Link } from '../Link'
+import { Loading } from '../Loading'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { SearchSummoner } from './SearchSummoner'
@@ -42,9 +44,13 @@ export const MainLayout: React.FC = ({ children }) => {
           </div>
           {pipe(
             user,
-            Maybe.fold(
+            AsyncState.fold(
+              () => <Loading className="h-6" />,
               () => <AccountDisconnected />,
-              u => <AccountConnected user={u} />,
+              Maybe.fold(
+                () => <AccountDisconnected />,
+                u => <AccountConnected user={u} />,
+              ),
             ),
           )}
         </div>

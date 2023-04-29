@@ -31,7 +31,7 @@ import { Select } from '../Select'
 
 export const SearchSummoner = (): JSX.Element => {
   const { navigate, matchesLocation, masteriesQuery } = useHistory()
-  const { user, recentSearches } = useUser()
+  const { maybeUser, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
   const close = useCallback(() => setIsOpen(false), [])
@@ -77,13 +77,13 @@ export const SearchSummoner = (): JSX.Element => {
 
   const searches: List<JSX.Element> = List.compact([
     pipe(
-      user,
+      maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
       // eslint-disable-next-line react/jsx-key
       Maybe.map(s => <SummonerSearch type="self" summoner={s} closeSearch={close} />),
     ),
     pipe(
-      user,
+      maybeUser,
       Maybe.chain(u => NonEmptyArray.fromReadonlyArray(u.favoriteSearches)),
       Maybe.map(favoriteSearches => (
         <>

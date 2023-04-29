@@ -27,11 +27,11 @@ export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
 
 export const Login = (): JSX.Element => {
   const { navigate } = useHistory()
-  const { user, refreshUser } = useUser()
+  const { maybeUser, refreshUser } = useUser()
 
   useEffect(() => {
-    if (Maybe.isSome(user)) navigate(appRoutes.index)
-  }, [navigate, user])
+    if (Maybe.isSome(maybeUser)) navigate(appRoutes.index)
+  }, [maybeUser, navigate])
 
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
 

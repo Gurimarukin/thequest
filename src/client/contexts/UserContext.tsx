@@ -3,7 +3,7 @@
 import { predicate } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { createContext, useCallback, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useMemo } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
@@ -15,6 +15,7 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
+import { AsyncState } from '../models/AsyncState'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
 
@@ -22,7 +23,8 @@ const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<Summ
 
 type UserContext = {
   refreshUser: () => void
-  user: Maybe<UserView>
+  user: AsyncState<unknown, Maybe<UserView>>
+  maybeUser: Maybe<UserView>
   addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
   removeFavoriteSearch: (summoner: SummonerShort) => Future<NotUsed>
   recentSearches: List<SummonerShort>
@@ -46,6 +48,10 @@ export const UserContextProvider: React.FC = ({ children }) => {
         futureMaybe.map(
           pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),
         ),
+        Future.orElse(e => {
+          alert("Erreur lors de la récupération l'utilisateur") // TODO: toaster
+          return Future.failed(e)
+        }),
         futureRunUnsafe,
       ),
     { revalidateOnFocus: false },
@@ -147,6 +153,9 @@ export const UserContextProvider: React.FC = ({ children }) => {
     [setRecentSearches_],
   )
 
+  const user = useMemo(() => AsyncState.fromSWR({ data, error }), [data, error])
+  const maybeUser = useMemo(() => pipe(user, AsyncState.toOption, Maybe.flatten), [user])
+
   if (error !== undefined) {
     return (
       <div className="flex justify-center">
@@ -155,12 +164,13 @@ export const UserContextProvider: React.FC = ({ children }) => {
     )
   }
 
-  const user = pipe(Maybe.fromNullable(data), Maybe.flatten)
   const recentSearches = pipe(
     recentSearches_,
     List.difference(SummonerShort.byPuuidEq)(
       pipe(
         user,
+        AsyncState.toOption,
+        Maybe.flatten,
         List.fromOption,
         List.chain(u =>
           pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
@@ -172,6 +182,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
   const value: UserContext = {
     refreshUser: () => refreshUser(),
     user,
+    maybeUser,
     addFavoriteSearch,
     removeFavoriteSearch,
     recentSearches,

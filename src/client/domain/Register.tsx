@@ -36,11 +36,11 @@ const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 
 export const Register = (): JSX.Element => {
   const { navigate } = useHistory()
-  const { user } = useUser()
+  const { maybeUser } = useUser()
 
   useEffect(() => {
-    if (Maybe.isSome(user)) navigate(appRoutes.index)
-  }, [navigate, user])
+    if (Maybe.isSome(maybeUser)) navigate(appRoutes.index)
+  }, [navigate, maybeUser])
 
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
 
