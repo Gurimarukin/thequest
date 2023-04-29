@@ -28,7 +28,10 @@ export const Routes = (
   return [
     m(api.healthcheck.get, () => healthCheckController.check),
     m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
-    m(api.summoner.get, ({ platform, summonerName }) =>
+    m(api.summoner.byPuuid.get, ({ platform, puuid }) =>
+      maybeWithAuth(summonerController.findByPuuid(platform, puuid)),
+    ),
+    m(api.summoner.byName.get, ({ platform, summonerName }) =>
       maybeWithAuth(summonerController.findByName(platform, summonerName)),
     ),
     m(api.user.self.get, () => withAuth(userController.getSelf)),

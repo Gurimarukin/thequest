@@ -1,9 +1,9 @@
 import * as C from 'io-ts/Codec'
 
 import { Platform } from '../../shared/models/api/Platform'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 
 import { DayJsFromDate } from '../utils/ioTsUtils'
-import { Puuid } from './riot/Puuid'
 import { TagLine } from './riot/TagLine'
 
 type RiotAccountDb = C.TypeOf<typeof codec>

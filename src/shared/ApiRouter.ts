@@ -4,6 +4,7 @@ import { end, format, lit, str } from 'fp-ts-routing'
 import type { Method } from './models/Method'
 import { Lang } from './models/api/Lang'
 import { Platform } from './models/api/Platform'
+import { Puuid } from './models/api/summoner/Puuid'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
 
@@ -17,8 +18,13 @@ const { codec } = RouterUtils
 const api = lit('api')
 const healthcheck = api.then(lit('healthcheck'))
 const staticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
-const summoner = api
-  .then(lit('summoner'))
+const summoner = api.then(lit('summoner'))
+const summonerByPuuid = summoner
+  .then(lit('byPuuid'))
+  .then(codec('platform', Platform.codec))
+  .then(codec('puuid', Puuid.codec))
+const summonerByName = summoner
+  .then(lit('byName'))
   .then(codec('platform', Platform.codec))
   .then(str('summonerName'))
 const user = api.then(lit('user'))
@@ -45,7 +51,8 @@ const madosayentisutoUsersGetProgression = madosayentisuto
 // final
 const healthcheckGet = m(healthcheck, 'get')
 const staticDataLangGet = m(staticDataLang, 'get')
-const summonerGet = m(summoner, 'get')
+const summonerByPuuidGet = m(summonerByPuuid, 'get')
+const summonerByNameGet = m(summonerByName, 'get')
 const userSelfGet = m(userSelf, 'get')
 const userSelfFavoritesPut = m(userSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(userSelfFavorites, 'delete')
@@ -65,7 +72,10 @@ const madosayentisutoUsersGetProgressionPost = m(madosayentisutoUsersGetProgress
 export const apiParsers = {
   healthcheck: { get: p(healthcheckGet) },
   staticData: { lang: { get: p(staticDataLangGet) } },
-  summoner: { get: p(summonerGet) },
+  summoner: {
+    byPuuid: { get: p(summonerByPuuidGet) },
+    byName: { get: p(summonerByNameGet) },
+  },
   user: {
     self: {
       get: p(userSelfGet),
@@ -102,7 +112,13 @@ export const apiParsers = {
 export const apiRoutes = {
   staticData: { lang: { get: (lang: Lang) => r(staticDataLangGet, { lang }) } },
   summoner: {
-    get: (platform: Platform, summonerName: string) => r(summonerGet, { platform, summonerName }),
+    byPuuid: {
+      get: (platform: Platform, puuid: Puuid) => r(summonerByPuuidGet, { platform, puuid }),
+    },
+    byName: {
+      get: (platform: Platform, summonerName: string) =>
+        r(summonerByNameGet, { platform, summonerName }),
+    },
   },
   user: {
     self: {

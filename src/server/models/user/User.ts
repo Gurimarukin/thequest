@@ -6,10 +6,10 @@ import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 import { lens } from 'monocle-ts'
 
+import { PlatformWithPuuid } from '../../../shared/models/api/summoner/PlatformWithPuuid'
 import { UserName } from '../../../shared/models/api/user/UserName'
 import { List } from '../../../shared/utils/fp'
 
-import { PlatformWithPuuid } from '../PlatformWithPuuid'
 import { UserId } from './UserId'
 import { UserLogin } from './UserLogin'
 

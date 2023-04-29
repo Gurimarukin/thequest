@@ -9,7 +9,7 @@ import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import { ChampionShardsPayload } from '../../shared/models/api/summoner/ChampionShardsPayload'
-import { PlatformWithName } from '../../shared/models/api/summoner/PlatformWithName'
+import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
@@ -25,7 +25,6 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 
 import { constants } from '../config/constants'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
-import type { PlatformWithPuuid } from '../models/PlatformWithPuuid'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { Summoner } from '../models/summoner/Summoner'
 import { SummonerId } from '../models/summoner/SummonerId'
@@ -152,7 +151,7 @@ function UserController(
       ),
 
     addFavoriteSelf: (user_: TokenContent): EndedMiddleware =>
-      EndedMiddleware.withBody(PlatformWithName.codec)(({ platform, name }) =>
+      EndedMiddleware.withBody(PlatformWithPuuid.codec)(({ platform, puuid }) =>
         pipe(
           userService.findById(user_.id),
           Future.map(Either.fromOption(() => 'User not found')),
@@ -165,7 +164,7 @@ function UserController(
           futureEither.bindTo('linkedRiotAccount'),
           futureEither.bind('summonerToFavorite', () =>
             pipe(
-              summonerService.findByName(platform, name),
+              summonerService.findByPuuid(platform, puuid),
               Future.map(Either.fromOption(() => 'Summoner not found')),
             ),
           ),
@@ -200,18 +199,11 @@ function UserController(
       ),
 
     removeFavoriteSelf: (user: TokenContent): EndedMiddleware =>
-      EndedMiddleware.withBody(PlatformWithName.codec)(({ platform, name }) =>
+      EndedMiddleware.withBody(PlatformWithPuuid.codec)(({ platform, puuid }) =>
         pipe(
-          summonerService.findByName(platform, name),
-          Future.map(Either.fromOption(() => 'Summoner not found')),
-          futureEither.chain(summoner =>
-            pipe(
-              userService.removeFavoriteSearch(user.id, {
-                platform: summoner.platform,
-                puuid: summoner.puuid,
-              }),
-              Future.map(Either.fromOption(() => 'User not found')),
-            ),
+          pipe(
+            userService.removeFavoriteSearch(user.id, { platform, puuid }),
+            Future.map(Either.fromOption(() => 'User not found')),
           ),
           M.fromTaskEither,
           M.ichain(

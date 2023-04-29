@@ -1,14 +1,11 @@
-- recherches récentes : stocker l'id côté client
 - useless qs.stringify?
 - tailwind colors
 - toaster (replace alert)
 - account menu
 - admin bo
 - shards styling
-- maybe fix shards hitbox
 - discord OAuth2: proper state
-- encrypted
-- debounce setShards
+- debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
 - clean old cache entries

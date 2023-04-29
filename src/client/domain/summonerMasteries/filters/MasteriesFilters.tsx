@@ -41,7 +41,7 @@ type Props = {
 
 export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.Element => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
-  const { user } = useUser()
+  const { maybeUser } = useUser()
 
   const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
   const handleMasteriesMouseEnter = useCallback(() => {
@@ -85,7 +85,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
   const searchRef = useRef<SearchChampionRef>(null)
 
   const handleRandomClick = useMemo(
-    () =>
+    (): (() => void) | undefined =>
       pipe(
         randomChampion,
         Maybe.map(io.map(name => searchRef.current?.setSearch(name))),
@@ -168,6 +168,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
           )}
           checked={masteriesQuery.position}
           toggleChecked={toggleLaneChecked}
+          tooltipPlacement="top"
           iconClassName="p-1.5"
         />
       </div>
@@ -189,13 +190,17 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
         >
           <DiceFilled className="h-7 fill-wheat transition-transform duration-300 group-enabled:group-hover:animate-dice" />
         </button>
-        <Tooltip hoverRef={randomButtonRef}>Champion aléatoire</Tooltip>
+        <Tooltip hoverRef={randomButtonRef} placement="top">
+          Champion aléatoire
+        </Tooltip>
 
         <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
           {labelValue(
             'percents',
             <TextLabel
-              tooltip={`Trier par pourcents / ${Maybe.isSome(user) ? 'fragments / ' : ''}points`}
+              tooltip={`Trier par pourcents / ${
+                Maybe.isSome(maybeUser) ? 'fragments / ' : ''
+              }points`}
             >
               %
             </TextLabel>,
@@ -267,8 +272,7 @@ const getSelectLevelsButton =
           disabled={isSelected}
           className={cssClasses(
             'flex items-center justify-between gap-1 py-1.5 pr-2 pl-4 text-left text-sm',
-            ['hover:bg-black', !isSelected],
-            ['bg-goldenrod-secondary text-black', isSelected],
+            isSelected ? 'bg-goldenrod-secondary text-black' : 'hover:bg-black',
           )}
         >
           <span>{children}</span>
@@ -301,7 +305,9 @@ const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
       <span ref={hoverRef} className="flex h-6 w-10 items-center justify-center text-sm">
         {children}
       </span>
-      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
+      <Tooltip hoverRef={hoverRef} placement="top">
+        {tooltip}
+      </Tooltip>
     </>
   )
 }
@@ -313,7 +319,9 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
       <span ref={hoverRef} className="flex h-6 w-6 items-center justify-center">
         {children}
       </span>
-      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
+      <Tooltip hoverRef={hoverRef} placement="top">
+        {tooltip}
+      </Tooltip>
     </>
   )
 }

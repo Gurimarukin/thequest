@@ -39,13 +39,22 @@ export const appParsers = {
 export const appRoutes = {
   index: format(end.formatter, {}),
   platformSummonerName: (platform: Platform, summonerName: string, query: PartialMasteriesQuery) =>
-    `${format(platformSummonerNameMatch.formatter, { platform, summonerName })}${q(
-      PartialMasteriesQuery.qsStringify(query),
-    )}`,
+    withQuery(
+      format(platformSummonerNameMatch.formatter, { platform, summonerName }),
+      PartialMasteriesQuery,
+      query,
+    ),
   aram: (query: PartialAramQuery) =>
-    `${format(aramMatch.formatter, {})}${q(PartialAramQuery.qsStringify(query))}`,
+    withQuery(format(aramMatch.formatter, {}), PartialAramQuery, query),
   login: format(loginMatch.formatter, {}),
   register: format(registerMatch.formatter, {}),
 }
 
-const q = (query: string): string => (query === '' ? '' : `?${query}`)
+const withQuery = <A>(
+  path: string,
+  { qsStringify }: { qsStringify: (a: A) => string },
+  a: A,
+): string => {
+  const query = qsStringify(a)
+  return `${path}${query === '' ? '' : `?${query}`}`
+}
