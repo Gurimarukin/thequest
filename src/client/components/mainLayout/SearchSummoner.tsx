@@ -207,7 +207,7 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
                 replace: true,
               }),
             ),
-            Future.delay(MsDuration.wrap(100)),
+            Future.delay(MsDuration.ms(100)),
           )
         }),
         Future.orElseW(() => {
