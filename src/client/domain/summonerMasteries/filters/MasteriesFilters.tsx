@@ -36,7 +36,7 @@ import { Checkboxes } from './Checkboxes'
 
 type Props = {
   searchCount: number
-  randomChampion: Maybe<io.IO<string>>
+  randomChampion: Maybe<() => string>
 }
 
 export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.Element => {

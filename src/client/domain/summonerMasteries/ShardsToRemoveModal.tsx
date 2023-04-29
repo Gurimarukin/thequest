@@ -175,8 +175,7 @@ export const ShardsToRemoveModal = ({
           <ul
             className={cssClasses(
               'grid grid-cols-[repeat(4,auto)] items-center gap-y-6 gap-x-1',
-              ['mt-6', isSingleMode],
-              ['mt-2', !isSingleMode],
+              isSingleMode ? 'mt-6' : 'mt-2',
             )}
           >
             {notificationsState.map(n => (
@@ -278,11 +277,7 @@ const Toggle = ({ isChecked, toggleChecked }: ToggleProps): JSX.Element => (
   <label className="cursor-pointer">
     <input type="checkbox" checked={isChecked} onChange={toggleChecked} className="hidden" />
     <ToggleFilled
-      className={cssClasses(
-        'w-8',
-        ['fill-goldenrod', isChecked],
-        ['rotate-180 fill-red-700', !isChecked],
-      )}
+      className={cssClasses('w-8', isChecked ? 'fill-goldenrod' : 'rotate-180 fill-red-700')}
     />
   </label>
 )

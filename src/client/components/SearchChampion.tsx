@@ -99,8 +99,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
             placeholder="Rechercher champion"
             className={cssClasses(
               'w-[151px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
-              ['pr-2', search === ''],
-              ['pr-7', search !== ''],
+              search === '' ? 'pr-2' : 'pr-7',
             )}
           />
           {search !== '' ? (

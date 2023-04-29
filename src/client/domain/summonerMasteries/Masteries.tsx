@@ -88,7 +88,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
     ])
 
   const randomChampion = useMemo(
-    () =>
+    (): Maybe<() => string> =>
       pipe(
         filteredAndSortedMasteries,
         List.filter(m => !m.isHidden),
@@ -109,20 +109,7 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
   return (
     <>
       <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
-      <div
-        className={cssClasses(
-          'w-full',
-          [
-            'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
-            masteriesQuery.view === 'compact',
-          ],
-          ['grid max-w-7xl grid-cols-[auto_1fr] gap-y-2', masteriesQuery.view === 'histogram'],
-          [
-            'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
-            masteriesQuery.view === 'aram',
-          ],
-        )}
-      >
+      <div className={cssClasses('w-full', viewContainerClassName(masteriesQuery.view))}>
         {pipe(
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
@@ -141,6 +128,17 @@ export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element 
       }`}</div>
     </>
   )
+}
+
+const viewContainerClassName = (view: MasteriesQueryView): string => {
+  switch (view) {
+    case 'compact':
+      return 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4'
+    case 'histogram':
+      return 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2'
+    case 'aram':
+      return 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1'
+  }
 }
 
 const getSortBy = (
