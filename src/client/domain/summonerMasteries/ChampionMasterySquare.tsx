@@ -79,13 +79,11 @@ export const ChampionMasterySquare = ({
     <div className={cssClasses('relative', className)}>
       {/* glow */}
       <div
-        className={cssClasses(
-          ['hidden', !isGlowing],
-          [
-            'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm',
-            isGlowing,
-          ],
-        )}
+        className={
+          isGlowing
+            ? 'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm'
+            : 'hidden'
+        }
         style={animationDelay(glow)}
       />
 
@@ -94,21 +92,15 @@ export const ChampionMasterySquare = ({
         ref={hoverRef}
         className={cssClasses(
           'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
+          championLevelBgColor(championLevel),
           roundedBrInsteadOfTr ? 'rounded-br-xl' : 'rounded-tr-xl',
-          ['bg-mastery7-blue', championLevel === 7],
-          ['bg-mastery6-violet', championLevel === 6],
-          ['bg-mastery5-red', championLevel === 5],
-          ['bg-mastery4-brown', championLevel === 4],
-          ['bg-mastery-beige', 1 <= championLevel && championLevel <= 3],
-          ['bg-black', championLevel === 0],
         )}
       >
         {/* champion image */}
         <div
           className={cssClasses(
             'h-12 w-12 overflow-hidden rounded-bl-lg',
-            ['rounded-br-lg', roundedBrInsteadOfTr],
-            ['rounded-tr-lg', !roundedBrInsteadOfTr],
+            roundedBrInsteadOfTr ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
         >
           <img
@@ -122,11 +114,7 @@ export const ChampionMasterySquare = ({
         <div
           className={cssClasses(
             'absolute top-0 left-0 flex h-4 w-[14px] justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
-            ['text-blue-500', championLevel === 7],
-            ['text-purple-400', championLevel === 6],
-            ['text-red-700', championLevel === 5],
-            ['text-yellow-600', championLevel === 4],
-            ['text-neutral-400', championLevel < 4],
+            championLevelNumberColor(championLevel),
           )}
         >
           <span className="mt-[-2px]">{championLevel}</span>
@@ -181,6 +169,23 @@ const animationDelay: (glow: Maybe<number>) => React.CSSProperties | undefined =
   }),
   Maybe.toUndefined,
 )
+
+const championLevelBgColor = (championLevel: ChampionLevelOrZero): string => {
+  if (championLevel === 7) return 'bg-mastery7-blue'
+  if (championLevel === 6) return 'bg-mastery6-violet'
+  if (championLevel === 5) return 'bg-mastery5-red'
+  if (championLevel === 4) return 'bg-mastery4-brown'
+  if (championLevel === 0) return 'bg-black'
+  return 'bg-mastery-beige'
+}
+
+const championLevelNumberColor = (championLevel: ChampionLevelOrZero): string => {
+  if (championLevel === 7) return 'text-blue-500'
+  if (championLevel === 6) return 'text-purple-400'
+  if (championLevel === 5) return 'text-red-700'
+  if (championLevel === 4) return 'text-yellow-600'
+  return 'text-neutral-400'
+}
 
 type TokensProps = {
   championLevel: number
