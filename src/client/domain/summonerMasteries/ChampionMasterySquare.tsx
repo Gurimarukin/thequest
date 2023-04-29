@@ -252,17 +252,24 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
     [setShardsCount, shardsCount],
   )
 
+  const canRemoveShard = 1 <= shardsCount
+
   return (
     <div className="group absolute right-0 bottom-0 flex items-end">
       <span className="-mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="h-2.5 w-2.5 rotate-180 fill-current" />
       </span>
-      <span className="flex h-4 w-3.5 justify-end rounded-tl-lg bg-black pl-0.5 text-xs">
+      <span className="flex h-4 w-3.5 justify-end rounded-tl-lg bg-black pl-0.5 text-xs group-hover:justify-center">
         <span className="mt-0.5">{shardsCount}</span>
       </span>
       {setShardsCount !== null ? (
-        <div className="absolute -bottom-3.5 -right-px z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex">
-          <span className="flex bg-black p-px pb-0.5">
+        <div
+          className={cssClasses(
+            'absolute -right-px z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex',
+            ['-bottom-3.5', canRemoveShard],
+          )}
+        >
+          <span className={cssClasses('flex bg-black p-px pb-0.5', ['hidden', 9 <= shardsCount])}>
             <button
               ref={addButtonRef}
               type="button"
@@ -276,7 +283,7 @@ const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
             </Tooltip>
           </span>
           <span className="h-3 w-px bg-black" />
-          <span className="flex bg-black p-px">
+          <span className={cssClasses('flex bg-black p-px', ['hidden', !canRemoveShard])}>
             <button
               ref={removeButtonRef}
               type="button"
