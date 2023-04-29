@@ -168,6 +168,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
           )}
           checked={masteriesQuery.position}
           toggleChecked={toggleLaneChecked}
+          tooltipPlacement="top"
           iconClassName="p-1.5"
         />
       </div>
@@ -189,7 +190,9 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
         >
           <DiceFilled className="h-7 fill-wheat transition-transform duration-300 group-enabled:group-hover:animate-dice" />
         </button>
-        <Tooltip hoverRef={randomButtonRef}>Champion aléatoire</Tooltip>
+        <Tooltip hoverRef={randomButtonRef} placement="top">
+          Champion aléatoire
+        </Tooltip>
 
         <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
           {labelValue(
@@ -301,7 +304,9 @@ const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
       <span ref={hoverRef} className="flex h-6 w-10 items-center justify-center text-sm">
         {children}
       </span>
-      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
+      <Tooltip hoverRef={hoverRef} placement="top">
+        {tooltip}
+      </Tooltip>
     </>
   )
 }
@@ -313,7 +318,9 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
       <span ref={hoverRef} className="flex h-6 w-6 items-center justify-center">
         {children}
       </span>
-      <Tooltip hoverRef={hoverRef}>{tooltip}</Tooltip>
+      <Tooltip hoverRef={hoverRef} placement="top">
+        {tooltip}
+      </Tooltip>
     </>
   )
 }
