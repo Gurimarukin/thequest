@@ -2,6 +2,8 @@ import { HTTPError } from 'ky'
 import React from 'react'
 import type { SWRResponse } from 'swr'
 
+import { Loading } from '../components/Loading'
+
 export function basicAsyncRenderer<A>({
   data,
   error,
@@ -23,7 +25,7 @@ export function basicAsyncRenderer<A>({
     if (data === undefined) {
       return (
         <div className="flex justify-center">
-          <pre className="mt-4">loading...</pre>
+          <Loading className="mt-4 h-6" />
         </div>
       )
     }
