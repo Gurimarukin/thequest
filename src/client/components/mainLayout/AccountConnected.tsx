@@ -1,3 +1,5 @@
+/* eslint-disable functional/no-expression-statements */
+import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useState } from 'react'
 
@@ -9,6 +11,7 @@ import { useUser } from '../../contexts/UserContext'
 import { PersonFilled } from '../../imgs/svgIcons'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
+import { Loading } from '../Loading'
 import { Menu } from './Menu'
 
 type AccountConnectedProps = {
@@ -22,8 +25,19 @@ export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element =
   const toggleMenu = useCallback(() => setMenuIsVisible(v => !v), [])
   const hideMenu = useCallback(() => setMenuIsVisible(false), [])
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const disconnect = useCallback(
-    () => pipe(apiUserLogoutPost, Future.map(refreshUser), futureRunUnsafe), // TODO: handle error
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setIsLoading(true)
+      return pipe(
+        apiUserLogoutPost,
+        Future.chain(() => refreshUser),
+        task.chainFirstIOK(() => () => setIsLoading(false)),
+        futureRunUnsafe,
+      )
+    }, // TODO: handle error
     [refreshUser],
   )
 
@@ -41,9 +55,10 @@ export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element =
                 <button
                   type="button"
                   onClick={disconnect}
-                  className="bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
+                  disabled={isLoading}
+                  className="flex items-center gap-2 bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
                 >
-                  Déconnexion
+                  Déconnexion {isLoading ? <Loading className="h-4" /> : null}
                 </button>
               </li>
             </ul>

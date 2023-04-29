@@ -1,5 +1,6 @@
 /* eslint-disable functional/no-expression-statements */
-import { flow, pipe } from 'fp-ts/function'
+import { task } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -8,6 +9,7 @@ import { Either, Future, Maybe } from '../../shared/utils/fp'
 
 import { apiUserLoginPasswordPost } from '../api'
 import { Link } from '../components/Link'
+import { Loading } from '../components/Loading'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
@@ -33,6 +35,7 @@ export const Login = (): JSX.Element => {
     if (Maybe.isSome(maybeUser)) navigate(appRoutes.index)
   }, [maybeUser, navigate])
 
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
 
   const [state, setState] = useState(emptyState)
@@ -52,14 +55,17 @@ export const Login = (): JSX.Element => {
       e.preventDefault()
       pipe(
         validated,
-        Either.map(
-          flow(
+        Either.map(valid => {
+          setIsLoading(true)
+          return pipe(
+            valid,
             apiUserLoginPasswordPost,
-            Future.map(refreshUser),
-            Future.orElse(() => Future.successful(setError(Maybe.some('error')))),
+            Future.chain(() => refreshUser),
+            Future.orElseW(() => Future.successful(setError(Maybe.some('error')))),
+            task.chainFirstIOK(() => () => setIsLoading(false)),
             futureRunUnsafe,
-          ),
-        ),
+          )
+        }),
       )
     },
     [refreshUser, validated],
@@ -105,10 +111,10 @@ export const Login = (): JSX.Element => {
           <div className="flex flex-col items-center gap-2 self-center">
             <button
               type="submit"
-              disabled={Either.isLeft(validated)}
-              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              disabled={isLoading || Either.isLeft(validated)}
+              className="flex items-center gap-2 bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
-              Connexion
+              Connexion {isLoading ? <Loading className="h-4" /> : null}
             </button>
             {pipe(
               error,

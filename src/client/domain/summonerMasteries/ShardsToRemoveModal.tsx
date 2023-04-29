@@ -1,6 +1,5 @@
 /* eslint-disable functional/no-expression-statements,
                 functional/no-return-void */
-import type { io } from 'fp-ts'
 import { number, ord, predicate, string, task } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { identity, pipe } from 'fp-ts/function'
@@ -15,6 +14,7 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Future, List, NotUsed } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { Loading } from '../../components/Loading'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Modal } from '../../components/Modal'
 import { ButtonPrimary, ButtonSecondary } from '../../components/buttons'
@@ -106,16 +106,16 @@ export const ShardsToRemoveModal = ({
 
   const futureWithLoading = useCallback((f: Future<NotUsed>) => {
     setIsLoading(true)
-    pipe(
+    return pipe(
       f,
-      task.chainFirstIOK((): io.IO<void> => () => setIsLoading(false)),
+      task.chainFirstIOK(() => () => setIsLoading(false)),
       futureRunUnsafe,
     )
   }, [])
 
   const noSingleMode = useCallback(() => {
     const n = NonEmptyArray.head(notifications)
-    pipe(
+    return pipe(
       setChampionsShardsBulk([{ championId: n.championId, shardsCount: n.shardsCount }]),
       futureWithLoading,
     )
@@ -123,7 +123,7 @@ export const ShardsToRemoveModal = ({
 
   const yesSingleMode = useCallback(() => {
     const n = NonEmptyArray.head(notifications)
-    pipe(
+    return pipe(
       setChampionsShardsBulk([
         { championId: n.championId, shardsCount: n.shardsCount - n.shardsToRemove },
       ]),
@@ -207,11 +207,21 @@ export const ShardsToRemoveModal = ({
           </ul>
           {isSingleMode ? (
             <div className="mt-6 flex gap-8">
-              <ButtonSecondary type="button" onClick={noSingleMode} disabled={isLoading}>
-                Non
+              <ButtonSecondary
+                type="button"
+                onClick={noSingleMode}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                Non {isLoading ? <Loading className="h-4" /> : null}
               </ButtonSecondary>
-              <ButtonPrimary type="button" onClick={yesSingleMode} disabled={isLoading}>
-                Oui
+              <ButtonPrimary
+                type="button"
+                onClick={yesSingleMode}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                Oui {isLoading ? <Loading className="h-4" /> : null}
               </ButtonPrimary>
             </div>
           ) : (
@@ -219,9 +229,9 @@ export const ShardsToRemoveModal = ({
               type="button"
               onClick={confirmMultipleMode}
               disabled={isLoading}
-              className="mt-6 bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
+              className="mt-6 flex items-center gap-2 bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
             >
-              Confirmer
+              Confirmer {isLoading ? <Loading className="h-4" /> : null}
             </ButtonPrimary>
           )}
         </div>

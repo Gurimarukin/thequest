@@ -1,5 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
+import { task } from 'fp-ts'
 import type { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -225,16 +226,11 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
     (e: React.MouseEvent) => {
       e.stopPropagation()
       setFavoriteIsLoading(true)
-      pipe(
-        // error is already handled in UserContext
+      return pipe(
         addFavoriteSearch(summoner),
         // on not found
-        Future.map(
-          Maybe.fold(
-            () => navigateToSummonerByPuuid(),
-            () => setFavoriteIsLoading(false),
-          ),
-        ),
+        Future.map(Maybe.getOrElseW(() => navigateToSummonerByPuuid())),
+        task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )
     },
@@ -245,10 +241,9 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
     (e: React.MouseEvent) => {
       e.stopPropagation()
       setFavoriteIsLoading(true)
-      pipe(
-        // error is already handled in UserContext
+      return pipe(
         removeFavoriteSearch(summoner),
-        Future.map(() => setFavoriteIsLoading(false)),
+        task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )
     },

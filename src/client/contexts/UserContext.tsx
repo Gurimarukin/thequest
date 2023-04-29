@@ -22,7 +22,7 @@ import { http, statusesToOption } from '../utils/http'
 const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<SummonerShort>')
 
 type UserContext = {
-  refreshUser: () => void
+  refreshUser: Future<Maybe<UserView> | undefined>
   user: AsyncState<unknown, Maybe<UserView>>
   maybeUser: Maybe<UserView>
   addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
@@ -35,11 +35,7 @@ type UserContext = {
 const UserContext = createContext<UserContext | undefined>(undefined)
 
 export const UserContextProvider: React.FC = ({ children }) => {
-  const {
-    data,
-    error,
-    mutate: refreshUser,
-  } = useSWR(
+  const { data, error, mutate } = useSWR(
     apiRoutes.user.self.get,
     ([url, method]) =>
       pipe(
@@ -73,7 +69,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
             apiUserSelfFavoritesPut(summoner),
             statusesToOption(404),
             futureMaybe.map(() => {
-              refreshUser(
+              mutate(
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
@@ -92,7 +88,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
           return futureMaybe.some(NotUsed)
         }),
       ),
-    [data, refreshUser],
+    [data, mutate],
   )
 
   const removeFavoriteSearch = useCallback(
@@ -107,7 +103,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
           pipe(
             apiUserSelfFavoritesDelete(summoner),
             Future.map(() => {
-              refreshUser(
+              mutate(
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
@@ -126,7 +122,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
           return Future.notUsed
         }),
       ),
-    [data, refreshUser],
+    [data, mutate],
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(
@@ -153,8 +149,33 @@ export const UserContextProvider: React.FC = ({ children }) => {
     [setRecentSearches_],
   )
 
+  const refreshUser = useMemo(
+    (): Future<Maybe<UserView> | undefined> =>
+      Future.tryCatch(() => mutate(() => Promise.resolve(undefined))),
+    [mutate],
+  )
+
   const user = useMemo(() => AsyncState.fromSWR({ data, error }), [data, error])
   const maybeUser = useMemo(() => pipe(user, AsyncState.toOption, Maybe.flatten), [user])
+
+  const recentSearches = useMemo(
+    () =>
+      pipe(
+        recentSearches_,
+        List.difference(SummonerShort.byPuuidEq)(
+          pipe(
+            user,
+            AsyncState.toOption,
+            Maybe.flatten,
+            List.fromOption,
+            List.chain(u =>
+              pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
+            ),
+          ),
+        ),
+      ),
+    [recentSearches_, user],
+  )
 
   if (error !== undefined) {
     return (
@@ -164,23 +185,8 @@ export const UserContextProvider: React.FC = ({ children }) => {
     )
   }
 
-  const recentSearches = pipe(
-    recentSearches_,
-    List.difference(SummonerShort.byPuuidEq)(
-      pipe(
-        user,
-        AsyncState.toOption,
-        Maybe.flatten,
-        List.fromOption,
-        List.chain(u =>
-          pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
-        ),
-      ),
-    ),
-  )
-
   const value: UserContext = {
-    refreshUser: () => refreshUser(),
+    refreshUser,
     user,
     maybeUser,
     addFavoriteSearch,
