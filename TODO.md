@@ -4,7 +4,6 @@
 - account menu
 - admin bo
 - shards styling
-- maybe fix shards hitbox
 - discord OAuth2: proper state
 - encrypted
 - debounce setShards
