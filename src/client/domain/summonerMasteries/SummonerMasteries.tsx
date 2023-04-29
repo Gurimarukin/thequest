@@ -8,7 +8,6 @@ import useSWR from 'swr'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
-import { MsDuration } from '../../../shared/models/MsDuration'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
@@ -46,8 +45,6 @@ import { Summoner } from './Summoner'
 
 const { cleanChampionName } = StringUtils
 
-const fromHistoryStateDelay = MsDuration.ms(500)
-
 // should mutate data before API response
 type OptimisticMutation = {
   optimisticMutation: boolean
@@ -66,13 +63,13 @@ export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Elemen
     apiRoutes.summoner.byName.get(platform, clearSummonerName(summonerName)),
     methodWithUrl =>
       pipe(
-        historyStateRef.current.summonerMasteries,
+        historyStateRef.current.futureSummonerMasteries,
         Maybe.fold(
           () => http(methodWithUrl, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
-          summonerMasteries => {
-            modifyHistoryStateRef(HistoryState.Lens.summonerMasteries.set(Maybe.none))
-            return pipe(Future.successful(summonerMasteries), Future.delay(fromHistoryStateDelay))
-          },
+          Future.chainFirstIOK(
+            () => () =>
+              modifyHistoryStateRef(HistoryState.Lens.futureSummonerMasteries.set(Maybe.none)),
+          ),
         ),
         futureRunUnsafe,
       ),

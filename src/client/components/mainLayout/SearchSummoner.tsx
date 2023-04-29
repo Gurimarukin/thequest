@@ -4,10 +4,9 @@ import type { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { MsDuration } from '../../../shared/models/MsDuration'
 import { Platform } from '../../../shared/models/api/Platform'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
-import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { apiSummonerByPuuidGet } from '../../api'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
@@ -25,7 +24,6 @@ import {
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cssClasses } from '../../utils/cssClasses'
-import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
 import { Select } from '../Select'
 
@@ -194,37 +192,26 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
     [masteriesQuery, matchesLocation],
   )
 
-  const handleClick = useCallback(
-    () =>
-      pipe(
-        apiSummonerByPuuidGet(summoner.platform, summoner.puuid),
-        Future.chain(summonerMasteries => {
-          closeSearch()
-          setHistoryState(HistoryState.Lens.summonerMasteries.set(Maybe.some(summonerMasteries)))
-          return pipe(
-            Future.fromIO(() =>
-              navigate(platformSummonerName(summoner.platform, summonerMasteries.summoner.name), {
-                replace: true,
-              }),
-            ),
-            Future.delay(MsDuration.ms(100)),
-          )
-        }),
-        Future.orElseW(() => {
-          alert("Erreur en récupérant le nom de l'invocateur")
-          return Future.notUsed
-        }),
-        futureRunUnsafe,
-      ),
-    [
-      closeSearch,
-      navigate,
-      platformSummonerName,
+  const handleClick = useCallback(() => {
+    pipe(
+      apiSummonerByPuuidGet(summoner.platform, summoner.puuid),
+      Maybe.some,
+      HistoryState.Lens.futureSummonerMasteries.set,
       setHistoryState,
-      summoner.platform,
-      summoner.puuid,
-    ],
-  )
+    )
+    closeSearch()
+    navigate(platformSummonerName(summoner.platform, summoner.name), {
+      replace: true,
+    })
+  }, [
+    closeSearch,
+    navigate,
+    platformSummonerName,
+    setHistoryState,
+    summoner.name,
+    summoner.platform,
+    summoner.puuid,
+  ])
 
   const handleRemoveRecentClick = useCallback(
     () => removeRecentSearch(summoner),

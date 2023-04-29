@@ -17,6 +17,7 @@ import React, {
 } from 'react'
 
 import type { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
+import type { Future } from '../../shared/utils/fp'
 import { Either, Maybe } from '../../shared/utils/fp'
 
 import { AramQuery } from '../models/aramQuery/AramQuery'
@@ -146,17 +147,17 @@ export const useHistory = (): HistoryContext => {
 }
 
 type HistoryState = {
-  summonerMasteries: Maybe<SummonerMasteriesView>
+  futureSummonerMasteries: Maybe<Future<SummonerMasteriesView>>
 }
 
 const empty: HistoryState = {
-  summonerMasteries: Maybe.none,
+  futureSummonerMasteries: Maybe.none,
 }
 
 const HistoryState = {
   empty,
   Lens: {
-    summonerMasteries: pipe(lens.id<HistoryState>(), lens.prop('summonerMasteries')),
+    futureSummonerMasteries: pipe(lens.id<HistoryState>(), lens.prop('futureSummonerMasteries')),
   },
 }
 
