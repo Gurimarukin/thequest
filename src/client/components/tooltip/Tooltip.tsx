@@ -7,7 +7,6 @@ import { createPortal } from 'react-dom'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import { NonEmptyArray } from '../../../shared/utils/fp'
 
-import { useForceRender } from '../../hooks/useForceRender'
 import type { ReactPopperParams } from '../../hooks/useVisiblePopper'
 import { useVisiblePopper } from '../../hooks/useVisiblePopper'
 import { CaretUpSharpCropped } from '../../imgs/svgIcons'
@@ -52,11 +51,11 @@ export const Tooltip: React.FC<Props> = ({
   const hoverRefs = useMemo(() => hoverRefs_, hoverRefs_)
   const placementRef_ = maybePlacementRef ?? NonEmptyArray.head(hoverRefs)
 
-  const shouldDisplayRef = useRef(false)
+  const [shouldDisplay_, setShouldDisplay_] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const arrowRef = useRef<HTMLDivElement>(null)
 
-  const shouldDisplay = alwaysVisible || shouldDisplayRef.current
+  const shouldDisplay = alwaysVisible || shouldDisplay_
 
   const [eventListenersEnabled, setEventListenersEnabled] = useState(false)
   const options = useMemo(
@@ -81,7 +80,7 @@ export const Tooltip: React.FC<Props> = ({
 
   const setupHoverClickListeners = useSetupHoverClickListeners(
     hoverRefs,
-    shouldDisplayRef,
+    setShouldDisplay_,
     openedDuration,
     setEventListenersEnabled,
   )
@@ -132,13 +131,11 @@ export const Tooltip: React.FC<Props> = ({
  */
 const useSetupHoverClickListeners = (
   hoverRefs: NonEmptyArray<React.RefObject<Element>>,
-  shouldDisplayRef: React.MutableRefObject<boolean>,
+  setShouldDisplay: React.Dispatch<React.SetStateAction<boolean>>,
   openedDuration: MsDuration,
   setEventListenersEnabled: React.Dispatch<React.SetStateAction<boolean>>,
-): (() => void) => {
-  const forceRender = useForceRender()
-
-  return useCallback(() => {
+): (() => void) =>
+  useCallback(() => {
     const hovers = hoverRefs.map(r => r.current)
 
     // eslint-disable-next-line functional/no-let
@@ -148,22 +145,13 @@ const useSetupHoverClickListeners = (
       if (hovers.every(h => h === null)) return
       window.clearTimeout(timer)
       setEventListenersEnabled(true)
-
-      // eslint-disable-next-line functional/immutable-data
-      if (!shouldDisplayRef.current) shouldDisplayRef.current = true
-
-      forceRender()
+      setShouldDisplay(true)
     }
 
     function hideTooltip(): void {
       window.clearTimeout(timer)
       setEventListenersEnabled(false)
-
-      if (!shouldDisplayRef.current) return
-
-      // eslint-disable-next-line functional/immutable-data
-      shouldDisplayRef.current = false
-      forceRender()
+      setShouldDisplay(false)
     }
 
     function clickTooltip(): void {
@@ -196,8 +184,7 @@ const useSetupHoverClickListeners = (
         hover.removeEventListener('mouseleave', hideTooltip, true)
       })
     }
-  }, [forceRender, hoverRefs, openedDuration, setEventListenersEnabled, shouldDisplayRef])
-}
+  }, [hoverRefs, openedDuration, setEventListenersEnabled, setShouldDisplay])
 
 function isArray<A>(a: A | NonEmptyArray<A>): a is NonEmptyArray<A> {
   return Array.isArray(a)

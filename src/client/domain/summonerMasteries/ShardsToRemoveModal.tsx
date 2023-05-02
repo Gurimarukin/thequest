@@ -192,7 +192,7 @@ export const ShardsToRemoveModal = ({
                   <ChevronForwardFilled className="h-4" />
                   <MasteryImg level={n.championLevel} className="h-6" />
                 </span>
-                <Tooltip hoverRef={masteriesRef}>
+                <Tooltip hoverRef={masteriesRef} placement="top">
                   Changement de maîtrise {n.leveledUpFrom} à {n.championLevel}
                 </Tooltip>
                 <span className="justify-self-end pl-12 pr-4 text-sm">

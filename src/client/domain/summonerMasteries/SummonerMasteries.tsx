@@ -23,6 +23,7 @@ import type { PartialDict, Tuple } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
+import { Loading } from '../../components/Loading'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { config } from '../../config/unsafe'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
@@ -34,6 +35,7 @@ import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+import { cssClasses } from '../../utils/cssClasses'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -211,45 +213,18 @@ const SummonerViewComponent = ({
     [championShards, masteries, masteriesQuery.search, staticData.champions],
   )
 
+  const [uiIsBlocked, setUiIsBlocked] = useState(true)
+
+  useEffect(() => {
+    setUiIsBlocked(false)
+  }, [])
+
   const [isNotificationsHidden, setIsNotificationsHidden] = useState(false)
 
   const hideNotifications = useCallback(() => setIsNotificationsHidden(true), [])
 
   const notifications = useMemo(
-    (): Maybe<NonEmptyArray<ShardsToRemoveNotification>> =>
-      pipe(
-        championShards,
-        Maybe.map(
-          List.filterMap(({ champion, count, shardsToRemoveFromNotification }) =>
-            pipe(
-              shardsToRemoveFromNotification,
-              Maybe.chain(n =>
-                pipe(
-                  enrichedMasteries,
-                  List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
-                  Maybe.map(
-                    (c): ShardsToRemoveNotification => ({
-                      championId: champion,
-                      name: c.name,
-                      championLevel: c.championLevel,
-                      championPoints: c.championPoints,
-                      championPointsUntilNextLevel: c.championPointsUntilNextLevel,
-                      percents: c.percents,
-                      chestGranted: c.chestGranted,
-                      tokensEarned: c.tokensEarned,
-                      shardsCount: count,
-                      positions: c.positions,
-                      leveledUpFrom: n.leveledUpFrom,
-                      shardsToRemove: n.shardsToRemove,
-                    }),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Maybe.chain(NonEmptyArray.fromReadonlyArray),
-      ),
+    () => getNotifications(championShards, enrichedMasteries),
     [championShards, enrichedMasteries],
   )
 
@@ -276,13 +251,23 @@ const SummonerViewComponent = ({
 
   return (
     <>
-      <div className="flex h-full flex-col items-center gap-6 overflow-y-auto overflow-x-hidden px-2 pb-24 pt-3">
+      {uiIsBlocked ? (
+        <div className="flex justify-center">
+          <Loading className="mt-4 h-6 self-center" />
+        </div>
+      ) : null}
+      <div
+        className={cssClasses(
+          'flex h-full flex-col items-center gap-6 overflow-y-auto overflow-x-hidden px-2 pb-24 pt-3',
+          ['hidden', uiIsBlocked],
+        )}
+      >
         <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
         <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
       </div>
       {pipe(
         notifications,
-        Maybe.filter(() => !isNotificationsHidden),
+        Maybe.filter(() => !uiIsBlocked && !isNotificationsHidden),
         Maybe.fold(
           () => null,
           n => (
@@ -407,3 +392,41 @@ const enrichAll = (
     enrichedMasteries: enrichedMasteries_,
   }
 }
+
+const getNotifications = (
+  championShards: Maybe<List<ChampionShardsView>>,
+  enrichedMasteries: EnrichedAll['enrichedMasteries'],
+): Maybe<NonEmptyArray<ShardsToRemoveNotification>> =>
+  pipe(
+    championShards,
+    Maybe.map(
+      List.filterMap(({ champion, count, shardsToRemoveFromNotification }) =>
+        pipe(
+          shardsToRemoveFromNotification,
+          Maybe.chain(n =>
+            pipe(
+              enrichedMasteries,
+              List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
+              Maybe.map(
+                (c): ShardsToRemoveNotification => ({
+                  championId: champion,
+                  name: c.name,
+                  championLevel: c.championLevel,
+                  championPoints: c.championPoints,
+                  championPointsUntilNextLevel: c.championPointsUntilNextLevel,
+                  percents: c.percents,
+                  chestGranted: c.chestGranted,
+                  tokensEarned: c.tokensEarned,
+                  shardsCount: count,
+                  positions: c.positions,
+                  leveledUpFrom: n.leveledUpFrom,
+                  shardsToRemove: n.shardsToRemove,
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+    Maybe.chain(NonEmptyArray.fromReadonlyArray),
+  )

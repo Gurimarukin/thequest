@@ -8,10 +8,6 @@
 - limit favorites
 - modal: trap focus
 - clean old cache entries
-- Suspense, lazy, requestAnimationFrame
-  ```ts
-  lazy(() => Promise.resolve({ default: () => <pre>TOTO</pre> }))
-  ```
 
 ---
 
