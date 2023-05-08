@@ -1,6 +1,7 @@
-- SearchSummoner: use Link
 - fix aram icons shrink
 - @parcel/optimizer-image: Could not optimize image src/client/imgs/stats/tenacity.png: Invalid header detected; Not a PNG file
+- histogram: search: hide not matching
+- aram: search: yellow glow highlight
 - clean constants (only multiple references)
 - useless qs.stringify?
 - tailwind colors

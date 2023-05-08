@@ -1,6 +1,8 @@
+import type { Match, Parser } from 'fp-ts-routing'
 import { end, format, lit, str } from 'fp-ts-routing'
 
 import { Platform } from '../../shared/models/api/Platform'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 
 import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
@@ -12,6 +14,9 @@ const { codec } = RouterUtils
  * matches
  */
 
+const sPlatformPuuidMatch = lit('s')
+  .then(codec('platform', Platform.codec))
+  .then(codec('puuid', Puuid.codec))
 const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
 const aramMatch = lit('aram')
 const loginMatch = lit('login')
@@ -25,11 +30,12 @@ const discordRedirectMatch = lit('discordRedirect')
 // don't forget .then(end).parser
 export const appParsers = {
   index: end.parser,
-  platformSummonerName: platformSummonerNameMatch.then(end).parser,
-  aram: aramMatch.then(end).parser,
-  login: loginMatch.then(end).parser,
-  register: registerMatch.then(end).parser,
-  discordRedirect: discordRedirectMatch.then(end).parser,
+  sPlatformPuuid: p(sPlatformPuuidMatch),
+  platformSummonerName: p(platformSummonerNameMatch),
+  aram: p(aramMatch),
+  login: p(loginMatch),
+  register: p(registerMatch),
+  discordRedirect: p(discordRedirectMatch),
 }
 
 /**
@@ -38,6 +44,12 @@ export const appParsers = {
 
 export const appRoutes = {
   index: format(end.formatter, {}),
+  sPlatformPuuid: (platform: Platform, puuid: Puuid, query: PartialMasteriesQuery) =>
+    withQuery(
+      format(sPlatformPuuidMatch.formatter, { platform, puuid }),
+      PartialMasteriesQuery,
+      query,
+    ),
   platformSummonerName: (platform: Platform, summonerName: string, query: PartialMasteriesQuery) =>
     withQuery(
       format(platformSummonerNameMatch.formatter, { platform, summonerName }),
@@ -57,4 +69,8 @@ const withQuery = <A>(
 ): string => {
   const query = qsStringify(a)
   return `${path}${query === '' ? '' : `?${query}`}`
+}
+
+function p<A>(match: Match<A>): Parser<A> {
+  return match.then(end).parser
 }
