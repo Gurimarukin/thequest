@@ -1,5 +1,4 @@
 import { HTTPError } from 'ky'
-import React from 'react'
 import type { SWRResponse } from 'swr'
 
 import { Loading } from '../components/Loading'
@@ -9,7 +8,7 @@ export function basicAsyncRenderer<A>({
   error,
 }: Pick<SWRResponse<A, unknown>, 'data' | 'error'>): <B>(
   renderData: (a: A) => B,
-) => JSX.Element | B {
+) => React.JSX.Element | B {
   return renderData => {
     if (error !== undefined) {
       return (

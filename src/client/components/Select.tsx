@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 
 import type { List } from '../../shared/utils/fp'
 
@@ -16,7 +16,7 @@ export function Select<A extends string>({
   value,
   setValue,
   className,
-}: Props<A>): JSX.Element {
+}: Props<A>): React.JSX.Element {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       setValue(e.target.value as A)

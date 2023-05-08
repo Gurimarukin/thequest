@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
@@ -23,7 +23,7 @@ export type EnrichedSummonerView = SummonerView & {
   masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
 }
 
-export const Summoner = ({
+export const Summoner: React.FC<Props> = ({
   summoner: {
     name,
     profileIconId,
@@ -32,7 +32,7 @@ export const Summoner = ({
     totalMasteryLevel,
     masteriesCount,
   },
-}: Props): JSX.Element => {
+}) => {
   const staticData = useStaticData()
 
   const masteriesRef = useRef<HTMLDivElement>(null)
@@ -117,8 +117,8 @@ type MasteryImgWithCountProps = {
 }
 
 const getMasteryImgWithCount =
-  (masteriesCount: Dict<`${ChampionLevelOrZero}`, number>) =>
-  ({ level, imgClassName, className }: MasteryImgWithCountProps): JSX.Element =>
+  (masteriesCount: Dict<`${ChampionLevelOrZero}`, number>): React.FC<MasteryImgWithCountProps> =>
+  ({ level, imgClassName, className }) =>
     (
       <div className={cssClasses('flex flex-col items-center', className)}>
         <span className="text-xs">{masteriesCount[level]}</span>

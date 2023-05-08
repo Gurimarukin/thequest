@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-return-void */
 import { flow, pipe } from 'fp-ts/function'
-import React, { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -40,7 +40,7 @@ type ChampionMasterySquareProps = {
   className?: string
 }
 
-export const ChampionMasterySquare = ({
+export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   championId,
   championLevel,
   championPoints,
@@ -57,7 +57,7 @@ export const ChampionMasterySquare = ({
   roundedBrInsteadOfTr = false,
   hoverRef: overrideHoverRef,
   className,
-}: ChampionMasterySquareProps): JSX.Element => {
+}) => {
   const staticData = useStaticData()
 
   const setShardsCount = useMemo(
@@ -192,9 +192,9 @@ type TokensProps = {
   tokensEarned: number
 }
 
-const Tokens = ({ championLevel, tokensEarned }: TokensProps): JSX.Element | null => {
+const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
   const render = useCallback(
-    (totalTockens: number, src: string): JSX.Element => {
+    (totalTockens: number, src: string): React.JSX.Element => {
       const alt = `Jeton de maîtrise ${championLevel + 1}`
       return (
         <span
@@ -239,7 +239,7 @@ type ShardsProps = {
   setShardsCount: ((count: number) => void) | null
 }
 
-const Shards = ({ shardsCount, setShardsCount }: ShardsProps): JSX.Element => {
+const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount }) => {
   const addButtonRef = useRef<HTMLButtonElement>(null)
   const removeButtonRef = useRef<HTMLButtonElement>(null)
 

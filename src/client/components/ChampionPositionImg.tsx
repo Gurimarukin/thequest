@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 
 import { Assets } from '../imgs/Assets'
@@ -13,7 +11,7 @@ type Props = {
   className?: string
 }
 
-export const ChampionPositionImg = ({ position, className }: Props): JSX.Element => (
+export const ChampionPositionImg: React.FC<Props> = ({ position, className }) => (
   <div className={cssClasses('flex items-center justify-center', className)}>
     <img
       src={Assets.positions[position]}

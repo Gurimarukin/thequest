@@ -4,7 +4,7 @@ import { readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import type { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
-import React, { useCallback, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 
 import { List } from '../../../../shared/utils/fp'
 
@@ -38,7 +38,7 @@ export function Checkboxes<A>({
   tooltipPlacement,
   iconClassName,
   className,
-}: Props<A>): JSX.Element {
+}: Props<A>): React.JSX.Element {
   const toggleChecked_ = useCallback(
     (value: A) => (e: React.ChangeEvent<HTMLInputElement>) =>
       toggleChecked(prev => {
@@ -110,7 +110,7 @@ function LabelCheckbox<A>({
   isMenuVisible,
   tooltipPlacement,
   iconClassName,
-}: LabelCheckboxProps<A>): JSX.Element {
+}: LabelCheckboxProps<A>): React.JSX.Element {
   const hoverRef = useRef<HTMLSpanElement>(null)
   const isChecked = isAllChecked ? false : readonlySet.elem(eq)(value, checked)
   return (

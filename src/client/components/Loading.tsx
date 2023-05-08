@@ -1,12 +1,10 @@
-import React from 'react'
-
 import { cssClasses } from '../utils/cssClasses'
 
 type LoadingProps = {
   className?: string
 }
 
-export const Loading = ({ className }: LoadingProps): JSX.Element => (
+export const Loading: React.FC<LoadingProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"

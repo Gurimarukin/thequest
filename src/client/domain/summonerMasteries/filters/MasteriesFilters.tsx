@@ -4,7 +4,8 @@ import { io, number, ord, readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import type React from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
@@ -39,7 +40,7 @@ type Props = {
   randomChampion: Maybe<() => string>
 }
 
-export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.Element => {
+export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion }) => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { maybeUser } = useUser()
 
@@ -251,6 +252,7 @@ export const MasteriesFilters = ({ searchCount, randomChampion }: Props): JSX.El
 
 type SelectLevelsButtonProps = {
   levels: NonEmptyArray<ChampionLevelOrZero>
+  children?: React.ReactNode
 }
 
 const getSelectLevelsButton =
@@ -296,6 +298,7 @@ const getSelectLevelsButton =
 
 type SpanProps = {
   tooltip: React.ReactNode
+  children?: React.ReactNode
 }
 
 const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {

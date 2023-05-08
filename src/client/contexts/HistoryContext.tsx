@@ -6,20 +6,13 @@ import { pipe } from 'fp-ts/function'
 import * as history from 'history'
 import { lens } from 'monocle-ts'
 import qs from 'qs'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import type { Future } from '../../shared/utils/fp'
 import { Either, Maybe } from '../../shared/utils/fp'
 
+import type { ChildrenFC } from '../models/ChildrenFC'
 import { AramQuery } from '../models/aramQuery/AramQuery'
 import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
 import { MasteriesQuery } from '../models/masteriesQuery/MasteriesQuery'
@@ -50,7 +43,7 @@ type NavigateOptions = {
 
 const HistoryContext = createContext<HistoryContext | undefined>(undefined)
 
-export const HistoryContextProvider: React.FC = ({ children }) => {
+export const HistoryContextProvider: ChildrenFC = ({ children }) => {
   const historyStateRef = useRef<HistoryState>(HistoryState.empty)
   const modifyHistoryStateRef = useCallback((f: (prev: HistoryState) => HistoryState) => {
     // eslint-disable-next-line functional/immutable-data

@@ -1,11 +1,9 @@
-import React from 'react'
-
 import { Spell } from '../../../shared/models/api/Spell'
 
 import type { AramStatsProps } from './AramStats'
 import { getAramStats, renderStatIcon, renderStatValue } from './AramStats'
 
-export const AramStatsCompact: (props: AramStatsProps) => JSX.Element | null = getAramStats(
+export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
   name => {
     const icon = renderStatIcon(name, 'h-2.5 w-2.5')
     const renderStatValue_ = renderStatValue(name)

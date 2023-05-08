@@ -4,7 +4,7 @@ import { io, number, ord, predicate, random, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
-import React, { useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -36,7 +36,7 @@ type Props = {
   setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-export const Masteries = ({ masteries, setChampionShards }: Props): JSX.Element => {
+export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -214,12 +214,12 @@ type ChampionProps = {
   setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-const Champion = ({
+const Champion: React.FC<ChampionProps> = ({
   maybeMaxPoints,
   maybePrev,
   champion,
   setChampionShards,
-}: ChampionProps): JSX.Element => {
+}) => {
   const { masteriesQuery } = useHistory()
 
   const hoverRef = useRef<HTMLInputElement>(null)
@@ -279,7 +279,7 @@ type ChampionMasteryHistogramProps = {
   className?: string
 }
 
-const ChampionMasteryHistogram = ({
+const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
   maybeMaxPoints,
   champion: {
     championLevel,
@@ -288,7 +288,7 @@ const ChampionMasteryHistogram = ({
     championPointsUntilNextLevel,
   },
   className,
-}: ChampionMasteryHistogramProps): JSX.Element => {
+}) => {
   const hoverRef1 = useRef<HTMLDivElement>(null)
   const hoverRef2 = useRef<HTMLDivElement>(null)
   const hoverRef3 = useRef<HTMLDivElement>(null)
@@ -388,7 +388,7 @@ type ChampionMasteryAramProps = {
   className?: string
 }
 
-const ChampionMasteryAram = ({ aram, className }: ChampionMasteryAramProps): JSX.Element => {
+const ChampionMasteryAram: React.FC<ChampionMasteryAramProps> = ({ aram, className }) => {
   const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(className), [className])
   return (
     <AramStatsCompact aram={aram} splitAt={Infinity}>
@@ -399,7 +399,7 @@ const ChampionMasteryAram = ({ aram, className }: ChampionMasteryAramProps): JSX
 
 const getRenderChildrenCompact =
   (className: string | undefined) =>
-  (children1: List<JSX.Element>): JSX.Element =>
+  (children1: List<React.JSX.Element>): React.JSX.Element =>
     (
       <ul className={cssClasses('flex flex-col items-start self-center py-1 px-1.5', className)}>
         {children1}
