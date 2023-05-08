@@ -20,6 +20,7 @@ import * as C_ from 'io-ts/Codec'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
+import * as E_ from 'io-ts/Encoder'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
 
@@ -53,7 +54,7 @@ export type Dict<K extends string, A> = readonlyRecord.ReadonlyRecord<K, A>
 
 export const Dict = {
   ...readonlyRecord,
-  empty: <K extends string, A>(): Dict<K, A> => readonlyRecord.empty,
+  empty: <K extends string = string, A = never>(): Dict<K, A> => readonlyRecord.empty,
 }
 
 export type PartialDict<K extends string, A> = Partial<Dict<K, A>>
@@ -133,9 +134,10 @@ function mkString(startOrSep: string, sep?: string, end?: string): (list: List<s
 
 const listDecoder: <A>(decoder: Decoder<unknown, A>) => Decoder<unknown, List<A>> = D.array
 
-const listEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<List<O>, List<A>> => ({
-  encode: readonlyArray.map(encoder.encode),
-})
+const listEncoder: <O, A>(encoder: Encoder<O, A>) => Encoder<List<O>, List<A>> = flow(
+  E_.array,
+  E_.readonly,
+)
 
 export const List = {
   ...readonlyArray,
