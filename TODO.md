@@ -1,4 +1,3 @@
-- @parcel/optimizer-image: Could not optimize image src/client/imgs/stats/tenacity.png: Invalid header detected; Not a PNG file
 - histogram: search: hide not matching
 - aram (masteries and general): search: improve highlight (yellow glow)
 - clean constants (only multiple references)
