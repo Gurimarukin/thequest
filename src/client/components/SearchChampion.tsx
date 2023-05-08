@@ -38,12 +38,13 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
     useEffect(() => {
       const onKeyup = (e: KeyboardEvent): void => {
         if (
-          (e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) ||
-          e.key === '/' ||
-          e.key === 'F3'
+          ((e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) ||
+            e.key === '/' ||
+            e.key === 'F3') &&
+          searchRef.current !== null
         ) {
           e.preventDefault()
-          searchRef.current?.focus()
+          searchRef.current.select()
         }
       }
 
