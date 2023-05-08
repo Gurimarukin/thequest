@@ -13,6 +13,7 @@ import { Register } from '../domain/Register'
 import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
+import { SummonerPuuid } from '../domain/summonerMasteries/SummonerPuuid'
 import { appParsers } from './AppRouter'
 
 type ElementWithTitle = Tuple<React.JSX.Element, Maybe<string>>
@@ -22,6 +23,11 @@ const t = (element: React.JSX.Element, title?: string): ElementWithTitle =>
 
 const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
+  .alt(
+    appParsers.sPlatformPuuid.map(({ platform, puuid }) =>
+      t(<SummonerPuuid platform={platform} puuid={puuid} />),
+    ),
+  )
   .alt(
     appParsers.platformSummonerName.map(({ platform, summonerName }) =>
       t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),

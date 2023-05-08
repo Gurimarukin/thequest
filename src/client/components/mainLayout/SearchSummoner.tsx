@@ -1,16 +1,15 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { task } from 'fp-ts'
-import type { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
+import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { apiSummonerByPuuidGet } from '../../api'
-import { HistoryState, useHistory } from '../../contexts/HistoryContext'
+import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
@@ -27,6 +26,7 @@ import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cssClasses } from '../../utils/cssClasses'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
+import { Link } from '../Link'
 import { Loading } from '../Loading'
 import { Select } from '../Select'
 
@@ -62,18 +62,20 @@ export const SearchSummoner: React.FC = () => {
     setIsOpen(true)
   }, [])
 
-  // with current masteriesQuery
-  const platformSummonerName = useMemo(
-    () => getPlatformSummonerName(matchesLocation, masteriesQuery),
-    [masteriesQuery, matchesLocation],
-  )
-
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      navigate(platformSummonerName(platform, summonerName))
+      navigate(
+        appRoutes.platformSummonerName(
+          platform,
+          summonerName,
+          matchesLocation(appParsers.platformSummonerName)
+            ? MasteriesQuery.toPartial(masteriesQuery)
+            : {},
+        ),
+      )
     },
-    [navigate, platform, platformSummonerName, summonerName],
+    [masteriesQuery, matchesLocation, navigate, platform, summonerName],
   )
 
   const searches: List<React.JSX.Element> = List.compact([
@@ -81,7 +83,7 @@ export const SearchSummoner: React.FC = () => {
       maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
       // eslint-disable-next-line react/jsx-key
-      Maybe.map(s => <SummonerSearch type="self" summoner={s} closeSearch={close} />),
+      Maybe.map(s => <SummonerSearch type="self" summoner={s} />),
     ),
     pipe(
       maybeUser,
@@ -89,12 +91,7 @@ export const SearchSummoner: React.FC = () => {
       Maybe.map(favoriteSearches => (
         <>
           {favoriteSearches.map(s => (
-            <SummonerSearch
-              key={`${s.platform}${s.name}`}
-              type="favorite"
-              summoner={s}
-              closeSearch={close}
-            />
+            <SummonerSearch key={Puuid.unwrap(s.puuid)} type="favorite" summoner={s} />
           ))}
         </>
       )),
@@ -105,12 +102,7 @@ export const SearchSummoner: React.FC = () => {
       Maybe.map(recentSearches_ => (
         <>
           {recentSearches_.map(s => (
-            <SummonerSearch
-              key={`${s.platform}${s.name}`}
-              type="recent"
-              summoner={s}
-              closeSearch={close}
-            />
+            <SummonerSearch key={Puuid.unwrap(s.puuid)} type="recent" summoner={s} />
           ))}
         </>
       )),
@@ -175,45 +167,25 @@ const concatWithHr = (es: List<React.JSX.Element>): React.JSX.Element | null =>
 type SummonerSearchProps = {
   type: 'self' | 'favorite' | 'recent'
   summoner: SummonerShort
-  closeSearch: () => void
 }
 
-const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner, closeSearch }) => {
-  const {
-    modifyHistoryStateRef: setHistoryState,
-    navigate,
-    matchesLocation,
-    masteriesQuery,
-  } = useHistory()
+const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
+  const { navigate, matchesLocation, masteriesQuery } = useHistory()
   const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
   // with current masteriesQuery
-  const platformSummonerName = useMemo(
-    () => getPlatformSummonerName(matchesLocation, masteriesQuery),
+  const sPlatformPuuid = useCallback(
+    (platform: Platform, puuid: Puuid): string =>
+      appRoutes.sPlatformPuuid(
+        platform,
+        puuid,
+        matchesLocation(appParsers.platformSummonerName)
+          ? MasteriesQuery.toPartial(masteriesQuery)
+          : {},
+      ),
     [masteriesQuery, matchesLocation],
   )
-
-  const navigateToSummonerByPuuid = useCallback(() => {
-    pipe(
-      apiSummonerByPuuidGet(summoner.platform, summoner.puuid),
-      Maybe.some,
-      HistoryState.Lens.futureSummonerMasteries.set,
-      setHistoryState,
-    )
-    closeSearch()
-    navigate(platformSummonerName(summoner.platform, summoner.name), {
-      replace: true,
-    })
-  }, [
-    closeSearch,
-    navigate,
-    platformSummonerName,
-    setHistoryState,
-    summoner.name,
-    summoner.platform,
-    summoner.puuid,
-  ])
 
   const removeRecent = useCallback(
     () => removeRecentSearch(summoner),
@@ -229,12 +201,14 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner, closeSe
       return pipe(
         addFavoriteSearch(summoner),
         // on not found
-        Future.map(Maybe.getOrElseW(() => navigateToSummonerByPuuid())),
+        Future.map(
+          Maybe.getOrElseW(() => navigate(sPlatformPuuid(summoner.platform, summoner.puuid))),
+        ),
         task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )
     },
-    [addFavoriteSearch, navigateToSummonerByPuuid, summoner],
+    [addFavoriteSearch, navigate, sPlatformPuuid, summoner],
   )
 
   const removeFavorite = useCallback(
@@ -253,9 +227,8 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner, closeSe
   return (
     <li className="contents">
       {renderRecent(type, removeRecent)}
-      <button
-        type="button"
-        onClick={navigateToSummonerByPuuid}
+      <Link
+        to={sPlatformPuuid(summoner.platform, summoner.puuid)}
         className="flex items-center hover:underline"
       >
         <img
@@ -265,7 +238,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner, closeSe
         />
         <span className="ml-2 grow">{summoner.name}</span>
         <span className="ml-4">{summoner.platform}</span>
-      </button>
+      </Link>
       {renderFavorite(type, favoriteIsLoading, addFavorite, removeFavorite)}
     </li>
   )
@@ -339,12 +312,3 @@ const Hr: React.FC = () => (
     <div className="w-[calc(100%_-_1rem)] border-t border-goldenrod" />
   </>
 )
-
-const getPlatformSummonerName =
-  (matchesLocation: <A>(parser: Parser<A>) => boolean, query: MasteriesQuery) =>
-  (platform: Platform, summonerName: string): string =>
-    appRoutes.platformSummonerName(
-      platform,
-      summonerName,
-      matchesLocation(appParsers.platformSummonerName) ? MasteriesQuery.toPartial(query) : {},
-    )

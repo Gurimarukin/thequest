@@ -65,12 +65,15 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
     apiRoutes.summoner.byName.get(platform, clearSummonerName(summonerName)),
     methodWithUrl =>
       pipe(
-        historyStateRef.current.futureSummonerMasteries,
+        historyStateRef.current.summonerMasteries,
         Maybe.fold(
           () => http(methodWithUrl, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
-          Future.chainFirstIOK(
-            () => () =>
-              modifyHistoryStateRef(HistoryState.Lens.futureSummonerMasteries.set(Maybe.none)),
+          flow(
+            Future.successful,
+            Future.chainFirstIOK(
+              () => () =>
+                modifyHistoryStateRef(HistoryState.Lens.summonerMasteries.set(Maybe.none)),
+            ),
           ),
         ),
         futureRunUnsafe,
@@ -189,6 +192,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   )
 
   const summonerNameFromLocation = useSummonerNameFromLocation()
+
   // Correct case of summoner's name in url
   useEffect(() => {
     if (

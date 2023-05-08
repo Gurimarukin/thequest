@@ -9,7 +9,6 @@ import qs from 'qs'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
-import type { Future } from '../../shared/utils/fp'
 import { Either, Maybe } from '../../shared/utils/fp'
 
 import type { ChildrenFC } from '../models/ChildrenFC'
@@ -34,7 +33,7 @@ type HistoryContext = {
   updateAramQuery: (f: (q: AramQuery) => AramQuery) => void
 }
 
-type NavigateOptions = {
+export type NavigateOptions = {
   /**
    * @default false
    */
@@ -140,17 +139,17 @@ export const useHistory = (): HistoryContext => {
 }
 
 type HistoryState = {
-  futureSummonerMasteries: Maybe<Future<SummonerMasteriesView>>
+  summonerMasteries: Maybe<SummonerMasteriesView>
 }
 
 const empty: HistoryState = {
-  futureSummonerMasteries: Maybe.none,
+  summonerMasteries: Maybe.none,
 }
 
 const HistoryState = {
   empty,
   Lens: {
-    futureSummonerMasteries: pipe(lens.id<HistoryState>(), lens.prop('futureSummonerMasteries')),
+    summonerMasteries: pipe(lens.id<HistoryState>(), lens.prop('summonerMasteries')),
   },
 }
 
