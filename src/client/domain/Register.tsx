@@ -2,7 +2,8 @@
 import { task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import type React from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
@@ -19,6 +20,7 @@ import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
 import { DiscordLogoTitle } from '../imgs/DiscordLogoTitle'
 import { CheckMarkSharp } from '../imgs/svgIcons'
+import type { ChildrenFC } from '../models/ChildrenFC'
 import { appRoutes } from '../router/AppRouter'
 import { cssClasses } from '../utils/cssClasses'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
@@ -36,7 +38,7 @@ const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
 const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 
-export const Register = (): JSX.Element => {
+export const Register: React.FC = () => {
   const { navigate } = useHistory()
   const { maybeUser } = useUser()
 
@@ -265,19 +267,23 @@ export const Register = (): JSX.Element => {
   )
 }
 
-const Th: React.FC = ({ children }) => (
+const Th: ChildrenFC = ({ children }) => (
   <th className="flex items-center justify-center px-2 pb-3 font-normal">{children}</th>
 )
 
-type TdProps = {
-  className?: string
+type TdProps = EmptyTdProps & {
+  children?: React.ReactNode
 }
 
 const Td: React.FC<TdProps> = ({ className, children }) => (
   <td className={cssClasses('flex items-center bg-zinc-900 px-2 py-5', className)}>{children}</td>
 )
 
-const EmptyTd = ({ className }: TdProps): JSX.Element => (
+type EmptyTdProps = {
+  className?: string
+}
+
+const EmptyTd: React.FC<EmptyTdProps> = ({ className }) => (
   <Td className={cssClasses('justify-center text-sm', className)}>—</Td>
 )
 

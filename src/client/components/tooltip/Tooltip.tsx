@@ -1,7 +1,8 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import type { Placement } from '@popperjs/core'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type React from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { MsDuration } from '../../../shared/models/MsDuration'
@@ -35,6 +36,7 @@ type Props = {
   placement?: Placement
   alwaysVisible?: boolean
   className?: string
+  children?: React.ReactNode
 }
 
 export const Tooltip: React.FC<Props> = ({

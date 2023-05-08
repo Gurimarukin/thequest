@@ -2,7 +2,7 @@
                   functional/no-return-void */
 import { predicate, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import React, {
+import {
   forwardRef,
   useCallback,
   useEffect,

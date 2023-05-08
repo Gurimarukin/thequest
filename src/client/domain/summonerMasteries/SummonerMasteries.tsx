@@ -3,7 +3,7 @@ import { monoid, number, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { HttpMethod } from 'ky/distribution/types/options'
 import { optional } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
@@ -57,7 +57,7 @@ type Props = {
   summonerName: string
 }
 
-export const SummonerMasteries = ({ platform, summonerName }: Props): JSX.Element => {
+export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
   const { maybeUser } = useUser()
 
@@ -166,13 +166,13 @@ type SummonerViewProps = {
   ) => Future<NotUsed>
 }
 
-const SummonerViewComponent = ({
+const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   platform,
   summoner,
   masteries,
   championShards,
   setChampionsShardsBulk,
-}: SummonerViewProps): JSX.Element => {
+}) => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
   const staticData = useStaticData()

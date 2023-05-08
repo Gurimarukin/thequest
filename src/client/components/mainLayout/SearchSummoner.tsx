@@ -3,7 +3,7 @@
 import { task } from 'fp-ts'
 import type { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
@@ -30,7 +30,7 @@ import { ClickOutside } from '../ClickOutside'
 import { Loading } from '../Loading'
 import { Select } from '../Select'
 
-export const SearchSummoner = (): JSX.Element => {
+export const SearchSummoner: React.FC = () => {
   const { navigate, matchesLocation, masteriesQuery } = useHistory()
   const { maybeUser, recentSearches } = useUser()
 
@@ -76,7 +76,7 @@ export const SearchSummoner = (): JSX.Element => {
     [navigate, platform, platformSummonerName, summonerName],
   )
 
-  const searches: List<JSX.Element> = List.compact([
+  const searches: List<React.JSX.Element> = List.compact([
     pipe(
       maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
@@ -154,7 +154,7 @@ export const SearchSummoner = (): JSX.Element => {
   )
 }
 
-const concatWithHr = (es: List<JSX.Element>): JSX.Element | null =>
+const concatWithHr = (es: List<React.JSX.Element>): React.JSX.Element | null =>
   pipe(
     es,
     NonEmptyArray.fromReadonlyArray,
@@ -178,7 +178,7 @@ type SummonerSearchProps = {
   closeSearch: () => void
 }
 
-const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): JSX.Element => {
+const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner, closeSearch }) => {
   const {
     modifyHistoryStateRef: setHistoryState,
     navigate,
@@ -271,7 +271,10 @@ const SummonerSearch = ({ type, summoner, closeSearch }: SummonerSearchProps): J
   )
 }
 
-const renderRecent = (type: SummonerSearchProps['type'], removeRecent: () => void): JSX.Element => {
+const renderRecent = (
+  type: SummonerSearchProps['type'],
+  removeRecent: () => void,
+): React.JSX.Element => {
   switch (type) {
     case 'self':
       return <span className="w-3" />
@@ -294,7 +297,7 @@ const renderFavorite = (
   isLoading: boolean,
   addFavorite: (e: React.MouseEvent) => void,
   removeFavorite: (e: React.MouseEvent) => void,
-): JSX.Element => {
+): React.JSX.Element => {
   switch (type) {
     case 'self':
       return (
@@ -329,7 +332,7 @@ const renderFavorite = (
   }
 }
 
-const Hr = (): JSX.Element => (
+const Hr: React.FC = () => (
   <>
     <div className="w-[calc(100%_-_1rem)] justify-self-end border-t border-goldenrod" />
     <div className="border-t border-goldenrod" />

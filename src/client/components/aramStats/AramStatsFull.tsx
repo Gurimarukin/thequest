@@ -1,12 +1,10 @@
-import React from 'react'
-
 import { Spell } from '../../../shared/models/api/Spell'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 
 import type { AramStatsProps } from './AramStats'
 import { getAramStats, renderStatIcon, renderStatValue } from './AramStats'
 
-export const AramStatsFull: (props: AramStatsProps) => JSX.Element | null = getAramStats(
+export const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
   name => {
     const icon = renderStatIcon(name, 'h-4, w-4')
     const label = WikiaStatsBalance.label[name]

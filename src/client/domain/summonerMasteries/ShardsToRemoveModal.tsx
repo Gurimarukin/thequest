@@ -4,7 +4,7 @@ import { number, ord, predicate, string, task } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { identity, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
@@ -66,11 +66,11 @@ const isCheckedLens = pipe(lens.id<IsChecked>(), lens.prop('isChecked'))
 
 const invert = predicate.not<boolean>(identity)
 
-export const ShardsToRemoveModal = ({
+export const ShardsToRemoveModal: React.FC<Props> = ({
   notifications,
   setChampionsShardsBulk,
   hide,
-}: Props): JSX.Element => {
+}) => {
   const toIsChecked = useCallback(
     () =>
       pipe(
@@ -244,10 +244,10 @@ type ForAllButtonProps = {
   setNotificationsState: React.Dispatch<React.SetStateAction<NonEmptyArray<IsChecked>>>
 }
 
-const ForAllButton = ({
+const ForAllButton: React.FC<ForAllButtonProps> = ({
   notificationsState,
   setNotificationsState,
-}: ForAllButtonProps): JSX.Element => {
+}) => {
   const yesForAll = notificationsState.some(n => !n.isChecked)
   const forAllClick = useMemo(
     () =>
@@ -273,7 +273,7 @@ type ToggleProps = {
   toggleChecked: () => void
 }
 
-const Toggle = ({ isChecked, toggleChecked }: ToggleProps): JSX.Element => (
+const Toggle: React.FC<ToggleProps> = ({ isChecked, toggleChecked }) => (
   <label className="cursor-pointer">
     <input type="checkbox" checked={isChecked} onChange={toggleChecked} className="hidden" />
     <ToggleFilled

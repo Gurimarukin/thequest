@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statements */
 import { Route, parse, zero } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
-import React, { useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { Maybe, Tuple } from '../../shared/utils/fp'
 
@@ -15,9 +15,9 @@ import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
 import { appParsers } from './AppRouter'
 
-type ElementWithTitle = Tuple<JSX.Element, Maybe<string>>
+type ElementWithTitle = Tuple<React.JSX.Element, Maybe<string>>
 
-const t = (element: JSX.Element, title?: string): ElementWithTitle =>
+const t = (element: React.JSX.Element, title?: string): ElementWithTitle =>
   Tuple.of(element, Maybe.fromNullable(title))
 
 const titleWithElementParser = zero<ElementWithTitle>()
@@ -32,7 +32,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
   .alt(appParsers.discordRedirect.map(() => t(<DiscordRedirect />)))
 
-export const AppRouterComponent = (): JSX.Element => {
+export const AppRouterComponent: React.FC = () => {
   const { location } = useHistory()
 
   const [node, title] = useMemo(() => {

@@ -104,6 +104,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => ({
              * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
              * @deprecated
              */
+            // eslint-disable-next-line deprecation/deprecation
             byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
               pipe(
                 httpClient.http(

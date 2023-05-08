@@ -1,5 +1,5 @@
 import { flow, pipe } from 'fp-ts/function'
-import React, { createContext, useContext } from 'react'
+import { createContext, useContext } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import { Lang } from '../../shared/models/api/Lang'
@@ -10,6 +10,7 @@ import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import { List, Maybe } from '../../shared/utils/fp'
 
 import { useSWRHttp } from '../hooks/useSWRHttp'
+import type { ChildrenFC } from '../models/ChildrenFC'
 import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 
 const { ddragonCdn } = DDragonUtils
@@ -28,7 +29,7 @@ export type StaticDataContext = {
 
 const StaticDataContext = createContext<StaticDataContext | undefined>(undefined)
 
-export const StaticDataContextProvider: React.FC = ({ children }) =>
+export const StaticDataContextProvider: ChildrenFC = ({ children }) =>
   basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang.get(lang), {}, [StaticData.codec, 'StaticData'], {
       revalidateOnFocus: false,
