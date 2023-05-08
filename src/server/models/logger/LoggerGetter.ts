@@ -1,5 +1,4 @@
 import { flow, pipe } from 'fp-ts/function'
-import util from 'util'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { LogLevel, LogLevelOrOff } from '../../../shared/models/logger/LogLevel'
@@ -7,15 +6,17 @@ import type { LoggerType } from '../../../shared/models/logger/LoggerType'
 import type { NotUsed } from '../../../shared/utils/fp'
 import { IO, toNotUsed } from '../../../shared/utils/fp'
 
+import { utilFormat } from '../../utils/utilInspect'
+
 type LoggerGetter = (name: string) => LoggerType
 
 const LoggerGetter = (logLevel: LogLevelOrOff): LoggerGetter => {
   return name => ({
-    trace: (...params) => log(name, 'trace', util.format(...params)),
-    debug: (...params) => log(name, 'debug', util.format(...params)),
-    info: (...params) => log(name, 'info', util.format(...params)),
-    warn: (...params) => log(name, 'warn', util.format(...params)),
-    error: (...params) => log(name, 'error', util.format(...params)),
+    trace: (...params) => log(name, 'trace', utilFormat(...params)),
+    debug: (...params) => log(name, 'debug', utilFormat(...params)),
+    info: (...params) => log(name, 'info', utilFormat(...params)),
+    warn: (...params) => log(name, 'warn', utilFormat(...params)),
+    error: (...params) => log(name, 'error', utilFormat(...params)),
   })
 
   function log(name: string, level: LogLevel, message: string): IO<NotUsed> {
