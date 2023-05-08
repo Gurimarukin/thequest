@@ -1,6 +1,5 @@
 - SearchSummoner: use Link
 - fix aram icons shrink
-- better HTTPError logs
 - @parcel/optimizer-image: Could not optimize image src/client/imgs/stats/tenacity.png: Invalid header detected; Not a PNG file
 - clean constants (only multiple references)
 - useless qs.stringify?
