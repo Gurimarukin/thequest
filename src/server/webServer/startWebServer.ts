@@ -7,6 +7,7 @@ import { flow, identity, pipe } from 'fp-ts/function'
 import type * as http from 'http'
 import { Status } from 'hyper-ts'
 import type { ExpressConnection } from 'hyper-ts/lib/express'
+import type { Duplex } from 'stream'
 
 import { Method } from '../../shared/models/Method'
 import type { NotUsed } from '../../shared/utils/fp'
@@ -173,8 +174,8 @@ export const startWebServer = (
             return handler(request, socket, head)
           }),
           Future.orElseIOEitherK<Either<SimpleHttpResponse, void>>(handleErrorUpgrade),
-          Future.map(Either.getOrElse(res => socket.end(SimpleHttpResponse.toRawHttp(res)))),
-          Future.map<void, NotUsed>(toNotUsed),
+          Future.map(Either.getOrElseW(res => socket.end(SimpleHttpResponse.toRawHttp(res)))),
+          Future.map<void | Duplex, NotUsed>(toNotUsed),
           Future.run(getOnError(logger)),
         ),
       ),
