@@ -9,7 +9,7 @@ export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
     const renderStatValue_ = renderStatValue(name)
     return value => (
       <li key={name} className="flex items-center gap-1">
-        <span>{icon}</span>
+        <span className="shrink-0">{icon}</span>
         {renderStatValue_(value)}
       </li>
     )
