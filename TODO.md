@@ -1,4 +1,3 @@
-- ctrl+f when SearchChampion focused
 - SearchSummoner: use Link
 - fix aram icons shrink
 - better HTTPError logs
