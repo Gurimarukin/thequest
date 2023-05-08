@@ -1,6 +1,4 @@
 /* eslint-disable functional/no-return-void */
-import React from 'react'
-
 import type { NonEmptyArray } from '../../shared/utils/fp'
 
 import { cssClasses } from '../utils/cssClasses'
@@ -24,7 +22,7 @@ export function Radios<A extends Value>({
   value,
   setValue,
   children,
-}: RadiosProps<A>): JSX.Element {
+}: RadiosProps<A>): React.JSX.Element {
   return (
     <div className="flex">
       {children.map(({ value: val, label }) => {

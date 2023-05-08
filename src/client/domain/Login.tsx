@@ -2,7 +2,7 @@
 import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
@@ -27,7 +27,7 @@ const emptyState: State = { userName: '', password: '' }
 export const userNameLens = pipe(lens.id<State>(), lens.prop('userName'))
 export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
 
-export const Login = (): JSX.Element => {
+export const Login: React.FC = () => {
   const { navigate } = useHistory()
   const { maybeUser, refreshUser } = useUser()
 

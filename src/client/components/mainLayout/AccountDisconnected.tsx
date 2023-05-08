@@ -1,11 +1,11 @@
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { appRoutes } from '../../router/AppRouter'
 import { ClickOutside } from '../ClickOutside'
 import { Link } from '../Link'
 import { Menu } from './Menu'
 
-export const AccountDisconnected = (): JSX.Element => {
+export const AccountDisconnected: React.FC = () => {
   const [loginIsVisible, setLoginIsVisible] = useState(false)
   const toggleLogin = useCallback(() => setLoginIsVisible(v => !v), [])
   const hideLogin = useCallback(() => setLoginIsVisible(false), [])

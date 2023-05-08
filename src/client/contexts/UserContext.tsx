@@ -3,7 +3,7 @@
 import { predicate } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import React, { createContext, useCallback, useContext, useMemo } from 'react'
+import { createContext, useCallback, useContext, useMemo } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
@@ -16,6 +16,7 @@ import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import { AsyncState } from '../models/AsyncState'
+import type { ChildrenFC } from '../models/ChildrenFC'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
 
@@ -34,7 +35,7 @@ type UserContext = {
 
 const UserContext = createContext<UserContext | undefined>(undefined)
 
-export const UserContextProvider: React.FC = ({ children }) => {
+export const UserContextProvider: ChildrenFC = ({ children }) => {
   const { data, error, mutate } = useSWR(
     apiRoutes.user.self.get,
     ([url, method]) =>

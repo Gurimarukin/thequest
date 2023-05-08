@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statements */
 import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import type { UserView } from '../../../shared/models/api/user/UserView'
 import { Future } from '../../../shared/utils/fp'
@@ -18,7 +18,7 @@ type AccountConnectedProps = {
   user: UserView
 }
 
-export const AccountConnected = ({ user }: AccountConnectedProps): JSX.Element => {
+export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   const { refreshUser } = useUser()
 
   const [menuIsVisible, setMenuIsVisible] = useState(false)

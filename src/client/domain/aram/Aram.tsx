@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-return-void */
 import { ord } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import React, { Fragment, useMemo, useRef } from 'react'
+import { Fragment, useMemo, useRef } from 'react'
 
 import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -28,7 +28,7 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
   category: ChampionCategory
 }
 
-export const Aram = (): JSX.Element => {
+export const Aram: React.FC = () => {
   const { aramQuery, updateAramQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -109,7 +109,7 @@ type ChampionProps = {
   champion: EnrichedStaticDataChampion
 }
 
-const Champion = ({ champion }: ChampionProps): JSX.Element => {
+const Champion: React.FC<ChampionProps> = ({ champion }) => {
   const { assets } = useStaticData()
   const hoverRef = useRef<HTMLDivElement>(null)
 
@@ -142,9 +142,9 @@ const Champion = ({ champion }: ChampionProps): JSX.Element => {
 }
 
 const renderChildrenCompact = (
-  children1: List<JSX.Element>,
-  children2: List<JSX.Element>,
-): JSX.Element => (
+  children1: List<React.JSX.Element>,
+  children2: List<React.JSX.Element>,
+): React.JSX.Element => (
   <>
     <ul className="row-span-2 flex flex-col self-center py-0.5 px-1.5">{children1}</ul>
     {List.isNonEmpty(children2) ? (
@@ -153,6 +153,6 @@ const renderChildrenCompact = (
   </>
 )
 
-const renderChildrenFull = (children1: List<JSX.Element>): JSX.Element => (
+const renderChildrenFull = (children1: List<React.JSX.Element>): React.JSX.Element => (
   <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>
 )

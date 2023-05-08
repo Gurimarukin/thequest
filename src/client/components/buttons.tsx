@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { cssClasses } from '../utils/cssClasses'
 
 type Props = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> & {

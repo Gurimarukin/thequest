@@ -1,5 +1,4 @@
 import { pipe } from 'fp-ts/function'
-import React from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
@@ -26,7 +25,7 @@ type Props = {
   aram: Maybe<AramData>
 }
 
-export const ChampionTooltip = ({
+export const ChampionTooltip: React.FC<Props> = ({
   championLevel,
   percents,
   championPoints,
@@ -37,7 +36,7 @@ export const ChampionTooltip = ({
   filteredShardsCount,
   positions,
   aram,
-}: Props): JSX.Element => {
+}) => {
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
       {Math.round(percents)} %
@@ -127,9 +126,9 @@ export const ChampionTooltip = ({
 }
 
 const renderAramChildren = (
-  children1: List<JSX.Element>,
-  children2: List<JSX.Element>,
-): JSX.Element => (
+  children1: List<React.JSX.Element>,
+  children2: List<React.JSX.Element>,
+): React.JSX.Element => (
   <div className="grid grid-rows-[auto_1fr] items-center gap-1 border-l border-goldenrod-secondary px-2 pt-1 pb-1.5">
     <h4 className="text-center font-bold">ARAM</h4>
     <div className="flex items-center gap-2">

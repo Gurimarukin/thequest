@@ -2,7 +2,7 @@
 import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import useSWR from 'swr'
 
 import type { RouteWithMethod } from '../../../shared/ApiRouter'
@@ -27,7 +27,7 @@ const codeDecoder = D.struct({
   state: DiscordRedirectState.decoder,
 })
 
-export const DiscordRedirect = (): JSX.Element => {
+export const DiscordRedirect: React.FC = () => {
   const { query } = useHistory()
 
   return pipe(
@@ -44,7 +44,7 @@ type DiscordRedirectValidatedProps = {
   state: DiscordRedirectState
 }
 
-const DiscordRedirectValidated = ({ code, state }: DiscordRedirectValidatedProps): JSX.Element => {
+const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ code, state }) => {
   const { navigate } = useHistory()
   const { refreshUser } = useUser()
 

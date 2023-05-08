@@ -1,7 +1,7 @@
 import { separated } from 'fp-ts'
 import type { Separated } from 'fp-ts/Separated'
 import { flow, identity, pipe } from 'fp-ts/function'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import type { AramData, ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { Spell } from '../../../shared/models/api/Spell'
@@ -24,17 +24,20 @@ export type AramStatsProps = {
    * @prop renderChildren
    * Called only if isSome(aram.stats) or isSome(aram.spells).
    */
-  children: (children1: List<JSX.Element>, children2: List<JSX.Element>) => JSX.Element
+  children: (
+    children1: List<React.JSX.Element>,
+    children2: List<React.JSX.Element>,
+  ) => React.JSX.Element
 }
 
-type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => JSX.Element
-type RenderSpell = (spell: Spell) => (html: ChampionSpellHtml) => JSX.Element
+type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => React.JSX.Element
+type RenderSpell = (spell: Spell) => (html: ChampionSpellHtml) => React.JSX.Element
 
 export const getAramStats = (
   renderStat: RenderStat,
   renderSpell: RenderSpell,
   defaultSplitAt: number,
-): ((props: AramStatsProps) => JSX.Element | null) => {
+): React.FC<AramStatsProps> => {
   const separateChildren = getSeparateChildren(renderStat, renderSpell)
   return ({
     aram,
@@ -66,7 +69,7 @@ const getSeparateChildren =
     aram: AramData,
     splitAt: number,
     simpleStatsSpellsSplit: boolean,
-  ): Separated<List<JSX.Element>, List<JSX.Element>> => {
+  ): Separated<List<React.JSX.Element>, List<React.JSX.Element>> => {
     const eithers = pipe(
       [
         pipe(
@@ -77,7 +80,11 @@ const getSeparateChildren =
               List.filterMap(key =>
                 pipe(
                   Dict.lookup(key, stats),
-                  Maybe.map(flow(renderStat(key), e => Either.right<JSX.Element, JSX.Element>(e))),
+                  Maybe.map(
+                    flow(renderStat(key), e =>
+                      Either.right<React.JSX.Element, React.JSX.Element>(e),
+                    ),
+                  ),
                 ),
               ),
               NonEmptyArray.fromReadonlyArray,
@@ -93,7 +100,9 @@ const getSeparateChildren =
                 pipe(
                   Dict.lookup(spell, spells),
                   Maybe.map(
-                    flow(renderSpell(spell), e => Either.left<JSX.Element, JSX.Element>(e)),
+                    flow(renderSpell(spell), e =>
+                      Either.left<React.JSX.Element, React.JSX.Element>(e),
+                    ),
                   ),
                 ),
               ),
@@ -120,7 +129,10 @@ const getSeparateChildren =
     )
   }
 
-export const renderStatIcon = (name: WikiaStatsBalanceKey, className?: string): JSX.Element => (
+export const renderStatIcon = (
+  name: WikiaStatsBalanceKey,
+  className?: string,
+): React.JSX.Element => (
   <img
     src={Assets.stats[name]}
     alt={`Icône stat ${WikiaStatsBalance.label[name]}`}
@@ -131,7 +143,7 @@ export const renderStatIcon = (name: WikiaStatsBalanceKey, className?: string): 
 export const renderStatValue = (
   name: WikiaStatsBalanceKey,
   className?: string,
-): ((value: number) => JSX.Element) => {
+): ((value: number) => React.JSX.Element) => {
   const isMalusStat = WikiaStatsBalance.isMalusStat(name)
   const maybeUnit = WikiaStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
   return value => {
