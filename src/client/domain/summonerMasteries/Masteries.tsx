@@ -401,7 +401,7 @@ const getRenderChildrenCompact =
   (className: string | undefined) =>
   (children1: List<React.JSX.Element>): React.JSX.Element =>
     (
-      <ul className={cssClasses('flex flex-col items-start self-center py-1 px-1.5', className)}>
+      <ul className={cssClasses('flex flex-col items-start self-center py-1 px-0.5', className)}>
         {children1}
       </ul>
     )

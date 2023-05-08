@@ -77,7 +77,7 @@ export const Aram: React.FC = () => {
           onChange={onSearchChange}
           className="self-center"
         />
-        <div className="grid w-full grid-cols-[repeat(auto-fit,48px)] items-start gap-x-4 gap-y-1">
+        <div className="grid w-full grid-cols-[repeat(auto-fit,1px)] items-start gap-x-[15px] gap-y-1">
           {pipe(
             filteredAndSortedChampions,
             ListUtils.mapWithPrevious((maybePrev, c) => (
@@ -118,12 +118,12 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
       <div
         ref={hoverRef}
         className={cssClasses(
-          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-zinc-800 text-2xs',
-          ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-2' : 'col-span-1',
+          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-zinc-800 text-2xs',
+          ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
           ['outline outline-pink-500', champion.highlight],
         )}
       >
-        <div className="h-12 w-12 overflow-hidden">
+        <div className="h-12 w-12 overflow-hidden rounded-xl shadow-even shadow-black">
           <img
             src={assets.champion.square(champion.key)}
             alt={`Icône de ${champion.name}`}
@@ -146,7 +146,7 @@ const renderChildrenCompact = (
   children2: List<React.JSX.Element>,
 ): React.JSX.Element => (
   <>
-    <ul className="row-span-2 flex flex-col self-center py-0.5 px-1.5">{children1}</ul>
+    <ul className="row-span-2 flex flex-col self-center p-0.5">{children1}</ul>
     {List.isNonEmpty(children2) ? (
       <ul className="flex flex-col self-start py-0.5 px-1.5">{children2}</ul>
     ) : null}
