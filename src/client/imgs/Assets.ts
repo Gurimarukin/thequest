@@ -23,15 +23,15 @@ const positions: Dict<ChampionPosition, string> = {
 }
 
 const stats: Dict<WikiaStatsBalanceKey, string> = {
-  dmg_dealt: new URL('./stats/dmg_dealt.png', import.meta.url).toString(),
-  dmg_taken: new URL('./stats/dmg_taken.png', import.meta.url).toString(),
-  healing: new URL('./stats/healing.png', import.meta.url).toString(),
-  shielding: new URL('./stats/shielding.png', import.meta.url).toString(),
-  ability_haste: new URL('./stats/ability_haste.png', import.meta.url).toString(),
-  energy_regen: new URL('./stats/energy_regen.png', import.meta.url).toString(),
-  attack_speed: new URL('./stats/attack_speed.png', import.meta.url).toString(),
-  movement_speed: new URL('./stats/movement_speed.png', import.meta.url).toString(),
-  tenacity: new URL('./stats/tenacity.png', import.meta.url).toString(),
+  dmg_dealt: new URL('./stats/dmg_dealt.webp', import.meta.url).toString(),
+  dmg_taken: new URL('./stats/dmg_taken.webp', import.meta.url).toString(),
+  healing: new URL('./stats/healing.webp', import.meta.url).toString(),
+  shielding: new URL('./stats/shielding.webp', import.meta.url).toString(),
+  ability_haste: new URL('./stats/ability_haste.webp', import.meta.url).toString(),
+  energy_regen: new URL('./stats/energy_regen.webp', import.meta.url).toString(),
+  attack_speed: new URL('./stats/attack_speed.webp', import.meta.url).toString(),
+  movement_speed: new URL('./stats/movement_speed.webp', import.meta.url).toString(),
+  tenacity: new URL('./stats/tenacity.webp', import.meta.url).toString(),
 }
 
 export const Assets = {
