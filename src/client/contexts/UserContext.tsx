@@ -16,7 +16,7 @@ import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import { AsyncState } from '../models/AsyncState'
-import { ChildrenFC } from '../models/ChildrenFC'
+import type { ChildrenFC } from '../models/ChildrenFC'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
 

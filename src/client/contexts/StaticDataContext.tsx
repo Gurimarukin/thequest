@@ -10,7 +10,7 @@ import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import { List, Maybe } from '../../shared/utils/fp'
 
 import { useSWRHttp } from '../hooks/useSWRHttp'
-import { ChildrenFC } from '../models/ChildrenFC'
+import type { ChildrenFC } from '../models/ChildrenFC'
 import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 
 const { ddragonCdn } = DDragonUtils

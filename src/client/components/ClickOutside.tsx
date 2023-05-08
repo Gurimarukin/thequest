@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statements
+/* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { Children, cloneElement, createRef, useCallback, useEffect } from 'react'
 

@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 
-import { ChildrenFC } from '../models/ChildrenFC'
+import type { ChildrenFC } from '../models/ChildrenFC'
 
 const modalLayerId = 'modal-layer'
 
