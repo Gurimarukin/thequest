@@ -1,5 +1,3 @@
-- histogram: search: hide not matching
-- aram (masteries and general): search: improve highlight (yellow glow)
 - clean constants (only multiple references)
 - useless qs.stringify?
 - tailwind colors

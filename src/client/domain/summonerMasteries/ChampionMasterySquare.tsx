@@ -1,5 +1,5 @@
 /* eslint-disable functional/no-return-void */
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { useCallback, useMemo, useRef } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
@@ -12,11 +12,8 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
-import { NumberUtils } from '../../utils/NumberUtils'
 import { cssClasses } from '../../utils/cssClasses'
 import { ChampionTooltip } from './ChampionTooltip'
-
-const { round } = NumberUtils
 
 type ChampionMasterySquareProps = {
   championId: ChampionKey
@@ -28,7 +25,6 @@ type ChampionMasterySquareProps = {
   name: string
   percents: number
   shardsCount: Maybe<number>
-  glow: Maybe<number>
   positions: List<ChampionPosition>
   aram: Maybe<AramData>
   setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
@@ -50,7 +46,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   name,
   percents,
   shardsCount,
-  glow,
   positions,
   aram,
   setChampionShards,
@@ -65,8 +60,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
     [championId, setChampionShards],
   )
 
-  const isGlowing = Maybe.isSome(glow)
-
   const filteredShardsCount = pipe(
     shardsCount,
     Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
@@ -77,16 +70,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
   return (
     <div className={cssClasses('relative', className)}>
-      {/* glow */}
-      <div
-        className={
-          isGlowing
-            ? 'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm'
-            : 'hidden'
-        }
-        style={animationDelay(glow)}
-      />
-
       {/* container, color background */}
       <div
         ref={hoverRef}
@@ -157,18 +140,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
     </div>
   )
 }
-
-const animationDelay: (glow: Maybe<number>) => React.CSSProperties | undefined = flow(
-  Maybe.map((delay): React.CSSProperties => {
-    const delaySeconds = `${round(delay, 3)}s`
-    return {
-      animationDelay: delaySeconds,
-      MozAnimationDelay: delaySeconds,
-      WebkitAnimationDelay: delaySeconds,
-    }
-  }),
-  Maybe.toUndefined,
-)
 
 const championLevelBgColor = (championLevel: ChampionLevelOrZero): string => {
   if (championLevel === 7) return 'bg-mastery7-blue'

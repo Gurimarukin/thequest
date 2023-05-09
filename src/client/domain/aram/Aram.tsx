@@ -24,7 +24,7 @@ import './Aram.css'
 const { cleanChampionName } = StringUtils
 
 type EnrichedStaticDataChampion = StaticDataChampion & {
-  highlight: boolean
+  isHidden: boolean
   category: ChampionCategory
 }
 
@@ -38,9 +38,9 @@ export const Aram: React.FC = () => {
       List.map(
         (c): EnrichedStaticDataChampion => ({
           ...c,
-          highlight: pipe(
+          isHidden: !pipe(
             aramQuery.search,
-            Maybe.exists(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
+            Maybe.every(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
           ),
           category: ChampionCategory.fromAramData(c.aram),
         }),
@@ -57,7 +57,7 @@ export const Aram: React.FC = () => {
       filteredAndSortedChampions: filteredAndSortedChampions_,
       searchCount: pipe(
         filteredAndSortedChampions_,
-        List.filter(c => c.highlight),
+        List.filter(c => !c.isHidden),
         List.size,
       ),
     }
@@ -120,7 +120,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
         className={cssClasses(
           'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-zinc-800 text-2xs',
           ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
-          ['outline outline-pink-500', champion.highlight],
+          ['hidden', champion.isHidden],
         )}
       >
         <div className="h-12 w-12 overflow-hidden rounded-xl shadow-even shadow-black">

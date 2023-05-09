@@ -183,7 +183,6 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                 <ChampionMasterySquare
                   {...n}
                   shardsCount={Maybe.some(n.shardsCount)}
-                  glow={Maybe.none}
                   aram={Maybe.none}
                   setChampionShards={null}
                 />
