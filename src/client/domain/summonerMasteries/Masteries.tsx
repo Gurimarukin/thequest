@@ -1,16 +1,11 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { io, number, ord, predicate, random, readonlySet } from 'fp-ts'
-import type { Ord } from 'fp-ts/Ord'
-import type { Predicate } from 'fp-ts/Predicate'
-import { flow, identity, pipe } from 'fp-ts/function'
-import { optional } from 'monocle-ts'
+import { io, random } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
@@ -22,15 +17,14 @@ import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
-import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { NumberUtils } from '../../utils/NumberUtils'
 import { cssClasses } from '../../utils/cssClasses'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 import { bgGradientMastery } from './ChampionTooltip'
-import { EnrichedChampionMastery } from './EnrichedChampionMastery'
+import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
+import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 
 const { round } = NumberUtils
 const { plural } = StringUtils
@@ -44,63 +38,17 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const { filteredAndSortedMasteries, championsCount, searchCount, maybeMaxPoints } =
-    useMemo(() => {
-      const filterPredicate = pipe(
-        levelFilterPredicate(masteriesQuery.level),
-        predicate.and(positionFilterPredicate(masteriesQuery.position)),
-        predicate.and(
-          histogramOrAramSearchFilterPredicate(masteriesQuery.view, masteriesQuery.search),
-        ),
-      )
-
-      const filteredAndSortedMasteries_ = pipe(
-        masteries,
-        List.map(
-          (m): EnrichedChampionMastery =>
-            pipe(
-              m,
-              filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true),
-              hideInsteadOfGlow(masteriesQuery.view)
-                ? EnrichedChampionMastery.Lens.glow.set(Maybe.none)
-                : identity,
-            ),
-        ),
-        List.sortBy(getSortBy(masteriesQuery.sort, masteriesQuery.order, masteriesQuery.view)),
-      )
-
-      return {
-        filteredAndSortedMasteries: filteredAndSortedMasteries_,
-        championsCount: pipe(
-          filteredAndSortedMasteries_,
-          List.filter(c => !c.isHidden),
-          List.size,
-        ),
-        searchCount: pipe(
-          filteredAndSortedMasteries_,
-          List.filter(c => Maybe.isSome(c.glow)),
-          List.size,
-        ),
-        maybeMaxPoints: pipe(
-          filteredAndSortedMasteries_,
-          NonEmptyArray.fromReadonlyArray,
-          Maybe.map(
-            flow(
-              NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
-              NonEmptyArray.max(number.Ord),
-            ),
-          ),
-        ),
-      }
-    }, [
-      masteries,
-      masteriesQuery.level,
-      masteriesQuery.order,
-      masteriesQuery.position,
-      masteriesQuery.search,
-      masteriesQuery.sort,
-      masteriesQuery.view,
-    ])
+  const {
+    filteredAndSortedMasteries,
+    championsCount,
+    searchCount,
+    maybeMaxPoints,
+    hideInsteadOfGlow,
+    isHidden,
+  } = useMemo(
+    () => getFilteredAndSortedMasteries(masteries, masteriesQuery),
+    [masteries, masteriesQuery],
+  )
 
   const randomChampion = useMemo(
     (): Maybe<() => string> =>
@@ -131,6 +79,8 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
             <Champion
               key={ChampionKey.unwrap(champion.championId)}
               maybeMaxPoints={maybeMaxPoints}
+              isGlowing={!hideInsteadOfGlow && Maybe.isSome(champion.glow)}
+              isHidden={isHidden(champion)}
               maybePrev={maybePrev}
               champion={champion}
               setChampionShards={setChampionShards}
@@ -151,83 +101,10 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
   aram: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
 }
 
-const getSortBy = (
-  sort: MasteriesQuerySort,
-  order: MasteriesQueryOrder,
-  view: MasteriesQueryView,
-): List<Ord<EnrichedChampionMastery>> => {
-  const aramSort =
-    view === 'aram' ? EnrichedChampionMastery.Ord.byAramCategory : ord.fromCompare(() => 0)
-  switch (sort) {
-    case 'percents':
-      return [
-        aramSort,
-        reverseIfDesc(EnrichedChampionMastery.Ord.byPercents),
-        reverseIfDesc(ordByShardsWithLevel),
-        reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
-        EnrichedChampionMastery.Ord.byName,
-      ]
-    case 'points':
-      return [
-        aramSort,
-        reverseIfDesc(EnrichedChampionMastery.Ord.byPoints),
-        EnrichedChampionMastery.Ord.byName,
-      ]
-    case 'name':
-      return [aramSort, reverseIfDesc(EnrichedChampionMastery.Ord.byName)]
-  }
-
-  function reverseIfDesc<A>(o: Ord<A>): Ord<A> {
-    switch (order) {
-      case 'asc':
-        return o
-      case 'desc':
-        return ord.reverse(o)
-    }
-  }
-}
-
-const levelFilterPredicate =
-  (levels: ReadonlySet<ChampionLevelOrZero>): Predicate<EnrichedChampionMastery> =>
-  c =>
-    readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
-
-const positionFilterPredicate =
-  (positions: ReadonlySet<ChampionPosition>) =>
-  (c: EnrichedChampionMastery): boolean =>
-    pipe(
-      c.positions,
-      List.some(position => readonlySet.elem(ChampionPosition.Eq)(position, positions)),
-    )
-
-// for histogram and aram views, hide if some search and champion doesn't match search
-const histogramOrAramSearchFilterPredicate =
-  (view: MasteriesQueryView, search: Maybe<string>): Predicate<EnrichedChampionMastery> =>
-  c =>
-    !hideInsteadOfGlow(view) || Maybe.isNone(search) || Maybe.isSome(c.glow)
-
-const hideInsteadOfGlow = (view: MasteriesQueryView): boolean =>
-  view === 'histogram' || view === 'aram'
-
-// At level 7, shards doesn't matter
-// At level 6, more than 1 shard doesn't matter
-// At level 5 and less, more than 2 shards doesn't matter
-const ordByShardsWithLevel: Ord<EnrichedChampionMastery> = pipe(
-  EnrichedChampionMastery.Ord.byShards,
-  ord.contramap(c =>
-    pipe(
-      EnrichedChampionMastery.Lens.shardsCount,
-      optional.modify(shardsCount => {
-        if (c.championLevel === 7) return Math.min(shardsCount, 0)
-        if (c.championLevel === 6) return Math.min(shardsCount, 1)
-        return Math.min(shardsCount, 2)
-      }),
-    )(c),
-  ),
-)
-
 type ChampionProps = {
   maybeMaxPoints: Maybe<number>
+  isGlowing: boolean
+  isHidden: boolean
   maybePrev: Maybe<EnrichedChampionMastery>
   champion: EnrichedChampionMastery
   setChampionShards: (champion: ChampionKey) => (count: number) => void
@@ -235,6 +112,8 @@ type ChampionProps = {
 
 const Champion: React.FC<ChampionProps> = ({
   maybeMaxPoints,
+  isGlowing,
+  isHidden,
   maybePrev,
   champion,
   setChampionShards,
@@ -243,36 +122,31 @@ const Champion: React.FC<ChampionProps> = ({
 
   const hoverRef = useRef<HTMLInputElement>(null)
 
-  const isGlowing = Maybe.isSome(champion.glow)
-
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
 
   return (
     <>
-      {pipe(
+      {isAram &&
+      !isHidden &&
+      !pipe(
         maybePrev,
-        Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
-        Maybe.fold(
-          () =>
-            isAram ? (
-              <h2
-                className={cssClasses('col-span-full w-full pb-1 text-sm', [
-                  'pt-4',
-                  Maybe.isSome(maybePrev),
-                ])}
-              >
-                {ChampionCategory.label[champion.category]}
-              </h2>
-            ) : null,
-          () => null,
-        ),
-      )}
+        Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
+      ) ? (
+        <h2
+          className={cssClasses('col-span-full w-full pb-1 text-sm', [
+            'pt-4',
+            Maybe.isSome(maybePrev),
+          ])}
+        >
+          {ChampionCategory.label[champion.category]}
+        </h2>
+      ) : null}
       <div
         ref={hoverRef}
         className={cssClasses(
           'relative',
-          ['hidden', champion.isHidden],
+          ['hidden', isHidden],
           [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
         )}
       >
@@ -300,7 +174,7 @@ const Champion: React.FC<ChampionProps> = ({
       <ChampionMasteryHistogram
         maybeMaxPoints={maybeMaxPoints}
         champion={champion}
-        className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
+        className={cssClasses(['hidden', !isHistogram || isHidden])}
       />
     </>
   )

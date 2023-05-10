@@ -141,6 +141,7 @@ const listEncoder: <O, A>(encoder: Encoder<O, A>) => Encoder<List<O>, List<A>> =
 
 export const List = {
   ...readonlyArray,
+  empty: <A = never>(): List<A> => readonlyArray.empty,
   groupBy: readonlyNonEmptyArray.groupBy as <A, K extends string>(
     f: (a: A) => K,
   ) => (as: List<A>) => PartialDict<K, NonEmptyArray<A>>,

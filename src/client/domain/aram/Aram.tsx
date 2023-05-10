@@ -1,5 +1,4 @@
 /* eslint-disable functional/no-return-void */
-import { ord } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { Fragment, useMemo, useRef } from 'react'
 
@@ -33,7 +32,7 @@ export const Aram: React.FC = () => {
   const { champions } = useStaticData()
 
   const { filteredAndSortedChampions, searchCount } = useMemo(() => {
-    const filteredAndSortedChampions_ = pipe(
+    const grouped = pipe(
       champions,
       List.map(
         (c): EnrichedStaticDataChampion => ({
@@ -45,12 +44,15 @@ export const Aram: React.FC = () => {
           category: ChampionCategory.fromAramData(c.aram),
         }),
       ),
-      List.sort(
-        pipe(
-          ChampionCategory.Ord,
-          ord.contramap((c: EnrichedStaticDataChampion) => c.category),
-        ),
+      List.groupBy((a): ChampionCategory | 'hidden' => (a.isHidden ? 'hidden' : a.category)),
+    )
+
+    const filteredAndSortedChampions_ = pipe(
+      ChampionCategory.values,
+      List.reduce(List.empty<EnrichedStaticDataChampion>(), (acc, category) =>
+        pipe(acc, List.concat(grouped[category] ?? [])),
       ),
+      List.concat(grouped.hidden ?? []),
     )
 
     return {
@@ -82,19 +84,15 @@ export const Aram: React.FC = () => {
             filteredAndSortedChampions,
             ListUtils.mapWithPrevious((maybePrev, c) => (
               <Fragment key={ChampionKey.unwrap(c.key)}>
-                {pipe(
+                {!c.isHidden &&
+                !pipe(
                   maybePrev,
-                  Maybe.filter(prev => ChampionCategory.Eq.equals(prev.category, c.category)),
-                  Maybe.fold(
-                    () => (
-                      <h2 className="peer col-span-full w-full pt-4 pb-1 text-sm">
-                        {ChampionCategory.label[c.category]}
-                      </h2>
-                    ),
-                    () => null,
-                  ),
-                )}
-
+                  Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, c.category)),
+                ) ? (
+                  <h2 className="peer col-span-full w-full pt-4 pb-1 text-sm">
+                    {ChampionCategory.label[c.category]}
+                  </h2>
+                ) : null}
                 <Champion champion={c} />
               </Fragment>
             )),

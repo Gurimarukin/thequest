@@ -20,7 +20,7 @@ const AsyncQueue = <A>(onError: (e: Error) => io.IO<NotUsed>): AsyncQueue<A> => 
   // Holds Future to publish when completed.
   // First element is removed only when completed.
   // So the first element (if exists) is the currently running Future.
-  const pendingFutures = Store<List<Future<A>>>(List.empty)
+  const pendingFutures = Store<List<Future<A>>>([])
   const pubSub = PubSub<A>()
 
   return {
@@ -54,7 +54,7 @@ const AsyncQueue = <A>(onError: (e: Error) => io.IO<NotUsed>): AsyncQueue<A> => 
               pendingFutures.modify(
                 flow(
                   List.tail,
-                  Maybe.getOrElseW(() => List.empty),
+                  Maybe.getOrElse(() => List.empty()),
                 ),
               ),
             ),
