@@ -57,6 +57,7 @@ const byAramCategory: Ord<EnrichedChampionMastery> = pipe(
 
 const Lens = {
   shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
+  glow: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('glow')),
   isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
 }
 
