@@ -7,7 +7,7 @@ import type { Puuid } from '../../../../../src/shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../../../../src/shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../../../src/shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../../../src/shared/utils/ListUtils'
-import { List, Maybe } from '../../../../../src/shared/utils/fp'
+import { Maybe } from '../../../../../src/shared/utils/fp'
 
 import { expectT } from '../../../../expectT'
 
@@ -44,12 +44,12 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
         optional.modify(ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)(shardsOne)),
       )({
         summoner,
-        masteries: List.empty,
+        masteries: [],
         championShards: Maybe.none,
       }),
     ).toStrictEqual({
       summoner,
-      masteries: List.empty,
+      masteries: [],
       championShards: Maybe.none,
     })
 
@@ -59,12 +59,12 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
         optional.modify(ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)(shardsTwo)),
       )({
         summoner,
-        masteries: List.empty,
+        masteries: [],
         championShards: Maybe.some([shardsOne]),
       }),
     ).toStrictEqual({
       summoner,
-      masteries: List.empty,
+      masteries: [],
       championShards: Maybe.some([shardsOne, shardsTwo]),
     })
 
@@ -74,12 +74,12 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
         optional.modify(ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)(shardsOneBis)),
       )({
         summoner,
-        masteries: List.empty,
+        masteries: [],
         championShards: Maybe.some([shardsOne, shardsTwo]),
       }),
     ).toStrictEqual({
       summoner,
-      masteries: List.empty,
+      masteries: [],
       championShards: Maybe.some([shardsOneBis, shardsTwo]),
     })
   })

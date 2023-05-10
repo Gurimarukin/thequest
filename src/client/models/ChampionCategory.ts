@@ -1,4 +1,4 @@
-import { monoid, number, ord } from 'fp-ts'
+import { monoid, number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
 import type { AramData } from '../../shared/models/api/AramData'
@@ -63,11 +63,6 @@ const label: Dict<ChampionCategory, string> = {
   balanced: 'Champions parfaitement équilibrés',
 }
 
-const Ord: ord.Ord<ChampionCategory> = pipe(
-  number.Ord,
-  ord.contramap(category => e.values.findIndex(c => e.Eq.equals(c, category))),
-)
-
-const ChampionCategory = { groupChampions, fromAramData, label, Eq: e.Eq, Ord }
+const ChampionCategory = { values: e.values, groupChampions, fromAramData, label, Eq: e.Eq }
 
 export { ChampionCategory }
