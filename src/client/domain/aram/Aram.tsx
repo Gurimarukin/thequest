@@ -32,7 +32,7 @@ export const Aram: React.FC = () => {
   const { champions } = useStaticData()
 
   const { filteredAndSortedChampions, searchCount } = useMemo(() => {
-    const filteredChampions = pipe(
+    const grouped = pipe(
       champions,
       List.map(
         (c): EnrichedStaticDataChampion => ({
@@ -44,10 +44,6 @@ export const Aram: React.FC = () => {
           category: ChampionCategory.fromAramData(c.aram),
         }),
       ),
-    )
-
-    const grouped = pipe(
-      filteredChampions,
       List.groupBy((a): ChampionCategory | 'hidden' => (a.isHidden ? 'hidden' : a.category)),
     )
 
