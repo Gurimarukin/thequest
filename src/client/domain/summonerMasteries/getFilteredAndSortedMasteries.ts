@@ -22,12 +22,18 @@ type FilteredAndSortedMasteries = {
   searchCount: number
   maybeMaxPoints: Maybe<number>
   hideInsteadOfGlow: boolean
+  isHidden: (champion: EnrichedChampionMastery) => boolean
 }
 
 export const getFilteredAndSortedMasteries = (
   masteries: List<EnrichedChampionMastery>,
   query: MasteriesQuery,
 ): FilteredAndSortedMasteries => {
+  const hideInsteadOfGlow =
+    Maybe.isSome(query.search) && (query.view === 'histogram' || query.view === 'aram')
+
+  const isHidden = getIsHidden({ hideInsteadOfGlow })
+
   const filterPredicate = pipe(
     levelFilterPredicate(query.level),
     predicate.and(positionFilterPredicate(query.position)),
@@ -41,7 +47,7 @@ export const getFilteredAndSortedMasteries = (
       (m): EnrichedChampionMastery =>
         pipe(m, filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true)),
     ),
-    query.view === 'aram' ? sortAram(ords) : List.sortBy(ords),
+    query.view === 'aram' ? sortAram(isHidden, ords) : List.sortBy(ords),
   )
 
   return {
@@ -66,16 +72,17 @@ export const getFilteredAndSortedMasteries = (
         ),
       ),
     ),
-    hideInsteadOfGlow: query.view === 'histogram' || query.view === 'aram',
+    hideInsteadOfGlow,
+    isHidden,
   }
 }
 
 const sortAram =
-  (ords: List<Ord<EnrichedChampionMastery>>) =>
+  (isHidden: (c: EnrichedChampionMastery) => boolean, ords: List<Ord<EnrichedChampionMastery>>) =>
   (as: List<EnrichedChampionMastery>): List<EnrichedChampionMastery> => {
     const grouped = pipe(
       as,
-      List.groupBy((a): CategoryOrHidden => (a.isHidden ? 'hidden' : a.category)),
+      List.groupBy((c): CategoryOrHidden => (isHidden(c) ? 'hidden' : c.category)),
     )
     return pipe(
       ChampionCategory.values,
@@ -85,6 +92,15 @@ const sortAram =
       List.concat(grouped.hidden ?? []),
     )
   }
+
+type HideInsteadOfGlow = {
+  hideInsteadOfGlow: boolean
+}
+
+const getIsHidden =
+  ({ hideInsteadOfGlow }: HideInsteadOfGlow) =>
+  (c: EnrichedChampionMastery) =>
+    c.isHidden || (hideInsteadOfGlow && Maybe.isNone(c.glow))
 
 const getSortBy = (
   sort: MasteriesQuerySort,

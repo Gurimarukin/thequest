@@ -44,6 +44,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
     searchCount,
     maybeMaxPoints,
     hideInsteadOfGlow,
+    isHidden,
   } = useMemo(
     () => getFilteredAndSortedMasteries(masteries, masteriesQuery),
     [masteries, masteriesQuery],
@@ -78,7 +79,8 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
             <Champion
               key={ChampionKey.unwrap(champion.championId)}
               maybeMaxPoints={maybeMaxPoints}
-              hideInsteadOfGlow={hideInsteadOfGlow}
+              isGlowing={!hideInsteadOfGlow && Maybe.isSome(champion.glow)}
+              isHidden={isHidden(champion)}
               maybePrev={maybePrev}
               champion={champion}
               setChampionShards={setChampionShards}
@@ -101,7 +103,8 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
 
 type ChampionProps = {
   maybeMaxPoints: Maybe<number>
-  hideInsteadOfGlow: boolean
+  isGlowing: boolean
+  isHidden: boolean
   maybePrev: Maybe<EnrichedChampionMastery>
   champion: EnrichedChampionMastery
   setChampionShards: (champion: ChampionKey) => (count: number) => void
@@ -109,7 +112,8 @@ type ChampionProps = {
 
 const Champion: React.FC<ChampionProps> = ({
   maybeMaxPoints,
-  hideInsteadOfGlow,
+  isGlowing,
+  isHidden,
   maybePrev,
   champion,
   setChampionShards,
@@ -117,10 +121,6 @@ const Champion: React.FC<ChampionProps> = ({
   const { masteriesQuery } = useHistory()
 
   const hoverRef = useRef<HTMLInputElement>(null)
-
-  const isGlowing = !hideInsteadOfGlow && Maybe.isSome(champion.glow)
-
-  const isHidden = champion.isHidden || (hideInsteadOfGlow && Maybe.isNone(champion.glow))
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
