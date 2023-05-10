@@ -2,6 +2,7 @@
                   functional/no-return-void */
 import { predicate, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import type React from 'react'
 import {
   forwardRef,
   useCallback,
@@ -44,7 +45,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
           searchRef.current !== null
         ) {
           e.preventDefault()
-          searchRef.current.select()
+          searchRef.current.focus()
         }
       }
 
@@ -88,6 +89,8 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
       [],
     )
 
+    const onFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => e.target.select(), [])
+
     return (
       <div className={cssClasses('relative flex flex-col items-center text-xs', className)}>
         <div className="flex items-center">
@@ -97,6 +100,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
             value={search}
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
+            onFocus={onFocus}
             placeholder="Rechercher champion"
             className={cssClasses(
               'w-[151px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
