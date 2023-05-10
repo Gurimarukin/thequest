@@ -11,6 +11,7 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -133,14 +134,10 @@ const Champion: React.FC<ChampionProps> = ({
         maybePrev,
         Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
       ) ? (
-        <h2
-          className={cssClasses('col-span-full w-full pb-1 text-sm', [
-            'pt-4',
-            Maybe.isSome(maybePrev),
-          ])}
-        >
-          {ChampionCategory.label[champion.category]}
-        </h2>
+        <ChampionCategoryTitle
+          category={champion.category}
+          className={cssClasses(['pt-4', Maybe.isSome(maybePrev)])}
+        />
       ) : null}
       <div
         ref={hoverRef}

@@ -8,6 +8,7 @@ import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
 
+import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { SearchChampion } from '../../components/SearchChampion'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { AramStatsFull } from '../../components/aramStats/AramStatsFull'
@@ -89,9 +90,7 @@ export const Aram: React.FC = () => {
                   maybePrev,
                   Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, c.category)),
                 ) ? (
-                  <h2 className="peer col-span-full w-full pt-4 pb-1 text-sm">
-                    {ChampionCategory.label[c.category]}
-                  </h2>
+                  <ChampionCategoryTitle category={c.category} className="pt-4" />
                 ) : null}
                 <Champion champion={c} />
               </Fragment>
