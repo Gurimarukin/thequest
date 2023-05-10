@@ -3,7 +3,7 @@
 import { io, number, ord, predicate, random, readonlySet } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
-import { flow, pipe } from 'fp-ts/function'
+import { flow, identity, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 import { useMemo, useRef } from 'react'
 
@@ -13,6 +13,7 @@ import { ChampionLevelOrZero } from '../../../shared/models/api/champion/Champio
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
@@ -55,8 +56,15 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
 
       const filteredAndSortedMasteries_ = pipe(
         masteries,
-        List.map(m =>
-          filterPredicate(m) ? m : pipe(m, EnrichedChampionMastery.Lens.isHidden.set(true)),
+        List.map(
+          (m): EnrichedChampionMastery =>
+            pipe(
+              m,
+              filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true),
+              hideInsteadOfGlow(masteriesQuery.view)
+                ? EnrichedChampionMastery.Lens.glow.set(Maybe.none)
+                : identity,
+            ),
         ),
         List.sortBy(getSortBy(masteriesQuery.sort, masteriesQuery.order, masteriesQuery.view)),
       )
@@ -116,7 +124,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   return (
     <>
       <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
-      <div className={cssClasses('w-full', viewContainerClassName(masteriesQuery.view))}>
+      <div className={cssClasses('w-full', viewContainerClassName[masteriesQuery.view])}>
         {pipe(
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
@@ -137,15 +145,10 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   )
 }
 
-const viewContainerClassName = (view: MasteriesQueryView): string => {
-  switch (view) {
-    case 'compact':
-      return 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4'
-    case 'histogram':
-      return 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2'
-    case 'aram':
-      return 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1'
-  }
+const viewContainerClassName: Dict<MasteriesQueryView, string> = {
+  compact: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
+  histogram: 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2',
+  aram: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
 }
 
 const getSortBy = (
@@ -201,7 +204,10 @@ const positionFilterPredicate =
 const histogramOrAramSearchFilterPredicate =
   (view: MasteriesQueryView, search: Maybe<string>): Predicate<EnrichedChampionMastery> =>
   c =>
-    (view !== 'histogram' && view !== 'aram') || Maybe.isNone(search) || Maybe.isSome(c.glow)
+    !hideInsteadOfGlow(view) || Maybe.isNone(search) || Maybe.isSome(c.glow)
+
+const hideInsteadOfGlow = (view: MasteriesQueryView): boolean =>
+  view === 'histogram' || view === 'aram'
 
 // At level 7, shards doesn't matter
 // At level 6, more than 1 shard doesn't matter

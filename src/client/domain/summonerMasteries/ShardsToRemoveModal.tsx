@@ -185,6 +185,7 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                   shardsCount={Maybe.some(n.shardsCount)}
                   aram={Maybe.none}
                   setChampionShards={null}
+                  centerShards={true}
                 />
                 <span ref={masteriesRef} className="flex items-center">
                   <MasteryImg level={n.leveledUpFrom} className="h-6" />

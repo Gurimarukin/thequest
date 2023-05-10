@@ -234,7 +234,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
 
   useEffect(() => {
     setIsNotificationsHidden(false)
-  }, [notifications])
+  }, [])
 
   const setChampionShards = useCallback(
     (championKey: ChampionKey) => (shardsCount: number) =>

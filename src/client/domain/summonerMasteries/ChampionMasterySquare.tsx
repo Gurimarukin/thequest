@@ -33,7 +33,7 @@ type ChampionMasterySquareProps = {
    */
   roundedBrInsteadOfTr?: boolean
   hoverRef?: React.RefObject<HTMLDivElement>
-  className?: string
+  centerShards?: boolean
 }
 
 export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
@@ -51,7 +51,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   setChampionShards,
   roundedBrInsteadOfTr = false,
   hoverRef: overrideHoverRef,
-  className,
+  centerShards,
 }) => {
   const staticData = useStaticData()
 
@@ -69,12 +69,12 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   const hoverRef = overrideHoverRef ?? hoverRef_
 
   return (
-    <div className={cssClasses('relative', className)}>
+    <div className="relative">
       {/* container, color background */}
       <div
         ref={hoverRef}
         className={cssClasses(
-          'relative flex h-16 w-16 items-center justify-center rounded-bl-xl',
+          'relative flex h-16 w-16 items-center justify-center rounded-bl-xl shadow-even shadow-black',
           championLevelBgColor(championLevel),
           roundedBrInsteadOfTr ? 'rounded-br-xl' : 'rounded-tr-xl',
         )}
@@ -118,7 +118,13 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           filteredShardsCount,
           Maybe.fold(
             () => null,
-            shards => <Shards shardsCount={shards} setShardsCount={setShardsCount} />,
+            shards => (
+              <Shards
+                shardsCount={shards}
+                setShardsCount={setShardsCount}
+                centerShards={centerShards}
+              />
+            ),
           ),
         )}
       </div>
@@ -208,9 +214,10 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 type ShardsProps = {
   shardsCount: number
   setShardsCount: ((count: number) => void) | null
+  centerShards: boolean | undefined
 }
 
-const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount }) => {
+const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShards = false }) => {
   const addButtonRef = useRef<HTMLButtonElement>(null)
   const removeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -230,7 +237,12 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount }) => {
       <span className="-mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="h-2.5 w-2.5 rotate-180 fill-current" />
       </span>
-      <span className="flex h-4 w-3.5 justify-end rounded-tl-lg bg-black pl-0.5 text-xs group-hover:justify-center">
+      <span
+        className={cssClasses(
+          'flex h-4 w-3.5 rounded-tl-lg bg-black pl-0.5 text-xs',
+          centerShards ? 'justify-center' : 'justify-end group-hover:justify-center',
+        )}
+      >
         <span className="mt-0.5">{shardsCount}</span>
       </span>
       {setShardsCount !== null ? (
