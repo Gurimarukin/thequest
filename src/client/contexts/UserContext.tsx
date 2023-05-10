@@ -129,7 +129,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(
     constants.recentSearches.localStorageKey,
     recentSearchesCodec,
-    List.empty,
+    [],
   )
 
   const addRecentSearch = useCallback(

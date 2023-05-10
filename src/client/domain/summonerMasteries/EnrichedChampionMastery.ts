@@ -11,7 +11,7 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
-import { ChampionCategory } from '../../models/ChampionCategory'
+import type { ChampionCategory } from '../../models/ChampionCategory'
 
 type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   championLevel: ChampionLevelOrZero
@@ -50,11 +50,6 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
   ord.contramap(c => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
-const byAramCategory: Ord<EnrichedChampionMastery> = pipe(
-  ChampionCategory.Ord,
-  ord.contramap(c => c.category),
-)
-
 const Lens = {
   shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
   glow: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('glow')),
@@ -62,7 +57,7 @@ const Lens = {
 }
 
 const EnrichedChampionMastery = {
-  Ord: { byPercents, byPoints, byShards, byName, byAramCategory },
+  Ord: { byPercents, byPoints, byShards, byName },
   Lens,
 }
 
