@@ -38,7 +38,13 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const { filteredAndSortedMasteries, championsCount, searchCount, maybeMaxPoints } = useMemo(
+  const {
+    filteredAndSortedMasteries,
+    championsCount,
+    searchCount,
+    maybeMaxPoints,
+    hideInsteadOfGlow,
+  } = useMemo(
     () => getFilteredAndSortedMasteries(masteries, masteriesQuery),
     [masteries, masteriesQuery],
   )
@@ -72,6 +78,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
             <Champion
               key={ChampionKey.unwrap(champion.championId)}
               maybeMaxPoints={maybeMaxPoints}
+              hideInsteadOfGlow={hideInsteadOfGlow}
               maybePrev={maybePrev}
               champion={champion}
               setChampionShards={setChampionShards}
@@ -94,6 +101,7 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
 
 type ChampionProps = {
   maybeMaxPoints: Maybe<number>
+  hideInsteadOfGlow: boolean
   maybePrev: Maybe<EnrichedChampionMastery>
   champion: EnrichedChampionMastery
   setChampionShards: (champion: ChampionKey) => (count: number) => void
@@ -101,6 +109,7 @@ type ChampionProps = {
 
 const Champion: React.FC<ChampionProps> = ({
   maybeMaxPoints,
+  hideInsteadOfGlow,
   maybePrev,
   champion,
   setChampionShards,
@@ -109,7 +118,9 @@ const Champion: React.FC<ChampionProps> = ({
 
   const hoverRef = useRef<HTMLInputElement>(null)
 
-  const isGlowing = Maybe.isSome(champion.glow)
+  const isGlowing = !hideInsteadOfGlow && Maybe.isSome(champion.glow)
+
+  const isHidden = champion.isHidden || (hideInsteadOfGlow && Maybe.isNone(champion.glow))
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
@@ -117,7 +128,7 @@ const Champion: React.FC<ChampionProps> = ({
   return (
     <>
       {isAram &&
-      !champion.isHidden &&
+      !isHidden &&
       !pipe(
         maybePrev,
         Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
@@ -135,7 +146,7 @@ const Champion: React.FC<ChampionProps> = ({
         ref={hoverRef}
         className={cssClasses(
           'relative',
-          ['hidden', champion.isHidden],
+          ['hidden', isHidden],
           [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
         )}
       >
@@ -163,7 +174,7 @@ const Champion: React.FC<ChampionProps> = ({
       <ChampionMasteryHistogram
         maybeMaxPoints={maybeMaxPoints}
         champion={champion}
-        className={cssClasses(['hidden', !isHistogram || champion.isHidden])}
+        className={cssClasses(['hidden', !isHistogram || isHidden])}
       />
     </>
   )

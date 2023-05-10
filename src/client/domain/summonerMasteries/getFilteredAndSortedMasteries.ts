@@ -12,7 +12,6 @@ import { ChampionCategory } from '../../models/ChampionCategory'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
 type CategoryOrHidden = ChampionCategory | 'hidden'
@@ -22,6 +21,7 @@ type FilteredAndSortedMasteries = {
   championsCount: number
   searchCount: number
   maybeMaxPoints: Maybe<number>
+  hideInsteadOfGlow: boolean
 }
 
 export const getFilteredAndSortedMasteries = (
@@ -31,7 +31,6 @@ export const getFilteredAndSortedMasteries = (
   const filterPredicate = pipe(
     levelFilterPredicate(query.level),
     predicate.and(positionFilterPredicate(query.position)),
-    predicate.and(histogramOrAramSearchFilterPredicate(query.view, query.search)),
   )
 
   const ords = getSortBy(query.sort, query.order)
@@ -40,13 +39,7 @@ export const getFilteredAndSortedMasteries = (
     masteries,
     List.map(
       (m): EnrichedChampionMastery =>
-        pipe(
-          m,
-          filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true),
-          hideInsteadOfGlow(query.view)
-            ? EnrichedChampionMastery.Lens.glow.set(Maybe.none)
-            : identity,
-        ),
+        pipe(m, filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true)),
     ),
     query.view === 'aram' ? sortAram(ords) : List.sortBy(ords),
   )
@@ -73,6 +66,7 @@ export const getFilteredAndSortedMasteries = (
         ),
       ),
     ),
+    hideInsteadOfGlow: query.view === 'histogram' || query.view === 'aram',
   }
 }
 
@@ -135,15 +129,6 @@ const positionFilterPredicate =
       c.positions,
       List.some(position => readonlySet.elem(ChampionPosition.Eq)(position, positions)),
     )
-
-// for histogram and aram views, hide if some search and champion doesn't match search
-const histogramOrAramSearchFilterPredicate =
-  (view: MasteriesQueryView, search: Maybe<string>): Predicate<EnrichedChampionMastery> =>
-  c =>
-    !hideInsteadOfGlow(view) || Maybe.isNone(search) || Maybe.isSome(c.glow)
-
-const hideInsteadOfGlow = (view: MasteriesQueryView): boolean =>
-  view === 'histogram' || view === 'aram'
 
 // At level 7, shards doesn't matter
 // At level 6, more than 1 shard doesn't matter
