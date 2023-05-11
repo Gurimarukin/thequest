@@ -12,8 +12,11 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
+import { NumberUtils } from '../../utils/NumberUtils'
 import { cssClasses } from '../../utils/cssClasses'
 import { ChampionTooltip } from './ChampionTooltip'
+
+const { round } = NumberUtils
 
 type ChampionMasterySquareProps = {
   championId: ChampionKey
@@ -21,6 +24,7 @@ type ChampionMasterySquareProps = {
   tokensEarned: number
   championLevel: ChampionLevelOrZero
   championPoints: number
+  championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
   name: string
   percents: number
@@ -31,7 +35,7 @@ type ChampionMasterySquareProps = {
   /**
    * @default false
    */
-  roundedBrInsteadOfTr?: boolean
+  isHistogram?: boolean
   hoverRef?: React.RefObject<HTMLDivElement>
   centerShards?: boolean
 }
@@ -40,6 +44,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   championId,
   championLevel,
   championPoints,
+  championPointsSinceLastLevel,
   championPointsUntilNextLevel,
   chestGranted,
   tokensEarned,
@@ -49,7 +54,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   positions,
   aram,
   setChampionShards,
-  roundedBrInsteadOfTr = false,
+  isHistogram = false,
   hoverRef: overrideHoverRef,
   centerShards,
 }) => {
@@ -70,20 +75,26 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
   return (
     <div className="relative">
-      {/* container, color background */}
-      <div
-        ref={hoverRef}
-        className={cssClasses(
-          'relative flex h-16 w-16 items-center justify-center rounded-bl-xl shadow-even shadow-black',
-          championLevelBgColor(championLevel),
-          roundedBrInsteadOfTr ? 'rounded-br-xl' : 'rounded-tr-xl',
-        )}
-      >
+      <div ref={hoverRef} className="relative flex h-16 w-16 items-center justify-center">
+        {/* level border */}
+        <div
+          className={cssClasses(
+            'absolute inset-0 flex flex-col justify-end overflow-hidden rounded-bl-xl bg-black shadow-even shadow-black',
+            isHistogram ? 'rounded-br-xl' : 'rounded-tr-xl',
+          )}
+        >
+          <LevelSVG
+            championLevel={championLevel}
+            championPointsUntilNextLevel={isHistogram ? 0 : championPointsUntilNextLevel} // always full for histogram
+            championPointsSinceLastLevel={championPointsSinceLastLevel}
+          />
+        </div>
+
         {/* champion image */}
         <div
           className={cssClasses(
-            'h-12 w-12 overflow-hidden rounded-bl-lg',
-            roundedBrInsteadOfTr ? 'rounded-br-lg' : 'rounded-tr-lg',
+            'relative h-12 w-12 overflow-hidden rounded-bl-lg',
+            isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
         >
           <img
@@ -147,13 +158,65 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   )
 }
 
+type LevelSVGProps = {
+  championLevel: ChampionLevelOrZero
+  championPointsSinceLastLevel: number
+  championPointsUntilNextLevel: number
+}
+
+const totalLength = 178
+
+const LevelSVG: React.FC<LevelSVGProps> = ({
+  championLevel,
+  championPointsSinceLastLevel,
+  championPointsUntilNextLevel,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 64 64"
+    className={cssClasses('h-full w-full', championLevelBgColor(championLevel))}
+  >
+    <path
+      d="M 14 8 H 56 V 56 H 8 V 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={23}
+      strokeLinejoin="round"
+      strokeDasharray={totalLength}
+      strokeDashoffset={
+        totalLength -
+        (totalLength *
+          levelPercents({
+            championPointsSinceLastLevel,
+            championPointsUntilNextLevel,
+          })) /
+          100
+      }
+    />
+  </svg>
+)
+
+type ChampionLevelPercents = {
+  championPointsSinceLastLevel: number
+  championPointsUntilNextLevel: number
+}
+
+const levelPercents = ({
+  championPointsSinceLastLevel,
+  championPointsUntilNextLevel,
+}: ChampionLevelPercents): number => {
+  const levelRange = championPointsSinceLastLevel + championPointsUntilNextLevel
+  if (levelRange === 0) return 0
+  return round((100 * championPointsSinceLastLevel) / levelRange)
+}
+
 const championLevelBgColor = (championLevel: ChampionLevelOrZero): string => {
-  if (championLevel === 7) return 'bg-mastery7-blue'
-  if (championLevel === 6) return 'bg-mastery6-violet'
-  if (championLevel === 5) return 'bg-mastery5-red'
-  if (championLevel === 4) return 'bg-mastery4-brown'
-  if (championLevel === 0) return 'bg-black'
-  return 'bg-mastery-beige'
+  if (championLevel === 7) return 'text-mastery7-blue'
+  if (championLevel === 6) return 'text-mastery6-violet'
+  if (championLevel === 5) return 'text-mastery5-red'
+  if (championLevel === 4) return 'text-mastery4-brown'
+  if (championLevel === 0) return 'text-black'
+  return 'text-mastery-beige'
 }
 
 const championLevelNumberColor = (championLevel: ChampionLevelOrZero): string => {
@@ -161,7 +224,7 @@ const championLevelNumberColor = (championLevel: ChampionLevelOrZero): string =>
   if (championLevel === 6) return 'text-purple-400'
   if (championLevel === 5) return 'text-red-700'
   if (championLevel === 4) return 'text-yellow-600'
-  return 'text-neutral-400'
+  return 'text-neutral-300'
 }
 
 type TokensProps = {

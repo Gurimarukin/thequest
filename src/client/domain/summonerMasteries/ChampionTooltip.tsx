@@ -148,5 +148,5 @@ export const bgGradientMastery = (level: ChampionLevelOrZero): string => {
   if (level === 5) return 'bg-gradient-to-r from-mastery5-red to-mastery5-red-secondary'
   if (level === 4) return 'bg-gradient-to-r from-mastery4-brown to-mastery4-brown-secondary'
   if (level === 0) return 'bg-black'
-  return 'bg-mastery-beige'
+  return 'bg-gradient-to-r from-mastery-beige to-mastery-beige-secondary'
 }

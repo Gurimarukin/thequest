@@ -162,7 +162,7 @@ const Champion: React.FC<ChampionProps> = ({
             {...champion}
             aram={masteriesQuery.view === 'aram' ? Maybe.some(champion.aram) : Maybe.none}
             setChampionShards={setChampionShards}
-            roundedBrInsteadOfTr={isHistogram}
+            isHistogram={isHistogram}
             hoverRef={hoverRef}
           />
           <ChampionMasteryAram aram={champion.aram} className={cssClasses(['hidden', !isAram])} />

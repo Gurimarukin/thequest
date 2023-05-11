@@ -24,7 +24,8 @@ module.exports = {
         'mastery5-red-secondary': '#672121',
         'mastery4-brown': '#9e7a39',
         'mastery4-brown-secondary': '#725a34',
-        'mastery-beige': '#52525b',
+        'mastery-beige': '#71717a',
+        'mastery-beige-secondary': '#52525b', // #52604f
         'discord-blurple': '#5865f2',
         'discord-green': '#57f287',
         'discord-red': '#ed4245',

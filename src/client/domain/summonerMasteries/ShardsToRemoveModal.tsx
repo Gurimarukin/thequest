@@ -37,6 +37,7 @@ export type ShardsToRemoveNotification = {
   name: string
   championLevel: ChampionLevelOrZero
   championPoints: number
+  championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
   percents: number
   chestGranted: boolean
