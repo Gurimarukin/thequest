@@ -129,8 +129,9 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
         }),
         // TODO: sucess toaster
         // Future.map(() => {}),
-        Future.orElse(() => {
+        Future.orElse(e => {
           if (optimisticMutation) mutate(data, { revalidate: false })
+          console.error(e)
           // TODO: error toaster
           alert('Erreur lors de la modification des fragments')
           return Future.notUsed
