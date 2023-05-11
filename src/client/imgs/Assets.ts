@@ -23,10 +23,10 @@ const positions: Dict<ChampionPosition, string> = {
 }
 
 const stats: Dict<WikiaStatsBalanceKey, string> = {
-  dmg_dealt: new URL('./stats/dmg_dealt.webp', import.meta.url).toString(),
-  dmg_taken: new URL('./stats/dmg_taken.webp', import.meta.url).toString(),
-  healing: new URL('./stats/healing.webp', import.meta.url).toString(),
-  shielding: new URL('./stats/shielding.webp', import.meta.url).toString(),
+  dmg_dealt: new URL('./stats/attack_damage.webp', import.meta.url).toString(),
+  dmg_taken: new URL('./stats/armor_penetration.webp', import.meta.url).toString(),
+  healing: new URL('./stats/heal_power.webp', import.meta.url).toString(),
+  shielding: new URL('./stats/shield_power.webp', import.meta.url).toString(),
   ability_haste: new URL('./stats/ability_haste.webp', import.meta.url).toString(),
   energy_regen: new URL('./stats/energy_regen.webp', import.meta.url).toString(),
   attack_speed: new URL('./stats/attack_speed.webp', import.meta.url).toString(),
