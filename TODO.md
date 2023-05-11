@@ -1,6 +1,7 @@
 - clean constants (only multiple references)
 - useless qs.stringify?
 - tailwind colors
+- linked discord account icon?
 - toaster (replace alert)
 - account menu
 - admin bo

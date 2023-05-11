@@ -417,6 +417,7 @@ const getNotifications = (
                   name: c.name,
                   championLevel: c.championLevel,
                   championPoints: c.championPoints,
+                  championPointsSinceLastLevel: c.championPointsSinceLastLevel,
                   championPointsUntilNextLevel: c.championPointsUntilNextLevel,
                   percents: c.percents,
                   chestGranted: c.chestGranted,
