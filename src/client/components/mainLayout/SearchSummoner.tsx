@@ -131,7 +131,8 @@ export const SearchSummoner: React.FC = () => {
           />
           <ul
             className={cssClasses(
-              'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] grid-cols-[auto_auto_auto] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
+              'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
+              Maybe.isSome(maybeUser) ? 'grid-cols-[auto_auto_auto]' : 'grid-cols-[auto_auto] pr-3',
               showSearches ? 'grid' : 'hidden',
             )}
           >
@@ -171,7 +172,7 @@ type SummonerSearchProps = {
 
 const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const { navigate, matchesLocation, masteriesQuery } = useHistory()
-  const { addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
+  const { maybeUser, addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
   // with current masteriesQuery
@@ -239,7 +240,9 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
         <span className="ml-2 grow">{summoner.name}</span>
         <span className="ml-4">{summoner.platform}</span>
       </Link>
-      {renderFavorite(type, favoriteIsLoading, addFavorite, removeFavorite)}
+      {Maybe.isSome(maybeUser)
+        ? renderFavorite(type, favoriteIsLoading, addFavorite, removeFavorite)
+        : null}
     </li>
   )
 }
