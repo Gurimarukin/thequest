@@ -45,7 +45,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
           searchRef.current !== null
         ) {
           e.preventDefault()
-          searchRef.current.focus()
+          searchRef.current.select()
         }
       }
 
