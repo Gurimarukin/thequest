@@ -46,6 +46,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
           pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),
         ),
         Future.orElse(e => {
+          console.error(e)
           alert("Erreur lors de la récupération l'utilisateur") // TODO: toaster
           return Future.failed(e)
         }),
@@ -84,7 +85,8 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
           ),
         ),
         Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
-        Future.orElse(() => {
+        Future.orElse(e => {
+          console.error(e)
           alert("Erreur lors de l'ajout du favori") // TODO: toaster
           return futureMaybe.some(NotUsed)
         }),
@@ -118,7 +120,8 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
           ),
         ),
         Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
-        Future.orElse(() => {
+        Future.orElse(e => {
+          console.error(e)
           alert('Erreur lors de la suppression du favori') // TODO: toaster
           return Future.notUsed
         }),
