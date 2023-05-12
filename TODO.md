@@ -1,4 +1,3 @@
-- home when loged redirects to self
 - linked discord account icon?
 - toaster (replace alert)
 - account menu
