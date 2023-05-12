@@ -93,7 +93,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* champion image */}
         <div
           className={cssClasses(
-            'relative h-12 w-12 overflow-hidden rounded-bl-lg',
+            'relative h-[54px] w-[54px] overflow-hidden rounded-bl-lg',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
         >
