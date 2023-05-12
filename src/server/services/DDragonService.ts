@@ -41,7 +41,7 @@ const DDragonService = (riotApiService: RiotApiService) => {
     Future.chain(({ maybeVersion, now }) =>
       pipe(
         maybeVersion,
-        Maybe.filter(StoredAt.isStillValid(constants.riotApi.cacheTtl.ddragonLatestVersion, now)),
+        Maybe.filter(StoredAt.isStillValid(constants.riotApiCacheTtl.ddragonLatestVersion, now)),
         Maybe.fold(
           () =>
             pipe(

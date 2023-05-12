@@ -40,7 +40,7 @@ const RiotAccountService = (
   ): Future<Maybe<PlatformWithPuuid>> =>
     pipe(
       Future.fromIO(DayJs.now),
-      Future.map(DayJs.subtract(constants.riotApi.cacheTtl.account)),
+      Future.map(DayJs.subtract(constants.riotApiCacheTtl.account)),
       Future.chain(insertedAfter =>
         riotAccountPersistence.findByGameNameAndTagLine(gameName, tagLine, insertedAfter),
       ),

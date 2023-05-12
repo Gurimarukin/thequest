@@ -1,12 +1,12 @@
 import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
+import { MsDuration } from '../shared/models/MsDuration'
 import { PubSub } from '../shared/models/rx/PubSub'
 import { StringUtils } from '../shared/utils/StringUtils'
 import { Future, IO, NonEmptyArray } from '../shared/utils/fp'
 
 import type { Config } from './config/Config'
-import { constants } from './config/constants'
 import { HttpClient } from './helpers/HttpClient'
 import { JwtHelper } from './helpers/JwtHelper'
 import { scheduleCronJob } from './helpers/scheduleCronJob'
@@ -32,6 +32,8 @@ import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
 import { StaticDataService } from './services/staticDataService/StaticDataService'
 import { getOnError } from './utils/getOnError'
+
+const dbRetryDelay = MsDuration.seconds(10)
 
 type Context = ReturnType<typeof of>
 
@@ -144,11 +146,11 @@ const load = (config: Config): Future<Context> => {
           pipe(
             logger.info(
               `Couldn't connect to mongo, waiting ${StringUtils.prettyMs(
-                constants.dbRetryDelay,
+                dbRetryDelay,
               )} before next try`,
             ),
             Future.fromIOEither,
-            Future.chain(() => pipe(waitDatabaseReady, Future.delay(constants.dbRetryDelay))),
+            Future.chain(() => pipe(waitDatabaseReady, Future.delay(dbRetryDelay))),
           ),
         ),
         Future.filterOrElse(

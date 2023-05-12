@@ -6,6 +6,7 @@ import * as D from 'io-ts/Decoder'
 import readline from 'readline'
 
 import { DayJs } from '../../shared/models/DayJs'
+import { MsDuration } from '../../shared/models/MsDuration'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
@@ -17,7 +18,6 @@ import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
 import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import { constants } from '../config/constants'
 import type { JwtHelper } from '../helpers/JwtHelper'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { DiscordConnection } from '../models/discord/DiscordConnection'
@@ -37,6 +37,8 @@ import { PasswordUtils } from '../utils/PasswordUtils'
 import type { DiscordService } from './DiscordService'
 import type { RiotAccountService } from './RiotAccountService'
 import type { SummonerService } from './SummonerService'
+
+const accountTokenTtl = MsDuration.days(30)
 
 export type SummonerWithDiscordInfos = {
   summoner: {
@@ -263,7 +265,7 @@ const UserService = (
   }
 
   function signToken(content: TokenContent): Future<Token> {
-    return jwtHelper.sign(TokenContent.codec)(content, { expiresIn: constants.account.tokenTtl })
+    return jwtHelper.sign(TokenContent.codec)(content, { expiresIn: accountTokenTtl })
   }
 
   /**

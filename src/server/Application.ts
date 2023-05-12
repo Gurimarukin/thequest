@@ -1,10 +1,10 @@
 import { pipe } from 'fp-ts/function'
 
+import { MsDuration } from '../shared/models/MsDuration'
 import type { NotUsed } from '../shared/utils/fp'
 import { IO } from '../shared/utils/fp'
 
 import type { Context } from './Context'
-import { constants } from './config/constants'
 import { HealthCheckController } from './controllers/HealthCheckController'
 import { MadosayentisutoController } from './controllers/MadosayentisutoController'
 import { StaticDataController } from './controllers/StaticDataController'
@@ -15,6 +15,8 @@ import { startWebServer } from './webServer/startWebServer'
 import { RateLimiter } from './webServer/utils/RateLimiter'
 import { WithAuth } from './webServer/utils/WithAuth'
 import { WithIp } from './webServer/utils/WithIp'
+
+const rateLimiterLifeTime = MsDuration.days(1)
 
 export const Application = ({
   config,
@@ -53,7 +55,7 @@ export const Application = ({
     staticDataController,
   )
 
-  const rateLimiter = RateLimiter(Logger, withIp, constants.rateLimiterLifeTime)
+  const rateLimiter = RateLimiter(Logger, withIp, rateLimiterLifeTime)
   const withAuth = WithAuth(userService)
 
   const routes = Routes(
