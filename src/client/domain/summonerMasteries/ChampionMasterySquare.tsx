@@ -119,7 +119,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
         {/* chest bottom left */}
         {chestGranted ? (
-          <div className="absolute left-0 bottom-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
+          <div className="absolute bottom-0 left-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
             <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
           </div>
         ) : null}
@@ -296,7 +296,7 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
   const canRemoveShard = 1 <= shardsCount
 
   return (
-    <div className="group absolute right-0 bottom-0 flex items-end">
+    <div className="group absolute bottom-0 right-0 flex items-end">
       <span className="-mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="h-2.5 w-2.5 rotate-180 fill-current" />
       </span>

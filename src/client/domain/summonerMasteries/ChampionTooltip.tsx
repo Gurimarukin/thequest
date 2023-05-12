@@ -83,7 +83,7 @@ export const ChampionTooltip: React.FC<Props> = ({
               : ''
           }  pts`}
         </p>
-        <div className="flex grow flex-col items-center justify-center gap-1 py-1 px-2">
+        <div className="flex grow flex-col items-center justify-center gap-1 px-2 py-1">
           {pipe(
             tokenShards,
             Maybe.fold(
@@ -129,7 +129,7 @@ const renderAramChildren = (
   children1: List<React.JSX.Element>,
   children2: List<React.JSX.Element>,
 ): React.JSX.Element => (
-  <div className="grid grid-rows-[auto_1fr] items-center gap-1 border-l border-goldenrod-secondary px-2 pt-1 pb-1.5">
+  <div className="grid grid-rows-[auto_1fr] items-center gap-1 border-l border-goldenrod-secondary px-2 pb-1.5 pt-1">
     <h4 className="text-center font-bold">ARAM</h4>
     <div className="flex items-center gap-2">
       <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>

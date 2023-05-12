@@ -119,12 +119,12 @@ export const Register: React.FC = () => {
           </thead>
           <tbody className="contents">
             <tr className="contents">
-              <Td className="border-t border-l border-goldenrod pl-6 pt-12">
+              <Td className="border-l border-t border-goldenrod pl-6 pt-12">
                 Accéder à tous les détails d’un invocateur via la recherche
               </Td>
               <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
               <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
-              <Td className="justify-center border-t border-r border-goldenrod pt-12">
+              <Td className="justify-center border-r border-t border-goldenrod pt-12">
                 {greenCheck}
               </Td>
             </tr>
@@ -168,7 +168,7 @@ export const Register: React.FC = () => {
               <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
             </tr>
             <tr className="contents">
-              <Td className="flex-col gap-3 border-l border-b border-goldenrod pl-6 pb-12">
+              <Td className="flex-col gap-3 border-b border-l border-goldenrod pb-12 pl-6">
                 <span className="self-start">
                   Classement dans le temple de la renommée sur le serveur Discord du capitaine :
                 </span>
@@ -186,7 +186,7 @@ export const Register: React.FC = () => {
                     href={lesQuaisAbattoirs.inviteLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="ml-8 rounded bg-discord-darkgreen py-2 px-3 text-sm"
+                    className="ml-8 rounded bg-discord-darkgreen px-3 py-2 text-sm"
                   >
                     Rejoindre
                   </a>
@@ -250,7 +250,7 @@ export const Register: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || Either.isLeft(validated)}
-              className="flex items-center gap-2 bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
               Inscription {isLoading ? <Loading className="h-4" /> : null}
             </button>

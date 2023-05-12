@@ -229,7 +229,7 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
               type="button"
               onClick={confirmMultipleMode}
               disabled={isLoading}
-              className="mt-6 flex items-center gap-2 bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
+              className="mt-6 flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75"
             >
               Confirmer {isLoading ? <Loading className="h-4" /> : null}
             </ButtonPrimary>
@@ -262,7 +262,7 @@ const ForAllButton: React.FC<ForAllButtonProps> = ({
     <button
       type="button"
       onClick={forAllClick}
-      className="col-span-2 mt-6 self-end border border-goldenrod bg-black py-1 px-2 text-sm hover:bg-goldenrod/75 hover:text-black"
+      className="col-span-2 mt-6 self-end border border-goldenrod bg-black px-2 py-1 text-sm hover:bg-goldenrod/75 hover:text-black"
     >
       {yesForAll ? 'Oui' : 'Non'} pour tout
     </button>
