@@ -70,7 +70,7 @@ export const SearchSummoner: React.FC = () => {
           platform,
           summonerName,
           matchesLocation(appParsers.platformSummonerName)
-            ? MasteriesQuery.toPartial(masteriesQuery)
+            ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
             : {},
         ),
       )
@@ -182,7 +182,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
         platform,
         puuid,
         matchesLocation(appParsers.platformSummonerName)
-          ? MasteriesQuery.toPartial(masteriesQuery)
+          ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
           : {},
       ),
     [masteriesQuery, matchesLocation],

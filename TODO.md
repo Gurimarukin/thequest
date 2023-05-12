@@ -1,4 +1,3 @@
-- fix history back
 - tailwind colors
 - linked discord account icon?
 - toaster (replace alert)
