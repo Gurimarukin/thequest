@@ -278,7 +278,7 @@ const Toggle: React.FC<ToggleProps> = ({ isChecked, toggleChecked }) => (
   <label className="cursor-pointer">
     <input type="checkbox" checked={isChecked} onChange={toggleChecked} className="hidden" />
     <ToggleFilled
-      className={cssClasses('w-8', isChecked ? 'fill-goldenrod' : 'rotate-180 fill-red-700')}
+      className={cssClasses('w-8', isChecked ? 'text-goldenrod' : 'rotate-180 text-zinc-400')}
     />
   </label>
 )
