@@ -175,7 +175,7 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
           )}
           <ul
             className={cssClasses(
-              'grid grid-cols-[repeat(4,auto)] items-center gap-y-6 gap-x-1',
+              'grid grid-cols-[repeat(4,auto)] items-center gap-x-1 gap-y-6',
               isSingleMode ? 'mt-6' : 'mt-2',
             )}
           >

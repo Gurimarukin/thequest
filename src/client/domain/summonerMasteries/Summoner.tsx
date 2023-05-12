@@ -64,7 +64,7 @@ export const Summoner: React.FC<Props> = ({
         </div>
         <Tooltip
           hoverRef={masteriesRef}
-          className="grid grid-cols-[1fr] justify-items-center gap-2 px-5 pt-3 pb-4"
+          className="grid grid-cols-[1fr] justify-items-center gap-2 px-5 pb-4 pt-3"
         >
           <div className="grid grid-cols-[repeat(4,54px)_34px] items-end gap-1">
             <MasteryImgWithCount level={4} imgClassName="-mt-1.5" />

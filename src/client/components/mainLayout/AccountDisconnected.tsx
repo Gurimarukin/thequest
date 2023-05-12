@@ -16,7 +16,7 @@ export const AccountDisconnected: React.FC = () => {
         <button
           type="button"
           onClick={toggleLogin}
-          className="border border-goldenrod bg-black py-1 px-4 hover:bg-goldenrod/75 hover:text-black"
+          className="border border-goldenrod bg-black px-4 py-1 hover:bg-goldenrod/75 hover:text-black"
         >
           Compte
         </button>
@@ -24,7 +24,7 @@ export const AccountDisconnected: React.FC = () => {
           <Menu>
             <Link
               to={appRoutes.login}
-              className="bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
               Connexion
             </Link>
