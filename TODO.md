@@ -1,5 +1,4 @@
 - fix history back
-- useless qs.stringify?
 - tailwind colors
 - linked discord account icon?
 - toaster (replace alert)
