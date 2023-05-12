@@ -94,7 +94,7 @@ export const Tooltip: React.FC<Props> = ({
     <div
       ref={tooltipRef}
       className={cssClasses(
-        'group z-40 whitespace-nowrap border border-mastery4-brown-secondary bg-zinc-900 px-2 py-1 text-xs text-wheat shadow-even shadow-black transition-opacity duration-300',
+        'group z-40 whitespace-nowrap border border-tooltip bg-zinc-900 px-2 py-1 text-xs text-wheat shadow-even shadow-black transition-opacity duration-300',
         shouldDisplay ? 'visible opacity-100' : 'invisible opacity-0',
         className,
       )}
@@ -109,7 +109,7 @@ export const Tooltip: React.FC<Props> = ({
       >
         <CaretUpSharpCropped
           className={cssClasses(
-            'fill-mastery4-brown-secondary group-data-popper-top:rotate-180',
+            'text-tooltip group-data-popper-top:rotate-180',
             ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
             [
               'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',

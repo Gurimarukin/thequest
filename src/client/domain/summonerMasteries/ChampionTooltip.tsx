@@ -60,11 +60,11 @@ export const ChampionTooltip: React.FC<Props> = ({
   return (
     <>
       <div className="flex flex-col">
-        <div className="relative flex overflow-hidden border-b border-mastery4-brown-secondary">
+        <div className="relative flex overflow-hidden border-b border-tooltip">
           {/* "hitbox" */}
           {percentsElement}
           <div className="absolute left-0">
-            <span className="absolute -right-2 -top-4 h-[200%] w-[200%] rotate-12 bg-goldenrod-secondary shadow-inner shadow-black" />
+            <span className="absolute -right-2 -top-4 h-[200%] w-[200%] rotate-12 bg-goldenrod-bis shadow-inner shadow-black" />
             {percentsElement}
           </div>
           <h3
@@ -76,7 +76,7 @@ export const ChampionTooltip: React.FC<Props> = ({
             {name}
           </h3>
         </div>
-        <p className="border-b border-mastery4-brown-secondary px-2 py-1 text-center">
+        <p className="border-b border-tooltip px-2 py-1 text-center">
           {`${championPoints.toLocaleString()}${
             0 < championLevel && championLevel < 5
               ? ` / ${(championPoints + championPointsUntilNextLevel).toLocaleString()}`
@@ -129,7 +129,7 @@ const renderAramChildren = (
   children1: List<React.JSX.Element>,
   children2: List<React.JSX.Element>,
 ): React.JSX.Element => (
-  <div className="grid grid-rows-[auto_1fr] items-center gap-1 border-l border-goldenrod-secondary px-2 pb-1.5 pt-1">
+  <div className="grid grid-rows-[auto_1fr] items-center gap-1 border-l border-tooltip px-2 pb-1.5 pt-1">
     <h4 className="text-center font-bold">ARAM</h4>
     <div className="flex items-center gap-2">
       <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>
@@ -142,11 +142,11 @@ const renderAramChildren = (
   </div>
 )
 
-export const bgGradientMastery = (level: ChampionLevelOrZero): string => {
-  if (level === 7) return 'bg-gradient-to-r from-mastery7-blue to-mastery7-blue-secondary'
-  if (level === 6) return 'bg-gradient-to-r from-mastery6-violet to-mastery6-violet-secondary'
-  if (level === 5) return 'bg-gradient-to-r from-mastery5-red to-mastery5-red-secondary'
-  if (level === 4) return 'bg-gradient-to-r from-mastery4-brown to-mastery4-brown-secondary'
-  if (level === 0) return 'bg-black'
-  return 'bg-gradient-to-r from-mastery-beige to-mastery-beige-secondary'
+export const bgGradientMastery = (level: ChampionLevelOrZero): string | undefined => {
+  if (level === 7) return 'bg-gradient-to-r from-mastery-7 to-mastery-7-bis'
+  if (level === 6) return 'bg-gradient-to-r from-mastery-6 to-mastery-6-bis'
+  if (level === 5) return 'bg-gradient-to-r from-mastery-5 to-mastery-5-bis'
+  if (level === 4) return 'bg-gradient-to-r from-mastery-4 to-mastery-4-bis'
+  if (level === 0) return undefined
+  return 'bg-gradient-to-r from-mastery-3 to-mastery-3-bis'
 }

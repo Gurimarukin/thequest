@@ -128,7 +128,7 @@ function LabelCheckbox<A>({
           isMenuVisible === true
             ? 'group-first/checkbox:rounded-tl-md group-last/checkbox:rounded-tr-md'
             : 'group-first/checkbox:rounded-l-md group-last/checkbox:rounded-r-md',
-          isChecked ? 'bg-goldenrod-secondary' : 'bg-zinc-700',
+          isChecked ? 'bg-goldenrod-bis' : 'bg-zinc-700',
           iconClassName,
         )}
       >

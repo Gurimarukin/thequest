@@ -151,13 +151,13 @@ const Champion: React.FC<ChampionProps> = ({
         <div
           className={
             isGlowing
-              ? 'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-amber-200 to-yellow-400 blur-sm'
+              ? 'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-glow to-glow-bis blur-sm'
               : 'hidden'
           }
           style={animationDelay(champion.glow)}
         />
 
-        <div className="relative grid grid-cols-[auto_auto] rounded-xl bg-zinc-800 text-2xs">
+        <div className="relative grid grid-cols-[auto_auto] rounded-xl bg-aram-stats text-2xs">
           <ChampionMasterySquare
             {...champion}
             aram={masteriesQuery.view === 'aram' ? Maybe.some(champion.aram) : Maybe.none}
@@ -245,7 +245,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                   {championPointsUntilNextLevel === 0 ? null : (
                     <div
                       ref={hoverRef1}
-                      className="h-full bg-gray-600 opacity-50"
+                      className="h-full bg-histogram-grey opacity-50"
                       style={{ width: p(championPoints + championPointsUntilNextLevel) }}
                     />
                   )}
@@ -294,9 +294,9 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
 }
 
 const rulerColor = (level: number): string => {
-  if (5 <= level && level <= 7) return 'border-gray-500'
-  if (level === 4) return 'border-gray-400'
-  return 'border-gray-500'
+  if (5 <= level && level <= 7) return 'border-grey-500'
+  if (level === 4) return 'border-grey-400'
+  return 'border-grey-500'
 }
 
 type ChampionMasteryAramProps = {

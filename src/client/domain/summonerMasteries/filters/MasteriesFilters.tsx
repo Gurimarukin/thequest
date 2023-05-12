@@ -128,7 +128,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           />
           <ul
             className={cssClasses(
-              'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
+              'border-black bg-zinc-700 shadow-black absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t shadow-even',
               ['hidden', !levelsMenuIsVisible],
             )}
           >
@@ -189,7 +189,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           disabled={Maybe.isNone(randomChampion)}
           className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
         >
-          <DiceFilled className="h-7 fill-wheat transition-transform duration-300 group-enabled:group-hover:animate-dice" />
+          <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
         </button>
         <Tooltip hoverRef={randomButtonRef} placement="top">
           Champion aléatoire
@@ -214,13 +214,13 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           {labelValue(
             'desc',
             <IconLabel tooltip="Tri décroissant">
-              <CaretDownOutline className="h-5 fill-current" />
+              <CaretDownOutline className="h-5" />
             </IconLabel>,
           )}
           {labelValue(
             'asc',
             <IconLabel tooltip="Tri croissant">
-              <CaretUpOutline className="h-5 fill-current" />
+              <CaretUpOutline className="h-5" />
             </IconLabel>,
           )}
         </Radios>
@@ -229,13 +229,13 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           {labelValue(
             'compact',
             <IconLabel tooltip="Vue compacte">
-              <AppsSharp className="h-4 fill-current" />
+              <AppsSharp className="h-4" />
             </IconLabel>,
           )}
           {labelValue(
             'histogram',
             <IconLabel tooltip="Vue histogramme">
-              <StatsChartSharp className="h-5 rotate-90 -scale-x-100 fill-current" />
+              <StatsChartSharp className="h-5 rotate-90 -scale-x-100" />
             </IconLabel>,
           )}
           {labelValue(
@@ -274,7 +274,7 @@ const getSelectLevelsButton =
           disabled={isSelected}
           className={cssClasses(
             'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm',
-            isSelected ? 'bg-goldenrod-secondary text-black' : 'hover:bg-black',
+            isSelected ? 'text-black bg-goldenrod-bis' : 'hover:bg-black',
           )}
         >
           <span>{children}</span>

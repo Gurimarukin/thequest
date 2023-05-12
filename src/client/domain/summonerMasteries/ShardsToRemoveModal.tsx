@@ -159,7 +159,7 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
     <Modal>
       <div className="flex max-h-full flex-col items-end overflow-auto border border-goldenrod bg-zinc-900 p-2">
         <button type="button" onClick={hide}>
-          <CloseFilled className="w-5 fill-goldenrod" />
+          <CloseFilled className="w-5 text-goldenrod" />
         </button>
         <div className="flex flex-col items-center p-4">
           <p className="text-sm">

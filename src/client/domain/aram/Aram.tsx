@@ -115,7 +115,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
       <div
         ref={hoverRef}
         className={cssClasses(
-          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-zinc-800 text-2xs',
+          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs',
           ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
           ['hidden', champion.isHidden],
         )}

@@ -24,7 +24,7 @@ export const AccountDisconnected: React.FC = () => {
           <Menu>
             <Link
               to={appRoutes.login}
-              className="bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75"
             >
               Connexion
             </Link>
