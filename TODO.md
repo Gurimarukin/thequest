@@ -1,4 +1,5 @@
 - clean constants (only multiple references)
+- fix history back
 - useless qs.stringify?
 - tailwind colors
 - linked discord account icon?

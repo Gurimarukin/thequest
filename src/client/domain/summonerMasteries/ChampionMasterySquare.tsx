@@ -164,7 +164,7 @@ type LevelSVGProps = {
   championPointsUntilNextLevel: number
 }
 
-const totalLength = 178
+const totalLength = 100.5
 
 const LevelSVG: React.FC<LevelSVGProps> = ({
   championLevel,
@@ -173,25 +173,25 @@ const LevelSVG: React.FC<LevelSVGProps> = ({
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 64 64"
+    viewBox="0 0 32 32"
     className={cssClasses('h-full w-full', championLevelBgColor(championLevel))}
   >
-    <path
-      d="M 14 8 H 56 V 56 H 8 V 16"
-      fill="none"
+    <circle
+      cx="16"
+      cy="16"
+      r="16"
       stroke="currentColor"
-      strokeWidth={23}
-      strokeLinejoin="round"
+      strokeWidth="16"
       strokeDasharray={totalLength}
       strokeDashoffset={
         totalLength -
-        (totalLength *
+        0.95 *
           levelPercents({
             championPointsSinceLastLevel,
             championPointsUntilNextLevel,
-          })) /
-          100
+          })
       }
+      className="origin-center rotate-[-127deg]"
     />
   </svg>
 )
