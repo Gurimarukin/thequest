@@ -152,7 +152,7 @@ export const renderStatValue = (
       <span
         className={cssClasses(
           'flex gap-0.5 justify-self-end font-mono',
-          (isMalusStat ? 0 < n : n < 0) ? 'text-red-600' : 'text-green-600',
+          (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
           className,
         )}
       >

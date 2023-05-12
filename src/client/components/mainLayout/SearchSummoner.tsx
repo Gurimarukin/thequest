@@ -262,7 +262,7 @@ const renderRecent = (
       return (
         <button type="button" onClick={removeRecent} className="group p-2">
           <TimeOutline className="h-4 text-goldenrod group-hover:hidden" />
-          <CloseFilled className="hidden h-4 fill-red-700 group-hover:flex" />
+          <CloseFilled className="hidden h-4 text-red group-hover:flex" />
         </button>
       )
   }
@@ -278,7 +278,7 @@ const renderFavorite = (
     case 'self':
       return (
         <span className="px-3">
-          <PersonFilled className="h-4 fill-goldenrod" />
+          <PersonFilled className="h-4 text-goldenrod" />
         </span>
       )
 
@@ -288,7 +288,7 @@ const renderFavorite = (
           type="button"
           onClick={removeFavorite}
           disabled={isLoading}
-          className="fill-goldenrod px-3 pb-3 pt-2 enabled:hover:fill-red-700"
+          className="px-3 pb-3 pt-2 text-goldenrod enabled:hover:text-red"
         >
           {isLoading ? <Loading className="h-5" /> : <StarFilled className="h-5" />}
         </button>

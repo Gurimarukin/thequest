@@ -18,15 +18,15 @@ export const AddOutline: SVGIcon = ({ className }) => (
 
 export const AppsSharp: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <rect x="48" y="48" width="112" height="112" rx="8" ry="8" />
-    <rect x="200" y="48" width="112" height="112" rx="8" ry="8" />
-    <rect x="352" y="48" width="112" height="112" rx="8" ry="8" />
-    <rect x="48" y="200" width="112" height="112" rx="8" ry="8" />
-    <rect x="200" y="200" width="112" height="112" rx="8" ry="8" />
-    <rect x="352" y="200" width="112" height="112" rx="8" ry="8" />
-    <rect x="48" y="352" width="112" height="112" rx="8" ry="8" />
-    <rect x="200" y="352" width="112" height="112" rx="8" ry="8" />
-    <rect x="352" y="352" width="112" height="112" rx="8" ry="8" />
+    <rect x="48" y="48" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="200" y="48" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="352" y="48" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="48" y="200" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="200" y="200" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="352" y="200" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="48" y="352" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="200" y="352" width="112" height="112" rx="8" ry="8" fill="currentColor" />
+    <rect x="352" y="352" width="112" height="112" rx="8" ry="8" fill="currentColor" />
   </svg>
 )
 
@@ -38,26 +38,32 @@ export const ArrowRedoFilled: SVGIcon = ({ className }) => (
 
 export const CaretDownOutline: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M98 190.06l139.78 163.12a24 24 0 0036.44 0L414 190.06c13.34-15.57 2.28-39.62-18.22-39.62h-279.6c-20.5 0-31.56 24.05-18.18 39.62z" />
+    <path
+      d="M98 190.06l139.78 163.12a24 24 0 0036.44 0L414 190.06c13.34-15.57 2.28-39.62-18.22-39.62h-279.6c-20.5 0-31.56 24.05-18.18 39.62z"
+      fill="currentColor"
+    />
   </svg>
 )
 
 export const CaretUpOutline: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M414 321.94L274.22 158.82a24 24 0 00-36.44 0L98 321.94c-13.34 15.57-2.28 39.62 18.22 39.62h279.6c20.5 0 31.56-24.05 18.18-39.62z" />
+    <path
+      d="M414 321.94L274.22 158.82a24 24 0 00-36.44 0L98 321.94c-13.34 15.57-2.28 39.62 18.22 39.62h279.6c20.5 0 31.56-24.05 18.18-39.62z"
+      fill="currentColor"
+    />
   </svg>
 )
 
 export const CaretUpSharp: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M448 368L256 144 64 368h384z" />
+    <path d="M448 368L256 144 64 368h384z" fill="currentColor" />
   </svg>
 )
 
 export const CaretUpSharpCropped: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 224" className={className}>
     <g transform="translate(-64,-144)">
-      <path d="M448 368L256 144 64 368h384z" />
+      <path d="M448 368L256 144 64 368h384z" fill="currentColor" />
     </g>
   </svg>
 )
@@ -91,7 +97,10 @@ export const ChevronForwardFilled: SVGIcon = ({ className }) => (
 
 export const CloseFilled: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M289.94 256l95-95A24 24 0 00351 127l-95 95-95-95a24 24 0 00-34 34l95 95-95 95a24 24 0 1034 34l95-95 95 95a24 24 0 0034-34z" />
+    <path
+      d="M289.94 256l95-95A24 24 0 00351 127l-95 95-95-95a24 24 0 00-34 34l95 95-95 95a24 24 0 1034 34l95-95 95 95a24 24 0 0034-34z"
+      fill="currentColor"
+    />
   </svg>
 )
 
@@ -103,7 +112,10 @@ export const DiamondFilled: SVGIcon = ({ className }) => (
 
 export const DiceFilled: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M440.88 129.37L288.16 40.62a64.14 64.14 0 00-64.33 0L71.12 129.37a4 4 0 000 6.9L254 243.85a4 4 0 004.06 0L440.9 136.27a4 4 0 00-.02-6.9zM256 152c-13.25 0-24-7.16-24-16s10.75-16 24-16 24 7.16 24 16-10.75 16-24 16zM238 270.81L54 163.48a4 4 0 00-6 3.46v173.92a48 48 0 0023.84 41.39L234 479.48a4 4 0 006-3.46V274.27a4 4 0 00-2-3.46zM96 368c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm96-32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zM458 163.51L274 271.56a4 4 0 00-2 3.45V476a4 4 0 006 3.46l162.15-97.23A48 48 0 00464 340.86V167a4 4 0 00-6-3.49zM320 424c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm96 32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24z" />
+    <path
+      d="M440.88 129.37L288.16 40.62a64.14 64.14 0 00-64.33 0L71.12 129.37a4 4 0 000 6.9L254 243.85a4 4 0 004.06 0L440.9 136.27a4 4 0 00-.02-6.9zM256 152c-13.25 0-24-7.16-24-16s10.75-16 24-16 24 7.16 24 16-10.75 16-24 16zM238 270.81L54 163.48a4 4 0 00-6 3.46v173.92a48 48 0 0023.84 41.39L234 479.48a4 4 0 006-3.46V274.27a4 4 0 00-2-3.46zM96 368c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm96-32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zM458 163.51L274 271.56a4 4 0 00-2 3.45V476a4 4 0 006 3.46l162.15-97.23A48 48 0 00464 340.86V167a4 4 0 00-6-3.49zM320 424c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm96 32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24zm0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24z"
+      fill="currentColor"
+    />
   </svg>
 )
 
@@ -150,7 +162,12 @@ export const HammerOutline: SVGIcon = ({ className }) => (
 )
 
 export const InformationCircleOutline: SVGIcon = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+    fill="currentColor"
+    className={className}
+  >
     <path
       d="M248 64C146.39 64 64 146.39 64 248s82.39 184 184 184 184-82.39 184-184S349.61 64 248 64z"
       fill="none"
@@ -174,7 +191,7 @@ export const InformationCircleOutline: SVGIcon = ({ className }) => (
       strokeWidth="32"
       d="M208 340h88"
     />
-    <path d="M248 130a26 26 0 1026 26 26 26 0 00-26-26z" />
+    <path d="M248 130a26 26 0 1026 26 26 26 0 00-26-26z" fill="currentColor" />
   </svg>
 )
 
@@ -193,7 +210,10 @@ export const NotificationsSharp: SVGIcon = ({ className }) => (
 
 export const PersonFilled: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M332.64 64.58C313.18 43.57 286 32 256 32c-30.16 0-57.43 11.5-76.8 32.38-19.58 21.11-29.12 49.8-26.88 80.78C156.76 206.28 203.27 256 256 256s99.16-49.71 103.67-110.82c2.27-30.7-7.33-59.33-27.03-80.6zM432 480H80a31 31 0 01-24.2-11.13c-6.5-7.77-9.12-18.38-7.18-29.11C57.06 392.94 83.4 353.61 124.8 326c36.78-24.51 83.37-38 131.2-38s94.42 13.5 131.2 38c41.4 27.6 67.74 66.93 76.18 113.75 1.94 10.73-.68 21.34-7.18 29.11A31 31 0 01432 480z" />
+    <path
+      d="M332.64 64.58C313.18 43.57 286 32 256 32c-30.16 0-57.43 11.5-76.8 32.38-19.58 21.11-29.12 49.8-26.88 80.78C156.76 206.28 203.27 256 256 256s99.16-49.71 103.67-110.82c2.27-30.7-7.33-59.33-27.03-80.6zM432 480H80a31 31 0 01-24.2-11.13c-6.5-7.77-9.12-18.38-7.18-29.11C57.06 392.94 83.4 353.61 124.8 326c36.78-24.51 83.37-38 131.2-38s94.42 13.5 131.2 38c41.4 27.6 67.74 66.93 76.18 113.75 1.94 10.73-.68 21.34-7.18 29.11A31 31 0 01432 480z"
+      fill="currentColor"
+    />
   </svg>
 )
 
@@ -232,7 +252,10 @@ export const SearchOutline: SVGIcon = ({ className }) => (
 
 export const SparklesSharp: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M208 512l-52.38-139.62L16 320l139.62-52.38L208 128l52.38 139.62L400 320l-139.62 52.38zM88 176l-23.57-64.43L0 88l64.43-23.57L88 0l23.57 64.43L176 88l-64.43 23.57zM400 256l-31.11-80.89L288 144l80.89-31.11L400 32l31.11 80.89L512 144l-80.89 31.11z" />
+    <path
+      d="M208 512l-52.38-139.62L16 320l139.62-52.38L208 128l52.38 139.62L400 320l-139.62 52.38zM88 176l-23.57-64.43L0 88l64.43-23.57L88 0l23.57 64.43L176 88l-64.43 23.57zM400 256l-31.11-80.89L288 144l80.89-31.11L400 32l31.11 80.89L512 144l-80.89 31.11z"
+      fill="currentColor"
+    />
   </svg>
 )
 
@@ -250,13 +273,19 @@ export const StarOutline: SVGIcon = ({ className }) => (
 
 export const StarFilled: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M394 480a16 16 0 01-9.39-3L256 383.76 127.39 477a16 16 0 01-24.55-18.08L153 310.35 23 221.2a16 16 0 019-29.2h160.38l48.4-148.95a16 16 0 0130.44 0l48.4 149H480a16 16 0 019.05 29.2L359 310.35l50.13 148.53A16 16 0 01394 480z" />
+    <path
+      d="M394 480a16 16 0 01-9.39-3L256 383.76 127.39 477a16 16 0 01-24.55-18.08L153 310.35 23 221.2a16 16 0 019-29.2h160.38l48.4-148.95a16 16 0 0130.44 0l48.4 149H480a16 16 0 019.05 29.2L359 310.35l50.13 148.53A16 16 0 01394 480z"
+      fill="currentColor"
+    />
   </svg>
 )
 
 export const StatsChartSharp: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
-    <path d="M128 496H48V304h80zM352 496h-80V208h80zM464 496h-80V96h80zM240 496h-80V16h80z" />
+    <path
+      d="M128 496H48V304h80zM352 496h-80V208h80zM464 496h-80V96h80zM240 496h-80V16h80z"
+      fill="currentColor"
+    />
   </svg>
 )
 

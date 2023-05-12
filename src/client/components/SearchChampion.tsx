@@ -103,13 +103,13 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
             onFocus={onFocus}
             placeholder="Rechercher champion"
             className={cssClasses(
-              'w-[151px] justify-self-start rounded-sm border border-zinc-700 bg-transparent py-1 pl-2',
+              'w-[151px] justify-self-start rounded-sm border border-grey-disabled bg-transparent py-1 pl-2',
               search === '' ? 'pr-2' : 'pr-7',
             )}
           />
           {search !== '' ? (
             <button type="button" onClick={emptySearch} className="-ml-6">
-              <CloseFilled className="h-5 fill-wheat" />
+              <CloseFilled className="h-5 text-wheat" />
             </button>
           ) : null}
         </div>

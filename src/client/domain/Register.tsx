@@ -180,7 +180,7 @@ export const Register: React.FC = () => {
                   />
                   <span className="ml-4 flex flex-col">
                     <span className="font-bold">{lesQuaisAbattoirs.name}</span>
-                    <span className="text-sm text-gray-400">Serveur Discord</span>
+                    <span className="text-sm text-zinc-400">Serveur Discord</span>
                   </span>
                   <a
                     href={lesQuaisAbattoirs.inviteLink}
@@ -208,7 +208,7 @@ export const Register: React.FC = () => {
           className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
         >
           S’inscrire avec
-          <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
+          <DiscordLogoTitle className="my-3 ml-3 h-6" />
         </a>
 
         <p>ou</p>
@@ -250,7 +250,7 @@ export const Register: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || Either.isLeft(validated)}
-              className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:bg-grey-disabled"
             >
               Inscription {isLoading ? <Loading className="h-4" /> : null}
             </button>
@@ -258,7 +258,7 @@ export const Register: React.FC = () => {
               error,
               Maybe.fold(
                 () => null,
-                e => <span className="text-red-700">{e}</span>,
+                e => <span className="text-red">{e}</span>,
               ),
             )}
           </div>
@@ -294,7 +294,7 @@ const EmptyTd: React.FC<EmptyTdProps> = ({ className }) => (
   <Td className={cssClasses('justify-center text-sm', className)}>—</Td>
 )
 
-const greenCheck = <CheckMarkSharp className="h-6 text-green-600" />
+const greenCheck = <CheckMarkSharp className="h-6 text-green" />
 
 const validateOnSubmit = (
   password: ClearPassword,

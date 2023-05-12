@@ -79,7 +79,7 @@ export const Login: React.FC = () => {
           className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
         >
           Se connecter avec
-          <DiscordLogoTitle className="my-3 ml-3 h-6 fill-current" />
+          <DiscordLogoTitle className="my-3 ml-3 h-6" />
         </a>
 
         <p>ou</p>
@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || Either.isLeft(validated)}
-              className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:bg-grey-disabled"
             >
               Connexion {isLoading ? <Loading className="h-4" /> : null}
             </button>
@@ -120,7 +120,7 @@ export const Login: React.FC = () => {
               error,
               Maybe.fold(
                 () => null,
-                e => <span className="text-red-700">{e}</span>,
+                e => <span className="text-red">{e}</span>,
               ),
             )}
           </div>

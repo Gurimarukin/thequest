@@ -23,7 +23,7 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
     >
       <span>{label[category]}</span>
       <span ref={infoRef}>
-        <InformationCircleOutline className="h-4 fill-current" />
+        <InformationCircleOutline className="h-4" />
       </span>
       <Tooltip hoverRef={infoRef} className="max-w-xl !whitespace-normal break-normal py-2">
         {tooltip[category]}

@@ -210,21 +210,21 @@ const levelPercents = ({
   return round((100 * championPointsSinceLastLevel) / levelRange)
 }
 
-const championLevelBgColor = (championLevel: ChampionLevelOrZero): string => {
-  if (championLevel === 7) return 'text-mastery7-blue'
-  if (championLevel === 6) return 'text-mastery6-violet'
-  if (championLevel === 5) return 'text-mastery5-red'
-  if (championLevel === 4) return 'text-mastery4-brown'
-  if (championLevel === 0) return 'text-black'
-  return 'text-mastery-beige'
+const championLevelBgColor = (championLevel: ChampionLevelOrZero): string | undefined => {
+  if (championLevel === 7) return 'text-mastery-7'
+  if (championLevel === 6) return 'text-mastery-6'
+  if (championLevel === 5) return 'text-mastery-5'
+  if (championLevel === 4) return 'text-mastery-4'
+  if (championLevel === 0) return undefined
+  return 'text-mastery-3'
 }
 
 const championLevelNumberColor = (championLevel: ChampionLevelOrZero): string => {
-  if (championLevel === 7) return 'text-blue-500'
-  if (championLevel === 6) return 'text-purple-400'
-  if (championLevel === 5) return 'text-red-700'
-  if (championLevel === 4) return 'text-yellow-600'
-  return 'text-neutral-300'
+  if (championLevel === 7) return 'text-mastery-7-text'
+  if (championLevel === 6) return 'text-mastery-6-text'
+  if (championLevel === 5) return 'text-mastery-5-text'
+  if (championLevel === 4) return 'text-mastery-4-text'
+  return 'text-mastery-3-text'
 }
 
 type TokensProps = {
@@ -298,7 +298,7 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
   return (
     <div className="group absolute bottom-0 right-0 flex items-end">
       <span className="-mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
-        <SparklesSharp className="h-2.5 w-2.5 rotate-180 fill-current" />
+        <SparklesSharp className="h-2.5 w-2.5 rotate-180" />
       </span>
       <span
         className={cssClasses(

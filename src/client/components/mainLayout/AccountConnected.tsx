@@ -46,7 +46,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
       <div>
         <button type="button" onClick={toggleMenu} className="flex items-end gap-3 py-2">
           <span>{user.userName}</span>
-          <PersonFilled className="h-7 fill-wheat" />
+          <PersonFilled className="h-7 text-wheat" />
         </button>
         {menuIsVisible ? (
           <Menu>
@@ -56,7 +56,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                   type="button"
                   onClick={disconnect}
                   disabled={isLoading}
-                  className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75"
+                  className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75 disabled:bg-grey-disabled"
                 >
                   Déconnexion {isLoading ? <Loading className="h-4" /> : null}
                 </button>

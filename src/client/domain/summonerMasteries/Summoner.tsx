@@ -49,7 +49,7 @@ export const Summoner: React.FC<Props> = ({
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={`Icône de ${name}`}
-          className="h-24 w-24 rounded border border-goldenrod-secondary"
+          className="h-24 w-24 rounded border border-goldenrod-bis"
         />
         <div className="flex flex-col">
           <span className="text-lg text-goldenrod">{name}</span>
@@ -82,7 +82,7 @@ export const Summoner: React.FC<Props> = ({
         <span className="flex items-center gap-2">
           <span className="text-sm">Progression : {round(questPercents, 2)} %</span>
           <span ref={infoRef}>
-            <InformationCircleOutline className="h-6 fill-current" />
+            <InformationCircleOutline className="h-6" />
           </span>
           <Tooltip hoverRef={infoRef}>
             <ul className="list-disc pl-3 leading-6">
