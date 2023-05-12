@@ -107,7 +107,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* champion level top left */}
         <div
           className={cssClasses(
-            'absolute top-0 left-0 flex h-4 w-3.5 justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
+            'absolute left-0 top-0 flex h-4 w-3.5 justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
             championLevelNumberColor(championLevel),
           )}
         >
@@ -240,7 +240,7 @@ const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
         <span
           className={cssClasses(
             'absolute left-[13px] top-0 flex h-2.5 rounded-br bg-black pl-0.5',
-            ['gap-0.5 pt-px pb-0.5 pr-0.5', championLevel === 5],
+            ['gap-0.5 pb-0.5 pr-0.5 pt-px', championLevel === 5],
             ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
           )}
         >

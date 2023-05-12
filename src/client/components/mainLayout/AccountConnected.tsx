@@ -56,7 +56,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                   type="button"
                   onClick={disconnect}
                   disabled={isLoading}
-                  className="flex items-center gap-2 bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75"
+                  className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75"
                 >
                   Déconnexion {isLoading ? <Loading className="h-4" /> : null}
                 </button>

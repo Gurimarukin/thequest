@@ -69,7 +69,7 @@ export const ChampionTooltip: React.FC<Props> = ({
           </div>
           <h3
             className={cssClasses(
-              'grow py-0.5 pr-2 pl-4 text-center font-bold shadow-black text-shadow',
+              'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black text-shadow',
               bgGradientMastery(championLevel),
             )}
           >

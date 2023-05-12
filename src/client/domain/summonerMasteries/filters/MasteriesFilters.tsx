@@ -273,7 +273,7 @@ const getSelectLevelsButton =
           onClick={handleClick}
           disabled={isSelected}
           className={cssClasses(
-            'flex items-center justify-between gap-1 py-1.5 pr-2 pl-4 text-left text-sm',
+            'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm',
             isSelected ? 'bg-goldenrod-secondary text-black' : 'hover:bg-black',
           )}
         >

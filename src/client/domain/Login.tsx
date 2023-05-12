@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || Either.isLeft(validated)}
-              className="flex items-center gap-2 bg-goldenrod py-1 px-4 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
+              className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:cursor-default disabled:bg-zinc-600"
             >
               Connexion {isLoading ? <Loading className="h-4" /> : null}
             </button>
