@@ -56,9 +56,7 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
 
   const navigate = useCallback(
     (to: string, { replace = false }: NavigateOptions = {}) =>
-      replace
-        ? h.replace({ pathname: to, search: '', hash: '' })
-        : h.push({ pathname: to, search: '', hash: '' }),
+      (replace ? h.replace : h.push)({ pathname: to, search: '', hash: '' }),
     [h],
   )
 
@@ -86,14 +84,12 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const updateMasteriesQuery = useCallback(
-    (f: (q: MasteriesQuery) => MasteriesQuery) =>
-      h.push({
-        search: pipe(
-          f(masteriesQuery),
-          MasteriesQuery.toPartial,
-          PartialMasteriesQuery.qsStringify,
-        ),
-      }),
+    (f: (q: MasteriesQuery) => MasteriesQuery) => {
+      const newQuery = f(masteriesQuery)
+      return (masteriesQuery.view !== newQuery.view ? h.push : h.replace)({
+        search: pipe(newQuery, MasteriesQuery.toPartial, PartialMasteriesQuery.qsStringify),
+      })
+    },
     [h, masteriesQuery],
   )
 
@@ -109,7 +105,7 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
 
   const updateAramQuery = useCallback(
     (f: (q: AramQuery) => AramQuery) =>
-      h.push({ search: pipe(f(aramQuery), AramQuery.toPartial, PartialAramQuery.qsStringify) }),
+      h.replace({ search: pipe(f(aramQuery), AramQuery.toPartial, PartialAramQuery.qsStringify) }),
     [aramQuery, h],
   )
 
