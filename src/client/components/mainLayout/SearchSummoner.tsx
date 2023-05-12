@@ -288,7 +288,7 @@ const renderFavorite = (
           type="button"
           onClick={removeFavorite}
           disabled={isLoading}
-          className="fill-goldenrod px-3 pt-2 pb-3 enabled:hover:fill-red-700"
+          className="fill-goldenrod px-3 pb-3 pt-2 enabled:hover:fill-red-700"
         >
           {isLoading ? <Loading className="h-5" /> : <StarFilled className="h-5" />}
         </button>
@@ -300,7 +300,7 @@ const renderFavorite = (
           type="button"
           onClick={addFavorite}
           disabled={isLoading}
-          className="px-3 pt-2 pb-3 text-goldenrod enabled:hover:text-wheat"
+          className="px-3 pb-3 pt-2 text-goldenrod enabled:hover:text-wheat"
         >
           {isLoading ? <Loading className="h-5" /> : <StarOutline className="h-5" />}
         </button>

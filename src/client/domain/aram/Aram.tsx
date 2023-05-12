@@ -145,7 +145,7 @@ const renderChildrenCompact = (
   <>
     <ul className="row-span-2 flex flex-col self-center p-0.5">{children1}</ul>
     {List.isNonEmpty(children2) ? (
-      <ul className="flex flex-col self-start py-0.5 px-1.5">{children2}</ul>
+      <ul className="flex flex-col self-start px-1.5 py-0.5">{children2}</ul>
     ) : null}
   </>
 )
