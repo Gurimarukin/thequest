@@ -29,7 +29,7 @@ const WithAuth = (userService: UserService) => {
         pipe(
           futureMaybe.fromNullable(request.headers.cookie),
           futureMaybe.chainEitherK(cookie => Try.tryCatch(() => parseCookie(cookie))),
-          futureMaybe.chainOptionK(Dict.lookup(constants.account.cookie.name)),
+          futureMaybe.chainOptionK(Dict.lookup(constants.accountCookieName)),
           Future.chain(
             Maybe.fold(
               () => Future.successful(Either.left(SimpleHttpResponse.of(Status.Unauthorized, ''))),
@@ -41,7 +41,7 @@ const WithAuth = (userService: UserService) => {
                     Either.left(
                       SimpleHttpResponse.of(Status.Unauthorized, 'Invalid token', {
                         'Set-Cookie': [
-                          `${constants.account.cookie.name}=`,
+                          `${constants.accountCookieName}=`,
                           'Path=/',
                           'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
                         ],
@@ -65,7 +65,7 @@ const WithAuth = (userService: UserService) => {
   ): EndedMiddleware {
     return pipe(
       M.getCookies(),
-      M.map(Dict.lookup(constants.account.cookie.name)),
+      M.map(Dict.lookup(constants.accountCookieName)),
       M.ichain(
         Maybe.fold(
           () => f(Maybe.none),
@@ -76,7 +76,7 @@ const WithAuth = (userService: UserService) => {
               () =>
                 pipe(
                   M.status(Status.Unauthorized),
-                  M.ichain(() => M.clearCookie(constants.account.cookie.name, {})),
+                  M.ichain(() => M.clearCookie(constants.accountCookieName, {})),
                   M.ichain(() => M.closeHeaders()),
                   M.ichain(() => M.send('Invalid token')),
                 ),

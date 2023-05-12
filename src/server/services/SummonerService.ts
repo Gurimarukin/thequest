@@ -99,7 +99,7 @@ const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersist
         ? futureMaybe.none
         : pipe(
             Future.fromIO(DayJs.now),
-            Future.map(DayJs.subtract(constants.riotApi.cacheTtl.summoner)),
+            Future.map(DayJs.subtract(constants.riotApiCacheTtl.summoner)),
             Future.chain(fromPersistence),
           ),
       futureMaybe.alt<Summoner>(() =>

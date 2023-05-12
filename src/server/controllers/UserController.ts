@@ -3,6 +3,7 @@ import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
 import { DayJs } from '../../shared/models/DayJs'
+import { MsDuration } from '../../shared/models/MsDuration'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
@@ -37,6 +38,8 @@ import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
+
+const accountCookieTtl = MsDuration.days(30)
 
 type UserController = ReturnType<typeof UserController>
 
@@ -85,7 +88,7 @@ function UserController(
 
   const logout: EndedMiddleware = pipe(
     M.status(Status.NoContent),
-    M.ichain(() => M.clearCookie(constants.account.cookie.name, {})),
+    M.ichain(() => M.clearCookie(constants.accountCookieName, {})),
     M.ichain(() => M.closeHeaders()),
     M.ichain(() => M.send('')),
   )
@@ -229,8 +232,8 @@ function UserController(
     return pipe(
       M.status(Status.NoContent),
       M.ichain(() =>
-        M.cookie(constants.account.cookie.name, Token.codec.encode(token), {
-          maxAge: constants.account.cookie.ttl,
+        M.cookie(constants.accountCookieName, Token.codec.encode(token), {
+          maxAge: accountCookieTtl,
           httpOnly: true,
           sameSite: 'strict',
         }),

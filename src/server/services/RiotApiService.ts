@@ -5,11 +5,10 @@ import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
-import type { Future, Maybe } from '../../shared/utils/fp'
+import type { Dict, Future, Maybe } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
 
 import type { RiotConfig } from '../config/Config'
-import { constants } from '../config/constants'
 import type { HttpClient } from '../helpers/HttpClient'
 import { statusesToOption } from '../helpers/HttpClient'
 import { ActiveShards } from '../models/riot/ActiveShard'
@@ -25,10 +24,24 @@ const { ddragon, ddragonCdn } = DDragonUtils
 
 const xRiotToken = 'X-Riot-Token'
 
-const regionalUrl = (path: string): string => `https://${constants.riotApi.regionalHost}${path}`
+const regionalUrl = (path: string): string => `https://europe.api.riotgames.com${path}`
+
+const plateformEndpoint: Dict<Platform, string> = {
+  BR: 'br1.api.riotgames.com',
+  EUN: 'eun1.api.riotgames.com',
+  EUW: 'euw1.api.riotgames.com',
+  JP: 'jp1.api.riotgames.com',
+  KR: 'kr.api.riotgames.com',
+  LA1: 'la1.api.riotgames.com',
+  LA2: 'la2.api.riotgames.com',
+  NA: 'na1.api.riotgames.com',
+  OC: 'oc1.api.riotgames.com',
+  TR: 'tr1.api.riotgames.com',
+  RU: 'ru.api.riotgames.com',
+}
 
 const platformUrl = (platform: Platform, path: string): string =>
-  `https://${constants.riotApi.plateformEndpoint[platform]}${path}`
+  `https://${plateformEndpoint[platform]}${path}`
 
 type UseAccountApiKey = {
   useAccountApiKey: boolean

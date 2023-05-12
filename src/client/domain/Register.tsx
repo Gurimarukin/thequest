@@ -26,6 +26,13 @@ import { cssClasses } from '../utils/cssClasses'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
+const lesQuaisAbattoirs = {
+  inviteLink: 'https://discord.gg/M4jnkHd',
+  name: 'Les Quais-Abattoirs',
+  image:
+    'https://cdn.discordapp.com/icons/707621148652994642/a_8b2674e8d2831749f540f330df66a63e.gif?size=240',
+}
+
 type State = {
   userName: string
   password: string
@@ -123,7 +130,7 @@ export const Register: React.FC = () => {
             </tr>
             <tr className="contents">
               <Td className="border-l border-goldenrod pl-6">
-                Voir les {constants.recentSearches.maxCount} recherches les plus récentes (stockage
+                Voir les {constants.recentSearchesMaxCount} recherches les plus récentes (stockage
                 local du navigateur)
               </Td>
               <Td className="justify-center">{greenCheck}</Td>
@@ -167,16 +174,16 @@ export const Register: React.FC = () => {
                 </span>
                 <div className="flex items-center self-start rounded bg-discord-darkgrey px-6 py-5 font-[baloopaaji2] text-white">
                   <img
-                    src={constants.lesQuaisAbattoirs.image}
-                    alt={`Icône du serveur ${constants.lesQuaisAbattoirs.name}`}
+                    src={lesQuaisAbattoirs.image}
+                    alt={`Icône du serveur ${lesQuaisAbattoirs.name}`}
                     className="w-12 rounded-xl"
                   />
                   <span className="ml-4 flex flex-col">
-                    <span className="font-bold">{constants.lesQuaisAbattoirs.name}</span>
+                    <span className="font-bold">{lesQuaisAbattoirs.name}</span>
                     <span className="text-sm text-gray-400">Serveur Discord</span>
                   </span>
                   <a
-                    href={constants.lesQuaisAbattoirs.inviteLink}
+                    href={lesQuaisAbattoirs.inviteLink}
                     target="_blank"
                     rel="noreferrer"
                     className="ml-8 rounded bg-discord-darkgreen py-2 px-3 text-sm"

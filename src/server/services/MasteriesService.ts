@@ -33,7 +33,7 @@ const MasteriesService = (
         ? futureMaybe.none
         : pipe(
             Future.fromIO(DayJs.now),
-            Future.map(DayJs.subtract(constants.riotApi.cacheTtl.masteries)),
+            Future.map(DayJs.subtract(constants.riotApiCacheTtl.masteries)),
             Future.chain(insertedAfter =>
               championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
             ),

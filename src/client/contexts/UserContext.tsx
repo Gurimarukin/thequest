@@ -20,6 +20,8 @@ import type { ChildrenFC } from '../models/ChildrenFC'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
 
+const recentSearchesKey = 'recentSearches'
+
 const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<SummonerShort>')
 
 type UserContext = {
@@ -130,7 +132,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(
-    constants.recentSearches.localStorageKey,
+    recentSearchesKey,
     recentSearchesCodec,
     [],
   )
@@ -141,7 +143,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         flow(
           List.prepend(summoner),
           List.uniq(SummonerShort.byPuuidEq),
-          List.takeLeft(constants.recentSearches.maxCount),
+          List.takeLeft(constants.recentSearchesMaxCount),
         ),
       ),
     [setRecentSearches_],
