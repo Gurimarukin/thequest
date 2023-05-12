@@ -89,9 +89,9 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
           )),
         )}
       </div>
-      <div className="self-center text-sm">{`${plural('champion')(championsCount)} / ${
-        champions.length
-      }`}</div>
+      <div className="self-center text-sm">
+        {plural('champion')(championsCount)} / {champions.length}
+      </div>
     </>
   )
 }
@@ -317,7 +317,7 @@ const getRenderChildrenCompact =
   (className: string | undefined) =>
   (children1: List<React.JSX.Element>): React.JSX.Element =>
     (
-      <ul className={cssClasses('flex flex-col items-start self-center py-1 px-0.5', className)}>
+      <ul className={cssClasses('flex flex-col items-start self-center px-0.5 py-1', className)}>
         {children1}
       </ul>
     )
