@@ -99,7 +99,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
 const viewContainerClassName: Dict<MasteriesQueryView, string> = {
   compact: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
   histogram: 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2',
-  aram: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
+  aram: 'grid grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
 }
 
 type ChampionProps = {
