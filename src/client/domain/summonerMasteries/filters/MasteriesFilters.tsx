@@ -128,7 +128,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           />
           <ul
             className={cssClasses(
-              'border-black bg-zinc-700 shadow-black absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t shadow-even',
+              'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
               ['hidden', !levelsMenuIsVisible],
             )}
           >
@@ -274,7 +274,7 @@ const getSelectLevelsButton =
           disabled={isSelected}
           className={cssClasses(
             'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm',
-            isSelected ? 'text-black bg-goldenrod-bis' : 'hover:bg-black',
+            isSelected ? 'bg-goldenrod-bis text-black' : 'hover:bg-black',
           )}
         >
           <span>{children}</span>
