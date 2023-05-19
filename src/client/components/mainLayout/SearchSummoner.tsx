@@ -189,7 +189,10 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   )
 
   const removeRecent = useCallback(
-    () => removeRecentSearch(summoner),
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      removeRecentSearch(summoner)
+    },
     [removeRecentSearch, summoner],
   )
 
@@ -249,7 +252,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
 
 const renderRecent = (
   type: SummonerSearchProps['type'],
-  removeRecent: () => void,
+  removeRecent: (e: React.MouseEvent) => void,
 ): React.JSX.Element => {
   switch (type) {
     case 'self':
