@@ -50,164 +50,170 @@ type UseAccountApiKey = {
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => ({
-  leagueoflegends: {
-    ddragon: {
-      api: {
-        versions: httpClient.http([ddragon('/api/versions.json'), 'get'], {}, [
-          NonEmptyArray.decoder(DDragonVersion.codec),
-          'NonEmptyArray<DDragonVersion>',
-        ]),
-      },
+const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
+  const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
+    [ddragon('/api/versions.json'), 'get'],
+    {},
+    [NonEmptyArray.decoder(DDragonVersion.codec), 'NonEmptyArray<DDragonVersion>'],
+  )
 
-      cdn: (version: DDragonVersion) => ({
-        data: (lang: Lang) => ({
-          champion: httpClient.http(
-            [ddragonCdn(version, `/data/${lang}/champion.json`), 'get'],
-            {},
-            [DDragonChampions.decoder, 'DDragonChampions'],
-          ),
+  return {
+    leagueoflegends: {
+      ddragon: {
+        api: {
+          versions: leagueoflegendsDDragonApiVersions,
+        },
+
+        cdn: (version: DDragonVersion) => ({
+          data: (lang: Lang) => {
+            const champion: Future<DDragonChampions> = httpClient.http(
+              [ddragonCdn(version, `/data/${lang}/champion.json`), 'get'],
+              {},
+              [DDragonChampions.decoder, 'DDragonChampions'],
+            )
+            return { champion }
+          },
         }),
-      }),
+      },
     },
-  },
 
-  riotgames: {
-    platform: (platform: Platform) => ({
-      lol: {
-        summonerV4: {
-          summoners: {
-            byName: (summonerName: string) =>
-              pipe(
-                httpClient.http(
-                  [
-                    platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`),
-                    'get',
-                  ],
-                  { headers: { [xRiotToken]: config.lolApiKey } },
-                  [RiotSummoner.decoder, 'RiotSummoner'],
+    riotgames: {
+      platform: (platform: Platform) => ({
+        lol: {
+          summonerV4: {
+            summoners: {
+              byName: (summonerName: string): Future<Maybe<RiotSummoner>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
                 ),
-                statusesToOption(404),
-              ),
 
-            byPuuid: (
-              puuid: Puuid,
-              { useAccountApiKey }: UseAccountApiKey = { useAccountApiKey: false },
-            ) =>
-              pipe(
-                httpClient.http(
-                  [
-                    platformUrl(
-                      platform,
-                      `/lol/summoner/v4/summoners/by-puuid/${Puuid.unwrap(puuid)}`,
-                    ),
-                    'get',
-                  ],
-                  {
-                    headers: {
-                      [xRiotToken]: useAccountApiKey ? config.accountApiKey : config.lolApiKey,
+              byPuuid: (
+                puuid: Puuid,
+                { useAccountApiKey }: UseAccountApiKey = { useAccountApiKey: false },
+              ): Future<Maybe<RiotSummoner>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(
+                        platform,
+                        `/lol/summoner/v4/summoners/by-puuid/${Puuid.unwrap(puuid)}`,
+                      ),
+                      'get',
+                    ],
+                    {
+                      headers: {
+                        [xRiotToken]: useAccountApiKey ? config.accountApiKey : config.lolApiKey,
+                      },
                     },
-                  },
-                  [RiotSummoner.decoder, 'RiotSummoner'],
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
                 ),
-                statusesToOption(404),
-              ),
 
-            /**
-             * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
-             * @deprecated
-             */
-            // eslint-disable-next-line deprecation/deprecation
-            byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
-              pipe(
-                httpClient.http(
-                  [
-                    platformUrl(
-                      platform,
-                      `/lol/summoner/v4/summoners/${SummonerId.unwrap(summonerId)}`,
-                    ),
-                    'get',
-                  ],
-                  { headers: { [xRiotToken]: config.lolApiKey } },
-                  [RiotSummoner.decoder, 'RiotSummoner'],
-                ),
-                statusesToOption(404),
-              ),
-          },
-        },
-
-        championMasteryV4: {
-          championMasteries: {
-            bySummoner: (summonerId: SummonerId) =>
-              pipe(
-                httpClient.http(
-                  [
-                    platformUrl(
-                      platform,
-                      `/lol/champion-mastery/v4/champion-masteries/by-summoner/${SummonerId.unwrap(
-                        summonerId,
-                      )}`,
-                    ),
-                    'get',
-                  ],
-                  { headers: { [xRiotToken]: config.lolApiKey } },
-                  [List.decoder(RiotChampionMastery.decoder), 'List<ChampionMastery>'],
-                ),
-                statusesToOption(404),
-              ),
-          },
-        },
-      },
-    }),
-
-    regional: {
-      riot: {
-        accountV1: {
-          accounts: {
-            byRiotId:
-              (gameName: string) =>
-              (tagLine: TagLine): Future<Maybe<RiotAccount>> =>
+              /**
+               * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
+               * @deprecated
+               */
+              // eslint-disable-next-line deprecation/deprecation
+              byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
                     [
-                      regionalUrl(
-                        `/riot/account/v1/accounts/by-riot-id/${gameName}/${TagLine.unwrap(
-                          tagLine,
+                      platformUrl(
+                        platform,
+                        `/lol/summoner/v4/summoners/${SummonerId.unwrap(summonerId)}`,
+                      ),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
+                ),
+            },
+          },
+
+          championMasteryV4: {
+            championMasteries: {
+              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(
+                        platform,
+                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${SummonerId.unwrap(
+                          summonerId,
                         )}`,
                       ),
                       'get',
                     ],
-                    { headers: { [xRiotToken]: config.accountApiKey } },
-                    [RiotAccount.decoder, 'Account'],
+                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    [List.decoder(RiotChampionMastery.decoder), 'List<ChampionMastery>'],
                   ),
                   statusesToOption(404),
                 ),
+            },
           },
+        },
+      }),
 
-          activeShards: {
-            byGame: (game: Game) => ({
-              byPuuid: (puuid: Puuid) =>
-                pipe(
-                  httpClient.http(
-                    [
-                      regionalUrl(
-                        `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${Puuid.unwrap(
-                          puuid,
-                        )}`,
-                      ),
-                      'get',
-                    ],
-                    { headers: { [xRiotToken]: config.accountApiKey } },
-                    [ActiveShards.decoder, 'ActiveShards'],
+      regional: {
+        riot: {
+          accountV1: {
+            accounts: {
+              byRiotId:
+                (gameName: string) =>
+                (tagLine: TagLine): Future<Maybe<RiotAccount>> =>
+                  pipe(
+                    httpClient.http(
+                      [
+                        regionalUrl(
+                          `/riot/account/v1/accounts/by-riot-id/${gameName}/${TagLine.unwrap(
+                            tagLine,
+                          )}`,
+                        ),
+                        'get',
+                      ],
+                      { headers: { [xRiotToken]: config.accountApiKey } },
+                      [RiotAccount.decoder, 'Account'],
+                    ),
+                    statusesToOption(404),
                   ),
-                  statusesToOption(404),
-                ),
-            }),
+            },
+
+            activeShards: {
+              byGame: (game: Game) => ({
+                byPuuid: (puuid: Puuid): Future<Maybe<ActiveShards>> =>
+                  pipe(
+                    httpClient.http(
+                      [
+                        regionalUrl(
+                          `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${Puuid.unwrap(
+                            puuid,
+                          )}`,
+                        ),
+                        'get',
+                      ],
+                      { headers: { [xRiotToken]: config.accountApiKey } },
+                      [ActiveShards.decoder, 'ActiveShards'],
+                    ),
+                    statusesToOption(404),
+                  ),
+              }),
+            },
           },
         },
       },
     },
-  },
-})
+  }
+}
 
 export { RiotApiService }
