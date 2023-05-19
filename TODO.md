@@ -1,3 +1,4 @@
+- rework masteries colors
 - linked discord account icon?
 - toaster (replace alert)
 - account menu
