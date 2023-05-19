@@ -18,6 +18,7 @@ const sPlatformPuuidMatch = lit('s')
   .then(codec('platform', Platform.codec))
   .then(codec('puuid', Puuid.codec))
 const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
+const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
 const aramMatch = lit('aram')
 const loginMatch = lit('login')
 const registerMatch = lit('register')
@@ -27,15 +28,26 @@ const discordRedirectMatch = lit('discordRedirect')
  * parser
  */
 
-// don't forget .then(end).parser
+// don't forget .then(end).parser (p)
+const platformSummonerName = p(platformSummonerNameMatch)
+const platformSummonerNameGame = p(platformSummonerNameGameMatch)
+
+const anyPlatformSummonerName: Parser<{
+  platform: Platform
+  summonerName: string
+}> = platformSummonerName.alt(platformSummonerNameGame)
+
 export const appParsers = {
   index: end.parser,
   sPlatformPuuid: p(sPlatformPuuidMatch),
-  platformSummonerName: p(platformSummonerNameMatch),
+  platformSummonerName,
+  platformSummonerNameGame,
   aram: p(aramMatch),
   login: p(loginMatch),
   register: p(registerMatch),
   discordRedirect: p(discordRedirectMatch),
+
+  anyPlatformSummonerName,
 }
 
 /**
@@ -56,6 +68,8 @@ export const appRoutes = {
       PartialMasteriesQuery,
       query,
     ),
+  platformSummonerNameGame: (platform: Platform, summonerName: string) =>
+    format(platformSummonerNameGameMatch.formatter, { platform, summonerName }),
   aram: (query: PartialAramQuery) =>
     withQuery(format(aramMatch.formatter, {}), PartialAramQuery, query),
   login: format(loginMatch.formatter, {}),

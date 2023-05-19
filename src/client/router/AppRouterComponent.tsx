@@ -10,6 +10,7 @@ import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { NotFound } from '../domain/NotFound'
 import { Register } from '../domain/Register'
+import { ActiveGame } from '../domain/activeGame/ActiveGame'
 import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
@@ -30,7 +31,18 @@ const titleWithElementParser = zero<ElementWithTitle>()
   )
   .alt(
     appParsers.platformSummonerName.map(({ platform, summonerName }) =>
-      t(<SummonerMasteries platform={platform} summonerName={summonerName} />, summonerName),
+      t(
+        <SummonerMasteries platform={platform} summonerName={summonerName} />,
+        `${summonerName} (${platform})`,
+      ),
+    ),
+  )
+  .alt(
+    appParsers.platformSummonerNameGame.map(({ platform, summonerName }) =>
+      t(
+        <ActiveGame platform={platform} summonerName={summonerName} />,
+        `${summonerName} (${platform}) | partie`,
+      ),
     ),
   )
   .alt(appParsers.aram.map(() => t(<Aram />, 'ARAM')))

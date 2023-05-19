@@ -3,14 +3,14 @@ import { forwardRef, useCallback } from 'react'
 
 import { useHistory } from '../contexts/HistoryContext'
 
-type Props = {
+export type LinkProps = {
   to: string
   onClick?: React.MouseEventHandler<HTMLAnchorElement>
   className?: string
   children?: React.ReactNode
 }
 
-export const Link = forwardRef<HTMLAnchorElement, Props>(
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   ({ to, onClick: onClick_, className, children }, ref) => {
     const { navigate } = useHistory()
 

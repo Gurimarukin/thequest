@@ -12,7 +12,7 @@ import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
-import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
+import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import {
   CloseFilled,
   PersonFilled,
@@ -31,26 +31,26 @@ import { Loading } from '../Loading'
 import { Select } from '../Select'
 
 export const SearchSummoner: React.FC = () => {
-  const { navigate, matchesLocation, masteriesQuery } = useHistory()
+  const { navigate, matchLocation, masteriesQuery } = useHistory()
   const { maybeUser, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
   const close = useCallback(() => setIsOpen(false), [])
 
-  const summonerNameFromLocation = useSummonerNameFromLocation()
+  const platformSummonerNameFromLocation = usePlatformSummonerNameFromLocation()
 
-  const [summonerName, setSummonerName] = useState(
-    pipe(
-      summonerNameFromLocation,
-      Maybe.getOrElse(() => ''),
-    ),
+  const [platform, setPlatform] = useState<Platform>(
+    platformSummonerNameFromLocation?.platform ?? Platform.defaultPlatform,
   )
 
-  useEffect(() => {
-    pipe(summonerNameFromLocation, Maybe.map(setSummonerName))
-  }, [summonerNameFromLocation])
+  const summonerNameFromLocation = platformSummonerNameFromLocation?.summonerName
+  const [summonerName, setSummonerName] = useState(summonerNameFromLocation ?? '')
 
-  const [platform, setPlatform] = useState<Platform>(Platform.defaultPlatform)
+  useEffect(() => {
+    if (summonerNameFromLocation !== undefined) {
+      setSummonerName(summonerNameFromLocation)
+    }
+  }, [summonerNameFromLocation])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setSummonerName(e.target.value),
@@ -69,13 +69,13 @@ export const SearchSummoner: React.FC = () => {
         appRoutes.platformSummonerName(
           platform,
           summonerName,
-          matchesLocation(appParsers.platformSummonerName)
+          Maybe.isSome(matchLocation(appParsers.platformSummonerName))
             ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
             : {},
         ),
       )
     },
-    [masteriesQuery, matchesLocation, navigate, platform, summonerName],
+    [masteriesQuery, matchLocation, navigate, platform, summonerName],
   )
 
   const searches: List<React.JSX.Element> = List.compact([
@@ -171,7 +171,7 @@ type SummonerSearchProps = {
 }
 
 const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
-  const { navigate, matchesLocation, masteriesQuery } = useHistory()
+  const { navigate, matchLocation, masteriesQuery } = useHistory()
   const { maybeUser, addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const staticData = useStaticData()
 
@@ -181,11 +181,11 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       appRoutes.sPlatformPuuid(
         platform,
         puuid,
-        matchesLocation(appParsers.platformSummonerName)
+        Maybe.isSome(matchLocation(appParsers.platformSummonerName))
           ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
           : {},
       ),
-    [masteriesQuery, matchesLocation],
+    [masteriesQuery, matchLocation],
   )
 
   const removeRecent = useCallback(

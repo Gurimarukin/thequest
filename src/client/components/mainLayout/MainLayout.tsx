@@ -1,29 +1,24 @@
 import { pipe } from 'fp-ts/function'
-import { useRef } from 'react'
 
 import { Maybe } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
-import { PersonFilled } from '../../imgs/svgIcons'
+import { HowlingAbyssSimple } from '../../imgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
-import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
-import { cssClasses } from '../../utils/cssClasses'
 import { Link } from '../Link'
 import { Loading } from '../Loading'
-import { Tooltip } from '../tooltip/Tooltip'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
+import { HighlightLink } from './HighlightLink'
 import { SearchSummoner } from './SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
-  const { matchesLocation, masteriesQuery } = useHistory()
-  const { user, maybeUser } = useUser()
-
-  const selfRef = useRef<HTMLAnchorElement>(null)
+  const { matchLocation } = useHistory()
+  const { user } = useUser()
 
   return (
     <div className="flex h-full flex-col">
@@ -38,47 +33,49 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               />
             </Link>
             <SearchSummoner />
-            {pipe(
-              maybeUser,
-              Maybe.chain(u => u.linkedRiotAccount),
-              Maybe.fold(
-                () => null,
-                ({ platform, puuid, name }) => (
-                  <>
-                    <Link
-                      ref={selfRef}
-                      to={appRoutes.sPlatformPuuid(
-                        platform,
-                        puuid,
-                        matchesLocation(appParsers.platformSummonerName)
-                          ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
-                          : {},
-                      )}
-                      className="-mr-1 flex"
-                    >
-                      <PersonFilled className="h-5" />
-                    </Link>
-                    <Tooltip hoverRef={selfRef}>
-                      {name} — {platform}
-                    </Tooltip>
-                  </>
+
+            <div className="flex items-center gap-4 text-sm">
+              {pipe(
+                matchLocation(appParsers.anyPlatformSummonerName),
+                Maybe.fold(
+                  () => null,
+                  ({ platform, summonerName }) => (
+                    <>
+                      <HighlightLink
+                        to={appRoutes.platformSummonerName(platform, summonerName, {})}
+                        parser={appParsers.platformSummonerName}
+                        tooltip="Maîtrises de champions"
+                      >
+                        profil
+                      </HighlightLink>
+                      <HighlightLink
+                        to={appRoutes.platformSummonerNameGame(platform, summonerName)}
+                        parser={appParsers.platformSummonerNameGame}
+                        tooltip="Partie active"
+                      >
+                        partie
+                      </HighlightLink>
+                    </>
+                  ),
                 ),
-              ),
-            )}
-            <Link
-              to={appRoutes.aram({})}
-              className={cssClasses('text-sm', [
-                'border-b border-goldenrod',
-                matchesLocation(appParsers.aram),
-              ])}
-            >
-              ARAM
-            </Link>
+              )}
+
+              <hr className="h-5 border-r border-wheat" />
+
+              <HighlightLink
+                to={appRoutes.aram({})}
+                parser={appParsers.aram}
+                tooltip="ARAM — équilibrages spécifiques"
+              >
+                <HowlingAbyssSimple className="h-5" />
+              </HighlightLink>
+            </div>
           </div>
+
           {pipe(
             user,
             AsyncState.fold(
-              () => <Loading className="h-6" />,
+              () => <Loading className="h-5" />,
               () => <AccountDisconnected />,
               Maybe.fold(
                 () => <AccountDisconnected />,

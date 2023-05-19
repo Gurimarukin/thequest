@@ -1,17 +1,25 @@
 /* eslint-disable functional/no-expression-statements */
-import { task } from 'fp-ts'
+import { eq, string, task } from 'fp-ts'
+import type { Route } from 'fp-ts-routing'
+import { Parser } from 'fp-ts-routing'
+import type { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useState } from 'react'
 
+import { Platform } from '../../../shared/models/api/Platform'
 import type { UserView } from '../../../shared/models/api/user/UserView'
-import { Future } from '../../../shared/utils/fp'
+import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
+import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { PersonFilled } from '../../imgs/svgIcons'
+import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
+import { appParsers, appRoutes } from '../../router/AppRouter'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
 import { Loading } from '../Loading'
+import { HighlightLink } from './HighlightLink'
 import { Menu } from './Menu'
 
 type AccountConnectedProps = {
@@ -19,7 +27,10 @@ type AccountConnectedProps = {
 }
 
 export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
+  const { matchLocation, masteriesQuery } = useHistory()
   const { refreshUser } = useUser()
+
+  const matchSummoner = matchLocation(appParsers.platformSummonerName)
 
   const [menuIsVisible, setMenuIsVisible] = useState(false)
   const toggleMenu = useCallback(() => setMenuIsVisible(v => !v), [])
@@ -43,11 +54,32 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
 
   return (
     <ClickOutside onClickOutside={hideMenu}>
-      <div>
-        <button type="button" onClick={toggleMenu} className="flex items-end gap-3 py-2">
+      <div className="flex items-center gap-4">
+        {pipe(
+          user.linkedRiotAccount,
+          Maybe.fold(
+            () => null,
+            ({ platform, puuid, name }) => (
+              <HighlightLink
+                to={appRoutes.sPlatformPuuid(
+                  platform,
+                  puuid,
+                  Maybe.isSome(matchSummoner)
+                    ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
+                    : {},
+                )}
+                parser={anyPlatformSummonerNameExact(platform, name)}
+                tooltip={`${name} — ${platform}`}
+              >
+                <PersonFilled className="h-5" />
+              </HighlightLink>
+            ),
+          ),
+        )}
+        <button type="button" onClick={toggleMenu} className="flex items-center gap-3 py-2">
           <span>{user.userName}</span>
-          <PersonFilled className="h-7 text-wheat" />
         </button>
+
         {menuIsVisible ? (
           <Menu>
             <ul className="flex flex-col gap-0.5">
@@ -66,5 +98,29 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
         ) : null}
       </div>
     </ClickOutside>
+  )
+}
+
+type PlatformSummonerName<P extends Platform, S extends string> = {
+  platform: P
+  summonerName: S
+}
+
+const platformSummonerNameEq: Eq<PlatformSummonerName<Platform, string>> = eq.struct({
+  platform: Platform.Eq,
+  summonerName: string.Eq,
+})
+
+function anyPlatformSummonerNameExact<P extends Platform, S extends string>(
+  platform: P,
+  summonerName: S,
+): Parser<PlatformSummonerName<P, S>> {
+  return new Parser(r =>
+    pipe(
+      appParsers.anyPlatformSummonerName.run(r),
+      Maybe.filter((tuple): tuple is [PlatformSummonerName<P, S>, Route] =>
+        platformSummonerNameEq.equals(tuple[0], { platform, summonerName }),
+      ),
+    ),
   )
 }

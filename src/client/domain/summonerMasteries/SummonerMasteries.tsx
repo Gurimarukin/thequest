@@ -29,8 +29,8 @@ import { config } from '../../config/unsafe'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
+import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
-import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
@@ -192,16 +192,11 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
     [addRecentSearch, platform, summoner.name, summoner.profileIconId, summoner.puuid],
   )
 
-  const summonerNameFromLocation = useSummonerNameFromLocation()
+  const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
 
   // Correct case of summoner's name in url
   useEffect(() => {
-    if (
-      pipe(
-        summonerNameFromLocation,
-        Maybe.every(n => n !== summoner.name),
-      )
-    ) {
+    if (summonerNameFromLocation !== summoner.name) {
       navigate(
         appRoutes.platformSummonerName(
           platform,
