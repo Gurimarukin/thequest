@@ -43,6 +43,6 @@ const tooltip: Dict<ChampionCategory, string> = {
   buffed: 'Champions avec plus de buffs que de nerfs',
   nerfed: 'Champions avec plus de nerfs que de buffs',
   other:
-    "Champions avec autant de buffs que de nerfs (ou avec des modifications de compétences pour lesquelles il est difficile de déterminer automatiquement si c'est un buff ou un nerf 🙃)",
+    'Champions avec autant de buffs que de nerfs (ou avec des modifications de compétences pour lesquelles il est difficile de déterminer automatiquement si c’est un buff ou un nerf 🙃)',
   balanced: 'Champions avec aucun équilibrage',
 }
