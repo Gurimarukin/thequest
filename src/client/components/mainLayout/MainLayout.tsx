@@ -46,14 +46,14 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                         parser={appParsers.platformSummonerName}
                         tooltip="Maîtrises de champions"
                       >
-                        profil
+                        Profil
                       </HighlightLink>
                       <HighlightLink
                         to={appRoutes.platformSummonerNameGame(platform, summonerName)}
                         parser={appParsers.platformSummonerNameGame}
                         tooltip="Partie active"
                       >
-                        partie
+                        Partie
                       </HighlightLink>
                     </>
                   ),
