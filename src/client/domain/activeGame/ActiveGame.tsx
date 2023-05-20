@@ -14,16 +14,28 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => (
   <MainLayout>
-    <pre>
-      ActiveGame, platform: {platform}, summonerName: {summonerName}
-    </pre>
     {basicAsyncRenderer(
       useSWRHttp(apiRoutes.summoner.byName(platform, summonerName).activeGame.get, {}, [
         Maybe.decoder(CurrentGameInfoView.codec),
         'Maybe<CurrentGameInfoView>',
       ]),
-    )(game => (
-      <pre>{JSON.stringify(game, null, 2)}</pre>
-    ))}
+    )(
+      Maybe.fold(
+        () => (
+          <div className="flex justify-center">
+            <pre className="mt-4">pas en partie.</pre>
+          </div>
+        ),
+        game => <ActiveGameComponent game={game} />,
+      ),
+    )}
   </MainLayout>
+)
+
+type ActiveGameComponentProps = {
+  game: CurrentGameInfoView
+}
+
+const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({ game }) => (
+  <pre>{JSON.stringify(game, null, 2)}</pre>
 )
