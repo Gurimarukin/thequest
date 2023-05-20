@@ -1,12 +1,11 @@
 import * as C from 'io-ts/Codec'
 
-import { GameQueue } from '../../../../server/models/riot/GameQueue'
-
 import { List } from '../../../utils/fp'
 import { DayJsFromISOString } from '../../../utils/ioTsUtils'
 import { ChampionKey } from '../champion/ChampionKey'
 import { CurrentGameParticipantView } from './CurrentGameParticipantView'
 import { GameId } from './GameId'
+import { GameQueue } from './GameQueue'
 import { TeamId } from './TeamId'
 
 type CurrentGameInfoView = C.TypeOf<typeof codec>

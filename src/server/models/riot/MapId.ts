@@ -1,5 +1,5 @@
-import { createEnum } from '../../../utils/createEnum'
-import type { Dict } from '../../../utils/fp'
+import { createEnum } from '../../../shared/utils/createEnum'
+import type { Dict } from '../../../shared/utils/fp'
 
 type MapId = typeof MapId.T
 

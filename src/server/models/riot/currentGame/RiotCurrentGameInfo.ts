@@ -6,14 +6,14 @@ import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import type { CurrentGameInfoView } from '../../../../shared/models/api/currentGame/CurrentGameInfoView'
 import type { CurrentGameParticipantView } from '../../../../shared/models/api/currentGame/CurrentGameParticipantView'
 import { GameId } from '../../../../shared/models/api/currentGame/GameId'
-import { MapId } from '../../../../shared/models/api/currentGame/MapId'
+import { GameQueue } from '../../../../shared/models/api/currentGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/currentGame/TeamId'
 import { List } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
 import { GameMode } from '../GameMode'
-import { GameQueue } from '../GameQueue'
 import { GameType } from '../GameType'
+import { MapId } from '../MapId'
 import { RiotCurrentGameParticipant } from './RiotCurrentGameParticipant'
 
 // type RiotBannedChampion = D.TypeOf<typeof riotBannedChampionDecoder>
