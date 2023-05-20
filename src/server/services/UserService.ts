@@ -181,6 +181,7 @@ const UserService = (
     removeFavoriteSearch,
     removeAllFavoriteSearches,
     listChampionShardsForSummoner: championShardPersistence.listForSummoner,
+    findChampionShardsForChampion: championShardPersistence.findForChampion,
     setChampionsShardsForSummonerBulk: (
       user: UserId,
       summoner: SummonerId,

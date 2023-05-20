@@ -62,7 +62,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
-    apiRoutes.summoner.byName.get(platform, clearSummonerName(summonerName)),
+    apiRoutes.summoner.byName(platform, clearSummonerName(summonerName)).masteries.get,
     methodWithUrl =>
       pipe(
         historyStateRef.current.summonerMasteries,

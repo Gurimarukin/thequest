@@ -15,14 +15,9 @@ const { codec } = RouterUtils
  */
 
 // intermediate
+
 const api = lit('api')
-const healthcheck = api.then(lit('healthcheck'))
-const staticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
 const summoner = api.then(lit('summoner'))
-const summonerByPuuid = summoner
-  .then(lit('byPuuid'))
-  .then(codec('platform', Platform.codec))
-  .then(codec('puuid', Puuid.codec))
 const summonerByName = summoner
   .then(lit('byName'))
   .then(codec('platform', Platform.codec))
@@ -30,40 +25,45 @@ const summonerByName = summoner
 const user = api.then(lit('user'))
 const userSelf = user.then(lit('self'))
 const userSelfFavorites = userSelf.then(lit('favorites'))
-const userSelfSummonerChampionsShardsCount = userSelf
-  .then(lit('summoner'))
-  .then(codec('platform', Platform.codec))
-  .then(str('summonerName'))
-  .then(lit('championsShardsCount'))
 const userLogin = user.then(lit('login'))
-const userLoginDiscord = userLogin.then(lit('discord'))
-const userLoginPassword = userLogin.then(lit('password'))
-const userLogout = user.then(lit('logout'))
 const userRegister = user.then(lit('register'))
-const userRegisterDiscord = userRegister.then(lit('discord'))
-const userRegisterPassword = userRegister.then(lit('password'))
 const madosayentisuto = api.then(lit('madosayentisuto'))
-const madosayentisutoStaticData = madosayentisuto.then(lit('staticData'))
-const madosayentisutoUsersGetProgression = madosayentisuto
-  .then(lit('users'))
-  .then(lit('getProgression'))
 
 // final
-const healthcheckGet = m(healthcheck, 'get')
-const staticDataLangGet = m(staticDataLang, 'get')
-const summonerByPuuidGet = m(summonerByPuuid, 'get')
-const summonerByNameGet = m(summonerByName, 'get')
+
+const healthcheckGet = m(api.then(lit('healthcheck')), 'get')
+const staticDataLangGet = m(api.then(lit('staticData')).then(codec('lang', Lang.codec)), 'get')
+const summonerByPuuidMasteriesGet = m(
+  summoner
+    .then(lit('byPuuid'))
+    .then(codec('platform', Platform.codec))
+    .then(codec('puuid', Puuid.codec))
+    .then(lit('masteries')),
+  'get',
+)
+const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get')
+const summonerByNameActiveGameGet = m(summonerByName.then(lit('active-game')), 'get')
 const userSelfGet = m(userSelf, 'get')
 const userSelfFavoritesPut = m(userSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(userSelfFavorites, 'delete')
-const userSelfSummonerChampionsShardsCountPost = m(userSelfSummonerChampionsShardsCount, 'post')
-const userLoginDiscordPost = m(userLoginDiscord, 'post')
-const userLoginPasswordPost = m(userLoginPassword, 'post')
-const userLogoutPost = m(userLogout, 'post')
-const userRegisterDiscordPost = m(userRegisterDiscord, 'post')
-const userRegisterPasswordPost = m(userRegisterPassword, 'post')
-const madosayentisutoStaticDataGet = m(madosayentisutoStaticData, 'get')
-const madosayentisutoUsersGetProgressionPost = m(madosayentisutoUsersGetProgression, 'post')
+const userSelfSummonerChampionsShardsCountPost = m(
+  userSelf
+    .then(lit('summoner'))
+    .then(codec('platform', Platform.codec))
+    .then(str('summonerName'))
+    .then(lit('championsShardsCount')),
+  'post',
+)
+const userLoginDiscordPost = m(userLogin.then(lit('discord')), 'post')
+const userLoginPasswordPost = m(userLogin.then(lit('password')), 'post')
+const userLogoutPost = m(user.then(lit('logout')), 'post')
+const userRegisterDiscordPost = m(userRegister.then(lit('discord')), 'post')
+const userRegisterPasswordPost = m(userRegister.then(lit('password')), 'post')
+const madosayentisutoStaticDataGet = m(madosayentisuto.then(lit('staticData')), 'get')
+const madosayentisutoUsersGetProgressionPost = m(
+  madosayentisuto.then(lit('users')).then(lit('getProgression')),
+  'post',
+)
 
 /**
  * parsers
@@ -73,8 +73,11 @@ export const apiParsers = {
   healthcheck: { get: p(healthcheckGet) },
   staticData: { lang: { get: p(staticDataLangGet) } },
   summoner: {
-    byPuuid: { get: p(summonerByPuuidGet) },
-    byName: { get: p(summonerByNameGet) },
+    byPuuid: { masteries: { get: p(summonerByPuuidMasteriesGet) } },
+    byName: {
+      masteries: { get: p(summonerByNameMasteriesGet) },
+      activeGame: { get: p(summonerByNameActiveGameGet) },
+    },
   },
   user: {
     self: {
@@ -112,13 +115,15 @@ export const apiParsers = {
 export const apiRoutes = {
   staticData: { lang: { get: (lang: Lang) => r(staticDataLangGet, { lang }) } },
   summoner: {
-    byPuuid: {
-      get: (platform: Platform, puuid: Puuid) => r(summonerByPuuidGet, { platform, puuid }),
-    },
-    byName: {
-      get: (platform: Platform, summonerName: string) =>
-        r(summonerByNameGet, { platform, summonerName }),
-    },
+    byPuuid: (platform: Platform, puuid: Puuid) => ({
+      masteries: {
+        get: r(summonerByPuuidMasteriesGet, { platform, puuid }),
+      },
+    }),
+    byName: (platform: Platform, summonerName: string) => ({
+      masteries: { get: r(summonerByNameMasteriesGet, { platform, summonerName }) },
+      activeGame: { get: r(summonerByNameActiveGameGet, { platform, summonerName }) },
+    }),
   },
   user: {
     self: {

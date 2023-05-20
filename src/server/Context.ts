@@ -21,6 +21,7 @@ import { MigrationPersistence } from './persistence/MigrationPersistence'
 import { RiotAccountPersistence } from './persistence/RiotAccountPersistence'
 import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
+import { ActiveGameService } from './services/ActiveGameService'
 import { DDragonService } from './services/DDragonService'
 import { DiscordService } from './services/DiscordService'
 import { HealthCheckService } from './services/HealthCheckService'
@@ -62,6 +63,7 @@ const of = (
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
+  const activeGameService = ActiveGameService(riotApiService)
   const userService = UserService(
     Logger,
     championShardPersistence,
@@ -80,6 +82,7 @@ const of = (
     healthCheckService,
     summonerService,
     masteriesService,
+    activeGameService,
     staticDataService,
     userService,
   }

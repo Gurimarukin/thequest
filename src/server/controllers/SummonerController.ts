@@ -4,6 +4,7 @@ import { Status } from 'hyper-ts'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import { CurrentGameInfoView } from '../../shared/models/api/currentGame/CurrentGameInfoView'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
@@ -14,8 +15,11 @@ import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
+import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
+import { RiotCurrentGameParticipant } from '../models/riot/currentGame/RiotCurrentGameParticipant'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
+import type { ActiveGameService } from '../services/ActiveGameService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
@@ -28,21 +32,92 @@ type SummonerController = ReturnType<typeof SummonerController>
 const SummonerController = (
   summonerService: SummonerService,
   masteriesService: MasteriesService,
+  activeGameService: ActiveGameService,
   userService: UserService,
 ) => {
   return {
-    findByPuuid:
+    masteriesByPuuid:
       (platform: Platform, puuid: Puuid) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(summonerService.findByPuuid(platform, puuid), find(platform, maybeUser)),
+        pipe(summonerService.findByPuuid(platform, puuid), findMasteries(platform, maybeUser)),
 
-    findByName:
+    masteriesByName:
       (platform: Platform, summonerName: string) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(summonerService.findByName(platform, summonerName), find(platform, maybeUser)),
+        pipe(
+          summonerService.findByName(platform, summonerName),
+          findMasteries(platform, maybeUser),
+        ),
+
+    activeGame:
+      (platform: Platform, summonerName: string) =>
+      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
+        pipe(
+          summonerService.findByName(platform, summonerName),
+          Future.map(Either.fromOption(() => 'Summoner not found')),
+          futureEither.chain(summoner =>
+            pipe(
+              activeGameService.findBySummoner(platform, summoner.id),
+
+              futureMaybe.chainTaskEitherK(game =>
+                pipe(
+                  maybeUser,
+                  Maybe.fold(
+                    () =>
+                      pipe(
+                        game,
+                        RiotCurrentGameInfo.toView(
+                          pipe(game.participants, List.map(RiotCurrentGameParticipant.toView(0))),
+                        ),
+                        Future.successful,
+                      ),
+                    user =>
+                      pipe(
+                        game.participants,
+                        List.traverse(Future.ApplicativePar)(participant =>
+                          pipe(
+                            userService.findChampionShardsForChampion(
+                              user.id,
+                              participant.summonerId,
+                              participant.championId,
+                            ),
+                            Future.map(shards =>
+                              pipe(
+                                participant,
+                                RiotCurrentGameParticipant.toView(
+                                  pipe(
+                                    shards,
+                                    Maybe.fold(
+                                      () => 0,
+                                      s => s.count,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Future.map(participants =>
+                          pipe(game, RiotCurrentGameInfo.toView(participants)),
+                        ),
+                      ),
+                  ),
+                ),
+              ),
+              Future.map(Either.right),
+            ),
+          ),
+          M.fromTaskEither,
+          M.ichain(
+            Either.fold(
+              M.sendWithStatus(Status.NotFound),
+              M.json(Maybe.encoder(CurrentGameInfoView.codec)),
+            ),
+          ),
+        ),
   }
 
-  function find(
+  function findMasteries(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
   ): (futureSummoner: Future<Maybe<Summoner>>) => EndedMiddleware {

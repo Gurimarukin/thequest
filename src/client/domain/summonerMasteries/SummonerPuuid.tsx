@@ -22,7 +22,7 @@ type SummonerPuuidProps = {
 export const SummonerPuuid: React.FC<SummonerPuuidProps> = ({ platform, puuid }) => (
   <MainLayout>
     {basicAsyncRenderer(
-      useSWRHttp(apiRoutes.summoner.byPuuid.get(platform, puuid), {}, [
+      useSWRHttp(apiRoutes.summoner.byPuuid(platform, puuid).masteries.get, {}, [
         SummonerMasteriesView.codec,
         'SummonerMasteriesView',
       ]),

@@ -26,6 +26,7 @@ export const Application = ({
   healthCheckService,
   summonerService,
   masteriesService,
+  activeGameService,
   staticDataService,
   userService,
 }: Context): IO<NotUsed> => {
@@ -35,7 +36,12 @@ export const Application = ({
 
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(ddragonService, staticDataService)
-  const summonerController = SummonerController(summonerService, masteriesService, userService)
+  const summonerController = SummonerController(
+    summonerService,
+    masteriesService,
+    activeGameService,
+    userService,
+  )
   const userController = UserController(
     Logger,
     ddragonService,

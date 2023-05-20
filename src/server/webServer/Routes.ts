@@ -28,11 +28,14 @@ export const Routes = (
   return [
     m(api.healthcheck.get, () => healthCheckController.check),
     m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
-    m(api.summoner.byPuuid.get, ({ platform, puuid }) =>
-      maybeWithAuth(summonerController.findByPuuid(platform, puuid)),
+    m(api.summoner.byPuuid.masteries.get, ({ platform, puuid }) =>
+      maybeWithAuth(summonerController.masteriesByPuuid(platform, puuid)),
     ),
-    m(api.summoner.byName.get, ({ platform, summonerName }) =>
-      maybeWithAuth(summonerController.findByName(platform, summonerName)),
+    m(api.summoner.byName.masteries.get, ({ platform, summonerName }) =>
+      maybeWithAuth(summonerController.masteriesByName(platform, summonerName)),
+    ),
+    m(api.summoner.byName.activeGame.get, ({ platform, summonerName }) =>
+      maybeWithAuth(summonerController.activeGame(platform, summonerName)),
     ),
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),
