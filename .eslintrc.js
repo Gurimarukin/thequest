@@ -51,6 +51,7 @@ module.exports = {
           'DiscordUserId',
           'MsDuration',
           'Puuid',
+          'SummonerId',
           'TagLine',
           'UserId',
           'UserName',
