@@ -1,8 +1,7 @@
 import * as D from 'io-ts/Decoder'
 
+import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
-import type { CurrentGameParticipantView } from '../../../../shared/models/api/currentGame/CurrentGameParticipantView'
-import { TeamId } from '../../../../shared/models/api/currentGame/TeamId'
 import { List } from '../../../../shared/utils/fp'
 
 import { SummonerId } from '../../summoner/SummonerId'
@@ -37,13 +36,6 @@ const decoder = D.struct({
   gameCustomizationObjects: List.decoder(riotGameCustomizationObjectDecoder), // List of Game Customizations
 })
 
-const toView =
-  (shardsCount: number) =>
-  (p: RiotCurrentGameParticipant): CurrentGameParticipantView => ({
-    ...p,
-    shardsCount,
-  })
-
-const RiotCurrentGameParticipant = { decoder, toView }
+const RiotCurrentGameParticipant = { decoder }
 
 export { RiotCurrentGameParticipant }

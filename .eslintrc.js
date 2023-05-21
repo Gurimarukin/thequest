@@ -40,7 +40,7 @@ module.exports = {
         allowHigherOrderFunctions: true,
       },
     ],
-    '@typescript-eslint/no-base-to-string': 'error',
+    '@typescript-eslint/no-base-to-string': ['error', { ignoredTypeNames: ['ChampionKey'] }],
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-namespace': 'warn',

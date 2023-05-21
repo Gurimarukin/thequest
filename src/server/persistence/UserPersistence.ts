@@ -14,7 +14,6 @@ import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { UserOutput } from '../models/user/User'
 import { User } from '../models/user/User'
-import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
 import { UserId } from '../models/user/UserId'
 import type { UserLoginDiscord } from '../models/user/UserLogin'
 import { UserLogin, UserLoginPassword } from '../models/user/UserLogin'
@@ -22,12 +21,9 @@ import { UserLogin, UserLoginPassword } from '../models/user/UserLogin'
 const { getPath } = FpCollectionHelpers
 
 const Keys = {
-  loginDiscordId: getPath<User<UserLoginDiscord>>()(['login', 'id']),
-  loginPasswordDiscordId: `${getPath<User<UserLoginPassword>>()([
-    'login',
-    'discord',
-  ])}.${getPath<UserDiscordInfos>()(['id'])}`,
-  loginPasswordUserName: getPath<User<UserLoginPassword>>()(['login', 'userName']),
+  loginDiscordId: getPath<User<UserLoginDiscord>>()('login', 'id'),
+  loginPasswordDiscordId: getPath<User<UserLoginPassword>>()('login', 'discord', 'id'),
+  loginPasswordUserName: getPath<User<UserLoginPassword>>()('login', 'userName'),
 }
 
 type UserPersistence = ReturnType<typeof UserPersistence>

@@ -4,7 +4,7 @@ import { List } from '../../../utils/fp'
 import { ChampionKey } from '../champion/ChampionKey'
 import { TeamId } from './TeamId'
 
-type CurrentGameParticipantView = C.TypeOf<typeof codec>
+type ActiveGameParticipantView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   teamId: TeamId.codec,
@@ -21,6 +21,6 @@ const codec = C.struct({
   }),
 })
 
-const CurrentGameParticipantView = { codec }
+const ActiveGameParticipantView = { codec }
 
-export { CurrentGameParticipantView }
+export { ActiveGameParticipantView }

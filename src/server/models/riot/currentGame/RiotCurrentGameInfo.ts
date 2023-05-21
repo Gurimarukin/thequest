@@ -2,11 +2,9 @@ import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
+import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
+import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
-import type { CurrentGameInfoView } from '../../../../shared/models/api/currentGame/CurrentGameInfoView'
-import type { CurrentGameParticipantView } from '../../../../shared/models/api/currentGame/CurrentGameParticipantView'
-import { GameQueue } from '../../../../shared/models/api/currentGame/GameQueue'
-import { TeamId } from '../../../../shared/models/api/currentGame/TeamId'
 import { List } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
@@ -46,13 +44,6 @@ const decoder = D.struct({
   participants: List.decoder(RiotCurrentGameParticipant.decoder), // The participant information
 })
 
-const toView =
-  (participants: List<CurrentGameParticipantView>) =>
-  (g: RiotCurrentGameInfo): CurrentGameInfoView => ({
-    ...g,
-    participants,
-  })
-
-const RiotCurrentGameInfo = { decoder, toView }
+const RiotCurrentGameInfo = { decoder }
 
 export { RiotCurrentGameInfo }

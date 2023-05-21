@@ -1,3 +1,4 @@
+- when searching tab, stay in same tab
 - rework masteries colors
 - linked discord account icon?
 - toaster (replace alert)

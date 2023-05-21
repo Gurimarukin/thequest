@@ -30,8 +30,8 @@ type SummonerService = ReturnType<typeof of>
 
 const SummonerService = (
   Logger: LoggerGetter,
-  riotApiService: RiotApiService,
   summonerPersistence: SummonerPersistence,
+  riotApiService: RiotApiService,
   cronJobObservable: TObservable<CronJobEvent>,
 ): IO<SummonerService> => {
   const logger = Logger('SummonerService')
@@ -39,14 +39,20 @@ const SummonerService = (
   return pipe(
     cronJobObservable,
     TObservable.subscribe(getOnError(logger))({
-      next: ({ date }) => pipe(summonerPersistence.deleteBeforeDate(date), Future.map(toNotUsed)),
+      next: ({ date }) =>
+        pipe(
+          summonerPersistence.deleteBeforeDate(
+            pipe(date, DayJs.subtract(constants.riotApiCacheTtl.summoner)),
+          ),
+          Future.map(toNotUsed),
+        ),
     }),
-    IO.map(() => of(riotApiService, summonerPersistence)),
+    IO.map(() => of(summonerPersistence, riotApiService)),
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const of = (riotApiService: RiotApiService, summonerPersistence: SummonerPersistence) => {
+const of = (summonerPersistence: SummonerPersistence, riotApiService: RiotApiService) => {
   return {
     findByName: (
       platform: Platform,

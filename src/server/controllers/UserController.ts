@@ -48,8 +48,8 @@ function UserController(
   Logger: LoggerGetter,
   ddragonService: DDragonService,
   discordService: DiscordService,
-  summonerService: SummonerService,
   masteriesService: MasteriesService,
+  summonerService: SummonerService,
   userService: UserService,
 ) {
   const logger = Logger('UserController')

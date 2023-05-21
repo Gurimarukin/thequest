@@ -2,9 +2,9 @@ import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
 import type { Platform } from '../../shared/models/api/Platform'
+import { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGameView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
-import { CurrentGameInfoView } from '../../shared/models/api/currentGame/CurrentGameInfoView'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
@@ -14,10 +14,11 @@ import { Either, Future, List, Maybe, Try } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
+import { ActiveGame } from '../models/activeGame/ActiveGame'
+import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
-import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
-import { RiotCurrentGameParticipant } from '../models/riot/currentGame/RiotCurrentGameParticipant'
 import type { Summoner } from '../models/summoner/Summoner'
+import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { ActiveGameService } from '../services/ActiveGameService'
 import type { MasteriesService } from '../services/MasteriesService'
@@ -30,9 +31,9 @@ type SummonerController = ReturnType<typeof SummonerController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (
-  summonerService: SummonerService,
-  masteriesService: MasteriesService,
   activeGameService: ActiveGameService,
+  masteriesService: MasteriesService,
+  summonerService: SummonerService,
   userService: UserService,
 ) => {
   return {
@@ -56,62 +57,13 @@ const SummonerController = (
           summonerService.findByName(platform, summonerName),
           Future.map(Either.fromOption(() => 'Summoner not found')),
           futureEither.chain(summoner =>
-            pipe(
-              activeGameService.findBySummoner(platform, summoner.id),
-
-              futureMaybe.chainTaskEitherK(game =>
-                pipe(
-                  maybeUser,
-                  Maybe.fold(
-                    () =>
-                      pipe(
-                        game,
-                        RiotCurrentGameInfo.toView(
-                          pipe(game.participants, List.map(RiotCurrentGameParticipant.toView(0))),
-                        ),
-                        Future.successful,
-                      ),
-                    user =>
-                      pipe(
-                        game.participants,
-                        List.traverse(Future.ApplicativePar)(participant =>
-                          pipe(
-                            userService.findChampionShardsForChampion(
-                              user.id,
-                              participant.summonerId,
-                              participant.championId,
-                            ),
-                            Future.map(shards =>
-                              pipe(
-                                participant,
-                                RiotCurrentGameParticipant.toView(
-                                  pipe(
-                                    shards,
-                                    Maybe.fold(
-                                      () => 0,
-                                      s => s.count,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Future.map(participants =>
-                          pipe(game, RiotCurrentGameInfo.toView(participants)),
-                        ),
-                      ),
-                  ),
-                ),
-              ),
-              Future.map(Either.right),
-            ),
+            pipe(activeGame(platform, summoner.id, maybeUser), Future.map(Either.right)),
           ),
           M.fromTaskEither,
           M.ichain(
             Either.fold(
               M.sendWithStatus(Status.NotFound),
-              M.json(Maybe.encoder(CurrentGameInfoView.codec)),
+              M.json(Maybe.encoder(ActiveGameView.codec)),
             ),
           ),
         ),
@@ -176,6 +128,59 @@ const SummonerController = (
         ),
       ),
       Sink.readonlyArray,
+    )
+  }
+
+  function activeGame(
+    platform: Platform,
+    summonerId: SummonerId,
+    maybeUser: Maybe<TokenContent>,
+  ): Future<Maybe<ActiveGameView>> {
+    return pipe(
+      activeGameService.findBySummoner(platform, summonerId),
+      futureMaybe.chainTaskEitherK(game =>
+        pipe(
+          maybeUser,
+          Maybe.fold(
+            () =>
+              pipe(
+                game,
+                ActiveGame.toView(
+                  pipe(game.participants, List.map(ActiveGameParticipant.toView(0))),
+                ),
+                Future.successful,
+              ),
+            user =>
+              pipe(
+                game.participants,
+                List.traverse(Future.ApplicativePar)(participant =>
+                  pipe(
+                    userService.findChampionShardsForChampion(
+                      user.id,
+                      participant.summonerId,
+                      participant.championId,
+                    ),
+                    Future.map(shards =>
+                      pipe(
+                        participant,
+                        ActiveGameParticipant.toView(
+                          pipe(
+                            shards,
+                            Maybe.fold(
+                              () => 0,
+                              s => s.count,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Future.map(participants => pipe(game, ActiveGame.toView(participants))),
+              ),
+          ),
+        ),
+      ),
     )
   }
 }

@@ -10,6 +10,7 @@ export const constants = {
     ddragonLatestVersion: MsDuration.hour(1),
     summoner: MsDuration.minutes(15),
     masteries: MsDuration.minutes(5),
+    activeGame: MsDuration.minutes(5),
     account: MsDuration.days(99 * 365),
   },
 }

@@ -14,6 +14,7 @@ import type { CronJobEvent } from './models/event/CronJobEvent'
 import { LoggerGetter } from './models/logger/LoggerGetter'
 import { MongoCollectionGetter } from './models/mongo/MongoCollection'
 import { WithDb } from './models/mongo/WithDb'
+import { ActiveGamePersistence } from './persistence/ActiveGamePersistence'
 import { ChampionMasteryPersistence } from './persistence/ChampionMasteryPersistence'
 import { ChampionShardPersistence } from './persistence/ChampionShardPersistence'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
@@ -47,6 +48,7 @@ const of = (
   healthCheckPersistence: HealthCheckPersistence,
   riotAccountPersistence: RiotAccountPersistence,
   userPersistence: UserPersistence,
+  activeGameService: ActiveGameService,
   ddragonService: DDragonService,
   discordService: DiscordService,
   riotApiService: RiotApiService,
@@ -63,7 +65,6 @@ const of = (
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
-  const activeGameService = ActiveGameService(riotApiService)
   const userService = UserService(
     Logger,
     championShardPersistence,
@@ -77,13 +78,13 @@ const of = (
   return {
     config,
     Logger,
+    activeGameService,
     ddragonService,
     discordService,
     healthCheckService,
-    summonerService,
     masteriesService,
-    activeGameService,
     staticDataService,
+    summonerService,
     userService,
   }
 }
@@ -99,6 +100,7 @@ const load = (config: Config): Future<Context> => {
 
   const mongoCollection: MongoCollectionGetter = MongoCollectionGetter.fromWithDb(withDb)
 
+  const activeGamePersistence = ActiveGamePersistence(Logger, mongoCollection)
   const championMasteryPersistence = ChampionMasteryPersistence(Logger, mongoCollection)
   const championShardPersistence = ChampionShardPersistence(Logger, mongoCollection)
   const healthCheckPersistence = HealthCheckPersistence(withDb)
@@ -120,11 +122,12 @@ const load = (config: Config): Future<Context> => {
 
   return pipe(
     apply.sequenceT(IO.ApplyPar)(
-      SummonerService(Logger, riotApiService, summonerPersistence, cronJobPubSub.observable),
+      ActiveGameService(Logger, activeGamePersistence, riotApiService, cronJobPubSub.observable),
+      SummonerService(Logger, summonerPersistence, riotApiService, cronJobPubSub.observable),
       scheduleCronJob(Logger, cronJobPubSub.subject),
     ),
     Future.fromIOEither,
-    Future.chain(([summonerService]) => {
+    Future.chain(([activeGameService, summonerService]) => {
       const context = of(
         config,
         Logger,
@@ -133,6 +136,7 @@ const load = (config: Config): Future<Context> => {
         healthCheckPersistence,
         riotAccountPersistence,
         userPersistence,
+        activeGameService,
         ddragonService,
         discordService,
         riotApiService,
@@ -169,6 +173,7 @@ const load = (config: Config): Future<Context> => {
         Future.chain(() => migrationService.applyMigrations),
         Future.chain(() =>
           NonEmptyArray.sequence(Future.ApplicativeSeq)([
+            activeGamePersistence.ensureIndexes,
             championMasteryPersistence.ensureIndexes,
             championShardPersistence.ensureIndexes,
             riotAccountPersistence.ensureIndexes,

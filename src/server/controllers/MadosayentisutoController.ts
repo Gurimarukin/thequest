@@ -19,7 +19,6 @@ import type { TheQuestProgression } from '../models/madosayentisuto/TheQuestProg
 import { TheQuestProgressionResult } from '../models/madosayentisuto/TheQuestProgressionResult'
 import type { DDragonService } from '../services/DDragonService'
 import type { MasteriesService } from '../services/MasteriesService'
-import type { SummonerService } from '../services/SummonerService'
 import type { SummonerWithDiscordInfos, UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import type { WithIp } from '../webServer/utils/WithIp'
@@ -37,7 +36,6 @@ const MadosayentisutoController = (
   withIp: WithIp,
   ddragonService: DDragonService,
   masteriesService: MasteriesService,
-  summonerService: SummonerService,
   userService: UserService,
   staticDataController: StaticDataController,
 ) => {
