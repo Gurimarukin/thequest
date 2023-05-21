@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
 import type { Platform } from '../../shared/models/api/Platform'
+import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGameView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
@@ -140,48 +141,39 @@ const SummonerController = (
       activeGameService.findBySummoner(platform, summonerId),
       futureMaybe.chainTaskEitherK(game =>
         pipe(
-          maybeUser,
-          Maybe.fold(
-            () =>
-              pipe(
-                game,
-                ActiveGame.toView(
-                  pipe(game.participants, List.map(ActiveGameParticipant.toView(0))),
-                ),
-                Future.successful,
-              ),
-            user =>
-              pipe(
-                game.participants,
-                List.traverse(Future.ApplicativePar)(participant =>
-                  pipe(
-                    userService.findChampionShardsForChampion(
-                      user.id,
-                      participant.summonerId,
-                      participant.championId,
-                    ),
-                    Future.map(shards =>
-                      pipe(
-                        participant,
-                        ActiveGameParticipant.toView(
-                          pipe(
-                            shards,
-                            Maybe.fold(
-                              () => 0,
-                              s => s.count,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Future.map(participants => pipe(game, ActiveGame.toView(participants))),
-              ),
-          ),
+          game.participants,
+          List.traverse(Future.ApplicativePar)(enrichParticipant(maybeUser)),
+          Future.map(participants => pipe(game, ActiveGame.toView(participants))),
         ),
       ),
     )
+  }
+
+  function enrichParticipant(
+    maybeUser: Maybe<TokenContent>,
+  ): (participant: ActiveGameParticipant) => Future<ActiveGameParticipantView> {
+    return participant =>
+      pipe(
+        maybeUser,
+        Maybe.fold(
+          () => Future.successful(0),
+          user =>
+            pipe(
+              userService.findChampionShardsForChampion(
+                user.id,
+                participant.summonerId,
+                participant.championId,
+              ),
+              Future.map(
+                Maybe.fold(
+                  () => 0,
+                  s => s.count,
+                ),
+              ),
+            ),
+        ),
+        Future.map(shardsCount => pipe(participant, ActiveGameParticipant.toView(shardsCount))),
+      )
   }
 }
 
