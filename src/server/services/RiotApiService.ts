@@ -4,7 +4,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
-import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Dict, Future, Tuple } from '../../shared/utils/fp'
 import { Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
@@ -19,7 +19,7 @@ import type { Game } from '../models/riot/Game'
 import { RiotAccount } from '../models/riot/RiotAccount'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
-import { TagLine } from '../models/riot/TagLine'
+import type { TagLine } from '../models/riot/TagLine'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { SummonerId } from '../models/summoner/SummonerId'
@@ -105,13 +105,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
               ): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
-                    [
-                      platformUrl(
-                        platform,
-                        `/lol/summoner/v4/summoners/by-puuid/${Puuid.unwrap(puuid)}`,
-                      ),
-                      'get',
-                    ],
+                    [platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${puuid}`), 'get'],
                     {
                       headers: {
                         [xRiotToken]: useAccountApiKey ? config.accountApiKey : config.lolApiKey,
@@ -130,13 +124,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
               byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
-                    [
-                      platformUrl(
-                        platform,
-                        `/lol/summoner/v4/summoners/${SummonerId.unwrap(summonerId)}`,
-                      ),
-                      'get',
-                    ],
+                    [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
                     { headers: { [xRiotToken]: config.lolApiKey } },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
@@ -153,9 +141,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                     [
                       platformUrl(
                         platform,
-                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${SummonerId.unwrap(
-                          summonerId,
-                        )}`,
+                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
                       ),
                       'get',
                     ],
@@ -192,8 +178,8 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
               //     [
               //       platformUrl(
               //         platform,
-              //         `/lol/spectator/v4/active-games/by-summoner/${SummonerId.unwrap(
-              //           summonerId,
+              //         `/lol/spectator/v4/active-games/by-summoner/${(
+              //           summonerId
               //         )}`,
               //       ),
               //       'get',
@@ -218,11 +204,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                   pipe(
                     httpClient.http(
                       [
-                        regionalUrl(
-                          `/riot/account/v1/accounts/by-riot-id/${gameName}/${TagLine.unwrap(
-                            tagLine,
-                          )}`,
-                        ),
+                        regionalUrl(`/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`),
                         'get',
                       ],
                       { headers: { [xRiotToken]: config.accountApiKey } },
@@ -239,9 +221,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                     httpClient.http(
                       [
                         regionalUrl(
-                          `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${Puuid.unwrap(
-                            puuid,
-                          )}`,
+                          `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${puuid}`,
                         ),
                         'get',
                       ],

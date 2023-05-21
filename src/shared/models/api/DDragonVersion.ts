@@ -14,6 +14,6 @@ const codec = fromNewtype<DDragonVersion>(C.string)
 
 const Eq: eq.Eq<DDragonVersion> = pipe(string.Eq, eq.contramap(unwrap))
 
-const DDragonVersion = { unwrap, codec, Eq }
+const DDragonVersion = { codec, Eq }
 
 export { DDragonVersion }

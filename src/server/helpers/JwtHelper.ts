@@ -3,7 +3,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 import jwt from 'jsonwebtoken'
 
-import { MsDuration } from '../../shared/models/MsDuration'
+import type { MsDuration } from '../../shared/models/MsDuration'
 import { Token } from '../../shared/models/api/user/Token'
 import type { Tuple } from '../../shared/utils/fp'
 import { Dict, Either, Future, List, Maybe } from '../../shared/utils/fp'
@@ -72,7 +72,5 @@ const msDurationOptions = <K extends string>(
   pipe(
     obj,
     Dict.toReadonlyArray,
-    List.reduce({}, (acc, [key, val]) =>
-      val === undefined ? acc : { ...acc, [key]: `${MsDuration.unwrap(val)}` },
-    ),
+    List.reduce({}, (acc, [key, val]) => (val === undefined ? acc : { ...acc, [key]: `${val}` })),
   )

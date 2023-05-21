@@ -10,7 +10,6 @@ import { Lang } from '../../../shared/models/api/Lang'
 import type { Spell } from '../../../shared/models/api/Spell'
 import type { StaticData } from '../../../shared/models/api/StaticData'
 import { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
-import { ChampionId } from '../../../shared/models/api/champion/ChampionId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import type { PartialDict } from '../../../shared/utils/fp'
@@ -223,9 +222,7 @@ const enrichChampions = (
           ),
           Either.mapLeft(e =>
             ChampionError.of(
-              `- Wikia champion ${ChampionId.unwrap(champion.id)} (${ChampionKey.unwrap(
-                champion.key,
-              )}): ${e}`,
+              `- Wikia champion ${champion.id} (${champion.key}): ${e}`,
               Maybe.some(champion),
             ),
           ),
