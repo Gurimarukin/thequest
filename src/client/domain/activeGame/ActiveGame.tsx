@@ -7,6 +7,7 @@ import type { ActiveGameParticipantView } from '../../../shared/models/api/activ
 import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
 
 import { MainLayout } from '../../components/mainLayout/MainLayout'
@@ -14,6 +15,8 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+
+const { cleanSummonerName } = StringUtils
 
 type Props = {
   platform: Platform
@@ -23,10 +26,11 @@ type Props = {
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => (
   <MainLayout>
     {basicAsyncRenderer(
-      useSWRHttp(apiRoutes.summoner.byName(platform, summonerName).activeGame.get, {}, [
-        Maybe.decoder(ActiveGameView.codec),
-        'Maybe<ActiveGameView>',
-      ]),
+      useSWRHttp(
+        apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
+        {},
+        [Maybe.decoder(ActiveGameView.codec), 'Maybe<ActiveGameView>'],
+      ),
     )(
       Maybe.fold(
         () => (
