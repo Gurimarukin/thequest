@@ -9,7 +9,7 @@ import type { LinkProps } from '../Link'
 import { Link } from '../Link'
 import { Tooltip } from '../tooltip/Tooltip'
 
-type Props<A> = LinkProps & {
+type Props<A> = Omit<LinkProps, 'disabled'> & {
   parser: Parser<A>
   tooltip?: React.ReactNode
 }
@@ -24,16 +24,15 @@ export function HighlightLink<A>({
 
   const ref = useRef<HTMLAnchorElement>(null)
 
+  const matches = Maybe.isSome(matchLocation(parser))
+
   return (
     <>
       <Link
         ref={ref}
         {...props}
-        className={cssClasses(
-          'flex py-3',
-          ['border-b border-goldenrod-bis', Maybe.isSome(matchLocation(parser))],
-          className,
-        )}
+        disabled={matches}
+        className={cssClasses('flex py-3', ['border-b border-goldenrod-bis', matches], className)}
       />
       {tooltip !== undefined ? <Tooltip hoverRef={ref}>{tooltip}</Tooltip> : null}
     </>

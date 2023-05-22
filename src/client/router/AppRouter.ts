@@ -17,6 +17,7 @@ const { codec } = RouterUtils
 const sPlatformPuuidMatch = lit('s')
   .then(codec('platform', Platform.codec))
   .then(codec('puuid', Puuid.codec))
+const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
 const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
 const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
 const aramMatch = lit('aram')
@@ -40,6 +41,7 @@ const anyPlatformSummonerName: Parser<{
 export const appParsers = {
   index: end.parser,
   sPlatformPuuid: p(sPlatformPuuidMatch),
+  sPlatformPuuidGame: p(sPlatformPuuidGameMatch),
   platformSummonerName,
   platformSummonerNameGame,
   aram: p(aramMatch),
@@ -62,6 +64,8 @@ export const appRoutes = {
       PartialMasteriesQuery,
       query,
     ),
+  sPlatformPuuidGame: (platform: Platform, puuid: Puuid) =>
+    format(sPlatformPuuidGameMatch.formatter, { platform, puuid }),
   platformSummonerName: (platform: Platform, summonerName: string, query: PartialMasteriesQuery) =>
     withQuery(
       format(platformSummonerNameMatch.formatter, { platform, summonerName }),

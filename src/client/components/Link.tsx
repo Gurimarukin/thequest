@@ -2,31 +2,42 @@
 import { forwardRef, useCallback } from 'react'
 
 import { useHistory } from '../contexts/HistoryContext'
+import { cssClasses } from '../utils/cssClasses'
 
 export type LinkProps = {
   to: string
   onClick?: React.MouseEventHandler<HTMLAnchorElement>
+  disabled?: boolean
   className?: string
   children?: React.ReactNode
 }
 
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
-  ({ to, onClick: onClick_, className, children }, ref) => {
+  ({ to, onClick: onClick_, disabled = false, className, children }, ref) => {
     const { navigate } = useHistory()
 
     const onClick = useCallback(
       (e: React.MouseEvent<HTMLAnchorElement>) => {
-        onClick_?.(e)
-        if (!e.ctrlKey && !e.metaKey) {
+        if (disabled) {
           e.preventDefault()
-          navigate(to)
+        } else {
+          onClick_?.(e)
+          if (!e.ctrlKey && !e.metaKey) {
+            e.preventDefault()
+            navigate(to)
+          }
         }
       },
-      [navigate, onClick_, to],
+      [disabled, navigate, onClick_, to],
     )
 
     return (
-      <a ref={ref} href={to} onClick={onClick} className={className}>
+      <a
+        ref={ref}
+        href={to}
+        onClick={onClick}
+        className={cssClasses(['cursor-default', disabled], className)}
+      >
         {children}
       </a>
     )

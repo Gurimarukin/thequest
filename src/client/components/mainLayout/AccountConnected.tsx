@@ -61,7 +61,9 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
             () => null,
             ({ platform, puuid, name }) => (
               <HighlightLink
-                to={appRoutes.sPlatformPuuid(
+                to={(Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
+                  ? appRoutes.sPlatformPuuidGame
+                  : appRoutes.sPlatformPuuid)(
                   platform,
                   puuid,
                   Maybe.isSome(matchSummoner)

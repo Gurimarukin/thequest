@@ -1,4 +1,4 @@
-- when searching tab, stay in same tab
+- game: correct case of summoner's name in url
 - rework masteries colors
 - linked discord account icon?
 - toaster (replace alert)

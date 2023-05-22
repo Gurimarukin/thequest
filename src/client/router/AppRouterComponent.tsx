@@ -26,7 +26,12 @@ const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
   .alt(
     appParsers.sPlatformPuuid.map(({ platform, puuid }) =>
-      t(<SummonerPuuid platform={platform} puuid={puuid} />),
+      t(<SummonerPuuid platform={platform} puuid={puuid} page="profile" />),
+    ),
+  )
+  .alt(
+    appParsers.sPlatformPuuidGame.map(({ platform, puuid }) =>
+      t(<SummonerPuuid platform={platform} puuid={puuid} page="game" />),
     ),
   )
   .alt(

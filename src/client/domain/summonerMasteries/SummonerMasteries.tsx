@@ -45,7 +45,7 @@ import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 
-const { cleanChampionName } = StringUtils
+const { cleanSummonerName, cleanChampionName } = StringUtils
 
 // should mutate data before API response
 type OptimisticMutation = {
@@ -62,7 +62,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
-    apiRoutes.summoner.byName(platform, clearSummonerName(summonerName)).masteries.get,
+    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).masteries.get,
     methodWithUrl =>
       pipe(
         historyStateRef.current.summonerMasteries,
@@ -155,9 +155,6 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
     </MainLayout>
   )
 }
-
-const whiteSpaces = /\s+/g
-const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 type SummonerViewProps = {
   platform: Platform

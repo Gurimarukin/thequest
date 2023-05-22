@@ -66,7 +66,9 @@ export const SearchSummoner: React.FC = () => {
     (e: React.FormEvent) => {
       e.preventDefault()
       navigate(
-        appRoutes.platformSummonerName(
+        (Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
+          ? appRoutes.platformSummonerNameGame
+          : appRoutes.platformSummonerName)(
           platform,
           summonerName,
           Maybe.isSome(matchLocation(appParsers.platformSummonerName))
@@ -176,9 +178,11 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const staticData = useStaticData()
 
   // with current masteriesQuery
-  const sPlatformPuuid = useCallback(
+  const puuidRoute = useCallback(
     (platform: Platform, puuid: Puuid): string =>
-      appRoutes.sPlatformPuuid(
+      (Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
+        ? appRoutes.sPlatformPuuidGame
+        : appRoutes.sPlatformPuuid)(
         platform,
         puuid,
         Maybe.isSome(matchLocation(appParsers.platformSummonerName))
@@ -205,14 +209,12 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       return pipe(
         addFavoriteSearch(summoner),
         // on not found
-        Future.map(
-          Maybe.getOrElseW(() => navigate(sPlatformPuuid(summoner.platform, summoner.puuid))),
-        ),
+        Future.map(Maybe.getOrElseW(() => navigate(puuidRoute(summoner.platform, summoner.puuid)))),
         task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )
     },
-    [addFavoriteSearch, navigate, sPlatformPuuid, summoner],
+    [addFavoriteSearch, navigate, puuidRoute, summoner],
   )
 
   const removeFavorite = useCallback(
@@ -232,7 +234,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
     <li className="contents">
       {renderRecent(type, removeRecent)}
       <Link
-        to={sPlatformPuuid(summoner.platform, summoner.puuid)}
+        to={puuidRoute(summoner.platform, summoner.puuid)}
         className="flex items-center hover:underline"
       >
         <img
