@@ -12,8 +12,16 @@ import type { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
 import type { RiotApiService } from './RiotApiService'
 
-type ForceCacheRefresh = {
-  forceCacheRefresh: boolean
+type FindOptions = {
+  /**
+   * Forces cache refreshing (ignores cached value)
+   */
+  forceCacheRefresh?: boolean
+  /**
+   * Use value cached after this date. No effect if forceCacheRefresh === true
+   * @default now - constants.riotApiCacheTtl.masteries
+   */
+  overrideInsertedAfter?: DayJs
 }
 
 type MasteriesService = ReturnType<typeof MasteriesService>
@@ -26,14 +34,18 @@ const MasteriesService = (
   findBySummoner: (
     platform: Platform,
     summonerId: SummonerId,
-    { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+    { forceCacheRefresh = false, overrideInsertedAfter }: FindOptions = {},
   ): Future<Maybe<List<ChampionMastery>>> =>
     pipe(
       forceCacheRefresh
         ? futureMaybe.none
         : pipe(
-            Future.fromIO(DayJs.now),
-            Future.map(DayJs.subtract(constants.riotApiCacheTtl.masteries)),
+            overrideInsertedAfter !== undefined
+              ? Future.successful(overrideInsertedAfter)
+              : pipe(
+                  Future.fromIO(DayJs.now),
+                  Future.map(DayJs.subtract(constants.riotApiCacheTtl.masteries)),
+                ),
             Future.chain(insertedAfter =>
               championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
             ),

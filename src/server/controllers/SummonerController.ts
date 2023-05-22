@@ -1,7 +1,10 @@
-import { pipe } from 'fp-ts/function'
+import { apply, monoid, number } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
+import type { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
+import type { ActiveGameMasteryView } from '../../shared/models/api/activeGame/ActiveGameMasteryView'
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGameView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
@@ -142,7 +145,9 @@ const SummonerController = (
       futureMaybe.chainTaskEitherK(game =>
         pipe(
           game.participants,
-          List.traverse(Future.ApplicativePar)(enrichParticipant(maybeUser)),
+          List.traverse(Future.ApplicativePar)(
+            enrichParticipant(platform, maybeUser, game.gameStartTime),
+          ),
           Future.map(participants => pipe(game, ActiveGame.toView(participants))),
         ),
       ),
@@ -150,29 +155,69 @@ const SummonerController = (
   }
 
   function enrichParticipant(
+    platform: Platform,
     maybeUser: Maybe<TokenContent>,
+    gameStartTime: DayJs,
   ): (participant: ActiveGameParticipant) => Future<ActiveGameParticipantView> {
     return participant =>
       pipe(
-        maybeUser,
-        Maybe.fold(
-          () => Future.successful(0),
-          user =>
-            pipe(
-              userService.findChampionShardsForChampion(
-                user.id,
-                participant.summonerId,
-                participant.championId,
+        apply.sequenceS(Future.ApplyPar)({
+          masteries: masteriesService.findBySummoner(platform, participant.summonerId, {
+            overrideInsertedAfter: gameStartTime,
+          }),
+          shardsCount: pipe(
+            maybeUser,
+            Maybe.fold(
+              () => futureMaybe.none,
+              user =>
+                userService.findChampionShardsForChampion(
+                  user.id,
+                  participant.summonerId,
+                  participant.championId,
+                ),
+            ),
+          ),
+        }),
+        Future.map(({ masteries, shardsCount }) =>
+          pipe(
+            participant,
+            ActiveGameParticipant.toView({
+              totalMasteryScore: pipe(
+                masteries,
+                Maybe.fold(
+                  () => 0,
+                  flow(
+                    List.map(m => m.championLevel),
+                    monoid.concatAll(number.MonoidSum),
+                  ),
+                ),
               ),
-              Future.map(
+              mastery: pipe(
+                masteries,
+                Maybe.chain(
+                  List.findFirst(m => ChampionKey.Eq.equals(m.championId, participant.championId)),
+                ),
+                Maybe.map(
+                  (m): ActiveGameMasteryView => ({
+                    level: m.championLevel,
+                    points: m.championPoints,
+                    pointsSinceLastLevel: m.championPointsSinceLastLevel,
+                    pointsUntilNextLevel: m.championPointsUntilNextLevel,
+                    chestGranted: m.chestGranted,
+                    tokensEarned: m.tokensEarned,
+                  }),
+                ),
+              ),
+              shardsCount: pipe(
+                shardsCount,
                 Maybe.fold(
                   () => 0,
                   s => s.count,
                 ),
               ),
-            ),
+            }),
+          ),
         ),
-        Future.map(shardsCount => pipe(participant, ActiveGameParticipant.toView(shardsCount))),
       )
   }
 }
