@@ -18,6 +18,7 @@ import { ActiveShards } from '../models/riot/ActiveShard'
 import type { Game } from '../models/riot/Game'
 import { RiotAccount } from '../models/riot/RiotAccount'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
+import { RiotLeagueEntry } from '../models/riot/RiotLeagueEntry'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
 import type { TagLine } from '../models/riot/TagLine'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
@@ -133,6 +134,23 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
             },
           },
 
+          leagueV4: {
+            entries: {
+              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotLeagueEntry>>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(platform, `/lol/league/v4/entries/by-summoner/${summonerId}`),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    [List.decoder(RiotLeagueEntry.decoder), 'List<RiotLeagueEntry>'],
+                  ),
+                  statusesToOption(404),
+                ),
+            },
+          },
+
           championMasteryV4: {
             championMasteries: {
               bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
@@ -146,7 +164,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                       'get',
                     ],
                     { headers: { [xRiotToken]: config.lolApiKey } },
-                    [List.decoder(RiotChampionMastery.decoder), 'List<ChampionMastery>'],
+                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
                   ),
                   statusesToOption(404),
                 ),
@@ -208,7 +226,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                         'get',
                       ],
                       { headers: { [xRiotToken]: config.accountApiKey } },
-                      [RiotAccount.decoder, 'Account'],
+                      [RiotAccount.decoder, 'RiotAccount'],
                     ),
                     statusesToOption(404),
                   ),

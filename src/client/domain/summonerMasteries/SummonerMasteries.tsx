@@ -15,6 +15,7 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
+import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
@@ -143,10 +144,11 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
 
   return (
     <MainLayout>
-      {basicAsyncRenderer({ data, error })(({ summoner, masteries, championShards }) => (
+      {basicAsyncRenderer({ data, error })(({ summoner, leagues, masteries, championShards }) => (
         <SummonerViewComponent
           platform={platform}
           summoner={summoner}
+          leagues={leagues}
           masteries={masteries}
           championShards={championShards}
           setChampionsShardsBulk={setChampionsShardsBulk}
@@ -159,6 +161,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
 type SummonerViewProps = {
   platform: Platform
   summoner: SummonerView
+  leagues: SummonerLeaguesView
   masteries: List<ChampionMasteryView>
   championShards: Maybe<List<ChampionShardsView>>
   setChampionsShardsBulk: (
@@ -170,6 +173,7 @@ type SummonerViewProps = {
 const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   platform,
   summoner,
+  leagues,
   masteries,
   championShards,
   setChampionsShardsBulk,
@@ -259,7 +263,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
           ['hidden', uiIsBlocked],
         )}
       >
-        <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
+        <Summoner summoner={{ ...summoner, ...enrichedSummoner }} leagues={leagues} />
         <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
       </div>
       {pipe(

@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import type { Dict } from '../../../shared/utils/fp'
 
@@ -15,6 +16,7 @@ const { round } = NumberUtils
 
 type Props = {
   summoner: EnrichedSummonerView
+  leagues: SummonerLeaguesView
 }
 
 export type EnrichedSummonerView = SummonerView & {
@@ -32,6 +34,7 @@ export const Summoner: React.FC<Props> = ({
     totalMasteryLevel,
     masteriesCount,
   },
+  leagues,
 }) => {
   const staticData = useStaticData()
 
@@ -106,6 +109,7 @@ export const Summoner: React.FC<Props> = ({
           </Tooltip>
         </span>
       </div>
+      <pre>{JSON.stringify(leagues, null, 2)}</pre>
     </div>
   )
 }

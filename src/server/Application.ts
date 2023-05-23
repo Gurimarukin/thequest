@@ -25,6 +25,7 @@ export const Application = ({
   ddragonService,
   discordService,
   healthCheckService,
+  leagueEntryService,
   masteriesService,
   staticDataService,
   summonerService,
@@ -38,6 +39,7 @@ export const Application = ({
   const staticDataController = StaticDataController(staticDataService)
   const summonerController = SummonerController(
     activeGameService,
+    leagueEntryService,
     masteriesService,
     summonerService,
     userService,

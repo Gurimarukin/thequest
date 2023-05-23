@@ -11,6 +11,7 @@ import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
+import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
@@ -25,17 +26,24 @@ import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { ActiveGameService } from '../services/ActiveGameService'
+import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
+const queueTypes = {
+  soloDuo: 'RANKED_SOLO_5x5',
+  flex: 'RANKED_FLEX_SR',
+}
+
 type SummonerController = ReturnType<typeof SummonerController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (
   activeGameService: ActiveGameService,
+  leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
   summonerService: SummonerService,
   userService: UserService,
@@ -82,6 +90,12 @@ const SummonerController = (
         futureSummoner,
         Future.map(Either.fromOption(() => 'Summoner not found')),
         futureEither.bindTo('summoner'),
+        futureEither.bind('leagues', ({ summoner }) =>
+          pipe(
+            findLeagues(platform, summoner.id),
+            Future.map(Either.fromOption(() => 'Leagues not found')),
+          ),
+        ),
         futureEither.bind('masteries', ({ summoner }) =>
           pipe(
             masteriesService.findBySummoner(platform, summoner.id),
@@ -100,6 +114,25 @@ const SummonerController = (
           Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerMasteriesView.codec)),
         ),
       )
+  }
+
+  function findLeagues(
+    platform: Platform,
+    summonerId: SummonerId,
+  ): Future<Maybe<SummonerLeaguesView>> {
+    return pipe(
+      leagueEntryService.findBySummoner(platform, summonerId),
+      futureMaybe.map(entries => ({
+        soloDuo: pipe(
+          entries,
+          List.findFirst(e => e.queueType === queueTypes.soloDuo),
+        ),
+        flex: pipe(
+          entries,
+          List.findFirst(e => e.queueType === queueTypes.flex),
+        ),
+      })),
+    )
   }
 
   function findChampionShards(
