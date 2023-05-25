@@ -1,7 +1,42 @@
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
+import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
+import type { FourRanksTier, OneRankTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
+
+const ironIcon = new URL('./divisions/iron_I.png', import.meta.url).toString()
+
+const divisions: Dict<'unranked' | `${FourRanksTier}${LeagueRank}` | OneRankTier, string> = {
+  unranked: new URL('./divisions/unranked.png', import.meta.url).toString(),
+  IRONI: ironIcon,
+  IRONII: ironIcon,
+  IRONIII: ironIcon,
+  IRONIV: ironIcon,
+  BRONZEI: new URL('./divisions/bronze_I.png', import.meta.url).toString(),
+  BRONZEII: new URL('./divisions/bronze_II.png', import.meta.url).toString(),
+  BRONZEIII: new URL('./divisions/bronze_III.png', import.meta.url).toString(),
+  BRONZEIV: new URL('./divisions/bronze_IV.png', import.meta.url).toString(),
+  SILVERI: new URL('./divisions/silver_I.png', import.meta.url).toString(),
+  SILVERII: new URL('./divisions/silver_II.png', import.meta.url).toString(),
+  SILVERIII: new URL('./divisions/silver_III.png', import.meta.url).toString(),
+  SILVERIV: new URL('./divisions/silver_IV.png', import.meta.url).toString(),
+  GOLDI: new URL('./divisions/gold_I.png', import.meta.url).toString(),
+  GOLDII: new URL('./divisions/gold_II.png', import.meta.url).toString(),
+  GOLDIII: new URL('./divisions/gold_III.png', import.meta.url).toString(),
+  GOLDIV: new URL('./divisions/gold_IV.png', import.meta.url).toString(),
+  PLATINUMI: new URL('./divisions/platinum_I.png', import.meta.url).toString(),
+  PLATINUMII: new URL('./divisions/platinum_II.png', import.meta.url).toString(),
+  PLATINUMIII: new URL('./divisions/platinum_III.png', import.meta.url).toString(),
+  PLATINUMIV: new URL('./divisions/platinum_IV.png', import.meta.url).toString(),
+  DIAMONDI: new URL('./divisions/diamond_I.png', import.meta.url).toString(),
+  DIAMONDII: new URL('./divisions/diamond_II.png', import.meta.url).toString(),
+  DIAMONDIII: new URL('./divisions/diamond_III.png', import.meta.url).toString(),
+  DIAMONDIV: new URL('./divisions/diamond_IV.png', import.meta.url).toString(),
+  MASTER: new URL('./divisions/master.png', import.meta.url).toString(),
+  GRANDMASTER: new URL('./divisions/grandmaster.png', import.meta.url).toString(),
+  CHALLENGER: new URL('./divisions/challenger.png', import.meta.url).toString(),
+}
 
 const masteries: Dict<`${ChampionLevelOrZero}`, string> = {
   0: new URL('./masteries/mastery-0.png', import.meta.url).toString(),
@@ -35,11 +70,12 @@ const stats: Dict<WikiaStatsBalanceKey, string> = {
 }
 
 export const Assets = {
-  chest: new URL('./chest.png', import.meta.url).toString(),
-  iconYuumi: new URL('./icon-yuumi.png', import.meta.url).toString(),
-  token5: new URL('./tokens/token-5.png', import.meta.url).toString(),
-  token6: new URL('./tokens/token-6.png', import.meta.url).toString(),
+  divisions,
   masteries,
   positions,
   stats,
+  token5: new URL('./tokens/token-5.png', import.meta.url).toString(),
+  token6: new URL('./tokens/token-6.png', import.meta.url).toString(),
+  chest: new URL('./chest.png', import.meta.url).toString(),
+  iconYuumi: new URL('./icon-yuumi.png', import.meta.url).toString(),
 }
