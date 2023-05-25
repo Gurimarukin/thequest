@@ -1,10 +1,13 @@
 import { pipe } from 'fp-ts/function'
-import { Fragment, useMemo } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { DayJs } from '../../../shared/models/DayJs'
+import { MsDuration } from '../../../shared/models/MsDuration'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
+import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -15,8 +18,11 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+import { queueLabel } from './queueLabel'
 
-const { cleanSummonerName } = StringUtils
+const { cleanSummonerName, pad10 } = StringUtils
+
+const clockInterval = MsDuration.second(1)
 
 type Props = {
   platform: Platform
@@ -49,20 +55,69 @@ type ActiveGameComponentProps = {
   game: ActiveGameView
 }
 
-const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({ platform, game }) => {
-  const {
-    participants: {},
-    ...rest
-  } = game
-  const grouped = useMemo(() => groupParticipants(game.participants), [game.participants])
+const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
+  platform,
+  game: { gameStartTime, gameQueueConfigId, bannedChampions, participants },
+}) => {
+  const { champions, assets } = useStaticData()
+
+  const groupedBans = pipe(
+    bannedChampions,
+    List.match(
+      () => null,
+      List.groupBy(c => `${c.teamId}`),
+    ),
+  )
+
+  const groupedParticipants = useMemo(() => groupParticipants(participants), [participants])
+
+  const [gameDuration, setGameDuration] = useState(() =>
+    pipe(DayJs.now(), DayJs.diff(gameStartTime)),
+  )
+
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setGameDuration(MsDuration.add(clockInterval)),
+      MsDuration.unwrap(clockInterval),
+    )
+    return () => window.clearInterval(id)
+  }, [])
+
   return (
     <div>
+      <h2>
+        <span>{queueLabel[gameQueueConfigId]}</span>
+        <span>({prettyMs(gameDuration)})</span>
+      </h2>
+
+      {groupedBans !== null ? (
+        <div className="flex justify-between">
+          {TeamId.values.map(teamId => (
+            <ul key={teamId} className="flex gap-1">
+              {groupedBans[teamId]?.map(({ pickTurn, championId }) => {
+                const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+                return (
+                  <li key={ChampionKey.unwrap(championId)}>
+                    <img
+                      src={assets.champion.square(championId)}
+                      alt={`Icône de ${champion?.name ?? `<Champion ${championId}>`}`}
+                      className="w-12"
+                    />
+                  </li>
+                )
+              })}
+            </ul>
+          ))}
+        </div>
+      ) : null}
+
       <ul className="grid grid-cols-[repeat(4,auto)_1fr_repeat(4,auto)] gap-y-3">
-        {grouped.map((maybeParticipant, i) =>
+        {groupedParticipants.map((maybeParticipant, i) =>
           pipe(
             maybeParticipant,
             Maybe.fold(
-              () => <span className="col-span-5" />,
+              // eslint-disable-next-line react/no-array-index-key
+              () => <span key={i} className="col-span-5" />,
               participant => (
                 <Fragment key={participant.summonerName}>
                   <Participant platform={platform} participant={participant} />
@@ -73,8 +128,6 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({ platform, gam
           ),
         )}
       </ul>
-
-      <pre>{JSON.stringify(rest, null, 2)}</pre>
     </div>
   )
 }
@@ -100,6 +153,18 @@ const groupParticipants = (
   )
 }
 
+const prettyMs = (ms: MsDuration): string => {
+  const date = DayJs.of(MsDuration.unwrap(ms))
+  const zero = DayJs.of(0)
+
+  const d = pipe(date, DayJs.diff(zero, 'days'))
+  const h = DayJs.hour.get(date)
+  const m = DayJs.minute.get(date)
+  const s = DayJs.second.get(date)
+
+  return `${pad10(d * 24 + h)}:${pad10(m)}:${pad10(s)}`
+}
+
 type ParticipantProps = {
   platform: Platform
   participant: ActiveGameParticipantView
@@ -111,8 +176,11 @@ const Participant: React.FC<ParticipantProps> = ({
     teamId,
     summonerName,
     profileIconId,
+    leagues,
+    totalMasteryScore,
     championId,
     shardsCount,
+    mastery,
     spell1Id,
     spell2Id,
     perks,
@@ -120,11 +188,14 @@ const Participant: React.FC<ParticipantProps> = ({
 }) => {
   const { champions, assets } = useStaticData()
 
+  const isBlue = teamId === 100
+
   const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
 
-  /* eslint-disable react/jsx-key */
+  const bg = isBlue ? 'bg-mastery-7-bis/30' : 'bg-mastery-6-bis/30'
+
   const children = [
-    <span>
+    <span key="icon" className={bg}>
       <img
         src={assets.summonerIcon(profileIconId)}
         alt={`Icône de ${summonerName}`}
@@ -132,23 +203,23 @@ const Participant: React.FC<ParticipantProps> = ({
       />
     </span>,
     <a
+      key="summoner"
       href={appRoutes.platformSummonerName(platform, summonerName, {})}
       target="_blank"
       rel="noreferrer"
-      className="bg-mastery-7-bis/50"
+      className={bg}
     >
       {summonerName}
     </a>,
-    <span>
+    <span key="champion" className={bg}>
       <img
         src={assets.champion.square(championId)}
         alt={`Icône de ${champion?.name ?? `<Champion ${championId}>`}`}
         className="w-12"
       />
     </span>,
-    <pre>{JSON.stringify({ shardsCount, spell1Id, spell2Id, perks }, null, 2)}</pre>,
+    <span key="empty" className={bg} />,
   ]
-  /* eslint-enable react/jsx-key */
 
-  return <li className="contents">{teamId === 100 ? children : List.reverse(children)}</li>
+  return <li className="contents">{isBlue ? children : List.reverse(children)}</li>
 }

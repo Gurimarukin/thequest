@@ -77,6 +77,7 @@ export const StringUtils = {
   matcher2,
   matcher3,
   stripMargins,
+  pad10,
   cleanUTF8ToASCII,
   cleanSummonerName,
   cleanChampionName,
