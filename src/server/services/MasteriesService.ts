@@ -18,7 +18,7 @@ type FindOptions = {
    */
   forceCacheRefresh?: boolean
   /**
-   * Use value cached after this date. No effect if forceCacheRefresh === true
+   * Keep values cached after this date. No effect if forceCacheRefresh === true
    * @default now - constants.riotApiCacheTtl.masteries
    */
   overrideInsertedAfter?: DayJs

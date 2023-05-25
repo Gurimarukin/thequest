@@ -119,9 +119,10 @@ const SummonerController = (
   function findLeagues(
     platform: Platform,
     summonerId: SummonerId,
+    options?: { overrideInsertedAfter: DayJs },
   ): Future<Maybe<SummonerLeaguesView>> {
     return pipe(
-      leagueEntryService.findBySummoner(platform, summonerId),
+      leagueEntryService.findBySummoner(platform, summonerId, options),
       futureMaybe.map(entries => ({
         soloDuo: pipe(
           entries,
@@ -195,6 +196,9 @@ const SummonerController = (
     return participant =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
+          leagues: findLeagues(platform, participant.summonerId, {
+            overrideInsertedAfter: gameStartTime,
+          }),
           masteries: masteriesService.findBySummoner(platform, participant.summonerId, {
             overrideInsertedAfter: gameStartTime,
           }),
@@ -211,10 +215,11 @@ const SummonerController = (
             ),
           ),
         }),
-        Future.map(({ masteries, shardsCount }) =>
+        Future.map(({ leagues, masteries, shardsCount }) =>
           pipe(
             participant,
             ActiveGameParticipant.toView({
+              leagues,
               totalMasteryScore: pipe(
                 masteries,
                 Maybe.fold(

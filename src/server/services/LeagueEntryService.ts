@@ -12,6 +12,14 @@ import type { SummonerId } from '../models/summoner/SummonerId'
 import type { LeagueEntryPersistence } from '../persistence/LeagueEntryPersistence'
 import type { RiotApiService } from './RiotApiService'
 
+type FindOptions = {
+  /**
+   * Keep values cached after this date.
+   * @default now - constants.riotApiCacheTtl.leagueEntries
+   */
+  overrideInsertedAfter: DayJs
+}
+
 type LeagueEntryService = ReturnType<typeof LeagueEntryService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -19,10 +27,18 @@ const LeagueEntryService = (
   leagueEntryPersistence: LeagueEntryPersistence,
   riotApiService: RiotApiService,
 ) => ({
-  findBySummoner: (platform: Platform, summonerId: SummonerId): Future<Maybe<List<LeagueEntry>>> =>
+  findBySummoner: (
+    platform: Platform,
+    summonerId: SummonerId,
+    options?: FindOptions,
+  ): Future<Maybe<List<LeagueEntry>>> =>
     pipe(
-      Future.fromIO(DayJs.now),
-      Future.map(DayJs.subtract(constants.riotApiCacheTtl.leagueEntries)),
+      options !== undefined
+        ? Future.successful(options.overrideInsertedAfter)
+        : pipe(
+            Future.fromIO(DayJs.now),
+            Future.map(DayJs.subtract(constants.riotApiCacheTtl.leagueEntries)),
+          ),
       Future.chain(insertedAfter =>
         leagueEntryPersistence.findBySummonerId(summonerId, insertedAfter),
       ),

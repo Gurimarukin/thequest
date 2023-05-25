@@ -2,6 +2,7 @@ import type { ActiveGameMasteryView } from '../../../shared/models/api/activeGam
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { List, Maybe } from '../../../shared/utils/fp'
 
 import type { SummonerId } from '../summoner/SummonerId'
@@ -22,15 +23,17 @@ type ActiveGameParticipant = {
 }
 
 type ToView = {
+  leagues: Maybe<SummonerLeaguesView>
   totalMasteryScore: number
   mastery: Maybe<ActiveGameMasteryView>
   shardsCount: number
 }
 
 const toView =
-  ({ totalMasteryScore, mastery, shardsCount }: ToView) =>
+  ({ leagues, totalMasteryScore, mastery, shardsCount }: ToView) =>
   (p: ActiveGameParticipant): ActiveGameParticipantView => ({
     ...p,
+    leagues,
     totalMasteryScore,
     mastery,
     shardsCount,
