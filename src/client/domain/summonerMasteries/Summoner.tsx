@@ -1,10 +1,13 @@
+import { pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
+import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import type { Dict } from '../../../shared/utils/fp'
+import { List } from '../../../shared/utils/fp'
 
+import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -38,6 +41,7 @@ export const Summoner: React.FC<Props> = ({
 }) => {
   const staticData = useStaticData()
 
+  const levelRef = useRef<HTMLSpanElement>(null)
   const masteriesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLSpanElement>(null)
 
@@ -48,17 +52,32 @@ export const Summoner: React.FC<Props> = ({
 
   return (
     <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap gap-4">
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={`Icône de ${name}`}
           className="h-24 w-24 rounded border border-goldenrod-bis"
         />
-        <div className="flex flex-col">
-          <span className="text-lg text-goldenrod">{name}</span>
-          <span className="text-sm">Niveau {summonerLevel}</span>
+        <div className="grid grid-rows-[1fr_auto] items-center gap-4">
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="text-lg text-goldenrod">{name}</span>
+            <span className="text-sm text-grey-400">—</span>
+            <span ref={levelRef} className="text-sm">
+              {summonerLevel}
+            </span>
+            <Tooltip hoverRef={levelRef} placement="right">
+              Niveau d’invocateur
+            </Tooltip>
+          </div>
+          <ul className="flex flex-wrap gap-6">
+            {pipe(
+              SummonerLeaguesView.keys,
+              List.map(queue => <League key={queue} queue={queue} league={leagues[queue]} />),
+            )}
+          </ul>
         </div>
       </div>
+
       <div className="flex flex-col items-center gap-3">
         <div ref={masteriesRef} className="flex items-end gap-2">
           <MasteryImgWithCount level={7} imgClassName="!w-[72px] -mt-1.5" />
@@ -109,7 +128,6 @@ export const Summoner: React.FC<Props> = ({
           </Tooltip>
         </span>
       </div>
-      <pre>{JSON.stringify(leagues, null, 2)}</pre>
     </div>
   )
 }
