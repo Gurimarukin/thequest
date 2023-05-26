@@ -37,7 +37,7 @@ const { cleanSummonerName, pad10 } = StringUtils
 
 const clockInterval = MsDuration.second(1)
 
-const gridTeamCols = 5 // should be children count returned by Participant
+const gridTeamCols = 6 // should be children count returned by Participant
 const gridTotalCols = 2 * gridTeamCols + 1
 
 const gridTemplateColumns = `repeat(${gridTeamCols},auto) 1fr repeat(${gridTeamCols},auto)`
@@ -297,7 +297,7 @@ const Participant: React.FC<ParticipantProps> = ({
     child('div', 2)(
       {
         className: cx('col-span-2 self-start flex items-baseline gap-1.5 !bg-transparent text-xs', [
-          'justify-end',
+          'flex-row-reverse',
           reverse,
         ]),
       },
@@ -350,6 +350,7 @@ const Participant: React.FC<ParticipantProps> = ({
         <span>Champion {ChampionKey.unwrap(championId)}</span>
       ),
     ),
+    child('div', 6)({}, 'perks'),
   ]
 
   return (
