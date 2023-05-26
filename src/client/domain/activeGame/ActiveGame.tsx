@@ -23,7 +23,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
 
@@ -252,8 +252,8 @@ const Participant: React.FC<ParticipantProps> = ({
         className="w-12"
       />
     </span>,
-    <div key="summoner" className={cssClasses('flex flex-col', bg)}>
-      <div className={cssClasses('flex grow', ['justify-end', !isBlue])}>
+    <div key="summoner" className={cx('flex flex-col', bg)}>
+      <div className={cx('flex grow', ['justify-end', !isBlue])}>
         <a
           href={appRoutes.platformSummonerName(platform, summonerName, {})}
           target="_blank"

@@ -36,7 +36,7 @@ import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -258,7 +258,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
         </div>
       ) : null}
       <div
-        className={cssClasses(
+        className={cx(
           'flex h-full flex-col items-center gap-6 overflow-y-auto overflow-x-hidden px-2 pb-24 pt-3',
           ['hidden', uiIsBlocked],
         )}

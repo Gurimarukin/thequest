@@ -10,7 +10,7 @@ import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalanc
 import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { Assets } from '../../imgs/Assets'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import { partitionStats } from './partitionStats'
 
 export type AramStatsProps = {
@@ -136,7 +136,7 @@ export const renderStatIcon = (
   <img
     src={Assets.stats[name]}
     alt={`Icône stat ${WikiaStatsBalance.label[name]}`}
-    className={cssClasses('bg-contain brightness-75 sepia', className)}
+    className={cx('bg-contain brightness-75 sepia', className)}
   />
 )
 
@@ -150,7 +150,7 @@ export const renderStatValue = (
     const n = WikiaStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
     return (
       <span
-        className={cssClasses(
+        className={cx(
           'flex gap-0.5 justify-self-end font-mono',
           (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
           className,

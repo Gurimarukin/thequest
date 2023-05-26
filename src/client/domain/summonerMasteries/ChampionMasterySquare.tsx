@@ -13,7 +13,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { Assets } from '../../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
 import { NumberUtils } from '../../utils/NumberUtils'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
 
 const { round } = NumberUtils
@@ -78,7 +78,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
       <div ref={hoverRef} className="relative flex h-16 w-16 items-center justify-center">
         {/* level border */}
         <div
-          className={cssClasses(
+          className={cx(
             'absolute inset-0 flex flex-col justify-end overflow-hidden rounded-bl-xl bg-black shadow-even shadow-black',
             isHistogram ? 'rounded-br-xl' : 'rounded-tr-xl',
           )}
@@ -92,7 +92,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
         {/* champion image */}
         <div
-          className={cssClasses(
+          className={cx(
             'relative h-[54px] w-[54px] overflow-hidden rounded-bl-lg',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
@@ -106,7 +106,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
         {/* champion level top left */}
         <div
-          className={cssClasses(
+          className={cx(
             'absolute left-0 top-0 flex h-4 w-3.5 justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
             championLevelNumberColor(championLevel),
           )}
@@ -174,7 +174,7 @@ const LevelSVG: React.FC<LevelSVGProps> = ({
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
-    className={cssClasses('h-full w-full', championLevelBgColor(championLevel))}
+    className={cx('h-full w-full', championLevelBgColor(championLevel))}
   >
     <circle
       cx="16"
@@ -238,7 +238,7 @@ const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
       const alt = `Jeton de maîtrise ${championLevel + 1}`
       return (
         <span
-          className={cssClasses(
+          className={cx(
             'absolute left-[13px] top-0 flex h-2.5 rounded-br bg-black pl-0.5',
             ['gap-0.5 pb-0.5 pr-0.5 pt-px', championLevel === 5],
             ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
@@ -301,7 +301,7 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
         <SparklesSharp className="h-2.5 w-2.5 rotate-180" />
       </span>
       <span
-        className={cssClasses(
+        className={cx(
           'flex h-4 w-3.5 rounded-tl-lg bg-black pl-0.5 text-xs',
           centerShards ? 'justify-center' : 'justify-end group-hover:justify-center',
         )}
@@ -310,12 +310,12 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
       </span>
       {setShardsCount !== null ? (
         <div
-          className={cssClasses(
+          className={cx(
             'absolute -right-px z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex',
             ['-bottom-3.5', canRemoveShard],
           )}
         >
-          <span className={cssClasses('flex bg-black p-px pb-0.5', ['hidden', 9 <= shardsCount])}>
+          <span className={cx('flex bg-black p-px pb-0.5', ['hidden', 9 <= shardsCount])}>
             <button
               ref={addButtonRef}
               type="button"
@@ -329,7 +329,7 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
             </Tooltip>
           </span>
           <span className="h-3 w-px bg-black" />
-          <span className={cssClasses('flex bg-black p-px', ['hidden', !canRemoveShard])}>
+          <span className={cx('flex bg-black p-px', ['hidden', !canRemoveShard])}>
             <button
               ref={removeButtonRef}
               type="button"

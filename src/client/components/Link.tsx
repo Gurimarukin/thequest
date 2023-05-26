@@ -2,7 +2,7 @@
 import { forwardRef, useCallback } from 'react'
 
 import { useHistory } from '../contexts/HistoryContext'
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 
 export type LinkProps = {
   to: string
@@ -36,7 +36,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         ref={ref}
         href={to}
         onClick={onClick}
-        className={cssClasses(['cursor-default', disabled], className)}
+        className={cx(['cursor-default', disabled], className)}
       >
         {children}
       </a>

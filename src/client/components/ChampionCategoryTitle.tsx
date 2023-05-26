@@ -4,7 +4,7 @@ import type { Dict } from '../../shared/utils/fp'
 
 import { InformationCircleOutline } from '../imgs/svgIcons'
 import type { ChampionCategory } from '../models/ChampionCategory'
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
 type ChampionCategoryTitleProps = {
@@ -18,9 +18,7 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
 }) => {
   const infoRef = useRef<HTMLSpanElement>(null)
   return (
-    <h2
-      className={cssClasses('col-span-full flex w-full items-center gap-2 pb-1 text-sm', className)}
-    >
+    <h2 className={cx('col-span-full flex w-full items-center gap-2 pb-1 text-sm', className)}>
       <span>{label[category]}</span>
       <span ref={infoRef}>
         <InformationCircleOutline className="h-4" />

@@ -8,7 +8,7 @@ import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { ChampionPositionImg } from '../../components/ChampionPositionImg'
 import { AramStatsFull } from '../../components/aramStats/AramStatsFull'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 
 const { plural } = StringUtils
 
@@ -68,7 +68,7 @@ export const ChampionTooltip: React.FC<Props> = ({
             {percentsElement}
           </div>
           <h3
-            className={cssClasses(
+            className={cx(
               'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black text-shadow',
               bgGradientMastery(championLevel),
             )}

@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import type { LinkProps } from '../Link'
 import { Link } from '../Link'
 import { Tooltip } from '../tooltip/Tooltip'
@@ -32,7 +32,7 @@ export function HighlightLink<A>({
         ref={ref}
         {...props}
         disabled={matches}
-        className={cssClasses('flex py-3', ['border-b border-goldenrod-bis', matches], className)}
+        className={cx('flex py-3', ['border-b border-goldenrod-bis', matches], className)}
       />
       {tooltip !== undefined ? <Tooltip hoverRef={ref}>{tooltip}</Tooltip> : null}
     </>

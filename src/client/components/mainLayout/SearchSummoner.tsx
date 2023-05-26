@@ -23,7 +23,7 @@ import {
 } from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
 import { Link } from '../Link'
@@ -132,7 +132,7 @@ export const SearchSummoner: React.FC = () => {
             className="w-52 border border-goldenrod bg-black pl-2 pr-8"
           />
           <ul
-            className={cssClasses(
+            className={cx(
               'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
               Maybe.isSome(maybeUser) ? 'grid-cols-[auto_auto_auto]' : 'grid-cols-[auto_auto] pr-3',
               showSearches ? 'grid' : 'hidden',

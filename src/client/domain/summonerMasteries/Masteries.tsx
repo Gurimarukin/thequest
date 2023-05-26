@@ -20,7 +20,7 @@ import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { NumberUtils } from '../../utils/NumberUtils'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import { ChampionMasterySquare } from './ChampionMasterySquare'
 import { bgGradientMastery } from './ChampionTooltip'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -73,7 +73,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   return (
     <>
       <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
-      <div className={cssClasses('w-full', viewContainerClassName[masteriesQuery.view])}>
+      <div className={cx('w-full', viewContainerClassName[masteriesQuery.view])}>
         {pipe(
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
@@ -136,12 +136,12 @@ const Champion: React.FC<ChampionProps> = ({
       ) ? (
         <ChampionCategoryTitle
           category={champion.category}
-          className={cssClasses(['pt-4', Maybe.isSome(maybePrev)])}
+          className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
       <div
         ref={hoverRef}
-        className={cssClasses(
+        className={cx(
           'relative',
           ['hidden', isHidden],
           [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
@@ -165,13 +165,13 @@ const Champion: React.FC<ChampionProps> = ({
             isHistogram={isHistogram}
             hoverRef={hoverRef}
           />
-          <ChampionMasteryAram aram={champion.aram} className={cssClasses(['hidden', !isAram])} />
+          <ChampionMasteryAram aram={champion.aram} className={cx(['hidden', !isAram])} />
         </div>
       </div>
       <ChampionMasteryHistogram
         maybeMaxPoints={maybeMaxPoints}
         champion={champion}
-        className={cssClasses(['hidden', !isHistogram || isHidden])}
+        className={cx(['hidden', !isHistogram || isHidden])}
       />
     </>
   )
@@ -233,7 +233,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
 
   return (
     <>
-      <div className={cssClasses('flex flex-col', className)}>
+      <div className={cx('flex flex-col', className)}>
         {pipe(
           maybeMaxPoints,
           Maybe.fold(
@@ -251,10 +251,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                   )}
                   <div
                     ref={hoverRef2}
-                    className={cssClasses(
-                      'absolute top-0 h-full',
-                      bgGradientMastery(championLevel),
-                    )}
+                    className={cx('absolute top-0 h-full', bgGradientMastery(championLevel))}
                     style={{ width: p(championPoints) }}
                   />
                   {championLevel < 2 ? null : (
@@ -317,7 +314,7 @@ const getRenderChildrenCompact =
   (className: string | undefined) =>
   (children1: List<React.JSX.Element>): React.JSX.Element =>
     (
-      <ul className={cssClasses('flex flex-col items-start self-center px-0.5 py-1', className)}>
+      <ul className={cx('flex flex-col items-start self-center px-0.5 py-1', className)}>
         {children1}
       </ul>
     )

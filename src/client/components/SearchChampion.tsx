@@ -17,7 +17,7 @@ import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe } from '../../shared/utils/fp'
 
 import { CloseFilled } from '../imgs/svgIcons'
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 
 const { plural } = StringUtils
 
@@ -92,7 +92,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
     const onFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => e.target.select(), [])
 
     return (
-      <div className={cssClasses('relative flex flex-col items-center text-xs', className)}>
+      <div className={cx('relative flex flex-col items-center text-xs', className)}>
         <div className="flex items-center">
           <input
             ref={searchRef}
@@ -102,7 +102,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
             onKeyDown={handleKeyDown}
             onFocus={onFocus}
             placeholder="Rechercher champion"
-            className={cssClasses(
+            className={cx(
               'w-[151px] justify-self-start rounded-sm border border-grey-disabled bg-transparent py-1 pl-2',
               search === '' ? 'pr-2' : 'pr-7',
             )}
@@ -114,7 +114,7 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
           ) : null}
         </div>
         <span
-          className={cssClasses('absolute top-full pt-0.5 text-zinc-400', [
+          className={cx('absolute top-full pt-0.5 text-zinc-400', [
             'hidden',
             Maybe.isNone(initialSearch),
           ])}

@@ -18,7 +18,7 @@ import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { AramQuery } from '../../models/aramQuery/AramQuery'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import './Aram.css'
 
 const { cleanChampionName } = StringUtils
@@ -114,7 +114,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
     <>
       <div
         ref={hoverRef}
-        className={cssClasses(
+        className={cx(
           'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs',
           ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
           ['hidden', champion.isHidden],

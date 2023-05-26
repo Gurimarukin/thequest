@@ -8,7 +8,7 @@ import type { Dict } from '../../shared/utils/fp'
 import { Maybe } from '../../shared/utils/fp'
 
 import { Assets } from '../imgs/Assets'
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
 type Attrs = {
@@ -66,7 +66,7 @@ export const League: React.FC<Props> = ({ queue, league, className }) => {
 
   return (
     <>
-      <div ref={ref} className={cssClasses('-mb-1 flex items-center gap-2', className)}>
+      <div ref={ref} className={cx('-mb-1 flex items-center gap-2', className)}>
         <span className="h-10 w-10 overflow-hidden">
           <img
             src={src}
@@ -83,7 +83,7 @@ export const League: React.FC<Props> = ({ queue, league, className }) => {
       </div>
       <Tooltip hoverRef={ref} className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1">
         <span
-          className={cssClasses('col-span-2 justify-self-center font-bold', [
+          className={cx('col-span-2 justify-self-center font-bold', [
             'pb-0.5',
             tooltip !== undefined,
           ])}
@@ -104,7 +104,7 @@ type WinLossProps = {
 
 const WinLoss: React.FC<WinLossProps> = ({ value, unit, valueClassName }) => (
   <>
-    <span className={cssClasses('justify-self-end', valueClassName)}>{value}</span>
+    <span className={cx('justify-self-end', valueClassName)}>{value}</span>
     <span>
       {unit}
       {value < 2 ? '' : 's'}

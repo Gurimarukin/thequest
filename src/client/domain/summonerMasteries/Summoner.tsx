@@ -13,7 +13,7 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { InformationCircleOutline } from '../../imgs/svgIcons'
 import { NumberUtils } from '../../utils/NumberUtils'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils
 
@@ -142,8 +142,8 @@ const getMasteryImgWithCount =
   (masteriesCount: Dict<`${ChampionLevelOrZero}`, number>): React.FC<MasteryImgWithCountProps> =>
   ({ level, imgClassName, className }) =>
     (
-      <div className={cssClasses('flex flex-col items-center', className)}>
+      <div className={cx('flex flex-col items-center', className)}>
         <span className="text-xs">{masteriesCount[level]}</span>
-        <MasteryImg level={level} className={cssClasses('w-full', imgClassName)} />
+        <MasteryImg level={level} className={cx('w-full', imgClassName)} />
       </div>
     )
