@@ -63,7 +63,7 @@ export const Summoner: React.FC<Props> = ({
             <span className="text-lg text-goldenrod">{name}</span>
             <span className="text-sm text-grey-400">—</span>
             <span ref={levelRef} className="text-sm">
-              {summonerLevel}
+              niveau {summonerLevel}
             </span>
             <Tooltip hoverRef={levelRef} placement="right">
               Niveau d’invocateur
