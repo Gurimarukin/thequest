@@ -17,11 +17,13 @@ import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
 
+import { League } from '../../components/League'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+import { cssClasses } from '../../utils/cssClasses'
 import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
 
@@ -90,9 +92,11 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
   return (
     <div>
-      <h2>
-        <span>{GameQueue.label[gameQueueConfigId]}</span>
-        <span>({prettyMs(gameDuration)})</span>
+      <h2 className="flex gap-2 text-lg">
+        <span className="text-goldenrod">{GameQueue.label[gameQueueConfigId]}</span>
+        <span className="flex text-grey-400">
+          (<pre>{prettyMs(gameDuration)}</pre>)
+        </span>
       </h2>
 
       {groupedBans !== null ? (
@@ -116,13 +120,13 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         </div>
       ) : null}
 
-      <ul className="grid grid-cols-[repeat(4,auto)_1fr_repeat(4,auto)] gap-y-3">
+      <ul className="grid grid-cols-[repeat(5,auto)_1fr_repeat(5,auto)] gap-y-3">
         {groupedParticipants.map((maybeParticipant, i) =>
           pipe(
             maybeParticipant,
             Maybe.fold(
               // eslint-disable-next-line react/no-array-index-key
-              () => <span key={i} className="col-span-5" />,
+              () => <span key={i} className="col-span-6" />, // span = repeat count + 1
               participant => (
                 <Fragment key={participant.summonerName}>
                   <Participant platform={platform} mapId={mapId} participant={participant} />
@@ -248,15 +252,33 @@ const Participant: React.FC<ParticipantProps> = ({
         className="w-12"
       />
     </span>,
-    <a
-      key="summoner"
-      href={appRoutes.platformSummonerName(platform, summonerName, {})}
-      target="_blank"
-      rel="noreferrer"
-      className={bg}
-    >
-      {summonerName}
-    </a>,
+    <div key="summoner" className={cssClasses('flex flex-col', bg)}>
+      <div className={cssClasses('flex grow', ['justify-end', !isBlue])}>
+        <a
+          href={appRoutes.platformSummonerName(platform, summonerName, {})}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {summonerName}
+        </a>
+      </div>
+      {pipe(
+        leagues,
+        Maybe.fold(
+          () => null,
+          l => <League queue="soloDuo" league={l.soloDuo} />,
+        ),
+      )}
+    </div>,
+    <div key="flex" className={bg}>
+      {pipe(
+        leagues,
+        Maybe.fold(
+          () => null,
+          l => <League queue="flex" league={l.flex} />,
+        ),
+      )}
+    </div>,
     <span key="champion" className={bg}>
       {squareProps !== undefined ? (
         <ChampionMasterySquare {...squareProps} />

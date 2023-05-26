@@ -1,3 +1,6 @@
+- la quête recent searches insensitive sort
+- eslint unused argument (even if middle)
+- classNames > cx
 - game: correct case of summoner's name in url
 - rework masteries colors
 - linked discord account icon?

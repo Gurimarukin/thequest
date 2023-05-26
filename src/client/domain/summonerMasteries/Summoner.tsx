@@ -69,12 +69,12 @@ export const Summoner: React.FC<Props> = ({
               Niveau d’invocateur
             </Tooltip>
           </div>
-          <ul className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-6">
             {pipe(
               SummonerLeaguesView.keys,
               List.map(queue => <League key={queue} queue={queue} league={leagues[queue]} />),
             )}
-          </ul>
+          </div>
         </div>
       </div>
 

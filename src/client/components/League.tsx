@@ -26,7 +26,7 @@ type Props = {
 }
 
 export const League: React.FC<Props> = ({ queue, league, className }) => {
-  const ref = useRef<HTMLLIElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
     league,
@@ -66,7 +66,7 @@ export const League: React.FC<Props> = ({ queue, league, className }) => {
 
   return (
     <>
-      <li ref={ref} className={cssClasses('-mb-1 flex items-center gap-2', className)}>
+      <div ref={ref} className={cssClasses('-mb-1 flex items-center gap-2', className)}>
         <span className="h-10 w-10 overflow-hidden">
           <img
             src={src}
@@ -80,7 +80,7 @@ export const League: React.FC<Props> = ({ queue, league, className }) => {
             <span className="flex gap-1">{subDescription}</span>
           ) : null}
         </div>
-      </li>
+      </div>
       <Tooltip hoverRef={ref} className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1">
         <span
           className={cssClasses('col-span-2 justify-self-center font-bold', [
