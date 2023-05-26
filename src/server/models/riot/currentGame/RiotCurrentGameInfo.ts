@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
+import { MapId } from '../../../../shared/models/api/MapId'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
@@ -11,7 +12,6 @@ import { DayJsFromNumber } from '../../../utils/ioTsUtils'
 import { GameId } from '../GameId'
 import { GameMode } from '../GameMode'
 import { GameType } from '../GameType'
-import { MapId } from '../MapId'
 import { RiotCurrentGameParticipant } from './RiotCurrentGameParticipant'
 
 // type RiotBannedChampion = D.TypeOf<typeof riotBannedChampionDecoder>

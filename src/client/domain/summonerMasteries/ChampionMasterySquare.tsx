@@ -18,7 +18,7 @@ import { ChampionTooltip } from './ChampionTooltip'
 
 const { round } = NumberUtils
 
-type ChampionMasterySquareProps = {
+export type ChampionMasterySquareProps = {
   championId: ChampionKey
   chestGranted: boolean
   tokensEarned: number

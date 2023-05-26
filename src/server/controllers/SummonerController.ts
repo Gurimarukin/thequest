@@ -237,10 +237,10 @@ const SummonerController = (
                 ),
                 Maybe.map(
                   (m): ActiveGameMasteryView => ({
-                    level: m.championLevel,
-                    points: m.championPoints,
-                    pointsSinceLastLevel: m.championPointsSinceLastLevel,
-                    pointsUntilNextLevel: m.championPointsUntilNextLevel,
+                    championLevel: m.championLevel,
+                    championPoints: m.championPoints,
+                    championPointsSinceLastLevel: m.championPointsSinceLastLevel,
+                    championPointsUntilNextLevel: m.championPointsUntilNextLevel,
                     chestGranted: m.chestGranted,
                     tokensEarned: m.tokensEarned,
                   }),

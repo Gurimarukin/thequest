@@ -1,4 +1,5 @@
 import type { DayJs } from '../../../shared/models/DayJs'
+import type { MapId } from '../../../shared/models/api/MapId'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import type { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
@@ -12,6 +13,7 @@ import type { ActiveGameParticipant } from './ActiveGameParticipant'
 type ActiveGame = {
   gameId: GameId
   gameStartTime: DayJs
+  mapId: MapId
   gameQueueConfigId: GameQueue
   bannedChampions: List<{
     pickTurn: number

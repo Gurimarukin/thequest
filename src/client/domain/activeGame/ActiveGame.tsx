@@ -2,11 +2,15 @@ import { pipe } from 'fp-ts/function'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { Business } from '../../../shared/Business'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
+import { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
+import type { ActiveGameMasteryView } from '../../../shared/models/api/activeGame/ActiveGameMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
+import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
@@ -18,7 +22,8 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
-import { queueLabel } from './queueLabel'
+import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
+import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
 
 const { cleanSummonerName, pad10 } = StringUtils
 
@@ -57,7 +62,7 @@ type ActiveGameComponentProps = {
 
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   platform,
-  game: { gameStartTime, gameQueueConfigId, bannedChampions, participants },
+  game: { gameStartTime, mapId, gameQueueConfigId, bannedChampions, participants },
 }) => {
   const { champions, assets } = useStaticData()
 
@@ -86,7 +91,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   return (
     <div>
       <h2>
-        <span>{queueLabel[gameQueueConfigId]}</span>
+        <span>{GameQueue.label[gameQueueConfigId]}</span>
         <span>({prettyMs(gameDuration)})</span>
       </h2>
 
@@ -120,7 +125,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
               () => <span key={i} className="col-span-5" />,
               participant => (
                 <Fragment key={participant.summonerName}>
-                  <Participant platform={platform} participant={participant} />
+                  <Participant platform={platform} mapId={mapId} participant={participant} />
                   {i % 2 === 0 ? <span /> : null}
                 </Fragment>
               ),
@@ -165,13 +170,26 @@ const prettyMs = (ms: MsDuration): string => {
   return `${pad10(d * 24 + h)}:${pad10(m)}:${pad10(s)}`
 }
 
+type SquarePropsRest = Pick<
+  ChampionMasterySquareProps,
+  | 'chestGranted'
+  | 'tokensEarned'
+  | 'championLevel'
+  | 'championPoints'
+  | 'championPointsSinceLastLevel'
+  | 'championPointsUntilNextLevel'
+  | 'percents'
+>
+
 type ParticipantProps = {
   platform: Platform
+  mapId: MapId
   participant: ActiveGameParticipantView
 }
 
 const Participant: React.FC<ParticipantProps> = ({
   platform,
+  mapId,
   participant: {
     teamId,
     summonerName,
@@ -190,7 +208,35 @@ const Participant: React.FC<ParticipantProps> = ({
 
   const isBlue = teamId === 100
 
-  const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+  const squareProps = useMemo((): ChampionMasterySquareProps | undefined => {
+    const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+
+    return champion !== undefined
+      ? {
+          championId,
+          name: champion.name,
+          shardsCount: shardsCount === 0 ? Maybe.none : Maybe.some(shardsCount),
+          positions: champion.positions,
+          aram: MapId.isHowlingAbyss(mapId) ? Maybe.some(champion.aram) : Maybe.none,
+          setChampionShards: null,
+          ...pipe(
+            mastery,
+            Maybe.fold<ActiveGameMasteryView, SquarePropsRest>(
+              () => ({
+                chestGranted: false,
+                tokensEarned: 0,
+                championLevel: 0,
+                championPoints: 0,
+                championPointsSinceLastLevel: 0,
+                championPointsUntilNextLevel: 0,
+                percents: 0,
+              }),
+              m => ({ ...m, percents: Business.championPercents(m) }),
+            ),
+          ),
+        }
+      : undefined
+  }, [championId, champions, mapId, mastery, shardsCount])
 
   const bg = isBlue ? 'bg-mastery-7-bis/30' : 'bg-mastery-6-bis/30'
 
@@ -212,11 +258,11 @@ const Participant: React.FC<ParticipantProps> = ({
       {summonerName}
     </a>,
     <span key="champion" className={bg}>
-      <img
-        src={assets.champion.square(championId)}
-        alt={`Icône de ${champion?.name ?? `<Champion ${championId}>`}`}
-        className="w-12"
-      />
+      {squareProps !== undefined ? (
+        <ChampionMasterySquare {...squareProps} />
+      ) : (
+        <span>Champion {ChampionKey.unwrap(championId)}</span>
+      )}
     </span>,
     <span key="empty" className={bg} />,
   ]

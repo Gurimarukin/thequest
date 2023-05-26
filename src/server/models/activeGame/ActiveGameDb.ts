@@ -1,5 +1,6 @@
 import * as C from 'io-ts/Codec'
 
+import { MapId } from '../../../shared/models/api/MapId'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -13,6 +14,7 @@ type ActiveGameDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   gameId: GameId.codec,
+  mapId: MapId.codec,
   gameStartTime: DayJsFromDate.codec,
   gameQueueConfigId: GameQueue.codec,
   bannedChampions: List.codec(

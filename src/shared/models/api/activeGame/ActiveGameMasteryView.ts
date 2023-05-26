@@ -5,10 +5,10 @@ import { ChampionLevel } from '../champion/ChampionLevel'
 type ActiveGameMasteryView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  level: ChampionLevel.codec,
-  points: C.number,
-  pointsSinceLastLevel: C.number,
-  pointsUntilNextLevel: C.number,
+  championLevel: ChampionLevel.codec,
+  championPoints: C.number,
+  championPointsSinceLastLevel: C.number,
+  championPointsUntilNextLevel: C.number,
   chestGranted: C.boolean,
   tokensEarned: C.number,
 })
