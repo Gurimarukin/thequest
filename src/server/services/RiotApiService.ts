@@ -79,10 +79,10 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
             )
 
             const summoner: Future<DDragonSummoners> = httpClient.http(
-              [ddragonCdn(version , `/data/${lang}/summoner.json`), 'get'],
+              [ddragonCdn(version, `/data/${lang}/summoner.json`), 'get'],
               {},
               [DDragonSummoners.decoder, 'DDragonSummoners'],
-            ) 
+            )
 
             return { champion, summoner }
           },
