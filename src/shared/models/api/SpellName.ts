@@ -1,11 +1,11 @@
 import { createEnum } from '../../utils/createEnum'
 import type { Dict } from '../../utils/fp'
 
-type Spell = typeof e.T
+type SpellName = typeof e.T
 
 const e = createEnum('I', 'Q', 'W', 'E', 'R')
 
-const label: Dict<Spell, string> = {
+const label: Dict<SpellName, string> = {
   I: 'P',
   Q: 'Q',
   W: 'W',
@@ -13,6 +13,6 @@ const label: Dict<Spell, string> = {
   R: 'R',
 }
 
-const Spell = { ...e, label }
+const SpellName = { ...e, label }
 
-export { Spell }
+export { SpellName }

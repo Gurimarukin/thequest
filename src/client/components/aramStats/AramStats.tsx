@@ -4,7 +4,7 @@ import { flow, identity, pipe } from 'fp-ts/function'
 import { useMemo } from 'react'
 
 import type { AramData, ChampionSpellHtml } from '../../../shared/models/api/AramData'
-import { Spell } from '../../../shared/models/api/Spell'
+import { SpellName } from '../../../shared/models/api/SpellName'
 import type { WikiaStatsBalanceKey } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
@@ -31,7 +31,7 @@ export type AramStatsProps = {
 }
 
 type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => React.JSX.Element
-type RenderSpell = (spell: Spell) => (html: ChampionSpellHtml) => React.JSX.Element
+type RenderSpell = (spell: SpellName) => (html: ChampionSpellHtml) => React.JSX.Element
 
 export const getAramStats = (
   renderStat: RenderStat,
@@ -95,7 +95,7 @@ const getSeparateChildren =
           aram.spells,
           Maybe.chain(spells =>
             pipe(
-              Spell.values,
+              SpellName.values,
               List.filterMap(spell =>
                 pipe(
                   Dict.lookup(spell, spells),

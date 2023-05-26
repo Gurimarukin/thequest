@@ -1,7 +1,8 @@
 import { pipe } from 'fp-ts/function'
 
 import type { Lang } from '../../shared/models/api/Lang'
-import { StaticData } from '../../shared/models/api/StaticData'
+import { AdditionalStaticData } from '../../shared/models/api/staticData/AdditionalStaticData'
+import { StaticData } from '../../shared/models/api/staticData/StaticData'
 
 import type { StaticDataService } from '../services/staticDataService/StaticDataService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
@@ -13,6 +14,13 @@ type StaticDataController = ReturnType<typeof StaticDataController>
 const StaticDataController = (staticDataService: StaticDataService) => ({
   staticData: (lang: Lang): EndedMiddleware =>
     pipe(staticDataService.getLatest(lang), M.fromTaskEither, M.ichain(M.json(StaticData.codec))),
+
+  additionalStaticData: (lang: Lang): EndedMiddleware =>
+    pipe(
+      staticDataService.getLatestAdditional(lang),
+      M.fromTaskEither,
+      M.ichain(M.json(AdditionalStaticData.codec)),
+    ),
 })
 
 export { StaticDataController }

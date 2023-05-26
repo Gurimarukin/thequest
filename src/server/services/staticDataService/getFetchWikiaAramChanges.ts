@@ -5,7 +5,7 @@ import * as D from 'io-ts/Decoder'
 import xml2js from 'xml2js'
 
 import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
-import { Spell } from '../../../shared/models/api/Spell'
+import { SpellName } from '../../../shared/models/api/SpellName'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Tuple3 } from '../../../shared/utils/fp'
 import {
@@ -25,7 +25,7 @@ import type { HttpClient } from '../../helpers/HttpClient'
 
 const lolFandomApiPhpUrl = `${constants.lolWikiaDomain}/api.php`
 
-type WikiaAramChanges = Dict<string, PartialDict<Spell, ChampionSpellHtml>>
+type WikiaAramChanges = Dict<string, PartialDict<SpellName, ChampionSpellHtml>>
 
 export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAramChanges> => {
   return pipe(
@@ -61,7 +61,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
           flow(
             StringUtils.matcher3(nameSpellValueRegex) as (
               str: string,
-            ) => Maybe<Tuple3<string, Spell, string>>,
+            ) => Maybe<Tuple3<string, SpellName, string>>,
             Maybe.map(parseChampionChanges),
           ),
         ),
@@ -92,7 +92,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
 
   function parseChampionChanges([englishName, spell, value]: Tuple3<
     string,
-    Spell,
+    SpellName,
     string
   >): Future<ChampionSpellHtmlDescription> {
     return pipe(
@@ -104,7 +104,11 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
     )
   }
 
-  function parseSpellWikiText(englishName: string, spell: Spell, value: string): Future<string> {
+  function parseSpellWikiText(
+    englishName: string,
+    spell: SpellName,
+    value: string,
+  ): Future<string> {
     return pipe(
       httpClient.http(
         [lolFandomApiPhpUrl, 'get'],
@@ -161,7 +165,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
 
 type ChampionSpellHtmlDescription = {
   englishName: string
-  spell: Spell
+  spell: SpellName
   html: ChampionSpellHtml
 }
 
@@ -177,7 +181,10 @@ const parseXML =
     )
 
 // Akshan Q = \n* Scoundrel duration reduced to 25 seconds.
-const nameSpellValueRegex = RegExp(`^(.*)\\s+([${Spell.values.join('')}])\\s+=\\s*\\n(.*)$`, 's')
+const nameSpellValueRegex = RegExp(
+  `^(.*)\\s+([${SpellName.values.join('')}])\\s+=\\s*\\n(.*)$`,
+  's',
+)
 
 // https://static.wikia.nocookie.net/leagueoflegends/images/e/e9/Akshan_Going_Rogue.png/revision/latest/scale-to-width-down/20?cb=20210827174804
 const imageRegex = /^(.*\.png).*$/

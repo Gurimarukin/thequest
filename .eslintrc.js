@@ -52,6 +52,7 @@ module.exports = {
           'MsDuration',
           'Puuid',
           'SummonerId',
+          'SummonerSpellId',
           'TagLine',
           'UserId',
           'UserName',

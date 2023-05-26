@@ -7,10 +7,12 @@ import { Store } from '../../../shared/models/Store'
 import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { Lang } from '../../../shared/models/api/Lang'
-import type { Spell } from '../../../shared/models/api/Spell'
-import type { StaticData } from '../../../shared/models/api/StaticData'
-import { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
+import type { SpellName } from '../../../shared/models/api/SpellName'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
+import type { StaticData } from '../../../shared/models/api/staticData/StaticData'
+import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
+import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import type { PartialDict } from '../../../shared/utils/fp'
 import {
@@ -74,10 +76,7 @@ const StaticDataService = (
   return {
     getLatest: (lang: Lang): Future<StaticData> => {
       if (!Lang.Eq.equals(lang, Lang.defaultLang)) {
-        return pipe(
-          ddragonService.latestDataChampions(lang),
-          Future.chain(fetchAdvancedChampionData),
-        )
+        return pipe(ddragonService.latestDataChampions(lang), Future.chain(fetchStaticData))
       }
 
       return pipe(
@@ -92,7 +91,7 @@ const StaticDataService = (
             Maybe.fold(
               () =>
                 pipe(
-                  fetchAdvancedChampionData(ddragon),
+                  fetchStaticData(ddragon),
                   Future.chainFirstIOK(value =>
                     pipe(
                       DayJs.now,
@@ -108,9 +107,32 @@ const StaticDataService = (
         ),
       )
     },
+
+    getLatestAdditional: (lang: Lang): Future<AdditionalStaticData> =>
+      pipe(
+        ddragonService.latestDataSummoners(lang),
+        Future.map(
+          (ddragon): AdditionalStaticData => ({
+            version: ddragon.version,
+            summonerSpells: pipe(
+              ddragon.value.data,
+              Dict.toReadonlyArray,
+              List.map(
+                flow(
+                  Tuple.snd,
+                  (s): StaticDataSummonerSpell => ({
+                    ...s,
+                    cooldown: NonEmptyArray.head(s.cooldown),
+                  }),
+                ),
+              ),
+            ),
+          }),
+        ),
+      ),
   }
 
-  function fetchAdvancedChampionData(ddragon: VersionWithChampions): Future<StaticData> {
+  function fetchStaticData(ddragon: VersionWithChampions): Future<StaticData> {
     return pipe(
       apply.sequenceS(Future.ApplyPar)({
         championData: pipe(
@@ -120,7 +142,7 @@ const StaticDataService = (
         aramChanges: fetchWikiaAramChanges,
       }),
       Future.map(({ championData, aramChanges }) =>
-        enrichChampions(ddragon.champions, championData, aramChanges),
+        enrichChampions(ddragon.value, championData, aramChanges),
       ),
       Future.chainFirstIOEitherK(
         flow(
@@ -189,7 +211,7 @@ const ChampionError = {
 const enrichChampions = (
   langDDragonChampions: DDragonChampions,
   wikiaChampions: List<Tuple<EnglishName, WikiaChampionData>>,
-  aramChanges: Dict<EnglishName, PartialDict<Spell, ChampionSpellHtml>>,
+  aramChanges: Dict<EnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
   const withoutAramChanges: List<Either<ChampionError, Tuple<EnglishName, StaticDataChampion>>> =
     pipe(

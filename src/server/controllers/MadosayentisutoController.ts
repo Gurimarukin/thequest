@@ -86,7 +86,7 @@ const MadosayentisutoController = (
       }),
       futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
         const percents: List<number> = pipe(
-          staticData.champions.data,
+          staticData.value.data,
           Dict.toReadonlyArray,
           List.map(([, { key }]) =>
             pipe(

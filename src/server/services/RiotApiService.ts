@@ -23,6 +23,7 @@ import { RiotSummoner } from '../models/riot/RiotSummoner'
 import type { TagLine } from '../models/riot/TagLine'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
+import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import { SummonerId } from '../models/summoner/SummonerId'
 
 const { ddragon, ddragonCdn } = DDragonUtils
@@ -76,7 +77,14 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
               {},
               [DDragonChampions.decoder, 'DDragonChampions'],
             )
-            return { champion }
+
+            const summoner: Future<DDragonSummoners> = httpClient.http(
+              [ddragonCdn(version , `/data/${lang}/summoner.json`), 'get'],
+              {},
+              [DDragonSummoners.decoder, 'DDragonSummoners'],
+            ) 
+
+            return { champion, summoner }
           },
         }),
       },

@@ -13,11 +13,14 @@ import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGame
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
+import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
+import { SummonerSpell } from '../../components/SummonerSpell'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
@@ -56,18 +59,33 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => (
             <pre className="mt-4">pas en partie.</pre>
           </div>
         ),
-        game => <ActiveGameComponent platform={platform} game={game} />,
+        game => <WithoutAdditional platform={platform} game={game} />,
       ),
     )}
   </MainLayout>
 )
 
+const WithoutAdditional: React.FC<
+  Omit<ActiveGameComponentProps, 'additionalStaticData'>
+> = props => {
+  const { lang } = useStaticData()
+
+  return basicAsyncRenderer(
+    useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
+      AdditionalStaticData.codec,
+      'AdditionalStaticData',
+    ]),
+  )(additionalStaticData => <ActiveGameComponent {...{ ...props, additionalStaticData }} />)
+}
+
 type ActiveGameComponentProps = {
+  additionalStaticData: AdditionalStaticData
   platform: Platform
   game: ActiveGameView
 }
 
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
+  additionalStaticData,
   platform,
   game: { gameStartTime, mapId, gameQueueConfigId, bannedChampions, participants },
 }) => {
@@ -138,6 +156,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
             {groupedParticipants[teamId]?.map((participant, j) => (
               <Participant
                 key={participant.summonerName}
+                additionalStaticData={additionalStaticData}
                 platform={platform}
                 mapId={mapId}
                 participant={participant}
@@ -176,6 +195,7 @@ type SquarePropsRest = Pick<
 >
 
 type ParticipantProps = {
+  additionalStaticData: AdditionalStaticData
   platform: Platform
   mapId: MapId
   participant: ActiveGameParticipantView
@@ -187,6 +207,7 @@ type ParticipantProps = {
 }
 
 const Participant: React.FC<ParticipantProps> = ({
+  additionalStaticData: { summonerSpells },
   platform,
   mapId,
   participant: {
@@ -206,6 +227,9 @@ const Participant: React.FC<ParticipantProps> = ({
   index,
 }) => {
   const { champions, assets } = useStaticData()
+
+  const spell1 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell1Id))
+  const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
 
   const squareProps = useMemo((): ChampionMasterySquareProps | undefined => {
     const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
@@ -276,7 +300,23 @@ const Participant: React.FC<ParticipantProps> = ({
         {summonerName}
       </a>,
     ),
-    child('ul', 4)({}, <li>{spell1Id}</li>, <li>{spell2Id}</li>),
+    child('ul', 4)(
+      {},
+      <li className="h-7">
+        {spell1 !== undefined ? (
+          <SummonerSpell spell={spell1} className="h-full" />
+        ) : (
+          <span>Sort {SummonerSpellKey.unwrap(spell1Id)}</span>
+        )}
+      </li>,
+      <li className="h-7">
+        {spell2 !== undefined ? (
+          <SummonerSpell spell={spell2} className="h-full" />
+        ) : (
+          <span>Sort {SummonerSpellKey.unwrap(spell2Id)}</span>
+        )}
+      </li>,
+    ),
     child('div', 5)(
       {},
       squareProps !== undefined ? (

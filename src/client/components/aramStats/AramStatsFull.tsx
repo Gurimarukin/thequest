@@ -1,4 +1,4 @@
-import { Spell } from '../../../shared/models/api/Spell'
+import { SpellName } from '../../../shared/models/api/SpellName'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 
 import type { AramStatsProps } from './AramStats'
@@ -25,7 +25,7 @@ export const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
       <li key={spell} className="col-span-3 mt-1 flex flex-col gap-1 last:mb-1">
         <div className="flex items-center gap-1">
           <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia" />
-          <span>({Spell.label[spell]}) :</span>
+          <span>({SpellName.label[spell]}) :</span>
         </div>
         <span dangerouslySetInnerHTML={{ __html: html.description }} className="wikia" />
       </li>

@@ -2,8 +2,8 @@
 import { flow, pipe } from 'fp-ts/function'
 import { Fragment, useMemo, useRef } from 'react'
 
-import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'

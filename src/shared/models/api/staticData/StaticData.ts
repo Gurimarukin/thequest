@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { List } from '../../utils/fp'
-import { DDragonVersion } from './DDragonVersion'
+import { List } from '../../../utils/fp'
+import { DDragonVersion } from '../DDragonVersion'
 import { StaticDataChampion } from './StaticDataChampion'
 
 type StaticData = C.TypeOf<typeof codec>

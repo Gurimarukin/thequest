@@ -4,6 +4,7 @@ import { MapId } from '../../../shared/models/api/MapId'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { List } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
@@ -31,8 +32,8 @@ const codec = C.struct({
       summonerName: C.string,
       profileIconId: C.number,
       championId: ChampionKey.codec,
-      spell1Id: C.number,
-      spell2Id: C.number,
+      spell1Id: SummonerSpellKey.codec,
+      spell2Id: SummonerSpellKey.codec,
       perks: C.struct({
         perkIds: List.codec(C.number),
         perkStyle: C.number,

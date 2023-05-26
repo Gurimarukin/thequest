@@ -2,11 +2,11 @@ import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { lens } from 'monocle-ts'
 
-import { List } from '../../utils/fp'
-import { AramData } from './AramData'
-import { ChampionId } from './champion/ChampionId'
-import { ChampionKey } from './champion/ChampionKey'
-import { ChampionPosition } from './champion/ChampionPosition'
+import { List } from '../../../utils/fp'
+import { AramData } from '../AramData'
+import { ChampionId } from '../champion/ChampionId'
+import { ChampionKey } from '../champion/ChampionKey'
+import { ChampionPosition } from '../champion/ChampionPosition'
 
 type StaticDataChampion = C.TypeOf<typeof codec>
 

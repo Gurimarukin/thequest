@@ -17,6 +17,7 @@ const { codec } = RouterUtils
 // intermediate
 
 const api = lit('api')
+const staticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
 const summoner = api.then(lit('summoner'))
 const summonerByName = summoner
   .then(lit('byName'))
@@ -32,7 +33,8 @@ const madosayentisuto = api.then(lit('madosayentisuto'))
 // final
 
 const healthcheckGet = m(api.then(lit('healthcheck')), 'get')
-const staticDataLangGet = m(api.then(lit('staticData')).then(codec('lang', Lang.codec)), 'get')
+const staticDataLangGet = m(staticDataLang, 'get')
+const staticDataLangAdditionalGet = m(staticDataLang.then(lit('additional')), 'get')
 const summonerByPuuidMasteriesGet = m(
   summoner
     .then(lit('byPuuid'))
@@ -71,7 +73,12 @@ const madosayentisutoUsersGetProgressionPost = m(
 
 export const apiParsers = {
   healthcheck: { get: p(healthcheckGet) },
-  staticData: { lang: { get: p(staticDataLangGet) } },
+  staticData: {
+    lang: {
+      get: p(staticDataLangGet),
+      additional: { get: p(staticDataLangAdditionalGet) },
+    },
+  },
   summoner: {
     byPuuid: { masteries: { get: p(summonerByPuuidMasteriesGet) } },
     byName: {
@@ -113,7 +120,12 @@ export const apiParsers = {
  */
 
 export const apiRoutes = {
-  staticData: { lang: { get: (lang: Lang) => r(staticDataLangGet, { lang }) } },
+  staticData: {
+    lang: (lang: Lang) => ({
+      get: r(staticDataLangGet, { lang }),
+      additional: { get: r(staticDataLangAdditionalGet, { lang }) },
+    }),
+  },
   summoner: {
     byPuuid: (platform: Platform, puuid: Puuid) => ({
       masteries: {
