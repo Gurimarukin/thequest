@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
@@ -13,8 +13,8 @@ import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGame
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
@@ -30,6 +30,11 @@ import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquar
 const { cleanSummonerName, pad10 } = StringUtils
 
 const clockInterval = MsDuration.second(1)
+
+const gridTeamCols = 5 // should be children count returned by Participant
+const gridTotalCols = 2 * gridTeamCols + 1
+
+const gridTemplateColumns = `repeat(${gridTeamCols},auto) 1fr repeat(${gridTeamCols},auto)`
 
 type Props = {
   platform: Platform
@@ -76,7 +81,14 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     ),
   )
 
-  const groupedParticipants = useMemo(() => groupParticipants(participants), [participants])
+  const groupedParticipants = useMemo(
+    () =>
+      pipe(
+        participants,
+        List.groupBy(p => `${p.teamId}`),
+      ),
+    [participants],
+  )
 
   const [gameDuration, setGameDuration] = useState(() =>
     pipe(DayJs.now(), DayJs.diff(gameStartTime)),
@@ -92,8 +104,8 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
   return (
     <div>
-      <h2 className="flex gap-2 text-lg">
-        <span className="text-goldenrod">{GameQueue.label[gameQueueConfigId]}</span>
+      <h2 className="flex flex-wrap items-baseline gap-4">
+        <span className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</span>
         <span className="flex text-grey-400">
           (<pre>{prettyMs(gameDuration)}</pre>)
         </span>
@@ -120,45 +132,23 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         </div>
       ) : null}
 
-      <ul className="grid grid-cols-[repeat(5,auto)_1fr_repeat(5,auto)] gap-y-3">
-        {groupedParticipants.map((maybeParticipant, i) =>
-          pipe(
-            maybeParticipant,
-            Maybe.fold(
-              // eslint-disable-next-line react/no-array-index-key
-              () => <span key={i} className="col-span-6" />, // span = repeat count + 1
-              participant => (
-                <Fragment key={participant.summonerName}>
-                  <Participant platform={platform} mapId={mapId} participant={participant} />
-                  {i % 2 === 0 ? <span /> : null}
-                </Fragment>
-              ),
-            ),
-          ),
-        )}
-      </ul>
+      <div className="grid gap-y-3" style={{ gridTemplateColumns }}>
+        {TeamId.values.map((teamId, i) => (
+          <ul key={teamId} className="contents">
+            {groupedParticipants[teamId]?.map((participant, j) => (
+              <Participant
+                key={participant.summonerName}
+                platform={platform}
+                mapId={mapId}
+                participant={participant}
+                reverse={i % 2 === 1}
+                index={j}
+              />
+            ))}
+          </ul>
+        ))}
+      </div>
     </div>
-  )
-}
-
-const groupParticipants = (
-  participants: List<ActiveGameParticipantView>,
-): List<Maybe<ActiveGameParticipantView>> => {
-  const grouped = pipe(
-    participants,
-    List.groupBy(p => `${p.teamId}`),
-  )
-
-  const p100 = pipe(grouped[100] ?? [], List.chunksOf(3))[0] ?? []
-  const p200 = grouped[200] ?? []
-  const size = Math.max(p100.length, p200.length)
-
-  return pipe(
-    p100,
-    List.map(Maybe.some),
-    ListUtils.padEnd(size, Maybe.none),
-    List.zip(pipe(p200, List.map(Maybe.some), ListUtils.padEnd(size, Maybe.none))),
-    List.flatten,
   )
 }
 
@@ -189,6 +179,11 @@ type ParticipantProps = {
   platform: Platform
   mapId: MapId
   participant: ActiveGameParticipantView
+  reverse: boolean
+  /**
+   * index inside of team
+   */
+  index: number
 }
 
 const Participant: React.FC<ParticipantProps> = ({
@@ -207,10 +202,10 @@ const Participant: React.FC<ParticipantProps> = ({
     spell2Id,
     perks,
   },
+  reverse,
+  index,
 }) => {
   const { champions, assets } = useStaticData()
-
-  const isBlue = teamId === 100
 
   const squareProps = useMemo((): ChampionMasterySquareProps | undefined => {
     const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
@@ -242,52 +237,102 @@ const Participant: React.FC<ParticipantProps> = ({
       : undefined
   }, [championId, champions, mapId, mastery, shardsCount])
 
-  const bg = isBlue ? 'bg-mastery-7-bis/30' : 'bg-mastery-6-bis/30'
-
   const children = [
-    <span key="icon" className={bg}>
+    child('div', 1)(
+      {},
       <img
         src={assets.summonerIcon(profileIconId)}
         alt={`Icône de ${summonerName}`}
         className="w-12"
-      />
-    </span>,
-    <div key="summoner" className={cx('flex flex-col', bg)}>
-      <div className={cx('flex grow', ['justify-end', !isBlue])}>
-        <a
-          href={appRoutes.platformSummonerName(platform, summonerName, {})}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {summonerName}
-        </a>
-      </div>
-      {pipe(
+      />,
+    ),
+    child('div', 2)(
+      { className: 'flex items-end' },
+      pipe(
         leagues,
         Maybe.fold(
           () => null,
           l => <League queue="soloDuo" league={l.soloDuo} />,
         ),
-      )}
-    </div>,
-    <div key="flex" className={bg}>
-      {pipe(
+      ),
+    ),
+    child('div', 3)(
+      { className: 'flex items-end' },
+      pipe(
         leagues,
         Maybe.fold(
           () => null,
           l => <League queue="flex" league={l.flex} />,
         ),
-      )}
-    </div>,
-    <span key="champion" className={bg}>
-      {squareProps !== undefined ? (
+      ),
+    ),
+    child('div', 2)(
+      { className: cx('col-span-2 flex self-start !bg-transparent', ['justify-end', reverse]) },
+      <a
+        href={appRoutes.platformSummonerName(platform, summonerName, {})}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {summonerName}
+      </a>,
+    ),
+    child('ul', 4)({}, <li>{spell1Id}</li>, <li>{spell2Id}</li>),
+    child('div', 5)(
+      {},
+      squareProps !== undefined ? (
         <ChampionMasterySquare {...squareProps} />
       ) : (
         <span>Champion {ChampionKey.unwrap(championId)}</span>
-      )}
-    </span>,
-    <span key="empty" className={bg} />,
+      ),
+    ),
   ]
 
-  return <li className="contents">{isBlue ? children : List.reverse(children)}</li>
+  return (
+    <li className="contents">
+      {children.map((c, key) =>
+        c(reverse, {
+          key,
+          className: teamBg[teamId],
+          style: {
+            gridRowStart: index + 1,
+          },
+        }),
+      )}
+    </li>
+  )
+}
+
+type BaseProps = {
+  key: React.Key
+  className?: string
+  style?: React.CSSProperties
+}
+
+const child =
+  <P extends React.HTMLAttributes<T>, T extends HTMLElement>(
+    type: keyof React.ReactHTML,
+
+    gridColStart: number,
+  ) =>
+  ({ className, style, ...props }: React.ClassAttributes<T> & P, ...children: React.ReactNode[]) =>
+  (reverse: boolean, { key, className: baseClassName, style: baseStyle }: BaseProps) =>
+    createElement(
+      type,
+      {
+        key,
+        className: cx(baseClassName, className),
+        style: {
+          ...baseStyle,
+          ...style,
+          gridColumnStart: reverse ? undefined : gridColStart,
+          gridColumnEnd: reverse ? gridTotalCols - gridColStart + 2 : undefined,
+        },
+        ...props,
+      },
+      ...children,
+    )
+
+const teamBg: Dict<`${TeamId}`, string> = {
+  100: 'bg-mastery-7-bis/30',
+  200: 'bg-mastery-5-bis/30',
 }
