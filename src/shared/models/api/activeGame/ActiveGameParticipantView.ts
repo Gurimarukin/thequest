@@ -4,7 +4,7 @@ import { List, Maybe } from '../../../utils/fp'
 import { ChampionKey } from '../champion/ChampionKey'
 import { SummonerLeaguesView } from '../summoner/SummonerLeaguesView'
 import { SummonerSpellKey } from '../summonerSpell/SummonerSpellKey'
-import { ActiveGameMasteryView } from './ActiveGameMasteryView'
+import { ActiveGameMasteriesView } from './ActiveGameMasteriesView'
 import { TeamId } from './TeamId'
 
 type ActiveGameParticipantView = C.TypeOf<typeof codec>
@@ -14,10 +14,9 @@ const codec = C.struct({
   summonerName: C.string,
   profileIconId: C.number,
   leagues: Maybe.codec(SummonerLeaguesView.codec),
-  totalMasteryScore: C.number,
   championId: ChampionKey.codec,
+  masteries: Maybe.codec(ActiveGameMasteriesView.codec),
   shardsCount: C.number,
-  mastery: Maybe.codec(ActiveGameMasteryView.codec),
   spell1Id: SummonerSpellKey.codec,
   spell2Id: SummonerSpellKey.codec,
   perks: C.struct({

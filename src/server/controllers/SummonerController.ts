@@ -1,10 +1,12 @@
 import { apply, monoid, number } from 'fp-ts'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
+import { Business } from '../../shared/Business'
 import type { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
-import type { ActiveGameMasteryView } from '../../shared/models/api/activeGame/ActiveGameMasteryView'
+import type { ActiveGameChampionMasteryView } from '../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
+import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGameView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
@@ -199,7 +201,7 @@ const SummonerController = (
           leagues: findLeagues(platform, participant.summonerId, {
             overrideInsertedAfter: gameStartTime,
           }),
-          masteries: masteriesService.findBySummoner(platform, participant.summonerId, {
+          maybeMasteries: masteriesService.findBySummoner(platform, participant.summonerId, {
             overrideInsertedAfter: gameStartTime,
           }),
           shardsCount: pipe(
@@ -215,34 +217,44 @@ const SummonerController = (
             ),
           ),
         }),
-        Future.map(({ leagues, masteries, shardsCount }) =>
+        Future.map(({ leagues, maybeMasteries, shardsCount }) =>
           pipe(
             participant,
             ActiveGameParticipant.toView({
               leagues,
-              totalMasteryScore: pipe(
-                masteries,
-                Maybe.fold(
-                  () => 0,
-                  flow(
-                    List.map(m => m.championLevel),
-                    monoid.concatAll(number.MonoidSum),
-                  ),
-                ),
-              ),
-              mastery: pipe(
-                masteries,
-                Maybe.chain(
-                  List.findFirst(m => ChampionKey.Eq.equals(m.championId, participant.championId)),
-                ),
+              masteries: pipe(
+                maybeMasteries,
                 Maybe.map(
-                  (m): ActiveGameMasteryView => ({
-                    championLevel: m.championLevel,
-                    championPoints: m.championPoints,
-                    championPointsSinceLastLevel: m.championPointsSinceLastLevel,
-                    championPointsUntilNextLevel: m.championPointsUntilNextLevel,
-                    chestGranted: m.chestGranted,
-                    tokensEarned: m.tokensEarned,
+                  (masteries): ActiveGameMasteriesView => ({
+                    totalPercents:
+                      masteries.length === 0
+                        ? 0
+                        : pipe(
+                            masteries,
+                            List.map(Business.championPercents),
+                            monoid.concatAll(number.MonoidSum),
+                          ) / masteries.length,
+                    totalScore: pipe(
+                      masteries,
+                      List.map(m => m.championLevel),
+                      monoid.concatAll(number.MonoidSum),
+                    ),
+                    champion: pipe(
+                      masteries,
+                      List.findFirst(m =>
+                        ChampionKey.Eq.equals(m.championId, participant.championId),
+                      ),
+                      Maybe.map(
+                        (m): ActiveGameChampionMasteryView => ({
+                          championLevel: m.championLevel,
+                          championPoints: m.championPoints,
+                          championPointsSinceLastLevel: m.championPointsSinceLastLevel,
+                          championPointsUntilNextLevel: m.championPointsUntilNextLevel,
+                          chestGranted: m.chestGranted,
+                          tokensEarned: m.tokensEarned,
+                        }),
+                      ),
+                    ),
                   }),
                 ),
               ),

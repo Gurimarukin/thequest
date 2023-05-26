@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
@@ -7,7 +7,7 @@ import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
-import type { ActiveGameMasteryView } from '../../../shared/models/api/activeGame/ActiveGameMasteryView'
+import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
@@ -22,14 +22,17 @@ import { List, Maybe } from '../../../shared/utils/fp'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
+import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
+import { NumberUtils } from '../../utils/NumberUtils'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
 
+const { round } = NumberUtils
 const { cleanSummonerName, pad10 } = StringUtils
 
 const clockInterval = MsDuration.second(1)
@@ -215,10 +218,9 @@ const Participant: React.FC<ParticipantProps> = ({
     summonerName,
     profileIconId,
     leagues,
-    totalMasteryScore,
     championId,
+    masteries,
     shardsCount,
-    mastery,
     spell1Id,
     spell2Id,
     perks,
@@ -231,10 +233,9 @@ const Participant: React.FC<ParticipantProps> = ({
   const spell1 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell1Id))
   const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
 
-  const squareProps = useMemo((): ChampionMasterySquareProps | undefined => {
-    const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
-
-    return champion !== undefined
+  const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+  const squareProps =
+    champion !== undefined
       ? {
           championId,
           name: champion.name,
@@ -243,8 +244,9 @@ const Participant: React.FC<ParticipantProps> = ({
           aram: MapId.isHowlingAbyss(mapId) ? Maybe.some(champion.aram) : Maybe.none,
           setChampionShards: null,
           ...pipe(
-            mastery,
-            Maybe.fold<ActiveGameMasteryView, SquarePropsRest>(
+            masteries,
+            Maybe.chain(m => m.champion),
+            Maybe.fold<ActiveGameChampionMasteryView, SquarePropsRest>(
               () => ({
                 chestGranted: false,
                 tokensEarned: 0,
@@ -259,7 +261,9 @@ const Participant: React.FC<ParticipantProps> = ({
           ),
         }
       : undefined
-  }, [championId, champions, mapId, mastery, shardsCount])
+
+  const percentsRef = useRef<HTMLSpanElement>(null)
+  const totalMasteriesRef = useRef<HTMLSpanElement>(null)
 
   const children = [
     child('div', 1)(
@@ -291,14 +295,35 @@ const Participant: React.FC<ParticipantProps> = ({
       ),
     ),
     child('div', 2)(
-      { className: cx('col-span-2 flex self-start !bg-transparent', ['justify-end', reverse]) },
+      {
+        className: cx('col-span-2 self-start flex items-baseline gap-1.5 !bg-transparent text-xs', [
+          'justify-end',
+          reverse,
+        ]),
+      },
       <a
         href={appRoutes.platformSummonerName(platform, summonerName, {})}
         target="_blank"
         rel="noreferrer"
+        className="text-base text-goldenrod"
       >
         {summonerName}
       </a>,
+      pipe(
+        masteries,
+        Maybe.map(m => (
+          <>
+            <span className="text-grey-400">—</span>
+            <span ref={percentsRef}>{round(m.totalPercents, 1)}%</span>
+            <Tooltip hoverRef={percentsRef}>Progression de La Quête</Tooltip>
+            <span ref={totalMasteriesRef} className="text-grey-400">
+              ({m.totalScore})
+            </span>
+            <Tooltip hoverRef={totalMasteriesRef}>Score total de maîtrise</Tooltip>
+          </>
+        )),
+        Maybe.toNullable,
+      ),
     ),
     child('ul', 4)(
       {},

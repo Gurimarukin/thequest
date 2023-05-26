@@ -2,7 +2,7 @@ import * as C from 'io-ts/Codec'
 
 import { ChampionLevel } from '../champion/ChampionLevel'
 
-type ActiveGameMasteryView = C.TypeOf<typeof codec>
+type ActiveGameChampionMasteryView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   championLevel: ChampionLevel.codec,
@@ -13,6 +13,6 @@ const codec = C.struct({
   tokensEarned: C.number,
 })
 
-const ActiveGameMasteryView = { codec }
+const ActiveGameChampionMasteryView = { codec }
 
-export { ActiveGameMasteryView }
+export { ActiveGameChampionMasteryView }

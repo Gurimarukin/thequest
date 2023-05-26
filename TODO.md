@@ -1,6 +1,7 @@
+- game: correct case of summoner's name in url
+- game: summoner level?
 - la quête recent searches insensitive sort
 - eslint unused argument (even if middle)
-- game: correct case of summoner's name in url
 - rework masteries colors
 - linked discord account icon?
 - toaster (replace alert)

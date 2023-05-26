@@ -360,11 +360,13 @@ const enrichAll = (
   )
   const totalChampionsCount = enrichedMasteries_.length
   const questPercents =
-    pipe(
-      enrichedMasteries_,
-      List.map(c => c.percents),
-      monoid.concatAll(number.MonoidSum),
-    ) / totalChampionsCount
+    totalChampionsCount === 0
+      ? 0
+      : pipe(
+          enrichedMasteries_,
+          List.map(c => c.percents),
+          monoid.concatAll(number.MonoidSum),
+        ) / totalChampionsCount
   const totalMasteryLevel = pipe(
     enrichedMasteries_,
     List.map(c => c.championLevel),
