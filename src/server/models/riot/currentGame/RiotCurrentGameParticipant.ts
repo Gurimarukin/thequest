@@ -2,6 +2,8 @@ import * as D from 'io-ts/Decoder'
 
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
+import { RuneId } from '../../../../shared/models/api/perk/RuneId'
+import { RuneStyleId } from '../../../../shared/models/api/perk/RuneStyleId'
 import { SummonerSpellKey } from '../../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { List } from '../../../../shared/utils/fp'
 
@@ -17,9 +19,9 @@ const riotGameCustomizationObjectDecoder = D.struct({
 // type RiotPerks = D.TypeOf<typeof riotPerksDecoder>
 
 const riotPerksDecoder = D.struct({
-  perkIds: List.decoder(D.number), // IDs of the perks/runes assigned.
-  perkStyle: D.number, // Primary runes path
-  perkSubStyle: D.number, // Secondary runes path
+  perkIds: List.decoder(RuneId.codec), // IDs of the perks/runes assigned.
+  perkStyle: RuneStyleId.codec, // Primary runes path
+  perkSubStyle: RuneStyleId.codec, // Secondary runes path
 })
 
 type RiotCurrentGameParticipant = D.TypeOf<typeof decoder>

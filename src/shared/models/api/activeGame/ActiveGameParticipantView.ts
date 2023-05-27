@@ -1,7 +1,8 @@
 import * as C from 'io-ts/Codec'
 
-import { List, Maybe } from '../../../utils/fp'
+import { Maybe } from '../../../utils/fp'
 import { ChampionKey } from '../champion/ChampionKey'
+import { PerksView } from '../perk/PerksView'
 import { SummonerLeaguesView } from '../summoner/SummonerLeaguesView'
 import { SummonerSpellKey } from '../summonerSpell/SummonerSpellKey'
 import { ActiveGameMasteriesView } from './ActiveGameMasteriesView'
@@ -19,11 +20,7 @@ const codec = C.struct({
   shardsCount: C.number,
   spell1Id: SummonerSpellKey.codec,
   spell2Id: SummonerSpellKey.codec,
-  perks: C.struct({
-    perkIds: List.codec(C.number),
-    perkStyle: C.number,
-    perkSubStyle: C.number,
-  }),
+  perks: PerksView.codec,
 })
 
 const ActiveGameParticipantView = { codec }

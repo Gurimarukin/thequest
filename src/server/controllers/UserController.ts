@@ -346,7 +346,7 @@ function UserController(
     championShards: NonEmptyArray<ChampionShardsPayload>,
   ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShardsPayload>>> {
     return pipe(
-      ddragonService.latestDataChampions(Lang.defaultLang),
+      ddragonService.latestChampions(Lang.defaultLang),
       Future.map(({ value: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,

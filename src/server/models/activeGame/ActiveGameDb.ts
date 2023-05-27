@@ -4,6 +4,8 @@ import { MapId } from '../../../shared/models/api/MapId'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { RuneId } from '../../../shared/models/api/perk/RuneId'
+import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { List } from '../../../shared/utils/fp'
 
@@ -35,9 +37,9 @@ const codec = C.struct({
       spell1Id: SummonerSpellKey.codec,
       spell2Id: SummonerSpellKey.codec,
       perks: C.struct({
-        perkIds: List.codec(C.number),
-        perkStyle: C.number,
-        perkSubStyle: C.number,
+        perkIds: List.codec(RuneId.codec),
+        perkStyle: RuneStyleId.codec,
+        perkSubStyle: RuneStyleId.codec,
       }),
     }),
   ),

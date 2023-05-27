@@ -5,11 +5,14 @@ import { DayJs } from '../../shared/models/DayJs'
 import { Store } from '../../shared/models/Store'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import { Lang } from '../../shared/models/api/Lang'
+import type { List } from '../../shared/utils/fp'
 import { Future, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { constants } from '../config/constants'
 import { StoredAt } from '../models/StoredAt'
+import type { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import type { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
+import type { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import type { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import type { RiotApiService } from './RiotApiService'
 
@@ -54,53 +57,78 @@ const DDragonService = (riotApiService: RiotApiService) => {
     ),
   )
 
-  const latestDefaultLangDataChampions = Store<Maybe<WithVersion<DDragonChampions>>>(Maybe.none)
-  const latestDefaultLangDataSummoners = Store<Maybe<WithVersion<DDragonSummoners>>>(Maybe.none)
+  const latestChampionsDefaultLang = Store<Maybe<WithVersion<DDragonChampions>>>(Maybe.none)
+  const latestSummonersDefaultLang = Store<Maybe<WithVersion<DDragonSummoners>>>(Maybe.none)
+  const latestRuneStylesDefaultLang = Store<Maybe<WithVersion<List<DDragonRuneStyle>>>>(Maybe.none)
+  const latestRunesDefaultLang = Store<Maybe<WithVersion<List<CDragonRune>>>>(Maybe.none)
 
-  const latestDataChampions: (lang: Lang) => Future<VersionWithChampions> = getLatest(
-    latestDefaultLangDataChampions,
+  const champions = getLatest(
+    latestChampionsDefaultLang,
     (version, lang) => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).champion,
   )
 
-  const latestDataSummoners: (lang: Lang) => Future<WithVersion<DDragonSummoners>> = getLatest(
-    latestDefaultLangDataSummoners,
-    (version, lang) => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).summoner,
+  const runes = getLatest(
+    latestRunesDefaultLang,
+    ({}, lang: Lang) =>
+      riotApiService.communitydragon.latest.plugins.rcpBeLolGameData.global(lang).v1.perks,
   )
 
-  return { latestDataChampions, latestDataSummoners }
+  const summoners: (lang: Lang) => (version: DDragonVersion) => Future<DDragonSummoners> =
+    getLatest(
+      latestSummonersDefaultLang,
+      (version, lang) => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).summoner,
+    )
+
+  const runeStyles: (lang: Lang) => (version: DDragonVersion) => Future<List<DDragonRuneStyle>> =
+    getLatest(
+      latestRuneStylesDefaultLang,
+      (version, lang) =>
+        riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).runesReforged,
+    )
+
+  return {
+    latestVersion: getLatestVersionWithCache,
+    latestChampions: (lang: Lang): Future<WithVersion<DDragonChampions>> =>
+      pipe(
+        getLatestVersionWithCache,
+        Future.bindTo('version'),
+        Future.bind('value', ({ version }) => champions(lang)(version)),
+      ),
+    summoners,
+    runeStyles,
+
+    cdragon: {
+      latestRunes: (lang: Lang): Future<List<CDragonRune>> =>
+        pipe(getLatestVersionWithCache, Future.chain(runes(lang))),
+    },
+  }
 
   function getLatest<A>(
     latestDefaultLang: Store<Maybe<WithVersion<A>>>,
     fromAPI: (version: DDragonVersion, lang: Lang) => Future<A>,
-  ): (lang: Lang) => Future<WithVersion<A>> {
-    return lang =>
-      pipe(
-        getLatestVersionWithCache,
-        Future.bindTo('version'),
-        Future.bind('value', ({ version }) =>
-          // cache only for defaultLang
-          Lang.Eq.equals(lang, Lang.defaultLang)
-            ? pipe(
-                Future.fromIO(latestDefaultLang.get),
-                Future.chain(
-                  flow(
-                    Maybe.filter(v => DDragonVersion.Eq.equals(v.version, version)),
-                    Maybe.fold(
-                      () =>
-                        pipe(
-                          fromAPI(version, lang),
-                          Future.chainFirstIOK(value =>
-                            latestDefaultLang.set(Maybe.some({ value, version })),
-                          ),
-                        ),
-                      v => Future.successful(v.value),
+  ): (lang: Lang) => (version: DDragonVersion) => Future<A> {
+    return lang => version =>
+      // cache only for defaultLang
+      Lang.Eq.equals(lang, Lang.defaultLang)
+        ? pipe(
+            Future.fromIO(latestDefaultLang.get),
+            Future.chain(
+              flow(
+                Maybe.filter(v => DDragonVersion.Eq.equals(v.version, version)),
+                Maybe.fold(
+                  () =>
+                    pipe(
+                      fromAPI(version, lang),
+                      Future.chainFirstIOK(value =>
+                        latestDefaultLang.set(Maybe.some({ value, version })),
+                      ),
                     ),
-                  ),
+                  v => Future.successful(v.value),
                 ),
-              )
-            : fromAPI(version, lang),
-        ),
-      )
+              ),
+            ),
+          )
+        : fromAPI(version, lang)
   }
 }
 

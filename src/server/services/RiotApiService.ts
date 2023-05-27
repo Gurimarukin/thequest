@@ -22,7 +22,9 @@ import { RiotLeagueEntry } from '../models/riot/RiotLeagueEntry'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
 import type { TagLine } from '../models/riot/TagLine'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
+import { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
+import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import { SummonerId } from '../models/summoner/SummonerId'
 
@@ -84,7 +86,13 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
               [DDragonSummoners.decoder, 'DDragonSummoners'],
             )
 
-            return { champion, summoner }
+            const runesReforged: Future<List<DDragonRuneStyle>> = httpClient.http(
+              [ddragonCdn(version, `/data/${lang}/runesReforged.json`), 'get'],
+              {},
+              [List.decoder(DDragonRuneStyle.decoder), 'List<DDragonRuneStyle>'],
+            )
+
+            return { champion, summoner, runesReforged }
           },
         }),
       },
@@ -257,6 +265,28 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                     statusesToOption(404),
                   ),
               }),
+            },
+          },
+        },
+      },
+    },
+
+    communitydragon: {
+      latest: {
+        plugins: {
+          rcpBeLolGameData: {
+            global: (lang: Lang) => {
+              const perks: Future<List<CDragonRune>> = httpClient.http(
+                [
+                  `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/${lang.toLowerCase()}/v1/perks.json`,
+                  'get',
+                ],
+                {},
+                [List.decoder(CDragonRune.decoder), 'List<CDragonRune>'],
+              )
+              return {
+                v1: { perks },
+              }
             },
           },
         },

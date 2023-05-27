@@ -80,9 +80,7 @@ const MadosayentisutoController = (
         masteries: masteriesService.findBySummoner(summoner.platform, summoner.id, {
           forceCacheRefresh: true,
         }),
-        staticData: futureMaybe.fromTaskEither(
-          ddragonService.latestDataChampions(Lang.defaultLang),
-        ),
+        staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(Lang.defaultLang)),
       }),
       futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
         const percents: List<number> = pipe(

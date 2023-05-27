@@ -76,11 +76,11 @@ const StaticDataService = (
   return {
     getLatest: (lang: Lang): Future<StaticData> => {
       if (!Lang.Eq.equals(lang, Lang.defaultLang)) {
-        return pipe(ddragonService.latestDataChampions(lang), Future.chain(fetchStaticData))
+        return pipe(ddragonService.latestChampions(lang), Future.chain(fetchStaticData))
       }
 
       return pipe(
-        ddragonService.latestDataChampions(lang),
+        ddragonService.latestChampions(lang),
         Future.bindTo('ddragon'),
         Future.bind('latest', ({ ddragon }) =>
           Future.fromIO(getLatestDefaultLangData(ddragon.version)),
@@ -110,12 +110,22 @@ const StaticDataService = (
 
     getLatestAdditional: (lang: Lang): Future<AdditionalStaticData> =>
       pipe(
-        ddragonService.latestDataSummoners(lang),
+        ddragonService.latestVersion,
+        Future.chain(version =>
+          pipe(
+            apply.sequenceS(Future.ApplicativePar)({
+              version: Future.successful(version),
+              summoners: ddragonService.summoners(lang)(version),
+              runeStyles: ddragonService.runeStyles(lang)(version),
+              runes: ddragonService.cdragon.latestRunes(lang),
+            }),
+          ),
+        ),
         Future.map(
-          (ddragon): AdditionalStaticData => ({
-            version: ddragon.version,
+          ({ version, summoners, runeStyles, runes }): AdditionalStaticData => ({
+            version,
             summonerSpells: pipe(
-              ddragon.value.data,
+              summoners.data,
               Dict.toReadonlyArray,
               List.map(
                 flow(
@@ -127,6 +137,22 @@ const StaticDataService = (
                 ),
               ),
             ),
+            runeStyles: pipe(
+              runeStyles,
+              List.map(style => ({
+                ...style,
+                slots: pipe(
+                  style.slots,
+                  List.map(slot => ({
+                    runes: pipe(
+                      slot.runes,
+                      List.map(rune => rune.id),
+                    ),
+                  })),
+                ),
+              })),
+            ),
+            runes,
           }),
         ),
       ),

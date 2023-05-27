@@ -2,6 +2,8 @@ import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeG
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { RuneId } from '../../../shared/models/api/perk/RuneId'
+import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { List, Maybe } from '../../../shared/utils/fp'
@@ -17,9 +19,9 @@ type ActiveGameParticipant = {
   spell1Id: SummonerSpellKey
   spell2Id: SummonerSpellKey
   perks: {
-    perkIds: List<number>
-    perkStyle: number
-    perkSubStyle: number
+    perkIds: List<RuneId>
+    perkStyle: RuneStyleId
+    perkSubStyle: RuneStyleId
   }
 }
 

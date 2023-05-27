@@ -277,6 +277,9 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 type ShardsProps = {
   shardsCount: number
   setShardsCount: ((count: number) => void) | null
+  /**
+   * @default fale
+   */
   centerShards: boolean | undefined
 }
 

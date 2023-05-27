@@ -67,7 +67,7 @@ export const League: React.FC<Props> = ({ queue, league, className }) => {
   return (
     <>
       <div ref={ref} className={cx('-mb-1 flex items-center gap-2', className)}>
-        <span className="h-10 w-10 overflow-hidden">
+        <span className="h-10 w-10 shrink-0 overflow-hidden">
           <img
             src={src}
             alt={`Icône ${alt}`}
