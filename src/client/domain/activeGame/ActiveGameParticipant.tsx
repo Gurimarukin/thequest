@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { createElement, useRef } from 'react'
+import { createElement, useCallback, useRef, useState } from 'react'
 
 import { Business } from '../../../shared/Business'
 import { MapId } from '../../../shared/models/api/MapId'
@@ -19,6 +19,7 @@ import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { appRoutes } from '../../router/AppRouter'
 import { NumberUtils } from '../../utils/NumberUtils'
 import { cx } from '../../utils/cx'
@@ -32,6 +33,8 @@ const gridTeamAutoCols = 6
 const gridTotalCols = 2 * gridTeamAutoCols + 2
 
 export const gridTemplateColumns = `1fr repeat(${gridTeamAutoCols},auto) repeat(${gridTeamAutoCols},auto) 1fr`
+
+const bevelWidth = 32 // px
 
 type SquarePropsRest = Pick<
   ChampionMasterySquareProps,
@@ -116,6 +119,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const percentsRef = useRef<HTMLSpanElement>(null)
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
+
+  const [bevelHeight, setBevelHeight] = useState(0)
+  const resizeBevel = useCallback((e: HTMLElement) => setBevelHeight(e.offsetHeight), [])
+  const onBevelMount = useRefWithResize(resizeBevel)
 
   const children = [
     child('div', 1)({}),
@@ -209,8 +216,18 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
     child('div', 7)(
-      { className: 'bg-transparent' },
-      <span className="w-5 border-b-[30px] border-l-[20px] border-b-transparent border-l-[lime]" />,
+      { ref: onBevelMount, className: 'bg-transparent' },
+      <div
+        className={cx(
+          teamBorder[teamId],
+          reverse ? 'border-l-transparent' : 'border-b-transparent',
+        )}
+        style={{
+          width: bevelWidth,
+          borderLeftWidth: bevelWidth,
+          borderBottomWidth: bevelHeight,
+        }}
+      />,
     ),
   ]
 
@@ -232,6 +249,11 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 const teamBg: Dict<`${TeamId}`, string> = {
   100: 'bg-mastery-7-bis/30',
   200: 'bg-mastery-5-bis/30',
+}
+
+const teamBorder: Dict<`${TeamId}`, string> = {
+  100: 'border-mastery-7-bis/30',
+  200: 'border-mastery-5-bis/30',
 }
 
 type BaseProps = {
