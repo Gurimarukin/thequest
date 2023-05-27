@@ -60,6 +60,13 @@ export const Dict = {
 export type PartialDict<K extends string, A> = Partial<Dict<K, A>>
 
 export const PartialDict = {
+  every: readonlyRecord.every as {
+    <A, B extends A>(refinement: Refinement<A, B>): Refinement<
+      PartialDict<string, A>,
+      PartialDict<string, B>
+    >
+    <A>(predicate: Predicate<A>): Predicate<PartialDict<string, A>>
+  },
   map: readonlyRecord.map as <A, B>(
     f: (a: A) => B,
   ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
