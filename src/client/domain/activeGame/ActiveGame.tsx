@@ -22,13 +22,11 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { ActiveGameBans } from './ActiveGameBans'
-import { ActiveGameParticipant, gridTeamCols } from './ActiveGameParticipant'
+import { ActiveGameParticipant, gridTemplateColumns } from './ActiveGameParticipant'
 
 const { cleanSummonerName, pad10 } = StringUtils
 
 const clockInterval = MsDuration.second(1)
-
-const gridTemplateColumns = `repeat(${2 * gridTeamCols},auto)`
 
 type Props = {
   platform: Platform

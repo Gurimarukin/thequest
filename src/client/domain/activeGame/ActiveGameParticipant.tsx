@@ -28,8 +28,10 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-export const gridTeamCols = 5 // should be children count returned by Participant
-const gridTotalCols = 2 * gridTeamCols + 1
+const gridTeamAutoCols = 6
+const gridTotalCols = 2 * gridTeamAutoCols + 2
+
+export const gridTemplateColumns = `1fr repeat(${gridTeamAutoCols},auto) repeat(${gridTeamAutoCols},auto) 1fr`
 
 type SquarePropsRest = Pick<
   ChampionMasterySquareProps,
@@ -116,7 +118,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
 
   const children = [
-    child('div', 1)(
+    child('div', 1)({}),
+    child('div', 2)(
       { className: 'flex items-end pt-6' },
       pipe(
         leagues,
@@ -126,7 +129,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       ),
     ),
-    child('div', 2)(
+    child('div', 3)(
       { className: 'flex items-end pt-6' },
       pipe(
         leagues,
@@ -136,7 +139,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       ),
     ),
-    child('div', 1)(
+    child('div', 2)(
       {
         className: cx('col-span-2 self-start flex items-center !bg-transparent', [
           'flex-row-reverse',
@@ -176,7 +179,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </div>,
     ),
-    child('ul', 3)(
+    child('ul', 4)(
       {},
       <li className="h-7">
         {spell1 !== undefined ? (
@@ -193,7 +196,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </li>,
     ),
-    child('div', 4)(
+    child('div', 5)(
       {},
       squareProps !== undefined ? (
         <ChampionMasterySquare {...squareProps} />
@@ -201,9 +204,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <span>Champion {ChampionKey.unwrap(championId)}</span>
       ),
     ),
-    child('div', 5)(
+    child('div', 6)(
       { className: cx('flex items-center gap-1', ['flex-row-reverse', reverse]) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
+    ),
+    child('div', 7)(
+      { className: 'bg-transparent' },
+      <span className="w-5 border-b-[30px] border-l-[20px] border-b-transparent border-l-[lime]" />,
     ),
   ]
 
@@ -236,7 +243,6 @@ type BaseProps = {
 const child =
   <P extends React.HTMLAttributes<T>, T extends HTMLElement>(
     type: keyof React.ReactHTML,
-
     gridColStart: number,
   ) =>
   ({ className, style, ...props }: React.ClassAttributes<T> & P, ...children: React.ReactNode[]) =>
