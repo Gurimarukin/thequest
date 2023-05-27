@@ -24,10 +24,12 @@ import { NumberUtils } from '../../utils/NumberUtils'
 import { cx } from '../../utils/cx'
 import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
-import { gridTotalCols } from './ActiveGame'
 import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
+
+export const gridTeamCols = 5 // should be children count returned by Participant
+const gridTotalCols = 2 * gridTeamCols + 1
 
 type SquarePropsRest = Pick<
   ChampionMasterySquareProps,
