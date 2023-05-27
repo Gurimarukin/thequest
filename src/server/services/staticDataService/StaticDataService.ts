@@ -13,18 +13,10 @@ import type { AdditionalStaticData } from '../../../shared/models/api/staticData
 import type { StaticData } from '../../../shared/models/api/staticData/StaticData'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
+import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import type { PartialDict } from '../../../shared/utils/fp'
-import {
-  Dict,
-  Either,
-  Future,
-  IO,
-  List,
-  Maybe,
-  NonEmptyArray,
-  Tuple,
-} from '../../../shared/utils/fp'
+import type { Dict, PartialDict } from '../../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
 
 import { constants } from '../../config/constants'
 import type { HttpClient } from '../../helpers/HttpClient'
@@ -126,7 +118,7 @@ const StaticDataService = (
             version,
             summonerSpells: pipe(
               summoners.data,
-              Dict.toReadonlyArray,
+              DictUtils.entries,
               List.map(
                 flow(
                   Tuple.snd,
@@ -163,7 +155,7 @@ const StaticDataService = (
       apply.sequenceS(Future.ApplyPar)({
         championData: pipe(
           fetchWikiaChampionData,
-          Future.map(flow(Dict.toReadonlyArray, List.map(Tuple.mapFst(EnglishName.wrap)))),
+          Future.map(flow(DictUtils.entries, List.map(Tuple.mapFst(EnglishName.wrap)))),
         ),
         aramChanges: fetchWikiaAramChanges,
       }),
@@ -242,7 +234,7 @@ const enrichChampions = (
   const withoutAramChanges: List<Either<ChampionError, Tuple<EnglishName, StaticDataChampion>>> =
     pipe(
       langDDragonChampions.data,
-      Dict.toReadonlyArray,
+      DictUtils.entries,
       List.map(([, champion]) =>
         pipe(
           wikiaChampions,
@@ -279,7 +271,7 @@ const enrichChampions = (
     )
   return pipe(
     aramChanges,
-    Dict.toReadonlyArray,
+    DictUtils.entries,
     List.reduce(withoutAramChanges, (acc, [englishName, spells]) =>
       pipe(
         acc,

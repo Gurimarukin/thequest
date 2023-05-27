@@ -17,7 +17,8 @@ import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPassword
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
-import { Dict, Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
+import { DictUtils } from '../../shared/utils/DictUtils'
+import { Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { validatePassword } from '../../shared/validations/validatePassword'
@@ -350,7 +351,7 @@ function UserController(
       Future.map(({ value: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,
-          Dict.toReadonlyArray,
+          DictUtils.entries,
           List.map(([, { key }]) => key),
         )
         return pipe(

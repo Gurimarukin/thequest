@@ -1,7 +1,11 @@
-import type { Dict, List, Tuple } from './fp'
+import type { Dict, List, PartialDict, Tuple } from './fp'
 
-const keys = Object.keys as <K extends string>(r: Dict<K, unknown>) => List<K>
-
-const entries = Object.entries as <K extends string, A>(r: Dict<K, A>) => List<Tuple<K, A>>
-
-export const DictUtils = { keys, entries }
+export const DictUtils = {
+  keys: Object.keys as <K extends string>(r: Dict<K, unknown>) => List<K>,
+  entries: Object.entries as <K extends string, A>(r: Dict<K, A>) => List<Tuple<K, A>>,
+  partial: {
+    entries: Object.entries as <K extends string, A>(
+      r: PartialDict<K, A>,
+    ) => List<Tuple<K, A | undefined>>,
+  },
+}

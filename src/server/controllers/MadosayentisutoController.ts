@@ -10,8 +10,9 @@ import { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
+import { DictUtils } from '../../shared/utils/DictUtils'
 import type { Future } from '../../shared/utils/fp'
-import { Dict, Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { MadosayentisutoConfig } from '../config/Config'
@@ -85,7 +86,7 @@ const MadosayentisutoController = (
       futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
         const percents: List<number> = pipe(
           staticData.value.data,
-          Dict.toReadonlyArray,
+          DictUtils.entries,
           List.map(([, { key }]) =>
             pipe(
               masteries,

@@ -1,8 +1,9 @@
 import { pipe } from 'fp-ts/function'
 import type { Status } from 'hyper-ts'
 
-import type { NonEmptyArray } from '../../../shared/utils/fp'
-import { Dict, List } from '../../../shared/utils/fp'
+import { DictUtils } from '../../../shared/utils/DictUtils'
+import type { Dict, NonEmptyArray } from '../../../shared/utils/fp'
+import { List } from '../../../shared/utils/fp'
 
 type SimpleHttpResponse = {
   status: Status
@@ -22,7 +23,7 @@ const toRawHttp = ({ status, body, headers }: SimpleHttpResponse): string =>
       `HTTP/1.1 ${status}`,
       ...pipe(
         headers,
-        Dict.toReadonlyArray,
+        DictUtils.entries,
         List.map(([key, val]) => `${key}: ${pipe(val, List.mkString('; '))}`),
       ),
       '',

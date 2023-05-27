@@ -1,6 +1,6 @@
 import * as C from 'io-ts/Codec'
 
-import type { List } from '../../../utils/fp'
+import { DictUtils } from '../../../utils/DictUtils'
 import { Maybe } from '../../../utils/fp'
 import { LeagueEntryView } from '../league/LeagueEntryView'
 
@@ -13,7 +13,7 @@ const properties = {
 
 const codec = C.struct(properties)
 
-const keys = Object.keys(properties) as List<keyof SummonerLeaguesView>
+const keys = DictUtils.keys(properties)
 
 const SummonerLeaguesView = { codec, keys }
 
