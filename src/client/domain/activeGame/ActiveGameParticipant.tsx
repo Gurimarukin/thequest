@@ -150,8 +150,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       {
         className: cx(
           'col-span-2 self-start flex items-center gap-2 pt-2 !bg-transparent',
-          padding,
           ['flex-row-reverse', reverse],
+          padding,
         ),
       },
       <div className="w-8">
@@ -175,12 +175,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           Maybe.map(m => (
             <>
               <span className="text-grey-400">—</span>
-              <span ref={percentsRef}>{round(m.totalPercents, 1)}%</span>
-              <Tooltip hoverRef={percentsRef}>Progression de La Quête</Tooltip>
-              <span ref={totalMasteriesRef} className="text-grey-400">
-                ({m.totalScore})
+              <span className="flex gap-1.5">
+                <span ref={percentsRef}>{round(m.totalPercents, 1)}%</span>
+                <Tooltip hoverRef={percentsRef}>Progression de La Quête</Tooltip>
+                <span ref={totalMasteriesRef} className="text-grey-400">
+                  ({m.totalScore})
+                </span>
+                <Tooltip hoverRef={totalMasteriesRef}>Score total de maîtrise</Tooltip>
               </span>
-              <Tooltip hoverRef={totalMasteriesRef}>Score total de maîtrise</Tooltip>
             </>
           )),
           Maybe.toNullable,
