@@ -233,7 +233,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       ) : undefined,
     ),
     child('div', 6)(
-      { className: cx('flex items-center', padding) },
+      { className: cx('py-[13px]', padding) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
     child('div', 7)({}),

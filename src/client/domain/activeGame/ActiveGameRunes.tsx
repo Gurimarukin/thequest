@@ -52,24 +52,19 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, rev
   }, [perks, runeStyles, runes])
 
   return (
-    <div className={cx('flex items-center gap-1.5', ['flex-row-reverse', reverse])}>
-      <RunePath
-        runes={shards}
-        className="flex flex-col gap-1.5"
-        liClassName="!w-3 h-3 overflow-hidden"
-        runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
-      />
-      <div className={cx('flex flex-col gap-1.5', reverse ? 'pr-1' : 'pl-1')}>
+    <div className={cx('flex gap-1.5', ['flex-row-reverse', reverse])}>
+      <div className={cx('flex flex-col gap-2', reverse ? 'pr-1' : 'pl-1')}>
+        <RunePath runes={primaryPath} reverse={reverse} className="gap-1" />
+        <RunePath runes={secondaryPath} reverse={reverse} className="gap-1" />
         <RunePath
-          runes={primaryPath}
-          className={cx('flex items-center justify-end gap-1', ['flex-row-reverse', !reverse])}
-        />
-        <RunePath
-          runes={secondaryPath}
-          className={cx('flex justify-end gap-1', ['flex-row-reverse', !reverse])}
+          runes={shards}
+          reverse={!reverse}
+          className="justify-end gap-1.5"
+          liClassName="!w-3 h-3 overflow-hidden"
+          runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
         />
       </div>
-      <span className="-mt-1.5 ml-0.5 flex h-9 w-9 self-start">
+      <span className="-mt-1.5 flex h-9 w-9">
         {pipe(
           keyStone,
           Maybe.fold(
@@ -117,13 +112,20 @@ const getFindRunes =
 
 type RunePathProps = {
   runes: List<StaticDataRune>
+  reverse: boolean
   className?: string
   liClassName?: string
   runeClassName?: string
 }
 
-const RunePath: React.FC<RunePathProps> = ({ runes, className, liClassName, runeClassName }) => (
-  <ul className={className}>
+const RunePath: React.FC<RunePathProps> = ({
+  runes,
+  reverse,
+  className,
+  liClassName,
+  runeClassName,
+}) => (
+  <ul className={cx('flex', ['flex-row-reverse', reverse], className)}>
     {runes.map((r, i) => (
       <li
         // eslint-disable-next-line react/no-array-index-key
