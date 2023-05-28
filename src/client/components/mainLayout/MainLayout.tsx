@@ -22,8 +22,8 @@ export const MainLayout: ChildrenFC = ({ children }) => {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900">
-        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between px-3 py-2">
+      <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
+        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between py-2">
           <div className="flex shrink-0 items-center gap-6">
             <Link to={appRoutes.index}>
               <img
