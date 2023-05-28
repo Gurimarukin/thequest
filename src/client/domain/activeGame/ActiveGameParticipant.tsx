@@ -25,6 +25,7 @@ import { NumberUtils } from '../../utils/NumberUtils'
 import { cx } from '../../utils/cx'
 import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
+import { ActiveGameAramStats } from './ActiveGameAramStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
@@ -84,10 +85,15 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 }) => {
   const { champions, assets } = useStaticData()
 
+  const percentsRef = useRef<HTMLSpanElement>(null)
+  const totalMasteriesRef = useRef<HTMLSpanElement>(null)
+  const aramRef = useRef<HTMLDivElement>(null)
+
   const spell1 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell1Id))
   const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
 
   const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+  // const champion = champions.find(c => c.name === 'Sion')
   const squareProps: ChampionMasterySquareProps | undefined =
     champion !== undefined
       ? {
@@ -113,13 +119,11 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               m => ({ ...m, percents: Business.championPercents(m) }),
             ),
           ),
+          hoverRef: aramRef,
           centerShards: true,
           noShadow: true,
         }
       : undefined
-
-  const percentsRef = useRef<HTMLSpanElement>(null)
-  const totalMasteriesRef = useRef<HTMLSpanElement>(null)
 
   const [bevelHeight, setBevelHeight] = useState(0)
   const resizeBevel = useCallback((e: HTMLElement) => setBevelHeight(e.offsetHeight), [])
@@ -208,12 +212,22 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </li>,
     ),
     child('div', 4)(
-      { className: cx('py-2', padding) },
+      {
+        ref: aramRef,
+        className: cx(
+          'flex items-center gap-1.5 py-2 text-2xs',
+          ['flex-row-reverse', reverse],
+          padding,
+        ),
+      },
       squareProps !== undefined ? (
         <ChampionMasterySquare {...squareProps} />
       ) : (
         <div className="h-16 w-16 bg-black text-2xs">Champion {ChampionKey.unwrap(championId)}</div>
       ),
+      champion !== undefined ? (
+        <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
+      ) : undefined,
     ),
     child('div', 5)(
       { className: cx('flex items-center', padding) },
