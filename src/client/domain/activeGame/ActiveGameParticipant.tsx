@@ -93,7 +93,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
 
   const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
-  // const champion = champions.find(c => c.name === 'Sion')
   const squareProps: ChampionMasterySquareProps | undefined =
     champion !== undefined
       ? {
