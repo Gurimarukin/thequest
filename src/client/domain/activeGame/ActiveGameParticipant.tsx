@@ -30,9 +30,10 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-const gridTotalCols = 16
+const gridTeamAutoCols = 7
+const gridTotalCols = 2 * gridTeamAutoCols + 2
 
-export const gridTemplateColumns = `repeat(${gridTotalCols},auto)`
+export const gridTemplateColumns = `1fr repeat(${gridTeamAutoCols},auto) repeat(${gridTeamAutoCols},auto) 1fr`
 
 const bevelWidth = 32 // px
 
