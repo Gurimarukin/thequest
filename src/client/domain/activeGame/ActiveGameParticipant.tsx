@@ -137,7 +137,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       ),
     ),
     child('div', 2)(
-      { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse]) },
+      { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
       pipe(
         leagues,
         Maybe.fold(
