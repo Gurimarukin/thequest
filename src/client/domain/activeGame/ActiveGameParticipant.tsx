@@ -159,7 +159,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           padding,
         ),
       },
-      <div className="w-8">
+      <div className="w-9">
         <img
           src={assets.summonerIcon(profileIconId)}
           alt={`Icône de ${summonerName}`}
