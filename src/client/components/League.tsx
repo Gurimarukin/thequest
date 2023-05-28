@@ -11,6 +11,16 @@ import { Assets } from '../imgs/Assets'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
+type Props = {
+  /**
+   * @default 'base'
+   */
+  variant?: 'base' | 'small'
+  queue: keyof SummonerLeaguesView
+  league: Maybe<LeagueEntryView>
+  className?: string
+}
+
 type Attrs = {
   src: string
   alt: string
@@ -19,13 +29,7 @@ type Attrs = {
   tooltip?: React.ReactNode
 }
 
-type Props = {
-  queue: keyof SummonerLeaguesView
-  league: Maybe<LeagueEntryView>
-  className?: string
-}
-
-export const League: React.FC<Props> = ({ queue, league, className }) => {
+export const League: React.FC<Props> = ({ variant = 'base', queue, league, className }) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
@@ -66,8 +70,22 @@ export const League: React.FC<Props> = ({ queue, league, className }) => {
 
   return (
     <>
-      <div ref={ref} className={cx('-mb-1 flex items-center gap-2', className)}>
-        <span className="h-10 w-10 shrink-0 overflow-hidden">
+      <div
+        ref={ref}
+        className={cx(
+          '-mb-1 flex items-center',
+          ['gap-2', variant === 'base'],
+          ['gap-1.5', variant === 'small'],
+          className,
+        )}
+      >
+        <span
+          className={cx(
+            'shrink-0 overflow-hidden',
+            ['h-10 w-10', variant === 'base'],
+            ['h-6 w-6', variant === 'small'],
+          )}
+        >
           <img
             src={src}
             alt={`Icône ${alt}`}
