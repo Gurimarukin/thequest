@@ -138,13 +138,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         </span>
       </div>
 
-      {groupedBans !== null ? (
-        <div className="flex justify-center">
-          <ActiveGameBans bans={groupedBans} />
-        </div>
-      ) : (
-        <span />
-      )}
+      {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : <span />}
 
       <div className="grid gap-y-4" style={{ gridTemplateColumns }}>
         {TeamId.values.map((teamId, i) => (
