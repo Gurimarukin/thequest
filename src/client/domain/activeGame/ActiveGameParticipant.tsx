@@ -29,10 +29,10 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-const gridTeamAutoCols = 6
-const gridTotalCols = 2 * gridTeamAutoCols + 2
+const gridTeamAutoCols = 5
+const gridTotalCols = 2 * gridTeamAutoCols + 4
 
-export const gridTemplateColumns = `1fr repeat(${gridTeamAutoCols},auto) repeat(${gridTeamAutoCols},auto) 1fr`
+export const gridTemplateColumns = `repeat(${gridTeamAutoCols},auto) auto 1fr 1fr auto repeat(${gridTeamAutoCols},auto)`
 
 const bevelWidth = 32 // px
 
@@ -126,8 +126,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
-    child('div', 1)({ className: 'bg-transparent' }),
-    child('div', 2)(
+    child('div', 1)(
       { className: cx('flex items-end pt-6', padding) },
       pipe(
         leagues,
@@ -137,7 +136,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       ),
     ),
-    child('div', 3)(
+    child('div', 2)(
       { className: 'flex items-end pt-6' },
       pipe(
         leagues,
@@ -147,7 +146,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       ),
     ),
-    child('div', 2)(
+    child('div', 1)(
       {
         className: cx(
           'col-span-2 self-start flex items-center gap-2 pt-2 !bg-transparent',
@@ -188,7 +187,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </div>,
     ),
-    child('ul', 4)(
+    child('ul', 3)(
       { className: cx('flex flex-col justify-between py-2', padding) },
       <li className="h-7 overflow-hidden shadow-even shadow-black">
         {spell1 !== undefined ? (
@@ -205,7 +204,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </li>,
     ),
-    child('div', 5)(
+    child('div', 4)(
       { className: cx('py-2', padding) },
       squareProps !== undefined ? (
         <ChampionMasterySquare {...squareProps} />
@@ -213,12 +212,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <div className="h-16 w-16 bg-black text-2xs">Champion {ChampionKey.unwrap(championId)}</div>
       ),
     ),
-    child('div', 6)(
+    child('div', 5)(
       { className: cx('flex items-center', padding) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
+    child('div', 6)({}),
     child('div', 7)(
-      { ref: onBevelMount, className: 'bg-transparent' },
+      { ref: onBevelMount, className: cx('bg-transparent', ['justify-self-end', reverse]) },
       <div
         className={cx(
           teamBorder[teamId],
