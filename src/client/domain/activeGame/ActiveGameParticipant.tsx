@@ -93,6 +93,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
 
   const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+  const isHowlingAbyss = MapId.isHowlingAbyss(mapId)
   const squareProps: ChampionMasterySquareProps | undefined =
     champion !== undefined
       ? {
@@ -100,7 +101,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           name: champion.name,
           shardsCount: shardsCount === 0 ? Maybe.none : Maybe.some(shardsCount),
           positions: champion.positions,
-          aram: MapId.isHowlingAbyss(mapId) ? Maybe.some(champion.aram) : Maybe.none,
+          aram: isHowlingAbyss ? Maybe.some(champion.aram) : Maybe.none,
           setChampionShards: null,
           ...pipe(
             masteries,
@@ -227,7 +228,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       ) : (
         <div className="h-16 w-16 bg-black text-2xs">Champion {ChampionKey.unwrap(championId)}</div>
       ),
-      champion !== undefined ? (
+      champion !== undefined && isHowlingAbyss ? (
         <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
       ) : undefined,
     ),
