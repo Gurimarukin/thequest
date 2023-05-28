@@ -13,11 +13,10 @@ import { cx } from '../../utils/cx'
 
 type Props = {
   bans: PartialDict<`${TeamId}`, List<Tuple<string, NonEmptyArray<BannedChampion>>>>
-  className?: string
 }
 
-export const ActiveGameBans: React.FC<Props> = ({ bans, className }) => (
-  <div className={cx('flex flex-wrap justify-between gap-6', className)}>
+export const ActiveGameBans: React.FC<Props> = ({ bans }) => (
+  <div className="flex flex-wrap justify-between gap-6">
     {TeamId.values.map((teamId, i) => {
       const teamBans = bans[teamId]
       const reverse = i % 2 === 1
