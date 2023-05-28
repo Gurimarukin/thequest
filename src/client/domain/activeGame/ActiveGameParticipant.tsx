@@ -127,22 +127,22 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
     child('div', 1)(
-      { className: cx('flex items-end pt-6', padding) },
+      { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
       pipe(
         leagues,
         Maybe.fold(
           () => null,
-          l => <League queue="soloDuo" league={l.soloDuo} />,
+          l => <League variant="small" queue="soloDuo" league={l.soloDuo} />,
         ),
       ),
     ),
     child('div', 2)(
-      { className: 'flex items-end pt-6' },
+      { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse]) },
       pipe(
         leagues,
         Maybe.fold(
           () => null,
-          l => <League queue="flex" league={l.flex} />,
+          l => <League variant="small" queue="flex" league={l.flex} />,
         ),
       ),
     ),
