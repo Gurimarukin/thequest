@@ -83,18 +83,18 @@ export const League: React.FC<Props> = ({
       <div
         ref={ref}
         className={cx(
-          '-mb-1 flex items-center',
+          '-mb-1 grid grid-cols-[auto_auto] items-center',
           ['gap-2', variant === 'base'],
           ['gap-1.5', variant === 'small'],
-          ['flex-row-reverse', reverse],
           className,
         )}
       >
         <span
           className={cx(
-            'shrink-0 overflow-hidden',
+            'overflow-hidden',
             ['h-10 w-10', variant === 'base'],
             ['h-7 w-7', variant === 'small'],
+            ['col-start-2', reverse],
           )}
         >
           <img
@@ -107,8 +107,8 @@ export const League: React.FC<Props> = ({
             )}
           />
         </span>
-        <div className="flex flex-col text-xs">
-          <span>{description}</span>
+        <div className={cx('flex flex-col text-xs', ['col-start-1 row-start-1', reverse])}>
+          <span className="whitespace-nowrap">{description}</span>
           {subDescription !== undefined ? (
             <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
           ) : null}

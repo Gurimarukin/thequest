@@ -114,6 +114,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             ),
           ),
           centerShards: true,
+          noShadow: true,
         }
       : undefined
 
@@ -191,18 +192,18 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     ),
     child('ul', 3)(
       { className: cx('flex flex-col justify-between py-2', padding) },
-      <li className="h-7 overflow-hidden shadow-even shadow-black">
+      <li className="h-7 w-7 overflow-hidden">
         {spell1 !== undefined ? (
-          <SummonerSpell spell={spell1} className="h-full" />
+          <SummonerSpell spell={spell1} className="h-full w-full" />
         ) : (
-          <Empty className="h-full w-7">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
+          <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
         )}
       </li>,
       <li className="h-7">
         {spell2 !== undefined ? (
-          <SummonerSpell spell={spell2} className="h-full" />
+          <SummonerSpell spell={spell2} className="h-full w-full" />
         ) : (
-          <Empty className="h-full w-7">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>
+          <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>
         )}
       </li>,
     ),

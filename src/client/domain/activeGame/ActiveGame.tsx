@@ -130,17 +130,15 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   }, [])
 
   return (
-    <div className="flex flex-col gap-4 py-3">
-      <div className="flex flex-col gap-4 px-3">
-        <div className="flex w-full max-w-7xl flex-wrap items-baseline justify-center gap-4 self-center">
-          <h2 className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</h2>
-          <span className="flex text-grey-400">
-            (<pre>{prettyMs(gameDuration)}</pre>)
-          </span>
-        </div>
-
-        {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : null}
+    <div className="grid min-h-full grid-rows-[1fr_auto_auto_1fr] gap-4 py-3">
+      <div className="flex items-center justify-center gap-4 px-3">
+        <h2 className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</h2>
+        <span className="flex text-grey-400">
+          (<pre>{prettyMs(gameDuration)}</pre>)
+        </span>
       </div>
+
+      {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : <span />}
 
       <div className="grid gap-y-4" style={{ gridTemplateColumns }}>
         {TeamId.values.map((teamId, i) => (

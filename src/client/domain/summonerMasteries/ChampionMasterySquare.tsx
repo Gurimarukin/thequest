@@ -37,7 +37,14 @@ export type ChampionMasterySquareProps = {
    */
   isHistogram?: boolean
   hoverRef?: React.RefObject<HTMLDivElement>
+  /**
+   * @default false
+   */
   centerShards?: boolean
+  /**
+   * @default false
+   */
+  noShadow?: boolean
 }
 
 export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
@@ -56,7 +63,8 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   setChampionShards,
   isHistogram = false,
   hoverRef: overrideHoverRef,
-  centerShards,
+  centerShards = false,
+  noShadow = false,
 }) => {
   const staticData = useStaticData()
 
@@ -79,8 +87,9 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* level border */}
         <div
           className={cx(
-            'absolute inset-0 flex flex-col justify-end overflow-hidden rounded-bl-xl bg-black shadow-even shadow-black',
+            'absolute inset-0 flex flex-col justify-end overflow-hidden rounded-bl-xl bg-black',
             isHistogram ? 'rounded-br-xl' : 'rounded-tr-xl',
+            ['shadow-even shadow-black', !noShadow],
           )}
         >
           <LevelSVG
@@ -277,10 +286,7 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 type ShardsProps = {
   shardsCount: number
   setShardsCount: ((count: number) => void) | null
-  /**
-   * @default fale
-   */
-  centerShards: boolean | undefined
+  centerShards: boolean
 }
 
 const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShards = false }) => {
