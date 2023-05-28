@@ -30,10 +30,9 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-const gridTeamAutoCols = 5
-const gridTotalCols = 2 * gridTeamAutoCols + 4
+const gridTotalCols = 16
 
-export const gridTemplateColumns = `repeat(${gridTeamAutoCols},auto) auto 1fr 1fr auto repeat(${gridTeamAutoCols},auto)`
+export const gridTemplateColumns = `repeat(${gridTotalCols},auto)`
 
 const bevelWidth = 32 // px
 
@@ -131,7 +130,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
-    child('div', 1)(
+    child('div', 1)({}),
+    child('div', 2)(
       { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
       pipe(
         leagues,
@@ -141,7 +141,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       ),
     ),
-    child('div', 2)(
+    child('div', 3)(
       { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
       pipe(
         leagues,
@@ -151,7 +151,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       ),
     ),
-    child('div', 1)(
+    child('div', 2)(
       {
         className: cx(
           'col-span-2 self-start flex items-center gap-2 pt-2 !bg-transparent',
@@ -194,16 +194,16 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </div>,
     ),
-    child('ul', 3)(
-      { className: cx('flex flex-col justify-between py-2', padding) },
-      <li className="h-7 w-7 overflow-hidden">
+    child('ul', 4)(
+      { className: cx('flex flex-col justify-between items-center py-2', padding) },
+      <li className="h-7 w-7">
         {spell1 !== undefined ? (
           <SummonerSpell spell={spell1} className="h-full w-full" />
         ) : (
           <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
         )}
       </li>,
-      <li className="h-7">
+      <li className="h-7 w-7">
         {spell2 !== undefined ? (
           <SummonerSpell spell={spell2} className="h-full w-full" />
         ) : (
@@ -211,7 +211,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </li>,
     ),
-    child('div', 4)(
+    child('div', 5)(
       {
         ref: aramRef,
         className: cx(
@@ -229,12 +229,12 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
       ) : undefined,
     ),
-    child('div', 5)(
+    child('div', 6)(
       { className: cx('flex items-center', padding) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
-    child('div', 6)({}),
-    child('div', 7)(
+    child('div', 7)({}),
+    child('div', 8)(
       { ref: onBevelMount, className: cx('bg-transparent', ['justify-self-end', reverse]) },
       <div
         className={cx(
