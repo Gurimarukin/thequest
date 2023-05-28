@@ -1,5 +1,6 @@
 - game: correct case of summoner's name in url
 - game: summoner level?
+- game: when (dis)connecting user, update shards
 - la quête recent searches insensitive sort
 - eslint unused argument (even if middle)
 - rework masteries colors

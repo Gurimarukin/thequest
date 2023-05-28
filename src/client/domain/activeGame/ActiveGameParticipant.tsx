@@ -124,10 +124,11 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const resizeBevel = useCallback((e: HTMLElement) => setBevelHeight(e.offsetHeight), [])
   const onBevelMount = useRefWithResize(resizeBevel)
 
+  const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
-    child('div', 1)({}),
+    child('div', 1)({ className: 'bg-transparent' }),
     child('div', 2)(
-      { className: 'flex items-end pt-6' },
+      { className: cx('flex items-end pt-6', padding) },
       pipe(
         leagues,
         Maybe.fold(
@@ -148,12 +149,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     ),
     child('div', 2)(
       {
-        className: cx('col-span-2 self-start flex items-center !bg-transparent', [
-          'flex-row-reverse',
-          reverse,
-        ]),
+        className: cx(
+          'col-span-2 self-start flex items-center gap-2 pt-2 !bg-transparent',
+          padding,
+          ['flex-row-reverse', reverse],
+        ),
       },
-      <div className="w-6 rounded-sm border border-goldenrod-bis">
+      <div className="w-8">
         <img
           src={assets.summonerIcon(profileIconId)}
           alt={`Icône de ${summonerName}`}
@@ -187,32 +189,32 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </div>,
     ),
     child('ul', 4)(
-      {},
-      <li className="h-7">
+      { className: cx('flex flex-col justify-between py-2', padding) },
+      <li className="h-7 overflow-hidden shadow-even shadow-black">
         {spell1 !== undefined ? (
           <SummonerSpell spell={spell1} className="h-full" />
         ) : (
-          <span>Sort {SummonerSpellKey.unwrap(spell1Id)}</span>
+          <Empty className="h-full w-7">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
         )}
       </li>,
       <li className="h-7">
         {spell2 !== undefined ? (
           <SummonerSpell spell={spell2} className="h-full" />
         ) : (
-          <span>Sort {SummonerSpellKey.unwrap(spell2Id)}</span>
+          <Empty className="h-full w-7">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>
         )}
       </li>,
     ),
     child('div', 5)(
-      {},
+      { className: cx('py-2', padding) },
       squareProps !== undefined ? (
         <ChampionMasterySquare {...squareProps} />
       ) : (
-        <span>Champion {ChampionKey.unwrap(championId)}</span>
+        <div className="h-16 w-16 bg-black text-2xs">Champion {ChampionKey.unwrap(championId)}</div>
       ),
     ),
     child('div', 6)(
-      { className: cx('flex items-center gap-1', ['flex-row-reverse', reverse]) },
+      { className: cx('flex items-center', padding) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
     child('div', 7)(
@@ -284,3 +286,12 @@ const child =
       },
       ...children,
     )
+
+type EmptyProps = {
+  className?: string
+  children?: React.ReactNode
+}
+
+const Empty: React.FC<EmptyProps> = ({ className, children }) => (
+  <div className={cx('bg-black text-2xs', className)}>{children}</div>
+)

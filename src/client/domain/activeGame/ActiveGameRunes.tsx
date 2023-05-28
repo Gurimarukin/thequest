@@ -52,14 +52,14 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, rev
   }, [perks, runeStyles, runes])
 
   return (
-    <>
+    <div className={cx('flex items-center gap-1.5', ['flex-row-reverse', reverse])}>
       <RunePath
         runes={shards}
-        className="flex flex-col gap-1"
+        className="flex flex-col gap-1.5"
         liClassName="!w-3 h-3 overflow-hidden"
         runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
       />
-      <div>
+      <div className={cx('flex flex-col gap-1.5', reverse ? 'pr-1' : 'pl-1')}>
         <RunePath
           runes={primaryPath}
           className={cx('flex items-center justify-end gap-1', ['flex-row-reverse', !reverse])}
@@ -69,7 +69,7 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, rev
           className={cx('flex justify-end gap-1', ['flex-row-reverse', !reverse])}
         />
       </div>
-      <span className="h-10 w-10 rounded-sm">
+      <span className="-mt-1.5 ml-0.5 flex h-9 w-9 self-start">
         {pipe(
           keyStone,
           Maybe.fold(
@@ -80,7 +80,7 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, rev
           ),
         )}
       </span>
-    </>
+    </div>
   )
 }
 
