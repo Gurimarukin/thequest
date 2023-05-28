@@ -18,6 +18,10 @@ type Props = {
   variant?: 'base' | 'small'
   queue: keyof SummonerLeaguesView
   league: Maybe<LeagueEntryView>
+  /**
+   * @default false
+   */
+  reverse?: boolean
   className?: string
 }
 
@@ -29,7 +33,13 @@ type Attrs = {
   tooltip?: React.ReactNode
 }
 
-export const League: React.FC<Props> = ({ variant = 'base', queue, league, className }) => {
+export const League: React.FC<Props> = ({
+  variant = 'base',
+  queue,
+  league,
+  reverse = false,
+  className,
+}) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
@@ -76,6 +86,7 @@ export const League: React.FC<Props> = ({ variant = 'base', queue, league, class
           '-mb-1 flex items-center',
           ['gap-2', variant === 'base'],
           ['gap-1.5', variant === 'small'],
+          ['flex-row-reverse', reverse],
           className,
         )}
       >
@@ -83,19 +94,23 @@ export const League: React.FC<Props> = ({ variant = 'base', queue, league, class
           className={cx(
             'shrink-0 overflow-hidden',
             ['h-10 w-10', variant === 'base'],
-            ['h-6 w-6', variant === 'small'],
+            ['h-7 w-7', variant === 'small'],
           )}
         >
           <img
             src={src}
             alt={`Icône ${alt}`}
-            className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
+            className={cx(
+              'max-w-none',
+              ['m-[-3px] w-[calc(100%_+_6px)]', variant === 'base'],
+              ['-m-0.5 w-[calc(100%_+_4px)]', variant === 'small'],
+            )}
           />
         </span>
         <div className="flex flex-col text-xs">
           <span>{description}</span>
           {subDescription !== undefined ? (
-            <span className="flex gap-1">{subDescription}</span>
+            <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
           ) : null}
         </div>
       </div>

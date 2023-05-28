@@ -132,7 +132,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         leagues,
         Maybe.fold(
           () => null,
-          l => <League variant="small" queue="soloDuo" league={l.soloDuo} />,
+          l => <League variant="small" queue="soloDuo" league={l.soloDuo} reverse={reverse} />,
         ),
       ),
     ),
@@ -142,7 +142,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         leagues,
         Maybe.fold(
           () => null,
-          l => <League variant="small" queue="flex" league={l.flex} />,
+          l => <League variant="small" queue="flex" league={l.flex} reverse={reverse} />,
         ),
       ),
     ),
