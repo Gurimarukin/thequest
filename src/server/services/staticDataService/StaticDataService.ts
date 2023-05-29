@@ -82,7 +82,21 @@ const StaticDataService = (
   const fetchWikiaChampionData = getFetchWikiaChampionData(httpClient)
   const wikiaChampions: Future<WikiaChampionsData> = pipe(
     Future.fromIO(getWikiaChampionData),
-    Future.chain(Maybe.fold(() => fetchWikiaChampionData, Future.successful)),
+    Future.chain(
+      Maybe.fold(
+        () =>
+          pipe(
+            fetchWikiaChampionData,
+            Future.chainFirstIOK(value =>
+              pipe(
+                DayJs.now,
+                io.chain(now => wikiaChampionsDataCache.set(Maybe.some({ value, storedAt: now }))),
+              ),
+            ),
+          ),
+        Future.successful,
+      ),
+    ),
   )
 
   const fetchWikiaAramChanges = getFetchWikiaAramChanges(httpClient)
