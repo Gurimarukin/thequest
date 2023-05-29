@@ -42,6 +42,7 @@ export const Application = ({
     leagueEntryService,
     masteriesService,
     summonerService,
+    staticDataService,
     userService,
   )
   const userController = UserController(

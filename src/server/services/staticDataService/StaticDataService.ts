@@ -26,6 +26,7 @@ import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import type { DDragonChampions } from '../../models/riot/ddragon/DDragonChampions'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
+import type { WikiaChampionsData } from '../../models/wikia/WikiaChampionsData'
 import type { DDragonService, VersionWithChampions } from '../DDragonService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
 import { getFetchWikiaChampionData } from './getFetchWikiaChampionData'
@@ -40,13 +41,13 @@ const StaticDataService = (
 ) => {
   const logger = Logger('StaticDataService')
 
-  const latestDefaultLangData = Store<Maybe<StoredAt<StaticData>>>(Maybe.none)
+  const latestDefaultLangStaticData = Store<Maybe<StoredAt<StaticData>>>(Maybe.none)
 
   // keep if same version
   const getLatestDefaultLangData = (version: DDragonVersion): io.IO<Maybe<StaticData>> =>
     pipe(
       apply.sequenceS(io.Apply)({
-        maybeData: latestDefaultLangData.get,
+        maybeData: latestDefaultLangStaticData.get,
         now: DayJs.now,
       }),
       io.map(({ maybeData, now }) =>
@@ -62,10 +63,33 @@ const StaticDataService = (
       ),
     )
 
+  const wikiaChampionsDataCache = Store<Maybe<StoredAt<WikiaChampionsData>>>(Maybe.none)
+
+  const getWikiaChampionData: io.IO<Maybe<WikiaChampionsData>> = pipe(
+    apply.sequenceS(io.Apply)({
+      maybeData: wikiaChampionsDataCache.get,
+      now: DayJs.now,
+    }),
+    io.map(({ maybeData, now }) =>
+      pipe(
+        maybeData,
+        Maybe.filter(data => pipe(data, StoredAt.isStillValid(constants.staticDataCacheTtl, now))),
+        Maybe.map(data => data.value),
+      ),
+    ),
+  )
+
   const fetchWikiaChampionData = getFetchWikiaChampionData(httpClient)
+  const wikiaChampions: Future<WikiaChampionsData> = pipe(
+    Future.fromIO(getWikiaChampionData),
+    Future.chain(Maybe.fold(() => fetchWikiaChampionData, Future.successful)),
+  )
+
   const fetchWikiaAramChanges = getFetchWikiaAramChanges(httpClient)
 
   return {
+    wikiaChampions,
+
     getLatest: (lang: Lang): Future<StaticData> => {
       if (!Lang.Eq.equals(lang, Lang.defaultLang)) {
         return pipe(ddragonService.latestChampions(lang), Future.chain(fetchStaticData))
@@ -88,7 +112,7 @@ const StaticDataService = (
                     pipe(
                       DayJs.now,
                       io.chain(now =>
-                        latestDefaultLangData.set(Maybe.some({ value, storedAt: now })),
+                        latestDefaultLangStaticData.set(Maybe.some({ value, storedAt: now })),
                       ),
                     ),
                   ),
@@ -154,7 +178,7 @@ const StaticDataService = (
     return pipe(
       apply.sequenceS(Future.ApplyPar)({
         championData: pipe(
-          fetchWikiaChampionData,
+          wikiaChampions,
           Future.map(flow(DictUtils.entries, List.map(Tuple.mapFst(EnglishName.wrap)))),
         ),
         aramChanges: fetchWikiaAramChanges,

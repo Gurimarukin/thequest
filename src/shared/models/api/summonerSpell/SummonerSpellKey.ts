@@ -21,8 +21,10 @@ const fromStringCodec: Codec<unknown, string, SummonerSpellKey> = C.make(
   { encode: String },
 )
 
+const isSmite = (spell: SummonerSpellKey): boolean => unwrap(spell) === 11
+
 const Eq: eq.Eq<SummonerSpellKey> = pipe(number.Eq, eq.contramap(unwrap))
 
-const SummonerSpellKey = { unwrap, codec, fromStringCodec, Eq }
+const SummonerSpellKey = { unwrap, codec, fromStringCodec, isSmite, Eq }
 
 export { SummonerSpellKey }
