@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-expression-statements */
 import { number, ord } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useEffect, useMemo, useState } from 'react'
@@ -18,8 +19,11 @@ import type { Tuple } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { MainLayout } from '../../components/mainLayout/MainLayout'
+import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
+import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { ActiveGameBans } from './ActiveGameBans'
@@ -60,17 +64,44 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => (
   </MainLayout>
 )
 
-const WithoutAdditional: React.FC<
-  Omit<ActiveGameComponentProps, 'additionalStaticData'>
-> = props => {
+const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStaticData'>> = ({
+  platform,
+  game,
+}) => {
+  const { navigate } = useHistory()
   const { lang } = useStaticData()
+  const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
+
+  // Correct case of summoner's name in url
+  useEffect(() => {
+    if (summonerNameFromLocation !== undefined) {
+      pipe(
+        game.participants,
+        List.findFirst(
+          p => cleanSummonerName(p.summonerName) === cleanSummonerName(summonerNameFromLocation),
+        ),
+        Maybe.filter(p => p.summonerName !== summonerNameFromLocation),
+        Maybe.map(participant => {
+          navigate(appRoutes.platformSummonerNameGame(platform, participant.summonerName), {
+            replace: true,
+          })
+        }),
+      )
+    }
+  }, [game.participants, navigate, platform, summonerNameFromLocation])
 
   return basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
       AdditionalStaticData.codec,
       'AdditionalStaticData',
     ]),
-  )(additionalStaticData => <ActiveGameComponent {...{ ...props, additionalStaticData }} />)
+  )(additionalStaticData => (
+    <ActiveGameComponent
+      platform={platform}
+      game={game}
+      additionalStaticData={additionalStaticData}
+    />
+  ))
 }
 
 type ActiveGameComponentProps = {

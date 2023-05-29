@@ -189,40 +189,38 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
 
           spectatorV4: {
             activeGames: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
-                staticData([RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'])(
-                  (id_: SummonerId) => {
-                    const id = SummonerId.unwrap(id_)
+              bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> => {
+                const id = SummonerId.unwrap(summonerId)
 
-                    // JeanMarieLeePong
-                    if (id === 'mO7BRK1xihCSnaVHRbUgO_oXzJSxdeUF8j5RdJapNf4cVjM') {
-                      return Maybe.some(aramGame)
-                    }
+                // JeanMarieLeePong
+                if (id === 'mO7BRK1xihCSnaVHRbUgO_oXzJSxdeUF8j5RdJapNf4cVjM') {
+                  return staticData([RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'])(() =>
+                    Maybe.some(aramGame),
+                  )(summonerId)
+                }
 
-                    // Elektrokiute
-                    if (id === 'YAM8bQSkRGLieK4hjcEL3sZ-DRGOscHC2ASltF-EQHpKnZg') {
-                      return Maybe.some(rankedGame)
-                    }
+                // Elektrokiute
+                if (id === 'YAM8bQSkRGLieK4hjcEL3sZ-DRGOscHC2ASltF-EQHpKnZg') {
+                  return staticData([RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'])(() =>
+                    Maybe.some(rankedGame),
+                  )(summonerId)
+                }
 
-                    return Maybe.none
-                  },
-                )(summonerId),
-              // pipe(
-              //   httpClient.http(
-              //     [
-              //       platformUrl(
-              //         platform,
-              //         `/lol/spectator/v4/active-games/by-summoner/${(
-              //           summonerId
-              //         )}`,
-              //       ),
-              //       'get',
-              //     ],
-              //     { headers: { [xRiotToken]: config.lolApiKey } },
-              //     [RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'],
-              //   ),
-              //   statusesToOption(404),
-              // ),
+                return pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(
+                        platform,
+                        `/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
+                      ),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    [RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'],
+                  ),
+                  statusesToOption(404),
+                )
+              },
             },
           },
         },
