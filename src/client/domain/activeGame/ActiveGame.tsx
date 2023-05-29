@@ -21,8 +21,14 @@ import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
+import { cx } from '../../utils/cx'
 import { ActiveGameBans } from './ActiveGameBans'
-import { ActiveGameParticipant, gridTemplateColumns } from './ActiveGameParticipant'
+import {
+  ActiveGameParticipant,
+  gridCols,
+  gridColsReverse,
+  xlGridCols,
+} from './ActiveGameParticipant'
 
 const { cleanSummonerName, pad10 } = StringUtils
 
@@ -140,24 +146,30 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
       {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : <span />}
 
-      <div className="grid gap-y-4" style={{ gridTemplateColumns }}>
-        {TeamId.values.map((teamId, i) => (
-          <ul key={teamId} className="contents">
-            {groupedParticipants[teamId]?.map((participant, j) => (
-              <ActiveGameParticipant
-                key={participant.summonerName}
-                summonerSpells={additionalStaticData.summonerSpells}
-                runeStyles={additionalStaticData.runeStyles}
-                runes={additionalStaticData.runes}
-                platform={platform}
-                mapId={mapId}
-                participant={participant}
-                reverse={i % 2 === 1}
-                index={j}
-              />
-            ))}
-          </ul>
-        ))}
+      <div className={cx('flex flex-col gap-1 xl:grid xl:gap-x-0 xl:gap-y-4', xlGridCols)}>
+        {TeamId.values.map((teamId, i) => {
+          const reverse = i % 2 === 1
+          return (
+            <ul
+              key={teamId}
+              className={cx('grid gap-y-1 xl:contents', reverse ? gridColsReverse : gridCols)}
+            >
+              {groupedParticipants[teamId]?.map((participant, j) => (
+                <ActiveGameParticipant
+                  key={participant.summonerName}
+                  summonerSpells={additionalStaticData.summonerSpells}
+                  runeStyles={additionalStaticData.runeStyles}
+                  runes={additionalStaticData.runes}
+                  platform={platform}
+                  mapId={mapId}
+                  participant={participant}
+                  reverse={reverse}
+                  index={j}
+                />
+              ))}
+            </ul>
+          )
+        })}
       </div>
     </div>
   )

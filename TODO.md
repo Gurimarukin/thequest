@@ -1,4 +1,3 @@
-- game: break at 1300px (or `xl`: 1280px)
 - game: correct case of summoner's name in url
 - game: summoner level?
 - game: when (dis)connecting user, update shards
