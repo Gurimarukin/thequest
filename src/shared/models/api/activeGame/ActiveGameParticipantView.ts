@@ -1,4 +1,6 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
+import { lens } from 'monocle-ts'
 
 import { Maybe } from '../../../utils/fp'
 import { ChampionKey } from '../champion/ChampionKey'
@@ -17,12 +19,16 @@ const codec = C.struct({
   leagues: Maybe.codec(SummonerLeaguesView.codec),
   championId: ChampionKey.codec,
   masteries: Maybe.codec(ActiveGameMasteriesView.codec),
-  shardsCount: C.number,
+  shardsCount: Maybe.codec(C.number),
   spell1Id: SummonerSpellKey.codec,
   spell2Id: SummonerSpellKey.codec,
   perks: PerksView.codec,
 })
 
-const ActiveGameParticipantView = { codec }
+const Lens = {
+  shardsCount: pipe(lens.id<ActiveGameParticipantView>(), lens.prop('shardsCount')),
+}
+
+const ActiveGameParticipantView = { codec, Lens }
 
 export { ActiveGameParticipantView }

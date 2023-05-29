@@ -1,5 +1,5 @@
+- (manually) test remove shards when disconnecting
 - game: summoner level?
-- game: when (dis)connecting user, update shards
 - recent searches insensitive sort
 - eslint unused argument (even if middle)
 - rework masteries colors

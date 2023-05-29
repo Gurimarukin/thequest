@@ -283,10 +283,7 @@ const SummonerController = (
               ),
               shardsCount: pipe(
                 shardsCount,
-                Maybe.fold(
-                  () => 0,
-                  s => s.count,
-                ),
+                Maybe.map(s => s.count),
               ),
             }),
           ),

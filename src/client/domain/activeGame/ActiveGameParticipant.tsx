@@ -100,7 +100,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       ? {
           championId,
           name: champion.name,
-          shardsCount: shardsCount === 0 ? Maybe.none : Maybe.some(shardsCount),
+          shardsCount: pipe(
+            shardsCount,
+            Maybe.filter(c => c !== 0),
+          ),
           positions: champion.positions,
           aram: isHowlingAbyss ? Maybe.some(champion.aram) : Maybe.none,
           setChampionShards: null,

@@ -1,13 +1,14 @@
 /* eslint-disable functional/no-expression-statements */
 import { number, ord } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import { lens } from 'monocle-ts'
 import { useEffect, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import type { Platform } from '../../../shared/models/api/Platform'
-import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
+import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import type { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
@@ -21,7 +22,9 @@ import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/f
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
+import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
@@ -43,26 +46,51 @@ type Props = {
   summonerName: string
 }
 
-export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => (
-  <MainLayout>
-    {basicAsyncRenderer(
-      useSWRHttp(
-        apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
-        {},
-        [Maybe.decoder(ActiveGameView.codec), 'Maybe<ActiveGameView>'],
-      ),
-    )(
-      Maybe.fold(
-        () => (
-          <div className="flex justify-center">
-            <pre className="mt-4">pas en partie.</pre>
-          </div>
+export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
+  const { maybeUser } = useUser()
+
+  const { data, error, mutate } = useSWRHttp(
+    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
+    {},
+    [Maybe.decoder(ActiveGameView.codec), 'Maybe<ActiveGameView>'],
+  )
+
+  // Remove shards on user disconnect
+  const previousUser = usePrevious(maybeUser)
+  useEffect(() => {
+    if (
+      data !== undefined &&
+      Maybe.isNone(maybeUser) &&
+      Maybe.isSome(Maybe.flatten(previousUser)) &&
+      Maybe.isSome(data)
+    ) {
+      mutate(
+        Maybe.some(
+          pipe(
+            ActiveGameView.Lens.participants,
+            lens.modify(List.map(ActiveGameParticipantView.Lens.shardsCount.set(Maybe.none))),
+          )(data.value),
         ),
-        game => <WithoutAdditional platform={platform} game={game} />,
-      ),
-    )}
-  </MainLayout>
-)
+        { revalidate: false },
+      )
+    }
+  }, [data, maybeUser, mutate, previousUser])
+
+  return (
+    <MainLayout>
+      {basicAsyncRenderer({ data, error })(
+        Maybe.fold(
+          () => (
+            <div className="flex justify-center">
+              <pre className="mt-4">pas en partie.</pre>
+            </div>
+          ),
+          game => <WithoutAdditional platform={platform} game={game} />,
+        ),
+      )}
+    </MainLayout>
+  )
+}
 
 const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStaticData'>> = ({
   platform,

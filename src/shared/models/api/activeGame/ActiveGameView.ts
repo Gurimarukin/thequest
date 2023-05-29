@@ -1,4 +1,6 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
+import { lens } from 'monocle-ts'
 
 import { List } from '../../../utils/fp'
 import { DayJsFromISOString } from '../../../utils/ioTsUtils'
@@ -17,6 +19,10 @@ const codec = C.struct({
   participants: List.codec(ActiveGameParticipantView.codec),
 })
 
-const ActiveGameView = { codec }
+const Lens = {
+  participants: pipe(lens.id<ActiveGameView>(), lens.prop('participants')),
+}
+
+const ActiveGameView = { codec, Lens }
 
 export { ActiveGameView }

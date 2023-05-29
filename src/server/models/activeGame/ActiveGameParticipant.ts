@@ -28,7 +28,7 @@ type ActiveGameParticipant = {
 type ToView = {
   leagues: Maybe<SummonerLeaguesView>
   masteries: Maybe<ActiveGameMasteriesView>
-  shardsCount: number
+  shardsCount: Maybe<number>
 }
 
 const toView =
