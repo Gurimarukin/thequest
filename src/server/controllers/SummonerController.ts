@@ -373,7 +373,7 @@ const sortTeamParticipants =
           pipe(withoutSmite, List.concat(withSmiteNotJungle), List.sort(ordByPositionCount)),
         ),
         ([acc, remain], position) => {
-          if (acc[position] !== undefined) return [acc, remain]
+          if (acc[position] !== undefined) return Tuple.of(acc, remain)
 
           const { left: doesntMatchPosition, right: matchesPosition } = pipe(
             remain,
