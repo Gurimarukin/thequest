@@ -43,14 +43,6 @@ const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
   Infinity,
 )
 
-const renderAramChildren = (
-  children1: List<React.JSX.Element>,
-  // children2: List<React.JSX.Element>,
-): React.JSX.Element => (
-  // <div className="flex max-w-md items-center gap-2 py-1">
-  <ul className="grid max-w-sm grid-cols-[auto_auto_1fr] items-center gap-y-2 py-1">{children1}</ul>
-  //   {List.isNonEmpty(children2) ? (
-  //     <ul className="grid max-w-xs grid-cols-[1fr_auto_auto_1fr] items-center gap-y-1">{children2}</ul>
-  //   ) : null}
-  // </div>
+const renderAramChildren = (children: List<React.JSX.Element>): React.JSX.Element => (
+  <ul className="grid max-w-sm grid-cols-[auto_auto_1fr] items-center gap-y-2 py-1">{children}</ul>
 )
