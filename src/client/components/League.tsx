@@ -70,7 +70,7 @@ export const League: React.FC<Props> = ({
           tooltip: (
             <>
               <WinLoss value={wins} unit="victoire" valueClassName="text-green" />
-              <WinLoss value={losses} unit="defaite" valueClassName="text-red" />
+              <WinLoss value={losses} unit="défaite" valueClassName="text-red" />
             </>
           ),
         }

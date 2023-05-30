@@ -1,4 +1,5 @@
 - game: summoner level?
+- game: ban order matches participant order
 - rework glow
 - recent searches insensitive sort
 - eslint unused argument (even if middle)
