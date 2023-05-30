@@ -70,7 +70,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   isHistogram = false,
   tooltipHoverRef: overrideHoverRef,
   tooltipPlacementRef,
-  tooltipPlacement = 'top',
+  tooltipPlacement = 'bottom',
   centerShards = false,
   noShadow = false,
 }) => {
