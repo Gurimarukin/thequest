@@ -2,7 +2,7 @@
 import { number, ord } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
@@ -20,6 +20,7 @@ import type { Tuple } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { MainLayout } from '../../components/mainLayout/MainLayout'
+import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
@@ -200,13 +201,19 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     return () => window.clearInterval(id)
   }, [])
 
+  const timerRef = useRef<HTMLSpanElement>(null)
+  const date = DayJs.toDate(gameStartTime)
+
   return (
     <div className="grid min-h-full grid-rows-[1fr_auto_auto_1fr] gap-4 py-3">
       <div className="flex items-center justify-center gap-4 px-3">
         <h2 className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</h2>
-        <span className="flex text-grey-400">
+        <span ref={timerRef} className="flex text-grey-400">
           (<pre>{prettyMs(gameDuration)}</pre>)
         </span>
+        <Tooltip hoverRef={timerRef}>
+          Partie commencée à {date.toLocaleTimeString()} (le {date.toLocaleDateString()})
+        </Tooltip>
       </div>
 
       {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : <span />}
