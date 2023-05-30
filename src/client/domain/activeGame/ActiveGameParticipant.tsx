@@ -88,7 +88,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const percentsRef = useRef<HTMLSpanElement>(null)
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
-  const aramRef = useRef<HTMLDivElement>(null)
+  const championTooltipRef = useRef<HTMLDivElement>(null)
 
   const spell1 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell1Id))
   const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
@@ -123,7 +123,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               m => ({ ...m, percents: Business.championPercents(m) }),
             ),
           ),
-          hoverRef: aramRef,
+          tooltipHoverRef: championTooltipRef,
           centerShards: true,
           noShadow: true,
         }
@@ -219,7 +219,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     ),
     child('div', 5)(
       {
-        ref: aramRef,
+        ref: championTooltipRef,
         className: cx('flex items-center gap-1.5 text-2xs', ['flex-row-reverse', reverse], padding),
       },
       squareProps !== undefined ? (

@@ -1,4 +1,5 @@
 /* eslint-disable functional/no-return-void */
+import type { Placement } from '@popperjs/core'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useMemo, useRef } from 'react'
 
@@ -36,7 +37,12 @@ export type ChampionMasterySquareProps = {
    * @default false
    */
   isHistogram?: boolean
-  hoverRef?: React.RefObject<HTMLDivElement>
+  tooltipHoverRef?: React.RefObject<HTMLDivElement>
+  tooltipPlacementRef?: React.RefObject<Element>
+  /**
+   * @default 'top'
+   */
+  tooltipPlacement?: Placement
   /**
    * @default false
    */
@@ -62,7 +68,9 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   aram,
   setChampionShards,
   isHistogram = false,
-  hoverRef: overrideHoverRef,
+  tooltipHoverRef: overrideHoverRef,
+  tooltipPlacementRef,
+  tooltipPlacement = 'top',
   centerShards = false,
   noShadow = false,
 }) => {
@@ -83,7 +91,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
   return (
     <div className="relative">
-      <div ref={hoverRef} className="relative flex h-16 w-16 items-center justify-center">
+      <div ref={hoverRef_} className="relative flex h-16 w-16 items-center justify-center">
         {/* level border */}
         <div
           className={cx(
@@ -149,7 +157,12 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         )}
       </div>
 
-      <Tooltip hoverRef={hoverRef} placement="top" className="grid grid-cols-[auto_auto] !p-0">
+      <Tooltip
+        hoverRef={hoverRef}
+        placementRef={tooltipPlacementRef}
+        placement={tooltipPlacement}
+        className="grid grid-cols-[auto_auto] !p-0"
+      >
         <ChampionTooltip
           chestGranted={chestGranted}
           tokensEarned={tokensEarned}
