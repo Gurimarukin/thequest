@@ -1,5 +1,6 @@
 import { apply } from 'fp-ts'
 import type { Applicative2C } from 'fp-ts/Applicative'
+import type { LazyArg } from 'fp-ts/function'
 import { flow } from 'fp-ts/function'
 
 import type { Dict, List } from '../utils/fp'
@@ -15,7 +16,7 @@ const fromEither: <E, A>(either: Either<E, A>) => ValidatedNea<E, A> = Either.ma
   NonEmptyArray.of,
 )
 
-const fromOption = <E, A>(onNone: () => E): ((ma: Maybe<A>) => ValidatedNea<E, A>) =>
+const fromOption = <E, A>(onNone: LazyArg<E>): ((ma: Maybe<A>) => ValidatedNea<E, A>) =>
   flow(Either.fromOption(onNone), fromEither)
 
 const fromEmptyE = <E, A>(e: E): ((either: Either<List<E>, A>) => ValidatedNea<E, A>) =>
@@ -29,6 +30,11 @@ const fromEmptyE = <E, A>(e: E): ((either: Either<List<E>, A>) => ValidatedNea<E
 const fromEmptyErrors: <A>(either: Either<List<string>, A>) => ValidatedNea<string, A> = fromEmptyE(
   'Got empty Errors from codec',
 )
+
+const chainOptionK =
+  <E>(onNone: LazyArg<E>) =>
+  <A, B>(f: (a: A) => Maybe<B>): ((ma: ValidatedNea<E, A>) => ValidatedNea<E, B>) =>
+    Either.chain(flow(f, fromOption(onNone)))
 
 const bimap = <E, G, A, B>(
   f: (e: E) => G,
@@ -53,6 +59,7 @@ const ValidatedNea = {
   fromOption,
   fromEmptyE,
   fromEmptyErrors,
+  chainOptionK,
   bimap,
   getValidation,
   getSeqS,

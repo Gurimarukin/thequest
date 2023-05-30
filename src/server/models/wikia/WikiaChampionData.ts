@@ -8,12 +8,13 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionType } from '../../../shared/models/api/champion/ChampionType'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { createEnum } from '../../../shared/utils/createEnum'
+import type { Tuple } from '../../../shared/utils/fp'
 import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtils'
 
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
-type WikiaChampionData = D.TypeOf<typeof decoder>
+type RawWikiaChampionData = D.TypeOf<typeof decoder>
 
 const Resource = createEnum(
   'Blood Well',
@@ -152,6 +153,17 @@ const decoder = StrictStruct.decoder({
   skills: Maybe.decoder(NonEmptyArray.decoder(D.string)),
 })
 
-const WikiaChampionData = { decoder }
+const RawWikiaChampionData = { decoder }
 
-export { WikiaChampionData }
+type WikiaChampionData = RawWikiaChampionData & {
+  englishName: string
+}
+
+const fromTuple = ([englishName, c]: Tuple<string, RawWikiaChampionData>): WikiaChampionData => ({
+  ...c,
+  englishName,
+})
+
+const WikiaChampionData = { fromTuple }
+
+export { WikiaChampionData, RawWikiaChampionData }

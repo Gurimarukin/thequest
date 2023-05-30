@@ -23,7 +23,6 @@ import { SummonerMasteriesView } from '../../shared/models/api/summoner/Summoner
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
-import { DictUtils } from '../../shared/utils/DictUtils'
 import type { NonEmptyArray, PartialDict } from '../../shared/utils/fp'
 import { Either, Future, List, Maybe, Try, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
@@ -192,11 +191,7 @@ const SummonerController = (
       activeGameService.findBySummoner(platform, summonerId),
       futureMaybe.bindTo('game'),
       futureMaybe.bind('champions', () =>
-        pipe(
-          staticDataService.wikiaChampions,
-          Future.map(DictUtils.values),
-          futureMaybe.fromTaskEither,
-        ),
+        pipe(staticDataService.wikiaChampions, futureMaybe.fromTaskEither),
       ),
       futureMaybe.chainTaskEitherK(({ game, champions }) =>
         pipe(

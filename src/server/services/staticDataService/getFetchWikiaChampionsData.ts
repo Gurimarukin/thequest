@@ -13,7 +13,7 @@ const championDataUrl = `${constants.lolWikiaDomain}/wiki/Module:ChampionData/da
 
 const mwCodeClassName = '.mw-code'
 
-export const getFetchWikiaChampionData = (httpClient: HttpClient): Future<WikiaChampionsData> =>
+export const getFetchWikiaChampionsData = (httpClient: HttpClient): Future<WikiaChampionsData> =>
   pipe(
     httpClient.text([championDataUrl, 'get']),
     Future.chainEitherK(DomHandler.of),

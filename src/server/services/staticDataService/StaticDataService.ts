@@ -1,9 +1,10 @@
 import { apply, io, string } from 'fp-ts'
-import type { Eq } from 'fp-ts/Eq'
-import { flow, identity, pipe } from 'fp-ts/function'
+import type { Predicate } from 'fp-ts/Predicate'
+import { flow, pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { Store } from '../../../shared/models/Store'
+import { ValidatedNea } from '../../../shared/models/ValidatedNea'
 import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { Lang } from '../../../shared/models/api/Lang'
@@ -15,8 +16,17 @@ import { StaticDataChampion } from '../../../shared/models/api/staticData/Static
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import type { Dict, PartialDict } from '../../../shared/utils/fp'
-import { Either, Future, IO, List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
+import type { PartialDict } from '../../../shared/utils/fp'
+import {
+  Dict,
+  Either,
+  Future,
+  IO,
+  List,
+  Maybe,
+  NonEmptyArray,
+  Tuple,
+} from '../../../shared/utils/fp'
 
 import { constants } from '../../config/constants'
 import type { HttpClient } from '../../helpers/HttpClient'
@@ -24,12 +34,11 @@ import { StoredAt } from '../../models/StoredAt'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import type { DDragonChampions } from '../../models/riot/ddragon/DDragonChampions'
-import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
 import type { WikiaChampionsData } from '../../models/wikia/WikiaChampionsData'
-import type { DDragonService, VersionWithChampions } from '../DDragonService'
+import type { DDragonService } from '../DDragonService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
-import { getFetchWikiaChampionData } from './getFetchWikiaChampionData'
+import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
@@ -41,102 +50,45 @@ const StaticDataService = (
 ) => {
   const logger = Logger('StaticDataService')
 
-  const latestDefaultLangStaticData = Store<Maybe<StoredAt<StaticData>>>(Maybe.none)
-
-  // keep if same version
-  const getLatestDefaultLangData = (version: DDragonVersion): io.IO<Maybe<StaticData>> =>
-    pipe(
-      apply.sequenceS(io.Apply)({
-        maybeData: latestDefaultLangStaticData.get,
-        now: DayJs.now,
-      }),
-      io.map(({ maybeData, now }) =>
-        pipe(
-          maybeData,
-          Maybe.filter(
-            data =>
-              DDragonVersion.Eq.equals(data.value.version, version) &&
-              pipe(data, StoredAt.isStillValid(constants.staticDataCacheTtl, now)),
-          ),
-          Maybe.map(data => data.value),
-        ),
-      ),
-    )
-
-  const wikiaChampionsDataCache = Store<Maybe<StoredAt<WikiaChampionsData>>>(Maybe.none)
-
-  const getWikiaChampionData: io.IO<Maybe<WikiaChampionsData>> = pipe(
-    apply.sequenceS(io.Apply)({
-      maybeData: wikiaChampionsDataCache.get,
-      now: DayJs.now,
-    }),
-    io.map(({ maybeData, now }) =>
+  const fetchDefautLangStaticData = fetchCached(
+    (version: DDragonVersion): Future<StaticData> =>
       pipe(
-        maybeData,
-        Maybe.filter(data => pipe(data, StoredAt.isStillValid(constants.staticDataCacheTtl, now))),
-        Maybe.map(data => data.value),
+        apply.sequenceS(Future.ApplyPar)({
+          requestedLang: ddragonService.champions(Lang.defaultLang)(version),
+          english: ddragonService.champions(Lang.english)(version),
+        }),
+        Future.chain(flow(withEnglishData, fetchStaticData(version))),
       ),
-    ),
+    version => data => DDragonVersion.Eq.equals(data.value.version, version),
   )
 
-  const fetchWikiaChampionData = getFetchWikiaChampionData(httpClient)
-  const wikiaChampions: Future<WikiaChampionsData> = pipe(
-    Future.fromIO(getWikiaChampionData),
-    Future.chain(
-      Maybe.fold(
-        () =>
-          pipe(
-            fetchWikiaChampionData,
-            Future.chainFirstIOK(value =>
-              pipe(
-                DayJs.now,
-                io.chain(now => wikiaChampionsDataCache.set(Maybe.some({ value, storedAt: now }))),
-              ),
-            ),
-          ),
-        Future.successful,
-      ),
-    ),
+  const fetchWikiaChampionsData: Future<WikiaChampionsData> = fetchCachedSimple(
+    getFetchWikiaChampionsData(httpClient),
   )
 
   const fetchWikiaAramChanges = getFetchWikiaAramChanges(httpClient)
 
   return {
-    wikiaChampions,
+    wikiaChampions: fetchWikiaChampionsData,
 
-    getLatest: (lang: Lang): Future<StaticData> => {
-      if (!Lang.Eq.equals(lang, Lang.defaultLang)) {
-        return pipe(ddragonService.latestChampions(lang), Future.chain(fetchStaticData))
-      }
+    getLatest: (lang: Lang): Future<StaticData> =>
+      pipe(
+        ddragonService.latestVersion,
+        Future.chain(version => {
+          if (Lang.Eq.equals(lang, Lang.defaultLang)) return fetchDefautLangStaticData(version)
 
-      return pipe(
-        ddragonService.latestChampions(lang),
-        Future.bindTo('ddragon'),
-        Future.bind('latest', ({ ddragon }) =>
-          Future.fromIO(getLatestDefaultLangData(ddragon.version)),
-        ),
-        Future.chain(({ ddragon, latest }) =>
-          pipe(
-            latest,
-            Maybe.fold(
-              () =>
-                pipe(
-                  fetchStaticData(ddragon),
-                  Future.chainFirstIOK(value =>
-                    pipe(
-                      DayJs.now,
-                      io.chain(now =>
-                        latestDefaultLangStaticData.set(Maybe.some({ value, storedAt: now })),
-                      ),
-                    ),
-                  ),
-                ),
-              Future.successful,
-            ),
-          ),
-        ),
-      )
-    },
+          const futureEnglish = ddragonService.champions(Lang.english)(version)
+          return pipe(
+            apply.sequenceS(Future.ApplyPar)({
+              requestedLang: Lang.Eq.equals(lang, Lang.english)
+                ? futureEnglish
+                : ddragonService.champions(lang)(version),
+              english: futureEnglish,
+            }),
+            Future.chain(flow(withEnglishData, fetchStaticData(version))),
+          )
+        }),
+      ),
 
     getLatestAdditional: (lang: Lang): Future<AdditionalStaticData> =>
       pipe(
@@ -188,125 +140,129 @@ const StaticDataService = (
       ),
   }
 
-  function fetchStaticData(ddragon: VersionWithChampions): Future<StaticData> {
-    return pipe(
-      apply.sequenceS(Future.ApplyPar)({
-        championData: pipe(
-          wikiaChampions,
-          Future.map(flow(DictUtils.entries, List.map(Tuple.mapFst(EnglishName.wrap)))),
+  /**
+   * We need english champion names because wikia's aram changes are only retrievable with the english name.
+   * But we also want requestedLang, as we want translated champions for front.
+   */
+  function fetchStaticData(
+    version: DDragonVersion,
+  ): (champions: ChampionsWithEnglish) => Future<StaticData> {
+    return championsWithEnglish =>
+      pipe(
+        apply.sequenceS(Future.ApplyPar)({
+          wikiaChampions: fetchWikiaChampionsData,
+          aramChanges: fetchWikiaAramChanges,
+        }),
+        Future.map(({ wikiaChampions, aramChanges }) =>
+          enrichChampions(championsWithEnglish, wikiaChampions, aramChanges),
         ),
-        aramChanges: fetchWikiaAramChanges,
-      }),
-      Future.map(({ championData, aramChanges }) =>
-        enrichChampions(ddragon.value, championData, aramChanges),
-      ),
-      Future.chainFirstIOEitherK(
-        flow(
-          List.lefts,
-          NonEmptyArray.fromReadonlyArray,
-          Maybe.fold(
-            () => IO.notUsed,
-            flow(
-              NonEmptyArray.map(e => e.message),
-              List.mkString(`Errors while enriching champions data:\n- `, '\n- ', ''),
-              logger.warn,
-            ),
+        Future.chainFirstIOEitherK(
+          flow(
+            List.lefts,
+            NonEmptyArray.fromReadonlyArray,
+            Maybe.fold(() => IO.notUsed, flow(logChampionErrors, logger.warn)),
           ),
         ),
-      ),
-      Future.map(
-        flow(
-          List.filterMap(
-            Either.fold(
-              e =>
-                pipe(
-                  e.champion,
-                  Maybe.map(
-                    (c): StaticDataChampion => ({
-                      id: c.id,
-                      key: c.key,
-                      name: c.name,
-                      positions: [],
-                      aram: {
-                        stats: Maybe.none,
-                        spells: Maybe.none,
-                      },
-                    }),
+        Future.map(
+          flow(
+            List.filterMap(
+              Either.fold(
+                e =>
+                  pipe(
+                    e.nonFatalChampion,
+                    Maybe.map(
+                      (c): StaticDataChampion => ({
+                        id: c.id,
+                        key: c.key,
+                        name: c.name,
+                        positions: [],
+                        aram: {
+                          stats: Maybe.none,
+                          spells: Maybe.none,
+                        },
+                      }),
+                    ),
                   ),
-                ),
-              Maybe.some,
+                Maybe.some,
+              ),
             ),
+            (champions): StaticData => ({ version, champions }),
           ),
-          (champions): StaticData => ({ version: ddragon.version, champions }),
         ),
-      ),
-    )
+      )
   }
 }
 
 export { StaticDataService }
 
-type EnglishName = string & {
-  readonly EnglishName: unique symbol
-}
+const withEnglishData: <K extends string>(
+  fa: Dict<K, DDragonChampions>,
+) => Dict<K, List<DDragonChampion>> = Dict.map(a => DictUtils.values(a.data))
 
-const EnglishName = {
-  wrap: identity as (value: string) => EnglishName,
-  Eq: string.Eq as Eq<EnglishName>,
-}
-
-type ChampionError = {
-  message: string // message should allow to identify the champion
-  champion: Maybe<DDragonChampion>
-}
-
-const ChampionError = {
-  of: (message: string, champion: Maybe<DDragonChampion>): ChampionError => ({ message, champion }),
+type ChampionsWithEnglish = {
+  requestedLang: List<DDragonChampion>
+  english: List<DDragonChampion>
 }
 
 const enrichChampions = (
-  langDDragonChampions: DDragonChampions,
-  wikiaChampions: List<Tuple<EnglishName, WikiaChampionData>>,
-  aramChanges: Dict<EnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
+  {
+    requestedLang: requestedLangDDragonChampions,
+    english: englishDDragonChampions,
+  }: ChampionsWithEnglish,
+  wikiaChampions: WikiaChampionsData,
+  aramChanges: Dict<string, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
-  const withoutAramChanges: List<Either<ChampionError, Tuple<EnglishName, StaticDataChampion>>> =
-    pipe(
-      langDDragonChampions.data,
-      DictUtils.entries,
-      List.map(([, champion]) =>
-        pipe(
-          wikiaChampions,
-          List.findFirst(([, c]) => ChampionKey.Eq.equals(c.id, champion.key)),
-          Either.fromOption(() => 'not found'),
-          Either.chain(([englishName, c]) =>
-            pipe(
-              c.positions,
-              Maybe.map(NonEmptyArray.map(p => WikiaChampionPosition.position[p])),
-              Either.fromOption(() => `empty positions`),
-              Either.map(positions => {
-                const data: StaticDataChampion = {
-                  id: champion.id,
-                  key: champion.key,
-                  name: champion.name,
-                  positions,
-                  aram: {
-                    stats: c.stats.aram,
-                    spells: Maybe.none,
-                  },
-                }
-                return Tuple.of(englishName, data)
-              }),
-            ),
+  const withoutAramChanges: List<Either<ChampionError, Tuple<string, StaticDataChampion>>> = pipe(
+    requestedLangDDragonChampions,
+    List.map(requestedLangChampion =>
+      pipe(
+        apply.sequenceS(ValidatedNea.getValidation<string>())({
+          englishChampion: pipe(
+            englishDDragonChampions,
+            List.findFirst(c => ChampionKey.Eq.equals(c.key, requestedLangChampion.key)),
+            ValidatedNea.fromOption(() => 'english champion not found'),
           ),
-          Either.mapLeft(e =>
-            ChampionError.of(
-              `- Wikia champion ${champion.id} (${champion.key}): ${e}`,
-              Maybe.some(champion),
-            ),
+          wikiaChampion: pipe(
+            wikiaChampions,
+            List.findFirst(c => ChampionKey.Eq.equals(c.id, requestedLangChampion.key)),
+            ValidatedNea.fromOption(() => 'wikiaChampion not found'),
+          ),
+        }),
+        Either.bind('positions', ({ wikiaChampion }) =>
+          pipe(
+            wikiaChampion.positions,
+            ValidatedNea.fromOption(() => 'empty positons'),
           ),
         ),
+        Either.bimap(
+          messages =>
+            ChampionError.of(
+              'Wikia champion',
+              `${requestedLangChampion.id} (${requestedLangChampion.key})`,
+              messages,
+              Maybe.some(requestedLangChampion),
+            ),
+          ({ englishChampion, wikiaChampion, positions }) => {
+            const data: StaticDataChampion = {
+              id: requestedLangChampion.id,
+              key: requestedLangChampion.key,
+              name: requestedLangChampion.name,
+              positions: pipe(
+                positions,
+                NonEmptyArray.map(p => WikiaChampionPosition.position[p]),
+              ),
+              aram: {
+                stats: wikiaChampion.stats.aram,
+                spells: Maybe.none,
+              },
+            }
+
+            return Tuple.of(englishChampion.name, data)
+          },
+        ),
       ),
-    )
+    ),
+  )
   return pipe(
     aramChanges,
     DictUtils.entries,
@@ -314,7 +270,7 @@ const enrichChampions = (
       pipe(
         acc,
         ListUtils.findFirstWithIndex(
-          Either.exists(([name]) => EnglishName.Eq.equals(name, englishName)),
+          Either.exists(([name]) => string.Eq.equals(name, englishName)),
         ),
         Maybe.fold(
           () =>
@@ -322,7 +278,7 @@ const enrichChampions = (
               acc,
               List.append(
                 Either.left(
-                  ChampionError.of(`- Wikia spells ${englishName}: not found`, Maybe.none),
+                  ChampionError.of('Wikia spells', englishName, ['not found'], Maybe.none),
                 ),
               ),
             ),
@@ -342,4 +298,85 @@ const enrichChampions = (
     ),
     List.map(Either.map(Tuple.snd)),
   )
+}
+
+type ChampionError = {
+  type: string
+  id: string // a way to identify the champion
+  messages: NonEmptyArray<string>
+  nonFatalChampion: Maybe<DDragonChampion> // if non fatal error, actual champion
+}
+
+const ChampionError = {
+  of: (
+    type: string,
+    id: string,
+    messages: NonEmptyArray<string>,
+    nonFatalChampion: Maybe<DDragonChampion>,
+  ): ChampionError => ({
+    type,
+    id,
+    messages,
+    nonFatalChampion,
+  }),
+}
+
+const logChampionErrors: (errors: NonEmptyArray<ChampionError>) => string = flow(
+  NonEmptyArray.map(e => {
+    const sep = e.messages.length === 1 ? ' ' : '\n  - '
+    return pipe(e.messages, List.mkString(`${e.type} ${e.id}:${sep}`, sep, ''))
+  }),
+  List.mkString('Errors while enriching champions data:\n- ', '\n- ', ''),
+)
+
+/**
+ * cache utils
+ */
+
+const fetchCachedSimple = <A>(
+  fetch: Future<A>,
+  getCacheFilter?: Predicate<StoredAt<A>>,
+): Future<A> =>
+  fetchCached(() => fetch, getCacheFilter !== undefined ? () => getCacheFilter : undefined)()
+
+const fetchCached = <A, Args extends List<unknown>>(
+  fetch: (...args: Args) => Future<A>,
+  getCacheFilter: (...args: Args) => Predicate<StoredAt<A>> = () => () => true,
+): ((...args: Args) => Future<A>) => {
+  const cache = Store<Maybe<StoredAt<A>>>(Maybe.none)
+
+  return (...args: Args): Future<A> =>
+    pipe(
+      apply.sequenceS(io.Apply)({
+        maybeData: cache.get,
+        now: DayJs.now,
+      }),
+      io.map(({ maybeData, now }) =>
+        pipe(
+          maybeData,
+          Maybe.filter(
+            data =>
+              getCacheFilter(...args)(data) &&
+              pipe(data, StoredAt.isStillValid(constants.staticDataCacheTtl, now)),
+          ),
+          Maybe.map(data => data.value),
+        ),
+      ),
+      Future.fromIO,
+      Future.chain(
+        Maybe.fold(
+          () =>
+            pipe(
+              fetch(...args),
+              Future.chainFirstIOK(value =>
+                pipe(
+                  DayJs.now,
+                  io.chain(now => cache.set(Maybe.some({ value, storedAt: now }))),
+                ),
+              ),
+            ),
+          Future.successful,
+        ),
+      ),
+    )
 }
