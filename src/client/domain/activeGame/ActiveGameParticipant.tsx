@@ -219,15 +219,11 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </li>,
     ),
     child('div', 5)(
-      {
-        // ref: championTooltipRef,
-        // className: cx('flex items-center gap-1.5 text-2xs', ['flex-row-reverse', reverse], padding),
-      },
+      { className: cx('flex flex-col gap-px text-2xs', padding) },
       squareProps !== undefined ? (
-        // <div className="flex flex-col items-center gap-px">
         <>
-          <span className="">h</span>
-          <div ref={championRef}>
+          <span className="invisible">h</span>
+          <div ref={championRef} className="flex flex-col items-center gap-px">
             <ChampionMasterySquare {...squareProps} />
             <span className={cx(['invisible', squareProps.championLevel < 4])}>
               {round(squareProps.championPoints / 1000, 1).toLocaleString()}k
@@ -235,15 +231,26 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           </div>
         </>
       ) : (
-        // </div>
-        <div className="h-16 w-16 bg-black text-2xs">Champion {ChampionKey.unwrap(championId)}</div>
+        <>
+          <span className="invisible">h</span>
+          <div className="h-16 w-16 bg-black text-2xs">
+            Champion {ChampionKey.unwrap(championId)}
+          </div>
+          <span className="invisible">h</span>
+        </>
       ),
     ),
     child('div', 6)(
-      {},
+      { className: cx('flex', padding) },
       champion !== undefined && isHowlingAbyss ? (
         <>
-          <div ref={aramRef}>
+          <div
+            ref={aramRef}
+            className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
+              'flex-row-reverse',
+              reverse,
+            ])}
+          >
             <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
           </div>
           <Tooltip hoverRef={aramRef}>
@@ -253,7 +260,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       ) : undefined,
     ),
     child('div', 7)(
-      { className: cx('flex items-center', padding) },
+      { className: cx('flex items-center py-1', padding) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
     child('div', 8)({}),

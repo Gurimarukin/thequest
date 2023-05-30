@@ -1,5 +1,6 @@
 - (manually) test remove shards when disconnecting
 - game: summoner level?
+- rework glow
 - recent searches insensitive sort
 - eslint unused argument (even if middle)
 - rework masteries colors
@@ -7,7 +8,7 @@
 - toaster (replace alert)
 - account menu
 - admin bo
-- discord OAuth2: proper state
+- discord OAuth2: proper state (redirect url)
 - debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
