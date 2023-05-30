@@ -3,19 +3,18 @@ import type { Placement } from '@popperjs/core'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useMemo, useRef } from 'react'
 
-import type { AramData } from '../../../shared/models/api/AramData'
-import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
-import { List, Maybe } from '../../../shared/utils/fp'
+import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
+import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
+import { List, Maybe } from '../../shared/utils/fp'
 
-import { Tooltip } from '../../components/tooltip/Tooltip'
-import { useStaticData } from '../../contexts/StaticDataContext'
-import { Assets } from '../../imgs/Assets'
-import { AddOutline, RemoveOutline, SparklesSharp } from '../../imgs/svgIcons'
-import { NumberUtils } from '../../utils/NumberUtils'
-import { cx } from '../../utils/cx'
+import { useStaticData } from '../contexts/StaticDataContext'
+import { Assets } from '../imgs/Assets'
+import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgIcons'
+import { NumberUtils } from '../utils/NumberUtils'
+import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
+import { Tooltip } from './tooltip/Tooltip'
 
 const { round } = NumberUtils
 
@@ -31,7 +30,6 @@ export type ChampionMasterySquareProps = {
   percents: number
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
-  aram: Maybe<AramData>
   setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
   /**
    * @default false
@@ -65,7 +63,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   percents,
   shardsCount,
   positions,
-  aram,
   setChampionShards,
   isHistogram = false,
   tooltipHoverRef: overrideHoverRef,
@@ -90,7 +87,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   const hoverRef = overrideHoverRef ?? hoverRef_
 
   return (
-    <div className="relative">
+    <>
       <div ref={hoverRef_} className="relative flex h-16 w-16 items-center justify-center">
         {/* level border */}
         <div
@@ -161,7 +158,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         hoverRef={hoverRef}
         placementRef={tooltipPlacementRef}
         placement={tooltipPlacement}
-        className="grid grid-cols-[auto_auto] !p-0"
+        className="!p-0"
       >
         <ChampionTooltip
           chestGranted={chestGranted}
@@ -173,10 +170,9 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           percents={percents}
           filteredShardsCount={filteredShardsCount}
           positions={positions}
-          aram={aram}
         />
       </Tooltip>
-    </div>
+    </>
   )
 }
 

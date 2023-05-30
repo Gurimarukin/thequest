@@ -1,7 +1,7 @@
 import { SpellName } from '../../../shared/models/api/SpellName'
 
-import type { AramStatsProps } from './AramStats'
-import { getAramStats, renderStatIcon, renderStatValue } from './AramStats'
+import type { AramStatsProps } from './aramStats'
+import { getAramStats, renderStatIcon, renderStatValue } from './aramStats'
 
 export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
   name => {

@@ -4,14 +4,16 @@ import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
-import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
+import { bgGradientMastery } from '../../components/ChampionTooltip'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -21,8 +23,6 @@ import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { NumberUtils } from '../../utils/NumberUtils'
 import { cx } from '../../utils/cx'
-import { ChampionMasterySquare } from './ChampionMasterySquare'
-import { bgGradientMastery } from './ChampionTooltip'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
@@ -121,7 +121,11 @@ const Champion: React.FC<ChampionProps> = ({
 }) => {
   const { masteriesQuery } = useHistory()
 
-  const hoverRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const aramHoverRef1 = useRef<HTMLUListElement>(null)
+  const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(aramHoverRef1), [])
+  const aramHoverRef2 = useRef<HTMLSpanElement>(null)
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
@@ -140,7 +144,7 @@ const Champion: React.FC<ChampionProps> = ({
         />
       ) : null}
       <div
-        ref={hoverRef}
+        ref={containerRef}
         className={cx(
           'relative',
           ['hidden', isHidden],
@@ -157,15 +161,29 @@ const Champion: React.FC<ChampionProps> = ({
           style={animationDelay(champion.glow)}
         />
 
-        <div className="relative grid grid-cols-[auto_auto] rounded-xl bg-aram-stats text-2xs">
+        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs">
           <ChampionMasterySquare
             {...champion}
-            aram={masteriesQuery.view === 'aram' ? Maybe.some(champion.aram) : Maybe.none}
             setChampionShards={setChampionShards}
             isHistogram={isHistogram}
-            tooltipHoverRef={hoverRef}
+            tooltipPlacementRef={containerRef}
+            tooltipPlacement="top"
           />
-          <ChampionMasteryAram aram={champion.aram} className={cx(['hidden', !isAram])} />
+
+          <div className={isAram ? 'contents' : 'hidden'}>
+            <AramStatsCompact aram={champion.aram} splitAt={Infinity}>
+              {renderChildrenCompact}
+            </AramStatsCompact>
+          </div>
+          {isAram ? (
+            <>
+              <Tooltip hoverRef={[aramHoverRef1, aramHoverRef2]} placementRef={containerRef}>
+                <AramTooltip aram={champion.aram} />
+              </Tooltip>
+
+              <span ref={aramHoverRef2} className="rounded-bl-xl" />
+            </>
+          ) : null}
         </div>
       </div>
       <ChampionMasteryHistogram
@@ -296,25 +314,14 @@ const rulerColor = (level: number): string => {
   return 'border-grey-500'
 }
 
-type ChampionMasteryAramProps = {
-  aram: AramData
-  className?: string
-}
-
-const ChampionMasteryAram: React.FC<ChampionMasteryAramProps> = ({ aram, className }) => {
-  const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(className), [className])
-  return (
-    <AramStatsCompact aram={aram} splitAt={Infinity}>
-      {renderChildrenCompact}
-    </AramStatsCompact>
-  )
-}
-
 const getRenderChildrenCompact =
-  (className: string | undefined) =>
+  (ref: React.RefObject<HTMLUListElement>) =>
   (children1: List<React.JSX.Element>): React.JSX.Element =>
     (
-      <ul className={cx('flex flex-col items-start self-center px-0.5 py-1', className)}>
+      <ul
+        ref={ref}
+        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1"
+      >
         {children1}
       </ul>
     )

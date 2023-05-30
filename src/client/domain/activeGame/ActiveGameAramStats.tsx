@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import { SpellName } from '../../../shared/models/api/SpellName'
 import { List } from '../../../shared/utils/fp'
 
-import type { AramStatsProps } from '../../components/aramStats/AramStats'
-import { getAramStats, renderStatIcon, renderStatValue } from '../../components/aramStats/AramStats'
+import type { AramStatsProps } from '../../components/aramStats/aramStats'
+import { getAramStats, renderStatIcon, renderStatValue } from '../../components/aramStats/aramStats'
 import { cx } from '../../utils/cx'
 
 type Props = Pick<AramStatsProps, 'aram'> & {

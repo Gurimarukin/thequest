@@ -14,6 +14,7 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Future, List, NotUsed } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { Loading } from '../../components/Loading'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Modal } from '../../components/Modal'
@@ -22,7 +23,6 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { ChevronForwardFilled, CloseFilled, ToggleFilled } from '../../imgs/svgIcons'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
-import { ChampionMasterySquare } from './ChampionMasterySquare'
 
 const { plural } = StringUtils
 
@@ -184,7 +184,6 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                 <ChampionMasterySquare
                   {...n}
                   shardsCount={Maybe.some(n.shardsCount)}
-                  aram={Maybe.none}
                   setChampionShards={null}
                   centerShards={true}
                 />

@@ -15,6 +15,9 @@ import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/Summo
 import type { Dict, List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
+import { AramTooltip } from '../../components/AramTooltip'
+import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
+import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { Tooltip } from '../../components/tooltip/Tooltip'
@@ -23,18 +26,16 @@ import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { appRoutes } from '../../router/AppRouter'
 import { NumberUtils } from '../../utils/NumberUtils'
 import { cx } from '../../utils/cx'
-import type { ChampionMasterySquareProps } from '../summonerMasteries/ChampionMasterySquare'
-import { ChampionMasterySquare } from '../summonerMasteries/ChampionMasterySquare'
 import { ActiveGameAramStats } from './ActiveGameAramStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-export const gridTotalCols = 16
+export const gridTotalCols = 18
 
-export const gridCols = 'grid-cols-[repeat(8,auto)_1fr]'
-export const gridColsReverse = 'grid-cols-[1fr_repeat(7,auto)]'
-export const xlGridCols = 'grid-cols-[1fr_repeat(14,auto)_1fr]'
+export const gridCols = 'grid-cols-[repeat(9,auto)_1fr]'
+export const gridColsReverse = 'grid-cols-[1fr_repeat(8,auto)]'
+export const xlGridCols = 'grid-cols-[1fr_repeat(16,auto)_1fr]'
 
 const bevelWidth = 32 // px
 
@@ -88,7 +89,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const percentsRef = useRef<HTMLSpanElement>(null)
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
-  const championTooltipRef = useRef<HTMLDivElement>(null)
+  const championRef = useRef<HTMLDivElement>(null)
+  const aramRef = useRef<HTMLDivElement>(null)
 
   const spell1 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell1Id))
   const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
@@ -105,7 +107,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             Maybe.filter(c => c !== 0),
           ),
           positions: champion.positions,
-          aram: isHowlingAbyss ? Maybe.some(champion.aram) : Maybe.none,
           setChampionShards: null,
           ...pipe(
             masteries,
@@ -123,7 +124,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               m => ({ ...m, percents: Business.championPercents(m) }),
             ),
           ),
-          tooltipHoverRef: championTooltipRef,
+          tooltipHoverRef: championRef,
           centerShards: true,
           noShadow: true,
         }
@@ -219,30 +220,44 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     ),
     child('div', 5)(
       {
-        ref: championTooltipRef,
-        className: cx('flex items-center gap-1.5 text-2xs', ['flex-row-reverse', reverse], padding),
+        // ref: championTooltipRef,
+        // className: cx('flex items-center gap-1.5 text-2xs', ['flex-row-reverse', reverse], padding),
       },
       squareProps !== undefined ? (
-        <div className="flex flex-col items-center gap-px">
-          <span className="invisible">h</span>
-          <ChampionMasterySquare {...squareProps} />
-          <span className={cx(['invisible', squareProps.championLevel < 4])}>
-            {round(squareProps.championPoints / 1000, 1).toLocaleString()}k
-          </span>
-        </div>
+        // <div className="flex flex-col items-center gap-px">
+        <>
+          <span className="">h</span>
+          <div ref={championRef}>
+            <ChampionMasterySquare {...squareProps} />
+            <span className={cx(['invisible', squareProps.championLevel < 4])}>
+              {round(squareProps.championPoints / 1000, 1).toLocaleString()}k
+            </span>
+          </div>
+        </>
       ) : (
+        // </div>
         <div className="h-16 w-16 bg-black text-2xs">Champion {ChampionKey.unwrap(championId)}</div>
       ),
-      champion !== undefined && isHowlingAbyss ? (
-        <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
-      ) : undefined,
     ),
     child('div', 6)(
+      {},
+      champion !== undefined && isHowlingAbyss ? (
+        <>
+          <div ref={aramRef}>
+            <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
+          </div>
+          <Tooltip hoverRef={aramRef}>
+            <AramTooltip aram={champion.aram} />
+          </Tooltip>
+        </>
+      ) : undefined,
+    ),
+    child('div', 7)(
       { className: cx('flex items-center', padding) },
       <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
     ),
-    child('div', 7)({}),
-    child('div', 8)(
+    child('div', 8)({}),
+    child('div', 9)(
       { ref: onBevelMount, className: cx('bg-transparent', ['justify-self-end', reverse]) },
       <div
         className={cx(
