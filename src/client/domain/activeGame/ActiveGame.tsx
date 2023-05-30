@@ -34,8 +34,10 @@ import {
   ActiveGameParticipant,
   gridCols,
   gridColsReverse,
+  gridTotalCols,
   xlGridCols,
 } from './ActiveGameParticipant'
+import { useShouldWrap } from './useShouldWrap'
 
 const { cleanSummonerName, pad10 } = StringUtils
 
@@ -138,11 +140,15 @@ type ActiveGameComponentProps = {
   game: ActiveGameView
 }
 
+const gridHalfCols = gridTotalCols / 2
+
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   additionalStaticData,
   platform,
   game: { gameStartTime, mapId, gameQueueConfigId, bannedChampions, participants },
 }) => {
+  const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
+
   const groupedBans = useMemo(
     (): PartialDict<`${TeamId}`, List<Tuple<string, NonEmptyArray<BannedChampion>>>> | null =>
       pipe(
@@ -205,14 +211,30 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
       {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : <span />}
 
-      <div className={cx('flex flex-col gap-1 xl:grid xl:gap-x-0 xl:gap-y-4', xlGridCols)}>
+      <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', xlGridCols)}>
         {TeamId.values.map((teamId, i) => {
           const reverse = i % 2 === 1
           return (
             <ul
               key={teamId}
-              className={cx('grid gap-y-1 xl:contents', reverse ? gridColsReverse : gridCols)}
+              className={
+                shouldWrap ? cx('grid gap-y-1', reverse ? gridColsReverse : gridCols) : 'contents'
+              }
             >
+              {i === 0 ? (
+                <span
+                  ref={onMountLeft}
+                  className="row-start-1"
+                  style={{ gridColumn: `1 / ${gridHalfCols + 1}` }}
+                />
+              ) : null}
+              {i === 1 ? (
+                <span
+                  ref={onMountRight}
+                  className="row-start-1"
+                  style={{ gridColumn: `${gridHalfCols + 1} / ${gridTotalCols + 1}` }}
+                />
+              ) : null}
               {groupedParticipants[teamId]?.map((participant, j) => (
                 <ActiveGameParticipant
                   key={participant.summonerName}

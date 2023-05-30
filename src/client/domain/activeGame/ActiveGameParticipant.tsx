@@ -30,9 +30,9 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-const gridTotalCols = 16
+export const gridTotalCols = 16
 
-export const gridCols = 'grid-cols-[repeat(7,auto)_1fr]'
+export const gridCols = 'grid-cols-[repeat(8,auto)_1fr]'
 export const gridColsReverse = 'grid-cols-[1fr_repeat(7,auto)]'
 export const xlGridCols = 'grid-cols-[1fr_repeat(14,auto)_1fr]'
 
@@ -130,8 +130,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       : undefined
 
   const [bevelHeight, setBevelHeight] = useState(0)
-  const resizeBevel = useCallback((e: HTMLElement) => setBevelHeight(e.offsetHeight), [])
-  const onBevelMount = useRefWithResize(resizeBevel)
+  const onBevelMount = useRefWithResize<HTMLElement>(
+    useCallback(e => setBevelHeight(e.offsetHeight), []),
+  )
 
   const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
