@@ -1,4 +1,3 @@
-- (manually) test remove shards when disconnecting
 - game: summoner level?
 - rework glow
 - recent searches insensitive sort
