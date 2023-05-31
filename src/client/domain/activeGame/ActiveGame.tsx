@@ -9,9 +9,9 @@ import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import type { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
+import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
 import { DictUtils } from '../../../shared/utils/DictUtils'
@@ -55,7 +55,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { data, error, mutate } = useSWRHttp(
     apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
     {},
-    [Maybe.decoder(ActiveGameView.codec), 'Maybe<ActiveGameView>'],
+    [Maybe.decoder(SummonerActiveGameView.codec), 'Maybe<SummonerActiveGameView>'],
   )
 
   // Remove shards on user disconnect
@@ -70,7 +70,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
       mutate(
         Maybe.some(
           pipe(
-            ActiveGameView.Lens.participants,
+            SummonerActiveGameView.Lens.game.participants,
             lens.modify(List.map(ActiveGameParticipantView.Lens.shardsCount.set(Maybe.none))),
           )(data.value),
         ),
@@ -88,7 +88,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
               <pre className="mt-4">pas en partie.</pre>
             </div>
           ),
-          game => <WithoutAdditional platform={platform} game={game} />,
+          summonerGame => <WithoutAdditional platform={platform} summonerGame={summonerGame} />,
         ),
       )}
     </MainLayout>
@@ -97,29 +97,34 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
 
 const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStaticData'>> = ({
   platform,
-  game,
+  summonerGame,
 }) => {
+  const { summoner } = summonerGame
+
   const { navigate } = useHistory()
+  const { addRecentSearch } = useUser()
   const { lang } = useStaticData()
   const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
 
+  useEffect(
+    () =>
+      addRecentSearch({
+        platform,
+        puuid: summoner.puuid,
+        name: summoner.name,
+        profileIconId: summoner.profileIconId,
+      }),
+    [addRecentSearch, platform, summoner.name, summoner.profileIconId, summoner.puuid],
+  )
+
   // Correct case of summoner's name in url
   useEffect(() => {
-    if (summonerNameFromLocation !== undefined) {
-      pipe(
-        game.participants,
-        List.findFirst(
-          p => cleanSummonerName(p.summonerName) === cleanSummonerName(summonerNameFromLocation),
-        ),
-        Maybe.filter(p => p.summonerName !== summonerNameFromLocation),
-        Maybe.map(participant => {
-          navigate(appRoutes.platformSummonerNameGame(platform, participant.summonerName), {
-            replace: true,
-          })
-        }),
-      )
+    if (summonerNameFromLocation !== summoner.name) {
+      navigate(appRoutes.platformSummonerNameGame(platform, summoner.name), {
+        replace: true,
+      })
     }
-  }, [game.participants, navigate, platform, summonerNameFromLocation])
+  }, [navigate, platform, summoner.name, summonerNameFromLocation])
 
   return basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
@@ -129,7 +134,7 @@ const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStat
   )(additionalStaticData => (
     <ActiveGameComponent
       platform={platform}
-      game={game}
+      summonerGame={summonerGame}
       additionalStaticData={additionalStaticData}
     />
   ))
@@ -138,7 +143,7 @@ const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStat
 type ActiveGameComponentProps = {
   additionalStaticData: AdditionalStaticData
   platform: Platform
-  game: ActiveGameView
+  summonerGame: SummonerActiveGameView
 }
 
 const gridHalfCols = gridTotalCols / 2
@@ -146,7 +151,10 @@ const gridHalfCols = gridTotalCols / 2
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   additionalStaticData,
   platform,
-  game: { gameStartTime, mapId, gameQueueConfigId, bannedChampions, participants },
+  summonerGame: {
+    summoner,
+    game: { gameStartTime, mapId, gameQueueConfigId, bannedChampions, participants },
+  },
 }) => {
   const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
 
@@ -251,6 +259,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   platform={platform}
                   mapId={mapId}
                   participant={participant}
+                  highlight={participant.summonerName === summoner.name}
                   reverse={reverse}
                   index={j}
                 />

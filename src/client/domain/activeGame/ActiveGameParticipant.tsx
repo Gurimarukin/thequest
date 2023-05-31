@@ -57,6 +57,7 @@ type ParticipantProps = {
   platform: Platform
   mapId: MapId
   participant: ActiveGameParticipantView
+  highlight: boolean
   reverse: boolean
   /**
    * index inside of team
@@ -82,6 +83,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     spell2Id,
     perks,
   },
+  highlight,
   reverse,
   index,
 }) => {
@@ -137,7 +139,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
-    child('div', 1)({}),
+    child('div', 1)({ className: highlight ? 'border-l-4 border-goldenrod-bis' : undefined }),
     child('div', 2)(
       { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
       pipe(

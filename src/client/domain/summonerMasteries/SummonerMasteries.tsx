@@ -181,7 +181,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
 }) => {
   const { navigate, masteriesQuery } = useHistory()
   const { addRecentSearch } = useUser()
-  const staticData = useStaticData()
+  const { champions } = useStaticData()
 
   useEffect(
     () =>
@@ -211,8 +211,8 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   }, [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name])
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
-    () => enrichAll(masteries, championShards, masteriesQuery.search, staticData.champions),
-    [championShards, masteries, masteriesQuery.search, staticData.champions],
+    () => enrichAll(masteries, championShards, masteriesQuery.search, champions),
+    [championShards, masteries, masteriesQuery.search, champions],
   )
 
   const [uiIsBlocked, setUiIsBlocked] = useState(true)
