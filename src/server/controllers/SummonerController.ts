@@ -11,7 +11,7 @@ import type { Platform } from '../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
-import { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGameView'
+import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
@@ -83,13 +83,13 @@ const SummonerController = (
           summonerService.findByName(platform, summonerName),
           Future.map(Either.fromOption(() => 'Summoner not found')),
           futureEither.chain(summoner =>
-            pipe(activeGame(platform, summoner.id, maybeUser), Future.map(Either.right)),
+            pipe(activeGame(platform, summoner, maybeUser), Future.map(Either.right)),
           ),
           M.fromTaskEither,
           M.ichain(
             Either.fold(
               M.sendWithStatus(Status.NotFound),
-              M.json(Maybe.encoder(ActiveGameView.codec)),
+              M.json(Maybe.encoder(SummonerActiveGameView.codec)),
             ),
           ),
         ),
@@ -185,11 +185,11 @@ const SummonerController = (
 
   function activeGame(
     platform: Platform,
-    summonerId: SummonerId,
+    summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
-  ): Future<Maybe<ActiveGameView>> {
+  ): Future<Maybe<SummonerActiveGameView>> {
     return pipe(
-      activeGameService.findBySummoner(platform, summonerId),
+      activeGameService.findBySummoner(platform, summoner.id),
       futureMaybe.bindTo('game'),
       futureMaybe.bind('champions', () =>
         pipe(staticDataService.wikiaChampions, futureMaybe.fromTaskEither),
@@ -200,9 +200,12 @@ const SummonerController = (
           List.traverse(Future.ApplicativePar)(
             enrichParticipant(platform, maybeUser, game.gameStartTime),
           ),
-          Future.map(participants => {
+          Future.map((participants): SummonerActiveGameView => {
             const sorted = pipe(participants, sortParticipants(champions)(game.mapId))
-            return pipe(game, ActiveGame.toView(sorted))
+            return {
+              summoner,
+              game: pipe(game, ActiveGame.toView(sorted)),
+            }
           }),
         ),
       ),
