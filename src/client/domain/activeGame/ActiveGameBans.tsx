@@ -7,6 +7,7 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { PartialDict, Tuple } from '../../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { CroppedChampionSquare } from '../../components/CroppedChampionSquare'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { cx } from '../../utils/cx'
@@ -56,22 +57,23 @@ type BanProps = {
 }
 
 const Ban: React.FC<BanProps> = ({ pickTurn, championId }) => {
-  const { assets, champions } = useStaticData()
-
+  const { champions } = useStaticData()
   const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
 
   const ref = useRef<HTMLLIElement>(null)
 
   return (
     <>
-      <li ref={ref} className="relative h-10 w-10 overflow-hidden" title={`${pickTurn}`}>
-        <img
-          src={assets.champion.square(championId)}
-          alt={`Icône de ${champion?.name ?? `<Champion ${championId}>`}`}
-          className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
-        />
+      <CroppedChampionSquare
+        ref={ref}
+        championKey={championId}
+        championName={champion?.name ?? `<Champion ${championId}>`}
+        as="li"
+        title={`${pickTurn}`}
+        className="relative h-10 w-10"
+      >
         <span className="absolute top-[calc(100%_-_2px)] w-20 origin-left -rotate-45 border-t-4 border-red-ban shadow-even shadow-black" />
-      </li>
+      </CroppedChampionSquare>
       {champion !== undefined ? <Tooltip hoverRef={ref}>{champion.name}</Tooltip> : null}
     </>
   )

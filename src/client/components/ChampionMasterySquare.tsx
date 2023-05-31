@@ -8,12 +8,12 @@ import type { ChampionLevelOrZero } from '../../shared/models/api/champion/Champ
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe } from '../../shared/utils/fp'
 
-import { useStaticData } from '../contexts/StaticDataContext'
 import { Assets } from '../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgIcons'
 import { NumberUtils } from '../utils/NumberUtils'
 import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
+import { CroppedChampionSquare } from './CroppedChampionSquare'
 import { Tooltip } from './tooltip/Tooltip'
 
 const { round } = NumberUtils
@@ -71,8 +71,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   centerShards = false,
   noShadow = false,
 }) => {
-  const staticData = useStaticData()
-
   const setShardsCount = useMemo(
     () => (setChampionShards !== null ? setChampionShards(championId) : null),
     [championId, setChampionShards],
@@ -105,18 +103,14 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         </div>
 
         {/* champion image */}
-        <div
+        <CroppedChampionSquare
+          championKey={championId}
+          championName={name}
           className={cx(
-            'relative h-[54px] w-[54px] overflow-hidden rounded-bl-lg',
+            'relative h-[54px] w-[54px] rounded-bl-lg',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
-        >
-          <img
-            src={staticData.assets.champion.square(championId)}
-            alt={`Icône de ${name}`}
-            className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
-          />
-        </div>
+        />
 
         {/* champion level top left */}
         <div

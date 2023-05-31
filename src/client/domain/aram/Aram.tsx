@@ -12,6 +12,7 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { CroppedChampionSquare } from '../../components/CroppedChampionSquare'
 import { SearchChampion } from '../../components/SearchChampion'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
@@ -115,8 +116,6 @@ type ChampionProps = {
 }
 
 const Champion: React.FC<ChampionProps> = ({ champion }) => {
-  const { assets } = useStaticData()
-
   const containerRef = useRef<HTMLDivElement>(null)
 
   const championHoverRef = useRef<HTMLDivElement>(null)
@@ -137,16 +136,12 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
         ['hidden', champion.isHidden],
       )}
     >
-      <div
+      <CroppedChampionSquare
         ref={championHoverRef}
-        className="h-12 w-12 overflow-hidden rounded-xl shadow-even shadow-black"
-      >
-        <img
-          src={assets.champion.square(champion.key)}
-          alt={`Icône de ${champion.name}`}
-          className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
-        />
-      </div>
+        championKey={champion.key}
+        championName={champion.name}
+        className="h-12 w-12 rounded-xl shadow-even shadow-black"
+      />
       <Tooltip hoverRef={championHoverRef} placement="top">
         {champion.name}
       </Tooltip>

@@ -1,11 +1,9 @@
-import { pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import type { Dict } from '../../../shared/utils/fp'
-import { List } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
@@ -70,10 +68,9 @@ export const Summoner: React.FC<Props> = ({
             </Tooltip>
           </div>
           <div className="flex flex-wrap gap-6">
-            {pipe(
-              SummonerLeaguesView.keys,
-              List.map(queue => <League key={queue} queue={queue} league={leagues[queue]} />),
-            )}
+            {SummonerLeaguesView.keys.map(queue => (
+              <League key={queue} queue={queue} league={leagues[queue]} />
+            ))}
           </div>
         </div>
       </div>

@@ -97,15 +97,7 @@ export const League: React.FC<Props> = ({
             ['col-start-2', reverse],
           )}
         >
-          <img
-            src={src}
-            alt={`Icône ${alt}`}
-            className={cx(
-              'max-w-none',
-              ['m-[-3px] w-[calc(100%_+_6px)]', variant === 'base'],
-              ['-m-0.5 w-[calc(100%_+_4px)]', variant === 'small'],
-            )}
-          />
+          <img src={src} alt={`Icône ${alt}`} className="m-[-7.5%] w-[115%] max-w-none" />
         </span>
         <div className={cx('flex flex-col text-xs', ['col-start-1 row-start-1', reverse])}>
           <span className="whitespace-nowrap">{description}</span>
