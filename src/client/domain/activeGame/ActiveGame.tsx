@@ -220,7 +220,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
           (<pre>{prettyMs(gameDuration)}</pre>)
         </span>
         <Tooltip hoverRef={timerRef}>
-          Partie commencée à {date.toLocaleTimeString()} (le {date.toLocaleDateString()})
+          Partie commencée à {date.toLocaleTimeString()} ({date.toLocaleDateString()})
         </Tooltip>
       </div>
 
