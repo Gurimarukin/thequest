@@ -28,6 +28,8 @@ import { Either, Future, List, Maybe, Try, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
+import { NumberUtils } from '../../client/utils/NumberUtils'
+
 import { ActiveGame } from '../models/activeGame/ActiveGame'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
@@ -244,14 +246,11 @@ const SummonerController = (
                 maybeMasteries,
                 Maybe.map(
                   (masteries): ActiveGameMasteriesView => ({
-                    totalPercents:
-                      masteries.length === 0
-                        ? 0
-                        : pipe(
-                            masteries,
-                            List.map(Business.championPercents),
-                            monoid.concatAll(number.MonoidSum),
-                          ) / masteries.length,
+                    totalPercents: pipe(
+                      masteries,
+                      List.map(Business.championPercents),
+                      NumberUtils.average,
+                    ),
                     totalScore: pipe(
                       masteries,
                       List.map(m => m.championLevel),

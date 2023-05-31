@@ -35,6 +35,7 @@ import { usePrevious } from '../../hooks/usePrevious'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
+import { NumberUtils } from '../../utils/NumberUtils'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -358,20 +359,6 @@ const enrichAll = (
       )
     }),
   )
-  const totalChampionsCount = enrichedMasteries_.length
-  const questPercents =
-    totalChampionsCount === 0
-      ? 0
-      : pipe(
-          enrichedMasteries_,
-          List.map(c => c.percents),
-          monoid.concatAll(number.MonoidSum),
-        ) / totalChampionsCount
-  const totalMasteryLevel = pipe(
-    enrichedMasteries_,
-    List.map(c => c.championLevel),
-    monoid.concatAll(number.MonoidSum),
-  )
 
   const grouped: PartialMasteriesGrouped = pipe(
     enrichedMasteries_,
@@ -379,18 +366,25 @@ const enrichAll = (
     Maybe.map(List.groupBy(c => ChampionLevelOrZero.stringify(c.championLevel))),
     Maybe.getOrElse(() => ({})),
   )
-  const masteriesCount = pipe(
-    ChampionLevelOrZero.values,
-    List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
-      const value: number = grouped[key]?.length ?? 0
-      return { ...acc, [key]: value }
-    }),
-  )
   return {
     enrichedSummoner: {
-      questPercents,
-      totalMasteryLevel,
-      masteriesCount,
+      questPercents: pipe(
+        enrichedMasteries_,
+        List.map(c => c.percents),
+        NumberUtils.average,
+      ),
+      totalMasteryLevel: pipe(
+        enrichedMasteries_,
+        List.map(c => c.championLevel),
+        monoid.concatAll(number.MonoidSum),
+      ),
+      masteriesCount: pipe(
+        ChampionLevelOrZero.values,
+        List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
+          const value: number = grouped[key]?.length ?? 0
+          return { ...acc, [key]: value }
+        }),
+      ),
     },
     enrichedMasteries: enrichedMasteries_,
   }

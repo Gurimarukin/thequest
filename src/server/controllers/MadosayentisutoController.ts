@@ -15,6 +15,8 @@ import type { Future } from '../../shared/utils/fp'
 import { Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
+import { NumberUtils } from '../../client/utils/NumberUtils'
+
 import type { MadosayentisutoConfig } from '../config/Config'
 import type { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
 import { TheQuestProgressionResult } from '../models/madosayentisuto/TheQuestProgressionResult'
@@ -84,17 +86,6 @@ const MadosayentisutoController = (
         staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(Lang.defaultLang)),
       }),
       futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
-        const percents: List<number> = pipe(
-          staticData.value.data,
-          DictUtils.entries,
-          List.map(([, { key }]) =>
-            pipe(
-              masteries,
-              List.findFirst(m => ChampionKey.Eq.equals(m.championId, key)),
-              Maybe.fold(() => 0, Business.championPercents),
-            ),
-          ),
-        )
         const filteredByLevel = (level: ChampionLevel): List<ChampionKey> =>
           pipe(
             masteries,
@@ -112,7 +103,18 @@ const MadosayentisutoController = (
             name: summoner.name,
             profileIconId: summoner.profileIconId,
           },
-          percents: pipe(percents, monoid.concatAll(number.MonoidSum)) / percents.length,
+          percents: pipe(
+            staticData.value.data,
+            DictUtils.entries,
+            List.map(([, { key }]) =>
+              pipe(
+                masteries,
+                List.findFirst(m => ChampionKey.Eq.equals(m.championId, key)),
+                Maybe.fold(() => 0, Business.championPercents),
+              ),
+            ),
+            NumberUtils.average,
+          ),
           totalMasteryLevel: pipe(
             masteries,
             List.map(m => m.championLevel),
