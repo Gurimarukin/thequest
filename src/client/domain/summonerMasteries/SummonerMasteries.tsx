@@ -10,14 +10,16 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
-import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
+import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { PartialDict, Tuple } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
@@ -29,13 +31,13 @@ import { config } from '../../config/unsafe'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
+import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
-import { useSummonerNameFromLocation } from '../../hooks/useSummonerNameFromLocation'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -45,7 +47,7 @@ import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 
-const { cleanChampionName } = StringUtils
+const { cleanSummonerName, cleanChampionName } = StringUtils
 
 // should mutate data before API response
 type OptimisticMutation = {
@@ -62,7 +64,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
-    apiRoutes.summoner.byName.get(platform, clearSummonerName(summonerName)),
+    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).masteries.get,
     methodWithUrl =>
       pipe(
         historyStateRef.current.summonerMasteries,
@@ -143,10 +145,11 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
 
   return (
     <MainLayout>
-      {basicAsyncRenderer({ data, error })(({ summoner, masteries, championShards }) => (
+      {basicAsyncRenderer({ data, error })(({ summoner, leagues, masteries, championShards }) => (
         <SummonerViewComponent
           platform={platform}
           summoner={summoner}
+          leagues={leagues}
           masteries={masteries}
           championShards={championShards}
           setChampionsShardsBulk={setChampionsShardsBulk}
@@ -156,12 +159,10 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   )
 }
 
-const whiteSpaces = /\s+/g
-const clearSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
-
 type SummonerViewProps = {
   platform: Platform
   summoner: SummonerView
+  leagues: SummonerLeaguesView
   masteries: List<ChampionMasteryView>
   championShards: Maybe<List<ChampionShardsView>>
   setChampionsShardsBulk: (
@@ -173,6 +174,7 @@ type SummonerViewProps = {
 const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   platform,
   summoner,
+  leagues,
   masteries,
   championShards,
   setChampionsShardsBulk,
@@ -192,16 +194,11 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
     [addRecentSearch, platform, summoner.name, summoner.profileIconId, summoner.puuid],
   )
 
-  const summonerNameFromLocation = useSummonerNameFromLocation()
+  const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
 
   // Correct case of summoner's name in url
   useEffect(() => {
-    if (
-      pipe(
-        summonerNameFromLocation,
-        Maybe.every(n => n !== summoner.name),
-      )
-    ) {
+    if (summonerNameFromLocation !== summoner.name) {
       navigate(
         appRoutes.platformSummonerName(
           platform,
@@ -262,12 +259,12 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
         </div>
       ) : null}
       <div
-        className={cssClasses(
+        className={cx(
           'flex h-full flex-col items-center gap-6 overflow-y-auto overflow-x-hidden px-2 pb-24 pt-3',
           ['hidden', uiIsBlocked],
         )}
       >
-        <Summoner summoner={{ ...summoner, ...enrichedSummoner }} />
+        <Summoner summoner={{ ...summoner, ...enrichedSummoner }} leagues={leagues} />
         <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
       </div>
       {pipe(
@@ -362,18 +359,6 @@ const enrichAll = (
       )
     }),
   )
-  const totalChampionsCount = enrichedMasteries_.length
-  const questPercents =
-    pipe(
-      enrichedMasteries_,
-      List.map(c => c.percents),
-      monoid.concatAll(number.MonoidSum),
-    ) / totalChampionsCount
-  const totalMasteryLevel = pipe(
-    enrichedMasteries_,
-    List.map(c => c.championLevel),
-    monoid.concatAll(number.MonoidSum),
-  )
 
   const grouped: PartialMasteriesGrouped = pipe(
     enrichedMasteries_,
@@ -381,18 +366,25 @@ const enrichAll = (
     Maybe.map(List.groupBy(c => ChampionLevelOrZero.stringify(c.championLevel))),
     Maybe.getOrElse(() => ({})),
   )
-  const masteriesCount = pipe(
-    ChampionLevelOrZero.values,
-    List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
-      const value: number = grouped[key]?.length ?? 0
-      return { ...acc, [key]: value }
-    }),
-  )
   return {
     enrichedSummoner: {
-      questPercents,
-      totalMasteryLevel,
-      masteriesCount,
+      questPercents: pipe(
+        enrichedMasteries_,
+        List.map(c => c.percents),
+        NumberUtils.average,
+      ),
+      totalMasteryLevel: pipe(
+        enrichedMasteries_,
+        List.map(c => c.championLevel),
+        monoid.concatAll(number.MonoidSum),
+      ),
+      masteriesCount: pipe(
+        ChampionLevelOrZero.values,
+        List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
+          const value: number = grouped[key]?.length ?? 0
+          return { ...acc, [key]: value }
+        }),
+      ),
     },
     enrichedMasteries: enrichedMasteries_,
   }

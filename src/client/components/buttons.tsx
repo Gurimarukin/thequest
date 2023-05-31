@@ -1,4 +1,4 @@
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 
 type Props = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> & {
   type: Exclude<React.ButtonHTMLAttributes<HTMLButtonElement>['type'], undefined>
@@ -12,7 +12,7 @@ const getButton =
         {...props}
         // eslint-disable-next-line react/button-has-type
         type={type}
-        className={cssClasses('disabled:opacity-25', baseClassName, className)}
+        className={cx('disabled:opacity-25', baseClassName, className)}
       >
         {children}
       </button>

@@ -22,7 +22,7 @@ import { DiscordLogoTitle } from '../imgs/DiscordLogoTitle'
 import { CheckMarkSharp } from '../imgs/svgIcons'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import { appRoutes } from '../router/AppRouter'
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
@@ -283,7 +283,7 @@ type TdProps = EmptyTdProps & {
 }
 
 const Td: React.FC<TdProps> = ({ className, children }) => (
-  <td className={cssClasses('flex items-center bg-zinc-900 px-2 py-5', className)}>{children}</td>
+  <td className={cx('flex items-center bg-zinc-900 px-2 py-5', className)}>{children}</td>
 )
 
 type EmptyTdProps = {
@@ -291,7 +291,7 @@ type EmptyTdProps = {
 }
 
 const EmptyTd: React.FC<EmptyTdProps> = ({ className }) => (
-  <Td className={cssClasses('justify-center text-sm', className)}>—</Td>
+  <Td className={cx('justify-center text-sm', className)}>—</Td>
 )
 
 const greenCheck = <CheckMarkSharp className="h-6 text-green" />

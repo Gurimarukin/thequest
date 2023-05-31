@@ -11,7 +11,7 @@ import { NonEmptyArray } from '../../../shared/utils/fp'
 import type { ReactPopperParams } from '../../hooks/useVisiblePopper'
 import { useVisiblePopper } from '../../hooks/useVisiblePopper'
 import { CaretUpSharpCropped } from '../../imgs/svgIcons'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 
 const tooltipLayerId = 'tooltip-layer'
 
@@ -93,7 +93,7 @@ export const Tooltip: React.FC<Props> = ({
   return createPortal(
     <div
       ref={tooltipRef}
-      className={cssClasses(
+      className={cx(
         'group z-40 whitespace-nowrap border border-tooltip bg-zinc-900 px-2 py-1 text-xs text-wheat shadow-even shadow-black transition-opacity duration-300',
         shouldDisplay ? 'visible opacity-100' : 'invisible opacity-0',
         className,
@@ -108,7 +108,7 @@ export const Tooltip: React.FC<Props> = ({
         style={styles['arrow']}
       >
         <CaretUpSharpCropped
-          className={cssClasses(
+          className={cx(
             'text-tooltip group-data-popper-top:rotate-180',
             ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
             [

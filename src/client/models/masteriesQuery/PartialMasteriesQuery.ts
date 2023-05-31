@@ -10,6 +10,7 @@ import qs from 'qs'
 
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import type { PartialDict } from '../../../shared/utils/fp'
 import { Dict } from '../../../shared/utils/fp'
 import { NonEmptyString, SetFromString } from '../../../shared/utils/ioTsUtils'
 
@@ -39,7 +40,7 @@ const properties = {
 
 const decoder = D.partial(properties)
 
-type Out = Partial<Dict<keyof PartialMasteriesQuery, string>>
+type Out = PartialDict<keyof PartialMasteriesQuery, string>
 const encoder: Encoder<Out, PartialMasteriesQuery> = E.partial(properties)
 
 const qsStringify = (query: PartialMasteriesQuery): string =>

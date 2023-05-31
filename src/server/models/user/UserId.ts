@@ -10,12 +10,12 @@ import { UUIDUtils } from '../../utils/UUIDUtils'
 
 type UserId = Newtype<{ readonly UserId: unique symbol }, string>
 
-const { wrap, unwrap } = iso<UserId>()
+const { wrap } = iso<UserId>()
 
 const codec = fromNewtype<UserId>(C.string)
 
 const generate: IO<UserId> = pipe(UUIDUtils.uuidV4, IO.map(wrap))
 
-const UserId = { wrap, unwrap, codec, generate }
+const UserId = { codec, generate }
 
 export { UserId }

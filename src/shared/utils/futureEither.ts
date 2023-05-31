@@ -49,7 +49,9 @@ const Functor: Functor2<URI> = {
 
 const ap = eitherT.ap(Future.ApplyPar)
 
-const chain = eitherT.chain(Future.Monad)
+const chain = eitherT.chain(Future.Monad) as <A, E1, E2, B>(
+  f: (a: A) => Future<Either<E2, B>>,
+) => (ma: Future<Either<E1, A>>) => Future<Either<E1 | E2, B>>
 
 const chainTaskEitherK = <A, B>(
   f: (a: A) => Future<B>,

@@ -4,6 +4,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
+import type { PartialDict } from '../../../shared/utils/fp'
 import { Dict } from '../../../shared/utils/fp'
 import { NonEmptyString } from '../../../shared/utils/ioTsUtils'
 
@@ -17,7 +18,7 @@ const properties = {
 
 const decoder = D.partial(properties)
 
-type Out = Partial<Dict<keyof PartialAramQuery, string>>
+type Out = PartialDict<keyof PartialAramQuery, string>
 const encoder: Encoder<Out, PartialAramQuery> = E.partial(properties)
 
 const qsStringify = (query: PartialAramQuery): string =>

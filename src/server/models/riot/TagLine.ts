@@ -6,10 +6,10 @@ import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
 type TagLine = Newtype<{ readonly TagLine: unique symbol }, string>
 
-const { wrap, unwrap } = iso<TagLine>()
+const { wrap } = iso<TagLine>()
 
 const codec = fromNewtype<TagLine>(C.string)
 
-const TagLine = { wrap, unwrap, codec }
+const TagLine = { wrap, codec }
 
 export { TagLine }

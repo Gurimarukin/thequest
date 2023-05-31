@@ -3,10 +3,11 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 import jwt from 'jsonwebtoken'
 
-import { MsDuration } from '../../shared/models/MsDuration'
+import type { MsDuration } from '../../shared/models/MsDuration'
 import { Token } from '../../shared/models/api/user/Token'
-import type { Tuple } from '../../shared/utils/fp'
-import { Dict, Either, Future, List, Maybe } from '../../shared/utils/fp'
+import { DictUtils } from '../../shared/utils/DictUtils'
+import type { Dict, PartialDict, Tuple } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 type MySignOptions = Omit<jwt.SignOptions, 'expiresIn' | 'notBefore'> & {
@@ -68,11 +69,9 @@ export { JwtHelper }
 
 const msDurationOptions = <K extends string>(
   obj: Dict<K, MsDuration | undefined>,
-): Partial<Dict<K, string>> =>
+): PartialDict<K, string> =>
   pipe(
     obj,
-    Dict.toReadonlyArray,
-    List.reduce({}, (acc, [key, val]) =>
-      val === undefined ? acc : { ...acc, [key]: `${MsDuration.unwrap(val)}` },
-    ),
+    DictUtils.entries,
+    List.reduce({}, (acc, [key, val]) => (val === undefined ? acc : { ...acc, [key]: `${val}` })),
   )

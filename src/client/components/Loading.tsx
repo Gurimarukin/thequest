@@ -1,4 +1,4 @@
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 
 type LoadingProps = {
   className?: string
@@ -8,7 +8,7 @@ export const Loading: React.FC<LoadingProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    className={cssClasses('animate-spin', className)}
+    className={cx('animate-spin', className)}
   >
     <circle
       cx="12"

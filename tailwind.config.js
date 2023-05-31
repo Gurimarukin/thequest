@@ -18,6 +18,7 @@ module.exports = {
       'grey-500': colors.gray[500],
       'grey-disabled': colors.zinc[600],
       red: colors.red[600],
+      'red-ban': colors.red[800],
       slate: colors.slate[900],
       'slate-dark': colors.slate[950],
       wheat: 'wheat',

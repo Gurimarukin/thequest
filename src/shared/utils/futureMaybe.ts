@@ -5,7 +5,7 @@ import type { Chain1 } from 'fp-ts/Chain'
 import type { Functor1 } from 'fp-ts/Functor'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
-import type { Lazy } from 'fp-ts/function'
+import type { LazyArg } from 'fp-ts/function'
 import { flow, identity, pipe } from 'fp-ts/function'
 
 import type { IO, Try } from './fp'
@@ -105,7 +105,7 @@ const fromIOEither: <A>(fa: IO<A>) => Future<Maybe<A>> = flow(
   Future.map(Maybe.some),
 )
 
-type GetOrElse = <A>(onNone: Lazy<Future<A>>) => (fa: Future<Maybe<A>>) => Future<A>
+type GetOrElse = <A>(onNone: LazyArg<Future<A>>) => (fa: Future<Maybe<A>>) => Future<A>
 const getOrElse: GetOrElse = optionT.getOrElse(Future.Monad)
 
 const map = optionT.map(Future.Functor)
@@ -117,7 +117,7 @@ export const futureMaybe = {
   ApplyPar,
   Functor,
   alt: optionT.alt(Future.Monad) as <A>(
-    second: Lazy<Future<Maybe<A>>>,
+    second: LazyArg<Future<Maybe<A>>>,
   ) => (first: Future<Maybe<A>>) => Future<Maybe<A>>,
   apS: apply.apS(ApplyPar),
   bind: fpTsChain.bind(Chain),

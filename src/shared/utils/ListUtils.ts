@@ -43,4 +43,11 @@ const updateOrAppend =
       ),
     )
 
-export const ListUtils = { findFirstWithIndex, mapWithPrevious, updateOrAppend }
+const padEnd =
+  <B>(maxLength: number, fillWith: B) =>
+  <A>(as: List<A>): List<A | B> =>
+    maxLength <= as.length
+      ? as
+      : pipe(as, List.concatW(List.makeBy(maxLength - as.length, () => fillWith)))
+
+export const ListUtils = { findFirstWithIndex, mapWithPrevious, updateOrAppend, padEnd }

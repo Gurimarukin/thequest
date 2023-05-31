@@ -1,24 +1,27 @@
 /* eslint-disable functional/no-return-void */
+import { ord, string } from 'fp-ts'
+import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { Fragment, useMemo, useRef } from 'react'
 
-import type { StaticDataChampion } from '../../../shared/models/api/StaticDataChampion'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
 
+import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { CroppedChampionSquare } from '../../components/CroppedChampionSquare'
 import { SearchChampion } from '../../components/SearchChampion'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
-import { AramStatsFull } from '../../components/aramStats/AramStatsFull'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { AramQuery } from '../../models/aramQuery/AramQuery'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 import './Aram.css'
 
 const { cleanChampionName } = StringUtils
@@ -27,6 +30,11 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
   isHidden: boolean
   category: ChampionCategory
 }
+
+const ordByName: Ord<EnrichedStaticDataChampion> = pipe(
+  string.Ord,
+  ord.contramap((c: EnrichedStaticDataChampion) => StringUtils.cleanUTF8ToASCII(c.name)),
+)
 
 export const Aram: React.FC = () => {
   const { aramQuery, updateAramQuery } = useHistory()
@@ -45,6 +53,7 @@ export const Aram: React.FC = () => {
           category: ChampionCategory.fromAramData(c.aram),
         }),
       ),
+      List.sort(ordByName),
       List.groupBy((a): ChampionCategory | 'hidden' => (a.isHidden ? 'hidden' : a.category)),
     )
 
@@ -107,49 +116,59 @@ type ChampionProps = {
 }
 
 const Champion: React.FC<ChampionProps> = ({ champion }) => {
-  const { assets } = useStaticData()
-  const hoverRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const championHoverRef = useRef<HTMLDivElement>(null)
+
+  const aramHoverRef1 = useRef<HTMLUListElement>(null)
+  const aramHoverRef2 = useRef<HTMLUListElement>(null)
+  const renderChildrenCompact = useMemo(
+    () => getRenderChildrenCompact(aramHoverRef1, aramHoverRef2),
+    [],
+  )
 
   return (
-    <>
-      <div
-        ref={hoverRef}
-        className={cssClasses(
-          'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs',
-          ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
-          ['hidden', champion.isHidden],
-        )}
-      >
-        <div className="h-12 w-12 overflow-hidden rounded-xl shadow-even shadow-black">
-          <img
-            src={assets.champion.square(champion.key)}
-            alt={`Icône de ${champion.name}`}
-            className="m-[-3px] w-[calc(100%_+_6px)] max-w-none"
-          />
-        </div>
-        <AramStatsCompact aram={champion.aram} splitAt={5}>
-          {renderChildrenCompact}
-        </AramStatsCompact>
-      </div>
-      <Tooltip hoverRef={hoverRef} className="max-w-md">
-        <AramStatsFull aram={champion.aram}>{renderChildrenFull}</AramStatsFull>
+    <div
+      ref={containerRef}
+      className={cx(
+        'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-aram-stats text-2xs',
+        ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
+        ['hidden', champion.isHidden],
+      )}
+    >
+      <CroppedChampionSquare
+        ref={championHoverRef}
+        championKey={champion.key}
+        championName={champion.name}
+        className="h-12 w-12 rounded-xl shadow-even shadow-black"
+      />
+      <Tooltip hoverRef={championHoverRef} placement="top">
+        {champion.name}
       </Tooltip>
-    </>
+
+      <AramStatsCompact aram={champion.aram} splitAt={5}>
+        {renderChildrenCompact}
+      </AramStatsCompact>
+      <Tooltip hoverRef={[aramHoverRef1, aramHoverRef2]} placementRef={containerRef}>
+        <AramTooltip aram={champion.aram} />
+      </Tooltip>
+    </div>
   )
 }
 
-const renderChildrenCompact = (
-  children1: List<React.JSX.Element>,
-  children2: List<React.JSX.Element>,
-): React.JSX.Element => (
-  <>
-    <ul className="row-span-2 flex flex-col self-center p-0.5">{children1}</ul>
-    {List.isNonEmpty(children2) ? (
-      <ul className="flex flex-col self-start px-1.5 py-0.5">{children2}</ul>
-    ) : null}
-  </>
-)
-
-const renderChildrenFull = (children1: List<React.JSX.Element>): React.JSX.Element => (
-  <ul className="grid grid-cols-[auto_auto_1fr] items-center gap-y-1">{children1}</ul>
-)
+const getRenderChildrenCompact =
+  (ref1: React.RefObject<HTMLUListElement>, ref2: React.RefObject<HTMLUListElement>) =>
+  (children1: List<React.JSX.Element>, children2: List<React.JSX.Element>): React.JSX.Element =>
+    (
+      <>
+        <ul ref={ref1} className="row-span-2 flex flex-col justify-center p-0.5">
+          {children1}
+        </ul>
+        <ul
+          ref={ref2}
+          className={cx('flex flex-col', ['px-1.5 py-0.5', List.isNonEmpty(children2)])}
+        >
+          {children2}
+        </ul>
+      </>
+    )

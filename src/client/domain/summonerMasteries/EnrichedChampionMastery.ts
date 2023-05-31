@@ -27,17 +27,17 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
 
 const byPercents: Ord<EnrichedChampionMastery> = pipe(
   number.Ord,
-  ord.contramap(c => c.percents),
+  ord.contramap((c: EnrichedChampionMastery) => c.percents),
 )
 
 const byPoints: Ord<EnrichedChampionMastery> = pipe(
   number.Ord,
-  ord.contramap(c => c.championPoints),
+  ord.contramap((c: EnrichedChampionMastery) => c.championPoints),
 )
 
 const byShards: Ord<EnrichedChampionMastery> = pipe(
   number.Ord,
-  ord.contramap(c =>
+  ord.contramap((c: EnrichedChampionMastery) =>
     pipe(
       c.shardsCount,
       Maybe.getOrElse(() => 0),
@@ -47,7 +47,7 @@ const byShards: Ord<EnrichedChampionMastery> = pipe(
 
 const byName: Ord<EnrichedChampionMastery> = pipe(
   string.Ord,
-  ord.contramap(c => StringUtils.cleanUTF8ToASCII(c.name)),
+  ord.contramap((c: EnrichedChampionMastery) => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
 const Lens = {

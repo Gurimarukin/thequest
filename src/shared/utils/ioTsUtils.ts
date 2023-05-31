@@ -12,8 +12,10 @@ import * as E from 'io-ts/Encoder'
 import type { AnyNewtype, CarrierOf } from 'newtype-ts'
 
 import { DayJs } from '../models/DayJs'
+import { DictUtils } from './DictUtils'
 import { StringUtils } from './StringUtils'
-import { Dict, Either, List, Maybe, NonEmptyArray } from './fp'
+import type { Dict } from './fp'
+import { Either, List, Maybe, NonEmptyArray } from './fp'
 
 const limit = 10000
 
@@ -222,7 +224,7 @@ const strictStructDecoder = <A>(properties: { [K in keyof A]: Decoder<unknown, A
       pipe(
         D.fromStruct(properties),
         D.parse(res => {
-          const diff = pipe(Dict.keys(pjo), List.difference(string.Eq)(Dict.keys(res)))
+          const diff = pipe(DictUtils.keys(pjo), List.difference(string.Eq)(DictUtils.keys(res)))
           return List.isNonEmpty(diff)
             ? D.failure(pjo, pipe(diff, List.mkString('KeysNotParsed: ', ', ', '')))
             : D.success(res)
@@ -248,7 +250,7 @@ const strictPartialDecoder = <A>(properties: { [K in keyof A]: Decoder<unknown, 
       pipe(
         D.fromPartial(properties),
         D.parse(res => {
-          const diff = pipe(Dict.keys(pjo), List.difference(string.Eq)(Dict.keys(res)))
+          const diff = pipe(DictUtils.keys(pjo), List.difference(string.Eq)(DictUtils.keys(res)))
           return List.isNonEmpty(diff)
             ? D.failure(pjo, pipe(diff, List.mkString('KeysNotParsed: ', ', ', '')))
             : D.success(res)

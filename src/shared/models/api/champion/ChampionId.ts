@@ -1,6 +1,5 @@
 import * as C from 'io-ts/Codec'
 import type { Newtype } from 'newtype-ts'
-import { iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../../utils/ioTsUtils'
 
@@ -8,10 +7,8 @@ import { fromNewtype } from '../../../utils/ioTsUtils'
 
 type ChampionId = Newtype<{ readonly ChampionId: unique symbol }, string>
 
-const { unwrap } = iso<ChampionId>()
-
 const codec = fromNewtype<ChampionId>(C.string)
 
-const ChampionId = { unwrap, codec }
+const ChampionId = { codec }
 
 export { ChampionId }

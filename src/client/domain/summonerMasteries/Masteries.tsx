@@ -4,14 +4,17 @@ import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
-import type { AramData } from '../../../shared/models/api/AramData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
+import { bgGradientMastery } from '../../components/ChampionTooltip'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -19,10 +22,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionCategory } from '../../models/ChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { NumberUtils } from '../../utils/NumberUtils'
-import { cssClasses } from '../../utils/cssClasses'
-import { ChampionMasterySquare } from './ChampionMasterySquare'
-import { bgGradientMastery } from './ChampionTooltip'
+import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
@@ -73,7 +73,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   return (
     <>
       <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
-      <div className={cssClasses('w-full', viewContainerClassName[masteriesQuery.view])}>
+      <div className={cx('w-full', viewContainerClassName[masteriesQuery.view])}>
         {pipe(
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
@@ -121,7 +121,11 @@ const Champion: React.FC<ChampionProps> = ({
 }) => {
   const { masteriesQuery } = useHistory()
 
-  const hoverRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const aramHoverRef1 = useRef<HTMLUListElement>(null)
+  const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(aramHoverRef1), [])
+  const aramHoverRef2 = useRef<HTMLSpanElement>(null)
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
@@ -136,12 +140,12 @@ const Champion: React.FC<ChampionProps> = ({
       ) ? (
         <ChampionCategoryTitle
           category={champion.category}
-          className={cssClasses(['pt-4', Maybe.isSome(maybePrev)])}
+          className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
       <div
-        ref={hoverRef}
-        className={cssClasses(
+        ref={containerRef}
+        className={cx(
           'relative',
           ['hidden', isHidden],
           [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
@@ -157,21 +161,35 @@ const Champion: React.FC<ChampionProps> = ({
           style={animationDelay(champion.glow)}
         />
 
-        <div className="relative grid grid-cols-[auto_auto] rounded-xl bg-aram-stats text-2xs">
+        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs">
           <ChampionMasterySquare
             {...champion}
-            aram={masteriesQuery.view === 'aram' ? Maybe.some(champion.aram) : Maybe.none}
             setChampionShards={setChampionShards}
             isHistogram={isHistogram}
-            hoverRef={hoverRef}
+            tooltipPlacementRef={containerRef}
+            tooltipPlacement="top"
           />
-          <ChampionMasteryAram aram={champion.aram} className={cssClasses(['hidden', !isAram])} />
+
+          <div className={isAram ? 'contents' : 'hidden'}>
+            <AramStatsCompact aram={champion.aram} splitAt={Infinity}>
+              {renderChildrenCompact}
+            </AramStatsCompact>
+          </div>
+          {isAram ? (
+            <>
+              <Tooltip hoverRef={[aramHoverRef1, aramHoverRef2]} placementRef={containerRef}>
+                <AramTooltip aram={champion.aram} />
+              </Tooltip>
+
+              <span ref={aramHoverRef2} className="rounded-bl-xl" />
+            </>
+          ) : null}
         </div>
       </div>
       <ChampionMasteryHistogram
         maybeMaxPoints={maybeMaxPoints}
         champion={champion}
-        className={cssClasses(['hidden', !isHistogram || isHidden])}
+        className={cx(['hidden', !isHistogram || isHidden])}
       />
     </>
   )
@@ -233,7 +251,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
 
   return (
     <>
-      <div className={cssClasses('flex flex-col', className)}>
+      <div className={cx('flex flex-col', className)}>
         {pipe(
           maybeMaxPoints,
           Maybe.fold(
@@ -251,10 +269,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                   )}
                   <div
                     ref={hoverRef2}
-                    className={cssClasses(
-                      'absolute top-0 h-full',
-                      bgGradientMastery(championLevel),
-                    )}
+                    className={cx('absolute top-0 h-full', bgGradientMastery(championLevel))}
                     style={{ width: p(championPoints) }}
                   />
                   {championLevel < 2 ? null : (
@@ -299,25 +314,14 @@ const rulerColor = (level: number): string => {
   return 'border-grey-500'
 }
 
-type ChampionMasteryAramProps = {
-  aram: AramData
-  className?: string
-}
-
-const ChampionMasteryAram: React.FC<ChampionMasteryAramProps> = ({ aram, className }) => {
-  const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(className), [className])
-  return (
-    <AramStatsCompact aram={aram} splitAt={Infinity}>
-      {renderChildrenCompact}
-    </AramStatsCompact>
-  )
-}
-
 const getRenderChildrenCompact =
-  (className: string | undefined) =>
-  (children1: List<React.JSX.Element>): React.JSX.Element =>
+  (ref: React.RefObject<HTMLUListElement>) =>
+  (children: List<React.JSX.Element>): React.JSX.Element =>
     (
-      <ul className={cssClasses('flex flex-col items-start self-center px-0.5 py-1', className)}>
-        {children1}
+      <ul
+        ref={ref}
+        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1"
+      >
+        {children}
       </ul>
     )
