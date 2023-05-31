@@ -29,7 +29,7 @@ const discordRedirectMatch = lit('discordRedirect')
  * parser
  */
 
-// don't forget .then(end).parser (p)
+// don't forget .then(end).parser (or use p)
 const platformSummonerName = p(platformSummonerNameMatch)
 const platformSummonerNameGame = p(platformSummonerNameGameMatch)
 
