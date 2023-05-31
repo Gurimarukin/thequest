@@ -1,5 +1,3 @@
-- rework glow
-
 - discord OAuth2: proper state (redirect url)
 - game: ban order matches participant order
 - toaster (replace alert)

@@ -6,7 +6,6 @@ import { useMemo, useRef } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
@@ -27,7 +26,6 @@ import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 
-const { round } = NumberUtils
 const { plural } = StringUtils
 
 type Props = {
@@ -80,7 +78,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
             <Champion
               key={ChampionKey.unwrap(champion.championId)}
               maybeMaxPoints={maybeMaxPoints}
-              isGlowing={!hideInsteadOfGlow && Maybe.isSome(champion.glow)}
+              isGlowing={!hideInsteadOfGlow && champion.glow}
               isHidden={isHidden(champion)}
               maybePrev={maybePrev}
               champion={champion}
@@ -152,14 +150,7 @@ const Champion: React.FC<ChampionProps> = ({
         )}
       >
         {/* glow */}
-        <div
-          className={
-            isGlowing
-              ? 'absolute -left-1.5 -top-1.5 h-[76px] w-[76px] animate-glow rounded-1/2 bg-gradient-to-r from-glow to-glow-bis blur-sm'
-              : 'hidden'
-          }
-          style={animationDelay(champion.glow)}
-        />
+        <Glow isGlowing={isGlowing} />
 
         <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs">
           <ChampionMasterySquare
@@ -195,16 +186,21 @@ const Champion: React.FC<ChampionProps> = ({
   )
 }
 
-const animationDelay: (glow: Maybe<number>) => React.CSSProperties | undefined = flow(
-  Maybe.map((delay): React.CSSProperties => {
-    const delaySeconds = `${round(delay, 3)}s`
-    return {
-      animationDelay: delaySeconds,
-      MozAnimationDelay: delaySeconds,
-      WebkitAnimationDelay: delaySeconds,
+type GlowProps = {
+  isGlowing: boolean
+}
+
+const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
+  <div
+    className={
+      isGlowing
+        ? 'absolute left-[-7px] top-[-7px] grid h-[78px] w-[78px] items-center justify-items-center overflow-hidden rounded-1/2'
+        : 'hidden'
     }
-  }),
-  Maybe.toUndefined,
+  >
+    <div className="col-start-1 row-start-1 h-full w-full animate-my-spin-reverse rounded-1/2 border-2 border-dashed border-white" />
+    <div className="col-start-1 row-start-1 h-[calc(100%_-_4px)] w-[calc(100%_-_4px)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
+  </div>
 )
 
 type ChampionMasteryHistogramProps = {

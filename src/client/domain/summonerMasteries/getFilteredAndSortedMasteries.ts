@@ -59,7 +59,7 @@ export const getFilteredAndSortedMasteries = (
     ),
     searchCount: pipe(
       filteredAndSortedMasteries_,
-      List.filter(c => Maybe.isSome(c.glow)),
+      List.filter(c => c.glow),
       List.size,
     ),
     maybeMaxPoints: pipe(
@@ -100,7 +100,7 @@ type HideInsteadOfGlow = {
 const getIsHidden =
   ({ hideInsteadOfGlow }: HideInsteadOfGlow) =>
   (c: EnrichedChampionMastery) =>
-    c.isHidden || (hideInsteadOfGlow && Maybe.isNone(c.glow))
+    c.isHidden || (hideInsteadOfGlow && !c.glow)
 
 const getSortBy = (
   sort: MasteriesQuerySort,

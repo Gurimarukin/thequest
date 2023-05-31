@@ -18,7 +18,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   name: string
   percents: number
   shardsCount: Maybe<number>
-  glow: Maybe<number> // animation delay (in seconds) if is glowing
+  glow: boolean
   positions: List<ChampionPosition>
   aram: AramData
   category: ChampionCategory
