@@ -1,5 +1,5 @@
 /* eslint-disable functional/no-expression-statements */
-import { monoid, number, random } from 'fp-ts'
+import { monoid, number } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { HttpMethod } from 'ky/distribution/types/options'
 import { optional } from 'monocle-ts'
@@ -319,8 +319,7 @@ const enrichAll = (
 
       const glow = pipe(
         maybeSearch,
-        Maybe.filter(search => cleanChampionName(name).includes(cleanChampionName(search))),
-        Maybe.map(() => random.random()),
+        Maybe.exists(search => cleanChampionName(name).includes(cleanChampionName(search))),
       )
 
       return pipe(

@@ -28,8 +28,6 @@ module.exports = {
       'zinc-950': colors.zinc[950],
 
       'aram-stats': colors.zinc[800],
-      glow: colors.amber[100],
-      'glow-bis': colors.yellow[300],
       'histogram-grey': colors.gray[600],
       'mastery-3': '#71717a',
       'mastery-3-bis': '#52525b', // #52604f
@@ -77,21 +75,11 @@ module.exports = {
         '1/2': '50%',
       },
       animation: {
-        glow: 'glow 1s ease-in-out infinite',
+        'my-spin': 'spin 40s linear infinite',
+        'my-spin-reverse': 'spin 10s linear infinite reverse',
         dice: 'dice 2s ease-in-out infinite',
       },
       keyframes: {
-        glow: {
-          '0%': {
-            transform: 'scale(1) rotate(0deg)',
-          },
-          '50%': {
-            transform: 'scale(1.05) rotate(180deg)',
-          },
-          '100%': {
-            transform: 'scale(1) rotate(360deg)',
-          },
-        },
         dice: {
           '0%': {
             transform: 'rotate(0deg)',
