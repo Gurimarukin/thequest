@@ -165,7 +165,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   const maybeUser = useMemo(() => pipe(user, AsyncState.toOption, Maybe.flatten), [user])
 
   const recentSearches = useMemo(
-    () =>
+    (): List<SummonerShort> =>
       pipe(
         recentSearches_,
         List.difference(SummonerShort.byPuuidEq)(

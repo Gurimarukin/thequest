@@ -1,5 +1,4 @@
 - rework glow
-- recent searches insensitive sort
 
 - discord OAuth2: proper state (redirect url)
 - game: ban order matches participant order
