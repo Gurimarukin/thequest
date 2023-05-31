@@ -9,10 +9,10 @@ export const constants = {
   riotApiCacheTtl: {
     ddragonLatestVersion: MsDuration.hour(1),
 
-    activeGame: MsDuration.minutes(2),
-    leagueEntries: MsDuration.minutes(10),
-    masteries: MsDuration.minutes(10),
-    summoner: MsDuration.minutes(10),
+    activeGame: MsDuration.minutes(3),
+    leagueEntries: MsDuration.minutes(3),
+    masteries: MsDuration.minutes(3),
+    summoner: MsDuration.minutes(9),
 
     account: MsDuration.days(99 * 365),
   },
