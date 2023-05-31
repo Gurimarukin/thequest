@@ -1,7 +1,7 @@
 import { monoid, number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
-import type { List } from '../../shared/utils/fp'
+import type { List } from './fp'
 
 const average = (ns: List<number>): number =>
   ns.length === 0 ? 0 : pipe(ns, monoid.concatAll(number.MonoidSum)) / ns.length

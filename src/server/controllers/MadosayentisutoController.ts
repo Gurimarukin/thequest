@@ -11,11 +11,10 @@ import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
+import { NumberUtils } from '../../shared/utils/NumberUtils'
 import type { Future } from '../../shared/utils/fp'
 import { Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
-
-import { NumberUtils } from '../../client/utils/NumberUtils'
 
 import type { MadosayentisutoConfig } from '../config/Config'
 import type { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'

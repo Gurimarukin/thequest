@@ -23,12 +23,11 @@ import { SummonerMasteriesView } from '../../shared/models/api/summoner/Summoner
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
+import { NumberUtils } from '../../shared/utils/NumberUtils'
 import type { NonEmptyArray, PartialDict } from '../../shared/utils/fp'
 import { Either, Future, List, Maybe, Try, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
-
-import { NumberUtils } from '../../client/utils/NumberUtils'
 
 import { ActiveGame } from '../models/activeGame/ActiveGame'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'

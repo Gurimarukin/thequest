@@ -3,6 +3,7 @@ import { useMemo, useRef } from 'react'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
+import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
@@ -10,7 +11,6 @@ import { MasteryImg } from '../../components/MasteryImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { InformationCircleOutline } from '../../imgs/svgIcons'
-import { NumberUtils } from '../../utils/NumberUtils'
 import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils
