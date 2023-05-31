@@ -15,11 +15,10 @@ import type { SummonerShort } from '../../shared/models/api/summoner/SummonerSho
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Token } from '../../shared/models/api/user/Token'
-import { UserName } from '../../shared/models/api/user/UserName'
 import { UserView } from '../../shared/models/api/user/UserView'
-import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
-import { Dict, Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
+import { DictUtils } from '../../shared/utils/DictUtils'
+import { Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { validatePassword } from '../../shared/validations/validatePassword'
@@ -48,8 +47,8 @@ function UserController(
   Logger: LoggerGetter,
   ddragonService: DDragonService,
   discordService: DiscordService,
-  summonerService: SummonerService,
   masteriesService: MasteriesService,
+  summonerService: SummonerService,
   userService: UserService,
 ) {
   const logger = Logger('UserController')
@@ -73,9 +72,7 @@ function UserController(
     ({ userName, password }) =>
       pipe(
         userService.loginPassword(userName, password),
-        Future.chainFirstIOEitherK(() =>
-          logger.info(`Login/password user created: ${UserName.unwrap(userName)}`),
-        ),
+        Future.chainFirstIOEitherK(() => logger.info(`Login/password user created: ${userName}`)),
         M.fromTaskEither,
         M.ichain(
           Maybe.fold(
@@ -104,9 +101,7 @@ function UserController(
             futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
             Future.chainFirstIOEitherK(() =>
               logger.info(
-                `Discord user created: ${discord.username}#${
-                  discord.discriminator
-                } (${DiscordUserId.unwrap(discord.id)})`,
+                `Discord user created: ${discord.username}#${discord.discriminator} (${discord.id})`,
               ),
             ),
           ),
@@ -352,11 +347,11 @@ function UserController(
     championShards: NonEmptyArray<ChampionShardsPayload>,
   ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShardsPayload>>> {
     return pipe(
-      ddragonService.latestDataChampions(Lang.defaultLang),
-      Future.map(({ champions: dataChampions }) => {
+      ddragonService.latestChampions(Lang.defaultLang),
+      Future.map(({ value: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,
-          Dict.toReadonlyArray,
+          DictUtils.entries,
           List.map(([, { key }]) => key),
         )
         return pipe(

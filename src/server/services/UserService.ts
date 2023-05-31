@@ -12,7 +12,6 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
-import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
 import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
@@ -181,6 +180,7 @@ const UserService = (
     removeFavoriteSearch,
     removeAllFavoriteSearches,
     listChampionShardsForSummoner: championShardPersistence.listForSummoner,
+    findChampionShardsForChampion: championShardPersistence.findForChampion,
     setChampionsShardsForSummonerBulk: (
       user: UserId,
       summoner: SummonerId,
@@ -225,9 +225,7 @@ const UserService = (
         riotGamesConnectionNameDecoder.decode(riotGamesConnection.name),
         Either.mapLeft(() =>
           Error(
-            `Couldn't decode RiotGamesConnectionName for user ${discord.username}#${
-              discord.discriminator
-            } (${DiscordUserId.unwrap(discord.id)}) - value: ${riotGamesConnection.name}`,
+            `Couldn't decode RiotGamesConnectionName for user ${discord.username}#${discord.discriminator} (${discord.id}) - value: ${riotGamesConnection.name}`,
           ),
         ),
         Future.fromEither,
@@ -318,7 +316,7 @@ const UserService = (
           ),
           Future.filterOrElse(
             success => success,
-            () => Error(`Couldn't update user's login: ${UserId.unwrap(user.id)}`),
+            () => Error(`Couldn't update user's login: ${user.id}`),
           ),
         ),
       ),

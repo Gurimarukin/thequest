@@ -3,7 +3,7 @@ import type { AnyBulkWriteOperation } from 'mongodb'
 
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { TObservable } from '../../shared/models/rx/TObservable'
-import type { NotUsed } from '../../shared/utils/fp'
+import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
@@ -40,6 +40,17 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
       collection.findAll()({
         user: UserId.codec.encode(user),
         summoner: SummonerId.codec.encode(summoner),
+      }),
+
+    findForChampion: (
+      user: UserId,
+      summoner: SummonerId,
+      champion: ChampionKey,
+    ): Future<Maybe<ChampionShardsDb>> =>
+      collection.findOne({
+        user: UserId.codec.encode(user),
+        summoner: SummonerId.codec.encode(summoner),
+        champion: ChampionKey.codec.encode(champion),
       }),
 
     bulkDeleteAndUpsert: (

@@ -3,9 +3,10 @@ import { pipe } from 'fp-ts/function'
 
 import type { AramData } from '../../shared/models/api/AramData'
 import { WikiaStatsBalance } from '../../shared/models/wikia/WikiaStatsBalance'
+import { DictUtils } from '../../shared/utils/DictUtils'
 import { createEnum } from '../../shared/utils/createEnum'
-import type { NonEmptyArray } from '../../shared/utils/fp'
-import { List, Maybe, PartialDict } from '../../shared/utils/fp'
+import type { NonEmptyArray, PartialDict } from '../../shared/utils/fp'
+import { List, Maybe } from '../../shared/utils/fp'
 
 type ChampionCategory = typeof e.T
 
@@ -44,7 +45,7 @@ const fromAramData = (aram: AramData): ChampionCategory =>
 const normalizeStats = (stats: WikiaStatsBalance): number =>
   pipe(
     stats,
-    PartialDict.toReadonlyArray,
+    DictUtils.partial.entries,
     List.map(([key, val]): number => {
       if (val === undefined || val === 0) return 0
 

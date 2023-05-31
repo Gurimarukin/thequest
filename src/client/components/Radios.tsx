@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-return-void */
 import type { NonEmptyArray } from '../../shared/utils/fp'
 
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 
 type Value = string | number | null
 
@@ -38,7 +38,7 @@ export function Radios<A extends Value>({
               className="hidden"
             />
             <span
-              className={cssClasses(
+              className={cx(
                 'flex border-l border-goldenrod-bis group-first:rounded-l-md group-first:border-l-0 group-last:rounded-r-md',
                 isChecked ? 'bg-goldenrod-bis text-black' : 'cursor-pointer bg-zinc-700',
               )}

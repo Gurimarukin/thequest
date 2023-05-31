@@ -173,32 +173,37 @@ export const FpCollection =
     }
   }
 
+type KeyOf<A> = A extends List<infer B> ? keyof B : A extends Maybe<infer C> ? keyof C : keyof A
+
 type Path<S> = {
   <
-    K1 extends keyof S,
-    K2 extends keyof S[K1],
-    K3 extends keyof S[K1][K2],
-    K4 extends keyof S[K1][K2][K3],
-    K5 extends keyof S[K1][K2][K3][K4],
+    K1 extends KeyOf<S>,
+    K2 extends KeyOf<S[K1]>,
+    K3 extends KeyOf<S[K1][K2]>,
+    K4 extends KeyOf<S[K1][K2][K3]>,
+    K5 extends KeyOf<S[K1][K2][K3][K4]>,
   >(
-    path: [K1, K2, K3, K4, K5],
+    ...path: [K1, K2, K3, K4, K5]
   ): string
   <
-    K1 extends keyof S,
-    K2 extends keyof S[K1],
-    K3 extends keyof S[K1][K2],
-    K4 extends keyof S[K1][K2][K3],
+    K1 extends KeyOf<S>,
+    K2 extends KeyOf<S[K1]>,
+    K3 extends KeyOf<S[K1][K2]>,
+    K4 extends KeyOf<S[K1][K2][K3]>,
   >(
-    path: [K1, K2, K3, K4],
+    ...path: [K1, K2, K3, K4]
   ): string
-  <K1 extends keyof S, K2 extends keyof S[K1], K3 extends keyof S[K1][K2]>(
-    path: [K1, K2, K3],
+  <K1 extends KeyOf<S>, K2 extends KeyOf<S[K1]>, K3 extends KeyOf<S[K1][K2]>>(
+    ...path: [K1, K2, K3]
   ): string
-  <K1 extends keyof S, K2 extends keyof S[K1]>(path: [K1, K2]): string
-  <K1 extends keyof S>(path: [K1]): string
+  <K1 extends KeyOf<S>, K2 extends KeyOf<S[K1]>>(...path: [K1, K2]): string
+  <K1 extends KeyOf<S>>(...path: [K1]): string
 }
 
-const getPath = <A>(): Path<A> => List.mkString('.')
+const getPath =
+  <A>(): Path<A> =>
+  (...path: List<string>) =>
+    List.mkString('.')(path)
 
 const fpCollectionHelpersFindAll =
   <O extends MongoDocument, B>(

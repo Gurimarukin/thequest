@@ -1,20 +1,23 @@
 import { useMemo, useRef } from 'react'
 
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
+import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
 
+import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { InformationCircleOutline } from '../../imgs/svgIcons'
-import { NumberUtils } from '../../utils/NumberUtils'
-import { cssClasses } from '../../utils/cssClasses'
+import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils
 
 type Props = {
   summoner: EnrichedSummonerView
+  leagues: SummonerLeaguesView
 }
 
 export type EnrichedSummonerView = SummonerView & {
@@ -32,9 +35,11 @@ export const Summoner: React.FC<Props> = ({
     totalMasteryLevel,
     masteriesCount,
   },
+  leagues,
 }) => {
   const staticData = useStaticData()
 
+  const levelRef = useRef<HTMLSpanElement>(null)
   const masteriesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLSpanElement>(null)
 
@@ -45,17 +50,31 @@ export const Summoner: React.FC<Props> = ({
 
   return (
     <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap gap-4">
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={`Icône de ${name}`}
           className="h-24 w-24 rounded border border-goldenrod-bis"
         />
-        <div className="flex flex-col">
-          <span className="text-lg text-goldenrod">{name}</span>
-          <span className="text-sm">Niveau {summonerLevel}</span>
+        <div className="grid grid-rows-[1fr_auto] items-center gap-4">
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="text-lg text-goldenrod">{name}</span>
+            <span className="text-sm text-grey-400">—</span>
+            <span ref={levelRef} className="text-sm">
+              niveau {summonerLevel}
+            </span>
+            <Tooltip hoverRef={levelRef} placement="right">
+              Niveau d’invocateur
+            </Tooltip>
+          </div>
+          <div className="flex flex-wrap gap-6">
+            {SummonerLeaguesView.keys.map(queue => (
+              <League key={queue} queue={queue} league={leagues[queue]} />
+            ))}
+          </div>
         </div>
       </div>
+
       <div className="flex flex-col items-center gap-3">
         <div ref={masteriesRef} className="flex items-end gap-2">
           <MasteryImgWithCount level={7} imgClassName="!w-[72px] -mt-1.5" />
@@ -120,8 +139,8 @@ const getMasteryImgWithCount =
   (masteriesCount: Dict<`${ChampionLevelOrZero}`, number>): React.FC<MasteryImgWithCountProps> =>
   ({ level, imgClassName, className }) =>
     (
-      <div className={cssClasses('flex flex-col items-center', className)}>
+      <div className={cx('flex flex-col items-center', className)}>
         <span className="text-xs">{masteriesCount[level]}</span>
-        <MasteryImg level={level} className={cssClasses('w-full', imgClassName)} />
+        <MasteryImg level={level} className={cx('w-full', imgClassName)} />
       </div>
     )

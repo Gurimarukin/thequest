@@ -4,7 +4,7 @@ import * as C from 'io-ts/Codec'
 
 import { Dict, List, Maybe } from '../../utils/fp'
 import { WikiaStatsBalance } from '../wikia/WikiaStatsBalance'
-import { Spell } from './Spell'
+import { SpellName } from './SpellName'
 
 type ChampionSpellHtml = C.TypeOf<typeof championSpellHtmlCodec>
 type ChampionSpellHtmlOutput = C.OutputOf<typeof championSpellHtmlCodec>
@@ -15,12 +15,12 @@ const championSpellHtmlCodec = C.struct({
 })
 
 const spellsProperties: Dict<
-  Spell,
+  SpellName,
   Codec<unknown, ChampionSpellHtmlOutput, ChampionSpellHtmlOutput>
 > = pipe(
-  Spell.values,
+  SpellName.values,
   List.reduce(
-    Dict.empty<Spell, Codec<unknown, ChampionSpellHtmlOutput, ChampionSpellHtml>>(),
+    Dict.empty<SpellName, Codec<unknown, ChampionSpellHtmlOutput, ChampionSpellHtml>>(),
     (acc, spell) => ({ ...acc, [spell]: championSpellHtmlCodec }),
   ),
 )

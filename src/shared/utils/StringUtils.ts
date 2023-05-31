@@ -38,6 +38,9 @@ const pad100 = padStart(3)
 const cleanUTF8ToASCII = (str: string): string =>
   str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
+const whiteSpaces = /\s+/g
+const cleanSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
+
 const nonAZ = /[^a-z]/g
 const cleanChampionName = (name: string): string =>
   StringUtils.cleanUTF8ToASCII(name).toLowerCase().replaceAll(nonAZ, '')
@@ -74,7 +77,9 @@ export const StringUtils = {
   matcher2,
   matcher3,
   stripMargins,
+  pad10,
   cleanUTF8ToASCII,
+  cleanSummonerName,
   cleanChampionName,
   plural,
   prettyMs,

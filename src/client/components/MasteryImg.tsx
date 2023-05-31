@@ -1,7 +1,7 @@
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 
 import { Assets } from '../imgs/Assets'
-import { cssClasses } from '../utils/cssClasses'
+import { cx } from '../utils/cx'
 
 type Props = {
   level: ChampionLevelOrZero
@@ -12,6 +12,6 @@ export const MasteryImg: React.FC<Props> = ({ level, className }) => (
   <img
     src={Assets.masteries[level]}
     alt={`Icône niveau ${level}`}
-    className={cssClasses(['grayscale', level === 0], className)}
+    className={cx(['grayscale', level === 0], className)}
   />
 )

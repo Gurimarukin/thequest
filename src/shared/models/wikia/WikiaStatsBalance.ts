@@ -5,8 +5,9 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 
+import { DictUtils } from '../../utils/DictUtils'
 import type { Dict } from '../../utils/fp'
-import { List, PartialDict } from '../../utils/fp'
+import { List } from '../../utils/fp'
 import { StrictPartial } from '../../utils/ioTsUtils'
 
 type WikiaStatsBalance = C.TypeOf<typeof rawCodec>
@@ -30,7 +31,7 @@ const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiaStatsBalance> = C.
     rawCodec,
     D.map(
       flow(
-        PartialDict.toReadonlyArray,
+        DictUtils.partial.entries,
         List.reduce({} as WikiaStatsBalance, (acc, [key, val]) => {
           if (val === undefined) return acc
           if (isModifierStat(key)) {
@@ -50,7 +51,7 @@ const Eq: eq.Eq<Key> = string.Eq
 
 type Key = keyof WikiaStatsBalance
 
-const keys = Object.keys(properties) as List<Key>
+const keys = DictUtils.keys(properties)
 
 const modifierStats: List<Key> = [
   'dmg_dealt',

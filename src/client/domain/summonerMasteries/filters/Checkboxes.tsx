@@ -9,7 +9,7 @@ import { useCallback, useRef } from 'react'
 import { List } from '../../../../shared/utils/fp'
 
 import { Tooltip } from '../../../components/tooltip/Tooltip'
-import { cssClasses } from '../../../utils/cssClasses'
+import { cx } from '../../../utils/cx'
 
 type Props<A> = {
   eq: Eq<A>
@@ -63,7 +63,7 @@ export function Checkboxes<A>({
   )
 
   return (
-    <div onMouseEnter={onMouseEnter} className={cssClasses('flex flex-wrap', className)}>
+    <div onMouseEnter={onMouseEnter} className={cx('flex flex-wrap', className)}>
       {pipe(
         values,
         List.map(({ key, value, icon, label }) => (
@@ -123,7 +123,7 @@ function LabelCheckbox<A>({
       />
       <span
         ref={hoverRef}
-        className={cssClasses(
+        className={cx(
           'flex h-9 shrink-0 cursor-pointer',
           isMenuVisible === true
             ? 'group-first/checkbox:rounded-tl-md group-last/checkbox:rounded-tr-md'

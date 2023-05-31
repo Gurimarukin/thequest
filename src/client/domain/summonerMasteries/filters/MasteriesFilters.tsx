@@ -32,7 +32,7 @@ import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../../models/masteriesQuery/MasteriesQueryView'
-import { cssClasses } from '../../../utils/cssClasses'
+import { cx } from '../../../utils/cx'
 import { Checkboxes } from './Checkboxes'
 
 type Props = {
@@ -112,7 +112,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                 icon: isChecked => (
                   <MasteryImg
                     level={level}
-                    className={cssClasses('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
+                    className={cx('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
                   />
                 ),
                 label: `Niveau ${level}`,
@@ -127,7 +127,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             className="relative z-20"
           />
           <ul
-            className={cssClasses(
+            className={cx(
               'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
               ['hidden', !levelsMenuIsVisible],
             )}
@@ -158,10 +158,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               icon: isChecked => (
                 <ChampionPositionImg
                   position={position}
-                  className={cssClasses('w-6', [
-                    'brightness-150 contrast-200 grayscale invert',
-                    isChecked,
-                  ])}
+                  className={cx('w-6', ['brightness-150 contrast-200 grayscale invert', isChecked])}
                 />
               ),
               label: ChampionPosition.label[position],
@@ -272,7 +269,7 @@ const getSelectLevelsButton =
           type="button"
           onClick={handleClick}
           disabled={isSelected}
-          className={cssClasses(
+          className={cx(
             'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm',
             isSelected ? 'bg-goldenrod-bis text-black' : 'hover:bg-black',
           )}
@@ -286,7 +283,7 @@ const getSelectLevelsButton =
                 <MasteryImg
                   key={level}
                   level={level}
-                  className={cssClasses('h-5', ['drop-shadow-[0_0_3px_black]', isSelected])}
+                  className={cx('h-5', ['drop-shadow-[0_0_3px_black]', isSelected])}
                 />
               )),
             )}

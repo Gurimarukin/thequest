@@ -5,9 +5,9 @@ import { DDragonChampion } from './DDragonChampion'
 type DDragonChampions = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
-  type: D.literal('champion'),
-  format: D.literal('standAloneComplex'),
-  version: D.string,
+  // type: D.literal('champion'),
+  // format: D.literal('standAloneComplex'),
+  // version: DDragonVersion.codec,
   data: D.record(DDragonChampion.decoder),
 })
 

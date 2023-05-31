@@ -4,7 +4,7 @@ import { List } from '../../shared/utils/fp'
 
 import type { ClientConfig } from '../config/Config'
 import type { HttpClient } from '../helpers/HttpClient'
-import { AccessToken } from '../models/discord/AccessToken'
+import type { AccessToken } from '../models/discord/AccessToken'
 import { DiscordConnection } from '../models/discord/DiscordConnection'
 import { DiscordUser } from '../models/discord/DiscordUser'
 import { OAuth2AccessTokenResult } from '../models/discord/OAuth2AccessTokenResult'
@@ -77,4 +77,4 @@ export { DiscordService }
 
 const authorizationHeader = (
   token: AccessToken,
-): `${OAuth2AccessTokenResult['token_type']} ${string}` => `Bearer ${AccessToken.unwrap(token)}`
+): `${OAuth2AccessTokenResult['token_type']} ${string}` => `Bearer ${token}`

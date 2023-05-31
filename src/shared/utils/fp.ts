@@ -13,7 +13,7 @@ import {
 } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
-import type { Lazy } from 'fp-ts/function'
+import type { LazyArg } from 'fp-ts/function'
 import { flow, identity, pipe, tuple } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C_ from 'io-ts/Codec'
@@ -60,12 +60,17 @@ export const Dict = {
 export type PartialDict<K extends string, A> = Partial<Dict<K, A>>
 
 export const PartialDict = {
+  every: readonlyRecord.every as {
+    <A, B extends A>(refinement: Refinement<A, B>): Refinement<
+      PartialDict<string, A>,
+      PartialDict<string, B>
+    >
+    <A>(predicate: Predicate<A>): Predicate<PartialDict<string, A>>
+  },
+  fromEntries: Object.entries as <K extends string, A>(fa: List<Tuple<K, A>>) => PartialDict<K, A>,
   map: readonlyRecord.map as <A, B>(
     f: (a: A) => B,
   ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
-  toReadonlyArray: readonlyRecord.toReadonlyArray as <K extends string, A>(
-    r: PartialDict<K, A>,
-  ) => List<Tuple<K, A | undefined>>,
 }
 
 export type Either<E, A> = either.Either<E, A>
@@ -176,7 +181,7 @@ export const Try = {
   success: either.right as <A>(a: A) => Try<A>,
   failure: either.left as <A = never>(e: Error) => Try<A>,
   fromNullable: either.fromNullable as (e: Error) => <A>(a: A) => Try<NonNullable<A>>,
-  tryCatch: <A>(a: Lazy<A>): Try<A> => Either.tryCatch(a, Either.toError),
+  tryCatch: <A>(a: LazyArg<A>): Try<A> => Either.tryCatch(a, Either.toError),
   getUnsafe: <A>(t: Try<A>): A =>
     pipe(
       t,
@@ -207,7 +212,7 @@ export const Future = {
   orElseIOEitherK: <A>(f: (e: Error) => IO<A>): ((fa: Future<A>) => Future<A>) =>
     taskEither.orElse(flow(f, Future.fromIOEither)),
   fromIO: taskEither.fromIO as <A>(fa: io.IO<A>) => Future<A>,
-  tryCatch: <A>(f: Lazy<Promise<A>>): Future<A> => taskEither.tryCatch(f, Either.toError),
+  tryCatch: <A>(f: LazyArg<Promise<A>>): Future<A> => taskEither.tryCatch(f, Either.toError),
   notUsed: futureNotUsed,
   todo: (...args: List<unknown>): Future<never> =>
     taskEither.fromEither(Try.tryCatch(() => todo(args))),
@@ -243,7 +248,7 @@ export const IO = {
   ...ioMethods,
   successful: ioEither.right as <A>(a: A) => IO<A>,
   failed: ioEither.left as <A = never>(e: Error) => IO<A>,
-  tryCatch: <A>(a: Lazy<A>): IO<A> => ioEither.tryCatch(a, Either.toError),
+  tryCatch: <A>(a: LazyArg<A>): IO<A> => ioEither.tryCatch(a, Either.toError),
   fromIO: ioFromIO,
   notUsed: ioNotUsed,
   runFuture:

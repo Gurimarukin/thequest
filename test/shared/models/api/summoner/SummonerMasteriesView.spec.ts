@@ -44,11 +44,13 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
         optional.modify(ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)(shardsOne)),
       )({
         summoner,
+        leagues: { soloDuo: Maybe.none, flex: Maybe.none },
         masteries: [],
         championShards: Maybe.none,
       }),
     ).toStrictEqual({
       summoner,
+      leagues: { soloDuo: Maybe.none, flex: Maybe.none },
       masteries: [],
       championShards: Maybe.none,
     })
@@ -59,11 +61,13 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
         optional.modify(ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)(shardsTwo)),
       )({
         summoner,
+        leagues: { soloDuo: Maybe.none, flex: Maybe.none },
         masteries: [],
         championShards: Maybe.some([shardsOne]),
       }),
     ).toStrictEqual({
       summoner,
+      leagues: { soloDuo: Maybe.none, flex: Maybe.none },
       masteries: [],
       championShards: Maybe.some([shardsOne, shardsTwo]),
     })
@@ -74,11 +78,13 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
         optional.modify(ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)(shardsOneBis)),
       )({
         summoner,
+        leagues: { soloDuo: Maybe.none, flex: Maybe.none },
         masteries: [],
         championShards: Maybe.some([shardsOne, shardsTwo]),
       }),
     ).toStrictEqual({
       summoner,
+      leagues: { soloDuo: Maybe.none, flex: Maybe.none },
       masteries: [],
       championShards: Maybe.some([shardsOneBis, shardsTwo]),
     })

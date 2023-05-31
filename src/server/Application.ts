@@ -21,12 +21,14 @@ const rateLimiterLifeTime = MsDuration.days(1)
 export const Application = ({
   config,
   Logger,
+  activeGameService,
   ddragonService,
   discordService,
   healthCheckService,
-  summonerService,
+  leagueEntryService,
   masteriesService,
   staticDataService,
+  summonerService,
   userService,
 }: Context): IO<NotUsed> => {
   const logger = Logger('Application')
@@ -34,14 +36,21 @@ export const Application = ({
   const withIp = WithIp(Logger, config)
 
   const healthCheckController = HealthCheckController(healthCheckService)
-  const staticDataController = StaticDataController(ddragonService, staticDataService)
-  const summonerController = SummonerController(summonerService, masteriesService, userService)
+  const staticDataController = StaticDataController(staticDataService)
+  const summonerController = SummonerController(
+    activeGameService,
+    leagueEntryService,
+    masteriesService,
+    summonerService,
+    staticDataService,
+    userService,
+  )
   const userController = UserController(
     Logger,
     ddragonService,
     discordService,
-    summonerService,
     masteriesService,
+    summonerService,
     userService,
   )
 
@@ -50,7 +59,6 @@ export const Application = ({
     withIp,
     ddragonService,
     masteriesService,
-    summonerService,
     userService,
     staticDataController,
   )
