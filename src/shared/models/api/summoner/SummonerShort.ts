@@ -2,6 +2,7 @@ import { eq, ord, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
+import { StringUtils } from '../../../utils/StringUtils'
 import { Platform } from '../Platform'
 import { Puuid } from './Puuid'
 
@@ -20,7 +21,7 @@ const byPuuidEq: eq.Eq<SummonerShort> = eq.struct<Pick<SummonerShort, 'puuid'>>(
 
 const byNameOrd: ord.Ord<SummonerShort> = pipe(
   string.Ord,
-  ord.contramap(s => s.name),
+  ord.contramap(s => StringUtils.cleanUTF8ToASCII(s.name).toLowerCase()),
 )
 
 const SummonerShort = { codec, byPuuidEq, byNameOrd }
