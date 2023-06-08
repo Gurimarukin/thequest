@@ -56,6 +56,7 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
         futureRunUnsafe,
       ),
     {
+      revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       shouldRetryOnError: false,

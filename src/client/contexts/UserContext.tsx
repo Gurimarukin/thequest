@@ -54,7 +54,11 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         }),
         futureRunUnsafe,
       ),
-    { revalidateOnFocus: false },
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   )
 
   const addFavoriteSearch = useCallback(

@@ -80,7 +80,11 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
         ),
         futureRunUnsafe,
       ),
-    { revalidateOnFocus: !config.isDev },
+    {
+      revalidateIfStale: !config.isDev,
+      revalidateOnFocus: !config.isDev,
+      revalidateOnReconnect: !config.isDev,
+    },
   )
 
   // Remove shards on user disconnect

@@ -20,5 +20,10 @@ export const useSWRHttp = <A, O, B>(
   useSWR<A, unknown, Tuple<string, HttpMethod>>(
     methodWithUrl,
     methodWithUrl_ => futureRunUnsafe(http(methodWithUrl_, { ...httpOptions }, decoderWithName)),
-    { ...swrOptions, revalidateOnFocus: swrOptions?.revalidateOnFocus ?? !config.isDev },
+    {
+      ...swrOptions,
+      revalidateIfStale: swrOptions?.revalidateIfStale ?? !config.isDev,
+      revalidateOnFocus: swrOptions?.revalidateOnFocus ?? !config.isDev,
+      revalidateOnReconnect: swrOptions?.revalidateOnReconnect ?? !config.isDev,
+    },
   )
