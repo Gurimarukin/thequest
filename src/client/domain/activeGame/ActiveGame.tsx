@@ -56,6 +56,11 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
     apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
     {},
     [Maybe.decoder(SummonerActiveGameView.codec), 'Maybe<SummonerActiveGameView>'],
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   )
 
   // Remove shards on user disconnect

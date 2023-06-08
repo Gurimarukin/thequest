@@ -35,6 +35,7 @@ const StaticDataContext = createContext<StaticDataContext | undefined>(undefined
 export const StaticDataContextProvider: ChildrenFC = ({ children }) =>
   basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
+      revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     }),
