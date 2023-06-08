@@ -139,7 +139,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const padding = reverse ? 'pr-2' : 'pl-2'
   const children = [
-    child('div', 1)({ className: highlight ? 'border-l-4 border-goldenrod-bis' : undefined }),
+    child(
+      'div',
+      1,
+    )({
+      className: highlight
+        ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4')
+        : undefined,
+    }),
     child('div', 2)(
       { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
       pipe(
@@ -227,7 +234,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           <span className="invisible">h</span>
           <div ref={championRef} className="flex flex-col items-center gap-px">
             <ChampionMasterySquare {...squareProps} />
-            <span className={cx(['invisible', squareProps.championLevel < 4])}>
+            <span className={cx(['invisible', squareProps.championLevel < 5])}>
               {round(squareProps.championPoints / 1000, 1).toLocaleString()}k
             </span>
           </div>
