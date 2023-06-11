@@ -1,3 +1,6 @@
+import { pipe } from 'fp-ts/function'
+import type { SWRResponse } from 'swr'
+
 import { Maybe } from '../../shared/utils/fp'
 
 type AsyncState<E, A> = Loading | Failure<E> | Success<A>
@@ -52,6 +55,16 @@ const toOption: <E, A>(as: AsyncState<E, A>) => Maybe<A> = fold(
   Maybe.some,
 )
 
-const AsyncState = { fromSWR, fold, toOption }
+const toSWR = <E, A>(as: AsyncState<E, A>): Pick<SWRResponse<A, unknown>, 'data' | 'error'> =>
+  pipe(
+    as,
+    fold<E, A, Pick<SWRResponse<A, unknown>, 'data' | 'error'>>(
+      () => ({ data: undefined, error: undefined }),
+      error => ({ data: undefined, error }),
+      data => ({ data, error: undefined }),
+    ),
+  )
+
+const AsyncState = { fromSWR, fold, toOption, toSWR }
 
 export { AsyncState }

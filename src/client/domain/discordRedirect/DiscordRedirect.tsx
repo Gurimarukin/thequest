@@ -1,8 +1,5 @@
-/* eslint-disable functional/no-expression-statements */
-import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
-import { useEffect } from 'react'
 import useSWR from 'swr'
 
 import type { RouteWithMethod } from '../../../shared/ApiRouter'
@@ -10,9 +7,10 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { DiscordCodePayload } from '../../../shared/models/api/user/DiscordCodePayload'
 import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 import type { Dict } from '../../../shared/utils/fp'
-import { Either } from '../../../shared/utils/fp'
+import { Either, Future } from '../../../shared/utils/fp'
 
 import { Link } from '../../components/Link'
+import { Navigate } from '../../components/Navigate'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { appRoutes } from '../../router/AppRouter'
@@ -21,6 +19,11 @@ import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 import { NotFound } from '../NotFound'
 import { DiscordRedirectState } from './DiscordRedirectState'
+
+const apiRoute: Dict<DiscordRedirectState, RouteWithMethod> = {
+  login: apiRoutes.user.login.discord.post,
+  register: apiRoutes.user.register.discord.post,
+}
 
 const codeDecoder = D.struct({
   code: OAuth2Code.codec,
@@ -45,7 +48,6 @@ type DiscordRedirectValidatedProps = {
 }
 
 const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ code, state }) => {
-  const { navigate } = useHistory()
   const { refreshUser } = useUser()
 
   const { data, error } = useSWR(
@@ -53,6 +55,7 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
     ([url, method, code_]) =>
       pipe(
         http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
+        Future.chain(() => refreshUser),
         futureRunUnsafe,
       ),
     {
@@ -63,19 +66,11 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
     },
   )
 
-  useEffect(() => {
-    if (data !== undefined) {
-      pipe(
-        refreshUser,
-        task.chainFirstIOK(() => () => navigate(appRoutes.index, { replace: true })),
-        futureRunUnsafe,
-      )
-    }
-  }, [data, navigate, refreshUser])
-
   return (
     <>
-      {basicAsyncRenderer({ data: undefined, error })(() => null)}
+      {basicAsyncRenderer({ data, error })(() => (
+        <Navigate to={appRoutes.index} replace={true} />
+      ))}
       {error !== undefined ? (
         <div className="flex justify-center">
           <Link to={appRoutes.index} className="mt-4 underline">
@@ -85,9 +80,4 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
       ) : null}
     </>
   )
-}
-
-const apiRoute: Dict<DiscordRedirectState, RouteWithMethod> = {
-  login: apiRoutes.user.login.discord.post,
-  register: apiRoutes.user.register.discord.post,
 }
