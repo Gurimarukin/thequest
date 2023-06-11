@@ -25,13 +25,13 @@ export type AramStatsProps = {
    * Called only if isSome(aram.stats) or isSome(aram.spells).
    */
   children: (
-    children1: List<React.JSX.Element>,
-    children2: List<React.JSX.Element>,
-  ) => React.JSX.Element
+    children1: List<React.ReactElement>,
+    children2: List<React.ReactElement>,
+  ) => React.ReactElement
 }
 
-type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => React.JSX.Element
-type RenderSpell = (spell: SpellName) => (html: ChampionSpellHtml) => React.JSX.Element
+type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => React.ReactElement
+type RenderSpell = (spell: SpellName) => (html: ChampionSpellHtml) => React.ReactElement
 
 export const getAramStats = (
   renderStat: RenderStat,
@@ -69,7 +69,7 @@ const getSeparateChildren =
     aram: AramData,
     splitAt: number,
     simpleStatsSpellsSplit: boolean,
-  ): Separated<List<React.JSX.Element>, List<React.JSX.Element>> => {
+  ): Separated<List<React.ReactElement>, List<React.ReactElement>> => {
     const eithers = pipe(
       [
         pipe(
@@ -82,7 +82,7 @@ const getSeparateChildren =
                   Dict.lookup(key, stats),
                   Maybe.map(
                     flow(renderStat(key), e =>
-                      Either.right<React.JSX.Element, React.JSX.Element>(e),
+                      Either.right<React.ReactElement, React.ReactElement>(e),
                     ),
                   ),
                 ),
@@ -101,7 +101,7 @@ const getSeparateChildren =
                   Dict.lookup(spell, spells),
                   Maybe.map(
                     flow(renderSpell(spell), e =>
-                      Either.left<React.JSX.Element, React.JSX.Element>(e),
+                      Either.left<React.ReactElement, React.ReactElement>(e),
                     ),
                   ),
                 ),
@@ -132,7 +132,7 @@ const getSeparateChildren =
 export const renderStatIcon = (
   name: WikiaStatsBalanceKey,
   className?: string,
-): React.JSX.Element => (
+): React.ReactElement => (
   <img
     src={Assets.stats[name]}
     alt={`Icône stat ${WikiaStatsBalance.label[name]}`}
@@ -143,7 +143,7 @@ export const renderStatIcon = (
 export const renderStatValue = (
   name: WikiaStatsBalanceKey,
   className?: string,
-): ((value: number) => React.JSX.Element) => {
+): ((value: number) => React.ReactElement) => {
   const isMalusStat = WikiaStatsBalance.isMalusStat(name)
   const maybeUnit = WikiaStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
   return value => {

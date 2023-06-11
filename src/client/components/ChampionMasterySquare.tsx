@@ -246,7 +246,7 @@ type TokensProps = {
 
 const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
   const render = useCallback(
-    (totalTockens: number, src: string): React.JSX.Element => {
+    (totalTockens: number, src: string): React.ReactElement => {
       const alt = `Jeton de maîtrise ${championLevel + 1}`
       return (
         <span

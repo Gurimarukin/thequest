@@ -80,7 +80,7 @@ export const SearchSummoner: React.FC = () => {
     [masteriesQuery, matchLocation, navigate, platform, summonerName],
   )
 
-  const searches: List<React.JSX.Element> = List.compact([
+  const searches: List<React.ReactElement> = List.compact([
     pipe(
       maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
@@ -149,7 +149,7 @@ export const SearchSummoner: React.FC = () => {
   )
 }
 
-const concatWithHr = (es: List<React.JSX.Element>): React.JSX.Element | null =>
+const concatWithHr = (es: List<React.ReactElement>): React.ReactElement | null =>
   pipe(
     es,
     NonEmptyArray.fromReadonlyArray,
@@ -255,7 +255,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
 const renderRecent = (
   type: SummonerSearchProps['type'],
   removeRecent: (e: React.MouseEvent) => void,
-): React.JSX.Element => {
+): React.ReactElement => {
   switch (type) {
     case 'self':
       return <span className="w-3" />
@@ -278,7 +278,7 @@ const renderFavorite = (
   isLoading: boolean,
   addFavorite: (e: React.MouseEvent) => void,
   removeFavorite: (e: React.MouseEvent) => void,
-): React.JSX.Element => {
+): React.ReactElement => {
   switch (type) {
     case 'self':
       return (

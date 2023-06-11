@@ -43,6 +43,6 @@ const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
   Infinity,
 )
 
-const renderAramChildren = (children: List<React.JSX.Element>): React.JSX.Element => (
+const renderAramChildren = (children: List<React.ReactElement>): React.ReactElement => (
   <ul className="grid max-w-sm grid-cols-[auto_auto_1fr] items-center gap-y-2 py-1">{children}</ul>
 )

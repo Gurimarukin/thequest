@@ -19,7 +19,7 @@ export function HighlightLink<A>({
   tooltip,
   className,
   ...props
-}: Props<A>): React.JSX.Element {
+}: Props<A>): React.ReactElement {
   const { matchLocation } = useHistory()
 
   const ref = useRef<HTMLAnchorElement>(null)
