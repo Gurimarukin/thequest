@@ -4,6 +4,7 @@ import { end, format, lit, str } from 'fp-ts-routing'
 import { Platform } from '../../shared/models/api/Platform'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
+import { StringUtils } from '../../shared/utils/StringUtils'
 
 import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
@@ -15,15 +16,24 @@ const { codec } = RouterUtils
  */
 
 const sPlatformPuuidMatch = lit('s')
-  .then(codec('platform', Platform.codec))
+  .then(codec('platform', Platform.orLowerCaseCodec))
   .then(codec('puuid', Puuid.codec))
 const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
-const platformSummonerNameMatch = codec('platform', Platform.codec).then(str('summonerName'))
+const platformSummonerNameMatch = codec('platform', Platform.orLowerCaseCodec).then(
+  str('summonerName'),
+)
 const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
 const aramMatch = lit('aram')
 const loginMatch = lit('login')
 const registerMatch = lit('register')
 const discordRedirectMatch = lit('discordRedirect')
+
+export const appMatches = {
+  sPlatformPuuid: sPlatformPuuidMatch.then(end),
+  sPlatformPuuidGame: sPlatformPuuidGameMatch.then(end),
+  platformSummonerName: platformSummonerNameMatch.then(end),
+  platformSummonerNameGame: platformSummonerNameGameMatch.then(end),
+}
 
 /**
  * parser
@@ -36,7 +46,9 @@ const platformSummonerNameGame = p(platformSummonerNameGameMatch)
 const anyPlatformSummonerName: Parser<{
   platform: Platform
   summonerName: string
-}> = platformSummonerName.alt(platformSummonerNameGame)
+}> = platformSummonerName
+  .alt(platformSummonerNameGame)
+  .map(({ platform, ...a }) => ({ ...a, platform: StringUtils.toUpperCase(platform) }))
 
 export const appParsers = {
   index: end.parser,
