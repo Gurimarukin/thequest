@@ -27,7 +27,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
           <div className="flex shrink-0 items-center gap-6">
             <Link to={appRoutes.index}>
               <img
-                src={Assets.iconYuumi}
+                src={Assets.yuumi}
                 alt="Icône accueil (Yuumi)"
                 className="w-12 rounded-sm bg-black"
               />

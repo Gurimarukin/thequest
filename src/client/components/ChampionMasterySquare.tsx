@@ -277,8 +277,8 @@ const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
     [championLevel, tokensEarned],
   )
 
-  if (championLevel === 5) return render(2, Assets.token5)
-  if (championLevel === 6) return render(3, Assets.token6)
+  if (championLevel === 5) return render(2, Assets.tokens[5])
+  if (championLevel === 6) return render(3, Assets.tokens[6])
   return null
 }
 

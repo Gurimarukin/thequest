@@ -69,13 +69,18 @@ const stats: Dict<WikiaStatsBalanceKey, string> = {
   tenacity: new URL('./stats/tenacity.webp', import.meta.url).toString(),
 }
 
+const tokens = {
+  5: new URL('./tokens/token-5.png', import.meta.url).toString(),
+  6: new URL('./tokens/token-6.png', import.meta.url).toString(),
+}
+
 export const Assets = {
+  champion: new URL('./champion.webp', import.meta.url).toString(),
+  chest: new URL('./chest.png', import.meta.url).toString(),
   divisions,
   masteries,
   positions,
   stats,
-  token5: new URL('./tokens/token-5.png', import.meta.url).toString(),
-  token6: new URL('./tokens/token-6.png', import.meta.url).toString(),
-  chest: new URL('./chest.png', import.meta.url).toString(),
-  iconYuumi: new URL('./icon-yuumi.png', import.meta.url).toString(),
+  tokens,
+  yuumi: new URL('./yuumi.png', import.meta.url).toString(),
 }
