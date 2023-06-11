@@ -38,7 +38,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
               <span className="">{SpellName.label[spell]}</span>
             </li>
           ),
-        4,
+        5,
       ),
     [reverse],
   )
