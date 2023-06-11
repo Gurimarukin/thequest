@@ -1,10 +1,14 @@
 /* eslint-disable functional/no-expression-statements */
-import { Route, parse, zero } from 'fp-ts-routing'
+import type { Match, Parser } from 'fp-ts-routing'
+import { Route, format, parse, zero } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import { useEffect, useMemo } from 'react'
 
+import type { Platform, PlatformLower } from '../../shared/models/api/Platform'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe, Tuple } from '../../shared/utils/fp'
 
+import { Navigate } from '../components/Navigate'
 import { useHistory } from '../contexts/HistoryContext'
 import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
@@ -15,27 +19,24 @@ import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
 import { SummonerPuuid } from '../domain/summonerMasteries/SummonerPuuid'
-import { appParsers } from './AppRouter'
+import { appMatches, appParsers } from './AppRouter'
 
 type ElementWithTitle = Tuple<React.JSX.Element, Maybe<string>>
-
-const t = (element: React.JSX.Element, title?: string): ElementWithTitle =>
-  Tuple.of(element, Maybe.fromNullable(title))
 
 const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
   .alt(
-    appParsers.sPlatformPuuid.map(({ platform, puuid }) =>
+    withPlatformLower(appMatches.sPlatformPuuid, ({ platform, puuid }) =>
       t(<SummonerPuuid platform={platform} puuid={puuid} page="profile" />),
     ),
   )
   .alt(
-    appParsers.sPlatformPuuidGame.map(({ platform, puuid }) =>
+    withPlatformLower(appMatches.sPlatformPuuidGame, ({ platform, puuid }) =>
       t(<SummonerPuuid platform={platform} puuid={puuid} page="game" />),
     ),
   )
   .alt(
-    appParsers.platformSummonerName.map(({ platform, summonerName }) =>
+    withPlatformLower(appMatches.platformSummonerName, ({ platform, summonerName }) =>
       t(
         <SummonerMasteries platform={platform} summonerName={summonerName} />,
         `${summonerName} (${platform})`,
@@ -43,7 +44,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
     ),
   )
   .alt(
-    appParsers.platformSummonerNameGame.map(({ platform, summonerName }) =>
+    withPlatformLower(appMatches.platformSummonerNameGame, ({ platform, summonerName }) =>
       t(
         <ActiveGame platform={platform} summonerName={summonerName} />,
         `${summonerName} (${platform}) | partie`,
@@ -80,4 +81,35 @@ export const AppRouterComponent: React.FC = () => {
   }, [title])
 
   return node
+}
+
+const t = (element: React.JSX.Element, title?: string): ElementWithTitle =>
+  Tuple.of(element, Maybe.fromNullable(title))
+
+type Platformable = {
+  platform: Platform | PlatformLower
+}
+
+type UppercasePlatform<A extends Platformable> = Omit<A, 'platform'> & {
+  platform: Uppercase<A['platform']>
+}
+
+// Redirect if upper case
+function withPlatformLower<A extends Platformable>(
+  match: Match<A>,
+  f: (a: UppercasePlatform<A>) => ElementWithTitle,
+): Parser<ElementWithTitle> {
+  return match.parser.map(a => {
+    const upperCase = StringUtils.toUpperCase<A['platform']>(a.platform)
+    const isUppercase = upperCase === a.platform
+
+    return isUppercase
+      ? t(
+          <Navigate
+            to={format(match.formatter, { ...a, platform: a.platform.toLowerCase() })}
+            replace={true}
+          />,
+        )
+      : f({ ...a, platform: upperCase })
+  })
 }

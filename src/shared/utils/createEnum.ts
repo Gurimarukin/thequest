@@ -7,7 +7,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import type { Literal } from 'io-ts/Schemable'
 
-import { NonEmptyArray } from './fp'
+import type { NonEmptyArray } from './fp'
 
 type Enum<A extends NonEmptyArray<Literal>> = {
   values: A
@@ -19,8 +19,8 @@ type Enum<A extends NonEmptyArray<Literal>> = {
 }
 
 export const createEnum = <A extends NonEmptyArray<Literal>>(...values: A): Enum<A> => {
-  const [head, tail] = NonEmptyArray.unprepend(values)
-  const decoder = D.union(C.literal(head), ...tail.map(v => C.literal(v)))
+  const [head, ...tail] = values
+  const decoder = D.literal(head, ...tail)
   const encoder = E.id<A[number]>()
   const codec = C.make(decoder, encoder)
 

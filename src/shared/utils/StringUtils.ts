@@ -71,6 +71,9 @@ const prettyMs = (ms: MsDuration): string => {
   return `${pad10(s)}.${pad100(ms_)}"`
 }
 
+const toLowerCase = <K extends string>(str: K): Lowercase<K> => str.toLowerCase() as Lowercase<K>
+const toUpperCase = <K extends string>(str: K): Uppercase<K> => str.toUpperCase() as Uppercase<K>
+
 export const StringUtils = {
   ellipse,
   matcher1,
@@ -83,4 +86,6 @@ export const StringUtils = {
   cleanChampionName,
   plural,
   prettyMs,
+  toLowerCase,
+  toUpperCase,
 }
