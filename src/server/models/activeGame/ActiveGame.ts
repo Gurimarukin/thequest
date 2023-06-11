@@ -4,8 +4,7 @@ import type { ActiveGameParticipantView } from '../../../shared/models/api/activ
 import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import type { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
-import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { List } from '../../../shared/utils/fp'
+import type { NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import type { GameId } from '../riot/GameId'
 import type { ActiveGameParticipant } from './ActiveGameParticipant'
@@ -15,16 +14,12 @@ type ActiveGame = {
   gameStartTime: DayJs
   mapId: MapId
   gameQueueConfigId: GameQueue
-  bannedChampions: List<{
-    pickTurn: number
-    championId: ChampionKey
-    teamId: TeamId
-  }>
-  participants: List<ActiveGameParticipant>
+  isDraft: boolean
+  participants: PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipant>>
 }
 
 const toView =
-  (participants: List<ActiveGameParticipantView>) =>
+  (participants: PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>) =>
   (g: ActiveGame): ActiveGameView => ({
     ...g,
     participants,

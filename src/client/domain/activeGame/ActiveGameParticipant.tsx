@@ -56,6 +56,7 @@ type ParticipantProps = {
   runes: List<StaticDataRune>
   platform: Platform
   mapId: MapId
+  teamId: TeamId
   participant: ActiveGameParticipantView
   highlight: boolean
   reverse: boolean
@@ -71,8 +72,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   runes,
   platform,
   mapId,
+  teamId,
   participant: {
-    teamId,
     summonerName,
     profileIconId,
     leagues,
