@@ -1,8 +1,9 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
-import { Future } from '../../shared/utils/fp'
+import { Future, List } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
 import { ActiveGameDb } from '../models/activeGame/ActiveGameDb'
@@ -21,8 +22,11 @@ const ActiveGamePersistence = (Logger: LoggerGetter, mongoCollection: MongoColle
     mongoCollection('activeGame'),
   )
 
-  const Key = {
-    participantsSummonerId: collection.path('participants', 'summonerId'),
+  const Keys = {
+    participantsSummonerId: pipe(
+      TeamId.values,
+      List.map(teamId => collection.path('participants', `${teamId}`, 'summonerId')),
+    ),
   }
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
@@ -32,11 +36,18 @@ const ActiveGamePersistence = (Logger: LoggerGetter, mongoCollection: MongoColle
   return {
     ensureIndexes,
 
-    findBySummonerId: (summonerId: SummonerId, insertedAfter: DayJs): Future<Maybe<ActiveGameDb>> =>
-      collection.findOne({
-        [Key.participantsSummonerId]: SummonerId.codec.encode(summonerId),
-        insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
-      }),
+    findBySummonerId: (
+      summonerId: SummonerId,
+      insertedAfter: DayJs,
+    ): Future<Maybe<ActiveGameDb>> => {
+      const id = SummonerId.codec.encode(summonerId)
+      return collection.findOne({
+        $and: [
+          { $or: Keys.participantsSummonerId.map(key => ({ [key]: id })) },
+          { insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) } },
+        ],
+      })
+    },
 
     upsert: (game: ActiveGameDb): Future<boolean> =>
       pipe(

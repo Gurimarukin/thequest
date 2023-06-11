@@ -1,5 +1,5 @@
+- active game drag and drop
 - discord OAuth2: proper state (redirect url)
-- game: ban order matches participant order
 - toaster (replace alert)
 - game: summoner level?
 - eslint unused argument (even if middle)

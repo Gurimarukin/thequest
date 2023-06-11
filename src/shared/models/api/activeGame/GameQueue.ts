@@ -1,12 +1,12 @@
-import { createEnum } from '../../../utils/createEnum'
-import type { Dict, List } from '../../../utils/fp'
-import { Tuple } from '../../../utils/fp'
+import { pipe } from 'fp-ts/function'
 
-const t: <K extends number>(key: K, value: string) => Tuple<K, string> = Tuple.of
+import { createEnum } from '../../../utils/createEnum'
+import type { List } from '../../../utils/fp'
+import { Dict, Tuple } from '../../../utils/fp'
 
 type GameQueue = typeof GameQueue.T
 
-const { struct: label, keys } = structAndKeys(
+const { keys, label: label_ } = init(
   t(0, 'Personnalisée'), // Custom games
   t(2, '5v5 Blind Pick'), // Summoner's Rift — 5v5 Blind Pick games — Deprecated in patch 7.19 in favor of queueId 430"
   t(4, '5v5 Ranked Solo'), // Summoner's Rift — 5v5 Ranked Solo games — Deprecated in favor of queueId 420"
@@ -96,22 +96,34 @@ const { struct: label, keys } = structAndKeys(
 
 const e = createEnum(...keys)
 
-const GameQueue = { ...e, label }
+const GameQueue = { ...e, label: label_ }
 
 export { GameQueue }
 
-function structAndKeys<A extends List<Tuple<number, string>>>(
-  ...entries: A
-): {
-  struct: Dict<`${A[number][0]}`, string>
+type LabelAndHasBan = {
+  label: string
+}
+
+function t<K extends number>(key: K, label: string): Tuple<K, LabelAndHasBan> {
+  return Tuple.of(key, { label })
+}
+
+type KeysLabelHasDraft<A extends List<readonly [number, ...unknown[]]>> = {
   keys: {
     [K in keyof A]: A[K][0]
   }
-} {
+  label: Dict<`${A[number][0]}`, string>
+}
+
+function init<A extends List<Tuple<number, LabelAndHasBan>>>(...entries: A): KeysLabelHasDraft<A> {
+  const dict = Object.fromEntries(entries) as Dict<`${A[number][0]}`, LabelAndHasBan>
   return {
-    struct: Object.fromEntries(entries) as Dict<`${A[number][0]}`, string>,
     keys: entries.map(Tuple.fst) as {
       [K in keyof A]: A[K][0]
     },
+    label: pipe(
+      dict,
+      Dict.map(a => a.label),
+    ),
   }
 }

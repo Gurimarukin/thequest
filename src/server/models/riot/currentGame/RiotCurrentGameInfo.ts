@@ -3,10 +3,12 @@ import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { MapId } from '../../../../shared/models/api/MapId'
+import { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
-import { List } from '../../../../shared/utils/fp'
+import { ListUtils } from '../../../../shared/utils/ListUtils'
+import { List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
 import { GameId } from '../GameId'
@@ -14,23 +16,22 @@ import { GameMode } from '../GameMode'
 import { GameType } from '../GameType'
 import { RiotCurrentGameParticipant } from './RiotCurrentGameParticipant'
 
-// type RiotBannedChampion = D.TypeOf<typeof riotBannedChampionDecoder>
-
-const riotBannedChampionDecoder = D.struct({
+const rawBannedChampionDecoder = D.struct({
   pickTurn: D.number, // The turn during which the champion was banned
-  championId: ChampionKey.codec, // The ID of the banned champion
+  championId: pipe(
+    ChampionKey.codec,
+    D.map(Maybe.fromPredicate(k => ChampionKey.unwrap(k) !== -1)),
+  ), // The ID of the banned champion
   teamId: TeamId.decoder, // The ID of the team that banned the champion
 })
 
-// type RiotObserver = D.TypeOf<typeof riotObserver>
-
-const riotObserver = D.struct({
+const rawObserver = D.struct({
   encryptionKey: D.string, // Key used to decrypt the spectator grid game data for playback
 })
 
-type RiotCurrentGameInfo = D.TypeOf<typeof decoder>
+type RawCurrentGameInfo = D.TypeOf<typeof rawDecoder>
 
-const decoder = D.struct({
+const rawDecoder = D.struct({
   gameId: GameId.codec, // The ID of the game
   gameType: GameType.decoder, // The game type
   gameStartTime: DayJsFromNumber.decoder, // The game start time represented in epoch milliseconds
@@ -38,11 +39,53 @@ const decoder = D.struct({
   gameLength: pipe(D.number, D.map(MsDuration.seconds)), // The amount of time in seconds that has passed since the game started
   // platformId: PlatformId.codec, // The ID of the platform on which the game is being played
   gameMode: GameMode.decoder, // The game mode
-  bannedChampions: List.decoder(riotBannedChampionDecoder), // Banned champion information
+  bannedChampions: List.decoder(rawBannedChampionDecoder), // Banned champion information
   gameQueueConfigId: GameQueue.decoder, // The queue type (queue types are documented on the Game Constants page)
-  observers: riotObserver, // The observer information
-  participants: List.decoder(RiotCurrentGameParticipant.decoder), // The participant information
+  observers: rawObserver, // The observer information
+  participants: List.decoder(RiotCurrentGameParticipant.rawDecoder), // The participant information
 })
+
+type RiotCurrentGameInfo = Omit<RawCurrentGameInfo, 'bannedChampions' | 'participants'> & {
+  isDraft: boolean
+  participants: PartialDict<`${TeamId}`, NonEmptyArray<RiotCurrentGameParticipant>>
+}
+
+const decoder = pipe(
+  rawDecoder,
+  D.map(({ bannedChampions, participants, ...game }): RiotCurrentGameInfo => {
+    const groupedBannedChampions = pipe(
+      bannedChampions,
+      List.groupBy(p => `${p.teamId}`),
+    )
+    const groupedParticipants = pipe(
+      participants,
+      List.groupBy(p => `${p.teamId}`),
+    )
+
+    return {
+      ...game,
+      isDraft: List.isNonEmpty(bannedChampions),
+      participants: pipe(
+        groupedParticipants,
+        PartialDict.mapWithIndex((teamId, participants_) => {
+          const bans = pipe(
+            groupedBannedChampions[teamId] ?? [],
+            ListUtils.padEnd(participants_.length, BannedChampion.empty),
+          ) as NonEmptyArray<BannedChampion>
+
+          return NonEmptyArray.zipWith(
+            participants_,
+            bans,
+            (participant, bannedChampion): RiotCurrentGameParticipant => ({
+              ...participant,
+              bannedChampion,
+            }),
+          )
+        }),
+      ),
+    }
+  }),
+)
 
 const RiotCurrentGameInfo = { decoder }
 

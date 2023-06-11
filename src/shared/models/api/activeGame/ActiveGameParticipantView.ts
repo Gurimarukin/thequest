@@ -8,16 +8,17 @@ import { PerksView } from '../perk/PerksView'
 import { SummonerLeaguesView } from '../summoner/SummonerLeaguesView'
 import { SummonerSpellKey } from '../summonerSpell/SummonerSpellKey'
 import { ActiveGameMasteriesView } from './ActiveGameMasteriesView'
-import { TeamId } from './TeamId'
+import { BannedChampion } from './BannedChampion'
 
 type ActiveGameParticipantView = C.TypeOf<typeof codec>
+type ActiveGameParticipantViewOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
-  teamId: TeamId.codec,
   summonerName: C.string,
   profileIconId: C.number,
   leagues: Maybe.codec(SummonerLeaguesView.codec),
   championId: ChampionKey.codec,
+  bannedChampion: BannedChampion.codec,
   masteries: Maybe.codec(ActiveGameMasteriesView.codec),
   shardsCount: Maybe.codec(C.number),
   spell1Id: SummonerSpellKey.codec,
@@ -31,4 +32,4 @@ const Lens = {
 
 const ActiveGameParticipantView = { codec, Lens }
 
-export { ActiveGameParticipantView }
+export { ActiveGameParticipantView, ActiveGameParticipantViewOutput }

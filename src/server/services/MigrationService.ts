@@ -10,6 +10,7 @@ import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { Migration } from '../models/migration/Migration'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { MigrationPersistence } from '../persistence/MigrationPersistence'
+import { Migration20230611 } from './migrations/Migration20230611'
 
 const { plural } = StringUtils
 
@@ -18,12 +19,12 @@ export type MigrationService = ReturnType<typeof MigrationService>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const MigrationService = (
   Logger: LoggerGetter,
-  mongoCollection: MongoCollectionGetter, // TODO: unused?
+  mongoCollection: MongoCollectionGetter,
   migrationPersistence: MigrationPersistence,
 ) => {
   const logger = Logger('MigrationService')
 
-  const migrations: List<Migration> = []
+  const migrations: List<Migration> = [Migration20230611(mongoCollection)]
 
   const applyMigrations: Future<NotUsed> = pipe(
     getUnappliedMigrations(),

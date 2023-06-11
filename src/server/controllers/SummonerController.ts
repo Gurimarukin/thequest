@@ -1,7 +1,7 @@
 import { apply, monoid, number, ord, separated } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
 import { Business } from '../../shared/Business'
@@ -12,7 +12,7 @@ import type { ActiveGameChampionMasteryView } from '../../shared/models/api/acti
 import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
-import { TeamId } from '../../shared/models/api/activeGame/TeamId'
+import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
@@ -24,8 +24,16 @@ import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/Summoner
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
-import type { NonEmptyArray, PartialDict } from '../../shared/utils/fp'
-import { Either, Future, List, Maybe, Try, Tuple } from '../../shared/utils/fp'
+import {
+  Either,
+  Future,
+  List,
+  Maybe,
+  NonEmptyArray,
+  PartialDict,
+  Try,
+  Tuple,
+} from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
@@ -197,16 +205,23 @@ const SummonerController = (
       futureMaybe.chainTaskEitherK(({ game, champions }) =>
         pipe(
           game.participants,
-          List.traverse(Future.ApplicativePar)(
-            enrichParticipant(platform, maybeUser, game.gameStartTime),
+          PartialDict.traverse(Future.ApplicativePar)(
+            NonEmptyArray.traverse(Future.ApplicativePar)(
+              enrichParticipant(platform, maybeUser, game.gameStartTime),
+            ),
           ),
-          Future.map((participants): SummonerActiveGameView => {
-            const sorted = pipe(participants, sortParticipants(champions)(game.mapId))
-            return {
-              summoner,
-              game: pipe(game, ActiveGame.toView(sorted)),
-            }
-          }),
+          Future.map<
+            PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
+            SummonerActiveGameView
+          >(
+            flow(
+              PartialDict.map(sortParticipants(champions)(game.mapId)),
+              (sorted): SummonerActiveGameView => ({
+                summoner,
+                game: pipe(game, ActiveGame.toView(sorted)),
+              }),
+            ),
+          ),
         ),
       ),
     )
@@ -312,22 +327,12 @@ export const shouldNotifyChampionLeveledUp =
 const sortParticipants =
   (champions: List<WikiaChampionData>) =>
   (mapId: MapId) =>
-  (participants: List<ActiveGameParticipantView>): List<ActiveGameParticipantView> => {
+  (
+    participants: NonEmptyArray<ActiveGameParticipantView>,
+  ): NonEmptyArray<ActiveGameParticipantView> => {
     if (!MapId.isSummonersRift(mapId)) return participants
 
-    const grouped = pipe(
-      participants,
-      List.groupBy(p => `${p.teamId}`),
-    )
-    return pipe(
-      TeamId.values,
-      List.reduce(List.empty<ActiveGameParticipantView>(), (acc, teamId) => {
-        const team = grouped[teamId]
-        return team !== undefined
-          ? pipe(acc, List.concat(sortTeamParticipants(champions)(team)))
-          : acc
-      }),
-    )
+    return sortTeamParticipants(champions)(participants)
   }
 
 type ParticipantWithChampion = Tuple<ActiveGameParticipantView, WikiaChampionData>
@@ -335,7 +340,9 @@ type Positions = PartialDict<ChampionPosition, ActiveGameParticipantView>
 
 const sortTeamParticipants =
   (champions: List<WikiaChampionData>) =>
-  (participants: NonEmptyArray<ActiveGameParticipantView>): List<ActiveGameParticipantView> => {
+  (
+    participants: NonEmptyArray<ActiveGameParticipantView>,
+  ): NonEmptyArray<ActiveGameParticipantView> => {
     // we won't be able to do much without associated wikia positions
     const { left: championNotFound, right: championFound } = pipe(
       participants,
@@ -416,7 +423,7 @@ const sortTeamParticipants =
         },
       ),
     )
-    return pipe(res, List.concat(remain2))
+    return pipe(res, List.concat(remain2)) as NonEmptyArray<ActiveGameParticipantView>
   }
 
 const hasOnePosition: Predicate<ParticipantWithChampion> = ([, c]) =>

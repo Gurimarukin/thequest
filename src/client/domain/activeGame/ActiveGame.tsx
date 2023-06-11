@@ -1,23 +1,19 @@
 /* eslint-disable functional/no-expression-statements */
-import { number, ord } from 'fp-ts'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import type { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
-import { DictUtils } from '../../../shared/utils/DictUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { Tuple } from '../../../shared/utils/fp'
-import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
+import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
@@ -76,7 +72,11 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
         Maybe.some(
           pipe(
             SummonerActiveGameView.Lens.game.participants,
-            lens.modify(List.map(ActiveGameParticipantView.Lens.shardsCount.set(Maybe.none))),
+            lens.modify(
+              PartialDict.map(
+                NonEmptyArray.map(ActiveGameParticipantView.Lens.shardsCount.set(Maybe.none)),
+              ),
+            ),
           )(data.value),
         ),
         { revalidate: false },
@@ -158,49 +158,10 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   platform,
   summonerGame: {
     summoner,
-    game: { gameStartTime, mapId, gameQueueConfigId, bannedChampions, participants },
+    game: { gameStartTime, mapId, gameQueueConfigId, isDraft, participants },
   },
 }) => {
   const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
-
-  const groupedBans = useMemo(
-    (): PartialDict<`${TeamId}`, List<Tuple<string, NonEmptyArray<BannedChampion>>>> | null =>
-      pipe(
-        bannedChampions,
-        List.match(
-          () => null,
-          flow(
-            List.groupBy(c => `${c.teamId}`),
-            PartialDict.map(teamBans => {
-              const grouped = pipe(
-                teamBans,
-                List.groupByStr(c => `${c.pickTurn}`),
-              )
-              return pipe(
-                pipe(
-                  grouped,
-                  PartialDict.every(bans => bans.length === 1),
-                )
-                  ? { 1: teamBans }
-                  : grouped,
-                DictUtils.entries,
-                List.sort(ordByPickTurn),
-              )
-            }),
-          ),
-        ),
-      ),
-    [bannedChampions],
-  )
-
-  const groupedParticipants = useMemo(
-    (): PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>> =>
-      pipe(
-        participants,
-        List.groupBy(p => `${p.teamId}`),
-      ),
-    [participants],
-  )
 
   const [gameDuration, setGameDuration] = useState(() =>
     pipe(DayJs.now(), DayJs.diff(gameStartTime)),
@@ -218,7 +179,12 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   const date = DayJs.toDate(gameStartTime)
 
   return (
-    <div className="grid min-h-full grid-rows-[1fr_auto_auto_1fr] gap-4 py-3">
+    <div
+      className={cx(
+        'grid min-h-full gap-4 py-3',
+        isDraft ? 'grid-rows-[1fr_auto_auto_1fr]' : 'grid-rows-[1fr_auto_1fr]',
+      )}
+    >
       <div className="flex items-center justify-center gap-4 px-3">
         <h2 className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</h2>
         <span ref={timerRef} className="flex text-grey-400">
@@ -229,7 +195,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         </Tooltip>
       </div>
 
-      {groupedBans !== null ? <ActiveGameBans bans={groupedBans} /> : <span />}
+      {isDraft ? <ActiveGameBans participants={participants} /> : null}
 
       <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', xlGridCols)}>
         {TeamId.values.map((teamId, i) => {
@@ -255,7 +221,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   style={{ gridColumn: `${gridHalfCols + 1} / ${gridTotalCols + 1}` }}
                 />
               ) : null}
-              {groupedParticipants[teamId]?.map((participant, j) => (
+              {participants[teamId]?.map((participant, j) => (
                 <ActiveGameParticipant
                   key={participant.summonerName}
                   summonerSpells={additionalStaticData.summonerSpells}
@@ -263,6 +229,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   runes={additionalStaticData.runes}
                   platform={platform}
                   mapId={mapId}
+                  teamId={teamId}
                   participant={participant}
                   highlight={participant.summonerName === summoner.name}
                   reverse={reverse}
@@ -288,10 +255,3 @@ const prettyMs = (ms: MsDuration): string => {
 
   return `${pad10(d * 24 + h)}:${pad10(m)}:${pad10(s)}`
 }
-
-const ordByPickTurn = pipe(
-  number.Ord,
-  ord.contramap(
-    ([, c]: Tuple<unknown, NonEmptyArray<BannedChampion>>) => NonEmptyArray.head(c).pickTurn,
-  ),
-)

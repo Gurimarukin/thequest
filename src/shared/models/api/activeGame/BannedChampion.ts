@@ -1,16 +1,20 @@
 import * as C from 'io-ts/Codec'
 
+import { Maybe } from '../../../utils/fp'
 import { ChampionKey } from '../champion/ChampionKey'
-import { TeamId } from './TeamId'
 
 type BannedChampion = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   pickTurn: C.number,
-  championId: ChampionKey.codec,
-  teamId: TeamId.codec,
+  championId: Maybe.codec(ChampionKey.codec),
 })
 
-const BannedChampion = { codec }
+const empty: BannedChampion = {
+  pickTurn: -1,
+  championId: Maybe.none,
+}
+
+const BannedChampion = { codec, empty }
 
 export { BannedChampion }

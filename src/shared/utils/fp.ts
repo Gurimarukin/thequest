@@ -11,6 +11,8 @@ import {
   task,
   taskEither,
 } from 'fp-ts'
+import type { Applicative2 } from 'fp-ts/Applicative'
+import type { Kind2, URIS2 } from 'fp-ts/HKT'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
 import type { LazyArg } from 'fp-ts/function'
@@ -67,10 +69,20 @@ export const PartialDict = {
     >
     <A>(predicate: Predicate<A>): Predicate<PartialDict<string, A>>
   },
-  fromEntries: Object.entries as <K extends string, A>(fa: List<Tuple<K, A>>) => PartialDict<K, A>,
+  fromEntries: Object.fromEntries as <K extends string, A>(
+    fa: List<Tuple<K, A>>,
+  ) => PartialDict<K, A>,
   map: readonlyRecord.map as <A, B>(
     f: (a: A) => B,
   ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
+  mapWithIndex: readonlyRecord.mapWithIndex as <K extends string, A, B>(
+    f: (k: K, a: A) => B,
+  ) => (fa: PartialDict<K, A>) => PartialDict<K, B>,
+  traverse: readonlyRecord.traverse as <F extends URIS2>(
+    F: Applicative2<F>,
+  ) => <E, A, B>(
+    f: (a: A) => Kind2<F, E, B>,
+  ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>,
 }
 
 export type Either<E, A> = either.Either<E, A>
