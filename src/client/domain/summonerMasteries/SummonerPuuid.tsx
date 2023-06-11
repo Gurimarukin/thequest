@@ -8,6 +8,7 @@ import { SummonerMasteriesView } from '../../../shared/models/api/summoner/Summo
 import type { Dict } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
+import { Navigate } from '../../components/Navigate'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
@@ -50,17 +51,19 @@ const SummonerPuuidLoaded: React.FC<SummonerPuuidLoadedProps> = ({
 }) => {
   const { summoner } = summonerMasteries
 
-  const { modifyHistoryStateRef, navigate, masteriesQuery } = useHistory()
+  const { modifyHistoryStateRef, masteriesQuery } = useHistory()
 
   useEffect(() => {
     modifyHistoryStateRef(HistoryState.Lens.summonerMasteries.set(Maybe.some(summonerMasteries)))
-    navigate(redirectUrl[page](platform, summoner.name, MasteriesQuery.toPartial(masteriesQuery)), {
-      replace: true,
-    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return null
+  return (
+    <Navigate
+      to={redirectUrl[page](platform, summoner.name, MasteriesQuery.toPartial(masteriesQuery))}
+      replace={true}
+    />
+  )
 }
 
 const redirectUrl: Dict<
