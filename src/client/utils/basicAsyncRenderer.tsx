@@ -8,7 +8,7 @@ export function basicAsyncRenderer<A>({
   error,
 }: Pick<SWRResponse<A, unknown>, 'data' | 'error'>): <B>(
   renderData: (a: A) => B,
-) => React.JSX.Element | B {
+) => React.ReactElement | B {
   return renderData => {
     if (error !== undefined) {
       return (

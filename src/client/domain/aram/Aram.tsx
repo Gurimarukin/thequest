@@ -158,7 +158,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
 
 const getRenderChildrenCompact =
   (ref1: React.RefObject<HTMLUListElement>, ref2: React.RefObject<HTMLUListElement>) =>
-  (children1: List<React.JSX.Element>, children2: List<React.JSX.Element>): React.JSX.Element =>
+  (children1: List<React.ReactElement>, children2: List<React.ReactElement>): React.ReactElement =>
     (
       <>
         <ul ref={ref1} className="row-span-2 flex flex-col justify-center p-0.5">

@@ -38,7 +38,7 @@ export function Checkboxes<A>({
   tooltipPlacement,
   iconClassName,
   className,
-}: Props<A>): React.JSX.Element {
+}: Props<A>): React.ReactElement {
   const toggleChecked_ = useCallback(
     (value: A) => (e: React.ChangeEvent<HTMLInputElement>) =>
       toggleChecked(prev => {
@@ -110,7 +110,7 @@ function LabelCheckbox<A>({
   isMenuVisible,
   tooltipPlacement,
   iconClassName,
-}: LabelCheckboxProps<A>): React.JSX.Element {
+}: LabelCheckboxProps<A>): React.ReactElement {
   const hoverRef = useRef<HTMLSpanElement>(null)
   const isChecked = isAllChecked ? false : readonlySet.elem(eq)(value, checked)
   return (

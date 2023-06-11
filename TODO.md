@@ -1,4 +1,3 @@
-- React.JSX.Element
 - active game drag and drop
 - discord OAuth2: proper state (redirect url)
 - toaster (replace alert)

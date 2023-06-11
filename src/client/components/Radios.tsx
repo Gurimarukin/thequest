@@ -22,7 +22,7 @@ export function Radios<A extends Value>({
   value,
   setValue,
   children,
-}: RadiosProps<A>): React.JSX.Element {
+}: RadiosProps<A>): React.ReactElement {
   return (
     <div className="flex">
       {children.map(({ value: val, label }) => {

@@ -21,7 +21,7 @@ import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries
 import { SummonerPuuid } from '../domain/summonerMasteries/SummonerPuuid'
 import { appMatches, appParsers } from './AppRouter'
 
-type ElementWithTitle = Tuple<React.JSX.Element, Maybe<string>>
+type ElementWithTitle = Tuple<React.ReactElement, Maybe<string>>
 
 const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
@@ -83,7 +83,7 @@ export const AppRouterComponent: React.FC = () => {
   return node
 }
 
-const t = (element: React.JSX.Element, title?: string): ElementWithTitle =>
+const t = (element: React.ReactElement, title?: string): ElementWithTitle =>
   Tuple.of(element, Maybe.fromNullable(title))
 
 type Platformable = {
