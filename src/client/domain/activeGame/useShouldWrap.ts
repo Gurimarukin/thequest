@@ -9,7 +9,7 @@ type ShouldWrap = {
 }
 
 export const useShouldWrap = (): ShouldWrap => {
-  const [shouldWrap, setShouldWrap] = useState(false)
+  const [shouldWrap, setShouldWrap] = useState(true)
 
   const leftRef = useRef<HTMLElement | null>(null)
   const rightRef = useRef<HTMLElement | null>(null)
