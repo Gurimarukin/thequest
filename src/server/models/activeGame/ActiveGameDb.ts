@@ -10,7 +10,7 @@ import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { Dict } from '../../../shared/utils/fp'
-import { List, NonEmptyArray } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { GameId } from '../riot/GameId'
@@ -47,11 +47,12 @@ const participantsProperties: Dict<
 const codec = C.struct({
   gameId: GameId.codec,
   mapId: MapId.codec,
-  gameStartTime: DayJsFromDate.codec,
+  gameStartTime: Maybe.codec(DayJsFromDate.codec),
   gameQueueConfigId: GameQueue.codec,
   isDraft: C.boolean,
   participants: C.readonly(C.partial(participantsProperties)),
   insertedAt: DayJsFromDate.codec,
+  updatedAt: DayJsFromDate.codec,
 })
 
 const ActiveGameDb = { codec }

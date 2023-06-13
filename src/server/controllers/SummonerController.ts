@@ -207,7 +207,7 @@ const SummonerController = (
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(
-              enrichParticipant(platform, maybeUser, game.gameStartTime),
+              enrichParticipant(platform, maybeUser, game.insertedAt),
             ),
           ),
           Future.map<
@@ -230,16 +230,16 @@ const SummonerController = (
   function enrichParticipant(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
-    gameStartTime: DayJs,
+    gameInsertedAt: DayJs,
   ): (participant: ActiveGameParticipant) => Future<ActiveGameParticipantView> {
     return participant =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
           leagues: findLeagues(platform, participant.summonerId, {
-            overrideInsertedAfter: gameStartTime,
+            overrideInsertedAfter: gameInsertedAt,
           }),
           maybeMasteries: masteriesService.findBySummoner(platform, participant.summonerId, {
-            overrideInsertedAfter: gameStartTime,
+            overrideInsertedAfter: gameInsertedAt,
           }),
           shardsCount: pipe(
             maybeUser,

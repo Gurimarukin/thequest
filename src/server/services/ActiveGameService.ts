@@ -1,14 +1,15 @@
+import { ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
 import { TObservable } from '../../shared/models/rx/TObservable'
-import type { Maybe } from '../../shared/utils/fp'
-import { Future, IO, toNotUsed } from '../../shared/utils/fp'
+import { Future, IO, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { constants } from '../config/constants'
 import type { ActiveGame } from '../models/activeGame/ActiveGame'
+import type { ActiveGameDb } from '../models/activeGame/ActiveGameDb'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { SummonerId } from '../models/summoner/SummonerId'
@@ -42,24 +43,56 @@ const ActiveGameService = (
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const of = (activeGamePersistence: ActiveGamePersistence, riotApiService: RiotApiService) => ({
-  findBySummoner: (platform: Platform, summonerId: SummonerId): Future<Maybe<ActiveGame>> =>
-    pipe(
-      Future.fromIO(DayJs.now),
-      Future.map(DayJs.subtract(constants.riotApiCacheTtl.activeGame)),
-      Future.chain(insertedAfter =>
-        activeGamePersistence.findBySummonerId(summonerId, insertedAfter),
+const of = (activeGamePersistence: ActiveGamePersistence, riotApiService: RiotApiService) => {
+  return {
+    findBySummoner: (platform: Platform, summonerId: SummonerId): Future<Maybe<ActiveGame>> =>
+      pipe(
+        futureMaybe.fromIO(DayJs.now),
+        futureMaybe.bindTo('now'),
+        futureMaybe.bind('game', ({ now }) => {
+          const insertedAfter = pipe(now, DayJs.subtract(constants.riotApiCacheTtl.activeGame))
+          return activeGamePersistence.findBySummonerId(summonerId, insertedAfter)
+        }),
+        futureMaybe.chain(({ now, game }) => {
+          const gameIsLoading = Maybe.isNone(game.gameStartTime)
+          if (!gameIsLoading) return futureMaybe.some(game)
+
+          const updatedAfter = pipe(
+            now,
+            DayJs.subtract(constants.riotApiCacheTtl.activeGameLoading),
+          )
+          if (ord.leq(DayJs.Ord)(updatedAfter, game.updatedAt)) return futureMaybe.some(game)
+
+          return fetchAndCache(platform, summonerId, Maybe.some(game.insertedAt))
+        }),
+        futureMaybe.alt<ActiveGame>(() => fetchAndCache(platform, summonerId, Maybe.none)),
       ),
-      futureMaybe.alt<ActiveGame>(() =>
-        pipe(
-          riotApiService.riotgames
-            .platform(platform)
-            .lol.spectatorV4.activeGames.bySummoner(summonerId),
-          futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
-          futureMaybe.chainFirstTaskEitherK(game => activeGamePersistence.upsert(game)),
-        ),
+  }
+
+  function fetchAndCache(
+    platform: Platform,
+    summonerId: SummonerId,
+    maybeInsertedAt: Maybe<DayJs>,
+  ): Future<Maybe<ActiveGame>> {
+    return pipe(
+      riotApiService.riotgames
+        .platform(platform)
+        .lol.spectatorV4.activeGames.bySummoner(summonerId),
+      futureMaybe.bindTo('game'),
+      futureMaybe.bind('now', () => futureMaybe.fromIO(DayJs.now)),
+      futureMaybe.map(
+        ({ game, now }): ActiveGameDb => ({
+          ...game,
+          insertedAt: pipe(
+            maybeInsertedAt,
+            Maybe.getOrElse(() => now),
+          ),
+          updatedAt: now,
+        }),
       ),
-    ),
-})
+      futureMaybe.chainFirstTaskEitherK(activeGamePersistence.upsert),
+    )
+  }
+}
 
 export { ActiveGameService }

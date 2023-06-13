@@ -1,7 +1,8 @@
-/* eslint-disable functional/no-expression-statements */
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
@@ -38,7 +39,8 @@ import { useShouldWrap } from './useShouldWrap'
 
 const { cleanSummonerName, pad10 } = StringUtils
 
-const clockInterval = MsDuration.second(1)
+const reloadInterval = MsDuration.seconds(10)
+const timerInterval = MsDuration.second(1)
 
 type Props = {
   platform: Platform
@@ -93,18 +95,23 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
               <pre className="mt-4">pas en partie.</pre>
             </div>
           ),
-          summonerGame => <WithoutAdditional platform={platform} summonerGame={summonerGame} />,
+          summonerGame => (
+            <WithoutAdditional
+              platform={platform}
+              summonerGame={summonerGame}
+              reloadGame={mutate}
+            />
+          ),
         ),
       )}
     </MainLayout>
   )
 }
 
-const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStaticData'>> = ({
-  platform,
-  summonerGame,
-}) => {
-  const { summoner } = summonerGame
+const WithoutAdditional: React.FC<
+  Omit<ActiveGameComponentProps, 'additionalStaticData'>
+> = props => {
+  const { summoner } = props.summonerGame
 
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
@@ -114,22 +121,22 @@ const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStat
   useEffect(
     () =>
       addRecentSearch({
-        platform,
+        platform: props.platform,
         puuid: summoner.puuid,
         name: summoner.name,
         profileIconId: summoner.profileIconId,
       }),
-    [addRecentSearch, platform, summoner.name, summoner.profileIconId, summoner.puuid],
+    [addRecentSearch, props.platform, summoner.name, summoner.profileIconId, summoner.puuid],
   )
 
   // Correct case of summoner's name in url
   useEffect(() => {
     if (summonerNameFromLocation !== summoner.name) {
-      navigate(appRoutes.platformSummonerNameGame(platform, summoner.name), {
+      navigate(appRoutes.platformSummonerNameGame(props.platform, summoner.name), {
         replace: true,
       })
     }
-  }, [navigate, platform, summoner.name, summonerNameFromLocation])
+  }, [navigate, props.platform, summoner.name, summonerNameFromLocation])
 
   return basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
@@ -137,11 +144,7 @@ const WithoutAdditional: React.FC<Omit<ActiveGameComponentProps, 'additionalStat
       'AdditionalStaticData',
     ]),
   )(additionalStaticData => (
-    <ActiveGameComponent
-      platform={platform}
-      summonerGame={summonerGame}
-      additionalStaticData={additionalStaticData}
-    />
+    <ActiveGameComponent {...props} additionalStaticData={additionalStaticData} />
   ))
 }
 
@@ -149,6 +152,7 @@ type ActiveGameComponentProps = {
   additionalStaticData: AdditionalStaticData
   platform: Platform
   summonerGame: SummonerActiveGameView
+  reloadGame: () => void
 }
 
 const gridHalfCols = gridTotalCols / 2
@@ -160,23 +164,9 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     summoner,
     game: { gameStartTime, mapId, gameQueueConfigId, isDraft, participants },
   },
+  reloadGame,
 }) => {
   const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
-
-  const [gameDuration, setGameDuration] = useState(() =>
-    pipe(DayJs.now(), DayJs.diff(gameStartTime)),
-  )
-
-  useEffect(() => {
-    const id = window.setInterval(
-      () => setGameDuration(MsDuration.add(clockInterval)),
-      MsDuration.unwrap(clockInterval),
-    )
-    return () => window.clearInterval(id)
-  }, [])
-
-  const timerRef = useRef<HTMLSpanElement>(null)
-  const date = DayJs.toDate(gameStartTime)
 
   return (
     <div
@@ -187,12 +177,13 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     >
       <div className="flex items-center justify-center gap-4 px-3">
         <h2 className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</h2>
-        <span ref={timerRef} className="flex text-grey-400">
-          (<pre>{prettyMs(gameDuration)}</pre>)
-        </span>
-        <Tooltip hoverRef={timerRef}>
-          Partie commencée à {date.toLocaleTimeString()} ({date.toLocaleDateString()})
-        </Tooltip>
+        {pipe(
+          gameStartTime,
+          Maybe.fold(
+            () => <Loading reload={reloadGame} />,
+            startTime => <Timer startTime={startTime} />,
+          ),
+        )}
       </div>
 
       {isDraft ? <ActiveGameBans participants={participants} /> : null}
@@ -244,6 +235,49 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   )
 }
 
+type LoadingProps = {
+  reload: () => void
+}
+
+const Loading: React.FC<LoadingProps> = ({ reload }) => {
+  useEffect(() => {
+    const id = window.setInterval(reload, MsDuration.unwrap(reloadInterval))
+    return () => window.clearInterval(id)
+  }, [reload])
+
+  return <GameInfo>chargement</GameInfo>
+}
+
+type TimerProps = {
+  startTime: DayJs
+}
+
+const Timer: React.FC<TimerProps> = ({ startTime }) => {
+  const [gameDuration, setGameDuration] = useState(() => pipe(DayJs.now(), DayJs.diff(startTime)))
+
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setGameDuration(MsDuration.add(timerInterval)),
+      MsDuration.unwrap(timerInterval),
+    )
+    return () => window.clearInterval(id)
+  }, [])
+
+  const timerRef = useRef<HTMLSpanElement>(null)
+  const date = DayJs.toDate(startTime)
+
+  return (
+    <>
+      <GameInfo ref={timerRef}>
+        <pre>{prettyMs(gameDuration)}</pre>
+      </GameInfo>
+      <Tooltip hoverRef={timerRef}>
+        Partie commencée à {date.toLocaleTimeString()} ({date.toLocaleDateString()})
+      </Tooltip>
+    </>
+  )
+}
+
 const prettyMs = (ms: MsDuration): string => {
   const date = DayJs.of(MsDuration.unwrap(ms))
   const zero = DayJs.of(0)
@@ -255,3 +289,13 @@ const prettyMs = (ms: MsDuration): string => {
 
   return `${pad10(d * 24 + h)}:${pad10(m)}:${pad10(s)}`
 }
+
+type GameInfoProps = {
+  children: React.ReactNode
+}
+
+const GameInfo = forwardRef<HTMLSpanElement, GameInfoProps>(({ children }, ref) => (
+  <span ref={ref} className="flex text-grey-400">
+    ({children})
+  </span>
+))

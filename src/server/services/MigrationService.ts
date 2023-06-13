@@ -11,6 +11,7 @@ import { Migration } from '../models/migration/Migration'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { MigrationPersistence } from '../persistence/MigrationPersistence'
 import { Migration20230611 } from './migrations/Migration20230611'
+import { Migration20230613 } from './migrations/Migration20230613'
 
 const { plural } = StringUtils
 
@@ -24,7 +25,10 @@ export const MigrationService = (
 ) => {
   const logger = Logger('MigrationService')
 
-  const migrations: List<Migration> = [Migration20230611(mongoCollection)]
+  const migrations: List<Migration> = [
+    Migration20230611(mongoCollection),
+    Migration20230613(mongoCollection),
+  ]
 
   const applyMigrations: Future<NotUsed> = pipe(
     getUnappliedMigrations(),
