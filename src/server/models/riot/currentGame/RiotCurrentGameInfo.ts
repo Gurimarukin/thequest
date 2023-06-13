@@ -8,7 +8,7 @@ import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../../shared/utils/ListUtils'
-import { List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
+import { Either, List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
 import { GameId } from '../GameId'
@@ -34,7 +34,14 @@ type RawCurrentGameInfo = D.TypeOf<typeof rawDecoder>
 const rawDecoder = D.struct({
   gameId: GameId.codec, // The ID of the game
   gameType: GameType.decoder, // The game type
-  gameStartTime: DayJsFromNumber.decoder, // The game start time represented in epoch milliseconds
+  gameStartTime: pipe(
+    D.number,
+    D.parse(n =>
+      n === 0
+        ? D.success(Maybe.none)
+        : pipe(DayJsFromNumber.numberDecoder.decode(n), Either.map(Maybe.some)),
+    ),
+  ), // The game start time represented in epoch milliseconds
   mapId: MapId.decoder, // The ID of the map
   gameLength: pipe(D.number, D.map(MsDuration.seconds)), // The amount of time in seconds that has passed since the game started
   // platformId: PlatformId.codec, // The ID of the platform on which the game is being played

@@ -40,12 +40,19 @@ export const DayJsFromDate = {
  * DayJsFromNumber
  */
 
-const dayJsFromNumberDecoder: Decoder<unknown, DayJs> = pipe(
-  D.number,
-  D.parse(n => {
+const dayJsFromNumberNumberDecoder: Decoder<number, DayJs> = {
+  decode: n => {
     const d = DayJs.of(n)
     return DayJs.isValid(d) ? D.success(d) : D.failure(n, 'DayJsFromNumber')
-  }),
+  },
+}
+
+const dayJsFromNumberDecoder: Decoder<unknown, DayJs> = pipe(
+  D.number,
+  D.compose(dayJsFromNumberNumberDecoder),
 )
 
-export const DayJsFromNumber = { decoder: dayJsFromNumberDecoder }
+export const DayJsFromNumber = {
+  decoder: dayJsFromNumberDecoder,
+  numberDecoder: dayJsFromNumberNumberDecoder,
+}

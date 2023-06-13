@@ -10,6 +10,7 @@ export const constants = {
     ddragonLatestVersion: MsDuration.hour(1),
 
     activeGame: MsDuration.minutes(3),
+    activeGameLoading: MsDuration.seconds(5), // if the game is loading, cache it less longer
     leagueEntries: MsDuration.minutes(3),
     masteries: MsDuration.minutes(3),
     summoner: MsDuration.minutes(9),
