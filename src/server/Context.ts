@@ -61,14 +61,23 @@ const of = (
   const jwtHelper = JwtHelper(config.jwtSecret)
 
   const riotAccountService = RiotAccountService(
+    config.riotApi.cacheTtl,
     riotAccountPersistence,
     riotApiService,
     summonerService,
   )
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
-  const leagueEntryService = LeagueEntryService(leagueEntryPersistence, riotApiService)
-  const masteriesService = MasteriesService(championMasteryPersistence, riotApiService)
+  const leagueEntryService = LeagueEntryService(
+    config.riotApi.cacheTtl,
+    leagueEntryPersistence,
+    riotApiService,
+  )
+  const masteriesService = MasteriesService(
+    config.riotApi.cacheTtl,
+    championMasteryPersistence,
+    riotApiService,
+  )
   const userService = UserService(
     Logger,
     championShardPersistence,
@@ -118,9 +127,9 @@ const load = (config: Config): Future<Context> => {
   const httpClient = HttpClient(Logger)
 
   const discordService = DiscordService(config.client, httpClient)
-  const riotApiService = RiotApiService(config.riot, httpClient)
+  const riotApiService = RiotApiService(config, httpClient)
 
-  const ddragonService = DDragonService(riotApiService)
+  const ddragonService = DDragonService(config.riotApi.cacheTtl, riotApiService)
 
   const staticDataService = StaticDataService(Logger, httpClient, ddragonService)
 
@@ -128,8 +137,20 @@ const load = (config: Config): Future<Context> => {
 
   return pipe(
     apply.sequenceT(IO.ApplyPar)(
-      ActiveGameService(Logger, activeGamePersistence, riotApiService, cronJobPubSub.observable),
-      SummonerService(Logger, summonerPersistence, riotApiService, cronJobPubSub.observable),
+      ActiveGameService(
+        config.riotApi.cacheTtl,
+        Logger,
+        activeGamePersistence,
+        riotApiService,
+        cronJobPubSub.observable,
+      ),
+      SummonerService(
+        config.riotApi.cacheTtl,
+        Logger,
+        summonerPersistence,
+        riotApiService,
+        cronJobPubSub.observable,
+      ),
       scheduleCronJob(Logger, cronJobPubSub.subject),
     ),
     Future.fromIOEither,

@@ -7,7 +7,7 @@ import type { Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import { constants } from '../config/constants'
+import type { RiotApiCacheTtlConfig } from '../config/Config'
 import { Shard } from '../models/riot/Shard'
 import type { TagLine } from '../models/riot/TagLine'
 import type { RiotAccountPersistence } from '../persistence/RiotAccountPersistence'
@@ -28,6 +28,7 @@ type RiotAccountService = ReturnType<typeof RiotAccountService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotAccountService = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
   riotAccountPersistence: RiotAccountPersistence,
   riotApiService: RiotApiService,
   summonerService: SummonerService,
@@ -40,7 +41,7 @@ const RiotAccountService = (
   ): Future<Maybe<PlatformWithPuuid>> =>
     pipe(
       Future.fromIO(DayJs.now),
-      Future.map(DayJs.subtract(constants.riotApiCacheTtl.account)),
+      Future.map(DayJs.subtract(riotApiCacheTtl.account)),
       Future.chain(insertedAfter =>
         riotAccountPersistence.findByGameNameAndTagLine(gameName, tagLine, insertedAfter),
       ),

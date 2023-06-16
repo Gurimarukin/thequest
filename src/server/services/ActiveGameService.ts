@@ -7,7 +7,7 @@ import { TObservable } from '../../shared/models/rx/TObservable'
 import { Future, IO, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import { constants } from '../config/constants'
+import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { ActiveGame } from '../models/activeGame/ActiveGame'
 import type { ActiveGameDb } from '../models/activeGame/ActiveGameDb'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
@@ -20,6 +20,7 @@ import type { RiotApiService } from './RiotApiService'
 type ActiveGameService = ReturnType<typeof of>
 
 const ActiveGameService = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
   Logger: LoggerGetter,
   activeGamePersistence: ActiveGamePersistence,
   riotApiService: RiotApiService,
@@ -33,34 +34,35 @@ const ActiveGameService = (
       next: ({ date }) =>
         pipe(
           activeGamePersistence.deleteBeforeDate(
-            pipe(date, DayJs.subtract(constants.riotApiCacheTtl.activeGame)),
+            pipe(date, DayJs.subtract(riotApiCacheTtl.activeGame)),
           ),
           Future.map(toNotUsed),
         ),
     }),
-    IO.map(() => of(activeGamePersistence, riotApiService)),
+    IO.map(() => of(riotApiCacheTtl, activeGamePersistence, riotApiService)),
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const of = (activeGamePersistence: ActiveGamePersistence, riotApiService: RiotApiService) => {
+const of = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
+  activeGamePersistence: ActiveGamePersistence,
+  riotApiService: RiotApiService,
+) => {
   return {
     findBySummoner: (platform: Platform, summonerId: SummonerId): Future<Maybe<ActiveGame>> =>
       pipe(
         futureMaybe.fromIO(DayJs.now),
         futureMaybe.bindTo('now'),
         futureMaybe.bind('game', ({ now }) => {
-          const insertedAfter = pipe(now, DayJs.subtract(constants.riotApiCacheTtl.activeGame))
+          const insertedAfter = pipe(now, DayJs.subtract(riotApiCacheTtl.activeGame))
           return activeGamePersistence.findBySummonerId(summonerId, insertedAfter)
         }),
         futureMaybe.chain(({ now, game }) => {
           const gameIsLoading = Maybe.isNone(game.gameStartTime)
           if (!gameIsLoading) return futureMaybe.some(game)
 
-          const updatedAfter = pipe(
-            now,
-            DayJs.subtract(constants.riotApiCacheTtl.activeGameLoading),
-          )
+          const updatedAfter = pipe(now, DayJs.subtract(riotApiCacheTtl.activeGameLoading))
           if (ord.leq(DayJs.Ord)(updatedAfter, game.updatedAt)) return futureMaybe.some(game)
 
           return fetchAndCache(platform, summonerId, Maybe.some(game.insertedAt))
