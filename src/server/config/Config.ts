@@ -1,4 +1,3 @@
-import type * as dotenv from 'dotenv'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import { lens } from 'monocle-ts'
@@ -8,7 +7,7 @@ import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { LogLevelOrOff } from '../../shared/models/logger/LogLevel'
 import { loadDotEnv } from '../../shared/utils/config/loadDotEnv'
 import { parseConfig } from '../../shared/utils/config/parseConfig'
-import type { List, NonEmptyArray, Try } from '../../shared/utils/fp'
+import type { List, NonEmptyArray, PartialDict, Try } from '../../shared/utils/fp'
 import { Either, IO, Maybe } from '../../shared/utils/fp'
 import {
   ArrayFromString,
@@ -61,7 +60,7 @@ export type MadosayentisutoConfig = {
   token: string
 }
 
-const parse = (dict: dotenv.DotenvParseOutput): Try<Config> =>
+const parse = (dict: PartialDict<string, string>): Try<Config> =>
   parseConfig(dict)(r =>
     seqS<Config>({
       isDev: pipe(

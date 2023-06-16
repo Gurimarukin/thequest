@@ -1,18 +1,17 @@
 import { flow, pipe } from 'fp-ts/function'
-import * as D from 'io-ts/Decoder'
 import type { Decoder } from 'io-ts/Decoder'
+import * as D from 'io-ts/Decoder'
 
 import type { ValidatedNea } from '../../models/ValidatedNea'
-import type { Dict, Try } from '../fp'
-import { List } from '../fp'
-import { Either, NonEmptyArray } from '../fp'
+import type { PartialDict, Try } from '../fp'
+import { Either, List, NonEmptyArray } from '../fp'
 
 export type DecodeKey = <B>(
   decoder: Decoder<unknown, B>,
 ) => (key: string) => ValidatedNea<string, B>
 
 export const parseConfig =
-  (rawConfig: Dict<string, string | undefined>) =>
+  (rawConfig: PartialDict<string, string>) =>
   <A>(f: (r: DecodeKey) => ValidatedNea<string, A>): Try<A> =>
     pipe(
       f(
