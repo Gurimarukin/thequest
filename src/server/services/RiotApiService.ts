@@ -7,6 +7,7 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Dict, Future, Maybe } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
+import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { Config } from '../config/Config'
 import type { HttpClient } from '../helpers/HttpClient'
@@ -192,9 +193,12 @@ const RiotApiService = (
           spectatorV4: {
             activeGames: {
               bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
-                config.mockRiotApi
-                  ? riotApiMockService.activeGames.bySummoner(summonerId)
-                  : pipe(
+                pipe(
+                  config.mockRiotApi
+                    ? riotApiMockService.activeGames.bySummoner(summonerId)
+                    : futureMaybe.none,
+                  futureMaybe.alt(() =>
+                    pipe(
                       httpClient.http(
                         [
                           platformUrl(
@@ -208,6 +212,8 @@ const RiotApiService = (
                       ),
                       statusesToOption(404),
                     ),
+                  ),
+                ),
             },
           },
         },
