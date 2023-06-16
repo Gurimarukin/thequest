@@ -8,7 +8,7 @@ import type { Maybe } from '../../shared/utils/fp'
 import { Future, IO, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import { constants } from '../config/constants'
+import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { RiotSummoner } from '../models/riot/RiotSummoner'
@@ -29,6 +29,7 @@ type UseAccountApiKey = {
 type SummonerService = ReturnType<typeof of>
 
 const SummonerService = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
   Logger: LoggerGetter,
   summonerPersistence: SummonerPersistence,
   riotApiService: RiotApiService,
@@ -42,17 +43,21 @@ const SummonerService = (
       next: ({ date }) =>
         pipe(
           summonerPersistence.deleteBeforeDate(
-            pipe(date, DayJs.subtract(constants.riotApiCacheTtl.summoner)),
+            pipe(date, DayJs.subtract(riotApiCacheTtl.summoner)),
           ),
           Future.map(toNotUsed),
         ),
     }),
-    IO.map(() => of(summonerPersistence, riotApiService)),
+    IO.map(() => of(riotApiCacheTtl, summonerPersistence, riotApiService)),
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const of = (summonerPersistence: SummonerPersistence, riotApiService: RiotApiService) => {
+const of = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
+  summonerPersistence: SummonerPersistence,
+  riotApiService: RiotApiService,
+) => {
   return {
     findByName: (
       platform: Platform,
@@ -105,7 +110,7 @@ const of = (summonerPersistence: SummonerPersistence, riotApiService: RiotApiSer
         ? futureMaybe.none
         : pipe(
             Future.fromIO(DayJs.now),
-            Future.map(DayJs.subtract(constants.riotApiCacheTtl.summoner)),
+            Future.map(DayJs.subtract(riotApiCacheTtl.summoner)),
             Future.chain(fromPersistence),
           ),
       futureMaybe.alt<Summoner>(() =>

@@ -6,7 +6,7 @@ import type { List, Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import { constants } from '../config/constants'
+import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { LeagueEntry } from '../models/league/LeagueEntry'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { LeagueEntryPersistence } from '../persistence/LeagueEntryPersistence'
@@ -24,6 +24,7 @@ type LeagueEntryService = ReturnType<typeof LeagueEntryService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const LeagueEntryService = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
   leagueEntryPersistence: LeagueEntryPersistence,
   riotApiService: RiotApiService,
 ) => ({
@@ -35,10 +36,7 @@ const LeagueEntryService = (
     pipe(
       options !== undefined
         ? Future.successful(options.overrideInsertedAfter)
-        : pipe(
-            Future.fromIO(DayJs.now),
-            Future.map(DayJs.subtract(constants.riotApiCacheTtl.leagueEntries)),
-          ),
+        : pipe(Future.fromIO(DayJs.now), Future.map(DayJs.subtract(riotApiCacheTtl.leagueEntries))),
       Future.chain(insertedAfter =>
         leagueEntryPersistence.findBySummonerId(summonerId, insertedAfter),
       ),
