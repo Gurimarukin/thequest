@@ -5,8 +5,8 @@ import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
-import type { Dict, Maybe } from '../../shared/utils/fp'
-import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
+import type { Dict, Future, Maybe } from '../../shared/utils/fp'
+import { List, NonEmptyArray } from '../../shared/utils/fp'
 
 import type { Config } from '../config/Config'
 import type { HttpClient } from '../helpers/HttpClient'
@@ -24,6 +24,7 @@ import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import type { SummonerId } from '../models/summoner/SummonerId'
+import type { RiotApiMockService } from './RiotApiMockService'
 
 const { ddragon, ddragonCdn } = DDragonUtils
 
@@ -55,7 +56,11 @@ type UseAccountApiKey = {
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const RiotApiService = (config: Config, httpClient: HttpClient) => {
+const RiotApiService = (
+  config: Config,
+  httpClient: HttpClient,
+  riotApiMockService: RiotApiMockService,
+) => {
   const { lol: lolKey, account: accountKey } = config.riotApi.keys
 
   const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
@@ -188,7 +193,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient) => {
             activeGames: {
               bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
                 config.mockRiotApi
-                  ? Future.todo()
+                  ? riotApiMockService.activeGames.bySummoner(summonerId)
                   : pipe(
                       httpClient.http(
                         [

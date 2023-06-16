@@ -31,6 +31,7 @@ import { LeagueEntryService } from './services/LeagueEntryService'
 import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
 import { RiotAccountService } from './services/RiotAccountService'
+import { RiotApiMockService } from './services/RiotApiMockService'
 import { RiotApiService } from './services/RiotApiService'
 import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
@@ -125,9 +126,10 @@ const load = (config: Config): Future<Context> => {
   const userPersistence = UserPersistence(Logger, mongoCollection)
 
   const httpClient = HttpClient(Logger)
+  const riotApiMockService = RiotApiMockService(Logger)
 
   const discordService = DiscordService(config.client, httpClient)
-  const riotApiService = RiotApiService(config, httpClient)
+  const riotApiService = RiotApiService(config, httpClient, riotApiMockService)
 
   const ddragonService = DDragonService(config.riotApi.cacheTtl, riotApiService)
 
