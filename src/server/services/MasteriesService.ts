@@ -6,7 +6,7 @@ import type { List, Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import { constants } from '../config/constants'
+import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
@@ -28,6 +28,7 @@ type MasteriesService = ReturnType<typeof MasteriesService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MasteriesService = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
   championMasteryPersistence: ChampionMasteryPersistence,
   riotApiService: RiotApiService,
 ) => ({
@@ -44,7 +45,7 @@ const MasteriesService = (
               ? Future.successful(overrideInsertedAfter)
               : pipe(
                   Future.fromIO(DayJs.now),
-                  Future.map(DayJs.subtract(constants.riotApiCacheTtl.masteries)),
+                  Future.map(DayJs.subtract(riotApiCacheTtl.masteries)),
                 ),
             Future.chain(insertedAfter =>
               championMasteryPersistence.findBySummoner(summonerId, insertedAfter),

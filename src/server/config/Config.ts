@@ -1,7 +1,8 @@
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import { lens } from 'monocle-ts'
 
+import { MsDuration } from '../../shared/models/MsDuration'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { LogLevelOrOff } from '../../shared/models/logger/LogLevel'
@@ -23,11 +24,12 @@ const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
   isDev: boolean
+  mockRiotApi: boolean
   logLevel: LogLevelOrOff
   client: ClientConfig
   http: HttpConfig
   db: DbConfig
-  riot: RiotConfig
+  riotApi: RiotApiConfig
   jwtSecret: string
   madosayentisuto: MadosayentisutoConfig
 }
@@ -50,9 +52,24 @@ type DbConfig = {
   password: string
 }
 
-export type RiotConfig = {
-  lolApiKey: string
-  accountApiKey: string // You need a legends of runeterra or valorant app for account-v1
+type RiotApiConfig = {
+  keys: RiotApiKeysConfig
+  cacheTtl: RiotApiCacheTtlConfig
+}
+
+export type RiotApiKeysConfig = {
+  lol: string
+  account: string // You need a legends of runeterra or valorant app for account-v1
+}
+
+export type RiotApiCacheTtlConfig = {
+  ddragonLatestVersion: MsDuration
+  activeGame: MsDuration
+  activeGameLoading: MsDuration // If the game is loading, cache it less longer
+  leagueEntries: MsDuration
+  masteries: MsDuration
+  summoner: MsDuration
+  account: MsDuration
 }
 
 export type MadosayentisutoConfig = {
@@ -65,7 +82,11 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
     seqS<Config>({
       isDev: pipe(
         r(Maybe.decoder(BooleanFromString.decoder))('IS_DEV'),
-        Either.map(Maybe.getOrElseW(() => false)),
+        Either.map(Maybe.getOrElse(() => false)),
+      ),
+      mockRiotApi: pipe(
+        r(Maybe.decoder(BooleanFromString.decoder))('MOCK_RIOT_API'),
+        Either.map(Maybe.getOrElse(() => false)),
       ),
       logLevel: r(LogLevelOrOff.codec)('LOG_LEVEL'),
       client: seqS<ClientConfig>({
@@ -85,9 +106,20 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         user: r(D.string)('DB_USER'),
         password: r(D.string)('DB_PASSWORD'),
       }),
-      riot: seqS<RiotConfig>({
-        lolApiKey: r(D.string)('RIOT_LOL_API_KEY'),
-        accountApiKey: r(D.string)('RIOT_ACCOUNT_API_KEY'),
+      riotApi: seqS<RiotApiConfig>({
+        keys: seqS<RiotApiKeysConfig>({
+          lol: r(D.string)('RIOT_API_KEYS_LOL'),
+          account: r(D.string)('RIOT_API_KEYS_ACCOUNT'),
+        }),
+        cacheTtl: pipe(
+          r(Maybe.decoder(BooleanFromString.decoder))('INFINITE_CACHE'),
+          Either.map(
+            flow(
+              Maybe.getOrElse(() => false),
+              riotApiCacheTtl,
+            ),
+          ),
+        ),
       }),
       jwtSecret: r(D.string)('JWT_SECRET'),
       madosayentisuto: seqS<MadosayentisutoConfig>({
@@ -96,6 +128,21 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
       }),
     }),
   )
+
+const riotApiCacheTtl = (infiniteCache: boolean): RiotApiCacheTtlConfig => {
+  const infinity = MsDuration.days(99 * 365)
+  return {
+    ddragonLatestVersion: infiniteCache ? infinity : MsDuration.hour(1),
+
+    activeGame: infiniteCache ? infinity : MsDuration.minutes(3),
+    activeGameLoading: infiniteCache ? infinity : MsDuration.seconds(5),
+    leagueEntries: infiniteCache ? infinity : MsDuration.minutes(3),
+    masteries: infiniteCache ? infinity : MsDuration.minutes(3),
+    summoner: infiniteCache ? infinity : MsDuration.minutes(9),
+
+    account: infinity,
+  }
+}
 
 const load: IO<Config> = pipe(loadDotEnv, IO.map(parse), IO.chain(IO.fromEither))
 

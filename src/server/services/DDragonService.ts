@@ -8,7 +8,7 @@ import { Lang } from '../../shared/models/api/Lang'
 import type { List } from '../../shared/utils/fp'
 import { Future, Maybe, NonEmptyArray, PartialDict, Tuple } from '../../shared/utils/fp'
 
-import { constants } from '../config/constants'
+import type { RiotApiCacheTtlConfig } from '../config/Config'
 import { StoredAt } from '../models/StoredAt'
 import type { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import type { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
@@ -24,7 +24,7 @@ type WithVersion<A> = {
 type DDragonService = ReturnType<typeof DDragonService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const DDragonService = (riotApiService: RiotApiService) => {
+const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: RiotApiService) => {
   const latestVersion = Store<Maybe<StoredAt<DDragonVersion>>>(Maybe.none)
 
   /**
@@ -39,7 +39,7 @@ const DDragonService = (riotApiService: RiotApiService) => {
     Future.chain(({ maybeVersion, now }) =>
       pipe(
         maybeVersion,
-        Maybe.filter(StoredAt.isStillValid(constants.riotApiCacheTtl.ddragonLatestVersion, now)),
+        Maybe.filter(StoredAt.isStillValid(riotApiCacheTtl.ddragonLatestVersion, now)),
         Maybe.fold(
           () =>
             pipe(

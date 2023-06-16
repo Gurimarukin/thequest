@@ -8,7 +8,7 @@ import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Dict, Future, Maybe } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
 
-import type { RiotConfig } from '../config/Config'
+import type { Config } from '../config/Config'
 import type { HttpClient } from '../helpers/HttpClient'
 import { statusesToOption } from '../helpers/HttpClient'
 import { ActiveShards } from '../models/riot/ActiveShard'
@@ -24,6 +24,7 @@ import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import type { SummonerId } from '../models/summoner/SummonerId'
+import type { RiotApiMockService } from './RiotApiMockService'
 
 const { ddragon, ddragonCdn } = DDragonUtils
 
@@ -55,7 +56,13 @@ type UseAccountApiKey = {
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
+const RiotApiService = (
+  config: Config,
+  httpClient: HttpClient,
+  riotApiMockService: RiotApiMockService,
+) => {
+  const { lol: lolKey, account: accountKey } = config.riotApi.keys
+
   const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
     [ddragon('/api/versions.json'), 'get'],
     {},
@@ -107,7 +114,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                       platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`),
                       'get',
                     ],
-                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    { headers: { [xRiotToken]: lolKey } },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
                   statusesToOption(404),
@@ -121,9 +128,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                   httpClient.http(
                     [platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${puuid}`), 'get'],
                     {
-                      headers: {
-                        [xRiotToken]: useAccountApiKey ? config.accountApiKey : config.lolApiKey,
-                      },
+                      headers: { [xRiotToken]: useAccountApiKey ? accountKey : lolKey },
                     },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
@@ -139,7 +144,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                 pipe(
                   httpClient.http(
                     [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
-                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    { headers: { [xRiotToken]: lolKey } },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
                   statusesToOption(404),
@@ -156,7 +161,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                       platformUrl(platform, `/lol/league/v4/entries/by-summoner/${summonerId}`),
                       'get',
                     ],
-                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    { headers: { [xRiotToken]: lolKey } },
                     [List.decoder(RiotLeagueEntry.decoder), 'List<RiotLeagueEntry>'],
                   ),
                   statusesToOption(404),
@@ -176,7 +181,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                       ),
                       'get',
                     ],
-                    { headers: { [xRiotToken]: config.lolApiKey } },
+                    { headers: { [xRiotToken]: lolKey } },
                     [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
                   ),
                   statusesToOption(404),
@@ -187,20 +192,22 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
           spectatorV4: {
             activeGames: {
               bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
-                pipe(
-                  httpClient.http(
-                    [
-                      platformUrl(
-                        platform,
-                        `/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
+                config.mockRiotApi
+                  ? riotApiMockService.activeGames.bySummoner(summonerId)
+                  : pipe(
+                      httpClient.http(
+                        [
+                          platformUrl(
+                            platform,
+                            `/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
+                          ),
+                          'get',
+                        ],
+                        { headers: { [xRiotToken]: lolKey } },
+                        [RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'],
                       ),
-                      'get',
-                    ],
-                    { headers: { [xRiotToken]: config.lolApiKey } },
-                    [RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'],
-                  ),
-                  statusesToOption(404),
-                ),
+                      statusesToOption(404),
+                    ),
             },
           },
         },
@@ -219,7 +226,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                         regionalUrl(`/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`),
                         'get',
                       ],
-                      { headers: { [xRiotToken]: config.accountApiKey } },
+                      { headers: { [xRiotToken]: accountKey } },
                       [RiotAccount.decoder, 'RiotAccount'],
                     ),
                     statusesToOption(404),
@@ -237,7 +244,7 @@ const RiotApiService = (config: RiotConfig, httpClient: HttpClient) => {
                         ),
                         'get',
                       ],
-                      { headers: { [xRiotToken]: config.accountApiKey } },
+                      { headers: { [xRiotToken]: accountKey } },
                       [ActiveShards.decoder, 'ActiveShards'],
                     ),
                     statusesToOption(404),
