@@ -2,6 +2,10 @@ import nodePath from 'path'
 
 import type { List } from '../../shared/utils/fp'
 
+type FileOrDir = MyFile | Dir
+
+export { FileOrDir }
+
 type MyFile = {
   _tag: 'File'
   path: string
@@ -16,14 +20,14 @@ const myFileOf = ({ path, basename, dirname }: Omit<MyFile, '_tag'>): MyFile => 
   dirname,
 })
 
-const MyFile = {
-  fromPath: (path: string): MyFile =>
-    myFileOf({
-      path,
-      basename: nodePath.basename(path),
-      dirname: nodePath.dirname(path),
-    }),
-}
+const myFileFromPath = (path: string): MyFile =>
+  myFileOf({
+    path,
+    basename: nodePath.basename(path),
+    dirname: nodePath.dirname(path),
+  })
+
+export { MyFile }
 
 type Dir = {
   _tag: 'Dir'
@@ -43,7 +47,7 @@ const Dir = {
   joinFile:
     (path: string, ...paths: List<string>) =>
     (dir: Dir): MyFile =>
-      MyFile.fromPath(nodePath.join(dir.path, path, ...paths)),
+      myFileFromPath(nodePath.join(dir.path, path, ...paths)),
 }
 
 export { Dir }
