@@ -26,9 +26,9 @@ export const getFetchWikiaChampionsData = (
   pipe(
     httpClient.text([championDataUrl, 'get']),
     Future.chainEitherK(DomHandler.of()),
-    Future.chainEitherK(jsdom =>
+    Future.chainEitherK(domHandler =>
       pipe(
-        jsdom.window.document.body,
+        domHandler.window.document.body,
         DomHandler.querySelectorEnsureOne(mwCodeClassName),
         Either.mapLeft(withUrlError),
       ),
