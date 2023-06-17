@@ -1,4 +1,4 @@
-import { apply, string } from 'fp-ts'
+import { apply, readonlyMap, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
@@ -6,22 +6,16 @@ import xml2js from 'xml2js'
 
 import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { SpellName } from '../../../shared/models/api/SpellName'
+import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Tuple3 } from '../../../shared/utils/fp'
-import {
-  Dict,
-  Either,
-  Future,
-  List,
-  Maybe,
-  NonEmptyArray,
-  PartialDict,
-} from '../../../shared/utils/fp'
+import { Either, Future, List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 import { decodeError } from '../../../shared/utils/ioTsUtils'
 
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
+import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
 import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
 
 const apiPhpUrl = `${constants.lolWikiaDomain}/api.php`
@@ -57,20 +51,15 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
         string.split('\n|'),
         NonEmptyArray.tail,
         List.filterMap(
-          flow(
-            StringUtils.matcher3(nameSpellValueRegex) as (
-              str: string,
-            ) => Maybe<Tuple3<string, SpellName, string>>,
-            Maybe.map(parseChampionChanges),
-          ),
+          flow(StringUtils.matcher3(nameSpellValueRegex), Maybe.map(parseChampionChanges)),
         ),
         List.sequence(Future.ApplicativePar),
       ),
     ),
     Future.map(
       flow(
-        List.groupByStr(c => c.englishName),
-        Dict.map(
+        ListUtils.groupByAsMap(ChampionEnglishName.Eq)(c => c.englishName),
+        readonlyMap.map(
           flow(
             List.groupBy(c => c.spell),
             PartialDict.map(
@@ -89,22 +78,27 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
     ),
   )
 
-  function parseChampionChanges([englishName, spell, value]: Tuple3<
-    string,
-    SpellName,
-    string
-  >): Future<ChampionSpellHtmlDescription> {
+  function parseChampionChanges(
+    tuple: Tuple3<string, string, string>,
+  ): Future<ChampionSpellHtmlDescription> {
     return pipe(
-      apply.sequenceS(Future.ApplyPar)({
-        spell: parseSpellWikiText(englishName, spell, `{{ai|${spell}|${englishName}}}`),
-        description: parseSpellWikiText(englishName, spell, value),
-      }),
-      Future.map((html): ChampionSpellHtmlDescription => ({ englishName, spell, html })),
+      tupleChampionEnglishNameSpellNameStringDecoder.decode(tuple),
+      Either.mapLeft(decodeError('Tuple<ChampionEnglishName, SpellName, string>')(tuple)),
+      Future.fromEither,
+      Future.chain(([englishName, spell, value]) =>
+        pipe(
+          apply.sequenceS(Future.ApplyPar)({
+            spell: parseSpellWikiText(englishName, spell, `{{ai|${spell}|${englishName}}}`),
+            description: parseSpellWikiText(englishName, spell, value),
+          }),
+          Future.map((html): ChampionSpellHtmlDescription => ({ englishName, spell, html })),
+        ),
+      ),
     )
   }
 
   function parseSpellWikiText(
-    englishName: string,
+    englishName: ChampionEnglishName,
     spell: SpellName,
     value: string,
   ): Future<string> {
@@ -163,7 +157,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
 }
 
 type ChampionSpellHtmlDescription = {
-  englishName: string
+  englishName: ChampionEnglishName
   spell: SpellName
   html: ChampionSpellHtml
 }
@@ -205,6 +199,12 @@ const aramChangesPageParseTreeXMLDecoder = D.struct({
 const includeOnlyXMLDecoder = D.struct({
   includeonly: D.string,
 })
+
+const tupleChampionEnglishNameSpellNameStringDecoder = D.tuple(
+  ChampionEnglishName.codec,
+  SpellName.decoder,
+  D.string,
+)
 
 const parseTextDecoder = D.struct({
   parse: D.struct({
