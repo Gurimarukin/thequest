@@ -11,6 +11,7 @@ import { createEnum } from '../../../shared/utils/createEnum'
 import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtils'
 
+import { ChampionEnglishName } from './ChampionEnglishName'
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
 type RawWikiaChampionData = D.TypeOf<typeof decoder>
@@ -155,12 +156,15 @@ const decoder = StrictStruct.decoder({
 const RawWikiaChampionData = { decoder }
 
 type WikiaChampionData = RawWikiaChampionData & {
-  englishName: string
+  englishName: ChampionEnglishName
 }
 
 const fromRaw =
   (englishName: string) =>
-  (champion: RawWikiaChampionData): WikiaChampionData => ({ ...champion, englishName })
+  (champion: RawWikiaChampionData): WikiaChampionData => ({
+    ...champion,
+    englishName: ChampionEnglishName.wrap(englishName),
+  })
 
 const WikiaChampionData = { fromRaw }
 
