@@ -45,6 +45,7 @@ module.exports = {
       {
         ignoredTypeNames: [
           'AccessToken',
+          'ChampionEnglishName',
           'ChampionId',
           'ChampionKey',
           'DDragonVersion',
