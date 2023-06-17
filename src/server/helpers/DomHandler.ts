@@ -25,17 +25,17 @@ type DomHandler = {
 const domHandlerOf = (options?: DomHandlerOptions) => (html: string) =>
   pipe(
     Try.tryCatch(() => new JSDOM(html, options)),
-    Try.map((jsdom): DomHandler => {
+    Try.map(({ window }): DomHandler => {
       const querySelectorEnsureOneTextContent =
         (selector: string) =>
         (parent: ParentNode): Either<string, string> =>
           pipe(
             parent,
-            querySelectorEnsureOne(selector, HTMLElement),
+            querySelectorEnsureOne(selector, window.HTMLElement),
             Either.chain(textContent(selector)),
           )
 
-      return { window: jsdom.window, querySelectorEnsureOneTextContent }
+      return { window, querySelectorEnsureOneTextContent }
     }),
   )
 
