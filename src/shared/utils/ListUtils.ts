@@ -1,8 +1,9 @@
+import { readonlyMap } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
 import type { Predicate } from 'fp-ts/Predicate'
 import { pipe } from 'fp-ts/function'
 
-import { List, Maybe, Tuple } from './fp'
+import { List, Maybe, NonEmptyArray, Tuple } from './fp'
 
 const findFirstWithIndex =
   <A>(predicate: Predicate<A>) =>
@@ -29,6 +30,20 @@ const findFirstWithPrevious =
       }),
     )
   }
+
+const groupByAsMap =
+  <K>(eq: Eq<K>) =>
+  <A>(f: (a: A) => K) =>
+  (as: List<A>): ReadonlyMap<K, NonEmptyArray<A>> =>
+    pipe(
+      as,
+      List.map(a => Tuple.of(f(a), NonEmptyArray.of(a))),
+      readonlyMap.fromFoldable<'ReadonlyArray', K, NonEmptyArray<A>>(
+        eq,
+        NonEmptyArray.getSemigroup<A>(),
+        List.Foldable,
+      ),
+    )
 
 const mapWithPrevious =
   <A, B>(f: (prev: Maybe<A>, a: A) => B) =>
@@ -69,6 +84,7 @@ const padEnd =
 export const ListUtils = {
   findFirstWithIndex,
   findFirstWithPrevious,
+  groupByAsMap,
   mapWithPrevious,
   updateOrAppend,
   padEnd,
