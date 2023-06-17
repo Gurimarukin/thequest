@@ -39,11 +39,21 @@ const cleanUTF8ToASCII = (str: string): string =>
   str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 const whiteSpaces = /\s+/g
+const cleanWhitespaces = (str: string): string => str.replace(whiteSpaces, ' ')
+
 const cleanSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 const nonAZ = /[^a-z]/g
 const cleanChampionName = (name: string): string =>
   StringUtils.cleanUTF8ToASCII(name).toLowerCase().replaceAll(nonAZ, '')
+
+const cleanHtml = (str: string): string =>
+  cleanWhitespaces(
+    str
+      // newline please
+      .trim()
+      .normalize(),
+  )
 
 /**
  * @example
@@ -84,6 +94,7 @@ export const StringUtils = {
   cleanUTF8ToASCII,
   cleanSummonerName,
   cleanChampionName,
+  cleanHtml,
   plural,
   prettyMs,
   toLowerCase,

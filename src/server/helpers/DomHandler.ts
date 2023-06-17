@@ -1,8 +1,9 @@
-import { apply } from 'fp-ts'
+import { apply, predicate } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { JSDOM } from 'jsdom'
 
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import { Either, List, NonEmptyArray, Try } from '../../shared/utils/fp'
 
 type Constructor<E> = {
@@ -14,10 +15,27 @@ type DomHandlerOptions = {
   url?: string
 }
 
-const domHandlerOf =
-  (options?: DomHandlerOptions) =>
-  (html: string): Try<JSDOM> =>
-    Try.tryCatch(() => new JSDOM(html, options))
+type DomHandler = {
+  window: JSDOM['window']
+  querySelectorTextContent: (selector: string) => (parent: ParentNode) => Either<string, string>
+}
+
+const domHandlerOf = (options?: DomHandlerOptions) => (html: string) =>
+  pipe(
+    Try.tryCatch(() => new JSDOM(html, options)),
+    Try.map((jsdom): DomHandler => {
+      const querySelectorTextContent =
+        (selector: string) =>
+        (parent: ParentNode): Either<string, string> =>
+          pipe(
+            parent,
+            querySelectorEnsureOne(selector, HTMLElement),
+            Either.chain(textContent(selector)),
+          )
+
+      return { window: jsdom.window, querySelectorTextContent }
+    }),
+  )
 
 function querySelectorEnsureOne(selector: string): (parent: ParentNode) => Either<string, Element>
 function querySelectorEnsureOne<E extends Element>(
@@ -92,6 +110,33 @@ function querySelectorAllNonEmpty<E extends Element>(
   }
 }
 
+const DomHandler = {
+  of: domHandlerOf,
+  querySelectorEnsureOne,
+  querySelectorAll,
+  querySelectorAllNonEmpty,
+}
+
+export { DomHandler }
+
+const getText =
+  (name: string, getter: (elt: HTMLElement) => string | null) =>
+  (selector: string) =>
+  (elt: HTMLElement): Either<string, string> =>
+    pipe(
+      getter(elt),
+      Either.fromNullable(`No ${name} for element: ${selector}`),
+      Either.map(StringUtils.cleanHtml),
+      Either.filterOrElse(
+        predicate.not(looksLikeHTMLTag),
+        str => `${name} looks like an HTML tag and this might be a problem: ${str}`,
+      ),
+    )
+
+const looksLikeHTMLTag = (str: string): boolean => str.startsWith('<') && str.endsWith('/>')
+
+const textContent = getText('textContent', e => e.textContent)
+
 const elementNotMatching =
   (selector: string, type: Constructor<Element>) =>
   (index: number, element: Element): ValidatedNea<string, never> =>
@@ -102,10 +147,3 @@ const elementNotMatching =
         } got <${element.nodeName.toLowerCase()}>`,
       ),
     )
-
-export const DomHandler = {
-  of: domHandlerOf,
-  querySelectorEnsureOne,
-  querySelectorAll,
-  querySelectorAllNonEmpty,
-}
