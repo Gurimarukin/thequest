@@ -14,6 +14,22 @@ const findFirstWithIndex =
       Maybe.map(i => Tuple.of(i, as[i]!)),
     )
 
+const findFirstWithPrevious =
+  <A>(f: (prev: Maybe<A>, a: A) => boolean) =>
+  (as: List<A>): Maybe<A> => {
+    // eslint-disable-next-line functional/no-let
+    let prev: Maybe<A> = Maybe.none
+    return pipe(
+      as,
+      List.findFirst(a => {
+        const res = f(prev, a)
+        // eslint-disable-next-line functional/no-expression-statements
+        prev = Maybe.some(a)
+        return res
+      }),
+    )
+  }
+
 const mapWithPrevious =
   <A, B>(f: (prev: Maybe<A>, a: A) => B) =>
   (as: List<A>): List<B> => {
@@ -50,4 +66,10 @@ const padEnd =
       ? as
       : pipe(as, List.concatW(List.makeBy(maxLength - as.length, () => fillWith)))
 
-export const ListUtils = { findFirstWithIndex, mapWithPrevious, updateOrAppend, padEnd }
+export const ListUtils = {
+  findFirstWithIndex,
+  findFirstWithPrevious,
+  mapWithPrevious,
+  updateOrAppend,
+  padEnd,
+}
