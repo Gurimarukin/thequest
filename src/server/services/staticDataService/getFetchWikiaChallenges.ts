@@ -12,15 +12,11 @@ import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 
-// https://leagueoflegends.fandom.com/wiki/Challenges_(League_of_Legends)
-// id: 1522274
-
 const challengesUrl = `${constants.lolWikiaDomain}/wiki/Challenges_(League_of_Legends)`
+// pageid: 1522274
 
-// const showTabContentsWait = MsDuration.ms(500)
-
-export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<unknown> => {
-  const res = pipe(
+export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<unknown> =>
+  pipe(
     httpClient.text([challengesUrl, 'get']),
     Future.chainEitherK(DomHandler.of({ url: challengesUrl })),
     Future.chainEitherK(jsdom =>
@@ -31,9 +27,6 @@ export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<unknown>
       ),
     ),
   )
-
-  return res
-}
 
 // export for testing purpose
 export const wikiaChallengesFromHtml = (html: string): Try<unknown> => {
