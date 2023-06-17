@@ -15,7 +15,7 @@ describe('MapFromArray', () => {
     C.tuple(C.string, C.number),
   )
 
-  const decoder = MapFromArray.decoder(ChampionEnglishName.Ord)(
+  const decoder = MapFromArray.decoder(ChampionEnglishName.Eq)(
     ChampionEnglishName.codec,
     D.tuple(D.string, D.number),
   )

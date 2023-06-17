@@ -1,3 +1,4 @@
+import type { eq } from 'fp-ts'
 import { ord, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
@@ -15,7 +16,8 @@ const { wrap, unwrap } = iso<ChampionEnglishName>()
 const codec = fromNewtype<ChampionEnglishName>(C.string)
 
 const Ord: ord.Ord<ChampionEnglishName> = pipe(string.Ord, ord.contramap(unwrap))
+const Eq: eq.Eq<ChampionEnglishName> = Ord
 
-const ChampionEnglishName = { wrap, codec, Ord }
+const ChampionEnglishName = { wrap, codec, Eq, Ord }
 
 export { ChampionEnglishName }
