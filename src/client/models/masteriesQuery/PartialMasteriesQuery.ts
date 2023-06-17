@@ -1,5 +1,5 @@
 import { readonlySet } from 'fp-ts'
-import type { Eq } from 'fp-ts/Eq'
+import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
@@ -27,12 +27,12 @@ const properties = {
   view: MasteriesQueryView.codec,
   level: setFromStringOrAllCodec(
     ChampionLevelOrZero.stringCodec,
-    ChampionLevelOrZero.Eq,
+    ChampionLevelOrZero.Ord,
     new Set(ChampionLevelOrZero.values),
   ),
   position: setFromStringOrAllCodec(
     ChampionPosition.codec,
-    ChampionPosition.Eq,
+    ChampionPosition.Ord,
     new Set(ChampionPosition.values),
   ),
   search: NonEmptyString.codec,
@@ -52,11 +52,11 @@ export { PartialMasteriesQuery }
 
 function setFromStringOrAllCodec<A>(
   codec: Codec<unknown, string, A>,
-  eq_: Eq<A>,
+  ord: Ord<A>,
   allValues: ReadonlySet<A>,
 ): Codec<unknown, string, ReadonlySet<A>> {
-  const setCodec = SetFromString.codec(codec, eq_)
-  const setEq = readonlySet.getEq(eq_)
+  const setCodec = SetFromString.codec(codec, ord)
+  const setEq = readonlySet.getEq(ord)
   return C.make(
     D.union(
       pipe(
