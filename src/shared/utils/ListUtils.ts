@@ -38,11 +38,7 @@ const groupByAsMap =
     pipe(
       as,
       List.map(a => Tuple.of(f(a), NonEmptyArray.of(a))),
-      readonlyMap.fromFoldable<'ReadonlyArray', K, NonEmptyArray<A>>(
-        eq,
-        NonEmptyArray.getSemigroup<A>(),
-        List.Foldable,
-      ),
+      readonlyMap.fromFoldable(eq, NonEmptyArray.getSemigroup<A>(), List.Foldable),
     )
 
 const mapWithPrevious =
