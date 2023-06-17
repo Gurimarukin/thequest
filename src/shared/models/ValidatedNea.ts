@@ -36,6 +36,10 @@ const chainOptionK =
   <A, B>(f: (a: A) => Maybe<B>): ((ma: ValidatedNea<E, A>) => ValidatedNea<E, B>) =>
     Either.chain(flow(f, fromOption(onNone)))
 
+const chainEitherK = <E, A, B>(
+  f: (a: A) => Either<E, B>,
+): ((fa: ValidatedNea<E, A>) => ValidatedNea<E, B>) => Either.chain(flow(f, fromEither))
+
 const bimap = <E, G, A, B>(
   f: (e: E) => G,
   g: (a: A) => B,
@@ -59,7 +63,11 @@ const ValidatedNea = {
   fromOption,
   fromEmptyE,
   fromEmptyErrors,
+  chain: Either.chain as <E, A, B>(
+    f: (a: A) => ValidatedNea<E, B>,
+  ) => (ma: ValidatedNea<E, A>) => ValidatedNea<E, B>,
   chainOptionK,
+  chainEitherK,
   bimap,
   getValidation,
   getSeqS,
