@@ -112,19 +112,23 @@ function querySelectorAllNonEmpty<E extends Element>(
   }
 }
 
+const textContent = getText('textContent', e => e.textContent)
+
 const DomHandler = {
   of: domHandlerOf,
   querySelectorEnsureOne,
   querySelectorAll,
   querySelectorAllNonEmpty,
+  textContent,
 }
 
 export { DomHandler }
 
-const getText =
-  (name: string, getter: (elt: HTMLElement) => string | null) =>
-  (selector: string) =>
-  (elt: HTMLElement): Either<string, string> =>
+function getText(
+  name: string,
+  getter: (elt: Element) => string | null,
+): (selector: string) => (elt: Element) => Either<string, string> {
+  return selector => elt =>
     pipe(
       getter(elt),
       Either.fromNullable(`No ${name} for element: ${selector}`),
@@ -134,10 +138,9 @@ const getText =
         str => `${name} looks like an HTML tag and this might be a problem: ${str}`,
       ),
     )
+}
 
 const looksLikeHTMLTag = (str: string): boolean => str.startsWith('<') && str.endsWith('/>')
-
-const textContent = getText('textContent', e => e.textContent)
 
 const elementNotMatching =
   (selector: string, type: Constructor<Element>) =>
