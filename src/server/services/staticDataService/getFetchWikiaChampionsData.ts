@@ -39,7 +39,7 @@ export const getFetchWikiaChampionsData = (
         Error(`[${championDataUrl}] empty text content for selector: ${mwCodeClassName}`),
       ),
     ),
-    Future.map(str => luainjs.createEnv().parse(str).exec()),
+    Future.chainEitherK(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
     Future.chainEitherK(u =>
       pipe(
         RawWikiaChampionsData.decoder.decode(u),
