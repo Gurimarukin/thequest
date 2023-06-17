@@ -25,12 +25,12 @@ export const getFetchWikiaChampionsData = (
 ): Future<List<WikiaChampionData>> =>
   pipe(
     httpClient.text([championDataUrl, 'get']),
-    Future.chainEitherK(DomHandler.of),
-    Future.chainEitherK(domHandler =>
+    Future.chainEitherK(DomHandler.of()),
+    Future.chainEitherK(jsdom =>
       pipe(
-        domHandler.window.document,
+        jsdom.window.document.body,
         DomHandler.querySelectorEnsureOne(mwCodeClassName),
-        Either.mapLeft(toErrorWithUrl(championDataUrl)),
+        Either.mapLeft(withUrlError),
       ),
     ),
     Future.map(mwCode => mwCode.textContent),
@@ -70,7 +70,4 @@ export const getFetchWikiaChampionsData = (
     Future.map(separated.right),
   )
 
-const toErrorWithUrl =
-  (url: string) =>
-  (e: string): Error =>
-    Error(`[${url}] ${e}`)
+const withUrlError = (e: string): Error => Error(`[${championDataUrl}] ${e}`)

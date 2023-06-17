@@ -121,10 +121,10 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
         },
         [parseTextDecoder, 'ParseText'],
       ),
-      Future.chainEitherK(res => DomHandler.of(res.parse.text['*'])),
-      Future.chainEitherK(domHandler =>
+      Future.chainEitherK(res => DomHandler.of()(res.parse.text['*'])),
+      Future.chainEitherK(jsdom =>
         pipe(
-          domHandler.window.document,
+          jsdom.window.document.body,
           DomHandler.querySelectorEnsureOne('div.mw-parser-output > *:first-child'),
           Either.bimap(
             message => Error(`${englishName} ${spell}:\n${message}\nValue:\n${value}`),
