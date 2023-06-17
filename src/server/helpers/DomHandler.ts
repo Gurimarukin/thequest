@@ -17,14 +17,16 @@ type DomHandlerOptions = {
 
 type DomHandler = {
   window: JSDOM['window']
-  querySelectorTextContent: (selector: string) => (parent: ParentNode) => Either<string, string>
+  querySelectorEnsureOneTextContent: (
+    selector: string,
+  ) => (parent: ParentNode) => Either<string, string>
 }
 
 const domHandlerOf = (options?: DomHandlerOptions) => (html: string) =>
   pipe(
     Try.tryCatch(() => new JSDOM(html, options)),
     Try.map((jsdom): DomHandler => {
-      const querySelectorTextContent =
+      const querySelectorEnsureOneTextContent =
         (selector: string) =>
         (parent: ParentNode): Either<string, string> =>
           pipe(
@@ -33,7 +35,7 @@ const domHandlerOf = (options?: DomHandlerOptions) => (html: string) =>
             Either.chain(textContent(selector)),
           )
 
-      return { window: jsdom.window, querySelectorTextContent }
+      return { window: jsdom.window, querySelectorEnsureOneTextContent }
     }),
   )
 
