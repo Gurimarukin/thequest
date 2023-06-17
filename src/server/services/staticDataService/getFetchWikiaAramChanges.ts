@@ -24,12 +24,12 @@ import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
 
-const lolFandomApiPhpUrl = `${constants.lolWikiaDomain}/api.php`
+const lolWikiaApiPhpUrl = `${constants.lolWikiaDomain}/api.php`
 
 export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAramChanges> => {
   return pipe(
     httpClient.http(
-      [lolFandomApiPhpUrl, 'get'],
+      [lolWikiaApiPhpUrl, 'get'],
       {
         searchParams: {
           action: 'parse',
@@ -110,7 +110,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
   ): Future<string> {
     return pipe(
       httpClient.http(
-        [lolFandomApiPhpUrl, 'get'],
+        [lolWikiaApiPhpUrl, 'get'],
         {
           searchParams: {
             action: 'parse',
