@@ -1,5 +1,6 @@
-import { json, ord, predicate, readonlySet, string } from 'fp-ts'
+import { json, ord, predicate, readonlyMap, readonlySet, string } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
+import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
 import { flow, identity, pipe } from 'fp-ts/function'
@@ -14,7 +15,7 @@ import type { AnyNewtype, CarrierOf } from 'newtype-ts'
 import { DayJs } from '../models/DayJs'
 import { DictUtils } from './DictUtils'
 import { StringUtils } from './StringUtils'
-import type { Dict } from './fp'
+import type { Dict, Tuple } from './fp'
 import { Either, List, Maybe, NonEmptyArray } from './fp'
 
 const limit = 10000
@@ -306,3 +307,52 @@ const strictTupleDecoder = <A extends List<unknown>>(
 export const StrictTuple = { decoder: strictTupleDecoder }
 
 const refinementFromPredicate = identity as <A>(f: Predicate<A>) => Refinement<A, A>
+
+/**
+ * MapFromArray
+ */
+
+const mapFromArrayDecoder =
+  <K>(eq: Eq<K>) =>
+  <A>(
+    keyDecoder: Decoder<unknown, K>,
+    valueDecoder: Decoder<unknown, A>,
+  ): Decoder<unknown, ReadonlyMap<K, A>> =>
+    pipe(
+      List.decoder(D.tuple(keyDecoder, valueDecoder)),
+      D.map(
+        readonlyMap.fromFoldable<'ReadonlyArray', K, A>(
+          eq,
+          { concat: ({}, y) => y },
+          List.Foldable,
+        ),
+      ),
+    )
+
+const mapFromArrayEncoder =
+  <K>(ord_: Ord<K>) =>
+  <W, O, A>(
+    keyEncoder: Encoder<W, K>,
+    valueEncoder: Encoder<O, A>,
+  ): Encoder<List<Tuple<W, O>>, ReadonlyMap<K, A>> =>
+    pipe(
+      List.encoder(E.readonly(E.tuple(keyEncoder, valueEncoder))),
+      E.contramap((m: ReadonlyMap<K, A>) => readonlyMap.toReadonlyArray(ord_)(m)),
+    )
+
+const mapFromArrayCodec =
+  <K>(ord_: Ord<K>) =>
+  <W, O, A>(
+    keyCodec: Codec<unknown, W, K>,
+    valueCodec: Codec<unknown, O, A>,
+  ): Codec<unknown, List<Tuple<W, O>>, ReadonlyMap<K, A>> =>
+    C.make(
+      mapFromArrayDecoder(ord_)(keyCodec, valueCodec),
+      mapFromArrayEncoder(ord_)(keyCodec, valueCodec),
+    )
+
+export const MapFromArray = {
+  decoder: mapFromArrayDecoder,
+  encoder: mapFromArrayEncoder,
+  codec: mapFromArrayCodec,
+}
