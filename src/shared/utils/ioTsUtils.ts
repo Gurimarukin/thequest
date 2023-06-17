@@ -14,6 +14,7 @@ import type { AnyNewtype, CarrierOf } from 'newtype-ts'
 
 import { DayJs } from '../models/DayJs'
 import { DictUtils } from './DictUtils'
+import { MapUtils } from './MapUtils'
 import { StringUtils } from './StringUtils'
 import type { Dict, Tuple } from './fp'
 import { Either, List, Maybe, NonEmptyArray } from './fp'
@@ -318,16 +319,7 @@ const mapFromArrayDecoder =
     keyDecoder: Decoder<unknown, K>,
     valueDecoder: Decoder<unknown, A>,
   ): Decoder<unknown, ReadonlyMap<K, A>> =>
-    pipe(
-      List.decoder(D.tuple(keyDecoder, valueDecoder)),
-      D.map(
-        readonlyMap.fromFoldable<'ReadonlyArray', K, A>(
-          eq,
-          { concat: ({}, y) => y },
-          List.Foldable,
-        ),
-      ),
-    )
+    pipe(List.decoder(D.tuple(keyDecoder, valueDecoder)), D.map(MapUtils.fromReadonlyArray(eq)))
 
 const mapFromArrayEncoder =
   <K>(ord_: Ord<K>) =>
