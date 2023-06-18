@@ -18,6 +18,6 @@ const codec = fromNewtype<ChampionEnglishName>(C.string)
 const Ord: ord.Ord<ChampionEnglishName> = pipe(string.Ord, ord.contramap(unwrap))
 const Eq: eq.Eq<ChampionEnglishName> = Ord
 
-const ChampionEnglishName = { wrap, codec, Eq, Ord }
+const ChampionEnglishName = { wrap, unwrap, codec, Eq, Ord }
 
 export { ChampionEnglishName }

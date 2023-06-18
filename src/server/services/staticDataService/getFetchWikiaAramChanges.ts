@@ -58,7 +58,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
     ),
     Future.map(
       flow(
-        ListUtils.groupByAsMap(ChampionEnglishName.Eq)(c => c.englishName),
+        ListUtils.groupByAsMap(ChampionEnglishName.Eq)(c => [c.englishName, c]),
         readonlyMap.map(
           flow(
             List.groupBy(c => c.spell),

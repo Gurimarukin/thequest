@@ -1,9 +1,15 @@
 import { readonlyMap } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
 import type { Predicate } from 'fp-ts/Predicate'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 
 import { List, Maybe, NonEmptyArray, Tuple } from './fp'
+
+const findFirstBy =
+  <B>(eq: Eq<B>) =>
+  (value: B) =>
+  <A>(f: (a: A) => B): ((as: List<A>) => Maybe<A>) =>
+    List.findFirst(v => eq.equals(f(v), value))
 
 const findFirstWithIndex =
   <A>(predicate: Predicate<A>) =>
@@ -33,12 +39,12 @@ const findFirstWithPrevious =
 
 const groupByAsMap =
   <K>(eq: Eq<K>) =>
-  <A>(f: (a: A) => K) =>
-  (as: List<A>): ReadonlyMap<K, NonEmptyArray<A>> =>
+  <A, B>(f: (a: A) => Tuple<K, B>) =>
+  (as: List<A>): ReadonlyMap<K, NonEmptyArray<B>> =>
     pipe(
       as,
-      List.map(a => Tuple.of(f(a), NonEmptyArray.of(a))),
-      readonlyMap.fromFoldable(eq, NonEmptyArray.getSemigroup<A>(), List.Foldable),
+      List.map(flow(f, Tuple.mapSnd(NonEmptyArray.of))),
+      readonlyMap.fromFoldable(eq, NonEmptyArray.getSemigroup<B>(), List.Foldable),
     )
 
 const mapWithPrevious =
@@ -78,6 +84,7 @@ const padEnd =
       : pipe(as, List.concatW(List.makeBy(maxLength - as.length, () => fillWith)))
 
 export const ListUtils = {
+  findFirstBy,
   findFirstWithIndex,
   findFirstWithPrevious,
   groupByAsMap,

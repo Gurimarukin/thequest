@@ -1,4 +1,4 @@
-import { apply, io, string } from 'fp-ts'
+import { apply, io, ord, readonlyMap } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 
@@ -34,6 +34,7 @@ import { StoredAt } from '../../models/StoredAt'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import type { DDragonChampions } from '../../models/riot/ddragon/DDragonChampions'
+import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
 import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
@@ -211,9 +212,11 @@ const enrichChampions = (
     english: englishDDragonChampions,
   }: ChampionsWithEnglish,
   wikiaChampions: List<WikiaChampionData>,
-  aramChanges: Dict<string, PartialDict<SpellName, ChampionSpellHtml>>,
+  aramChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
-  const withoutAramChanges: List<Either<ChampionError, Tuple<string, StaticDataChampion>>> = pipe(
+  const withoutAramChanges: List<
+    Either<ChampionError, Tuple<ChampionEnglishName, StaticDataChampion>>
+  > = pipe(
     requestedLangDDragonChampions,
     List.map(requestedLangChampion =>
       pipe(
@@ -258,7 +261,7 @@ const enrichChampions = (
               },
             }
 
-            return Tuple.of(englishChampion.name, data)
+            return Tuple.of(ChampionEnglishName.wrap(englishChampion.name), data)
           },
         ),
       ),
@@ -266,36 +269,42 @@ const enrichChampions = (
   )
   return pipe(
     aramChanges,
-    DictUtils.entries,
-    List.reduce(withoutAramChanges, (acc, [englishName, spells]) =>
-      pipe(
-        acc,
-        ListUtils.findFirstWithIndex(
-          Either.exists(([name]) => string.Eq.equals(name, englishName)),
-        ),
-        Maybe.fold(
-          () =>
-            pipe(
-              acc,
-              List.append(
-                Either.left(
-                  ChampionError.of('Wikia spells', englishName, ['not found'], Maybe.none),
-                ),
-              ),
-            ),
-          ([i, data]) =>
-            List.unsafeUpdateAt(
-              i,
+    readonlyMap.reduceWithIndex<ChampionEnglishName>(ord.trivial)(
+      withoutAramChanges,
+      (englishName, acc, spells) =>
+        pipe(
+          acc,
+          ListUtils.findFirstWithIndex(
+            Either.exists(([name]) => ChampionEnglishName.Eq.equals(name, englishName)),
+          ),
+          Maybe.fold(
+            () =>
               pipe(
-                data,
-                Either.map(
-                  Tuple.mapSnd(StaticDataChampion.Lens.aramSpells.set(Maybe.some(spells))),
+                acc,
+                List.append(
+                  Either.left(
+                    ChampionError.of(
+                      'Wikia spells',
+                      ChampionEnglishName.unwrap(englishName),
+                      ['not found'],
+                      Maybe.none,
+                    ),
+                  ),
                 ),
               ),
-              acc,
-            ),
+            ([i, data]) =>
+              List.unsafeUpdateAt(
+                i,
+                pipe(
+                  data,
+                  Either.map(
+                    Tuple.mapSnd(StaticDataChampion.Lens.aramSpells.set(Maybe.some(spells))),
+                  ),
+                ),
+                acc,
+              ),
+          ),
         ),
-      ),
     ),
     List.map(Either.map(Tuple.snd)),
   )
