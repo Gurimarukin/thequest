@@ -25,49 +25,56 @@ export const getFetchWikiaChampionsData = (
 ): Future<List<WikiaChampionData>> =>
   pipe(
     httpClient.text([championDataUrl, 'get']),
-    Future.chainEitherK(DomHandler.of()),
-    Future.chainEitherK(domHandler =>
-      pipe(
-        domHandler.window.document.body,
-        DomHandler.querySelectorEnsureOne(mwCodeClassName),
-        Either.mapLeft(withUrlError),
+    Future.chainIOEitherK(wikiaChampionsDataFromHtml(logger)),
+  )
+
+// export for testing purpose
+export const wikiaChampionsDataFromHtml =
+  (logger: LoggerType) =>
+  (html: string): IO<List<WikiaChampionData>> =>
+    pipe(
+      DomHandler.of()(html),
+      Try.chain(domHandler =>
+        pipe(
+          domHandler.window.document.body,
+          DomHandler.querySelectorEnsureOne(mwCodeClassName),
+          Either.mapLeft(withUrlError),
+        ),
       ),
-    ),
-    Future.map(mwCode => mwCode.textContent),
-    Future.chainEitherK(
-      Try.fromNullable(
+      Try.chainNullableK(
         Error(`[${championDataUrl}] empty text content for selector: ${mwCodeClassName}`),
+      )(mwCode => mwCode.textContent),
+      Try.chain(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
+      // Future.chainEitherK(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
+      Try.chain(u =>
+        pipe(
+          RawWikiaChampionsData.decoder.decode(u),
+          Either.mapLeft(decodeError('RawWikiaChampionsData')(u)),
+        ),
       ),
-    ),
-    Future.chainEitherK(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
-    Future.chainEitherK(u =>
-      pipe(
-        RawWikiaChampionsData.decoder.decode(u),
-        Either.mapLeft(decodeError('RawWikiaChampionsData')(u)),
-      ),
-    ),
-    Future.map(
-      flow(
-        DictUtils.entries,
-        List.partitionMap(([englishName, rawChampion]) =>
-          pipe(
-            RawWikiaChampionData.decoder.decode(rawChampion),
-            Either.bimap(
-              decodeErrorString(`RawWikiaChampionData (${JSON.stringify(englishName)})`)(
-                rawChampion,
+      Try.map(
+        flow(
+          DictUtils.entries,
+          List.partitionMap(([englishName, rawChampion]) =>
+            pipe(
+              RawWikiaChampionData.decoder.decode(rawChampion),
+              Either.bimap(
+                decodeErrorString(`RawWikiaChampionData (${JSON.stringify(englishName)})`)(
+                  rawChampion,
+                ),
+                WikiaChampionData.fromRaw(englishName),
               ),
-              WikiaChampionData.fromRaw(englishName),
             ),
           ),
         ),
       ),
-    ),
-    Future.chainFirstIOEitherK(({ left: errors }) =>
-      List.isNonEmpty(errors)
-        ? logger.warn(pipe(errors, List.mkString('\n', '\n', '')))
-        : IO.notUsed,
-    ),
-    Future.map(separated.right),
-  )
+      IO.fromEither,
+      IO.chainFirst(({ left: errors }) =>
+        List.isNonEmpty(errors)
+          ? logger.warn(pipe(errors, List.mkString('\n', '\n', '')))
+          : IO.notUsed,
+      ),
+      IO.map(separated.right),
+    )
 
 const withUrlError = (e: string): Error => Error(`[${championDataUrl}] ${e}`)
