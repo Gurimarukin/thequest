@@ -23,6 +23,7 @@ import { SummonerMasteriesView } from '../../shared/models/api/summoner/Summoner
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
+import { ListUtils } from '../../shared/utils/ListUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import {
   Either,
@@ -167,8 +168,10 @@ const SummonerController = (
       userService.listChampionShardsForSummoner(user.id, summoner.id),
       TObservable.chainEitherK(({ champion, count, updatedWhenChampionLevel }) =>
         pipe(
-          masteries,
-          List.findFirst(m => ChampionKey.Eq.equals(m.championId, champion)),
+          pipe(
+            masteries,
+            ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
+          )(champion),
           Maybe.map(m => m.championLevel),
           Maybe.getOrElse((): ChampionLevelOrZero => 0),
           shouldNotifyChampionLeveledUp(count)(updatedWhenChampionLevel),
@@ -274,10 +277,10 @@ const SummonerController = (
                       monoid.concatAll(number.MonoidSum),
                     ),
                     champion: pipe(
-                      masteries,
-                      List.findFirst(m =>
-                        ChampionKey.Eq.equals(m.championId, participant.championId),
-                      ),
+                      pipe(
+                        masteries,
+                        ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
+                      )(participant.championId),
                       Maybe.map(
                         (m): ActiveGameChampionMasteryView => ({
                           championLevel: m.championLevel,
@@ -343,13 +346,17 @@ const sortTeamParticipants =
   (
     participants: NonEmptyArray<ActiveGameParticipantView>,
   ): NonEmptyArray<ActiveGameParticipantView> => {
+    const championByKey = pipe(
+      champions,
+      ListUtils.findFirstBy(ChampionKey.Eq)(c => c.id),
+    )
+
     // we won't be able to do much without associated wikia positions
     const { left: championNotFound, right: championFound } = pipe(
       participants,
       List.partitionMap(p =>
         pipe(
-          champions,
-          List.findFirst(c => ChampionKey.Eq.equals(c.id, p.championId)),
+          championByKey(p.championId),
           Maybe.map(c => Tuple.of(p, c)),
           Either.fromOption(() => p),
         ),

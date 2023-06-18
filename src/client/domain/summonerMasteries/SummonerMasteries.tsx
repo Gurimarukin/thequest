@@ -327,8 +327,10 @@ const enrichAll = (
       )
 
       return pipe(
-        masteries,
-        List.findFirst(c => ChampionKey.Eq.equals(c.championId, key)),
+        pipe(
+          masteries,
+          ListUtils.findFirstBy(ChampionKey.Eq)(c => c.championId),
+        )(key),
         Maybe.fold(
           (): EnrichedChampionMastery => ({
             championId: key,
@@ -405,8 +407,10 @@ const getNotifications = (
           shardsToRemoveFromNotification,
           Maybe.chain(n =>
             pipe(
-              enrichedMasteries,
-              List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
+              pipe(
+                enrichedMasteries,
+                ListUtils.findFirstBy(ChampionKey.Eq)(c => c.championId),
+              )(champion),
               Maybe.map(
                 (c): ShardsToRemoveNotification => ({
                   championId: champion,

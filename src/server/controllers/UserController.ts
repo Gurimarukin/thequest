@@ -18,6 +18,7 @@ import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
 import { DictUtils } from '../../shared/utils/DictUtils'
+import { ListUtils } from '../../shared/utils/ListUtils'
 import { Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -382,8 +383,10 @@ function UserController(
             championId,
             shardsCount,
             championLevel: pipe(
-              masteries,
-              List.findFirst(m => ChampionKey.Eq.equals(m.championId, championId)),
+              pipe(
+                masteries,
+                ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
+              )(championId),
               Maybe.map(m => m.championLevel),
               Maybe.getOrElse<ChampionLevelOrZero>(() => 0),
             ),

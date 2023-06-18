@@ -7,9 +7,13 @@ import { List, Maybe, NonEmptyArray, Tuple } from './fp'
 
 const findFirstBy =
   <B>(eq: Eq<B>) =>
-  (value: B) =>
-  <A>(f: (a: A) => B): ((as: List<A>) => Maybe<A>) =>
-    List.findFirst(v => eq.equals(f(v), value))
+  <A>(f: (a: A) => B) =>
+  (as: List<A>) =>
+  (value: B): Maybe<A> =>
+    pipe(
+      as,
+      List.findFirst(v => eq.equals(f(v), value)),
+    )
 
 const findFirstWithIndex =
   <A>(predicate: Predicate<A>) =>
