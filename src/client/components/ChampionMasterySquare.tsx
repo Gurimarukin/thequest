@@ -3,6 +3,7 @@ import type { Placement } from '@popperjs/core'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useMemo, useRef } from 'react'
 
+import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
@@ -30,6 +31,7 @@ export type ChampionMasterySquareProps = {
   percents: number
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
+  factions: List<ChampionFaction>
   setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
   /**
    * @default false
@@ -63,6 +65,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   percents,
   shardsCount,
   positions,
+  factions,
   setChampionShards,
   isHistogram = false,
   tooltipHoverRef: overrideHoverRef,
@@ -164,6 +167,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           percents={percents}
           filteredShardsCount={filteredShardsCount}
           positions={positions}
+          factions={factions}
         />
       </Tooltip>
     </>

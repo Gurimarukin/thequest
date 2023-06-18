@@ -10,27 +10,19 @@ import { decodeErrorString } from '../../../shared/utils/ioTsUtils'
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
+import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
+import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
 import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 
-const challengesUrl = `${constants.lolWikiaDomain}/wiki/Challenges_(League_of_Legends)`
 // pageid: 1522274
+const challengesUrl = `${constants.lolWikiaDomain}/wiki/Challenges_(League_of_Legends)`
 
-export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<unknown> =>
-  pipe(
-    httpClient.text([challengesUrl, 'get']),
-    Future.chainEitherK(DomHandler.of({ url: challengesUrl })),
-    Future.chainEitherK(jsdom =>
-      pipe(
-        jsdom.window.document.body,
-        DomHandler.querySelectorEnsureOne('#Faction-specific_challenges'),
-        Either.mapLeft(withUrlError),
-      ),
-    ),
-  )
+export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<List<WikiaChallenge>> =>
+  pipe(httpClient.text([challengesUrl, 'get']), Future.chainEitherK(wikiaChallengesFromHtml))
 
 // export for testing purpose
-export const wikiaChallengesFromHtml = (html: string): Try<unknown> => {
-  const res = pipe(
+export const wikiaChallengesFromHtml = (html: string): Try<List<WikiaChallenge>> =>
+  pipe(
     html,
     DomHandler.of({ url: challengesUrl }),
     Try.chain(domHandler =>
@@ -80,14 +72,11 @@ export const wikiaChallengesFromHtml = (html: string): Try<unknown> => {
     ),
   )
 
-  return res
-}
-
 const championSelector = 'ul > li > span > span:last-of-type > a'
 
 const parseChallenge =
   (domHandler: DomHandler) =>
-  (i: number, tuple: List<Element>): ValidatedNea<string, unknown> => {
+  (i: number, tuple: List<Element>): ValidatedNea<string, WikiaChallenge> => {
     if (!isTuple3(tuple)) {
       return pipe(
         tuple,
@@ -122,7 +111,11 @@ const parseChallenge =
           DomHandler.querySelectorAllNonEmpty(championSelector),
           ValidatedNea.chain(
             NonEmptyArray.traverse(ValidatedNea.getValidation<string>())(
-              flow(DomHandler.textContent(championSelector), ValidatedNea.fromEither),
+              flow(
+                DomHandler.textContent(championSelector),
+                ValidatedNea.fromEither,
+                Either.map(ChampionEnglishName.wrap),
+              ),
             ),
           ),
         ),

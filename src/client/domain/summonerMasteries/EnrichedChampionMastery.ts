@@ -5,6 +5,7 @@ import { lens } from 'monocle-ts'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
+import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -20,6 +21,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   shardsCount: Maybe<number>
   glow: boolean
   positions: List<ChampionPosition>
+  factions: List<ChampionFaction>
   aram: AramData
   category: ChampionCategory
   isHidden: boolean

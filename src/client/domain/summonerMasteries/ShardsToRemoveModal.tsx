@@ -6,6 +6,7 @@ import { identity, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
@@ -44,6 +45,7 @@ export type ShardsToRemoveNotification = {
   tokensEarned: number
   shardsCount: number
   positions: List<ChampionPosition>
+  factions: List<ChampionFaction>
   leveledUpFrom: ChampionLevelOrZero
   shardsToRemove: number
 }

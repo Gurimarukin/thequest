@@ -26,10 +26,13 @@ import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
 import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
+import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
+import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
 import type { DDragonService } from '../DDragonService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
+import { getFetchWikiaChallenges } from './getFetchWikiaChallenges'
 import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
@@ -55,6 +58,8 @@ const StaticDataService = (
   const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = fetchCachedSimple(
     getFetchWikiaChampionsData(logger, httpClient),
   )
+
+  const fetchWikiaChallenges: Future<List<WikiaChallenge>> = getFetchWikiaChallenges(httpClient)
 
   const fetchWikiaAramChanges: Future<WikiaAramChanges> = getFetchWikiaAramChanges(httpClient)
 
@@ -125,10 +130,6 @@ const StaticDataService = (
       ),
   }
 
-  /**
-   * We need english champion names because wikia's aram changes are only retrievable with the english name.
-   * But we also want requestedLang, as we want translated champions for front.
-   */
   function fetchStaticData(
     version: DDragonVersion,
   ): (ddragonChampions: List<DDragonChampion>) => Future<StaticData> {
@@ -136,10 +137,11 @@ const StaticDataService = (
       pipe(
         apply.sequenceS(Future.ApplyPar)({
           wikiaChampions: fetchWikiaChampionsData,
+          challenges: fetchWikiaChallenges,
           aramChanges: fetchWikiaAramChanges,
         }),
-        Future.map(({ wikiaChampions, aramChanges }) =>
-          enrichChampions(ddragonChampions, wikiaChampions, aramChanges),
+        Future.map(({ wikiaChampions, challenges, aramChanges }) =>
+          enrichChampions(ddragonChampions, wikiaChampions, challenges, aramChanges),
         ),
         Future.chainFirstIOEitherK(
           flow(
@@ -161,6 +163,7 @@ const StaticDataService = (
                         key: c.key,
                         name: c.name,
                         positions: [],
+                        factions: [],
                         aram: {
                           stats: Maybe.none,
                           spells: Maybe.none,
@@ -183,6 +186,7 @@ export { StaticDataService }
 const enrichChampions = (
   ddragonChampions: List<DDragonChampion>,
   wikiaChampions: List<WikiaChampionData>,
+  challenges: List<WikiaChallenge>,
   aramChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
   const wikiaChampionByKey = pipe(
@@ -222,6 +226,14 @@ const enrichChampions = (
                 positions,
                 NonEmptyArray.map(p => WikiaChampionPosition.position[p]),
               ),
+              factions: pipe(
+                challenges,
+                List.filterMap(challenge =>
+                  List.elem(ChampionEnglishName.Eq)(wikiaChampion.englishName, challenge.champions)
+                    ? Maybe.some(WikiaChampionFaction.faction[challenge.postion])
+                    : Maybe.none,
+                ),
+              ),
               aram: {
                 stats: wikiaChampion.stats.aram,
                 spells: Maybe.none,
@@ -234,6 +246,7 @@ const enrichChampions = (
       ),
     ),
   )
+
   return pipe(
     aramChanges,
     readonlyMap.reduceWithIndex<ChampionEnglishName>(ord.trivial)(

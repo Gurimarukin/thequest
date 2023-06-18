@@ -1,5 +1,6 @@
 import { pipe } from 'fp-ts/function'
 
+import type { Try } from '../../../../src/shared/utils/fp';
 import { Either, Future } from '../../../../src/shared/utils/fp'
 
 import { Dir } from '../../../../src/server/models/FileOrDir'
@@ -13,7 +14,7 @@ const challengesHtml = pipe(Dir.of(__dirname), Dir.joinFile('challenges.html'))
 describe('wikiaChallengesFromHtml', () => {
   it('should wikia challenges from HTML', () =>
     pipe(FsUtils.readFile(challengesHtml), Future.chainEitherK(wikiaChallengesFromHtml))().then(
-      res => {
+      (res: Try<unknown>) => {
         expectT(res).toStrictEqual(Either.right(null))
       },
     ))

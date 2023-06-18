@@ -1,5 +1,6 @@
 import { pipe } from 'fp-ts/function'
 
+import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../shared/utils/StringUtils'
@@ -20,6 +21,7 @@ type Props = {
   percents: number
   filteredShardsCount: Maybe<number>
   positions: List<ChampionPosition>
+  factions: List<ChampionFaction>
 }
 
 export const ChampionTooltip: React.FC<Props> = ({
@@ -32,6 +34,7 @@ export const ChampionTooltip: React.FC<Props> = ({
   tokensEarned,
   filteredShardsCount,
   positions,
+  factions,
 }) => {
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
@@ -103,6 +106,7 @@ export const ChampionTooltip: React.FC<Props> = ({
             )}
           </div>
         ) : null}
+        <pre className="text-2xs">{JSON.stringify(factions)}</pre>
       </div>
     </div>
   )

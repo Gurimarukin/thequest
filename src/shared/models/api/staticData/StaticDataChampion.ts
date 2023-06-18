@@ -4,6 +4,7 @@ import { lens } from 'monocle-ts'
 
 import { List } from '../../../utils/fp'
 import { AramData } from '../AramData'
+import { ChampionFaction } from '../champion/ChampionFaction'
 import { ChampionId } from '../champion/ChampionId'
 import { ChampionKey } from '../champion/ChampionKey'
 import { ChampionPosition } from '../champion/ChampionPosition'
@@ -15,6 +16,7 @@ const codec = C.struct({
   key: ChampionKey.codec,
   name: C.string,
   positions: List.codec(ChampionPosition.codec),
+  factions: List.codec(ChampionFaction.codec),
   aram: AramData.codec,
 })
 

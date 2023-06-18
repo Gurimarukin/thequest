@@ -307,7 +307,7 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name, positions, aram }): EnrichedChampionMastery => {
+    List.map(({ key, name, positions, factions, aram }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -345,6 +345,7 @@ const enrichAll = (
             shardsCount,
             glow,
             positions,
+            factions,
             aram,
             category: ChampionCategory.fromAramData(aram),
             isHidden: false,
@@ -356,6 +357,7 @@ const enrichAll = (
             shardsCount,
             glow,
             positions,
+            factions,
             aram,
             category: ChampionCategory.fromAramData(aram),
             isHidden: false,
@@ -424,6 +426,7 @@ const getNotifications = (
                   tokensEarned: c.tokensEarned,
                   shardsCount: count,
                   positions: c.positions,
+                  factions: c.factions,
                   leveledUpFrom: n.leveledUpFrom,
                   shardsToRemove: n.shardsToRemove,
                 }),

@@ -113,6 +113,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           Maybe.filter(n => n !== 0),
         ),
         positions: c.positions,
+        factions: c.factions,
         setChampionShards: null,
         ...pipe(
           masteries,
