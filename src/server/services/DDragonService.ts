@@ -58,7 +58,6 @@ const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: 
   const champions: (lang: Lang) => (version: DDragonVersion) => Future<DDragonChampions> =
     fetchCached(
       lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).champion,
-      [Lang.defaultLang, Lang.english],
     )
 
   const runes: (lang: Lang) => (version: DDragonVersion) => Future<List<CDragonRune>> = fetchCached(
