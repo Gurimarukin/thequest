@@ -21,7 +21,7 @@ const byPuuidEq: eq.Eq<SummonerShort> = eq.struct<Pick<SummonerShort, 'puuid'>>(
 
 const byNameOrd: ord.Ord<SummonerShort> = pipe(
   string.Ord,
-  ord.contramap(s => StringUtils.cleanUTF8ToASCII(s.name).toLowerCase()),
+  ord.contramap((s: SummonerShort) => StringUtils.cleanUTF8ToASCII(s.name).toLowerCase()),
 )
 
 const SummonerShort = { codec, byPuuidEq, byNameOrd }

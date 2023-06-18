@@ -56,7 +56,7 @@ const byPercents: Ord<ShardsToRemoveNotification> = pipe(
 
 const byName: Ord<ShardsToRemoveNotification> = pipe(
   string.Ord,
-  ord.contramap(n => n.name),
+  ord.contramap((n: ShardsToRemoveNotification) => n.name),
 )
 
 type IsChecked = ShardsToRemoveNotification & {

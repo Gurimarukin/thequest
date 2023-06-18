@@ -151,7 +151,7 @@ const positionFilterPredicate =
 // At level 5 and less, more than 2 shards doesn't matter
 const ordByShardsWithLevel: Ord<EnrichedChampionMastery> = pipe(
   EnrichedChampionMastery.Ord.byShards,
-  ord.contramap(c =>
+  ord.contramap((c: EnrichedChampionMastery) =>
     pipe(
       EnrichedChampionMastery.Lens.shardsCount,
       optional.modify(shardsCount => {
