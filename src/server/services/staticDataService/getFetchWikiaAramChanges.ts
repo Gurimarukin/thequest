@@ -22,10 +22,9 @@ import { decodeError } from '../../../shared/utils/ioTsUtils'
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
+import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
 
 const lolFandomApiPhpUrl = `${constants.lolWikiaDomain}/api.php`
-
-type WikiaAramChanges = Dict<string, PartialDict<SpellName, ChampionSpellHtml>>
 
 export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAramChanges> => {
   return pipe(

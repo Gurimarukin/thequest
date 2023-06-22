@@ -34,8 +34,9 @@ import { StoredAt } from '../../models/StoredAt'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import type { DDragonChampions } from '../../models/riot/ddragon/DDragonChampions'
+import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
+import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
-import type { WikiaChampionsData } from '../../models/wikia/WikiaChampionsData'
 import type { DDragonService } from '../DDragonService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
 import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
@@ -62,11 +63,11 @@ const StaticDataService = (
     version => data => DDragonVersion.Eq.equals(data.value.version, version),
   )
 
-  const fetchWikiaChampionsData: Future<WikiaChampionsData> = fetchCachedSimple(
-    getFetchWikiaChampionsData(httpClient),
+  const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = fetchCachedSimple(
+    getFetchWikiaChampionsData(logger, httpClient),
   )
 
-  const fetchWikiaAramChanges = getFetchWikiaAramChanges(httpClient)
+  const fetchWikiaAramChanges: Future<WikiaAramChanges> = getFetchWikiaAramChanges(httpClient)
 
   return {
     wikiaChampions: fetchWikiaChampionsData,
@@ -209,7 +210,7 @@ const enrichChampions = (
     requestedLang: requestedLangDDragonChampions,
     english: englishDDragonChampions,
   }: ChampionsWithEnglish,
-  wikiaChampions: WikiaChampionsData,
+  wikiaChampions: List<WikiaChampionData>,
   aramChanges: Dict<string, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
   const withoutAramChanges: List<Either<ChampionError, Tuple<string, StaticDataChampion>>> = pipe(

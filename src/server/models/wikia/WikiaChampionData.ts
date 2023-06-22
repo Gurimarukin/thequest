@@ -8,7 +8,6 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionType } from '../../../shared/models/api/champion/ChampionType'
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { createEnum } from '../../../shared/utils/createEnum'
-import type { Tuple } from '../../../shared/utils/fp'
 import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtils'
 
@@ -159,11 +158,10 @@ type WikiaChampionData = RawWikiaChampionData & {
   englishName: string
 }
 
-const fromTuple = ([englishName, c]: Tuple<string, RawWikiaChampionData>): WikiaChampionData => ({
-  ...c,
-  englishName,
-})
+const fromRaw =
+  (englishName: string) =>
+  (champion: RawWikiaChampionData): WikiaChampionData => ({ ...champion, englishName })
 
-const WikiaChampionData = { fromTuple }
+const WikiaChampionData = { fromRaw }
 
 export { WikiaChampionData, RawWikiaChampionData }

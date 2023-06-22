@@ -19,23 +19,27 @@ import { Either, List, Maybe, NonEmptyArray } from './fp'
 
 const limit = 10000
 
+export const decodeErrorString =
+  (name: string) =>
+  (value: unknown) =>
+  (error: DecodeError): string =>
+    StringUtils.stripMargins(
+      `Couldn't decode ${name}:
+      |Error:
+      |${pipe(D.draw(error), StringUtils.ellipse(limit))}
+      |
+      |Value: ${pipe(
+        json.stringify(value),
+        Either.getOrElse(() => `${value}`),
+        StringUtils.ellipse(limit),
+      )}`,
+    )
+
 export const decodeError =
   (name: string) =>
   (value: unknown) =>
   (error: DecodeError): Error =>
-    Error(
-      StringUtils.stripMargins(
-        `Couldn't decode ${name}:
-        |Error:
-        |${pipe(D.draw(error), StringUtils.ellipse(limit))}
-        |
-        |Value: ${pipe(
-          json.stringify(value),
-          Either.getOrElse(() => `${value}`),
-          StringUtils.ellipse(limit),
-        )}`,
-      ),
-    )
+    Error(decodeErrorString(name)(value)(error))
 
 export const fromNewtype = <N extends AnyNewtype = never>(
   codec: Codec<unknown, CarrierOf<N>, CarrierOf<N>>,
