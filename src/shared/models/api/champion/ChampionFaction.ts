@@ -15,6 +15,7 @@ const e = createEnum(
   'shurima',
   'targon',
   'void',
+  'zaun',
 )
 
 const ChampionFaction = e
