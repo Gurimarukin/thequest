@@ -1,3 +1,6 @@
+- uri: ugly encode
+- ARAM: random champion
+- defaultLang > default
 - factions
 - active game drag and drop
 - discord OAuth2: proper state (redirect url)
