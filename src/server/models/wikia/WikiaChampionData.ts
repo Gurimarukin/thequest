@@ -14,7 +14,7 @@ import { DayJsFromISOString, StrictStruct } from '../../../shared/utils/ioTsUtil
 import { ChampionEnglishName } from './ChampionEnglishName'
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
-type RawWikiaChampionData = D.TypeOf<typeof decoder>
+type RawWikiaChampionData = D.TypeOf<typeof rawDecoder>
 
 const Resource = createEnum(
   'Blood Well',
@@ -77,7 +77,7 @@ const maybeBalanceDecoder = pipe(
 
 const AdaptiveType = createEnum('Magic', 'Physical')
 
-const decoder = StrictStruct.decoder({
+const rawProperties = {
   id: ChampionKey.codec,
   apiname: ChampionId.codec,
   title: D.string,
@@ -151,9 +151,11 @@ const decoder = StrictStruct.decoder({
   skill_e: NonEmptyArray.decoder(D.string),
   skill_r: NonEmptyArray.decoder(D.string),
   skills: Maybe.decoder(NonEmptyArray.decoder(D.string)),
-})
+}
 
-const RawWikiaChampionData = { decoder }
+const rawDecoder = StrictStruct.decoder(rawProperties)
+
+const RawWikiaChampionData = { decoder: rawDecoder }
 
 type WikiaChampionData = RawWikiaChampionData & {
   englishName: ChampionEnglishName
@@ -166,6 +168,11 @@ const fromRaw =
     englishName: ChampionEnglishName.wrap(englishName),
   })
 
-const WikiaChampionData = { fromRaw }
+const decoder: Decoder<unknown, WikiaChampionData> = pipe(
+  D.struct(rawProperties),
+  D.intersect(D.struct({ englishName: ChampionEnglishName.codec })),
+)
+
+const WikiaChampionData = { fromRaw, decoder }
 
 export { WikiaChampionData, RawWikiaChampionData }

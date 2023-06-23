@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/function'
 
-import type { Try } from '../../../../src/shared/utils/fp';
+import type { Try } from '../../../../src/shared/utils/fp'
 import { Either, Future } from '../../../../src/shared/utils/fp'
 
 import { Dir } from '../../../../src/server/models/FileOrDir'

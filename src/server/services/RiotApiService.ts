@@ -25,7 +25,7 @@ import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import type { SummonerId } from '../models/summoner/SummonerId'
-import type { RiotApiMockService } from './RiotApiMockService'
+import type { MockService } from './MockService'
 
 const { ddragon, ddragonCdn } = DDragonUtils
 
@@ -57,11 +57,7 @@ type UseAccountApiKey = {
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const RiotApiService = (
-  config: Config,
-  httpClient: HttpClient,
-  riotApiMockService: RiotApiMockService,
-) => {
+const RiotApiService = (config: Config, httpClient: HttpClient, mockService: MockService) => {
   const { lol: lolKey, account: accountKey } = config.riotApi.keys
 
   const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
@@ -194,9 +190,7 @@ const RiotApiService = (
             activeGames: {
               bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
                 pipe(
-                  config.mockRiotApi
-                    ? riotApiMockService.activeGames.bySummoner(summonerId)
-                    : futureMaybe.none,
+                  config.mock ? mockService.activeGames.bySummoner(summonerId) : futureMaybe.none,
                   futureMaybe.alt(() =>
                     pipe(
                       httpClient.http(

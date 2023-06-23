@@ -18,7 +18,9 @@ import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import type { PartialDict } from '../../../shared/utils/fp'
 import { Either, Future, IO, List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
+import { futureMaybe } from '../../../shared/utils/futureMaybe'
 
+import type { Config } from '../../config/Config'
 import { constants } from '../../config/constants'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { StoredAt } from '../../models/StoredAt'
@@ -31,6 +33,7 @@ import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
 import type { DDragonService } from '../DDragonService'
+import type { MockService } from '../MockService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
 import { getFetchWikiaChallenges } from './getFetchWikiaChallenges'
 import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
@@ -39,9 +42,11 @@ type StaticDataService = ReturnType<typeof StaticDataService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const StaticDataService = (
+  config: Config,
   Logger: LoggerGetter,
   httpClient: HttpClient,
   ddragonService: DDragonService,
+  mockService: MockService,
 ) => {
   const logger = Logger('StaticDataService')
 
@@ -64,70 +69,87 @@ const StaticDataService = (
   const fetchWikiaAramChanges: Future<WikiaAramChanges> = getFetchWikiaAramChanges(httpClient)
 
   return {
-    wikiaChampions: fetchWikiaChampionsData,
+    wikiaChampions: pipe(
+      config.mock ? mockService.wikia.champions : futureMaybe.none,
+      futureMaybe.getOrElse(() => fetchWikiaChampionsData),
+    ),
 
     getLatest: (lang: Lang): Future<StaticData> =>
       pipe(
-        ddragonService.latestVersion,
-        Future.chain(version => {
-          if (Lang.Eq.equals(lang, Lang.defaultLang)) return fetchDefautLangStaticData(version)
-
-          return pipe(
-            ddragonService.champions(lang)(version),
-            Future.map(d => DictUtils.values(d.data)),
-            Future.chain(fetchStaticData(version)),
-          )
-        }),
+        config.mock ? mockService.staticData : futureMaybe.none,
+        futureMaybe.getOrElse(() => getLatest(lang)),
       ),
 
     getLatestAdditional: (lang: Lang): Future<AdditionalStaticData> =>
       pipe(
-        ddragonService.latestVersion,
-        Future.chain(version =>
-          pipe(
-            apply.sequenceS(Future.ApplicativePar)({
-              version: Future.successful(version),
-              summoners: ddragonService.summoners(lang)(version),
-              runeStyles: ddragonService.runeStyles(lang)(version),
-              runes: ddragonService.cdragon.latestRunes(lang),
-            }),
-          ),
-        ),
-        Future.map(
-          ({ version, summoners, runeStyles, runes }): AdditionalStaticData => ({
-            version,
-            summonerSpells: pipe(
-              summoners.data,
-              DictUtils.entries,
-              List.map(
-                flow(
-                  Tuple.snd,
-                  (s): StaticDataSummonerSpell => ({
-                    ...s,
-                    cooldown: NonEmptyArray.head(s.cooldown),
-                  }),
-                ),
-              ),
-            ),
-            runeStyles: pipe(
-              runeStyles,
-              List.map(style => ({
-                ...style,
-                slots: pipe(
-                  style.slots,
-                  List.map(slot => ({
-                    runes: pipe(
-                      slot.runes,
-                      List.map(rune => rune.id),
-                    ),
-                  })),
-                ),
-              })),
-            ),
-            runes,
+        config.mock ? mockService.additionalStaticData : futureMaybe.none,
+        futureMaybe.getOrElse(() => getLatestAdditional(lang)),
+      ),
+  }
+
+  function getLatest(lang: Lang): Future<StaticData> {
+    return pipe(
+      ddragonService.latestVersion,
+      Future.chain(version => {
+        if (Lang.Eq.equals(lang, Lang.defaultLang)) return fetchDefautLangStaticData(version)
+
+        return pipe(
+          ddragonService.champions(lang)(version),
+          Future.map(d => DictUtils.values(d.data)),
+          Future.chain(fetchStaticData(version)),
+        )
+      }),
+    )
+  }
+
+  function getLatestAdditional(lang: Lang): Future<AdditionalStaticData> {
+    return pipe(
+      ddragonService.latestVersion,
+      Future.chain(version =>
+        pipe(
+          apply.sequenceS(Future.ApplicativePar)({
+            version: Future.successful(version),
+            summoners: ddragonService.summoners(lang)(version),
+            runeStyles: ddragonService.runeStyles(lang)(version),
+            runes: ddragonService.cdragon.latestRunes(lang),
           }),
         ),
       ),
+      Future.map(
+        ({ version, summoners, runeStyles, runes }): AdditionalStaticData => ({
+          version,
+          summonerSpells: pipe(
+            summoners.data,
+            DictUtils.entries,
+            List.map(
+              flow(
+                Tuple.snd,
+                (s): StaticDataSummonerSpell => ({
+                  ...s,
+                  cooldown: NonEmptyArray.head(s.cooldown),
+                }),
+              ),
+            ),
+          ),
+          runeStyles: pipe(
+            runeStyles,
+            List.map(style => ({
+              ...style,
+              slots: pipe(
+                style.slots,
+                List.map(slot => ({
+                  runes: pipe(
+                    slot.runes,
+                    List.map(rune => rune.id),
+                  ),
+                })),
+              ),
+            })),
+          ),
+          runes,
+        }),
+      ),
+    )
   }
 
   function fetchStaticData(

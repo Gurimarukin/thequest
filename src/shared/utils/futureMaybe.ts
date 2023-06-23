@@ -105,8 +105,8 @@ const fromIOEither: <A>(fa: IO<A>) => Future<Maybe<A>> = flow(
   Future.map(Maybe.some),
 )
 
-type GetOrElse = <A>(onNone: LazyArg<Future<A>>) => (fa: Future<Maybe<A>>) => Future<A>
-const getOrElse: GetOrElse = optionT.getOrElse(Future.Monad)
+const getOrElse: <A>(onNone: LazyArg<Future<A>>) => (fa: Future<Maybe<A>>) => Future<A> =
+  optionT.getOrElse(Future.Monad)
 
 const map = optionT.map(Future.Functor)
 

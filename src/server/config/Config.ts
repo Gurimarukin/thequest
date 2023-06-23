@@ -24,7 +24,7 @@ const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
   isDev: boolean
-  mockRiotApi: boolean
+  mock: boolean
   logLevel: LogLevelOrOff
   client: ClientConfig
   http: HttpConfig
@@ -84,8 +84,8 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         r(Maybe.decoder(BooleanFromString.decoder))('IS_DEV'),
         Either.map(Maybe.getOrElse(() => false)),
       ),
-      mockRiotApi: pipe(
-        r(Maybe.decoder(BooleanFromString.decoder))('MOCK_RIOT_API'),
+      mock: pipe(
+        r(Maybe.decoder(BooleanFromString.decoder))('MOCK'),
         Either.map(Maybe.getOrElse(() => false)),
       ),
       logLevel: r(LogLevelOrOff.codec)('LOG_LEVEL'),
