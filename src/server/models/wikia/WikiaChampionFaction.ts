@@ -20,7 +20,7 @@ const e = createEnum(
 )
 
 const faction: Dict<WikiaChampionFaction, ChampionFaction> = {
-  'Bandle City': 'bandleCity',
+  'Bandle City': 'bandle',
   Bilgewater: 'bilgewater',
   Demacia: 'demacia',
   Freljord: 'freljord',
