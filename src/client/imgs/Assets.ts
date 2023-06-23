@@ -98,6 +98,7 @@ export const Assets = {
   factions,
   masteries,
   positions,
+  runeterra: new URL('./runeterra.webp', import.meta.url).toString(),
   stats,
   tokens,
   yuumi: new URL('./yuumi.png', import.meta.url).toString(),
