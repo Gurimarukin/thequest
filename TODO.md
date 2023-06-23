@@ -3,6 +3,7 @@
 - defaultLang > default
 - factions
 - active game drag and drop
+- translation?
 - discord OAuth2: proper state (redirect url)
 - toaster (replace alert)
 - game: summoner level?

@@ -13,7 +13,7 @@ type Props = {
 
 export const ChampionFactionImg: React.FC<Props> = ({ faction, className }) => (
   <div
-    className={cx('flex items-center justify-center', className)}
+    className={cx('flex items-center justify-center bg-current', className)}
     style={{
       maskImage: `url(${Assets.factions[faction]})`,
       maskSize: '100% 100%, contain',

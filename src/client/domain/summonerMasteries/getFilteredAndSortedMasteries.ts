@@ -138,11 +138,13 @@ const getSortBy = (
 const levelFilterPredicate =
   (levels: ReadonlySet<ChampionLevelOrZero>): Predicate<EnrichedChampionMastery> =>
   c =>
+    readonlySet.size(levels) === ChampionLevelOrZero.values.length ||
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
 const factionFilterPredicate =
   (factions: ReadonlySet<ChampionFaction>): Predicate<EnrichedChampionMastery> =>
   c =>
+    readonlySet.size(factions) === ChampionFaction.values.length ||
     pipe(
       c.factions,
       List.some(faction => readonlySet.elem(ChampionFaction.Eq)(faction, factions)),
@@ -151,6 +153,7 @@ const factionFilterPredicate =
 const positionFilterPredicate =
   (positions: ReadonlySet<ChampionPosition>): Predicate<EnrichedChampionMastery> =>
   c =>
+    readonlySet.size(positions) === ChampionPosition.values.length ||
     pipe(
       c.positions,
       List.some(position => readonlySet.elem(ChampionPosition.Eq)(position, positions)),

@@ -225,7 +225,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               icon: isChecked => (
                 <ChampionFactionImg
                   faction={faction}
-                  className={cx('h-6 w-6', isChecked ? 'bg-black' : 'bg-[#c8ab6d]')}
+                  className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
                 />
               ),
               label: ChampionFaction.label[faction],
