@@ -1,3 +1,4 @@
+- translate aram stats
 - uri: ugly encode
 - ARAM: random champion
 - defaultLang > default

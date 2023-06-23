@@ -22,14 +22,15 @@ import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
-import { HowlingAbyssSimple } from '../../../imgs/HowlingAbyss'
 import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
   DiceFilled,
   StatsChartSharp,
+  TeamworkChallenges,
 } from '../../../imgs/svgIcons'
+import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
@@ -125,6 +126,12 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             'aram',
             <IconLabel tooltip="Vue ARAM" className="w-8">
               <HowlingAbyssSimple className="h-[18px]" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'factions',
+            <IconLabel tooltip="Vue factions" className="w-8">
+              <TeamworkChallenges className="h-5" />
             </IconLabel>,
           )}
         </Radios>
