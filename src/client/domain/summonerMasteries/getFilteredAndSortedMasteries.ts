@@ -4,6 +4,7 @@ import type { Predicate } from 'fp-ts/Predicate'
 import { flow, identity, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 
+import { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
@@ -36,6 +37,7 @@ export const getFilteredAndSortedMasteries = (
 
   const filterPredicate = pipe(
     levelFilterPredicate(query.level),
+    predicate.and(factionFilterPredicate(query.faction)),
     predicate.and(positionFilterPredicate(query.position)),
   )
 
@@ -138,9 +140,17 @@ const levelFilterPredicate =
   c =>
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
+const factionFilterPredicate =
+  (factions: ReadonlySet<ChampionFaction>): Predicate<EnrichedChampionMastery> =>
+  c =>
+    pipe(
+      c.factions,
+      List.some(faction => readonlySet.elem(ChampionFaction.Eq)(faction, factions)),
+    )
+
 const positionFilterPredicate =
-  (positions: ReadonlySet<ChampionPosition>) =>
-  (c: EnrichedChampionMastery): boolean =>
+  (positions: ReadonlySet<ChampionPosition>): Predicate<EnrichedChampionMastery> =>
+  c =>
     pipe(
       c.positions,
       List.some(position => readonlySet.elem(ChampionPosition.Eq)(position, positions)),
