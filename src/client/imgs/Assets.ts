@@ -1,3 +1,4 @@
+import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
@@ -36,6 +37,22 @@ const divisions: Dict<'unranked' | `${FourRanksTier}${LeagueRank}` | OneRankTier
   MASTER: new URL('./divisions/master.webp', import.meta.url).toString(),
   GRANDMASTER: new URL('./divisions/grandmaster.png', import.meta.url).toString(),
   CHALLENGER: new URL('./divisions/challenger.webp', import.meta.url).toString(),
+}
+
+const factions: Dict<ChampionFaction, string> = {
+  bandle: new URL('./factions/bandle.webp', import.meta.url).toString(),
+  bilgewater: new URL('./factions/bilgewater.webp', import.meta.url).toString(),
+  demacia: new URL('./factions/demacia.webp', import.meta.url).toString(),
+  freljord: new URL('./factions/freljord.webp', import.meta.url).toString(),
+  ionia: new URL('./factions/ionia.webp', import.meta.url).toString(),
+  ixtal: new URL('./factions/ixtal.webp', import.meta.url).toString(),
+  noxus: new URL('./factions/noxus.webp', import.meta.url).toString(),
+  piltover: new URL('./factions/piltover.webp', import.meta.url).toString(),
+  shadowIsles: new URL('./factions/shadowIsles.webp', import.meta.url).toString(),
+  shurima: new URL('./factions/shurima.webp', import.meta.url).toString(),
+  targon: new URL('./factions/targon.webp', import.meta.url).toString(),
+  void: new URL('./factions/void.webp', import.meta.url).toString(),
+  zaun: new URL('./factions/zaun.webp', import.meta.url).toString(),
 }
 
 const masteries: Dict<`${ChampionLevelOrZero}`, string> = {
@@ -78,6 +95,7 @@ export const Assets = {
   champion: new URL('./champion.webp', import.meta.url).toString(),
   chest: new URL('./chest.png', import.meta.url).toString(),
   divisions,
+  factions,
   masteries,
   positions,
   stats,

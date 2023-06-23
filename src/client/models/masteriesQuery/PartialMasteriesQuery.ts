@@ -8,6 +8,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
+import { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { PartialDict } from '../../../shared/utils/fp'
@@ -29,6 +30,11 @@ const properties = {
     ChampionLevelOrZero.stringCodec,
     ChampionLevelOrZero.Ord,
     new Set(ChampionLevelOrZero.values),
+  ),
+  faction: setFromStringOrAllCodec(
+    ChampionFaction.codec,
+    ChampionFaction.Ord,
+    new Set(ChampionFaction.values),
   ),
   position: setFromStringOrAllCodec(
     ChampionPosition.codec,
