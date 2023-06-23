@@ -106,30 +106,30 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
   const randomButtonRef = useRef<HTMLButtonElement>(null)
 
   return (
-    <div className="grid w-full max-w-7xl grid-cols-1 gap-3">
+    <div className="flex w-full max-w-7xl flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center justify-end gap-3">
-          <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
-            {labelValue(
-              'compact',
-              <IconLabel tooltip="Vue compacte" className="w-8">
-                <AppsSharp className="h-4" />
-              </IconLabel>,
-            )}
-            {labelValue(
-              'histogram',
-              <IconLabel tooltip="Vue histogramme" className="w-8">
-                <StatsChartSharp className="h-5 rotate-90 -scale-x-100" />
-              </IconLabel>,
-            )}
-            {labelValue(
-              'aram',
-              <IconLabel tooltip="Vue ARAM" className="w-8">
-                <HowlingAbyssSimple className="h-[18px]" />
-              </IconLabel>,
-            )}
-          </Radios>
+        <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
+          {labelValue(
+            'compact',
+            <IconLabel tooltip="Vue compacte" className="w-8">
+              <AppsSharp className="h-4" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'histogram',
+            <IconLabel tooltip="Vue histogramme" className="w-8">
+              <StatsChartSharp className="h-5 rotate-90 -scale-x-100" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'aram',
+            <IconLabel tooltip="Vue ARAM" className="w-8">
+              <HowlingAbyssSimple className="h-[18px]" />
+            </IconLabel>,
+          )}
+        </Radios>
 
+        <div className="flex flex-wrap items-center gap-3">
           <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
             {labelValue(
               'percents',
@@ -163,28 +163,6 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               </IconLabel>,
             )}
           </Radios>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchChampion
-            ref={searchRef}
-            searchCount={searchCount}
-            initialSearch={masteriesQuery.search}
-            onChange={setQuerySearch}
-          />
-
-          <button
-            ref={randomButtonRef}
-            type="button"
-            onClick={handleRandomClick}
-            disabled={Maybe.isNone(randomChampion)}
-            className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
-          >
-            <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
-          </button>
-          <Tooltip hoverRef={randomButtonRef} placement="top">
-            Champion aléatoire
-          </Tooltip>
         </div>
       </div>
 
@@ -237,53 +215,70 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           </ul>
         </div>
 
+        <Checkboxes<ChampionFaction>
+          eq={ChampionFaction.Eq}
+          values={pipe(
+            ChampionFaction.values,
+            List.map(faction => ({
+              key: faction,
+              value: faction,
+              icon: isChecked => (
+                <ChampionFactionImg
+                  faction={faction}
+                  className={cx('h-6 w-6', isChecked ? 'bg-black' : 'bg-[#c8ab6d]')}
+                />
+              ),
+              label: ChampionFaction.label[faction],
+            })),
+          )}
+          checked={masteriesQuery.faction}
+          toggleChecked={toggleFactionChecked}
+          tooltipPlacement="top"
+          iconClassName="px-1"
+        />
+
+        <Checkboxes<ChampionPosition>
+          eq={ChampionPosition.Eq}
+          values={pipe(
+            ChampionPosition.values,
+            List.map(position => ({
+              key: position,
+              value: position,
+              icon: isChecked => (
+                <ChampionPositionImg
+                  position={position}
+                  className={cx('w-6', ['brightness-150 contrast-200 grayscale invert', isChecked])}
+                />
+              ),
+              label: ChampionPosition.label[position],
+            })),
+          )}
+          checked={masteriesQuery.position}
+          toggleChecked={togglePositionChecked}
+          tooltipPlacement="top"
+          iconClassName="px-1.5"
+        />
+
         <div className="flex flex-wrap items-center gap-3">
-          <Checkboxes<ChampionFaction>
-            eq={ChampionFaction.Eq}
-            values={pipe(
-              ChampionFaction.values,
-              List.map(faction => ({
-                key: faction,
-                value: faction,
-                icon: isChecked => (
-                  <ChampionFactionImg
-                    faction={faction}
-                    className={cx('h-6 w-6', isChecked ? 'bg-black' : 'bg-[#c8ab6d]')}
-                  />
-                ),
-                label: ChampionFaction.label[faction],
-              })),
-            )}
-            checked={masteriesQuery.faction}
-            toggleChecked={toggleFactionChecked}
-            tooltipPlacement="top"
-            iconClassName="px-1"
+          <SearchChampion
+            ref={searchRef}
+            searchCount={searchCount}
+            initialSearch={masteriesQuery.search}
+            onChange={setQuerySearch}
           />
 
-          <Checkboxes<ChampionPosition>
-            eq={ChampionPosition.Eq}
-            values={pipe(
-              ChampionPosition.values,
-              List.map(position => ({
-                key: position,
-                value: position,
-                icon: isChecked => (
-                  <ChampionPositionImg
-                    position={position}
-                    className={cx('w-6', [
-                      'brightness-150 contrast-200 grayscale invert',
-                      isChecked,
-                    ])}
-                  />
-                ),
-                label: ChampionPosition.label[position],
-              })),
-            )}
-            checked={masteriesQuery.position}
-            toggleChecked={togglePositionChecked}
-            tooltipPlacement="top"
-            iconClassName="px-1.5"
-          />
+          <button
+            ref={randomButtonRef}
+            type="button"
+            onClick={handleRandomClick}
+            disabled={Maybe.isNone(randomChampion)}
+            className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
+          >
+            <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
+          </button>
+          <Tooltip hoverRef={randomButtonRef} placement="top">
+            Champion aléatoire
+          </Tooltip>
         </div>
       </div>
     </div>
