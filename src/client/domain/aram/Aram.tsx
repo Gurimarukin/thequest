@@ -19,7 +19,7 @@ import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
-import { ChampionCategory } from '../../models/ChampionCategory'
+import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { AramQuery } from '../../models/aramQuery/AramQuery'
 import { cx } from '../../utils/cx'
 import './Aram.css'
@@ -28,7 +28,7 @@ const { cleanChampionName } = StringUtils
 
 type EnrichedStaticDataChampion = StaticDataChampion & {
   isHidden: boolean
-  category: ChampionCategory
+  category: ChampionAramCategory
 }
 
 const ordByName: Ord<EnrichedStaticDataChampion> = pipe(
@@ -50,15 +50,15 @@ export const Aram: React.FC = () => {
             aramQuery.search,
             Maybe.every(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
           ),
-          category: ChampionCategory.fromAramData(c.aram),
+          category: ChampionAramCategory.fromAramData(c.aram),
         }),
       ),
       List.sort(ordByName),
-      List.groupBy((a): ChampionCategory | 'hidden' => (a.isHidden ? 'hidden' : a.category)),
+      List.groupBy((a): ChampionAramCategory | 'hidden' => (a.isHidden ? 'hidden' : a.category)),
     )
 
     const filteredAndSortedChampions_ = pipe(
-      ChampionCategory.values,
+      ChampionAramCategory.values,
       List.reduce(List.empty<EnrichedStaticDataChampion>(), (acc, category) =>
         pipe(acc, List.concat(grouped[category] ?? [])),
       ),
@@ -97,7 +97,7 @@ export const Aram: React.FC = () => {
                 {!c.isHidden &&
                 !pipe(
                   maybePrev,
-                  Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, c.category)),
+                  Maybe.exists(prev => ChampionAramCategory.Eq.equals(prev.category, c.category)),
                 ) ? (
                   <ChampionCategoryTitle category={c.category} className="pt-4" />
                 ) : null}
@@ -132,7 +132,9 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
       ref={containerRef}
       className={cx(
         'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-aram-stats text-2xs',
-        ChampionCategory.fromAramData(champion.aram) !== 'balanced' ? 'col-span-7' : 'col-span-4',
+        ChampionAramCategory.fromAramData(champion.aram) !== 'balanced'
+          ? 'col-span-7'
+          : 'col-span-4',
         ['hidden', champion.isHidden],
       )}
     >

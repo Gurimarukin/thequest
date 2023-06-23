@@ -18,7 +18,7 @@ import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
-import { ChampionCategory } from '../../models/ChampionCategory'
+import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cx } from '../../utils/cx'
@@ -94,11 +94,11 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
   )
 }
 
-const viewContainerClassName: Dict<MasteriesQueryView, string | undefined> = {
+const viewContainerClassName: Dict<MasteriesQueryView, string> = {
   compact: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
   histogram: 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2',
   aram: 'grid grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
-  factions: undefined,
+  factions: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
 }
 
 type ChampionProps = {
@@ -128,6 +128,7 @@ const Champion: React.FC<ChampionProps> = ({
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
+  const isFactions = masteriesQuery.view === 'factions'
 
   return (
     <>
@@ -135,7 +136,7 @@ const Champion: React.FC<ChampionProps> = ({
       !isHidden &&
       !pipe(
         maybePrev,
-        Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
+        Maybe.exists(prev => ChampionAramCategory.Eq.equals(prev.category, champion.category)),
       ) ? (
         <ChampionCategoryTitle
           category={champion.category}

@@ -12,7 +12,7 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
-import type { ChampionCategory } from '../../models/ChampionCategory'
+import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
 
 type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   championLevel: ChampionLevelOrZero
@@ -23,7 +23,7 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
   aram: AramData
-  category: ChampionCategory
+  category: ChampionAramCategory
   isHidden: boolean
 }
 

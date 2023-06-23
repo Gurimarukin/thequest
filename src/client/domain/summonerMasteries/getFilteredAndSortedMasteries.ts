@@ -9,13 +9,13 @@ import { ChampionLevelOrZero } from '../../../shared/models/api/champion/Champio
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { ChampionCategory } from '../../models/ChampionCategory'
+import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
-type CategoryOrHidden = ChampionCategory | 'hidden'
+type CategoryOrHidden = ChampionAramCategory | 'hidden'
 
 type FilteredAndSortedMasteries = {
   filteredAndSortedMasteries: List<EnrichedChampionMastery>
@@ -87,7 +87,7 @@ const sortAram =
       List.groupBy((c): CategoryOrHidden => (isHidden(c) ? 'hidden' : c.category)),
     )
     return pipe(
-      ChampionCategory.values,
+      ChampionAramCategory.values,
       List.reduce(List.empty<EnrichedChampionMastery>(), (acc, category) =>
         pipe(acc, List.concat(pipe(grouped[category] ?? [], List.sortBy(ords)))),
       ),

@@ -33,7 +33,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
-import { ChampionCategory } from '../../models/ChampionCategory'
+import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
@@ -347,7 +347,7 @@ const enrichAll = (
             positions,
             factions,
             aram,
-            category: ChampionCategory.fromAramData(aram),
+            category: ChampionAramCategory.fromAramData(aram),
             isHidden: false,
           }),
           champion => ({
@@ -359,7 +359,7 @@ const enrichAll = (
             positions,
             factions,
             aram,
-            category: ChampionCategory.fromAramData(aram),
+            category: ChampionAramCategory.fromAramData(aram),
             isHidden: false,
           }),
         ),

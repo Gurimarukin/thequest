@@ -3,12 +3,12 @@ import { useRef } from 'react'
 import type { Dict } from '../../shared/utils/fp'
 
 import { InformationCircleOutline } from '../imgs/svgIcons'
-import type { ChampionCategory } from '../models/ChampionCategory'
+import type { ChampionAramCategory } from '../models/ChampionAramCategory'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
 type ChampionCategoryTitleProps = {
-  category: ChampionCategory
+  category: ChampionAramCategory
   className?: string
 }
 
@@ -30,14 +30,14 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
   )
 }
 
-const label: Dict<ChampionCategory, string> = {
+const label: Dict<ChampionAramCategory, string> = {
   buffed: 'Champions buffés',
   nerfed: 'Champions nerfés',
   other: 'Autres',
   balanced: 'Champions parfaitement équilibrés',
 }
 
-const tooltip: Dict<ChampionCategory, string> = {
+const tooltip: Dict<ChampionAramCategory, string> = {
   buffed: 'Champions avec plus de buffs que de nerfs',
   nerfed: 'Champions avec plus de nerfs que de buffs',
   other:
