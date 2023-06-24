@@ -15,6 +15,7 @@ import { statusesToOption } from '../helpers/HttpClient'
 import { ActiveShards } from '../models/riot/ActiveShard'
 import type { Game } from '../models/riot/Game'
 import { RiotAccount } from '../models/riot/RiotAccount'
+import { RiotChallenges } from '../models/riot/RiotChallenges'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotLeagueEntry } from '../models/riot/RiotLeagueEntry'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
@@ -120,6 +121,17 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                   statusesToOption(404),
                 ),
             },
+          },
+
+          challengesV1: {
+            playerData: (puuid: Puuid): Future<RiotChallenges> =>
+              pipe(
+                httpClient.http(
+                  [platformUrl(platform, `/lol/challenges/v1/player-data/${puuid}`), 'get'],
+                  { headers: { [xRiotToken]: lolKey } },
+                  [RiotChallenges.decoder, 'RiotChallenges'],
+                ),
+              ),
           },
 
           leagueV4: {
