@@ -35,7 +35,7 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
               placementRef={placementRef}
               className="max-w-xl !whitespace-normal break-normal py-2"
             >
-              {tooltip[faction]}
+              Défi : <i>{tooltip[faction]}</i>
             </Tooltip>
           </>
         ) : null}
