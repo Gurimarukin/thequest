@@ -14,7 +14,7 @@ import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
+import { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
 type CategoryOrHidden = ChampionAramCategory | 'hidden'
@@ -29,12 +29,19 @@ type FilteredAndSortedMasteries = {
   isHidden: (champion: EnrichedChampionMastery) => boolean
 }
 
+const hideInsteadOfGlowViews: ReadonlySet<MasteriesQueryView> = new Set<MasteriesQueryView>([
+  'histogram',
+  'aram',
+  'factions',
+])
+
 export const getFilteredAndSortedMasteries = (
   masteries: List<EnrichedChampionMastery>,
   query: MasteriesQuery,
 ): FilteredAndSortedMasteries => {
   const hideInsteadOfGlow =
-    Maybe.isSome(query.search) && (query.view === 'histogram' || query.view === 'aram')
+    Maybe.isSome(query.search) &&
+    readonlySet.elem(MasteriesQueryView.Eq)(query.view, hideInsteadOfGlowViews)
 
   const isHidden = getIsHidden({ hideInsteadOfGlow })
 
