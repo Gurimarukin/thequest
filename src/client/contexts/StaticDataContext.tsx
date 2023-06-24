@@ -18,7 +18,7 @@ import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 
 const { ddragonCdn } = DDragonUtils
 
-const lang: Lang = Lang.defaultLang // TODO: based on browser
+const lang: Lang = Lang.default // TODO: based on browser
 
 export type StaticDataContext = {
   lang: Lang

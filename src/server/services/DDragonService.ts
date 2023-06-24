@@ -103,7 +103,7 @@ export { DDragonService }
 
 const fetchCached = <A>(
   fetch: (lang: Lang) => (version: DDragonVersion) => Future<A>,
-  cacheForLangs: NonEmptyArray<Lang> = [Lang.defaultLang],
+  cacheForLangs: NonEmptyArray<Lang> = [Lang.default],
 ): ((lang: Lang) => (version: DDragonVersion) => Future<A>) => {
   const caches = pipe(
     cacheForLangs,

@@ -1,7 +1,6 @@
 - translate aram stats
 - uri: ugly encode
 - ARAM: random champion
-- defaultLang > default
 - factions
 - active game drag and drop
 - translation?

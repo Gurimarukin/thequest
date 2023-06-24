@@ -53,7 +53,7 @@ const StaticDataService = (
   const fetchDefautLangStaticData = fetchCached(
     (version: DDragonVersion): Future<StaticData> =>
       pipe(
-        ddragonService.champions(Lang.defaultLang)(version),
+        ddragonService.champions(Lang.default)(version),
         Future.map(d => DictUtils.values(d.data)),
         Future.chain(fetchStaticData(version)),
       ),
@@ -91,7 +91,7 @@ const StaticDataService = (
     return pipe(
       ddragonService.latestVersion,
       Future.chain(version => {
-        if (Lang.Eq.equals(lang, Lang.defaultLang)) return fetchDefautLangStaticData(version)
+        if (Lang.Eq.equals(lang, Lang.default)) return fetchDefautLangStaticData(version)
 
         return pipe(
           ddragonService.champions(lang)(version),

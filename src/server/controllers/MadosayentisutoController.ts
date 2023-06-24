@@ -42,7 +42,7 @@ const MadosayentisutoController = (
   staticDataController: StaticDataController,
 ) => {
   const getStaticData: EndedMiddleware = withIpAndToken(
-    staticDataController.staticData(Lang.defaultLang),
+    staticDataController.staticData(Lang.default),
   )
 
   const getUsersProgression: EndedMiddleware = withIpAndToken(
@@ -82,7 +82,7 @@ const MadosayentisutoController = (
         masteries: masteriesService.findBySummoner(summoner.platform, summoner.id, {
           forceCacheRefresh: true,
         }),
-        staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(Lang.defaultLang)),
+        staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(Lang.default)),
       }),
       futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
         const filteredByLevel = (level: ChampionLevel): List<ChampionKey> =>
