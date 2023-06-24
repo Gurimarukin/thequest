@@ -32,7 +32,11 @@ export function HighlightLink<A>({
         ref={ref}
         {...props}
         disabled={matches}
-        className={cx('flex py-3', ['border-b border-goldenrod-bis', matches], className)}
+        className={cx(
+          'flex border-b py-3',
+          matches ? 'border-goldenrod-bis' : 'border-transparent',
+          className,
+        )}
       />
       {tooltip !== undefined ? <Tooltip hoverRef={ref}>{tooltip}</Tooltip> : null}
     </>

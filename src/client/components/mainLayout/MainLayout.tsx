@@ -68,7 +68,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 parser={appParsers.aram}
                 tooltip="ARAM — équilibrages spécifiques"
               >
-                <HowlingAbyssSimple className="h-5" />
+                <HowlingAbyssSimple className="w-5" />
               </HighlightLink>
 
               <HighlightLink
@@ -76,7 +76,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 parser={appParsers.factions}
                 tooltip="Factions — défis “Globe-trotteur”"
               >
-                <TeamworkChallenges className="h-5" />
+                <TeamworkChallenges className="w-5" />
               </HighlightLink>
             </div>
           </div>
