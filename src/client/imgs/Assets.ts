@@ -96,6 +96,7 @@ export const Assets = {
   chest: new URL('./chest.png', import.meta.url).toString(),
   divisions,
   factions,
+  globetrotter: new URL('./globetrotter.png', import.meta.url).toString(),
   masteries,
   positions,
   runeterra: new URL('./runeterra.webp', import.meta.url).toString(),
