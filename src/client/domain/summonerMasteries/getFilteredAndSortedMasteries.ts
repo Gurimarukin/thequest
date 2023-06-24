@@ -4,7 +4,7 @@ import type { Predicate } from 'fp-ts/Predicate'
 import { flow, identity, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 
-import { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
+import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
@@ -13,6 +13,7 @@ import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
+import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
 type CategoryOrHidden = ChampionAramCategory | 'hidden'
@@ -49,7 +50,7 @@ export const getFilteredAndSortedMasteries = (
       (m): EnrichedChampionMastery =>
         pipe(m, filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true)),
     ),
-    query.view === 'aram' ? sortAram(isHidden, ords) : List.sortBy(ords),
+    getSort(isHidden, query.view)(ords),
   )
 
   return {
@@ -79,8 +80,28 @@ export const getFilteredAndSortedMasteries = (
   }
 }
 
+const getSort = (
+  isHidden: (c: EnrichedChampionMastery) => boolean,
+  view: MasteriesQueryView,
+): ((
+  ords: List<Ord<EnrichedChampionMastery>>,
+) => (as: List<EnrichedChampionMastery>) => List<EnrichedChampionMastery>) => {
+  switch (view) {
+    case 'compact':
+    case 'histogram':
+      return List.sortBy
+
+    case 'aram':
+      return sortAram(isHidden)
+
+    case 'factions':
+      return sortFactions
+  }
+}
+
 const sortAram =
-  (isHidden: (c: EnrichedChampionMastery) => boolean, ords: List<Ord<EnrichedChampionMastery>>) =>
+  (isHidden: (c: EnrichedChampionMastery) => boolean) =>
+  (ords: List<Ord<EnrichedChampionMastery>>) =>
   (as: List<EnrichedChampionMastery>): List<EnrichedChampionMastery> => {
     const grouped = pipe(
       as,
@@ -94,6 +115,15 @@ const sortAram =
       List.concat(grouped.hidden ?? []),
     )
   }
+
+const sortFactions =
+  (ords: List<Ord<EnrichedChampionMastery>>) =>
+  (as: List<EnrichedChampionMastery>): List<EnrichedChampionMastery> =>
+    // const grouped = pipe(
+    //   as,
+    //   List.groupBy()
+    // )
+    List.sortBy(ords)(as)
 
 type HideInsteadOfGlow = {
   hideInsteadOfGlow: boolean
@@ -142,13 +172,15 @@ const levelFilterPredicate =
     readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
 
 const factionFilterPredicate =
-  (factions: ReadonlySet<ChampionFaction>): Predicate<EnrichedChampionMastery> =>
+  (factions: ReadonlySet<ChampionFactionOrNone>): Predicate<EnrichedChampionMastery> =>
   c =>
-    readonlySet.size(factions) === ChampionFaction.values.length ||
-    pipe(
-      c.factions,
-      List.some(faction => readonlySet.elem(ChampionFaction.Eq)(faction, factions)),
-    )
+    readonlySet.size(factions) === ChampionFactionOrNone.values.length ||
+    List.isNonEmpty(c.factions)
+      ? pipe(
+          c.factions,
+          List.some(faction => readonlySet.elem(ChampionFactionOrNone.Eq)(faction, factions)),
+        )
+      : readonlySet.elem(ChampionFactionOrNone.Eq)('none', factions)
 
 const positionFilterPredicate =
   (positions: ReadonlySet<ChampionPosition>): Predicate<EnrichedChampionMastery> =>

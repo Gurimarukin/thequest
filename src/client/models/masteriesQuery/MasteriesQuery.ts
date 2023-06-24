@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
 import type { MyPartial } from '../../../shared/models/MyPartial'
-import { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
+import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { Dict, List, Maybe } from '../../../shared/utils/fp'
@@ -18,7 +18,7 @@ type MasteriesQuery = {
   order: MasteriesQueryOrder
   view: MasteriesQueryView
   level: ReadonlySet<ChampionLevelOrZero>
-  faction: ReadonlySet<ChampionFaction>
+  faction: ReadonlySet<ChampionFactionOrNone>
   position: ReadonlySet<ChampionPosition>
   search: Maybe<string>
 }
@@ -34,8 +34,8 @@ const levelEq = readonlySet.getEq(ChampionLevelOrZero.Eq)
 const positionDefault: ReadonlySet<ChampionPosition> = new Set(ChampionPosition.values)
 const positionEq = readonlySet.getEq(ChampionPosition.Eq)
 
-const factionDefault: ReadonlySet<ChampionFaction> = new Set(ChampionFaction.values)
-const factionEq = readonlySet.getEq(ChampionFaction.Eq)
+const factionDefault: ReadonlySet<ChampionFactionOrNone> = new Set(ChampionFactionOrNone.values)
+const factionEq = readonlySet.getEq(ChampionFactionOrNone.Eq)
 
 const fromPartial = (partial: PartialMasteriesQuery): MasteriesQuery => ({
   sort: partial.sort ?? MasteriesQuerySort.default,

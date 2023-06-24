@@ -37,4 +37,10 @@ const label: Dict<ChampionFaction, string> = {
 
 const ChampionFaction = { ...e, label }
 
-export { ChampionFaction }
+type ChampionFactionOrNone = typeof eOrNone.T
+
+const eOrNone = createEnum(...e.values, 'none')
+
+const ChampionFactionOrNone = eOrNone
+
+export { ChampionFaction, ChampionFactionOrNone }

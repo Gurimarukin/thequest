@@ -7,7 +7,10 @@ import { lens } from 'monocle-ts'
 import type React from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { ChampionFaction } from '../../../../shared/models/api/champion/ChampionFaction'
+import {
+  ChampionFaction,
+  ChampionFactionOrNone,
+} from '../../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
 import type { NonEmptyArray } from '../../../../shared/utils/fp'
@@ -71,7 +74,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
   )
 
   const toggleFactionChecked = useCallback(
-    (f: Endomorphism<ReadonlySet<ChampionFaction>>): void =>
+    (f: Endomorphism<ReadonlySet<ChampionFactionOrNone>>): void =>
       updateMasteriesQuery(pipe(MasteriesQuery.Lens.faction, lens.modify(f))),
     [updateMasteriesQuery],
   )
@@ -222,20 +225,30 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           </ul>
         </div>
 
-        <Checkboxes<ChampionFaction>
-          eq={ChampionFaction.Eq}
+        <Checkboxes<ChampionFactionOrNone>
+          eq={ChampionFactionOrNone.Eq}
           values={pipe(
-            ChampionFaction.values,
+            ChampionFactionOrNone.values,
             List.map(faction => ({
               key: faction,
               value: faction,
-              icon: isChecked => (
-                <ChampionFactionImg
-                  faction={faction}
-                  className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
-                />
-              ),
-              label: ChampionFaction.label[faction],
+              icon: isChecked =>
+                faction === 'none' ? (
+                  <span
+                    className={cx(
+                      '-mt-0.5 w-6 text-center text-lg',
+                      isChecked ? 'text-black' : 'text-wheat-bis',
+                    )}
+                  >
+                    ∅
+                  </span>
+                ) : (
+                  <ChampionFactionImg
+                    faction={faction}
+                    className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
+                  />
+                ),
+              label: faction === 'none' ? 'Sans faction' : ChampionFaction.label[faction],
             })),
           )}
           checked={masteriesQuery.faction}
