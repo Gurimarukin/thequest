@@ -53,29 +53,28 @@ export const getFilteredAndSortedMasteries = (
 
   const ords = getSortBy(query.sort, query.order)
 
-  const filteredAndSortedMasteries_ = pipe(
+  const filteredMasteries = pipe(
     masteries,
     List.map(
       (m): EnrichedChampionMastery =>
         pipe(m, filterPredicate(m) ? identity : EnrichedChampionMastery.Lens.isHidden.set(true)),
     ),
-    getSort(isHidden, query.view)(ords),
   )
 
   return {
-    filteredAndSortedMasteries: filteredAndSortedMasteries_,
+    filteredAndSortedMasteries: pipe(filteredMasteries, getSort(isHidden, query.view)(ords)),
     championsCount: pipe(
-      filteredAndSortedMasteries_,
+      filteredMasteries,
       List.filter(c => !c.isHidden),
       List.size,
     ),
     searchCount: pipe(
-      filteredAndSortedMasteries_,
+      filteredMasteries,
       List.filter(c => c.glow),
       List.size,
     ),
     maybeMaxPoints: pipe(
-      filteredAndSortedMasteries_,
+      filteredMasteries,
       NonEmptyArray.fromReadonlyArray,
       Maybe.map(
         flow(
