@@ -41,8 +41,6 @@ const cleanUTF8ToASCII = (str: string): string =>
 const whiteSpaces = /\s+/g
 const cleanWhitespaces = (str: string): string => str.replace(whiteSpaces, ' ')
 
-const cleanSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
-
 const nonAZ = /[^a-z]/g
 const cleanChampionName = (name: string): string =>
   StringUtils.cleanUTF8ToASCII(name).toLowerCase().replaceAll(nonAZ, '')
@@ -92,7 +90,6 @@ export const StringUtils = {
   stripMargins,
   pad10,
   cleanUTF8ToASCII,
-  cleanSummonerName,
   cleanChampionName,
   cleanHtml,
   plural,

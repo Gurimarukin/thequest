@@ -44,7 +44,7 @@ import {
 } from './ActiveGameParticipant'
 import { useShouldWrap } from './useShouldWrap'
 
-const { cleanSummonerName, pad10 } = StringUtils
+const { pad10 } = StringUtils
 
 const reloadInterval = MsDuration.seconds(10)
 const timerInterval = MsDuration.second(1)
@@ -58,7 +58,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWRHttp(
-    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
+    apiRoutes.summoner.byName(platform, summonerName).activeGame.get,
     {},
     [Maybe.decoder(SummonerActiveGameView.codec), 'Maybe<SummonerActiveGameView>'],
     {

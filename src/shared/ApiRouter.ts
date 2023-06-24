@@ -44,6 +44,7 @@ const summonerByPuuidMasteriesGet = m(
   'get',
 )
 const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get')
+const summonerByNameChallengesGet = m(summonerByName.then(lit('challenges')), 'get')
 const summonerByNameActiveGameGet = m(summonerByName.then(lit('active-game')), 'get')
 const userSelfGet = m(userSelf, 'get')
 const userSelfFavoritesPut = m(userSelfFavorites, 'put')
@@ -83,6 +84,7 @@ export const apiParsers = {
     byPuuid: { masteries: { get: p(summonerByPuuidMasteriesGet) } },
     byName: {
       masteries: { get: p(summonerByNameMasteriesGet) },
+      challenges: { get: p(summonerByNameChallengesGet) },
       activeGame: { get: p(summonerByNameActiveGameGet) },
     },
   },
@@ -132,10 +134,14 @@ export const apiRoutes = {
         get: r(summonerByPuuidMasteriesGet, { platform, puuid }),
       },
     }),
-    byName: (platform: Platform, summonerName: string) => ({
-      masteries: { get: r(summonerByNameMasteriesGet, { platform, summonerName }) },
-      activeGame: { get: r(summonerByNameActiveGameGet, { platform, summonerName }) },
-    }),
+    byName: (platform: Platform, summonerName_: string) => {
+      const summonerName = cleanSummonerName(summonerName_)
+      return {
+        masteries: { get: r(summonerByNameMasteriesGet, { platform, summonerName }) },
+        challenges: { get: r(summonerByNameChallengesGet, { platform, summonerName }) },
+        activeGame: { get: r(summonerByNameActiveGameGet, { platform, summonerName }) },
+      }
+    },
   },
   user: {
     self: {
@@ -144,11 +150,14 @@ export const apiRoutes = {
         put: r(userSelfFavoritesPut, {}),
         delete: r(userSelfFavoritesDelete, {}),
       },
-      summoner: (platform: Platform, summonerName: string) => ({
-        championsShardsCount: {
-          post: r(userSelfSummonerChampionsShardsCountPost, { platform, summonerName }),
-        },
-      }),
+      summoner: (platform: Platform, summonerName_: string) => {
+        const summonerName = cleanSummonerName(summonerName_)
+        return {
+          championsShardsCount: {
+            post: r(userSelfSummonerChampionsShardsCountPost, { platform, summonerName }),
+          },
+        }
+      },
     },
     login: {
       discord: { post: r(userLoginDiscordPost, {}) },
@@ -165,6 +174,9 @@ export const apiRoutes = {
 /**
  * Helpers
  */
+
+const whiteSpaces = /\s+/g
+const cleanSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 type WithMethod<A> = Tuple<A, Method>
 type MatchWithMethod<A> = WithMethod<Match<A>>

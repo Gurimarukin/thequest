@@ -13,6 +13,7 @@ import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
+import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
@@ -47,6 +48,7 @@ import type { TokenContent } from '../models/user/TokenContent'
 import type { WikiaChampionData } from '../models/wikia/WikiaChampionData'
 import { WikiaChampionPosition } from '../models/wikia/WikiaChampionPosition'
 import type { ActiveGameService } from '../services/ActiveGameService'
+import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
@@ -65,6 +67,7 @@ type SummonerController = ReturnType<typeof SummonerController>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (
   activeGameService: ActiveGameService,
+  challengesService: ChallengesService,
   leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
   summonerService: SummonerService,
@@ -85,6 +88,20 @@ const SummonerController = (
           findMasteries(platform, maybeUser),
         ),
 
+    challenges: (platform: Platform, summonerName: string): EndedMiddleware =>
+      pipe(
+        summonerService.findByName(platform, summonerName),
+        Future.map(Either.fromOption(() => 'Summoner not found')),
+        futureEither.chain(summoner =>
+          pipe(
+            challengesService.findBySummoner(summoner.platform, summoner.puuid),
+            Future.map(Either.fromOption(() => 'Challenges not found')),
+          ),
+        ),
+        M.fromTaskEither,
+        M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(ChallengesView.codec))),
+      ),
+
     activeGame:
       (platform: Platform, summonerName: string) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
@@ -92,7 +109,7 @@ const SummonerController = (
           summonerService.findByName(platform, summonerName),
           Future.map(Either.fromOption(() => 'Summoner not found')),
           futureEither.chain(summoner =>
-            pipe(activeGame(platform, summoner, maybeUser), Future.map(Either.right)),
+            pipe(activeGame(summoner, maybeUser), Future.map(Either.right)),
           ),
           M.fromTaskEither,
           M.ichain(
@@ -195,12 +212,11 @@ const SummonerController = (
   }
 
   function activeGame(
-    platform: Platform,
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
   ): Future<Maybe<SummonerActiveGameView>> {
     return pipe(
-      activeGameService.findBySummoner(platform, summoner.id),
+      activeGameService.findBySummoner(summoner.platform, summoner.id),
       futureMaybe.bindTo('game'),
       futureMaybe.bind('champions', () =>
         pipe(staticDataService.wikiaChampions, futureMaybe.fromTaskEither),
@@ -210,7 +226,7 @@ const SummonerController = (
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(
-              enrichParticipant(platform, maybeUser, game.insertedAt),
+              enrichParticipant(summoner.platform, maybeUser, game.insertedAt),
             ),
           ),
           Future.map<

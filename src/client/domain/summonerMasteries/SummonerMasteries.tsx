@@ -46,8 +46,9 @@ import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
 import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
+import { useChallenges } from './useChallenges'
 
-const { cleanSummonerName, cleanChampionName } = StringUtils
+const { cleanChampionName } = StringUtils
 
 // should mutate data before API response
 type OptimisticMutation = {
@@ -64,12 +65,12 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
-    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).masteries.get,
-    methodWithUrl =>
+    apiRoutes.summoner.byName(platform, summonerName).masteries.get,
+    urlWithMethod =>
       pipe(
         historyStateRef.current.summonerMasteries,
         Maybe.fold(
-          () => http(methodWithUrl, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
+          () => http(urlWithMethod, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
           flow(
             Future.successful,
             Future.chainFirstIOK(
@@ -187,6 +188,8 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   const { addRecentSearch } = useUser()
   const { champions } = useStaticData()
 
+  const challenges = useChallenges(platform, summoner.name)
+
   useEffect(
     () =>
       addRecentSearch({
@@ -269,7 +272,11 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
         )}
       >
         <Summoner summoner={{ ...summoner, ...enrichedSummoner }} leagues={leagues} />
-        <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
+        <Masteries
+          challenges={challenges}
+          masteries={enrichedMasteries}
+          setChampionShards={setChampionShards}
+        />
       </div>
       {pipe(
         notifications,

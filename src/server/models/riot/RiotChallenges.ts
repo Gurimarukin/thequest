@@ -1,7 +1,8 @@
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
-import { List } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
 import { ChallengeId } from './ChallengId'
@@ -28,9 +29,18 @@ const decoder = D.struct({
     D.struct({
       challengeId: ChallengeId.codec,
       percentile: D.number,
-      level: LeagueTier.decoder,
+      level: pipe(
+        LeagueTier.decoder,
+        D.map(Maybe.some),
+        D.alt(() =>
+          pipe(
+            D.literal('NONE'),
+            D.map((): Maybe<LeagueTier> => Maybe.none),
+          ),
+        ),
+      ),
       value: D.number,
-      achievedTime: DayJsFromNumber.decoder,
+      achievedTime: Maybe.decoder(DayJsFromNumber.decoder),
     }),
   ),
   // preferences: D.struct({

@@ -9,8 +9,7 @@ import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { StaticDataChampion } from '../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
-import { NonEmptyArray } from '../../shared/utils/fp'
-import { List, Maybe, PartialDict } from '../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray, PartialDict } from '../../shared/utils/fp'
 
 import { ChampionFactionTitle } from '../components/ChampionFactionTitle'
 import { CroppedChampionSquare } from '../components/CroppedChampionSquare'
@@ -114,7 +113,11 @@ export const Factions: React.FC = () => {
                   maybePrev,
                   Maybe.exists(prev => ChampionFactionOrNone.Eq.equals(prev.faction, c.faction)),
                 ) ? (
-                  <ChampionFactionTitle faction={c.faction} className="pt-3" />
+                  <ChampionFactionTitle
+                    challenges={Maybe.none}
+                    faction={c.faction}
+                    className="pt-3"
+                  />
                 ) : null}
                 <Champion champion={c} />
               </Fragment>

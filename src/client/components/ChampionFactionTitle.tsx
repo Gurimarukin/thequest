@@ -1,20 +1,28 @@
+import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
+import type { SWRResponse } from 'swr'
 
+import { ChallengeView } from '../../shared/models/api/challenges/ChallengeView'
+import type { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import { ChampionFactionOrNone } from '../../shared/models/api/champion/ChampionFaction'
 import type { Dict } from '../../shared/utils/fp'
+import { Maybe } from '../../shared/utils/fp'
 
 import { InformationCircleOutline } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
 import { ChampionFactionImg } from './ChampionFactionImg'
+import { Loading } from './Loading'
 import { Tooltip } from './tooltip/Tooltip'
 
 type ChampionFactionTitleProps = {
+  challenges: Maybe<SWRResponse<ChallengesView, unknown>>
   faction: ChampionFactionOrNone
   className?: string
 }
 
 export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
+  challenges,
   faction,
   className,
 }) => {
@@ -37,6 +45,23 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
             >
               Défi : <i>{tooltip[faction]}</i>
             </Tooltip>
+
+            {pipe(
+              challenges,
+              Maybe.fold(
+                () => null,
+                ({ data, error }) =>
+                  error !== undefined ? (
+                    <pre>error</pre>
+                  ) : data === undefined ? (
+                    <Loading className="h-4" />
+                  ) : (
+                    <pre>
+                      {JSON.stringify(Maybe.codec(ChallengeView.codec).encode(data[faction]))}
+                    </pre>
+                  ),
+              ),
+            )}
           </>
         ) : null}
       </h2>

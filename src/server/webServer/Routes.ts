@@ -37,6 +37,9 @@ export const Routes = (
     m(api.summoner.byName.masteries.get, ({ platform, summonerName }) =>
       maybeWithAuth(summonerController.masteriesByName(platform, summonerName)),
     ),
+    m(api.summoner.byName.challenges.get, ({ platform, summonerName }) =>
+      summonerController.challenges(platform, summonerName),
+    ),
     m(api.summoner.byName.activeGame.get, ({ platform, summonerName }) =>
       maybeWithAuth(summonerController.activeGame(platform, summonerName)),
     ),

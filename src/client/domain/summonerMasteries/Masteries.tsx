@@ -3,7 +3,9 @@
 import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
+import type { SWRResponse } from 'swr'
 
+import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
@@ -31,11 +33,12 @@ import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 const { plural } = StringUtils
 
 type Props = {
+  challenges: SWRResponse<ChallengesView, unknown>
   masteries: List<EnrichedChampionMastery>
   setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => {
+export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionShards }) => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -79,6 +82,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
           ListUtils.mapWithPrevious((maybePrev, champion) => (
             <Champion
               key={`${champion.faction}${ChampionKey.unwrap(champion.championId)}`}
+              challenges={challenges}
               maybeMaxPoints={maybeMaxPoints}
               isGlowing={!hideInsteadOfGlow && champion.glow}
               isHidden={isHidden(champion)}
@@ -104,6 +108,7 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
 }
 
 type ChampionProps = {
+  challenges: SWRResponse<ChallengesView, unknown>
   maybeMaxPoints: Maybe<number>
   isGlowing: boolean
   isHidden: boolean
@@ -113,6 +118,7 @@ type ChampionProps = {
 }
 
 const Champion: React.FC<ChampionProps> = ({
+  challenges,
   maybeMaxPoints,
   isGlowing,
   isHidden,
@@ -153,6 +159,7 @@ const Champion: React.FC<ChampionProps> = ({
         Maybe.exists(prev => ChampionFactionOrNone.Eq.equals(prev.faction, champion.faction)),
       ) ? (
         <ChampionFactionTitle
+          challenges={Maybe.some(challenges)}
           faction={champion.faction}
           className={cx(['pt-2', Maybe.isSome(maybePrev)])}
         />

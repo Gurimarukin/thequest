@@ -66,6 +66,7 @@ export type RiotApiCacheTtlConfig = {
   ddragonLatestVersion: MsDuration
   activeGame: MsDuration
   activeGameLoading: MsDuration // If the game is loading, cache it less longer
+  challenges: MsDuration
   leagueEntries: MsDuration
   masteries: MsDuration
   summoner: MsDuration
@@ -136,6 +137,7 @@ const riotApiCacheTtl = (infiniteCache: boolean): RiotApiCacheTtlConfig => {
 
     activeGame: infiniteCache ? infinity : MsDuration.minutes(3),
     activeGameLoading: infiniteCache ? infinity : MsDuration.seconds(5),
+    challenges: infiniteCache ? infinity : MsDuration.seconds(3),
     leagueEntries: infiniteCache ? infinity : MsDuration.minutes(3),
     masteries: infiniteCache ? infinity : MsDuration.minutes(3),
     summoner: infiniteCache ? infinity : MsDuration.minutes(9),

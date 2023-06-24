@@ -124,13 +124,14 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
           },
 
           challengesV1: {
-            playerData: (puuid: Puuid): Future<RiotChallenges> =>
+            playerData: (puuid: Puuid): Future<Maybe<RiotChallenges>> =>
               pipe(
                 httpClient.http(
                   [platformUrl(platform, `/lol/challenges/v1/player-data/${puuid}`), 'get'],
                   { headers: { [xRiotToken]: lolKey } },
                   [RiotChallenges.decoder, 'RiotChallenges'],
                 ),
+                statusesToOption(404),
               ),
           },
 
