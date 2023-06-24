@@ -102,47 +102,20 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
     riotgames: {
       platform: (platform: Platform) => ({
         lol: {
-          summonerV4: {
-            summoners: {
-              byName: (summonerName: string): Future<Maybe<RiotSummoner>> =>
+          championMasteryV4: {
+            championMasteries: {
+              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
                 pipe(
                   httpClient.http(
                     [
-                      platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`),
+                      platformUrl(
+                        platform,
+                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
+                      ),
                       'get',
                     ],
                     { headers: { [xRiotToken]: lolKey } },
-                    [RiotSummoner.decoder, 'RiotSummoner'],
-                  ),
-                  statusesToOption(404),
-                ),
-
-              byPuuid: (
-                puuid: Puuid,
-                { useAccountApiKey }: UseAccountApiKey = { useAccountApiKey: false },
-              ): Future<Maybe<RiotSummoner>> =>
-                pipe(
-                  httpClient.http(
-                    [platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${puuid}`), 'get'],
-                    {
-                      headers: { [xRiotToken]: useAccountApiKey ? accountKey : lolKey },
-                    },
-                    [RiotSummoner.decoder, 'RiotSummoner'],
-                  ),
-                  statusesToOption(404),
-                ),
-
-              /**
-               * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
-               * @deprecated
-               */
-              // eslint-disable-next-line deprecation/deprecation
-              byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
-                pipe(
-                  httpClient.http(
-                    [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [RiotSummoner.decoder, 'RiotSummoner'],
+                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
                   ),
                   statusesToOption(404),
                 ),
@@ -160,26 +133,6 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                     ],
                     { headers: { [xRiotToken]: lolKey } },
                     [List.decoder(RiotLeagueEntry.decoder), 'List<RiotLeagueEntry>'],
-                  ),
-                  statusesToOption(404),
-                ),
-            },
-          },
-
-          championMasteryV4: {
-            championMasteries: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
-                pipe(
-                  httpClient.http(
-                    [
-                      platformUrl(
-                        platform,
-                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
-                      ),
-                      'get',
-                    ],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
                   ),
                   statusesToOption(404),
                 ),
@@ -207,6 +160,53 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                       statusesToOption(404),
                     ),
                   ),
+                ),
+            },
+          },
+
+          summonerV4: {
+            summoners: {
+              /**
+               * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
+               * @deprecated
+               */
+              // eslint-disable-next-line deprecation/deprecation
+              byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
+                pipe(
+                  httpClient.http(
+                    [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
+                ),
+
+              byName: (summonerName: string): Future<Maybe<RiotSummoner>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
+                ),
+
+              byPuuid: (
+                puuid: Puuid,
+                { useAccountApiKey }: UseAccountApiKey = { useAccountApiKey: false },
+              ): Future<Maybe<RiotSummoner>> =>
+                pipe(
+                  httpClient.http(
+                    [platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${puuid}`), 'get'],
+                    {
+                      headers: { [xRiotToken]: useAccountApiKey ? accountKey : lolKey },
+                    },
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
                 ),
             },
           },
