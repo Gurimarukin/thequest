@@ -17,6 +17,7 @@ const e = createEnum(
   'Shurima',
   'Targon',
   'Void',
+  'Zaun',
 )
 
 const faction: Dict<WikiaChampionFaction, ChampionFaction> = {
@@ -32,6 +33,7 @@ const faction: Dict<WikiaChampionFaction, ChampionFaction> = {
   Shurima: 'shurima',
   Targon: 'targon',
   Void: 'void',
+  Zaun: 'zaun',
 }
 
 const WikiaChampionFaction = { ...e, faction }
