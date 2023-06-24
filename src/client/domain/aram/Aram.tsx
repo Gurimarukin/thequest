@@ -1,11 +1,9 @@
 /* eslint-disable functional/no-return-void */
-import { ord, string } from 'fp-ts'
-import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import { Fragment, useMemo, useRef } from 'react'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
+import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
@@ -20,7 +18,7 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
-import { AramQuery } from '../../models/aramQuery/AramQuery'
+import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
 import './Aram.css'
 
@@ -31,53 +29,53 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
   category: ChampionAramCategory
 }
 
-const ordByName: Ord<EnrichedStaticDataChampion> = pipe(
-  string.Ord,
-  ord.contramap((c: EnrichedStaticDataChampion) => StringUtils.cleanUTF8ToASCII(c.name)),
-)
+type CategoryOrHidden = ChampionAramCategory | 'hidden'
 
 export const Aram: React.FC = () => {
-  const { aramQuery, updateAramQuery } = useHistory()
+  const { genericQuery, updateGenericQuery } = useHistory()
   const { champions } = useStaticData()
 
   const { filteredAndSortedChampions, searchCount } = useMemo(() => {
-    const grouped = pipe(
+    const sortedChampions = pipe(
       champions,
       List.map(
         (c): EnrichedStaticDataChampion => ({
           ...c,
           isHidden: !pipe(
-            aramQuery.search,
+            genericQuery.search,
             Maybe.every(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
           ),
           category: ChampionAramCategory.fromAramData(c.aram),
         }),
       ),
-      List.sort(ordByName),
-      List.groupBy((a): ChampionAramCategory | 'hidden' => (a.isHidden ? 'hidden' : a.category)),
+      List.sort(StaticDataChampion.Ord.byName),
     )
 
-    const filteredAndSortedChampions_ = pipe(
-      ChampionAramCategory.values,
-      List.reduce(List.empty<EnrichedStaticDataChampion>(), (acc, category) =>
-        pipe(acc, List.concat(grouped[category] ?? [])),
-      ),
-      List.concat(grouped.hidden ?? []),
+    const grouped = pipe(
+      sortedChampions,
+      List.groupBy((a): CategoryOrHidden => (a.isHidden ? 'hidden' : a.category)),
     )
 
     return {
-      filteredAndSortedChampions: filteredAndSortedChampions_,
+      filteredAndSortedChampions: pipe(
+        ChampionAramCategory.values,
+        List.reduce(List.empty<EnrichedStaticDataChampion>(), (acc, category) =>
+          pipe(acc, List.concat(grouped[category] ?? [])),
+        ),
+        List.concat(grouped.hidden ?? []),
+      ),
       searchCount: pipe(
-        filteredAndSortedChampions_,
+        sortedChampions,
         List.filter(c => !c.isHidden),
         List.size,
       ),
     }
-  }, [aramQuery.search, champions])
+  }, [champions, genericQuery.search])
 
   const onSearchChange = useMemo(
-    (): ((search_: Maybe<string>) => void) => flow(AramQuery.Lens.search.set, updateAramQuery),
-    [updateAramQuery],
+    (): ((search_: Maybe<string>) => void) =>
+      flow(GenericQuery.Lens.search.set, updateGenericQuery),
+    [updateGenericQuery],
   )
 
   return (
@@ -85,7 +83,7 @@ export const Aram: React.FC = () => {
       <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
-          initialSearch={aramQuery.search}
+          initialSearch={genericQuery.search}
           onChange={onSearchChange}
           className="self-center"
         />

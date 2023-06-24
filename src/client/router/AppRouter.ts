@@ -6,7 +6,7 @@ import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
 
-import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
+import { PartialGenericQuery } from '../models/genericQuery/PartialGenericQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
 
 const { codec } = RouterUtils
@@ -24,6 +24,7 @@ const platformSummonerNameMatch = codec('platform', Platform.orLowerCaseCodec).t
 )
 const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
 const aramMatch = lit('aram')
+const factionsMatch = lit('factions')
 const loginMatch = lit('login')
 const registerMatch = lit('register')
 const discordRedirectMatch = lit('discordRedirect')
@@ -57,6 +58,7 @@ export const appParsers = {
   platformSummonerName,
   platformSummonerNameGame,
   aram: p(aramMatch),
+  factions: p(factionsMatch),
   login: p(loginMatch),
   register: p(registerMatch),
   discordRedirect: p(discordRedirectMatch),
@@ -86,8 +88,10 @@ export const appRoutes = {
     ),
   platformSummonerNameGame: (platform: Platform, summonerName: string) =>
     format(platformSummonerNameGameMatch.formatter, { platform, summonerName }),
-  aram: (query: PartialAramQuery) =>
-    withQuery(format(aramMatch.formatter, {}), PartialAramQuery, query),
+  aram: (query: PartialGenericQuery) =>
+    withQuery(format(aramMatch.formatter, {}), PartialGenericQuery, query),
+  factions: (query: PartialGenericQuery) =>
+    withQuery(format(factionsMatch.formatter, {}), PartialGenericQuery, query),
   login: format(loginMatch.formatter, {}),
   register: format(registerMatch.formatter, {}),
 }

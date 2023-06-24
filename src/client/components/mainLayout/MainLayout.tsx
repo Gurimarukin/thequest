@@ -5,6 +5,7 @@ import { Maybe } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
+import { TeamworkChallenges } from '../../imgs/svgIcons'
 import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
@@ -68,6 +69,14 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 tooltip="ARAM — équilibrages spécifiques"
               >
                 <HowlingAbyssSimple className="h-5" />
+              </HighlightLink>
+
+              <HighlightLink
+                to={appRoutes.factions({})}
+                parser={appParsers.factions}
+                tooltip="Factions — défis “Globe-trotteur”"
+              >
+                <TeamworkChallenges className="h-5" />
               </HighlightLink>
             </div>
           </div>

@@ -12,7 +12,7 @@ import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMas
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import type { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
+import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
@@ -40,7 +40,7 @@ import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
-import { EnrichedChampionMastery } from './EnrichedChampionMastery'
+import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
 import { ShardsToRemoveModal } from './ShardsToRemoveModal'
@@ -326,7 +326,7 @@ const enrichAll = (
         Maybe.exists(search => cleanChampionName(name).includes(cleanChampionName(search))),
       )
       const category = ChampionAramCategory.fromAramData(aram)
-      const faction = EnrichedChampionMastery.getFaction(factions)
+      const faction = StaticDataChampion.getFaction(factions)
       const isHidden = false
 
       return pipe(

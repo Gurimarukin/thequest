@@ -1,6 +1,6 @@
 import { number, ord, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
 import type { AramData } from '../../../shared/models/api/AramData'
@@ -12,7 +12,7 @@ import type {
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List } from '../../../shared/utils/fp'
+import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
@@ -30,11 +30,6 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   faction: ChampionFactionOrNone
   isHidden: boolean
 }
-
-const getFaction: (factions: List<ChampionFaction>) => ChampionFactionOrNone = flow(
-  List.head,
-  Maybe.getOrElse<ChampionFactionOrNone>(() => 'none'),
-)
 
 const byPercents: Ord<EnrichedChampionMastery> = pipe(
   number.Ord,
@@ -62,7 +57,6 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
 )
 
 const EnrichedChampionMastery = {
-  getFaction,
   Ord: { byPercents, byPoints, byShards, byName },
   Lens: {
     shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),

@@ -7,6 +7,7 @@ import { optional } from 'monocle-ts'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
@@ -142,7 +143,7 @@ const sortFactions =
             pipe(
               c,
               EnrichedChampionMastery.Lens.faction.set(
-                faction === 'hidden' ? EnrichedChampionMastery.getFaction(c.factions) : faction,
+                faction === 'hidden' ? StaticDataChampion.getFaction(c.factions) : faction,
               ),
             ),
           ),

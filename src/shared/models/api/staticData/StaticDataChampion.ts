@@ -1,9 +1,13 @@
-import { pipe } from 'fp-ts/function'
+import { ord, string } from 'fp-ts'
+import type { Ord } from 'fp-ts/Ord'
+import { flow, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { lens } from 'monocle-ts'
 
-import { List } from '../../../utils/fp'
+import { StringUtils } from '../../../utils/StringUtils'
+import { List, Maybe } from '../../../utils/fp'
 import { AramData } from '../AramData'
+import type { ChampionFactionOrNone } from '../champion/ChampionFaction'
 import { ChampionFaction } from '../champion/ChampionFaction'
 import { ChampionId } from '../champion/ChampionId'
 import { ChampionKey } from '../champion/ChampionKey'
@@ -20,10 +24,20 @@ const codec = C.struct({
   aram: AramData.codec,
 })
 
+const getFaction: (factions: List<ChampionFaction>) => ChampionFactionOrNone = flow(
+  List.head,
+  Maybe.getOrElse<ChampionFactionOrNone>(() => 'none'),
+)
+
+const byName: Ord<StaticDataChampion> = pipe(
+  string.Ord,
+  ord.contramap((c: StaticDataChampion) => StringUtils.cleanUTF8ToASCII(c.name)),
+)
+
 const Lens = {
   aramSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('aram'), lens.prop('spells')),
 }
 
-const StaticDataChampion = { codec, Lens }
+const StaticDataChampion = { codec, getFaction, Ord: { byName }, Lens }
 
 export { StaticDataChampion }

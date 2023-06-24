@@ -4,18 +4,18 @@ import { lens } from 'monocle-ts'
 import type { MyPartial } from '../../../shared/models/MyPartial'
 import { Dict, Maybe } from '../../../shared/utils/fp'
 
-import type { PartialAramQuery } from './PartialAramQuery'
+import type { PartialGenericQuery } from './PartialGenericQuery'
 
-type AramQuery = {
+type GenericQuery = {
   search: Maybe<string>
 }
 
-const fromPartial = (partial: PartialAramQuery): AramQuery => ({
+const fromPartial = (partial: PartialGenericQuery): GenericQuery => ({
   search: Maybe.fromNullable(partial.search),
 })
 
-const toPartial = (query: AramQuery): PartialAramQuery => {
-  const res: MyPartial<PartialAramQuery> = {
+const toPartial = (query: GenericQuery): PartialGenericQuery => {
+  const res: MyPartial<PartialGenericQuery> = {
     search: Maybe.toUndefined(query.search),
   }
   return pipe(
@@ -25,9 +25,9 @@ const toPartial = (query: AramQuery): PartialAramQuery => {
 }
 
 const Lens = {
-  search: pipe(lens.id<AramQuery>(), lens.prop('search')),
+  search: pipe(lens.id<GenericQuery>(), lens.prop('search')),
 }
 
-const AramQuery = { fromPartial, toPartial, Lens }
+const GenericQuery = { fromPartial, toPartial, Lens }
 
-export { AramQuery }
+export { GenericQuery }
