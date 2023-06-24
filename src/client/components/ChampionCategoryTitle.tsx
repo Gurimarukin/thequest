@@ -16,17 +16,24 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
   category,
   className,
 }) => {
-  const infoRef = useRef<HTMLSpanElement>(null)
+  const hoverRef = useRef<HTMLHeadingElement>(null)
+  const placementRef = useRef<HTMLSpanElement>(null)
   return (
-    <h2 className={cx('col-span-full flex w-full items-center gap-2 pb-1 text-sm', className)}>
-      <span>{label[category]}</span>
-      <span ref={infoRef}>
-        <InformationCircleOutline className="h-4" />
-      </span>
-      <Tooltip hoverRef={infoRef} className="max-w-xl !whitespace-normal break-normal py-2">
-        {tooltip[category]}
-      </Tooltip>
-    </h2>
+    <div className={cx('col-span-full flex pb-1', className)}>
+      <h2 ref={hoverRef} className="flex items-center gap-2 text-sm">
+        <span>{label[category]}</span>
+        <span ref={placementRef}>
+          <InformationCircleOutline className="h-4" />
+        </span>
+        <Tooltip
+          hoverRef={hoverRef}
+          placementRef={placementRef}
+          className="max-w-xl !whitespace-normal break-normal py-2"
+        >
+          {tooltip[category]}
+        </Tooltip>
+      </h2>
+    </div>
   )
 }
 

@@ -1,8 +1,10 @@
+import type { nonEmptyArray } from 'fp-ts'
 import { readonlyMap } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 
+import type { PartialDict } from './fp'
 import { List, Maybe, NonEmptyArray, Tuple } from './fp'
 
 const findFirstBy =
@@ -67,6 +69,28 @@ const mapWithPrevious =
     )
   }
 
+const multipleGroupBy =
+  <A, K extends string>(f: (a: A) => NonEmptyArray<K>) =>
+  (as: List<A>): PartialDict<K, NonEmptyArray<A>> => {
+    const out: Partial<Record<K, nonEmptyArray.NonEmptyArray<A>>> = {}
+    /* eslint-disable functional/no-loop-statements */
+    for (const a of as) {
+      const ks = f(a)
+      for (const k of ks) {
+        /* eslint-enable functional/no-loop-statements */
+        if (has.call(out, k)) {
+          /* eslint-disable functional/no-expression-statements */
+          ;(out[k] as nonEmptyArray.NonEmptyArray<A>).push(a)
+        } else {
+          // eslint-disable-next-line functional/immutable-data
+          out[k] = [a]
+          /* eslint-enable functional/no-expression-statements */
+        }
+      }
+    }
+    return out
+  }
+
 const updateOrAppend =
   <A>(eq: Eq<A>) =>
   (a: A) =>
@@ -93,6 +117,9 @@ export const ListUtils = {
   findFirstWithPrevious,
   groupByAsMap,
   mapWithPrevious,
+  multipleGroupBy,
   updateOrAppend,
   padEnd,
 }
+
+const has = Object.prototype.hasOwnProperty

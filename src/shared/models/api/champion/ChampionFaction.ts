@@ -41,6 +41,11 @@ type ChampionFactionOrNone = typeof eOrNone.T
 
 const eOrNone = createEnum(...e.values, 'none')
 
-const ChampionFactionOrNone = eOrNone
+const orNoneLabel: Dict<ChampionFactionOrNone, string> = {
+  ...label,
+  none: 'Sans faction',
+}
+
+const ChampionFactionOrNone = { ...eOrNone, label: orNoneLabel }
 
 export { ChampionFaction, ChampionFactionOrNone }

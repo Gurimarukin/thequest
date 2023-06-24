@@ -7,10 +7,7 @@ import { lens } from 'monocle-ts'
 import type React from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import {
-  ChampionFaction,
-  ChampionFactionOrNone,
-} from '../../../../shared/models/api/champion/ChampionFaction'
+import { ChampionFactionOrNone } from '../../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
 import type { NonEmptyArray } from '../../../../shared/utils/fp'
@@ -236,7 +233,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                 faction === 'none' ? (
                   <span
                     className={cx(
-                      '-mt-0.5 w-6 text-center text-lg',
+                      'mt-[-3px] w-6 text-center text-lg',
                       isChecked ? 'text-black' : 'text-wheat-bis',
                     )}
                   >
@@ -248,7 +245,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                     className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
                   />
                 ),
-              label: faction === 'none' ? 'Sans faction' : ChampionFaction.label[faction],
+              label: ChampionFactionOrNone.label[faction],
             })),
           )}
           checked={masteriesQuery.faction}

@@ -40,7 +40,7 @@ import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
-import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
+import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
 import { ShardsToRemoveModal } from './ShardsToRemoveModal'
@@ -325,6 +325,9 @@ const enrichAll = (
         maybeSearch,
         Maybe.exists(search => cleanChampionName(name).includes(cleanChampionName(search))),
       )
+      const category = ChampionAramCategory.fromAramData(aram)
+      const faction = EnrichedChampionMastery.getFaction(factions)
+      const isHidden = false
 
       return pipe(
         pipe(
@@ -347,8 +350,9 @@ const enrichAll = (
             positions,
             factions,
             aram,
-            category: ChampionAramCategory.fromAramData(aram),
-            isHidden: false,
+            category,
+            faction,
+            isHidden,
           }),
           champion => ({
             ...champion,
@@ -359,8 +363,9 @@ const enrichAll = (
             positions,
             factions,
             aram,
-            category: ChampionAramCategory.fromAramData(aram),
-            isHidden: false,
+            category,
+            faction,
+            isHidden,
           }),
         ),
       )

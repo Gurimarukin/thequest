@@ -4,6 +4,7 @@ import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
+import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -12,6 +13,7 @@ import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { bgGradientMastery } from '../../components/ChampionTooltip'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
@@ -76,7 +78,7 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
             <Champion
-              key={ChampionKey.unwrap(champion.championId)}
+              key={`${champion.faction}${ChampionKey.unwrap(champion.championId)}`}
               maybeMaxPoints={maybeMaxPoints}
               isGlowing={!hideInsteadOfGlow && champion.glow}
               isHidden={isHidden(champion)}
@@ -143,6 +145,19 @@ const Champion: React.FC<ChampionProps> = ({
           className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
+
+      {isFactions &&
+      !isHidden &&
+      !pipe(
+        maybePrev,
+        Maybe.exists(prev => ChampionFactionOrNone.Eq.equals(prev.faction, champion.faction)),
+      ) ? (
+        <ChampionFactionTitle
+          faction={champion.faction}
+          className={cx(['pt-2', Maybe.isSome(maybePrev)])}
+        />
+      ) : null}
+
       <div
         ref={containerRef}
         className={cx(

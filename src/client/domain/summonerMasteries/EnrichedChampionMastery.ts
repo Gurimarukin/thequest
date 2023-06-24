@@ -1,15 +1,18 @@
 import { number, ord, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
 import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
-import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
+import type {
+  ChampionFaction,
+  ChampionFactionOrNone,
+} from '../../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { List } from '../../../shared/utils/fp'
+import { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
@@ -24,8 +27,14 @@ type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
   factions: List<ChampionFaction>
   aram: AramData
   category: ChampionAramCategory
+  faction: ChampionFactionOrNone
   isHidden: boolean
 }
+
+const getFaction: (factions: List<ChampionFaction>) => ChampionFactionOrNone = flow(
+  List.head,
+  Maybe.getOrElse<ChampionFactionOrNone>(() => 'none'),
+)
 
 const byPercents: Ord<EnrichedChampionMastery> = pipe(
   number.Ord,
@@ -52,15 +61,15 @@ const byName: Ord<EnrichedChampionMastery> = pipe(
   ord.contramap((c: EnrichedChampionMastery) => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
-const Lens = {
-  shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
-  glow: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('glow')),
-  isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
-}
-
 const EnrichedChampionMastery = {
+  getFaction,
   Ord: { byPercents, byPoints, byShards, byName },
-  Lens,
+  Lens: {
+    shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
+    glow: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('glow')),
+    faction: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('faction')),
+    isHidden: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('isHidden')),
+  },
 }
 
 export { EnrichedChampionMastery }
