@@ -30,7 +30,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               <img
                 src={Assets.yuumi}
                 alt="Icône accueil (Yuumi)"
-                className="w-12 rounded-sm bg-black"
+                className="h-12 w-12 rounded-sm bg-black"
               />
             </Link>
             <SearchSummoner />
