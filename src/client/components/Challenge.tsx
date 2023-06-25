@@ -2,12 +2,11 @@ import { number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
 
+import type { ChallengeId } from '../../shared/models/api/ChallengeId'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import type { PartialDict } from '../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
-
-import type { ChallengeId } from '../../server/models/riot/ChallengId'
 
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'

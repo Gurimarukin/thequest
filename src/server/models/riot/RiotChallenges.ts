@@ -1,11 +1,11 @@
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
+import { ChallengeId } from '../../../shared/models/api/ChallengeId'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import { List, Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
-import { ChallengeId } from './ChallengId'
 
 type RiotChallenges = D.TypeOf<typeof decoder>
 

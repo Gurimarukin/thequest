@@ -1,8 +1,7 @@
 import type { DayJs } from '../../../shared/models/DayJs'
+import type { ChallengeId } from '../../../shared/models/api/ChallengeId'
 import type { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import type { Maybe } from '../../../shared/utils/fp'
-
-import type { ChallengeId } from '../riot/ChallengId'
 
 type Challenge = {
   challengeId: ChallengeId

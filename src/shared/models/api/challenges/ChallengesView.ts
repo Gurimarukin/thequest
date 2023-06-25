@@ -1,8 +1,7 @@
 import * as C from 'io-ts/Codec'
 
-import { ChallengeId } from '../../../../server/models/riot/ChallengId'
-
 import { type Dict, Maybe } from '../../../utils/fp'
+import { ChallengeId } from '../ChallengeId'
 import type { ChampionFaction } from '../champion/ChampionFaction'
 import { ChallengeView } from './ChallengeView'
 

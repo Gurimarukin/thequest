@@ -1,5 +1,6 @@
 import * as C from 'io-ts/Codec'
 
+import { ChallengeId } from '../../../shared/models/api/ChallengeId'
 import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
@@ -7,7 +8,6 @@ import type { Dict } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { ChallengeId } from '../riot/ChallengId'
 
 type ChallengesDb = C.TypeOf<typeof codec>
 type ChallengesDbOutput = C.OutputOf<typeof codec>

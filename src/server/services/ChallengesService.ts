@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
+import { ChallengeId } from '../../shared/models/api/ChallengeId'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
@@ -11,7 +12,6 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { Challenges } from '../models/challenges/Challenges'
-import { ChallengeId } from '../models/riot/ChallengId'
 import type { ChallengesPersistence } from '../persistence/ChallengesPersistence'
 import type { RiotApiService } from './RiotApiService'
 
