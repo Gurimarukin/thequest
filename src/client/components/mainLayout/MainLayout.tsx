@@ -5,13 +5,13 @@ import { Maybe } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
-import { TeamworkChallenges } from '../../imgs/svgIcons'
 import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { Link } from '../Link'
 import { Loading } from '../Loading'
+import { MaskedImage } from '../MaskedImage'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
@@ -76,7 +76,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 parser={appParsers.factions}
                 tooltip="Factions — défis “Globe-trotteur”"
               >
-                <TeamworkChallenges className="w-5" />
+                <MaskedImage src={Assets.runeterra} className="h-5 w-5 scale-[1.2]" />
               </HighlightLink>
             </div>
           </div>

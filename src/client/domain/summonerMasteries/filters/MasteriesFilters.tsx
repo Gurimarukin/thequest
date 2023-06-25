@@ -15,6 +15,7 @@ import { List, Maybe } from '../../../../shared/utils/fp'
 
 import { ChampionFactionImg } from '../../../components/ChampionFactionImg'
 import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
+import { MaskedImage } from '../../../components/MaskedImage'
 import { MasteryImg } from '../../../components/MasteryImg'
 import { Radios, labelValue } from '../../../components/Radios'
 import type { SearchChampionRef } from '../../../components/SearchChampion'
@@ -22,13 +23,13 @@ import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
+import { Assets } from '../../../imgs/Assets'
 import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
   DiceFilled,
   StatsChartSharp,
-  TeamworkChallenges,
 } from '../../../imgs/svgIcons'
 import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
@@ -131,7 +132,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           {labelValue(
             'factions',
             <IconLabel tooltip="Vue factions" className="w-8">
-              <TeamworkChallenges className="h-5" />
+              <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px] scale-[1.2]" />
             </IconLabel>,
           )}
         </Radios>
