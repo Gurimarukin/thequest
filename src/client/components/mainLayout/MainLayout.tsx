@@ -5,13 +5,11 @@ import { Maybe } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
-import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { Link } from '../Link'
 import { Loading } from '../Loading'
-import { MaskedImage } from '../MaskedImage'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
@@ -60,24 +58,6 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                   ),
                 ),
               )}
-
-              <hr className="h-5 border-r border-wheat" />
-
-              <HighlightLink
-                to={appRoutes.aram({})}
-                parser={appParsers.aram}
-                tooltip="ARAM — équilibrages spécifiques"
-              >
-                <HowlingAbyssSimple className="w-5" />
-              </HighlightLink>
-
-              <HighlightLink
-                to={appRoutes.factions({})}
-                parser={appParsers.factions}
-                tooltip="Factions — défis “Globe-trotteur”"
-              >
-                <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
-              </HighlightLink>
             </div>
           </div>
 
