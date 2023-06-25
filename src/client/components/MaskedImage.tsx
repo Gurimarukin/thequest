@@ -7,7 +7,7 @@ type Props = {
 
 export const MaskedImage: React.FC<Props> = ({ src, className }) => (
   <span
-    className={cx('bg-current', className)}
+    className={cx('block bg-current', className)}
     style={{
       maskImage: `url(${src})`,
       WebkitMaskImage: `url(${src})`,
