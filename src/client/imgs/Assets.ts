@@ -99,7 +99,7 @@ export const Assets = {
   globetrotter: new URL('./globetrotter.png', import.meta.url).toString(),
   masteries,
   positions,
-  runeterra: new URL('./runeterra.webp', import.meta.url).toString(),
+  runeterra: new URL('./runeterra.png', import.meta.url).toString(),
   stats,
   tokens,
   yuumi: new URL('./yuumi.png', import.meta.url).toString(),

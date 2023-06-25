@@ -132,7 +132,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           {labelValue(
             'factions',
             <IconLabel tooltip="Vue factions" className="w-8">
-              <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px] scale-[1.2]" />
+              <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px]" />
             </IconLabel>,
           )}
         </Radios>

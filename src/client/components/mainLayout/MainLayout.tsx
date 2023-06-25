@@ -76,7 +76,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 parser={appParsers.factions}
                 tooltip="Factions — défis “Globe-trotteur”"
               >
-                <MaskedImage src={Assets.runeterra} className="h-5 w-5 scale-[1.2]" />
+                <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
               </HighlightLink>
             </div>
           </div>
