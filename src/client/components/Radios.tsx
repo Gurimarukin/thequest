@@ -24,7 +24,7 @@ export function Radios<A extends Value>({
   children,
 }: RadiosProps<A>): React.ReactElement {
   return (
-    <div className="flex">
+    <div className="flex flex-wrap">
       {children.map(({ value: val, label }) => {
         const isChecked = val === value
         return (
