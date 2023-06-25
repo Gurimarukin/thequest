@@ -17,23 +17,24 @@ const imgSrc = (id: ChallengeId, tier: LeagueTier): string =>
 
 type Props = {
   id: ChallengeId
-  name: string
+  name: React.ReactNode
+  description: React.ReactNode
   tier: Maybe<LeagueTier>
   value: Maybe<number>
   thresholds: PartialDict<LeagueTier, number>
-  hoverRef: React.RefObject<HTMLElement>
   iconClassName?: string
 }
 
 export const Challenge: React.FC<Props> = ({
   id,
   name,
+  description,
   tier,
   value: maybeValue,
   thresholds,
-  hoverRef,
   iconClassName,
 }) => {
+  const hoverRef = useRef<HTMLDivElement>(null)
   const placementRef = useRef<HTMLImageElement>(null)
 
   const src = imgSrc(
@@ -59,7 +60,7 @@ export const Challenge: React.FC<Props> = ({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div ref={hoverRef} className="flex items-center gap-2">
         <img
           ref={placementRef}
           src={src}
@@ -81,9 +82,13 @@ export const Challenge: React.FC<Props> = ({
             />
           </div>
 
-          <div className="flex flex-col gap-2 self-center">
-            <h3 className="text-sm font-bold">{name}</h3>
-            <div className="flex gap-2">
+          <div className="flex flex-col self-center">
+            <div className="flex items-baseline gap-2">
+              <span>Défi</span>
+              <h3 className="text-sm font-bold">{name}</h3>
+            </div>
+            <span className="pt-1 text-sm">{description}</span>
+            <div className="flex gap-2 pt-2">
               <span>
                 {value} / {total}
               </span>
