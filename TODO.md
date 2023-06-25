@@ -1,3 +1,4 @@
+- generic aram/factions: Home
 - translate aram stats
 - uri: ugly encode
 - ARAM and Faction: random champion

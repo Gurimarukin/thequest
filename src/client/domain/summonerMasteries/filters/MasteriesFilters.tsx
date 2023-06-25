@@ -28,6 +28,7 @@ import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
+  CircleOffOutline,
   DiceFilled,
   StatsChartSharp,
 } from '../../../imgs/svgIcons'
@@ -234,11 +235,11 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                 faction === 'none' ? (
                   <span
                     className={cx(
-                      'mt-[-3px] w-6 text-center text-lg',
+                      'flex w-6 justify-center',
                       isChecked ? 'text-black' : 'text-wheat-bis',
                     )}
                   >
-                    ∅
+                    <CircleOffOutline className="w-4 -rotate-90" />
                   </span>
                 ) : (
                   <ChampionFactionImg
