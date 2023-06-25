@@ -114,28 +114,28 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
         <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
           {labelValue(
             'compact',
-            <IconLabel tooltip="Vue compacte">
+            <IconLabel tooltip="Vue compacte" className="px-1.5">
               <AppsSharp className="w-4" />
               <span>Compact</span>
             </IconLabel>,
           )}
           {labelValue(
             'histogram',
-            <IconLabel tooltip="Vue histogramme">
+            <IconLabel tooltip="Vue histogramme" className="px-1.5">
               <StatsChartSharp className="w-5 rotate-90 -scale-x-100" />
               <span>Histogramme</span>
             </IconLabel>,
           )}
           {labelValue(
             'aram',
-            <IconLabel tooltip="Vue ARAM">
+            <IconLabel tooltip="Vue ARAM" className="px-1.5">
               <HowlingAbyssSimple className="w-[18px]" />
               <span>ARAM</span>
             </IconLabel>,
           )}
           {labelValue(
             'factions',
-            <IconLabel tooltip="Vue factions">
+            <IconLabel tooltip="Vue factions" className="px-1.5">
               <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px]" />
               <span>Factions</span>
             </IconLabel>,
@@ -166,13 +166,13 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             {labelValue(
               'desc',
               <IconLabel tooltip="Tri décroissant" className="w-6">
-                <CaretDownOutline className="h-5" />
+                <CaretDownOutline className="w-5" />
               </IconLabel>,
             )}
             {labelValue(
               'asc',
               <IconLabel tooltip="Tri croissant" className="w-6">
-                <CaretUpOutline className="h-5" />
+                <CaretUpOutline className="w-5" />
               </IconLabel>,
             )}
           </Radios>
@@ -383,7 +383,7 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
     <>
       <span
         ref={hoverRef}
-        className={cx('flex h-6 items-center justify-center gap-1.5 px-1.5 text-xs', className)}
+        className={cx('flex h-6 items-center justify-center gap-1.5 text-xs', className)}
       >
         {children}
       </span>
