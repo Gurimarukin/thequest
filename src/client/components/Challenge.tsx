@@ -89,16 +89,16 @@ export const Challenge: React.FC<Props> = ({
             </div>
             <span className="pt-1 text-sm">{description}</span>
             <div className="flex gap-2 pt-2">
-              <span>
-                {value} / {total}
-              </span>
               {pipe(
                 tier,
                 Maybe.fold(
                   () => null,
-                  t => <span>({LeagueTier.label[t]})</span>,
+                  t => <span>{LeagueTier.label[t]}</span>,
                 ),
               )}
+              <span>
+                {value} / {total}
+              </span>
             </div>
           </div>
         </div>
