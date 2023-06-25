@@ -114,26 +114,30 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
         <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
           {labelValue(
             'compact',
-            <IconLabel tooltip="Vue compacte" className="w-8">
-              <AppsSharp className="h-4" />
+            <IconLabel tooltip="Vue compacte">
+              <AppsSharp className="w-4" />
+              <span>Compact</span>
             </IconLabel>,
           )}
           {labelValue(
             'histogram',
-            <IconLabel tooltip="Vue histogramme" className="w-8">
-              <StatsChartSharp className="h-5 rotate-90 -scale-x-100" />
+            <IconLabel tooltip="Vue histogramme">
+              <StatsChartSharp className="w-5 rotate-90 -scale-x-100" />
+              <span>Histogramme</span>
             </IconLabel>,
           )}
           {labelValue(
             'aram',
-            <IconLabel tooltip="Vue ARAM" className="w-8">
-              <HowlingAbyssSimple className="h-[18px]" />
+            <IconLabel tooltip="Vue ARAM">
+              <HowlingAbyssSimple className="w-[18px]" />
+              <span>ARAM</span>
             </IconLabel>,
           )}
           {labelValue(
             'factions',
-            <IconLabel tooltip="Vue factions" className="w-8">
+            <IconLabel tooltip="Vue factions">
               <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px]" />
+              <span>Factions</span>
             </IconLabel>,
           )}
         </Radios>
@@ -377,7 +381,10 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
   const hoverRef = useRef<HTMLSpanElement>(null)
   return (
     <>
-      <span ref={hoverRef} className={cx('flex h-6 items-center justify-center', className)}>
+      <span
+        ref={hoverRef}
+        className={cx('flex h-6 items-center justify-center gap-1.5 px-1.5 text-xs', className)}
+      >
         {children}
       </span>
       <Tooltip hoverRef={hoverRef} placement="top">
