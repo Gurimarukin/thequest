@@ -17,7 +17,7 @@ const imgSrc = (id: ChallengeId, tier: LeagueTier): string =>
 type Props = {
   id: ChallengeId
   name: React.ReactNode
-  description: React.ReactNode
+  description: string
   tier: Maybe<LeagueTier>
   value: Maybe<number>
   thresholds: PartialDict<LeagueTier, number>
@@ -43,6 +43,7 @@ export const Challenge: React.FC<Props> = ({
       Maybe.getOrElse<LeagueTier>(() => 'BRONZE'),
     ),
   )
+  const alt = `Icône défi ${description}`
 
   const value = pipe(
     maybeValue,
@@ -63,7 +64,7 @@ export const Challenge: React.FC<Props> = ({
         <img
           ref={placementRef}
           src={src}
-          alt={`Icône défi ${id}`}
+          alt={alt}
           className={cx(['grayscale', Maybe.isNone(tier)], iconClassName)}
         />
         <span>
@@ -76,7 +77,7 @@ export const Challenge: React.FC<Props> = ({
           <div className="pl-1 pt-1">
             <img
               src={src}
-              alt={`Icône défi ${id}`}
+              alt={alt}
               className={cx('h-20 w-20', ['grayscale', Maybe.isNone(tier)])}
             />
           </div>
