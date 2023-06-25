@@ -1,7 +1,6 @@
 - translate aram stats
 - uri: ugly encode
 - ARAM and Faction: random champion
-- factions
 - active game drag and drop
 - translation?
 - discord OAuth2: proper state (redirect url)
