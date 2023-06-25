@@ -1,4 +1,3 @@
-- spacing between "Silver I" and "xx LP"
 - translate aram stats
 - uri: ugly encode
 - ARAM and Faction: random champion

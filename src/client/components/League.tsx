@@ -62,7 +62,12 @@ export const League: React.FC<Props> = ({
             : Assets.divisions[tier],
           alt: tierRank,
           tierRank,
-          description: `${tierRank} ${leaguePoints} LP`,
+          description: (
+            <>
+              <span>{tierRank}</span>
+              <span>{leaguePoints} LP</span>
+            </>
+          ),
           subDescription: (
             <>
               <span>{games === 0 ? 0 : Math.round((100 * wins) / games)}%</span>
@@ -102,7 +107,7 @@ export const League: React.FC<Props> = ({
           <img src={src} alt={`Icône ${alt}`} className="m-[-7.5%] w-[115%] max-w-none" />
         </span>
         <div className={cx('flex flex-col text-xs', ['col-start-1 row-start-1', reverse])}>
-          <span className="whitespace-nowrap">{description}</span>
+          <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
           {subDescription !== undefined ? (
             <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
           ) : null}
