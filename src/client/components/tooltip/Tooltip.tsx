@@ -33,6 +33,9 @@ type Props = {
    * Time spent open by the tooltip after the user navigates away from it / the hover (tablet).
    */
   openedDuration?: MsDuration
+  /**
+   * @deault 'bottom"
+   */
   placement?: Placement
   alwaysVisible?: boolean
   className?: string
