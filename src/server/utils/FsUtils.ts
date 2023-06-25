@@ -1,7 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import fs from 'fs'
 
-import { Future, Maybe } from '../../shared/utils/fp'
+import type { NotUsed } from '../../shared/utils/fp'
+import { Future, Maybe, toNotUsed } from '../../shared/utils/fp'
 
 import type { FileOrDir, MyFile } from '../models/FileOrDir'
 
@@ -17,4 +18,12 @@ const exists = (f: FileOrDir): Future<boolean> => pipe(stat(f), Future.map(Maybe
 const readFile = (file: MyFile): Future<string> =>
   Future.tryCatch(() => fs.promises.readFile(file.path, { encoding: 'utf-8' }))
 
-export const FsUtils = { exists, readFile }
+const writeFile =
+  (file: MyFile) =>
+  (data: string): Future<NotUsed> =>
+    pipe(
+      Future.tryCatch(() => fs.promises.writeFile(file.path, data, { encoding: 'utf-8' })),
+      Future.map(toNotUsed),
+    )
+
+export const FsUtils = { exists, readFile, writeFile }

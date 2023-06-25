@@ -3,7 +3,10 @@
 import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
+import type { SWRResponse } from 'swr'
 
+import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
+import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -12,13 +15,14 @@ import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { bgGradientMastery } from '../../components/ChampionTooltip'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
-import { ChampionCategory } from '../../models/ChampionCategory'
+import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cx } from '../../utils/cx'
@@ -29,11 +33,12 @@ import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 const { plural } = StringUtils
 
 type Props = {
+  challenges: SWRResponse<ChallengesView, unknown>
   masteries: List<EnrichedChampionMastery>
   setChampionShards: (champion: ChampionKey) => (count: number) => void
 }
 
-export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => {
+export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionShards }) => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
@@ -76,7 +81,8 @@ export const Masteries: React.FC<Props> = ({ masteries, setChampionShards }) => 
           filteredAndSortedMasteries,
           ListUtils.mapWithPrevious((maybePrev, champion) => (
             <Champion
-              key={ChampionKey.unwrap(champion.championId)}
+              key={`${champion.faction}${ChampionKey.unwrap(champion.championId)}`}
+              challenges={challenges}
               maybeMaxPoints={maybeMaxPoints}
               isGlowing={!hideInsteadOfGlow && champion.glow}
               isHidden={isHidden(champion)}
@@ -98,9 +104,11 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
   compact: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
   histogram: 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2',
   aram: 'grid grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
+  factions: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
 }
 
 type ChampionProps = {
+  challenges: SWRResponse<ChallengesView, unknown>
   maybeMaxPoints: Maybe<number>
   isGlowing: boolean
   isHidden: boolean
@@ -110,6 +118,7 @@ type ChampionProps = {
 }
 
 const Champion: React.FC<ChampionProps> = ({
+  challenges,
   maybeMaxPoints,
   isGlowing,
   isHidden,
@@ -127,6 +136,7 @@ const Champion: React.FC<ChampionProps> = ({
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
+  const isFactions = masteriesQuery.view === 'factions'
 
   return (
     <>
@@ -134,13 +144,27 @@ const Champion: React.FC<ChampionProps> = ({
       !isHidden &&
       !pipe(
         maybePrev,
-        Maybe.exists(prev => ChampionCategory.Eq.equals(prev.category, champion.category)),
+        Maybe.exists(prev => ChampionAramCategory.Eq.equals(prev.category, champion.category)),
       ) ? (
         <ChampionCategoryTitle
           category={champion.category}
           className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
+
+      {isFactions &&
+      !isHidden &&
+      !pipe(
+        maybePrev,
+        Maybe.exists(prev => ChampionFactionOrNone.Eq.equals(prev.faction, champion.faction)),
+      ) ? (
+        <ChampionFactionTitle
+          challenges={Maybe.some(challenges)}
+          faction={champion.faction}
+          className={cx(['pt-2', Maybe.isSome(maybePrev)])}
+        />
+      ) : null}
+
       <div
         ref={containerRef}
         className={cx(

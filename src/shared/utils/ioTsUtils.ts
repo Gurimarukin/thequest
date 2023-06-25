@@ -1,5 +1,6 @@
-import { json, ord, predicate, readonlySet, string } from 'fp-ts'
+import { json, predicate, readonlyMap, readonlySet, string } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
+import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
 import { flow, identity, pipe } from 'fp-ts/function'
@@ -13,8 +14,9 @@ import type { AnyNewtype, CarrierOf } from 'newtype-ts'
 
 import { DayJs } from '../models/DayJs'
 import { DictUtils } from './DictUtils'
+import { MapUtils } from './MapUtils'
 import { StringUtils } from './StringUtils'
-import type { Dict } from './fp'
+import type { Dict, Tuple } from './fp'
 import { Either, List, Maybe, NonEmptyArray } from './fp'
 
 const limit = 10000
@@ -188,14 +190,16 @@ const setFromStringDecoder = <A>(
 ): Decoder<unknown, ReadonlySet<A>> =>
   pipe(arrayFromStringDecoder(decoder), D.map(readonlySet.fromReadonlyArray(eq_)))
 
-const setFromStringEncoder = <A>(encoder: Encoder<string, A>): Encoder<string, ReadonlySet<A>> =>
-  pipe(arrayFromStringEncoder(encoder), E.contramap(readonlySet.toReadonlyArray<A>(ord.trivial)))
+const setFromStringEncoder =
+  <A>(ord: Ord<A>) =>
+  (encoder: Encoder<string, A>): Encoder<string, ReadonlySet<A>> =>
+    pipe(arrayFromStringEncoder(encoder), E.contramap(readonlySet.toReadonlyArray(ord)))
 
 const setFromStringCodec = <A>(
   codec: Codec<unknown, string, A>,
-  eq_: Eq<A>,
+  ord: Ord<A>,
 ): Codec<unknown, string, ReadonlySet<A>> =>
-  C.make(setFromStringDecoder(codec, eq_), setFromStringEncoder(codec))
+  C.make(setFromStringDecoder(codec, ord), setFromStringEncoder(ord)(codec))
 
 export const SetFromString = {
   decoder: setFromStringDecoder,
@@ -306,3 +310,43 @@ const strictTupleDecoder = <A extends List<unknown>>(
 export const StrictTuple = { decoder: strictTupleDecoder }
 
 const refinementFromPredicate = identity as <A>(f: Predicate<A>) => Refinement<A, A>
+
+/**
+ * MapFromArray
+ */
+
+const mapFromArrayDecoder =
+  <K>(eq: Eq<K>) =>
+  <A>(
+    keyDecoder: Decoder<unknown, K>,
+    valueDecoder: Decoder<unknown, A>,
+  ): Decoder<unknown, ReadonlyMap<K, A>> =>
+    pipe(List.decoder(D.tuple(keyDecoder, valueDecoder)), D.map(MapUtils.fromReadonlyArray(eq)))
+
+const mapFromArrayEncoder =
+  <K>(ord: Ord<K>) =>
+  <W, O, A>(
+    keyEncoder: Encoder<W, K>,
+    valueEncoder: Encoder<O, A>,
+  ): Encoder<List<Tuple<W, O>>, ReadonlyMap<K, A>> =>
+    pipe(
+      List.encoder(E.readonly(E.tuple(keyEncoder, valueEncoder))),
+      E.contramap((m: ReadonlyMap<K, A>) => readonlyMap.toReadonlyArray(ord)(m)),
+    )
+
+const mapFromArrayCodec =
+  <K>(ord: Ord<K>) =>
+  <W, O, A>(
+    keyCodec: Codec<unknown, W, K>,
+    valueCodec: Codec<unknown, O, A>,
+  ): Codec<unknown, List<Tuple<W, O>>, ReadonlyMap<K, A>> =>
+    C.make(
+      mapFromArrayDecoder(ord)(keyCodec, valueCodec),
+      mapFromArrayEncoder(ord)(keyCodec, valueCodec),
+    )
+
+export const MapFromArray = {
+  decoder: mapFromArrayDecoder,
+  encoder: mapFromArrayEncoder,
+  codec: mapFromArrayCodec,
+}

@@ -10,7 +10,7 @@ import { NonEmptyString } from '../../../shared/utils/ioTsUtils'
 
 import { isDefined } from '../../utils/isDefined'
 
-type PartialAramQuery = D.TypeOf<typeof decoder>
+type PartialGenericQuery = D.TypeOf<typeof decoder>
 
 const properties = {
   search: NonEmptyString.codec,
@@ -18,12 +18,12 @@ const properties = {
 
 const decoder = D.partial(properties)
 
-type Out = PartialDict<keyof PartialAramQuery, string>
-const encoder: Encoder<Out, PartialAramQuery> = E.partial(properties)
+type Out = PartialDict<keyof PartialGenericQuery, string>
+const encoder: Encoder<Out, PartialGenericQuery> = E.partial(properties)
 
-const qsStringify = (query: PartialAramQuery): string =>
+const qsStringify = (query: PartialGenericQuery): string =>
   pipe(query, Dict.filter(isDefined), encoder.encode, qs.stringify)
 
-const PartialAramQuery = { decoder, qsStringify }
+const PartialGenericQuery = { decoder, qsStringify }
 
-export { PartialAramQuery }
+export { PartialGenericQuery }

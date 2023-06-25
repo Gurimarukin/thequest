@@ -1,4 +1,4 @@
-import { apply, io, string } from 'fp-ts'
+import { apply, io, ord, readonlyMap } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 
@@ -17,48 +17,45 @@ import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticD
 import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import type { PartialDict } from '../../../shared/utils/fp'
-import {
-  Dict,
-  Either,
-  Future,
-  IO,
-  List,
-  Maybe,
-  NonEmptyArray,
-  Tuple,
-} from '../../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
+import { futureMaybe } from '../../../shared/utils/futureMaybe'
 
+import type { Config } from '../../config/Config'
 import { constants } from '../../config/constants'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { StoredAt } from '../../models/StoredAt'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
-import type { DDragonChampions } from '../../models/riot/ddragon/DDragonChampions'
+import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
 import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
+import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
+import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
 import type { DDragonService } from '../DDragonService'
+import type { MockService } from '../MockService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
+import { getFetchWikiaChallenges } from './getFetchWikiaChallenges'
 import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const StaticDataService = (
+  config: Config,
   Logger: LoggerGetter,
   httpClient: HttpClient,
   ddragonService: DDragonService,
+  mockService: MockService,
 ) => {
   const logger = Logger('StaticDataService')
 
   const fetchDefautLangStaticData = fetchCached(
     (version: DDragonVersion): Future<StaticData> =>
       pipe(
-        apply.sequenceS(Future.ApplyPar)({
-          requestedLang: ddragonService.champions(Lang.defaultLang)(version),
-          english: ddragonService.champions(Lang.english)(version),
-        }),
-        Future.chain(flow(withEnglishData, fetchStaticData(version))),
+        ddragonService.champions(Lang.default)(version),
+        Future.map(d => DictUtils.values(d.data)),
+        Future.chain(fetchStaticData(version)),
       ),
     version => data => DDragonVersion.Eq.equals(data.value.version, version),
   )
@@ -67,95 +64,106 @@ const StaticDataService = (
     getFetchWikiaChampionsData(logger, httpClient),
   )
 
+  const fetchWikiaChallenges: Future<List<WikiaChallenge>> = getFetchWikiaChallenges(httpClient)
+
   const fetchWikiaAramChanges: Future<WikiaAramChanges> = getFetchWikiaAramChanges(httpClient)
 
   return {
-    wikiaChampions: fetchWikiaChampionsData,
+    wikiaChampions: pipe(
+      config.mock ? mockService.wikia.champions : futureMaybe.none,
+      futureMaybe.getOrElse(() => fetchWikiaChampionsData),
+    ),
 
     getLatest: (lang: Lang): Future<StaticData> =>
       pipe(
-        ddragonService.latestVersion,
-        Future.chain(version => {
-          if (Lang.Eq.equals(lang, Lang.defaultLang)) return fetchDefautLangStaticData(version)
-
-          const futureEnglish = ddragonService.champions(Lang.english)(version)
-          return pipe(
-            apply.sequenceS(Future.ApplyPar)({
-              requestedLang: Lang.Eq.equals(lang, Lang.english)
-                ? futureEnglish
-                : ddragonService.champions(lang)(version),
-              english: futureEnglish,
-            }),
-            Future.chain(flow(withEnglishData, fetchStaticData(version))),
-          )
-        }),
+        config.mock ? mockService.staticData : futureMaybe.none,
+        futureMaybe.getOrElse(() => getLatest(lang)),
       ),
 
     getLatestAdditional: (lang: Lang): Future<AdditionalStaticData> =>
       pipe(
-        ddragonService.latestVersion,
-        Future.chain(version =>
-          pipe(
-            apply.sequenceS(Future.ApplicativePar)({
-              version: Future.successful(version),
-              summoners: ddragonService.summoners(lang)(version),
-              runeStyles: ddragonService.runeStyles(lang)(version),
-              runes: ddragonService.cdragon.latestRunes(lang),
-            }),
-          ),
-        ),
-        Future.map(
-          ({ version, summoners, runeStyles, runes }): AdditionalStaticData => ({
-            version,
-            summonerSpells: pipe(
-              summoners.data,
-              DictUtils.entries,
-              List.map(
-                flow(
-                  Tuple.snd,
-                  (s): StaticDataSummonerSpell => ({
-                    ...s,
-                    cooldown: NonEmptyArray.head(s.cooldown),
-                  }),
-                ),
-              ),
-            ),
-            runeStyles: pipe(
-              runeStyles,
-              List.map(style => ({
-                ...style,
-                slots: pipe(
-                  style.slots,
-                  List.map(slot => ({
-                    runes: pipe(
-                      slot.runes,
-                      List.map(rune => rune.id),
-                    ),
-                  })),
-                ),
-              })),
-            ),
-            runes,
-          }),
-        ),
+        config.mock ? mockService.additionalStaticData : futureMaybe.none,
+        futureMaybe.getOrElse(() => getLatestAdditional(lang)),
       ),
   }
 
-  /**
-   * We need english champion names because wikia's aram changes are only retrievable with the english name.
-   * But we also want requestedLang, as we want translated champions for front.
-   */
+  function getLatest(lang: Lang): Future<StaticData> {
+    return pipe(
+      ddragonService.latestVersion,
+      Future.chain(version => {
+        if (Lang.Eq.equals(lang, Lang.default)) return fetchDefautLangStaticData(version)
+
+        return pipe(
+          ddragonService.champions(lang)(version),
+          Future.map(d => DictUtils.values(d.data)),
+          Future.chain(fetchStaticData(version)),
+        )
+      }),
+    )
+  }
+
+  function getLatestAdditional(lang: Lang): Future<AdditionalStaticData> {
+    return pipe(
+      ddragonService.latestVersion,
+      Future.chain(version =>
+        pipe(
+          apply.sequenceS(Future.ApplicativePar)({
+            version: Future.successful(version),
+            summoners: ddragonService.summoners(lang)(version),
+            runeStyles: ddragonService.runeStyles(lang)(version),
+            runes: ddragonService.cdragon.latestRunes(lang),
+          }),
+        ),
+      ),
+      Future.map(
+        ({ version, summoners, runeStyles, runes }): AdditionalStaticData => ({
+          version,
+          summonerSpells: pipe(
+            summoners.data,
+            DictUtils.entries,
+            List.map(
+              flow(
+                Tuple.snd,
+                (s): StaticDataSummonerSpell => ({
+                  ...s,
+                  cooldown: NonEmptyArray.head(s.cooldown),
+                }),
+              ),
+            ),
+          ),
+          runeStyles: pipe(
+            runeStyles,
+            List.map(style => ({
+              ...style,
+              slots: pipe(
+                style.slots,
+                List.map(slot => ({
+                  runes: pipe(
+                    slot.runes,
+                    List.map(rune => rune.id),
+                  ),
+                })),
+              ),
+            })),
+          ),
+          runes,
+        }),
+      ),
+    )
+  }
+
   function fetchStaticData(
     version: DDragonVersion,
-  ): (champions: ChampionsWithEnglish) => Future<StaticData> {
-    return championsWithEnglish =>
+  ): (ddragonChampions: List<DDragonChampion>) => Future<StaticData> {
+    return ddragonChampions =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
           wikiaChampions: fetchWikiaChampionsData,
+          challenges: fetchWikiaChallenges,
           aramChanges: fetchWikiaAramChanges,
         }),
-        Future.map(({ wikiaChampions, aramChanges }) =>
-          enrichChampions(championsWithEnglish, wikiaChampions, aramChanges),
+        Future.map(({ wikiaChampions, challenges, aramChanges }) =>
+          enrichChampions(ddragonChampions, wikiaChampions, challenges, aramChanges),
         ),
         Future.chainFirstIOEitherK(
           flow(
@@ -177,6 +185,7 @@ const StaticDataService = (
                         key: c.key,
                         name: c.name,
                         positions: [],
+                        factions: [],
                         aram: {
                           stats: Maybe.none,
                           spells: Maybe.none,
@@ -196,39 +205,26 @@ const StaticDataService = (
 
 export { StaticDataService }
 
-const withEnglishData: <K extends string>(
-  fa: Dict<K, DDragonChampions>,
-) => Dict<K, List<DDragonChampion>> = Dict.map(a => DictUtils.values(a.data))
-
-type ChampionsWithEnglish = {
-  requestedLang: List<DDragonChampion>
-  english: List<DDragonChampion>
-}
-
 const enrichChampions = (
-  {
-    requestedLang: requestedLangDDragonChampions,
-    english: englishDDragonChampions,
-  }: ChampionsWithEnglish,
+  ddragonChampions: List<DDragonChampion>,
   wikiaChampions: List<WikiaChampionData>,
-  aramChanges: Dict<string, PartialDict<SpellName, ChampionSpellHtml>>,
+  challenges: List<WikiaChallenge>,
+  aramChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
-  const withoutAramChanges: List<Either<ChampionError, Tuple<string, StaticDataChampion>>> = pipe(
-    requestedLangDDragonChampions,
-    List.map(requestedLangChampion =>
+  const wikiaChampionByKey = pipe(
+    wikiaChampions,
+    ListUtils.findFirstBy(ChampionKey.Eq)(c => c.id),
+  )
+
+  const withoutAramChanges: List<
+    Either<ChampionError, Tuple<ChampionEnglishName, StaticDataChampion>>
+  > = pipe(
+    ddragonChampions,
+    List.map(ddragonChampion =>
       pipe(
-        apply.sequenceS(ValidatedNea.getValidation<string>())({
-          englishChampion: pipe(
-            englishDDragonChampions,
-            List.findFirst(c => ChampionKey.Eq.equals(c.key, requestedLangChampion.key)),
-            ValidatedNea.fromOption(() => 'english champion not found'),
-          ),
-          wikiaChampion: pipe(
-            wikiaChampions,
-            List.findFirst(c => ChampionKey.Eq.equals(c.id, requestedLangChampion.key)),
-            ValidatedNea.fromOption(() => 'wikiaChampion not found'),
-          ),
-        }),
+        wikiaChampionByKey(ddragonChampion.key),
+        ValidatedNea.fromOption(() => 'wikiaChampion not found'),
+        Either.bindTo('wikiaChampion'),
         Either.bind('positions', ({ wikiaChampion }) =>
           pipe(
             wikiaChampion.positions,
@@ -239,18 +235,26 @@ const enrichChampions = (
           messages =>
             ChampionError.of(
               'Wikia champion',
-              `${requestedLangChampion.id} (${requestedLangChampion.key})`,
+              `${ddragonChampion.id} (${ddragonChampion.key})`,
               messages,
-              Maybe.some(requestedLangChampion),
+              Maybe.some(ddragonChampion),
             ),
-          ({ englishChampion, wikiaChampion, positions }) => {
+          ({ wikiaChampion, positions }) => {
             const data: StaticDataChampion = {
-              id: requestedLangChampion.id,
-              key: requestedLangChampion.key,
-              name: requestedLangChampion.name,
+              id: ddragonChampion.id,
+              key: ddragonChampion.key,
+              name: ddragonChampion.name,
               positions: pipe(
                 positions,
                 NonEmptyArray.map(p => WikiaChampionPosition.position[p]),
+              ),
+              factions: pipe(
+                challenges,
+                List.filterMap(challenge =>
+                  List.elem(ChampionEnglishName.Eq)(wikiaChampion.englishName, challenge.champions)
+                    ? Maybe.some(WikiaChampionFaction.faction[challenge.postion])
+                    : Maybe.none,
+                ),
               ),
               aram: {
                 stats: wikiaChampion.stats.aram,
@@ -258,44 +262,51 @@ const enrichChampions = (
               },
             }
 
-            return Tuple.of(englishChampion.name, data)
+            return Tuple.of(wikiaChampion.englishName, data)
           },
         ),
       ),
     ),
   )
+
   return pipe(
     aramChanges,
-    DictUtils.entries,
-    List.reduce(withoutAramChanges, (acc, [englishName, spells]) =>
-      pipe(
-        acc,
-        ListUtils.findFirstWithIndex(
-          Either.exists(([name]) => string.Eq.equals(name, englishName)),
-        ),
-        Maybe.fold(
-          () =>
-            pipe(
-              acc,
-              List.append(
-                Either.left(
-                  ChampionError.of('Wikia spells', englishName, ['not found'], Maybe.none),
-                ),
-              ),
-            ),
-          ([i, data]) =>
-            List.unsafeUpdateAt(
-              i,
+    readonlyMap.reduceWithIndex<ChampionEnglishName>(ord.trivial)(
+      withoutAramChanges,
+      (englishName, acc, spells) =>
+        pipe(
+          acc,
+          ListUtils.findFirstWithIndex(
+            Either.exists(([name]) => ChampionEnglishName.Eq.equals(name, englishName)),
+          ),
+          Maybe.fold(
+            () =>
               pipe(
-                data,
-                Either.map(
-                  Tuple.mapSnd(StaticDataChampion.Lens.aramSpells.set(Maybe.some(spells))),
+                acc,
+                List.append(
+                  Either.left(
+                    ChampionError.of(
+                      'Wikia spells',
+                      ChampionEnglishName.unwrap(englishName),
+                      ['not found'],
+                      Maybe.none,
+                    ),
+                  ),
                 ),
               ),
-              acc,
-            ),
+            ([i, data]) =>
+              List.unsafeUpdateAt(
+                i,
+                pipe(
+                  data,
+                  Either.map(
+                    Tuple.mapSnd(StaticDataChampion.Lens.aramSpells.set(Maybe.some(spells))),
+                  ),
+                ),
+                acc,
+              ),
+          ),
         ),
-      ),
     ),
     List.map(Either.map(Tuple.snd)),
   )

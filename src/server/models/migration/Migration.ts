@@ -11,7 +11,7 @@ type Migration = {
 
 const OrdCreatedAt: ord.Ord<Migration> = pipe(
   DayJs.Ord,
-  ord.contramap(m => m.createdAt),
+  ord.contramap((m: Migration) => m.createdAt),
 )
 
 const Migration = { OrdCreatedAt }

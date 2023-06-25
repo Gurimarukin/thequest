@@ -1,16 +1,43 @@
-import { apply } from 'fp-ts'
+import { apply, predicate } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { JSDOM } from 'jsdom'
 
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
-import { Either, NonEmptyArray, Try } from '../../shared/utils/fp'
+import { StringUtils } from '../../shared/utils/StringUtils'
+import { Either, List, NonEmptyArray, Try } from '../../shared/utils/fp'
 
 type Constructor<E> = {
   new (): E
   prototype: E
 }
 
-const domHandlerOf = (html: string): Try<JSDOM> => Try.tryCatch(() => new JSDOM(html))
+type DomHandlerOptions = {
+  url?: string
+}
+
+type DomHandler = {
+  window: JSDOM['window']
+  querySelectorEnsureOneTextContent: (
+    selector: string,
+  ) => (parent: ParentNode) => Either<string, string>
+}
+
+const domHandlerOf = (options?: DomHandlerOptions) => (html: string) =>
+  pipe(
+    Try.tryCatch(() => new JSDOM(html, options)),
+    Try.map(({ window }): DomHandler => {
+      const querySelectorEnsureOneTextContent =
+        (selector: string) =>
+        (parent: ParentNode): Either<string, string> =>
+          pipe(
+            parent,
+            querySelectorEnsureOne(selector, window.HTMLElement),
+            Either.chain(textContent(selector)),
+          )
+
+      return { window, querySelectorEnsureOneTextContent }
+    }),
+  )
 
 function querySelectorEnsureOne(selector: string): (parent: ParentNode) => Either<string, Element>
 function querySelectorEnsureOne<E extends Element>(
@@ -33,6 +60,20 @@ function querySelectorEnsureOne<E extends Element>(selector: string, type?: Cons
     return Either.left(`Element don't have expected type: ${type.name}`)
   }
 }
+
+const querySelectorAll =
+  <E extends Element>(selector: string, type: Constructor<E>) =>
+  (parent: ParentNode): ValidatedNea<string, List<E>> => {
+    const elts = parent.querySelectorAll(selector)
+
+    const isE = (e: Element): e is E => e instanceof type
+    return pipe(
+      [...elts],
+      List.traverseWithIndex(ValidatedNea.getValidation<string>())((i, e) =>
+        isE(e) ? ValidatedNea.valid(e) : elementNotMatching(selector, type)(i, e),
+      ),
+    )
+  }
 
 function querySelectorAllNonEmpty(
   selector: string,
@@ -61,15 +102,7 @@ function querySelectorAllNonEmpty<E extends Element>(
       Either.map(
         NonEmptyArray.mapWithIndex(
           (i, e): ValidatedNea<string, E> =>
-            isE(e)
-              ? Either.right(e)
-              : Either.left(
-                  NonEmptyArray.of(
-                    `Element ${i} matching "${selector}" - expected ${
-                      type.name
-                    } got <${e.nodeName.toLowerCase()} />`,
-                  ),
-                ),
+            isE(e) ? ValidatedNea.valid(e) : elementNotMatching(selector, type)(i, e),
         ),
       ),
       Either.chain(([head, ...tail]) =>
@@ -79,8 +112,43 @@ function querySelectorAllNonEmpty<E extends Element>(
   }
 }
 
-export const DomHandler = {
+const textContent = getText('textContent', e => e.textContent)
+
+const DomHandler = {
   of: domHandlerOf,
   querySelectorEnsureOne,
+  querySelectorAll,
   querySelectorAllNonEmpty,
+  textContent,
 }
+
+export { DomHandler }
+
+function getText(
+  name: string,
+  getter: (elt: Element) => string | null,
+): (selector: string) => (elt: Element) => Either<string, string> {
+  return selector => elt =>
+    pipe(
+      getter(elt),
+      Either.fromNullable(`No ${name} for element: ${selector}`),
+      Either.map(StringUtils.cleanHtml),
+      Either.filterOrElse(
+        predicate.not(looksLikeHTMLTag),
+        str => `${name} looks like an HTML tag and this might be a problem: ${str}`,
+      ),
+    )
+}
+
+const looksLikeHTMLTag = (str: string): boolean => str.startsWith('<') && str.endsWith('/>')
+
+const elementNotMatching =
+  (selector: string, type: Constructor<Element>) =>
+  (index: number, element: Element): ValidatedNea<string, never> =>
+    ValidatedNea.invalid(
+      NonEmptyArray.of(
+        `Element ${index} matching "${selector}" - expected ${
+          type.name
+        } got <${element.nodeName.toLowerCase()}>`,
+      ),
+    )

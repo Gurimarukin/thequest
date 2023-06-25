@@ -4,16 +4,14 @@ import * as luainjs from 'lua-in-js'
 
 import type { LoggerType } from '../../../shared/models/logger/LoggerType'
 import { DictUtils } from '../../../shared/utils/DictUtils'
-import { IO, List } from '../../../shared/utils/fp'
-import { Either, Future, Try } from '../../../shared/utils/fp'
+import { Either, Future, IO, List, Try } from '../../../shared/utils/fp'
 import { decodeError, decodeErrorString } from '../../../shared/utils/ioTsUtils'
 
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { RawWikiaChampionsData } from '../../models/wikia/RawWikiaChampionsData'
-import { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
-import { RawWikiaChampionData } from '../../models/wikia/WikiaChampionData'
+import { RawWikiaChampionData, WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 
 const championDataUrl = `${constants.lolWikiaDomain}/wiki/Module:ChampionData/data`
 
@@ -25,52 +23,55 @@ export const getFetchWikiaChampionsData = (
 ): Future<List<WikiaChampionData>> =>
   pipe(
     httpClient.text([championDataUrl, 'get']),
-    Future.chainEitherK(DomHandler.of),
-    Future.chainEitherK(domHandler =>
-      pipe(
-        domHandler.window.document,
-        DomHandler.querySelectorEnsureOne(mwCodeClassName),
-        Either.mapLeft(toErrorWithUrl(championDataUrl)),
+    Future.chainIOEitherK(wikiaChampionsDataFromHtml(logger)),
+  )
+
+// export for testing purpose
+export const wikiaChampionsDataFromHtml =
+  (logger: LoggerType) =>
+  (html: string): IO<List<WikiaChampionData>> =>
+    pipe(
+      DomHandler.of()(html),
+      Try.chain(domHandler =>
+        pipe(
+          domHandler.window.document.body,
+          DomHandler.querySelectorEnsureOne(mwCodeClassName),
+          Either.mapLeft(withUrlError),
+        ),
       ),
-    ),
-    Future.map(mwCode => mwCode.textContent),
-    Future.chainEitherK(
-      Try.fromNullable(
+      Try.chainNullableK(
         Error(`[${championDataUrl}] empty text content for selector: ${mwCodeClassName}`),
+      )(mwCode => mwCode.textContent),
+      Try.chain(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
+      Try.chain(u =>
+        pipe(
+          RawWikiaChampionsData.decoder.decode(u),
+          Either.mapLeft(decodeError('RawWikiaChampionsData')(u)),
+        ),
       ),
-    ),
-    Future.map(str => luainjs.createEnv().parse(str).exec()),
-    Future.chainEitherK(u =>
-      pipe(
-        RawWikiaChampionsData.decoder.decode(u),
-        Either.mapLeft(decodeError('RawWikiaChampionsData')(u)),
-      ),
-    ),
-    Future.map(
-      flow(
-        DictUtils.entries,
-        List.partitionMap(([englishName, rawChampion]) =>
-          pipe(
-            RawWikiaChampionData.decoder.decode(rawChampion),
-            Either.bimap(
-              decodeErrorString(`RawWikiaChampionData (${JSON.stringify(englishName)})`)(
-                rawChampion,
+      Try.map(
+        flow(
+          DictUtils.entries,
+          List.partitionMap(([englishName, rawChampion]) =>
+            pipe(
+              RawWikiaChampionData.decoder.decode(rawChampion),
+              Either.bimap(
+                decodeErrorString(`RawWikiaChampionData (${JSON.stringify(englishName)})`)(
+                  rawChampion,
+                ),
+                WikiaChampionData.fromRaw(englishName),
               ),
-              WikiaChampionData.fromRaw(englishName),
             ),
           ),
         ),
       ),
-    ),
-    Future.chainFirstIOEitherK(({ left: errors }) =>
-      List.isNonEmpty(errors)
-        ? logger.warn(pipe(errors, List.mkString('\n', '\n', '')))
-        : IO.notUsed,
-    ),
-    Future.map(separated.right),
-  )
+      IO.fromEither,
+      IO.chainFirst(({ left: errors }) =>
+        List.isNonEmpty(errors)
+          ? logger.warn(pipe(errors, List.mkString('\n', '\n', '')))
+          : IO.notUsed,
+      ),
+      IO.map(separated.right),
+    )
 
-const toErrorWithUrl =
-  (url: string) =>
-  (e: string): Error =>
-    Error(`[${url}] ${e}`)
+const withUrlError = (e: string): Error => Error(`[${championDataUrl}] ${e}`)

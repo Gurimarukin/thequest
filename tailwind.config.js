@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     colors: {
       black: 'black',
+      current: 'currentColor',
       transparent: 'transparent',
       white: 'white',
 
@@ -22,6 +23,7 @@ module.exports = {
       slate: colors.slate[900],
       'slate-dark': colors.slate[950],
       wheat: 'wheat',
+      'wheat-bis':  '#c8ab6d',
       'zinc-400': colors.zinc[400],
       'zinc-700': colors.zinc[700],
       'zinc-900': colors.zinc[900],

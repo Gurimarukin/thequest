@@ -15,6 +15,7 @@ import { LoggerGetter } from './models/logger/LoggerGetter'
 import { MongoCollectionGetter } from './models/mongo/MongoCollection'
 import { WithDb } from './models/mongo/WithDb'
 import { ActiveGamePersistence } from './persistence/ActiveGamePersistence'
+import { ChallengesPersistence } from './persistence/ChallengesPersistence'
 import { ChampionMasteryPersistence } from './persistence/ChampionMasteryPersistence'
 import { ChampionShardPersistence } from './persistence/ChampionShardPersistence'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
@@ -24,14 +25,15 @@ import { RiotAccountPersistence } from './persistence/RiotAccountPersistence'
 import { SummonerPersistence } from './persistence/SummonerPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
 import { ActiveGameService } from './services/ActiveGameService'
+import { ChallengesService } from './services/ChallengesService'
 import { DDragonService } from './services/DDragonService'
 import { DiscordService } from './services/DiscordService'
 import { HealthCheckService } from './services/HealthCheckService'
 import { LeagueEntryService } from './services/LeagueEntryService'
 import { MasteriesService } from './services/MasteriesService'
 import { MigrationService } from './services/MigrationService'
+import { MockService } from './services/MockService'
 import { RiotAccountService } from './services/RiotAccountService'
-import { RiotApiMockService } from './services/RiotApiMockService'
 import { RiotApiService } from './services/RiotApiService'
 import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
@@ -46,6 +48,7 @@ type Context = ReturnType<typeof of>
 const of = (
   config: Config,
   Logger: LoggerGetter,
+  challengesPersistence: ChallengesPersistence,
   championMasteryPersistence: ChampionMasteryPersistence,
   championShardPersistence: ChampionShardPersistence,
   healthCheckPersistence: HealthCheckPersistence,
@@ -68,6 +71,11 @@ const of = (
     summonerService,
   )
 
+  const challengesService = ChallengesService(
+    config.riotApi.cacheTtl,
+    challengesPersistence,
+    riotApiService,
+  )
   const healthCheckService = HealthCheckService(healthCheckPersistence)
   const leagueEntryService = LeagueEntryService(
     config.riotApi.cacheTtl,
@@ -93,6 +101,7 @@ const of = (
     config,
     Logger,
     activeGameService,
+    challengesService,
     ddragonService,
     discordService,
     healthCheckService,
@@ -116,6 +125,7 @@ const load = (config: Config): Future<Context> => {
   const mongoCollection: MongoCollectionGetter = MongoCollectionGetter.fromWithDb(withDb)
 
   const activeGamePersistence = ActiveGamePersistence(Logger, mongoCollection)
+  const challengesPersistence = ChallengesPersistence(Logger, mongoCollection)
   const championMasteryPersistence = ChampionMasteryPersistence(Logger, mongoCollection)
   const championShardPersistence = ChampionShardPersistence(Logger, mongoCollection)
   const healthCheckPersistence = HealthCheckPersistence(withDb)
@@ -126,14 +136,20 @@ const load = (config: Config): Future<Context> => {
   const userPersistence = UserPersistence(Logger, mongoCollection)
 
   const httpClient = HttpClient(Logger)
-  const riotApiMockService = RiotApiMockService(Logger)
+  const mockService = MockService(Logger)
 
   const discordService = DiscordService(config.client, httpClient)
-  const riotApiService = RiotApiService(config, httpClient, riotApiMockService)
+  const riotApiService = RiotApiService(config, httpClient, mockService)
 
   const ddragonService = DDragonService(config.riotApi.cacheTtl, riotApiService)
 
-  const staticDataService = StaticDataService(Logger, httpClient, ddragonService)
+  const staticDataService = StaticDataService(
+    config,
+    Logger,
+    httpClient,
+    ddragonService,
+    mockService,
+  )
 
   const cronJobPubSub = PubSub<CronJobEvent>()
 
@@ -160,6 +176,7 @@ const load = (config: Config): Future<Context> => {
       const context = of(
         config,
         Logger,
+        challengesPersistence,
         championMasteryPersistence,
         championShardPersistence,
         healthCheckPersistence,
@@ -204,6 +221,7 @@ const load = (config: Config): Future<Context> => {
         Future.chain(() =>
           NonEmptyArray.sequence(Future.ApplicativeSeq)([
             activeGamePersistence.ensureIndexes,
+            challengesPersistence.ensureIndexes,
             championMasteryPersistence.ensureIndexes,
             championShardPersistence.ensureIndexes,
             leagueEntryPersistence.ensureIndexes,

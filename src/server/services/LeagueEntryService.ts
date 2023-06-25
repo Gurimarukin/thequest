@@ -44,12 +44,14 @@ const LeagueEntryService = (
       futureMaybe.alt<List<LeagueEntry>>(() =>
         pipe(
           riotApiService.riotgames.platform(platform).lol.leagueV4.entries.bySummoner(summonerId),
-          futureMaybe.bindTo('entries'),
-          futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
-          futureMaybe.chainFirstTaskEitherK(({ entries, insertedAt }) =>
-            leagueEntryPersistence.upsert({ summonerId, entries, insertedAt }),
+          futureMaybe.chainFirstTaskEitherK(entries =>
+            pipe(
+              Future.fromIO(DayJs.now),
+              Future.chain(insertedAt =>
+                leagueEntryPersistence.upsert({ summonerId, entries, insertedAt }),
+              ),
+            ),
           ),
-          futureMaybe.map(({ entries }) => entries),
         ),
       ),
     ),

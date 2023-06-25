@@ -10,6 +10,7 @@ import { Maybe, Tuple } from '../../shared/utils/fp'
 
 import { Navigate } from '../components/Navigate'
 import { useHistory } from '../contexts/HistoryContext'
+import { Factions } from '../domain/Factions'
 import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { NotFound } from '../domain/NotFound'
@@ -52,6 +53,7 @@ const titleWithElementParser = zero<ElementWithTitle>()
     ),
   )
   .alt(appParsers.aram.map(() => t(<Aram />, 'ARAM')))
+  .alt(appParsers.factions.map(() => t(<Factions />, 'Factions')))
   .alt(appParsers.login.map(() => t(<Login />, 'Connexion')))
   .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
   .alt(appParsers.discordRedirect.map(() => t(<DiscordRedirect />)))

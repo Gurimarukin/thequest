@@ -11,5 +11,7 @@ export const DictUtils = {
     entries: Object.entries as <K extends string, A>(
       r: PartialDict<K, A>,
     ) => List<Tuple<K, A | undefined>>,
+
+    values: Object.values as <A>(r: PartialDict<string, A>) => List<A>,
   },
 }

@@ -13,6 +13,7 @@ import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
+import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
@@ -23,6 +24,7 @@ import { SummonerMasteriesView } from '../../shared/models/api/summoner/Summoner
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
+import { ListUtils } from '../../shared/utils/ListUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import {
   Either,
@@ -46,6 +48,7 @@ import type { TokenContent } from '../models/user/TokenContent'
 import type { WikiaChampionData } from '../models/wikia/WikiaChampionData'
 import { WikiaChampionPosition } from '../models/wikia/WikiaChampionPosition'
 import type { ActiveGameService } from '../services/ActiveGameService'
+import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerService } from '../services/SummonerService'
@@ -64,6 +67,7 @@ type SummonerController = ReturnType<typeof SummonerController>
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (
   activeGameService: ActiveGameService,
+  challengesService: ChallengesService,
   leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
   summonerService: SummonerService,
@@ -84,6 +88,20 @@ const SummonerController = (
           findMasteries(platform, maybeUser),
         ),
 
+    challenges: (platform: Platform, summonerName: string): EndedMiddleware =>
+      pipe(
+        summonerService.findByName(platform, summonerName),
+        Future.map(Either.fromOption(() => 'Summoner not found')),
+        futureEither.chain(summoner =>
+          pipe(
+            challengesService.findBySummoner(summoner.platform, summoner.puuid),
+            Future.map(Either.fromOption(() => 'Challenges not found')),
+          ),
+        ),
+        M.fromTaskEither,
+        M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(ChallengesView.codec))),
+      ),
+
     activeGame:
       (platform: Platform, summonerName: string) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
@@ -91,7 +109,7 @@ const SummonerController = (
           summonerService.findByName(platform, summonerName),
           Future.map(Either.fromOption(() => 'Summoner not found')),
           futureEither.chain(summoner =>
-            pipe(activeGame(platform, summoner, maybeUser), Future.map(Either.right)),
+            pipe(activeGame(summoner, maybeUser), Future.map(Either.right)),
           ),
           M.fromTaskEither,
           M.ichain(
@@ -167,8 +185,10 @@ const SummonerController = (
       userService.listChampionShardsForSummoner(user.id, summoner.id),
       TObservable.chainEitherK(({ champion, count, updatedWhenChampionLevel }) =>
         pipe(
-          masteries,
-          List.findFirst(m => ChampionKey.Eq.equals(m.championId, champion)),
+          pipe(
+            masteries,
+            ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
+          )(champion),
           Maybe.map(m => m.championLevel),
           Maybe.getOrElse((): ChampionLevelOrZero => 0),
           shouldNotifyChampionLeveledUp(count)(updatedWhenChampionLevel),
@@ -192,12 +212,11 @@ const SummonerController = (
   }
 
   function activeGame(
-    platform: Platform,
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
   ): Future<Maybe<SummonerActiveGameView>> {
     return pipe(
-      activeGameService.findBySummoner(platform, summoner.id),
+      activeGameService.findBySummoner(summoner.platform, summoner.id),
       futureMaybe.bindTo('game'),
       futureMaybe.bind('champions', () =>
         pipe(staticDataService.wikiaChampions, futureMaybe.fromTaskEither),
@@ -207,7 +226,7 @@ const SummonerController = (
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(
-              enrichParticipant(platform, maybeUser, game.insertedAt),
+              enrichParticipant(summoner.platform, maybeUser, game.insertedAt),
             ),
           ),
           Future.map<
@@ -274,10 +293,10 @@ const SummonerController = (
                       monoid.concatAll(number.MonoidSum),
                     ),
                     champion: pipe(
-                      masteries,
-                      List.findFirst(m =>
-                        ChampionKey.Eq.equals(m.championId, participant.championId),
-                      ),
+                      pipe(
+                        masteries,
+                        ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
+                      )(participant.championId),
                       Maybe.map(
                         (m): ActiveGameChampionMasteryView => ({
                           championLevel: m.championLevel,
@@ -343,13 +362,17 @@ const sortTeamParticipants =
   (
     participants: NonEmptyArray<ActiveGameParticipantView>,
   ): NonEmptyArray<ActiveGameParticipantView> => {
+    const championByKey = pipe(
+      champions,
+      ListUtils.findFirstBy(ChampionKey.Eq)(c => c.id),
+    )
+
     // we won't be able to do much without associated wikia positions
     const { left: championNotFound, right: championFound } = pipe(
       participants,
       List.partitionMap(p =>
         pipe(
-          champions,
-          List.findFirst(c => ChampionKey.Eq.equals(c.id, p.championId)),
+          championByKey(p.championId),
           Maybe.map(c => Tuple.of(p, c)),
           Either.fromOption(() => p),
         ),
