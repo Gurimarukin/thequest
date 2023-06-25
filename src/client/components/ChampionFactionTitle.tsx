@@ -2,18 +2,16 @@ import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
 import type { SWRResponse } from 'swr'
 
-import { ChallengeView } from '../../shared/models/api/challenges/ChallengeView'
-import type { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
+import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import { ChampionFactionOrNone } from '../../shared/models/api/champion/ChampionFaction'
 import type { Dict } from '../../shared/utils/fp'
 import { Maybe } from '../../shared/utils/fp'
 
-import { InformationCircleOutline } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
+import { Challenge } from './Challenge'
 import { ChampionFactionImg } from './ChampionFactionImg'
 import { Loading } from './Loading'
-import { Tooltip } from './tooltip/Tooltip'
 
 type ChampionFactionTitleProps = {
   challenges: Maybe<SWRResponse<ChallengesView, unknown>>
@@ -26,27 +24,16 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
   faction,
   className,
 }) => {
-  const hoverRef = useRef<HTMLHeadingElement>(null)
-  const placementRef = useRef<HTMLSpanElement>(null)
+  const hoverRef = useRef<HTMLDivElement>(null)
   return (
     <div className={cx('col-span-full flex', className)}>
-      <h2 ref={hoverRef} className="flex items-center gap-2 text-sm">
-        {faction !== 'none' ? <ChampionFactionImg faction={faction} className="h-7 w-7" /> : null}
-        <span>{ChampionFactionOrNone.label[faction]}</span>
-        {faction !== 'none' ? (
-          <>
-            <span ref={placementRef}>
-              <InformationCircleOutline className="h-4" />
-            </span>
-            <Tooltip
-              hoverRef={hoverRef}
-              placementRef={placementRef}
-              className="max-w-xl !whitespace-normal break-normal py-2"
-            >
-              Défi : <i>{tooltip[faction]}</i>
-            </Tooltip>
-
-            {pipe(
+      <div ref={hoverRef} className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          {faction !== 'none' ? <ChampionFactionImg faction={faction} className="h-7 w-7" /> : null}
+          <span>{ChampionFactionOrNone.label[faction]}</span>
+        </div>
+        {faction !== 'none'
+          ? pipe(
               challenges,
               Maybe.fold(
                 () => null,
@@ -56,20 +43,31 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
                   ) : data === undefined ? (
                     <Loading className="h-4" />
                   ) : (
-                    <pre>
-                      {JSON.stringify(Maybe.codec(ChallengeView.codec).encode(data[faction]))}
-                    </pre>
+                    <Challenge
+                      id={ChallengesView.id[faction]}
+                      name={challengeName[faction]}
+                      tier={pipe(
+                        data[faction],
+                        Maybe.chain(c => c.level),
+                      )}
+                      value={pipe(
+                        data[faction],
+                        Maybe.map(c => c.value),
+                      )}
+                      thresholds={thresholds}
+                      hoverRef={hoverRef}
+                      iconClassName="h-7"
+                    />
                   ),
               ),
-            )}
-          </>
-        ) : null}
-      </h2>
+            )
+          : null}
+      </div>
     </div>
   )
 }
 
-const tooltip: Dict<ChampionFaction, string> = {
+const challengeName: Dict<ChampionFaction, string> = {
   bandle: '5 sur 5',
   bilgewater: 'Naufrageurs',
   demacia: 'POUR DEMACIA',
@@ -79,8 +77,15 @@ const tooltip: Dict<ChampionFaction, string> = {
   noxus: 'La force avant tout',
   piltover: 'Innovateurs',
   shadowIsles: 'Terreurs des îles',
-  shurima: 'Artistes shurimatiaux',
+  shurima: 'Artistes shurimartiaux',
   targon: 'Maîtres de la montagne',
   void: '(Cris inhumains)',
   zaun: 'Troupe techno-chimique',
+}
+
+const thresholds = {
+  GOLD: 1,
+  PLATINUM: 3,
+  DIAMOND: 6,
+  MASTER: 10,
 }

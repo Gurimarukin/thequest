@@ -1,7 +1,8 @@
 import * as C from 'io-ts/Codec'
 
-import type { Dict } from '../../../utils/fp'
-import { Maybe } from '../../../utils/fp'
+import { ChallengeId } from '../../../../server/models/riot/ChallengId'
+
+import { type Dict, Maybe } from '../../../utils/fp'
 import type { ChampionFaction } from '../champion/ChampionFaction'
 import { ChallengeView } from './ChallengeView'
 
@@ -27,6 +28,22 @@ const properties: Dict<ChampionFaction, typeof maybeChallengeCodec> = {
 
 const codec = C.struct(properties)
 
-const ChallengesView = { codec }
+const id: Dict<ChampionFaction, ChallengeId> = {
+  bandle: ChallengeId.wrap(303501),
+  bilgewater: ChallengeId.wrap(303502),
+  demacia: ChallengeId.wrap(303503),
+  freljord: ChallengeId.wrap(303504),
+  ionia: ChallengeId.wrap(303505),
+  ixtal: ChallengeId.wrap(303506),
+  noxus: ChallengeId.wrap(303507),
+  piltover: ChallengeId.wrap(303508),
+  shadowIsles: ChallengeId.wrap(303509),
+  shurima: ChallengeId.wrap(303510),
+  targon: ChallengeId.wrap(303511),
+  void: ChallengeId.wrap(303512),
+  zaun: ChallengeId.wrap(303513),
+}
+
+const ChallengesView = { id, codec }
 
 export { ChallengesView }

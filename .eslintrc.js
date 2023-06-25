@@ -45,6 +45,7 @@ module.exports = {
       {
         ignoredTypeNames: [
           'AccessToken',
+          'ChallengeId',
           'ChampionEnglishName',
           'ChampionId',
           'ChampionKey',
