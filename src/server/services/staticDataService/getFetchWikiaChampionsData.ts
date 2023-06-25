@@ -4,16 +4,14 @@ import * as luainjs from 'lua-in-js'
 
 import type { LoggerType } from '../../../shared/models/logger/LoggerType'
 import { DictUtils } from '../../../shared/utils/DictUtils'
-import { IO, List } from '../../../shared/utils/fp'
-import { Either, Future, Try } from '../../../shared/utils/fp'
+import { Either, Future, IO, List, Try } from '../../../shared/utils/fp'
 import { decodeError, decodeErrorString } from '../../../shared/utils/ioTsUtils'
 
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { RawWikiaChampionsData } from '../../models/wikia/RawWikiaChampionsData'
-import { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
-import { RawWikiaChampionData } from '../../models/wikia/WikiaChampionData'
+import { RawWikiaChampionData, WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 
 const championDataUrl = `${constants.lolWikiaDomain}/wiki/Module:ChampionData/data`
 
@@ -45,7 +43,6 @@ export const wikiaChampionsDataFromHtml =
         Error(`[${championDataUrl}] empty text content for selector: ${mwCodeClassName}`),
       )(mwCode => mwCode.textContent),
       Try.chain(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
-      // Future.chainEitherK(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
       Try.chain(u =>
         pipe(
           RawWikiaChampionsData.decoder.decode(u),
