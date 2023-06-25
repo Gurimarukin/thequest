@@ -10,7 +10,9 @@ export const MaskedImage: React.FC<Props> = ({ src, className }) => (
     className={cx('bg-current', className)}
     style={{
       maskImage: `url(${src})`,
+      WebkitMaskImage: `url(${src})`,
       maskSize: '100% 100%, contain',
+      WebkitMaskSize: '100% 100%, contain',
     }}
   />
 )
