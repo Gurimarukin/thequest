@@ -5,36 +5,23 @@ import type { AramData } from '../../shared/models/api/AramData'
 import { WikiaStatsBalance } from '../../shared/models/wikia/WikiaStatsBalance'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { createEnum } from '../../shared/utils/createEnum'
-import type { NonEmptyArray, PartialDict } from '../../shared/utils/fp'
 import { List, Maybe } from '../../shared/utils/fp'
 
-type ChampionCategory = typeof e.T
+type ChampionAramCategory = typeof e.T
 
 const e = createEnum('buffed', 'nerfed', 'other', 'balanced')
 
-type AramChampion = {
-  aram: AramData
-}
-
-const groupChampions = <A extends AramChampion>(
-  champions: List<A>,
-): PartialDict<ChampionCategory, NonEmptyArray<A>> =>
-  pipe(
-    champions,
-    List.groupBy(champion => fromAramData(champion.aram)),
-  )
-
-const fromAramData = (aram: AramData): ChampionCategory =>
+const fromAramData = (aram: AramData): ChampionAramCategory =>
   pipe(
     aram.stats,
-    Maybe.map((stats): ChampionCategory => {
+    Maybe.map((stats): ChampionAramCategory => {
       const normalized = normalizeStats(stats)
       return normalized < 0 ? 'nerfed' : 0 < normalized ? 'buffed' : 'other'
     }),
     Maybe.getOrElse(() =>
       pipe(
         aram.spells,
-        Maybe.fold<unknown, ChampionCategory>(
+        Maybe.fold<unknown, ChampionAramCategory>(
           () => 'balanced',
           () => 'other',
         ),
@@ -57,6 +44,6 @@ const normalizeStats = (stats: WikiaStatsBalance): number =>
     monoid.concatAll(number.MonoidSum),
   )
 
-const ChampionCategory = { values: e.values, groupChampions, fromAramData, Eq: e.Eq }
+const ChampionAramCategory = { values: e.values, fromAramData, Eq: e.Eq }
 
-export { ChampionCategory }
+export { ChampionAramCategory }

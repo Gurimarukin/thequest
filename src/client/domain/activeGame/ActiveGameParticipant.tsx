@@ -8,12 +8,14 @@ import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/a
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import type { RuneId } from '../../../shared/models/api/perk/RuneId'
+import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import type { Dict, List } from '../../../shared/utils/fp'
+import type { Dict } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
@@ -51,9 +53,9 @@ type SquarePropsRest = Pick<
 >
 
 type ParticipantProps = {
-  summonerSpells: List<StaticDataSummonerSpell>
-  runeStyles: List<StaticDataRuneStyle>
-  runes: List<StaticDataRune>
+  summonerSpellByKey: (key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>
+  runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
+  runeById: (id: RuneId) => Maybe<StaticDataRune>
   platform: Platform
   mapId: MapId
   teamId: TeamId
@@ -67,9 +69,9 @@ type ParticipantProps = {
 }
 
 export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
-  summonerSpells,
-  runeStyles,
-  runes,
+  summonerSpellByKey,
+  runeStyleById,
+  runeById,
   platform,
   mapId,
   teamId,
@@ -88,50 +90,53 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   reverse,
   index,
 }) => {
-  const { champions, assets } = useStaticData()
+  const { championByKey, assets } = useStaticData()
 
   const percentsRef = useRef<HTMLSpanElement>(null)
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
   const championRef = useRef<HTMLDivElement>(null)
   const aramRef = useRef<HTMLDivElement>(null)
 
-  const spell1 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell1Id))
-  const spell2 = summonerSpells.find(s => SummonerSpellKey.Eq.equals(s.key, spell2Id))
+  const spell1 = summonerSpellByKey(spell1Id)
+  const spell2 = summonerSpellByKey(spell2Id)
 
-  const champion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
+  const champion = championByKey(championId)
   const isHowlingAbyss = MapId.isHowlingAbyss(mapId)
-  const squareProps: ChampionMasterySquareProps | undefined =
-    champion !== undefined
-      ? {
-          championId,
-          name: champion.name,
-          shardsCount: pipe(
-            shardsCount,
-            Maybe.filter(c => c !== 0),
+  const squareProps = pipe(
+    champion,
+    Maybe.map(
+      (c): ChampionMasterySquareProps => ({
+        championId,
+        name: c.name,
+        shardsCount: pipe(
+          shardsCount,
+          Maybe.filter(n => n !== 0),
+        ),
+        positions: c.positions,
+        factions: c.factions,
+        setChampionShards: null,
+        ...pipe(
+          masteries,
+          Maybe.chain(m => m.champion),
+          Maybe.fold<ActiveGameChampionMasteryView, SquarePropsRest>(
+            () => ({
+              chestGranted: false,
+              tokensEarned: 0,
+              championLevel: 0,
+              championPoints: 0,
+              championPointsSinceLastLevel: 0,
+              championPointsUntilNextLevel: 0,
+              percents: 0,
+            }),
+            m => ({ ...m, percents: Business.championPercents(m) }),
           ),
-          positions: champion.positions,
-          setChampionShards: null,
-          ...pipe(
-            masteries,
-            Maybe.chain(m => m.champion),
-            Maybe.fold<ActiveGameChampionMasteryView, SquarePropsRest>(
-              () => ({
-                chestGranted: false,
-                tokensEarned: 0,
-                championLevel: 0,
-                championPoints: 0,
-                championPointsSinceLastLevel: 0,
-                championPointsUntilNextLevel: 0,
-                percents: 0,
-              }),
-              m => ({ ...m, percents: Business.championPercents(m) }),
-            ),
-          ),
-          tooltipHoverRef: championRef,
-          centerShards: true,
-          noShadow: true,
-        }
-      : undefined
+        ),
+        tooltipHoverRef: championRef,
+        centerShards: true,
+        noShadow: true,
+      }),
+    ),
+  )
 
   const [bevelHeight, setBevelHeight] = useState(0)
   const onBevelMount = useRefWithResize<HTMLElement>(
@@ -214,64 +219,86 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     child('ul', 4)(
       { className: cx('flex flex-col justify-between items-center py-[13px]', padding) },
       <li className="h-7 w-7">
-        {spell1 !== undefined ? (
-          <SummonerSpell spell={spell1} className="h-full w-full" />
-        ) : (
-          <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
+        {pipe(
+          spell1,
+          Maybe.fold(
+            () => <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>,
+            s => <SummonerSpell spell={s} className="h-full w-full" />,
+          ),
         )}
       </li>,
       <li className="h-7 w-7">
-        {spell2 !== undefined ? (
-          <SummonerSpell spell={spell2} className="h-full w-full" />
-        ) : (
-          <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>
+        {pipe(
+          spell2,
+          Maybe.fold(
+            () => <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>,
+            s => <SummonerSpell spell={s} className="h-full w-full" />,
+          ),
         )}
       </li>,
     ),
     child('div', 5)(
       { className: cx('flex flex-col gap-px text-2xs', padding) },
-      squareProps !== undefined ? (
-        <>
-          <span className="invisible">h</span>
-          <div ref={championRef} className="flex flex-col items-center gap-px">
-            <ChampionMasterySquare {...squareProps} />
-            <span className={cx(['invisible', squareProps.championLevel < 5])}>
-              {round(squareProps.championPoints / 1000, 1).toLocaleString()}k
-            </span>
-          </div>
-        </>
-      ) : (
-        <>
-          <span className="invisible">h</span>
-          <div className="h-16 w-16 bg-black text-2xs">
-            Champion {ChampionKey.unwrap(championId)}
-          </div>
-          <span className="invisible">h</span>
-        </>
+      pipe(
+        squareProps,
+        Maybe.fold(
+          () => (
+            <>
+              <span className="invisible">h</span>
+              <div className="h-16 w-16 bg-black text-2xs">
+                Champion {ChampionKey.unwrap(championId)}
+              </div>
+              <span className="invisible">h</span>
+            </>
+          ),
+          props => (
+            <>
+              <span className="invisible">h</span>
+              <div ref={championRef} className="flex flex-col items-center gap-px">
+                <ChampionMasterySquare {...props} />
+                <span className={cx(['invisible', props.championLevel < 5])}>
+                  {round(props.championPoints / 1000, 1).toLocaleString()}k
+                </span>
+              </div>
+            </>
+          ),
+        ),
       ),
     ),
     child('div', 6)(
       { className: cx('flex', padding) },
-      champion !== undefined && isHowlingAbyss ? (
-        <>
-          <div
-            ref={aramRef}
-            className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
-              'flex-row-reverse',
-              reverse,
-            ])}
-          >
-            <ActiveGameAramStats reverse={reverse} aram={champion.aram} />
-          </div>
-          <Tooltip hoverRef={aramRef}>
-            <AramTooltip aram={champion.aram} />
-          </Tooltip>
-        </>
-      ) : undefined,
+      pipe(
+        champion,
+        Maybe.filter(() => isHowlingAbyss),
+        Maybe.fold(
+          () => null,
+          c => (
+            <>
+              <div
+                ref={aramRef}
+                className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
+                  'flex-row-reverse',
+                  reverse,
+                ])}
+              >
+                <ActiveGameAramStats reverse={reverse} aram={c.aram} />
+              </div>
+              <Tooltip hoverRef={aramRef}>
+                <AramTooltip aram={c.aram} />
+              </Tooltip>
+            </>
+          ),
+        ),
+      ),
     ),
     child('div', 7)(
       { className: cx('flex items-center py-1', padding) },
-      <ActiveGameRunes runeStyles={runeStyles} runes={runes} perks={perks} reverse={reverse} />,
+      <ActiveGameRunes
+        runeStyleById={runeStyleById}
+        runeById={runeById}
+        perks={perks}
+        reverse={reverse}
+      />,
     ),
     child('div', 8)({}),
     child('div', 9)(

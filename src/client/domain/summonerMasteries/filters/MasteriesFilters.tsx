@@ -7,12 +7,15 @@ import { lens } from 'monocle-ts'
 import type React from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
+import { ChampionFactionOrNone } from '../../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
 import type { NonEmptyArray } from '../../../../shared/utils/fp'
 import { List, Maybe } from '../../../../shared/utils/fp'
 
+import { ChampionFactionImg } from '../../../components/ChampionFactionImg'
 import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
+import { MaskedImage } from '../../../components/MaskedImage'
 import { MasteryImg } from '../../../components/MasteryImg'
 import { Radios, labelValue } from '../../../components/Radios'
 import type { SearchChampionRef } from '../../../components/SearchChampion'
@@ -20,7 +23,7 @@ import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
-import { HowlingAbyssSimple } from '../../../imgs/HowlingAbyss'
+import { Assets } from '../../../imgs/Assets'
 import {
   AppsSharp,
   CaretDownOutline,
@@ -28,6 +31,7 @@ import {
   DiceFilled,
   StatsChartSharp,
 } from '../../../imgs/svgIcons'
+import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
@@ -67,7 +71,13 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
     [hideLevelsMenu, masteriesQuery.level, updateMasteriesQuery],
   )
 
-  const toggleLaneChecked = useCallback(
+  const toggleFactionChecked = useCallback(
+    (f: Endomorphism<ReadonlySet<ChampionFactionOrNone>>): void =>
+      updateMasteriesQuery(pipe(MasteriesQuery.Lens.faction, lens.modify(f))),
+    [updateMasteriesQuery],
+  )
+
+  const togglePositionChecked = useCallback(
     (f: Endomorphism<ReadonlySet<ChampionPosition>>): void =>
       updateMasteriesQuery(pipe(MasteriesQuery.Lens.position, lens.modify(f))),
     [updateMasteriesQuery],
@@ -98,8 +108,73 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
   const randomButtonRef = useRef<HTMLButtonElement>(null)
 
   return (
-    <div className="flex w-full max-w-7xl flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex w-full max-w-7xl flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
+          {labelValue(
+            'compact',
+            <IconLabel tooltip="Vue compacte" className="w-8">
+              <AppsSharp className="h-4" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'histogram',
+            <IconLabel tooltip="Vue histogramme" className="w-8">
+              <StatsChartSharp className="h-5 rotate-90 -scale-x-100" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'aram',
+            <IconLabel tooltip="Vue ARAM" className="w-8">
+              <HowlingAbyssSimple className="h-[18px]" />
+            </IconLabel>,
+          )}
+          {labelValue(
+            'factions',
+            <IconLabel tooltip="Vue factions" className="w-8">
+              <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px]" />
+            </IconLabel>,
+          )}
+        </Radios>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
+            {labelValue(
+              'percents',
+              <TextLabel
+                tooltip={`Trier par pourcents / ${
+                  Maybe.isSome(maybeUser) ? 'fragments / ' : ''
+                }points`}
+              >
+                %
+              </TextLabel>,
+            )}
+            {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
+            {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
+          </Radios>
+
+          <Radios<MasteriesQueryOrder>
+            name="order"
+            value={masteriesQuery.order}
+            setValue={setOrder}
+          >
+            {labelValue(
+              'desc',
+              <IconLabel tooltip="Tri décroissant" className="w-6">
+                <CaretDownOutline className="h-5" />
+              </IconLabel>,
+            )}
+            {labelValue(
+              'asc',
+              <IconLabel tooltip="Tri croissant" className="w-6">
+                <CaretUpOutline className="h-5" />
+              </IconLabel>,
+            )}
+          </Radios>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div onMouseLeave={hideLevelsMenu} className="relative">
           <Checkboxes<ChampionLevelOrZero>
             eq={ChampionLevelOrZero.Eq}
@@ -148,6 +223,38 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           </ul>
         </div>
 
+        <Checkboxes<ChampionFactionOrNone>
+          eq={ChampionFactionOrNone.Eq}
+          values={pipe(
+            ChampionFactionOrNone.values,
+            List.map(faction => ({
+              key: faction,
+              value: faction,
+              icon: isChecked =>
+                faction === 'none' ? (
+                  <span
+                    className={cx(
+                      'mt-[-3px] w-6 text-center text-lg',
+                      isChecked ? 'text-black' : 'text-wheat-bis',
+                    )}
+                  >
+                    ∅
+                  </span>
+                ) : (
+                  <ChampionFactionImg
+                    faction={faction}
+                    className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
+                  />
+                ),
+              label: ChampionFactionOrNone.label[faction],
+            })),
+          )}
+          checked={masteriesQuery.faction}
+          toggleChecked={toggleFactionChecked}
+          tooltipPlacement="top"
+          iconClassName="px-1"
+        />
+
         <Checkboxes<ChampionPosition>
           eq={ChampionPosition.Eq}
           values={pipe(
@@ -165,83 +272,32 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             })),
           )}
           checked={masteriesQuery.position}
-          toggleChecked={toggleLaneChecked}
+          toggleChecked={togglePositionChecked}
           tooltipPlacement="top"
-          iconClassName="p-1.5"
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <SearchChampion
-          ref={searchRef}
-          searchCount={searchCount}
-          initialSearch={masteriesQuery.search}
-          onChange={setQuerySearch}
+          iconClassName="px-1.5"
         />
 
-        <button
-          ref={randomButtonRef}
-          type="button"
-          onClick={handleRandomClick}
-          disabled={Maybe.isNone(randomChampion)}
-          className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
-        >
-          <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
-        </button>
-        <Tooltip hoverRef={randomButtonRef} placement="top">
-          Champion aléatoire
-        </Tooltip>
+        <div className="flex flex-wrap items-center gap-3">
+          <SearchChampion
+            ref={searchRef}
+            searchCount={searchCount}
+            initialSearch={masteriesQuery.search}
+            onChange={setQuerySearch}
+          />
 
-        <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
-          {labelValue(
-            'percents',
-            <TextLabel
-              tooltip={`Trier par pourcents / ${
-                Maybe.isSome(maybeUser) ? 'fragments / ' : ''
-              }points`}
-            >
-              %
-            </TextLabel>,
-          )}
-          {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
-          {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
-        </Radios>
-
-        <Radios<MasteriesQueryOrder> name="order" value={masteriesQuery.order} setValue={setOrder}>
-          {labelValue(
-            'desc',
-            <IconLabel tooltip="Tri décroissant">
-              <CaretDownOutline className="h-5" />
-            </IconLabel>,
-          )}
-          {labelValue(
-            'asc',
-            <IconLabel tooltip="Tri croissant">
-              <CaretUpOutline className="h-5" />
-            </IconLabel>,
-          )}
-        </Radios>
-
-        <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
-          {labelValue(
-            'compact',
-            <IconLabel tooltip="Vue compacte">
-              <AppsSharp className="h-4" />
-            </IconLabel>,
-          )}
-          {labelValue(
-            'histogram',
-            <IconLabel tooltip="Vue histogramme">
-              <StatsChartSharp className="h-5 rotate-90 -scale-x-100" />
-            </IconLabel>,
-          )}
-          {labelValue(
-            'aram',
-            <IconLabel tooltip="Vue ARAM">
-              <HowlingAbyssSimple className="h-[18px]" />
-            </IconLabel>,
-          )}
-        </Radios>
+          <button
+            ref={randomButtonRef}
+            type="button"
+            onClick={handleRandomClick}
+            disabled={Maybe.isNone(randomChampion)}
+            className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
+          >
+            <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
+          </button>
+          <Tooltip hoverRef={randomButtonRef} placement="top">
+            Champion aléatoire
+          </Tooltip>
+        </div>
       </div>
     </div>
   )
@@ -295,14 +351,18 @@ const getSelectLevelsButton =
 
 type SpanProps = {
   tooltip: React.ReactNode
+  className?: string
   children?: React.ReactNode
 }
 
-const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
+const TextLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
   const hoverRef = useRef<HTMLSpanElement>(null)
   return (
     <>
-      <span ref={hoverRef} className="flex h-6 w-10 items-center justify-center text-sm">
+      <span
+        ref={hoverRef}
+        className={cx('flex h-6 w-10 items-center justify-center text-sm', className)}
+      >
         {children}
       </span>
       <Tooltip hoverRef={hoverRef} placement="top">
@@ -312,11 +372,11 @@ const TextLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
   )
 }
 
-const IconLabel: React.FC<SpanProps> = ({ tooltip, children }) => {
+const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
   const hoverRef = useRef<HTMLSpanElement>(null)
   return (
     <>
-      <span ref={hoverRef} className="flex h-6 w-6 items-center justify-center">
+      <span ref={hoverRef} className={cx('flex h-6 items-center justify-center', className)}>
         {children}
       </span>
       <Tooltip hoverRef={hoverRef} placement="top">

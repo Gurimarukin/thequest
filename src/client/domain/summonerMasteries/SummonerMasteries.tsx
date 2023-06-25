@@ -12,7 +12,7 @@ import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMas
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import type { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
+import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
@@ -33,7 +33,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
-import { ChampionCategory } from '../../models/ChampionCategory'
+import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
@@ -46,8 +46,9 @@ import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
 import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
+import { useChallenges } from './useChallenges'
 
-const { cleanSummonerName, cleanChampionName } = StringUtils
+const { cleanChampionName } = StringUtils
 
 // should mutate data before API response
 type OptimisticMutation = {
@@ -64,12 +65,12 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
-    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).masteries.get,
-    methodWithUrl =>
+    apiRoutes.summoner.byName(platform, summonerName).masteries.get,
+    urlWithMethod =>
       pipe(
         historyStateRef.current.summonerMasteries,
         Maybe.fold(
-          () => http(methodWithUrl, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
+          () => http(urlWithMethod, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
           flow(
             Future.successful,
             Future.chainFirstIOK(
@@ -187,6 +188,8 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   const { addRecentSearch } = useUser()
   const { champions } = useStaticData()
 
+  const challenges = useChallenges(platform, summoner.name)
+
   useEffect(
     () =>
       addRecentSearch({
@@ -269,7 +272,11 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
         )}
       >
         <Summoner summoner={{ ...summoner, ...enrichedSummoner }} leagues={leagues} />
-        <Masteries masteries={enrichedMasteries} setChampionShards={setChampionShards} />
+        <Masteries
+          challenges={challenges}
+          masteries={enrichedMasteries}
+          setChampionShards={setChampionShards}
+        />
       </div>
       {pipe(
         notifications,
@@ -307,7 +314,7 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name, positions, aram }): EnrichedChampionMastery => {
+    List.map(({ key, name, positions, factions, aram }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -325,10 +332,15 @@ const enrichAll = (
         maybeSearch,
         Maybe.exists(search => cleanChampionName(name).includes(cleanChampionName(search))),
       )
+      const category = ChampionAramCategory.fromAramData(aram)
+      const faction = StaticDataChampion.getFaction(factions)
+      const isHidden = false
 
       return pipe(
-        masteries,
-        List.findFirst(c => ChampionKey.Eq.equals(c.championId, key)),
+        pipe(
+          masteries,
+          ListUtils.findFirstBy(ChampionKey.Eq)(c => c.championId),
+        )(key),
         Maybe.fold(
           (): EnrichedChampionMastery => ({
             championId: key,
@@ -343,9 +355,11 @@ const enrichAll = (
             shardsCount,
             glow,
             positions,
+            factions,
             aram,
-            category: ChampionCategory.fromAramData(aram),
-            isHidden: false,
+            category,
+            faction,
+            isHidden,
           }),
           champion => ({
             ...champion,
@@ -354,9 +368,11 @@ const enrichAll = (
             shardsCount,
             glow,
             positions,
+            factions,
             aram,
-            category: ChampionCategory.fromAramData(aram),
-            isHidden: false,
+            category,
+            faction,
+            isHidden,
           }),
         ),
       )
@@ -405,8 +421,10 @@ const getNotifications = (
           shardsToRemoveFromNotification,
           Maybe.chain(n =>
             pipe(
-              enrichedMasteries,
-              List.findFirst(c => ChampionKey.Eq.equals(c.championId, champion)),
+              pipe(
+                enrichedMasteries,
+                ListUtils.findFirstBy(ChampionKey.Eq)(c => c.championId),
+              )(champion),
               Maybe.map(
                 (c): ShardsToRemoveNotification => ({
                   championId: champion,
@@ -420,6 +438,7 @@ const getNotifications = (
                   tokensEarned: c.tokensEarned,
                   shardsCount: count,
                   positions: c.positions,
+                  factions: c.factions,
                   leveledUpFrom: n.leveledUpFrom,
                   shardsToRemove: n.shardsToRemove,
                 }),

@@ -3,6 +3,7 @@ import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
 import type { MyPartial } from '../../../shared/models/MyPartial'
+import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { Dict, List, Maybe } from '../../../shared/utils/fp'
@@ -17,27 +18,32 @@ type MasteriesQuery = {
   order: MasteriesQueryOrder
   view: MasteriesQueryView
   level: ReadonlySet<ChampionLevelOrZero>
+  faction: ReadonlySet<ChampionFactionOrNone>
   position: ReadonlySet<ChampionPosition>
   search: Maybe<string>
 }
 
-const queryLevelDefault: ReadonlySet<ChampionLevelOrZero> = new Set(
+const levelDefault: ReadonlySet<ChampionLevelOrZero> = new Set(
   pipe(
     ChampionLevelOrZero.values,
     List.filter(l => l !== 7),
   ),
 )
-const queryLevelEq = readonlySet.getEq(ChampionLevelOrZero.Eq)
+const levelEq = readonlySet.getEq(ChampionLevelOrZero.Eq)
 
-const queryLaneDefault: ReadonlySet<ChampionPosition> = new Set(ChampionPosition.values)
-const queryLaneEq = readonlySet.getEq(ChampionPosition.Eq)
+const positionDefault: ReadonlySet<ChampionPosition> = new Set(ChampionPosition.values)
+const positionEq = readonlySet.getEq(ChampionPosition.Eq)
+
+const factionDefault: ReadonlySet<ChampionFactionOrNone> = new Set(ChampionFactionOrNone.values)
+const factionEq = readonlySet.getEq(ChampionFactionOrNone.Eq)
 
 const fromPartial = (partial: PartialMasteriesQuery): MasteriesQuery => ({
   sort: partial.sort ?? MasteriesQuerySort.default,
   order: partial.order ?? MasteriesQueryOrder.default,
   view: partial.view ?? MasteriesQueryView.default,
-  level: partial.level ?? queryLevelDefault,
-  position: partial.position ?? queryLaneDefault,
+  level: partial.level ?? levelDefault,
+  faction: partial.faction ?? factionDefault,
+  position: partial.position ?? positionDefault,
   search: Maybe.fromNullable(partial.search),
 })
 
@@ -46,8 +52,9 @@ const toPartial = (query: MasteriesQuery): PartialMasteriesQuery => {
     sort: query.sort === MasteriesQuerySort.default ? undefined : query.sort,
     order: query.order === MasteriesQueryOrder.default ? undefined : query.order,
     view: query.view === MasteriesQueryView.default ? undefined : query.view,
-    level: queryLevelEq.equals(query.level, queryLevelDefault) ? undefined : query.level,
-    position: queryLaneEq.equals(query.position, queryLaneDefault) ? undefined : query.position,
+    level: levelEq.equals(query.level, levelDefault) ? undefined : query.level,
+    faction: factionEq.equals(query.faction, factionDefault) ? undefined : query.faction,
+    position: positionEq.equals(query.position, positionDefault) ? undefined : query.position,
     search: Maybe.toUndefined(query.search),
   }
   return pipe(
@@ -61,6 +68,7 @@ const Lens = {
   order: pipe(lens.id<MasteriesQuery>(), lens.prop('order')),
   view: pipe(lens.id<MasteriesQuery>(), lens.prop('view')),
   level: pipe(lens.id<MasteriesQuery>(), lens.prop('level')),
+  faction: pipe(lens.id<MasteriesQuery>(), lens.prop('faction')),
   position: pipe(lens.id<MasteriesQuery>(), lens.prop('position')),
   search: pipe(lens.id<MasteriesQuery>(), lens.prop('search')),
 }

@@ -57,12 +57,14 @@ const MasteriesService = (
           riotApiService.riotgames
             .platform(platform)
             .lol.championMasteryV4.championMasteries.bySummoner(summonerId),
-          futureMaybe.bindTo('champions'),
-          futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
-          futureMaybe.chainFirstTaskEitherK(({ champions, insertedAt }) =>
-            championMasteryPersistence.upsert({ summonerId, champions, insertedAt }),
+          futureMaybe.chainFirstTaskEitherK(champions =>
+            pipe(
+              Future.fromIO(DayJs.now),
+              Future.chain(insertedAt =>
+                championMasteryPersistence.upsert({ summonerId, champions, insertedAt }),
+              ),
+            ),
           ),
-          futureMaybe.map(({ champions }) => champions),
         ),
       ),
     ),

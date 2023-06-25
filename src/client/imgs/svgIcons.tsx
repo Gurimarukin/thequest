@@ -289,6 +289,17 @@ export const StatsChartSharp: SVGIcon = ({ className }) => (
   </svg>
 )
 
+// https://static.wikia.nocookie.net/leagueoflegends/images/f/fc/Challenge_CategoryIcon_Teamwork.svg
+export const TeamworkChallenges: SVGIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" className={className}>
+    <path
+      d="M2 4.31092C2 4.31092 6.22172 7.55158 9.88185 4.18414C13.542 0.8167 15.3333 2.34686 15.3333 2.34686L12.2222 12.6667H11.4379C11.4379 12.6667 12.1961 10.8619 7.52891 10.8619C2.39216 10.8619 2 4.31092 2 4.31092Z"
+      fill="currentColor"
+    />
+    <path d="M16.2223 2.44444H18.0001L13.5556 18H11.7778L16.2223 2.44444Z" fill="currentColor" />
+  </svg>
+)
+
 export const TimeOutline: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
     <path

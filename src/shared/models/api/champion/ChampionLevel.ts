@@ -28,6 +28,7 @@ const ChampionLevelOrZero = {
   stringCodec,
   stringify,
   Eq: eOrZero.Eq,
+  Ord: eOrZero.Ord,
 }
 
 export { ChampionLevel, ChampionLevelOrZero }

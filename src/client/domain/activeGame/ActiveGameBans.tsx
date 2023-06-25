@@ -3,7 +3,6 @@ import { useRef } from 'react'
 
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
-import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { PartialDict } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
 
@@ -43,13 +42,11 @@ type BanProps = {
 }
 
 const Ban: React.FC<BanProps> = ({ participant }) => {
-  const { champions } = useStaticData()
+  const { championByKey } = useStaticData()
 
   const ref = useRef<HTMLLIElement>(null)
 
-  const pickedChampion = champions.find(c =>
-    ChampionKey.Eq.equals(c.key, participant.championId),
-  )?.name
+  const pickedChampion = championByKey(participant.championId)
   const [children, tooltip] = pipe(
     participant.bannedChampion.championId,
     Maybe.fold(
@@ -68,8 +65,13 @@ const Ban: React.FC<BanProps> = ({ participant }) => {
           'Aucun.',
         ),
       championId => {
-        const bannedChampion = champions.find(c => ChampionKey.Eq.equals(c.key, championId))
-        const bannedChampionName = bannedChampion?.name ?? `<Champion ${championId}>`
+        const bannedChampionName = pipe(
+          championByKey(championId),
+          Maybe.fold(
+            () => `<Champion ${championId}>`,
+            c => c.name,
+          ),
+        )
         return Tuple.of(
           <CroppedChampionSquare
             ref={ref}
@@ -93,7 +95,13 @@ const Ban: React.FC<BanProps> = ({ participant }) => {
         <span className="text-2xs">banni par</span>
         <span>
           {participant.summonerName}
-          {pickedChampion !== undefined ? ` (${pickedChampion})` : null}
+          {pipe(
+            pickedChampion,
+            Maybe.fold(
+              () => null,
+              c => ` (${c.name})`,
+            ),
+          )}
         </span>
         <span className="text-2xs">au tour {participant.bannedChampion.pickTurn}</span>
       </Tooltip>

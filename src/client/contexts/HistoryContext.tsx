@@ -12,8 +12,8 @@ import type { SummonerMasteriesView } from '../../shared/models/api/summoner/Sum
 import { Either, Maybe } from '../../shared/utils/fp'
 
 import type { ChildrenFC } from '../models/ChildrenFC'
-import { AramQuery } from '../models/aramQuery/AramQuery'
-import { PartialAramQuery } from '../models/aramQuery/PartialAramQuery'
+import { GenericQuery } from '../models/genericQuery/GenericQuery'
+import { PartialGenericQuery } from '../models/genericQuery/PartialGenericQuery'
 import { MasteriesQuery } from '../models/masteriesQuery/MasteriesQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
 
@@ -29,8 +29,8 @@ type HistoryContext = {
   masteriesQuery: MasteriesQuery
   updateMasteriesQuery: (f: (q: MasteriesQuery) => MasteriesQuery) => void
 
-  aramQuery: AramQuery
-  updateAramQuery: (f: (q: AramQuery) => AramQuery) => void
+  genericQuery: GenericQuery
+  updateGenericQuery: (f: (q: GenericQuery) => GenericQuery) => void
 }
 
 export type NavigateOptions = {
@@ -70,7 +70,7 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const masteriesQuery = useMemo(
-    () =>
+    (): MasteriesQuery =>
       pipe(
         PartialMasteriesQuery.decoder.decode(query),
         Either.getOrElse(() => ({})),
@@ -89,20 +89,22 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
     [h, masteriesQuery],
   )
 
-  const aramQuery = useMemo(
-    () =>
+  const genericQuery = useMemo(
+    (): GenericQuery =>
       pipe(
-        PartialAramQuery.decoder.decode(query),
+        PartialGenericQuery.decoder.decode(query),
         Either.getOrElse(() => ({})),
-        MasteriesQuery.fromPartial,
+        GenericQuery.fromPartial,
       ),
     [query],
   )
 
-  const updateAramQuery = useCallback(
-    (f: (q: AramQuery) => AramQuery) =>
-      h.replace({ search: pipe(f(aramQuery), AramQuery.toPartial, PartialAramQuery.qsStringify) }),
-    [aramQuery, h],
+  const updateGenericQuery = useCallback(
+    (f: (q: GenericQuery) => GenericQuery) =>
+      h.replace({
+        search: pipe(f(genericQuery), GenericQuery.toPartial, PartialGenericQuery.qsStringify),
+      }),
+    [genericQuery, h],
   )
 
   const value: HistoryContext = {
@@ -114,8 +116,8 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
     matchLocation,
     masteriesQuery,
     updateMasteriesQuery,
-    aramQuery,
-    updateAramQuery,
+    genericQuery,
+    updateGenericQuery,
   }
 
   return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>

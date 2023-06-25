@@ -1,5 +1,5 @@
 import { readonlySet } from 'fp-ts'
-import type { Eq } from 'fp-ts/Eq'
+import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
@@ -8,6 +8,7 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
+import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { PartialDict } from '../../../shared/utils/fp'
@@ -27,12 +28,17 @@ const properties = {
   view: MasteriesQueryView.codec,
   level: setFromStringOrAllCodec(
     ChampionLevelOrZero.stringCodec,
-    ChampionLevelOrZero.Eq,
+    ChampionLevelOrZero.Ord,
     new Set(ChampionLevelOrZero.values),
+  ),
+  faction: setFromStringOrAllCodec(
+    ChampionFactionOrNone.codec,
+    ChampionFactionOrNone.Ord,
+    new Set(ChampionFactionOrNone.values),
   ),
   position: setFromStringOrAllCodec(
     ChampionPosition.codec,
-    ChampionPosition.Eq,
+    ChampionPosition.Ord,
     new Set(ChampionPosition.values),
   ),
   search: NonEmptyString.codec,
@@ -52,11 +58,11 @@ export { PartialMasteriesQuery }
 
 function setFromStringOrAllCodec<A>(
   codec: Codec<unknown, string, A>,
-  eq_: Eq<A>,
+  ord: Ord<A>,
   allValues: ReadonlySet<A>,
 ): Codec<unknown, string, ReadonlySet<A>> {
-  const setCodec = SetFromString.codec(codec, eq_)
-  const setEq = readonlySet.getEq(eq_)
+  const setCodec = SetFromString.codec(codec, ord)
+  const setEq = readonlySet.getEq(ord)
   return C.make(
     D.union(
       pipe(

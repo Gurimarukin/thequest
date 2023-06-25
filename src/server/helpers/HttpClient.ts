@@ -24,21 +24,21 @@ const HttpClient = (Logger: LoggerGetter) => {
   const logger = Logger('HttpClient')
 
   function http<O, B>(
-    methodWithUrl: Tuple<string, Method>,
+    urlWithMethod: Tuple<string, Method>,
     options?: HttpOptions<O, B>,
   ): Future<unknown>
   function http<A, O, B>(
-    methodWithUrl: Tuple<string, Method>,
+    urlWithMethod: Tuple<string, Method>,
     options: HttpOptions<O, B>,
     decoderWithName: Tuple<Decoder<unknown, A>, string>,
   ): Future<A>
   function http<A, O, B>(
-    methodWithUrl: Tuple<string, Method>,
+    urlWithMethod: Tuple<string, Method>,
     options?: HttpOptions<O, B>,
     decoderWithName?: Tuple<Decoder<unknown, A>, string>,
   ): Future<A> {
     return pipe(
-      text(methodWithUrl, options),
+      text(urlWithMethod, options),
       Future.chainEitherK(flow(fpTsJson.parse, Either.mapLeft(unknownToError))),
       Future.chainEitherK(u => {
         if (decoderWithName === undefined) return Either.right(u as A)

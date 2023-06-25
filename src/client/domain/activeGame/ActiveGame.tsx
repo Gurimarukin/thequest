@@ -2,7 +2,7 @@
                   functional/no-return-void */
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
@@ -12,7 +12,14 @@ import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
+import { RuneId } from '../../../shared/models/api/perk/RuneId'
+import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
+import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
+import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
+import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
+import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
@@ -37,7 +44,7 @@ import {
 } from './ActiveGameParticipant'
 import { useShouldWrap } from './useShouldWrap'
 
-const { cleanSummonerName, pad10 } = StringUtils
+const { pad10 } = StringUtils
 
 const reloadInterval = MsDuration.seconds(10)
 const timerInterval = MsDuration.second(1)
@@ -51,7 +58,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSWRHttp(
-    apiRoutes.summoner.byName(platform, cleanSummonerName(summonerName)).activeGame.get,
+    apiRoutes.summoner.byName(platform, summonerName).activeGame.get,
     {},
     [Maybe.decoder(SummonerActiveGameView.codec), 'Maybe<SummonerActiveGameView>'],
     {
@@ -168,6 +175,33 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 }) => {
   const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
 
+  const summonerSpellByKey = useMemo(
+    (): ((key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>) =>
+      pipe(
+        additionalStaticData.summonerSpells,
+        ListUtils.findFirstBy(SummonerSpellKey.Eq)(s => s.key),
+      ),
+    [additionalStaticData.summonerSpells],
+  )
+
+  const runeStyleById = useMemo(
+    (): ((id: RuneStyleId) => Maybe<StaticDataRuneStyle>) =>
+      pipe(
+        additionalStaticData.runeStyles,
+        ListUtils.findFirstBy(RuneStyleId.Eq)(s => s.id),
+      ),
+    [additionalStaticData.runeStyles],
+  )
+
+  const runeById = useMemo(
+    (): ((id: RuneId) => Maybe<StaticDataRune>) =>
+      pipe(
+        additionalStaticData.runes,
+        ListUtils.findFirstBy(RuneId.Eq)(s => s.id),
+      ),
+    [additionalStaticData.runes],
+  )
+
   return (
     <div
       className={cx(
@@ -215,9 +249,9 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
               {participants[teamId]?.map((participant, j) => (
                 <ActiveGameParticipant
                   key={participant.summonerName}
-                  summonerSpells={additionalStaticData.summonerSpells}
-                  runeStyles={additionalStaticData.runeStyles}
-                  runes={additionalStaticData.runes}
+                  summonerSpellByKey={summonerSpellByKey}
+                  runeStyleById={runeStyleById}
+                  runeById={runeById}
                   platform={platform}
                   mapId={mapId}
                   teamId={teamId}

@@ -24,7 +24,7 @@ const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
   isDev: boolean
-  mockRiotApi: boolean
+  mock: boolean
   logLevel: LogLevelOrOff
   client: ClientConfig
   http: HttpConfig
@@ -66,6 +66,7 @@ export type RiotApiCacheTtlConfig = {
   ddragonLatestVersion: MsDuration
   activeGame: MsDuration
   activeGameLoading: MsDuration // If the game is loading, cache it less longer
+  challenges: MsDuration
   leagueEntries: MsDuration
   masteries: MsDuration
   summoner: MsDuration
@@ -84,8 +85,8 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         r(Maybe.decoder(BooleanFromString.decoder))('IS_DEV'),
         Either.map(Maybe.getOrElse(() => false)),
       ),
-      mockRiotApi: pipe(
-        r(Maybe.decoder(BooleanFromString.decoder))('MOCK_RIOT_API'),
+      mock: pipe(
+        r(Maybe.decoder(BooleanFromString.decoder))('MOCK'),
         Either.map(Maybe.getOrElse(() => false)),
       ),
       logLevel: r(LogLevelOrOff.codec)('LOG_LEVEL'),
@@ -136,6 +137,7 @@ const riotApiCacheTtl = (infiniteCache: boolean): RiotApiCacheTtlConfig => {
 
     activeGame: infiniteCache ? infinity : MsDuration.minutes(3),
     activeGameLoading: infiniteCache ? infinity : MsDuration.seconds(5),
+    challenges: infiniteCache ? infinity : MsDuration.seconds(3),
     leagueEntries: infiniteCache ? infinity : MsDuration.minutes(3),
     masteries: infiniteCache ? infinity : MsDuration.minutes(3),
     summoner: infiniteCache ? infinity : MsDuration.minutes(9),

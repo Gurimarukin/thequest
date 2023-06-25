@@ -5,12 +5,13 @@ import { Maybe } from '../../../shared/utils/fp'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
-import { HowlingAbyssSimple } from '../../imgs/HowlingAbyss'
+import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { Link } from '../Link'
 import { Loading } from '../Loading'
+import { MaskedImage } from '../MaskedImage'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
@@ -29,7 +30,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               <img
                 src={Assets.yuumi}
                 alt="Icône accueil (Yuumi)"
-                className="w-12 rounded-sm bg-black"
+                className="h-12 w-12 rounded-sm bg-black"
               />
             </Link>
             <SearchSummoner />
@@ -67,7 +68,15 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 parser={appParsers.aram}
                 tooltip="ARAM — équilibrages spécifiques"
               >
-                <HowlingAbyssSimple className="h-5" />
+                <HowlingAbyssSimple className="w-5" />
+              </HighlightLink>
+
+              <HighlightLink
+                to={appRoutes.factions({})}
+                parser={appParsers.factions}
+                tooltip="Factions — défis “Globe-trotteur”"
+              >
+                <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
               </HighlightLink>
             </div>
           </div>

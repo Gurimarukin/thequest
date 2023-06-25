@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 
 import type { PerksView } from '../../../shared/models/api/perk/PerksView'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
-import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
+import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
 import { List, Maybe } from '../../../shared/utils/fp'
@@ -12,15 +12,15 @@ import { Rune } from '../../components/Rune'
 import { cx } from '../../utils/cx'
 
 type Props = {
-  runeStyles: List<StaticDataRuneStyle>
-  runes: List<StaticDataRune>
+  runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
+  runeById: (id: RuneId) => Maybe<StaticDataRune>
   perks: PerksView
   reverse: boolean
 }
 
-export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, reverse }) => {
+export const ActiveGameRunes: React.FC<Props> = ({ runeStyleById, runeById, perks, reverse }) => {
   const { keyStone, primaryPath, secondaryPath, shards } = useMemo(() => {
-    const findRunes = getFindRunes(runeStyles, runes, perks.perkIds)
+    const findRunes = getFindRunes(runeStyleById, runeById, perks.perkIds)
 
     const primaryPath_ = findRunes(perks.perkStyle)
     const secondaryPath_ = findRunes(perks.perkSubStyle)
@@ -38,18 +38,9 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, rev
         Maybe.getOrElseW(() => []),
       ),
       secondaryPath: secondaryPath_,
-      shards: pipe(
-        perks.perkIds,
-        List.difference(RuneId.Eq)(pathIds),
-        List.filterMap(runeId =>
-          pipe(
-            runes,
-            List.findFirst(rune => RuneId.Eq.equals(rune.id, runeId)),
-          ),
-        ),
-      ),
+      shards: pipe(perks.perkIds, List.difference(RuneId.Eq)(pathIds), List.filterMap(runeById)),
     }
-  }, [perks, runeStyles, runes])
+  }, [perks, runeById, runeStyleById])
 
   return (
     <div className={cx('flex gap-1.5', ['flex-row-reverse', reverse])}>
@@ -80,11 +71,14 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyles, runes, perks, rev
 }
 
 const getFindRunes =
-  (runeStyles: List<StaticDataRuneStyle>, runes: List<StaticDataRune>, runeIds: List<RuneId>) =>
+  (
+    runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>,
+    runeById: (id: RuneId) => Maybe<StaticDataRune>,
+    runeIds: List<RuneId>,
+  ) =>
   (styleId: RuneStyleId): List<StaticDataRune> => {
     const runesInStyle = pipe(
-      runeStyles,
-      List.findFirst(s => RuneStyleId.Eq.equals(s.id, styleId)),
+      runeStyleById(styleId),
       Maybe.fold(
         () => [],
         style =>
@@ -99,12 +93,7 @@ const getFindRunes =
       List.filterMap(
         flow(
           Maybe.fromPredicate(runeId => List.elem(RuneId.Eq)(runeId, runesInStyle)),
-          Maybe.chain(runeId =>
-            pipe(
-              runes,
-              List.findFirst(rune => RuneId.Eq.equals(rune.id, runeId)),
-            ),
-          ),
+          Maybe.chain(runeById),
         ),
       ),
     )

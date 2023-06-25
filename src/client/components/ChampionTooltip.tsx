@@ -1,11 +1,13 @@
 import { pipe } from 'fp-ts/function'
 
+import { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
-import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
+import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { cx } from '../utils/cx'
+import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
 
 const { plural } = StringUtils
@@ -20,6 +22,7 @@ type Props = {
   percents: number
   filteredShardsCount: Maybe<number>
   positions: List<ChampionPosition>
+  factions: List<ChampionFaction>
 }
 
 export const ChampionTooltip: React.FC<Props> = ({
@@ -32,6 +35,7 @@ export const ChampionTooltip: React.FC<Props> = ({
   tokensEarned,
   filteredShardsCount,
   positions,
+  factions,
 }) => {
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
@@ -89,20 +93,30 @@ export const ChampionTooltip: React.FC<Props> = ({
         <div className="flex items-center gap-2">
           <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
         </div>
-        {List.isNonEmpty(positions) ? (
-          <div className="flex">
-            {pipe(
-              positions,
-              NonEmptyArray.map(position => (
-                <ChampionPositionImg
-                  key={position}
-                  position={position}
-                  className="h-6 w-6 shrink-0 p-0.5"
-                />
-              )),
-            )}
-          </div>
-        ) : null}
+        <ul className="flex w-full max-w-[164px] flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
+          {List.isNonEmpty(positions)
+            ? pipe(
+                positions,
+                NonEmptyArray.map(position => (
+                  <li key={position} className="flex items-center gap-0.5">
+                    <ChampionPositionImg position={position} className="h-6 w-6 shrink-0 p-0.5" />
+                    <span>{ChampionPosition.label[position]}</span>
+                  </li>
+                )),
+              )
+            : null}
+          {List.isNonEmpty(factions)
+            ? pipe(
+                factions,
+                NonEmptyArray.map(faction => (
+                  <li key={faction} className="flex items-center gap-1.5">
+                    <ChampionFactionImg faction={faction} className="h-5 w-5 text-wheat-bis" />
+                    <span>{ChampionFaction.label[faction]}</span>
+                  </li>
+                )),
+              )
+            : null}
+        </ul>
       </div>
     </div>
   )

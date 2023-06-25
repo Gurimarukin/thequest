@@ -15,6 +15,7 @@ import { statusesToOption } from '../helpers/HttpClient'
 import { ActiveShards } from '../models/riot/ActiveShard'
 import type { Game } from '../models/riot/Game'
 import { RiotAccount } from '../models/riot/RiotAccount'
+import { RiotChallenges } from '../models/riot/RiotChallenges'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotLeagueEntry } from '../models/riot/RiotLeagueEntry'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
@@ -25,7 +26,7 @@ import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import type { SummonerId } from '../models/summoner/SummonerId'
-import type { RiotApiMockService } from './RiotApiMockService'
+import type { MockService } from './MockService'
 
 const { ddragon, ddragonCdn } = DDragonUtils
 
@@ -57,11 +58,7 @@ type UseAccountApiKey = {
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const RiotApiService = (
-  config: Config,
-  httpClient: HttpClient,
-  riotApiMockService: RiotApiMockService,
-) => {
+const RiotApiService = (config: Config, httpClient: HttpClient, mockService: MockService) => {
   const { lol: lolKey, account: accountKey } = config.riotApi.keys
 
   const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
@@ -106,8 +103,97 @@ const RiotApiService = (
     riotgames: {
       platform: (platform: Platform) => ({
         lol: {
+          championMasteryV4: {
+            championMasteries: {
+              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(
+                        platform,
+                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
+                      ),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
+                  ),
+                  statusesToOption(404),
+                ),
+            },
+          },
+
+          challengesV1: {
+            playerData: (puuid: Puuid): Future<Maybe<RiotChallenges>> =>
+              pipe(
+                httpClient.http(
+                  [platformUrl(platform, `/lol/challenges/v1/player-data/${puuid}`), 'get'],
+                  { headers: { [xRiotToken]: lolKey } },
+                  [RiotChallenges.decoder, 'RiotChallenges'],
+                ),
+                statusesToOption(404),
+              ),
+          },
+
+          leagueV4: {
+            entries: {
+              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotLeagueEntry>>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(platform, `/lol/league/v4/entries/by-summoner/${summonerId}`),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [List.decoder(RiotLeagueEntry.decoder), 'List<RiotLeagueEntry>'],
+                  ),
+                  statusesToOption(404),
+                ),
+            },
+          },
+
+          spectatorV4: {
+            activeGames: {
+              bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
+                pipe(
+                  config.mock ? mockService.activeGames.bySummoner(summonerId) : futureMaybe.none,
+                  futureMaybe.alt(() =>
+                    pipe(
+                      httpClient.http(
+                        [
+                          platformUrl(
+                            platform,
+                            `/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
+                          ),
+                          'get',
+                        ],
+                        { headers: { [xRiotToken]: lolKey } },
+                        [RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'],
+                      ),
+                      statusesToOption(404),
+                    ),
+                  ),
+                ),
+            },
+          },
+
           summonerV4: {
             summoners: {
+              /**
+               * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
+               * @deprecated
+               */
+              // eslint-disable-next-line deprecation/deprecation
+              byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
+                pipe(
+                  httpClient.http(
+                    [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [RiotSummoner.decoder, 'RiotSummoner'],
+                  ),
+                  statusesToOption(404),
+                ),
+
               byName: (summonerName: string): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
@@ -134,85 +220,6 @@ const RiotApiService = (
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
                   statusesToOption(404),
-                ),
-
-              /**
-               * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
-               * @deprecated
-               */
-              // eslint-disable-next-line deprecation/deprecation
-              byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
-                pipe(
-                  httpClient.http(
-                    [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [RiotSummoner.decoder, 'RiotSummoner'],
-                  ),
-                  statusesToOption(404),
-                ),
-            },
-          },
-
-          leagueV4: {
-            entries: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotLeagueEntry>>> =>
-                pipe(
-                  httpClient.http(
-                    [
-                      platformUrl(platform, `/lol/league/v4/entries/by-summoner/${summonerId}`),
-                      'get',
-                    ],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [List.decoder(RiotLeagueEntry.decoder), 'List<RiotLeagueEntry>'],
-                  ),
-                  statusesToOption(404),
-                ),
-            },
-          },
-
-          championMasteryV4: {
-            championMasteries: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
-                pipe(
-                  httpClient.http(
-                    [
-                      platformUrl(
-                        platform,
-                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
-                      ),
-                      'get',
-                    ],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
-                  ),
-                  statusesToOption(404),
-                ),
-            },
-          },
-
-          spectatorV4: {
-            activeGames: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
-                pipe(
-                  config.mockRiotApi
-                    ? riotApiMockService.activeGames.bySummoner(summonerId)
-                    : futureMaybe.none,
-                  futureMaybe.alt(() =>
-                    pipe(
-                      httpClient.http(
-                        [
-                          platformUrl(
-                            platform,
-                            `/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
-                          ),
-                          'get',
-                        ],
-                        { headers: { [xRiotToken]: lolKey } },
-                        [RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'],
-                      ),
-                      statusesToOption(404),
-                    ),
-                  ),
                 ),
             },
           },

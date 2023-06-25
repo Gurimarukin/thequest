@@ -52,7 +52,9 @@ export const League: React.FC<Props> = ({
         subDescription: undefined,
       }),
       ({ tier, rank, leaguePoints, wins, losses }) => {
-        const tierRank = `${tierLabel[tier]}${LeagueTier.isFourRanks(tier) ? ` ${rank}` : ''}`
+        const tierRank = `${LeagueTier.label[tier]}${
+          LeagueTier.isFourRanks(tier) ? ` ${rank}` : ''
+        }`
         const games = wins + losses
         return {
           src: LeagueTier.isFourRanks(tier)
@@ -140,16 +142,4 @@ const WinLoss: React.FC<WinLossProps> = ({ value, unit, valueClassName }) => (
 const queueLabel: Dict<keyof SummonerLeaguesView, string> = {
   soloDuo: 'Solo/Duo',
   flex: 'FLEXXX',
-}
-
-const tierLabel: Dict<LeagueTier, string> = {
-  IRON: 'Fer',
-  BRONZE: 'Bronze',
-  SILVER: 'Argent',
-  GOLD: 'Or',
-  PLATINUM: 'Platine',
-  DIAMOND: 'Diamant',
-  MASTER: 'Maître',
-  GRANDMASTER: 'Grand Maître',
-  CHALLENGER: 'Challenger',
 }
