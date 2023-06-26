@@ -1,4 +1,6 @@
-/* eslint-disable functional/no-return-void */
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
+import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { Fragment, useMemo, useRef } from 'react'
 
@@ -6,7 +8,7 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
@@ -78,11 +80,30 @@ export const Aram: React.FC = () => {
     [updateGenericQuery],
   )
 
+  const randomChampion = useMemo(
+    (): Maybe<() => string> =>
+      pipe(
+        filteredAndSortedChampions,
+        NonEmptyArray.fromReadonlyArray,
+        Maybe.map(
+          flow(
+            random.randomElem,
+            io.map(m => {
+              updateGenericQuery(GenericQuery.Lens.search.set(Maybe.some(m.name)))
+              return m.name
+            }),
+          ),
+        ),
+      ),
+    [filteredAndSortedChampions, updateGenericQuery],
+  )
+
   return (
     <MainLayout>
       <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
+          randomChampion={randomChampion}
           initialSearch={genericQuery.search}
           onChange={onSearchChange}
           className="self-center"

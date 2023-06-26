@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { io, number, ord, readonlySet } from 'fp-ts'
+import { number, ord, readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -18,7 +18,6 @@ import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
 import { MaskedImage } from '../../../components/MaskedImage'
 import { MasteryImg } from '../../../components/MasteryImg'
 import { Radios, labelValue } from '../../../components/Radios'
-import type { SearchChampionRef } from '../../../components/SearchChampion'
 import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
@@ -29,7 +28,6 @@ import {
   CaretDownOutline,
   CaretUpOutline,
   CircleOffOutline,
-  DiceFilled,
   StatsChartSharp,
 } from '../../../imgs/svgIcons'
 import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
@@ -93,20 +91,6 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
       flow(MasteriesQuery.Lens.search.set, updateMasteriesQuery),
     [updateMasteriesQuery],
   )
-
-  const searchRef = useRef<SearchChampionRef>(null)
-
-  const handleRandomClick = useMemo(
-    (): (() => void) | undefined =>
-      pipe(
-        randomChampion,
-        Maybe.map(io.map(name => searchRef.current?.setSearch(name))),
-        Maybe.toUndefined,
-      ),
-    [randomChampion],
-  )
-
-  const randomButtonRef = useRef<HTMLButtonElement>(null)
 
   return (
     <div className="flex w-full max-w-7xl flex-col gap-3">
@@ -282,27 +266,12 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           iconClassName="px-1.5"
         />
 
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchChampion
-            ref={searchRef}
-            searchCount={searchCount}
-            initialSearch={masteriesQuery.search}
-            onChange={setQuerySearch}
-          />
-
-          <button
-            ref={randomButtonRef}
-            type="button"
-            onClick={handleRandomClick}
-            disabled={Maybe.isNone(randomChampion)}
-            className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
-          >
-            <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
-          </button>
-          <Tooltip hoverRef={randomButtonRef} placement="top">
-            Champion aléatoire
-          </Tooltip>
-        </div>
+        <SearchChampion
+          searchCount={searchCount}
+          randomChampion={randomChampion}
+          initialSearch={masteriesQuery.search}
+          onChange={setQuerySearch}
+        />
       </div>
     </div>
   )

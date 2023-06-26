@@ -1,98 +1,100 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { predicate, string } from 'fp-ts'
+import { io, predicate, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type React from 'react'
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe } from '../../shared/utils/fp'
 
-import { CloseFilled } from '../imgs/svgIcons'
+import { CloseFilled, DiceFilled } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
+import { Tooltip } from './tooltip/Tooltip'
 
 const { plural } = StringUtils
 
-export type SearchChampionRef = {
-  setSearch: React.Dispatch<React.SetStateAction<string>>
-}
-
 type Props = {
   searchCount: number
+  randomChampion: Maybe<() => string>
   initialSearch: Maybe<string>
   onChange: (search: Maybe<string>) => void
   className?: string
 }
 
-export const SearchChampion = forwardRef<SearchChampionRef, Props>(
-  ({ searchCount, initialSearch, onChange, className }, ref) => {
-    const searchRef = useRef<HTMLInputElement>(null)
+export const SearchChampion: React.FC<Props> = ({
+  searchCount,
+  randomChampion,
+  initialSearch,
+  onChange,
+  className,
+}) => {
+  const searchRef = useRef<HTMLInputElement>(null)
 
-    useEffect(() => {
-      const onKeyup = (e: KeyboardEvent): void => {
-        if (
-          ((e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) ||
-            e.key === '/' ||
-            e.key === 'F3') &&
-          searchRef.current !== null
-        ) {
-          e.preventDefault()
-          searchRef.current.select()
-        }
+  useEffect(() => {
+    const onKeyup = (e: KeyboardEvent): void => {
+      if (
+        ((e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) ||
+          e.key === '/' ||
+          e.key === 'F3') &&
+        searchRef.current !== null
+      ) {
+        e.preventDefault()
+        searchRef.current.select()
       }
+    }
 
-      document.addEventListener('keydown', onKeyup, true)
-      return () => document.removeEventListener('keydown', onKeyup, true)
-    }, [])
+    document.addEventListener('keydown', onKeyup, true)
+    return () => document.removeEventListener('keydown', onKeyup, true)
+  }, [])
 
-    const [search, setSearch] = useState(
-      pipe(
-        initialSearch,
-        Maybe.getOrElse(() => ''),
-      ),
-    )
+  const [search, setSearch] = useState(
+    pipe(
+      initialSearch,
+      Maybe.getOrElse(() => ''),
+    ),
+  )
 
-    useImperativeHandle(ref, () => ({ setSearch }), [])
+  const emptySearch = useCallback(() => {
+    setSearch('')
+    searchRef.current?.focus()
+  }, [])
 
-    const emptySearch = useCallback(() => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
       setSearch('')
-      searchRef.current?.focus()
-    }, [])
+      searchRef.current?.blur()
+    }
+  }, [])
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setSearch('')
-        searchRef.current?.blur()
-      }
-    }, [])
+  const updateSearch = useMemo(
+    (): ((search_: string) => void) =>
+      flow(string.trim, Maybe.fromPredicate(predicate.not(string.isEmpty)), onChange),
+    [onChange],
+  )
 
-    const updateSearch = useMemo(
-      (): ((search_: string) => void) =>
-        flow(string.trim, Maybe.fromPredicate(predicate.not(string.isEmpty)), onChange),
-      [onChange],
-    )
+  useEffect(() => {
+    updateSearch(search)
+  }, [updateSearch, search])
 
-    useEffect(() => {
-      updateSearch(search)
-    }, [updateSearch, search])
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value),
+    [],
+  )
 
-    const handleSearchChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value),
-      [],
-    )
+  const onFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => e.target.select(), [])
 
-    const onFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => e.target.select(), [])
+  const handleRandomClick = useMemo(
+    (): (() => void) | undefined =>
+      pipe(randomChampion, Maybe.map(io.map(setSearch)), Maybe.toUndefined),
+    [randomChampion],
+  )
 
-    return (
-      <div className={cx('relative flex flex-col items-center text-xs', className)}>
+  const randomButtonRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <div className={cx('flex flex-wrap items-center gap-3', className)}>
+      <div className="relative flex flex-col items-center text-xs">
         <div className="flex items-center">
           <input
             ref={searchRef}
@@ -122,6 +124,19 @@ export const SearchChampion = forwardRef<SearchChampionRef, Props>(
           {plural('résultat')(searchCount)}
         </span>
       </div>
-    )
-  },
-)
+
+      <button
+        ref={randomButtonRef}
+        type="button"
+        onClick={handleRandomClick}
+        disabled={Maybe.isNone(randomChampion)}
+        className="group -mx-0.5 overflow-hidden p-0.5 disabled:opacity-30"
+      >
+        <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
+      </button>
+      <Tooltip hoverRef={randomButtonRef} placement="top">
+        Champion aléatoire
+      </Tooltip>
+    </div>
+  )
+}
