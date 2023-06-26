@@ -23,11 +23,13 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
+import { CountWithTotal } from '../../models/CountWithTotal'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
+import type { FilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 
 const { plural } = StringUtils
@@ -45,6 +47,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
   const {
     filteredAndSortedMasteries,
     championsCount,
+    factionsCount,
     searchCount,
     maybeMaxPoints,
     hideInsteadOfGlow,
@@ -83,6 +86,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
             <Champion
               key={`${champion.faction}${ChampionKey.unwrap(champion.championId)}`}
               challenges={challenges}
+              factionsCount={factionsCount}
               maybeMaxPoints={maybeMaxPoints}
               isGlowing={!hideInsteadOfGlow && champion.glow}
               isHidden={isHidden(champion)}
@@ -109,6 +113,7 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
 
 type ChampionProps = {
   challenges: SWRResponse<ChallengesView, unknown>
+  factionsCount: FilteredAndSortedMasteries['factionsCount']
   maybeMaxPoints: Maybe<number>
   isGlowing: boolean
   isHidden: boolean
@@ -119,6 +124,7 @@ type ChampionProps = {
 
 const Champion: React.FC<ChampionProps> = ({
   challenges,
+  factionsCount,
   maybeMaxPoints,
   isGlowing,
   isHidden,
@@ -161,6 +167,7 @@ const Champion: React.FC<ChampionProps> = ({
         <ChampionFactionTitle
           challenges={Maybe.some(challenges)}
           faction={champion.faction}
+          count={factionsCount[champion.faction] ?? CountWithTotal.empty}
           className={cx(['pt-2', Maybe.isSome(maybePrev)])}
         />
       ) : null}

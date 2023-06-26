@@ -12,6 +12,7 @@ import { ListUtils } from '../../../shared/utils/ListUtils'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
+import type { CountWithTotal } from '../../models/CountWithTotal'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
@@ -21,9 +22,10 @@ import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 type CategoryOrHidden = ChampionAramCategory | 'hidden'
 type FactionOrNoneOrHidden = ChampionFactionOrNone | 'hidden'
 
-type FilteredAndSortedMasteries = {
+export type FilteredAndSortedMasteries = {
   filteredAndSortedMasteries: List<EnrichedChampionMastery>
   championsCount: number
+  factionsCount: PartialDict<ChampionFactionOrNone, CountWithTotal>
   searchCount: number
   maybeMaxPoints: Maybe<number>
   hideInsteadOfGlow: boolean
@@ -62,6 +64,20 @@ export const getFilteredAndSortedMasteries = (
     ),
   )
 
+  const factionsCount_: PartialDict<ChampionFactionOrNone, CountWithTotal> = pipe(
+    filteredMasteries,
+    ListUtils.multipleGroupBy(
+      (c): NonEmptyArray<ChampionFactionOrNone> =>
+        List.isNonEmpty(c.factions) ? c.factions : ['none'],
+    ),
+    PartialDict.map(
+      (nea): CountWithTotal => ({
+        count: nea.filter(c => !c.isHidden).length,
+        total: nea.length,
+      }),
+    ),
+  )
+
   return {
     filteredAndSortedMasteries: pipe(filteredMasteries, getSort(isHidden, query.view)(ords)),
     championsCount: pipe(
@@ -69,6 +85,7 @@ export const getFilteredAndSortedMasteries = (
       List.filter(c => !c.isHidden),
       List.size,
     ),
+    factionsCount: factionsCount_,
     searchCount: pipe(
       filteredMasteries,
       List.filter(c => c.glow),
