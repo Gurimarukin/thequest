@@ -1,4 +1,6 @@
-/* eslint-disable functional/no-return-void */
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
+import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import type React from 'react'
@@ -110,11 +112,30 @@ export const Factions: React.FC = () => {
     [updateGenericQuery],
   )
 
+  const randomChampion = useMemo(
+    (): Maybe<() => string> =>
+      pipe(
+        filteredAndSortedChampions,
+        NonEmptyArray.fromReadonlyArray,
+        Maybe.map(
+          flow(
+            random.randomElem,
+            io.map(m => {
+              updateGenericQuery(GenericQuery.Lens.search.set(Maybe.some(m.name)))
+              return m.name
+            }),
+          ),
+        ),
+      ),
+    [filteredAndSortedChampions, updateGenericQuery],
+  )
+
   return (
     <MainLayout>
       <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
+          randomChampion={randomChampion}
           initialSearch={genericQuery.search}
           onChange={onSearchChange}
           className="self-center"
