@@ -49,11 +49,7 @@ const HighlightLink: React.FC<HighlightLinkProps> = ({ to, tooltip, children }) 
       <Link ref={ref} to={to} className="flex flex-col items-center gap-3 text-sm">
         {children}
       </Link>
-      {tooltip !== undefined ? (
-        <Tooltip hoverRef={ref} placement="top">
-          {tooltip}
-        </Tooltip>
-      ) : null}
+      {tooltip !== undefined ? <Tooltip hoverRef={ref}>{tooltip}</Tooltip> : null}
     </>
   )
 }
