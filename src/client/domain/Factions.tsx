@@ -18,6 +18,7 @@ import { MainLayout } from '../components/mainLayout/MainLayout'
 import { Tooltip } from '../components/tooltip/Tooltip'
 import { useHistory } from '../contexts/HistoryContext'
 import { useStaticData } from '../contexts/StaticDataContext'
+import { CountWithTotal } from '../models/CountWithTotal'
 import { GenericQuery } from '../models/genericQuery/GenericQuery'
 import { cx } from '../utils/cx'
 
@@ -39,7 +40,7 @@ export const Factions: React.FC = () => {
   const { genericQuery, updateGenericQuery } = useHistory()
   const { champions } = useStaticData()
 
-  const { filteredAndSortedChampions, searchCount } = useMemo(() => {
+  const { filteredAndSortedChampions, factionsCount, searchCount } = useMemo(() => {
     const sortedChampions = pipe(
       champions,
       List.map(
@@ -72,6 +73,20 @@ export const Factions: React.FC = () => {
       ),
     )
 
+    const factionsCount_: PartialDict<ChampionFactionOrNone, CountWithTotal> = pipe(
+      sortedChampions,
+      ListUtils.multipleGroupBy(
+        (c): NonEmptyArray<ChampionFactionOrNone> =>
+          List.isNonEmpty(c.factions) ? c.factions : ['none'],
+      ),
+      PartialDict.map(
+        (nea): CountWithTotal => ({
+          count: nea.filter(c => !c.isHidden).length,
+          total: nea.length,
+        }),
+      ),
+    )
+
     return {
       filteredAndSortedChampions: pipe(
         ChampionFactionOrNone.values,
@@ -80,6 +95,7 @@ export const Factions: React.FC = () => {
         ),
         List.concat(grouped.hidden ?? []),
       ),
+      factionsCount: factionsCount_,
       searchCount: pipe(
         sortedChampions,
         List.filter(c => !c.isHidden),
@@ -115,6 +131,7 @@ export const Factions: React.FC = () => {
                 ) ? (
                   <ChampionFactionTitle
                     challenges={Maybe.none}
+                    count={factionsCount[c.faction] ?? CountWithTotal.empty}
                     faction={c.faction}
                     className="pt-3"
                   />
