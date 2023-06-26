@@ -22,7 +22,7 @@ import { CountWithTotal } from '../models/CountWithTotal'
 import { GenericQuery } from '../models/genericQuery/GenericQuery'
 import { cx } from '../utils/cx'
 
-const { cleanChampionName } = StringUtils
+const { cleanChampionName, plural } = StringUtils
 
 type EnrichedStaticDataChampion = StaticDataChampion & {
   isHidden: boolean
@@ -140,6 +140,9 @@ export const Factions: React.FC = () => {
               </Fragment>
             )),
           )}
+        </div>
+        <div className="self-center text-sm">
+          {plural('champion')(searchCount)} / {champions.length}
         </div>
       </div>
     </MainLayout>

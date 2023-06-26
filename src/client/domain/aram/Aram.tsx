@@ -22,7 +22,7 @@ import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
 import './Aram.css'
 
-const { cleanChampionName } = StringUtils
+const { cleanChampionName, plural } = StringUtils
 
 type EnrichedStaticDataChampion = StaticDataChampion & {
   isHidden: boolean
@@ -103,6 +103,9 @@ export const Aram: React.FC = () => {
               </Fragment>
             )),
           )}
+        </div>
+        <div className="self-center text-sm">
+          {plural('champion')(searchCount)} / {champions.length}
         </div>
       </div>
     </MainLayout>
