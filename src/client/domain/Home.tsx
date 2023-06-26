@@ -10,10 +10,10 @@ import { appRoutes } from '../router/AppRouter'
 
 export const Home: React.FC = () => (
   <MainLayout>
-    <div className="grid h-full grid-rows-[1fr_auto] justify-center gap-3 p-3">
-      <h1 className="self-center font-mono text-2xl">La Quête.</h1>
+    <div className="grid h-full grid-rows-[1fr_1fr_auto] justify-center gap-3 p-3">
+      <h1 className="self-end justify-self-center font-mono text-2xl">La Quête.</h1>
 
-      <div className="flex flex-wrap justify-between gap-12 py-6">
+      <div className="flex flex-wrap justify-between gap-12 self-center justify-self-center py-6">
         <HighlightLink to={appRoutes.aram({})} tooltip="Équilibrages spécifiques">
           <HowlingAbyssSimple className="w-8" />
           <span>ARAM</span>
@@ -24,6 +24,13 @@ export const Home: React.FC = () => (
           <span>Factions</span>
         </HighlightLink>
       </div>
+
+      <p className="text-xs">
+        La Quête isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot
+        Games or anyone officially involved in producing or managing Riot Games properties. Riot
+        Games, and all associated properties are trademarks or registered trademarks of Riot Games,
+        Inc.
+      </p>
     </div>
   </MainLayout>
 )
