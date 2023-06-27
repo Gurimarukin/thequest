@@ -2,6 +2,7 @@
 - uri: ugly encode
 - active game drag and drop
 - translation?
+- challenge progression discord notification
 - discord OAuth2: proper state (redirect url)
 - toaster (replace alert)
 - game: summoner level?
