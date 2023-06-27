@@ -8,6 +8,7 @@ import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/a
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
+import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
@@ -190,7 +191,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </div>,
       <div className={cx('flex items-baseline gap-1.5 text-xs', ['flex-row-reverse', reverse])}>
         <a
-          href={appRoutes.platformSummonerName(platform, summonerName, {})}
+          href={appRoutes.platformSummonerName(platform, summonerName, {
+            view: 'histogram',
+            level: new Set(ChampionLevelOrZero.values),
+          })}
           target="_blank"
           rel="noreferrer"
           className="whitespace-nowrap text-base text-goldenrod"
