@@ -42,6 +42,8 @@ export const xlGridCols = 'grid-cols-[1fr_repeat(16,auto)_1fr]'
 
 const bevelWidth = 32 // px
 
+const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
+
 type SquarePropsRest = Pick<
   ChampionMasterySquareProps,
   | 'chestGranted'
@@ -193,7 +195,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <a
           href={appRoutes.platformSummonerName(platform, summonerName, {
             view: 'histogram',
-            level: new Set(ChampionLevelOrZero.values),
+            level: allLevels,
           })}
           target="_blank"
           rel="noreferrer"
