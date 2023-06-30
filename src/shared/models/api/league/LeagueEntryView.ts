@@ -1,5 +1,7 @@
 import * as C from 'io-ts/Codec'
 
+import { Maybe, NonEmptyArray } from '../../../utils/fp'
+import { LeagueMiniSeriesProgress } from './LeagueMiniSeriesProgress'
 import { LeagueRank } from './LeagueRank'
 import { LeagueTier } from './LeagueTier'
 
@@ -11,6 +13,7 @@ const codec = C.struct({
   leaguePoints: C.number,
   wins: C.number,
   losses: C.number,
+  miniSeriesProgress: Maybe.codec(NonEmptyArray.codec(LeagueMiniSeriesProgress.codec)),
 })
 
 const LeagueEntryView = { codec }

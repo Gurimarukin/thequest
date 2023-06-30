@@ -2,12 +2,11 @@ import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
-import type { List, Maybe } from '../../shared/utils/fp'
-import { Future } from '../../shared/utils/fp'
+import { Future, List, Maybe } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
-import type { LeagueEntry } from '../models/league/LeagueEntry'
+import { LeagueEntry } from '../models/league/LeagueEntry'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { LeagueEntryPersistence } from '../persistence/LeagueEntryPersistence'
 import type { RiotApiService } from './RiotApiService'
@@ -44,6 +43,7 @@ const LeagueEntryService = (
       futureMaybe.alt<List<LeagueEntry>>(() =>
         pipe(
           riotApiService.riotgames.platform(platform).lol.leagueV4.entries.bySummoner(summonerId),
+          Future.map(Maybe.map(List.map(LeagueEntry.fromRiot))),
           futureMaybe.chainFirstTaskEitherK(entries =>
             pipe(
               Future.fromIO(DayJs.now),

@@ -2,12 +2,14 @@ import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
 
 import type { LeagueEntryView } from '../../shared/models/api/league/LeagueEntryView'
+import type { LeagueMiniSeriesProgress } from '../../shared/models/api/league/LeagueMiniSeriesProgress'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import type { Dict } from '../../shared/utils/fp'
 import { Maybe } from '../../shared/utils/fp'
 
 import { Assets } from '../imgs/Assets'
+import { CheckMarkSharp, CloseFilled } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
@@ -51,7 +53,7 @@ export const League: React.FC<Props> = ({
         description: 'Non classé',
         subDescription: undefined,
       }),
-      ({ tier, rank, leaguePoints, wins, losses }) => {
+      ({ tier, rank, leaguePoints, wins, losses, miniSeriesProgress }) => {
         const tierRank = `${LeagueTier.label[tier]}${
           LeagueTier.isFourRanks(tier) ? ` ${rank}` : ''
         }`
@@ -76,6 +78,21 @@ export const League: React.FC<Props> = ({
           ),
           tooltip: (
             <>
+              {pipe(
+                miniSeriesProgress,
+                Maybe.fold(
+                  () => null,
+                  progress => (
+                    <div className="col-span-2 mb-1 flex items-center gap-1 justify-self-center">
+                      <span className="mr-1">Série :</span>
+                      {progress.map((p, i) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <span key={i}>{renderProgress(p)}</span>
+                      ))}
+                    </div>
+                  ),
+                ),
+              )}
               <WinLoss value={wins} unit="victoire" valueClassName="text-green" />
               <WinLoss value={losses} unit="défaite" valueClassName="text-red" />
             </>
@@ -143,6 +160,17 @@ const WinLoss: React.FC<WinLossProps> = ({ value, unit, valueClassName }) => (
     </span>
   </>
 )
+
+const renderProgress = (progress: LeagueMiniSeriesProgress): React.ReactElement => {
+  switch (progress) {
+    case 'W':
+      return <CheckMarkSharp className="h-4 text-green" />
+    case 'L':
+      return <CloseFilled className="h-4 text-red" />
+    case 'N':
+      return <span>—</span>
+  }
+}
 
 const queueLabel: Dict<keyof SummonerLeaguesView, string> = {
   soloDuo: 'Solo/Duo',

@@ -1,8 +1,9 @@
 import * as C from 'io-ts/Codec'
 
+import { LeagueMiniSeriesProgress } from '../../../shared/models/api/league/LeagueMiniSeriesProgress'
 import { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
-import { List } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { LeagueId } from '../riot/LeagueId'
@@ -25,6 +26,7 @@ const codec = C.struct({
       inactive: C.boolean,
       freshBlood: C.boolean,
       hotStreak: C.boolean,
+      miniSeriesProgress: Maybe.codec(NonEmptyArray.codec(LeagueMiniSeriesProgress.codec)),
     }),
   ),
   insertedAt: DayJsFromDate.codec,
