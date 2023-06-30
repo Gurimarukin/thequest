@@ -81,9 +81,6 @@ const rawProperties = {
   id: ChampionKey.codec,
   apiname: ChampionId.codec,
   title: D.string,
-  attack: D.number,
-  defense: D.number,
-  magic: D.number,
   difficulty: D.number,
   herotype: ChampionType.decoder,
   alttype: altTypeDecoder,
@@ -175,4 +172,4 @@ const decoder: Decoder<unknown, WikiaChampionData> = pipe(
 
 const WikiaChampionData = { fromRaw, decoder }
 
-export { WikiaChampionData, RawWikiaChampionData }
+export { RawWikiaChampionData, WikiaChampionData }
