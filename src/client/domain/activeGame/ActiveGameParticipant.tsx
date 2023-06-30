@@ -1,5 +1,13 @@
 import { pipe } from 'fp-ts/function'
-import { createElement, useCallback, useRef, useState } from 'react'
+import {
+  Children,
+  cloneElement,
+  createElement,
+  forwardRef,
+  useCallback,
+  useRef,
+  useState,
+} from 'react'
 
 import { Business } from '../../../shared/Business'
 import { MapId } from '../../../shared/models/api/MapId'
@@ -16,7 +24,7 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import type { Dict } from '../../../shared/utils/fp'
+import type { Dict, List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
@@ -147,196 +155,216 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   )
 
   const padding = reverse ? 'pr-2' : 'pl-2'
-  const children = [
-    child(
-      'div',
-      1,
-    )({
-      className: highlight
-        ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4')
-        : undefined,
-    }),
-    child('div', 2)(
-      { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
-      pipe(
-        leagues,
-        Maybe.fold(
-          () => null,
-          l => <League variant="small" queue="soloDuo" league={l.soloDuo} reverse={reverse} />,
-        ),
-      ),
-    ),
-    child('div', 3)(
-      { className: cx('flex items-end pt-6 pb-2', ['justify-end', reverse], padding) },
-      pipe(
-        leagues,
-        Maybe.fold(
-          () => null,
-          l => <League variant="small" queue="flex" league={l.flex} reverse={reverse} />,
-        ),
-      ),
-    ),
-    child('div', 2)(
-      {
-        className: cx(
-          'col-span-2 self-start flex items-center gap-2 pt-2 !bg-transparent',
-          ['flex-row-reverse', reverse],
-          padding,
-        ),
-      },
-      <div className="w-9">
-        <img
-          src={assets.summonerIcon(profileIconId)}
-          alt={`Icône de ${summonerName}`}
-          className="w-full"
-        />
-      </div>,
-      <div className={cx('flex items-baseline gap-1.5 text-xs', ['flex-row-reverse', reverse])}>
-        <a
-          href={appRoutes.platformSummonerName(platform, summonerName, {
-            view: 'histogram',
-            level: allLevels,
-          })}
-          target="_blank"
-          rel="noreferrer"
-          className="whitespace-nowrap text-base text-goldenrod"
-        >
-          {summonerName}
-        </a>
-        {pipe(
-          masteries,
-          Maybe.map(m => (
-            <>
-              <span className="text-grey-400">—</span>
-              <span className="flex gap-1.5">
-                <span ref={percentsRef}>{round(m.totalPercents, 1)}%</span>
-                <Tooltip hoverRef={percentsRef}>Progression de La Quête</Tooltip>
-                <span ref={totalMasteriesRef} className="text-grey-400">
-                  ({m.totalScore})
-                </span>
-                <Tooltip hoverRef={totalMasteriesRef}>Score total de maîtrise</Tooltip>
-              </span>
-            </>
-          )),
-          Maybe.toNullable,
-        )}
-      </div>,
-    ),
-    child('ul', 4)(
-      { className: cx('flex flex-col justify-between items-center py-[13px]', padding) },
-      <li className="h-7 w-7">
-        {pipe(
-          spell1,
-          Maybe.fold(
-            () => <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>,
-            s => <SummonerSpell spell={s} className="h-full w-full" />,
-          ),
-        )}
-      </li>,
-      <li className="h-7 w-7">
-        {pipe(
-          spell2,
-          Maybe.fold(
-            () => <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>,
-            s => <SummonerSpell spell={s} className="h-full w-full" />,
-          ),
-        )}
-      </li>,
-    ),
-    child('div', 5)(
-      { className: cx('flex flex-col gap-px text-2xs', padding) },
-      pipe(
-        squareProps,
-        Maybe.fold(
-          () => (
-            <>
-              <span className="invisible">h</span>
-              <div className="h-16 w-16 bg-black text-2xs">
-                Champion {ChampionKey.unwrap(championId)}
-              </div>
-              <span className="invisible">h</span>
-            </>
-          ),
-          props => (
-            <>
-              <span className="invisible">h</span>
-              <div ref={championRef} className="flex flex-col items-center gap-px">
-                <ChampionMasterySquare {...props} />
-                <span className={cx(['invisible', props.championLevel < 5])}>
-                  {round(props.championPoints / 1000, 1).toLocaleString()}k
-                </span>
-              </div>
-            </>
-          ),
-        ),
-      ),
-    ),
-    child('div', 6)(
-      { className: cx('flex', padding) },
-      pipe(
-        champion,
-        Maybe.filter(() => isHowlingAbyss),
-        Maybe.fold(
-          () => null,
-          c => (
-            <>
-              <div
-                ref={aramRef}
-                className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
-                  'flex-row-reverse',
-                  reverse,
-                ])}
-              >
-                <ActiveGameAramStats reverse={reverse} aram={c.aram} />
-              </div>
-              <Tooltip hoverRef={aramRef}>
-                <AramTooltip aram={c.aram} />
-              </Tooltip>
-            </>
-          ),
-        ),
-      ),
-    ),
-    child('div', 7)(
-      { className: cx('flex items-center py-1', padding) },
-      <ActiveGameRunes
-        runeStyleById={runeStyleById}
-        runeById={runeById}
-        perks={perks}
-        reverse={reverse}
-      />,
-    ),
-    child('div', 8)({}),
-    child('div', 9)(
-      { ref: onBevelMount, className: cx('bg-transparent', ['justify-self-end', reverse]) },
-      <div
-        className={cx(
-          teamBorder[teamId],
-          reverse ? 'border-l-transparent' : 'border-b-transparent',
-        )}
-        style={{
-          width: bevelWidth,
-          borderLeftWidth: bevelWidth,
-          borderBottomWidth: bevelHeight,
-        }}
-      />,
-    ),
-  ]
 
   return (
-    <li className="contents">
-      {children.map((c, key) =>
-        c(reverse, {
-          key,
-          className: teamBg[teamId],
-          style: {
-            gridRowStart: index + 1,
-          },
-        }),
-      )}
-    </li>
+    <Li teamId={teamId} reverse={reverse} index={index}>
+      <Cell
+        gridColStart={1}
+        className={
+          highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
+        }
+      />
+      <Cell
+        gridColStart={2}
+        className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
+      >
+        {pipe(
+          leagues,
+          Maybe.fold(
+            () => null,
+            l => <League variant="small" queue="soloDuo" league={l.soloDuo} reverse={reverse} />,
+          ),
+        )}
+      </Cell>
+      <Cell
+        gridColStart={3}
+        className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
+      >
+        {pipe(
+          leagues,
+          Maybe.fold(
+            () => null,
+            l => <League variant="small" queue="flex" league={l.flex} reverse={reverse} />,
+          ),
+        )}
+      </Cell>
+      <Cell
+        gridColStart={2}
+        className={cx(
+          'col-span-2 flex items-center gap-2 self-start !bg-transparent pt-2',
+          ['flex-row-reverse', reverse],
+          padding,
+        )}
+      >
+        <div className="w-9">
+          <img
+            src={assets.summonerIcon(profileIconId)}
+            alt={`Icône de ${summonerName}`}
+            className="w-full"
+          />
+        </div>
+        <div className={cx('flex items-baseline gap-1.5 text-xs', ['flex-row-reverse', reverse])}>
+          <a
+            href={appRoutes.platformSummonerName(platform, summonerName, {
+              view: 'histogram',
+              level: allLevels,
+            })}
+            target="_blank"
+            rel="noreferrer"
+            className="whitespace-nowrap text-base text-goldenrod"
+          >
+            {summonerName}
+          </a>
+          {pipe(
+            masteries,
+            Maybe.map(m => (
+              <>
+                <span className="text-grey-400">—</span>
+                <span className="flex gap-1.5">
+                  <span ref={percentsRef}>{round(m.totalPercents, 1)}%</span>
+                  <Tooltip hoverRef={percentsRef}>Progression de La Quête</Tooltip>
+                  <span ref={totalMasteriesRef} className="text-grey-400">
+                    ({m.totalScore})
+                  </span>
+                  <Tooltip hoverRef={totalMasteriesRef}>Score total de maîtrise</Tooltip>
+                </span>
+              </>
+            )),
+            Maybe.toNullable,
+          )}
+        </div>
+      </Cell>
+      <Cell
+        type="ul"
+        gridColStart={4}
+        className={cx('flex flex-col items-center justify-between py-[13px]', padding)}
+      >
+        <li className="h-7 w-7">
+          {pipe(
+            spell1,
+            Maybe.fold(
+              () => (
+                <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
+              ),
+              s => <SummonerSpell spell={s} className="h-full w-full" />,
+            ),
+          )}
+        </li>
+        <li className="h-7 w-7">
+          {pipe(
+            spell2,
+            Maybe.fold(
+              () => (
+                <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>
+              ),
+              s => <SummonerSpell spell={s} className="h-full w-full" />,
+            ),
+          )}
+        </li>
+      </Cell>
+      <Cell gridColStart={5} className={cx('flex flex-col gap-px text-2xs', padding)}>
+        {pipe(
+          squareProps,
+          Maybe.fold(
+            () => (
+              <>
+                <span className="invisible">h</span>
+                <div className="h-16 w-16 bg-black text-2xs">
+                  Champion {ChampionKey.unwrap(championId)}
+                </div>
+                <span className="invisible">h</span>
+              </>
+            ),
+            props => (
+              <>
+                <span className="invisible">h</span>
+                <div ref={championRef} className="flex flex-col items-center gap-px">
+                  <ChampionMasterySquare {...props} />
+                  <span className={cx(['invisible', props.championLevel < 5])}>
+                    {round(props.championPoints / 1000, 1).toLocaleString()}k
+                  </span>
+                </div>
+              </>
+            ),
+          ),
+        )}
+      </Cell>
+      <Cell gridColStart={6} className={cx('flex', padding)}>
+        {pipe(
+          champion,
+          Maybe.filter(() => isHowlingAbyss),
+          Maybe.fold(
+            () => null,
+            c => (
+              <>
+                <div
+                  ref={aramRef}
+                  className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
+                    'flex-row-reverse',
+                    reverse,
+                  ])}
+                >
+                  <ActiveGameAramStats reverse={reverse} aram={c.aram} />
+                </div>
+                <Tooltip hoverRef={aramRef}>
+                  <AramTooltip aram={c.aram} />
+                </Tooltip>
+              </>
+            ),
+          ),
+        )}
+      </Cell>
+      <Cell gridColStart={7} className={cx('flex items-center py-1', padding)}>
+        <ActiveGameRunes
+          runeStyleById={runeStyleById}
+          runeById={runeById}
+          perks={perks}
+          reverse={reverse}
+        />
+      </Cell>
+      <Cell gridColStart={8} />
+      <Cell
+        ref={onBevelMount}
+        gridColStart={9}
+        className={cx('bg-transparent', ['justify-self-end', reverse])}
+      >
+        <div
+          className={cx(
+            teamBorder[teamId],
+            reverse ? 'border-l-transparent' : 'border-b-transparent',
+          )}
+          style={{
+            width: bevelWidth,
+            borderLeftWidth: bevelWidth,
+            borderBottomWidth: bevelHeight,
+          }}
+        />
+      </Cell>
+    </Li>
   )
 }
+
+type LiProps = {
+  teamId: TeamId
+  reverse: boolean
+  index: number
+  children: List<React.ReactElement> // should be List<CellElement>, but typing is poorly done :/
+}
+
+const Li: React.FC<LiProps> = ({ teamId, reverse, index, children }) => (
+  <li className="contents">
+    {Children.map<CellElement, CellElement>(children as List<CellElement>, element => {
+      const { className, style, ...props_ } = element.props
+      const props: RequiredCellElementProps = {
+        ...props_,
+        reverse,
+        className: cx(className, teamBg[teamId]),
+        style: { ...style, gridRowStart: index + 1 },
+      }
+      return cloneElement(element, props)
+    })}
+  </li>
+)
 
 const teamBg: Dict<`${TeamId}`, string> = {
   100: 'bg-mastery-7-bis/30',
@@ -348,34 +376,37 @@ const teamBorder: Dict<`${TeamId}`, string> = {
   200: 'border-mastery-5-bis/30',
 }
 
-type BaseProps = {
-  key: React.Key
-  className?: string
-  style?: React.CSSProperties
+type CellProps = {
+  type?: keyof React.ReactHTML
+  gridColStart: number
+} & BaseCellProps &
+  HTMLElementProps
+
+type BaseCellProps = {
+  reverse?: boolean
 }
 
-const child =
-  <P extends React.HTMLAttributes<T>, T extends HTMLElement>(
-    type: keyof React.ReactHTML,
-    gridColStart: number,
-  ) =>
-  ({ className, style, ...props }: React.ClassAttributes<T> & P, ...children: React.ReactNode[]) =>
-  (reverse: boolean, { key, className: baseClassName, style: baseStyle }: BaseProps) =>
-    createElement(
-      type,
-      {
-        key,
-        className: cx(baseClassName, className),
-        style: {
-          ...baseStyle,
-          ...style,
-          gridColumnStart: reverse ? undefined : gridColStart,
-          gridColumnEnd: reverse ? gridTotalCols - gridColStart + 2 : undefined,
-        },
-        ...props,
+type CellElementProps = BaseCellProps & HTMLElementProps
+type RequiredCellElementProps = Required<BaseCellProps> & HTMLElementProps
+
+type CellElement = React.DetailedReactHTMLElement<CellElementProps, HTMLElement>
+
+type HTMLElementProps = React.ClassAttributes<HTMLElement> & React.HTMLAttributes<HTMLElement>
+
+const Cell = forwardRef<HTMLElement, CellProps>(
+  ({ type = 'div', gridColStart, reverse = false, style, children, ...props_ }, ref) => {
+    const props: HTMLElementProps = {
+      ...props_,
+      ref,
+      style: {
+        ...style,
+        gridColumnStart: reverse ? undefined : gridColStart,
+        gridColumnEnd: reverse ? gridTotalCols - gridColStart + 2 : undefined,
       },
-      ...children,
-    )
+    }
+    return createElement<HTMLElementProps, HTMLElement>(type, props, children)
+  },
+)
 
 type EmptyProps = {
   className?: string
