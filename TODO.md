@@ -1,3 +1,5 @@
+- refresh game
+- react-select
 - translate aram stats
 - uri: ugly encode
 - active game drag and drop
