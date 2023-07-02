@@ -32,7 +32,7 @@ export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
 
 export const Login: React.FC = () => {
   const { user, refreshUser } = useUser()
-  const { t } = useTranslation('login')
+  const { t } = useTranslation('form')
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Maybe<string>>(Maybe.none)

@@ -150,6 +150,19 @@ export type Translation = {
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
     summonerIconAlt: (name: string) => string
   }
+  form: {
+    alreadyAnAccount: React.ReactNode
+    confirmPassword: React.ReactNode
+    login: React.ReactNode
+    loginWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
+    noAccount: React.ReactNode
+    or: React.ReactNode
+    password: React.ReactNode
+    passwordsShouldBeIdentical: string
+    register: React.ReactNode
+    registerWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
+    userName: React.ReactNode
+  }
   home: {
     aram: React.ReactNode
     factions: React.ReactNode
@@ -157,15 +170,6 @@ export type Translation = {
     isntEndorsed: React.ReactNode
     specificBalanceChanges: React.ReactNode
     theQuest: React.ReactNode
-  }
-  login: {
-    loginWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
-    or: React.ReactNode
-    login: React.ReactNode
-    noAccount: React.ReactNode
-    password: React.ReactNode
-    register: React.ReactNode
-    userName: React.ReactNode
   }
   masteries: {
     addShard: React.ReactNode
@@ -184,5 +188,21 @@ export type Translation = {
   notFound: {
     home: React.ReactNode
     thisPageDoesntExist: React.ReactNode
+  }
+  register: {
+    accessRecentSearches: (recentSearches: number) => React.ReactNode
+    accessSummonerDetails: React.ReactNode
+    addSummonerToFavorites: React.ReactNode
+    customiseChampionPositions: React.ReactNode
+    discordHallOfFameRanking: React.ReactNode
+    discordServer: React.ReactNode
+    discordServerIconAlt: (name: string) => string
+    join: React.ReactNode
+    keepTrackOfShards: React.ReactNode
+    quickSummonerAccess: React.ReactNode
+    registrationExplanation: React.ReactNode
+    withAccountLinked: React.ReactNode
+    withAccountNotLinked: React.ReactNode
+    withoutAccount: React.ReactNode
   }
 }

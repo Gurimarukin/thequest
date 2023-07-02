@@ -313,6 +313,19 @@ export const frTranslation: Translation = {
     spellKey: key => `<Sort ${key}>`,
     summonerIconAlt: name => `Icône de ${name}`,
   },
+  form: {
+    alreadyAnAccount: 'Déjà un compte ?',
+    confirmPassword: 'Confirmation mot de passe :',
+    login: 'Se connecter',
+    loginWithDiscord: discordLogo => <>Se connecter avec {discordLogo}</>,
+    noAccount: 'Pas de compte ?',
+    or: 'ou',
+    password: 'Mot de passe :',
+    passwordsShouldBeIdentical: 'Les mots de passe doivent être identiques',
+    register: 'S’inscrire',
+    registerWithDiscord: discordLogo => <>S’inscrire avec {discordLogo}</>,
+    userName: 'Utilisateur :',
+  },
   home: {
     aram: 'ARAM',
     factions: 'Factions',
@@ -321,15 +334,6 @@ export const frTranslation: Translation = {
       'La Quête isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.',
     specificBalanceChanges: 'Équilibrages spécifiques',
     theQuest: 'La Quête.',
-  },
-  login: {
-    loginWithDiscord: discordLogo => <>Se connecter avec {discordLogo}</>,
-    or: 'ou',
-    login: 'Connexion',
-    noAccount: 'Pas de compte ?',
-    password: 'Mot de passe :',
-    register: 'S’inscrire',
-    userName: 'Utilisateur :',
   },
   masteries: {
     addShard: 'Ajouter un fragment',
@@ -354,6 +358,35 @@ export const frTranslation: Translation = {
   notFound: {
     home: 'Accueil',
     thisPageDoesntExist: 'Cette page n’existe pas.',
+  },
+  register: {
+    accessRecentSearches: recentSearches =>
+      `Voir les ${recentSearches.toLocaleString(
+        locale,
+      )} recherches les plus récentes (stockage local du navigateur)`,
+    accessSummonerDetails: 'Accéder à tous les détails d’un invocateur via la recherche',
+    addSummonerToFavorites: 'Ajouter des invocateur en favori',
+    customiseChampionPositions: 'Personnaliser les champions associés à un rôle',
+    discordHallOfFameRanking:
+      'Classement dans le temple de la renommée sur le serveur Discord du capitaine :',
+    discordServer: 'Serveur Discord',
+    discordServerIconAlt: name => `Icône du serveur ${name}`,
+    join: 'Rejoindre',
+    keepTrackOfShards: 'Garder le compe des fragments de champions (à la main, désolé)',
+    quickSummonerAccess: 'Accès rapide au profil d’invocateur lié',
+    registrationExplanation: (
+      <>
+        Avoir un compte lié à un compte Discord, lui-même lié à un compte Riot Games, permet d’avoir
+        accès à plus de fonctionnalités.
+        <br />
+        Comme Riot Games, c’est tout pourri, il n’est pas possible de lier directement un compte
+        Riot Games. Il faut passer par un compte Discord et que celui-ci soit lié à un compte Riot
+        Games.
+      </>
+    ),
+    withAccountLinked: 'Avec un compte lié à Riot Games',
+    withAccountNotLinked: 'Avec un compte NON lié à Riot Games',
+    withoutAccount: 'Sans compte',
   },
 }
 

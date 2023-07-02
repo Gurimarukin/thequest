@@ -18,6 +18,8 @@ import { Navigate } from '../components/Navigate'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { constants } from '../config/constants'
 import { useHistory } from '../contexts/HistoryContext'
+import type { Translation } from '../contexts/TranslationContext'
+import { useTranslation } from '../contexts/TranslationContext'
 import { useUser } from '../contexts/UserContext'
 import { CheckMarkSharp } from '../imgs/svgIcons'
 import { DiscordLogoTitle } from '../imgs/svgs/DiscordLogoTitle'
@@ -51,6 +53,7 @@ const confirmPasswordLens = pipe(lens.id<State>(), lens.prop('confirmPassword'))
 export const Register: React.FC = () => {
   const { navigate } = useHistory()
   const { user } = useUser()
+  const { t } = useTranslation()
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
@@ -78,7 +81,7 @@ export const Register: React.FC = () => {
         validated,
         Either.map(payload => {
           pipe(
-            validateOnSubmit(payload.password, state.confirmPassword),
+            validateOnSubmit(t.form)(payload.password, state.confirmPassword),
             Either.foldW(flow(Maybe.some, setError), () => {
               setIsLoading(true)
               return pipe(
@@ -93,7 +96,7 @@ export const Register: React.FC = () => {
         }),
       )
     },
-    [navigate, state, validated],
+    [navigate, state.confirmPassword, t.form, validated],
   )
 
   return basicAsyncRenderer(AsyncState.toSWR(user))(
@@ -101,27 +104,20 @@ export const Register: React.FC = () => {
       () => (
         <MainLayout>
           <div className="flex flex-col items-center gap-12 px-4 py-20">
-            <p className="leading-8">
-              Avoir un compte lié à un compte Discord, lui-même lié à un compte Riot Games, permet
-              d’avoir accès à plus de fonctionnalités.
-              <br />
-              Comme Riot Games, c'est tout pourri, il n’est pas possible de lier directement un
-              compte Riot Games. Il faut passer par un compte Discord et que celui-ci soit lié à un
-              compte Riot Games.
-            </p>
+            <p className="leading-8">{t.register.registrationExplanation}</p>
             <table className="grid grid-cols-[auto_repeat(3,1fr)]">
               <thead className="contents">
                 <tr className="contents">
                   <th />
-                  <Th>Sans compte</Th>
-                  <Th>Avec un compte NON lié à Riot Games</Th>
-                  <Th>Avec un compte lié à Riot Games</Th>
+                  <Th>{t.register.withoutAccount}</Th>
+                  <Th>{t.register.withAccountNotLinked}</Th>
+                  <Th>{t.register.withAccountLinked}</Th>
                 </tr>
               </thead>
               <tbody className="contents">
                 <tr className="contents">
                   <Td className="border-l border-t border-goldenrod pl-6 pt-12">
-                    Accéder à tous les détails d’un invocateur via la recherche
+                    {t.register.accessSummonerDetails}
                   </Td>
                   <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
                   <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
@@ -131,8 +127,7 @@ export const Register: React.FC = () => {
                 </tr>
                 <tr className="contents">
                   <Td className="border-l border-goldenrod pl-6">
-                    Voir les {constants.recentSearchesMaxCount} recherches les plus récentes
-                    (stockage local du navigateur)
+                    {t.register.accessRecentSearches(constants.recentSearchesMaxCount)}
                   </Td>
                   <Td className="justify-center">{greenCheck}</Td>
                   <Td className="justify-center">{greenCheck}</Td>
@@ -140,7 +135,21 @@ export const Register: React.FC = () => {
                 </tr>
                 <tr className="contents">
                   <Td className="border-l border-goldenrod pl-6">
-                    Ajouter des invocateur en favori
+                    {t.register.addSummonerToFavorites}
+                  </Td>
+                  <EmptyTd />
+                  <Td className="justify-center">{greenCheck}</Td>
+                  <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+                </tr>
+                <tr className="contents">
+                  <Td className="border-l border-goldenrod pl-6">{t.register.keepTrackOfShards}</Td>
+                  <EmptyTd />
+                  <Td className="justify-center">{greenCheck}</Td>
+                  <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
+                </tr>
+                <tr className="contents">
+                  <Td className="border-l border-goldenrod pl-6">
+                    {t.register.customiseChampionPositions}
                   </Td>
                   <EmptyTd />
                   <Td className="justify-center">{greenCheck}</Td>
@@ -148,23 +157,7 @@ export const Register: React.FC = () => {
                 </tr>
                 <tr className="contents">
                   <Td className="border-l border-goldenrod pl-6">
-                    Garder le compte des fragments de champions (à la main, désolé)
-                  </Td>
-                  <EmptyTd />
-                  <Td className="justify-center">{greenCheck}</Td>
-                  <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
-                </tr>
-                <tr className="contents">
-                  <Td className="border-l border-goldenrod pl-6">
-                    Personnaliser les champions associés à un rôle
-                  </Td>
-                  <EmptyTd />
-                  <Td className="justify-center">{greenCheck}</Td>
-                  <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
-                </tr>
-                <tr className="contents">
-                  <Td className="border-l border-goldenrod pl-6">
-                    Accès rapide au profil d’invocateur lié
+                    {t.register.quickSummonerAccess}
                   </Td>
                   <EmptyTd />
                   <EmptyTd />
@@ -172,18 +165,16 @@ export const Register: React.FC = () => {
                 </tr>
                 <tr className="contents">
                   <Td className="flex-col gap-3 border-b border-l border-goldenrod pb-12 pl-6">
-                    <span className="self-start">
-                      Classement dans le temple de la renommée sur le serveur Discord du capitaine :
-                    </span>
+                    <span className="self-start">{t.register.discordHallOfFameRanking}</span>
                     <div className="flex items-center self-start rounded bg-discord-darkgrey px-6 py-5 font-[baloopaaji2] text-white">
                       <img
                         src={lesQuaisAbattoirs.image}
-                        alt={`Icône du serveur ${lesQuaisAbattoirs.name}`}
+                        alt={t.register.discordServerIconAlt(lesQuaisAbattoirs.name)}
                         className="w-12 rounded-xl"
                       />
                       <span className="ml-4 flex flex-col">
                         <span className="font-bold">{lesQuaisAbattoirs.name}</span>
-                        <span className="text-sm text-zinc-400">Serveur Discord</span>
+                        <span className="text-sm text-zinc-400">{t.register.discordServer}</span>
                       </span>
                       <a
                         href={lesQuaisAbattoirs.inviteLink}
@@ -191,7 +182,7 @@ export const Register: React.FC = () => {
                         rel="noreferrer"
                         className="ml-8 rounded bg-discord-darkgreen px-3 py-2 text-sm"
                       >
-                        Rejoindre
+                        {t.register.join}
                       </a>
                     </div>
                   </Td>
@@ -210,11 +201,10 @@ export const Register: React.FC = () => {
               href={discordApiOAuth2Authorize('register')}
               className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
             >
-              S’inscrire avec
-              <DiscordLogoTitle className="my-3 ml-3 h-6" />
+              {t.form.registerWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
             </a>
 
-            <p>ou</p>
+            <p>{t.form.or}</p>
 
             <form
               onSubmit={handleSubmit}
@@ -222,7 +212,7 @@ export const Register: React.FC = () => {
             >
               <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
                 <label className="contents">
-                  <span>Login :</span>
+                  <span>{t.form.userName}</span>
                   <input
                     type="text"
                     value={state.userName}
@@ -231,7 +221,7 @@ export const Register: React.FC = () => {
                   />
                 </label>
                 <label className="contents">
-                  <span>Mot de passe :</span>
+                  <span>{t.form.password}</span>
                   <input
                     type="password"
                     value={state.password}
@@ -240,7 +230,7 @@ export const Register: React.FC = () => {
                   />
                 </label>
                 <label className="contents">
-                  <span>Confirmation mot de passe :</span>
+                  <span>{t.form.confirmPassword}</span>
                   <input
                     type="password"
                     value={state.confirmPassword}
@@ -255,7 +245,8 @@ export const Register: React.FC = () => {
                   disabled={isLoading || Either.isLeft(validated)}
                   className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:bg-grey-disabled"
                 >
-                  Inscription {isLoading ? <Loading className="h-4" /> : null}
+                  <span>{t.form.register}</span>
+                  {isLoading ? <Loading className="h-4" /> : null}
                 </button>
                 {pipe(
                   error,
@@ -267,9 +258,9 @@ export const Register: React.FC = () => {
               </div>
             </form>
             <div className="flex w-full max-w-xl flex-col items-center">
-              <span>Déjà un compte ?</span>
+              <span>{t.form.alreadyAnAccount}</span>
               <Link to={appRoutes.login} className="underline">
-                Se connecter
+                {t.form.login}
               </Link>
             </div>
           </div>
@@ -302,10 +293,9 @@ const EmptyTd: React.FC<EmptyTdProps> = ({ className }) => (
 
 const greenCheck = <CheckMarkSharp className="h-6 text-green" />
 
-const validateOnSubmit = (
-  password: ClearPassword,
-  confirmPassword: string,
-): Either<string, NotUsed> =>
-  ClearPassword.unwrap(password) !== confirmPassword
-    ? Either.left('Les mots de passe doivent être identiques')
-    : pipe(validatePassword(password), Either.map(toNotUsed))
+const validateOnSubmit =
+  (t: Translation['form']) =>
+  (password: ClearPassword, confirmPassword: string): Either<string, NotUsed> =>
+    ClearPassword.unwrap(password) !== confirmPassword
+      ? Either.left(t.passwordsShouldBeIdentical)
+      : pipe(validatePassword(password), Either.map(toNotUsed))
