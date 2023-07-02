@@ -25,6 +25,7 @@ import type { PartialDict, Tuple } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
+import { AsyncRenderer } from '../../compo../../components/AsyncRenderer'
 import { Loading } from '../../components/Loading'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { config } from '../../config/unsafe'
@@ -37,7 +38,6 @@ import { usePrevious } from '../../hooks/usePrevious'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
-import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
@@ -152,8 +152,8 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
 
   return (
     <MainLayout>
-      {basicAsyncRenderer(t.common)({ data, error })(
-        ({ summoner, leagues, masteries, championShards }) => (
+      <AsyncRenderer data={data} error={error}>
+        {({ summoner, leagues, masteries, championShards }) => (
           <SummonerViewComponent
             platform={platform}
             summoner={summoner}
@@ -162,8 +162,8 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
             championShards={championShards}
             setChampionsShardsBulk={setChampionsShardsBulk}
           />
-        ),
-      )}
+        )}
+      </AsyncRenderer>
     </MainLayout>
   )
 }

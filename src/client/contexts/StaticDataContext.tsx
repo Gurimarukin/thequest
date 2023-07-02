@@ -11,9 +11,9 @@ import { ListUtils } from '../../shared/utils/ListUtils'
 import type { List } from '../../shared/utils/fp'
 import { Maybe } from '../../shared/utils/fp'
 
+import { AsyncRenderer } from '../components/AsyncRenderer'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import type { ChildrenFC } from '../models/ChildrenFC'
-import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
 import { useTranslation } from './TranslationContext'
 
 const { ddragonCdn } = DDragonUtils
@@ -33,17 +33,20 @@ export type StaticDataContext = {
 const StaticDataContext = createContext<StaticDataContext | undefined>(undefined)
 
 export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
-  const { lang, t } = useTranslation('common')
-
-  return basicAsyncRenderer(t)(
-    useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }),
-  )(data => (
-    <StaticDataContextProviderLoader data={data}>{children}</StaticDataContextProviderLoader>
-  ))
+  const { lang } = useTranslation()
+  return (
+    <AsyncRenderer
+      {...useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+      })}
+    >
+      {data => (
+        <StaticDataContextProviderLoader data={data}>{children}</StaticDataContextProviderLoader>
+      )}
+    </AsyncRenderer>
+  )
 }
 
 type StaticDataContextProviderLoaderProps = {

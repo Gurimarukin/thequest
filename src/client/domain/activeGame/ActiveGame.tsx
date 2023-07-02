@@ -22,6 +22,7 @@ import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
+import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -31,7 +32,6 @@ import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSumm
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { appRoutes } from '../../router/AppRouter'
-import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { ActiveGameBans } from './ActiveGameBans'
 import {
@@ -55,7 +55,7 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
-  const { t } = useTranslation()
+  const { t } = useTranslation('activeGame')
 
   const { data, error, mutate } = useSWRHttp(
     apiRoutes.summoner.byName(platform, summonerName).activeGame.get,
@@ -95,11 +95,11 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
 
   return (
     <MainLayout>
-      {basicAsyncRenderer(t.common)({ data, error })(
-        Maybe.fold(
+      <AsyncRenderer data={data} error={error}>
+        {Maybe.fold(
           () => (
             <div className="flex justify-center">
-              <pre className="mt-4">{t.activeGame.notInGame}</pre>
+              <pre className="mt-4">{t.notInGame}</pre>
             </div>
           ),
           summonerGame => (
@@ -109,8 +109,8 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
               reloadGame={mutate}
             />
           ),
-        ),
-      )}
+        )}
+      </AsyncRenderer>
     </MainLayout>
   )
 }
@@ -122,7 +122,7 @@ const WithoutAdditional: React.FC<
 
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
-  const { lang, t } = useTranslation('common')
+  const { lang } = useTranslation()
   const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
 
   useEffect(
@@ -145,14 +145,18 @@ const WithoutAdditional: React.FC<
     }
   }, [navigate, props.platform, summoner.name, summonerNameFromLocation])
 
-  return basicAsyncRenderer(t)(
-    useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
-      AdditionalStaticData.codec,
-      'AdditionalStaticData',
-    ]),
-  )(additionalStaticData => (
-    <ActiveGameComponent {...props} additionalStaticData={additionalStaticData} />
-  ))
+  return (
+    <AsyncRenderer
+      {...useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
+        AdditionalStaticData.codec,
+        'AdditionalStaticData',
+      ])}
+    >
+      {additionalStaticData => (
+        <ActiveGameComponent {...props} additionalStaticData={additionalStaticData} />
+      )}
+    </AsyncRenderer>
+  )
 }
 
 type ActiveGameComponentProps = {

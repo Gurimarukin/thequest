@@ -9,13 +9,13 @@ import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 import type { Dict } from '../../../shared/utils/fp'
 import { Either, Future } from '../../../shared/utils/fp'
 
+import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { Link } from '../../components/Link'
 import { Navigate } from '../../components/Navigate'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { appRoutes } from '../../router/AppRouter'
-import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 import { NotFound } from '../NotFound'
@@ -70,9 +70,9 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
 
   return (
     <>
-      {basicAsyncRenderer(t)({ data, error })(() => (
-        <Navigate to={appRoutes.index} replace={true} />
-      ))}
+      <AsyncRenderer data={data} error={error}>
+        {() => <Navigate to={appRoutes.index} replace={true} />}
+      </AsyncRenderer>
       {error !== undefined ? (
         <div className="flex justify-center">
           <Link to={appRoutes.index} className="mt-4 underline">
