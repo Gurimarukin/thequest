@@ -5,13 +5,13 @@ import { UserContextProvider } from './contexts/UserContext'
 import { AppRouterComponent } from './router/AppRouterComponent'
 
 export const App: React.FC = () => (
-  <HistoryContextProvider>
-    <UserContextProvider>
-      <TranslationContextProvider>
+  <TranslationContextProvider>
+    <HistoryContextProvider>
+      <UserContextProvider>
         <StaticDataContextProvider>
           <AppRouterComponent />
         </StaticDataContextProvider>
-      </TranslationContextProvider>
-    </UserContextProvider>
-  </HistoryContextProvider>
+      </UserContextProvider>
+    </HistoryContextProvider>
+  </TranslationContextProvider>
 )

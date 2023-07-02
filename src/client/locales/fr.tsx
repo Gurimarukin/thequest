@@ -164,6 +164,11 @@ export const frTranslation: Translation = {
     ),
     emptyChampionIconAlt: 'Icône de champion vide',
     error: 'erreur',
+    errors: {
+      addFavoriteError: 'Erreur lors de l’ajout du favori',
+      fetchUserError: 'Erreur lors de la récupération l’utilisateur',
+      removeFavoriteError: 'Erreur lors de la suppression du favori',
+    },
     fraction: (numerator, denominator, o) => {
       const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
       return o !== undefined && o.withParenthesis ? `(${res})` : res

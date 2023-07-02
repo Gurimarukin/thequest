@@ -100,6 +100,11 @@ export type Translation = {
     cooldownSeconds: (cooldown: number, highlightClassName: string) => React.ReactNode
     emptyChampionIconAlt: string
     error: React.ReactNode
+    errors: {
+      addFavoriteError: React.ReactNode
+      fetchUserError: React.ReactNode
+      removeFavoriteError: React.ReactNode
+    }
     fraction: (
       numerator: number,
       denominator: number,
