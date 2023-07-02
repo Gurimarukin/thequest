@@ -128,6 +128,11 @@ export const frTranslation: Translation = {
         `${value} : ${leagueTier[tier]}${o !== undefined && o.withComma ? ',' : ''}`,
     },
     championIconAlt: name => `Icône de ${name}`,
+    cooldownSeconds: cooldown => (
+      <>
+        <span className="text-goldenrod">récupération :</span> {cooldown.toLocaleString(locale)}s
+      </>
+    ),
     fraction: (numerator, denominator, o) => {
       const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
       return o !== undefined && o.withParenthesis ? `(${res})` : res
@@ -172,15 +177,20 @@ export const frTranslation: Translation = {
       unranked: 'Non classé',
       unrankedIconAlt: 'Icône non classé',
     },
+    masteryIconAlt: level => `Icône niveau ${level}`,
     nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,
     nResults: plural('résultat'),
     number: (n, o) =>
       o !== undefined && o.withParenthesis
         ? `(${n.toLocaleString(locale)})`
         : n.toLocaleString(locale),
-    summonerIconAlt: name => `Icône de ${name}`,
     percents: n => `${n.toLocaleString(locale)} %`,
     positionIconAlt: p => `Icône position ${position[p]}`,
+    randomChampion: 'Champion aléatoire',
+    runeIconAlt: name => `Icône rune ${name}`,
+    searchChamion: 'Rechercher champion',
+    spellIconAlt: name => `Icône du sort ${name}`,
+    summonerIconAlt: name => `Icône de ${name}`,
   },
   masteries: {
     addShard: 'Ajouter un fragment',

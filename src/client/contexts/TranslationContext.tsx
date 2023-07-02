@@ -7,6 +7,7 @@ import type {
   ChampionFaction,
   ChampionFactionOrNone,
 } from '../../shared/models/api/champion/ChampionFaction'
+import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
@@ -75,6 +76,7 @@ export type Translation = {
       ) => React.ReactNode
     }
     championIconAlt: (name: string) => string
+    cooldownSeconds: (cooldown: number) => React.ReactNode
     fraction: (
       numerator: number,
       denominator: number,
@@ -112,12 +114,17 @@ export type Translation = {
       unranked: React.ReactNode
       unrankedIconAlt: string
     }
+    masteryIconAlt: (level: ChampionLevelOrZero) => string
     nChampionsFraction: (n: number, total: number) => React.ReactNode
     nResults: (n: number) => React.ReactNode
     number: (n: number, options?: { withParenthesis: boolean }) => React.ReactNode
-    summonerIconAlt: (name: string) => string
     percents: (n: number) => React.ReactNode
     positionIconAlt: (position: ChampionPosition) => string
+    randomChampion: React.ReactNode
+    runeIconAlt: (name: string) => string
+    searchChamion: string
+    spellIconAlt: (name: string) => string
+    summonerIconAlt: (name: string) => string
   }
   masteries: {
     addShard: React.ReactNode
