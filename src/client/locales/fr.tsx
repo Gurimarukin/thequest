@@ -277,7 +277,7 @@ export const frTranslation: Translation = {
       logout: 'Déconnexion',
       profile: 'Profil',
       searchSummoner: 'Rechercher invocateur',
-      signin: 'Inscription',
+      register: 'Inscription',
       yuumiIconAlt: 'Icône accueil (Yuumi)',
     },
     league: {
@@ -321,6 +321,15 @@ export const frTranslation: Translation = {
       'La Quête isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.',
     specificBalanceChanges: 'Équilibrages spécifiques',
     theQuest: 'La Quête.',
+  },
+  login: {
+    loginWithDiscord: discordLogo => <>Se connecter avec {discordLogo}</>,
+    or: 'ou',
+    login: 'Connexion',
+    noAccount: 'Pas de compte ?',
+    password: 'Mot de passe :',
+    register: 'S’inscrire',
+    userName: 'Utilisateur :',
   },
   masteries: {
     addShard: 'Ajouter un fragment',

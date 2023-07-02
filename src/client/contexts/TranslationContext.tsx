@@ -122,7 +122,7 @@ export type Translation = {
       logout: React.ReactNode
       profile: React.ReactNode
       searchSummoner: string
-      signin: React.ReactNode
+      register: React.ReactNode
       yuumiIconAlt: string
     }
     league: {
@@ -157,6 +157,15 @@ export type Translation = {
     isntEndorsed: React.ReactNode
     specificBalanceChanges: React.ReactNode
     theQuest: React.ReactNode
+  }
+  login: {
+    loginWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
+    or: React.ReactNode
+    login: React.ReactNode
+    noAccount: React.ReactNode
+    password: React.ReactNode
+    register: React.ReactNode
+    userName: React.ReactNode
   }
   masteries: {
     addShard: React.ReactNode

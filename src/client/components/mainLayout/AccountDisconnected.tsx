@@ -33,7 +33,7 @@ export const AccountDisconnected: React.FC = () => {
             </Link>
             <div className="flex justify-center">
               <Link to={appRoutes.register} className="underline">
-                {t.layout.signin}
+                {t.layout.register}
               </Link>
             </div>
           </Menu>
