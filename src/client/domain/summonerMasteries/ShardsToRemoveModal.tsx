@@ -155,8 +155,6 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
 
   const masteriesRef = useRef<HTMLSpanElement>(null)
 
-  const s = notificationsState.length < 2 ? '' : 's'
-
   return (
     <Modal>
       <div className="flex max-h-full flex-col items-end overflow-auto border border-goldenrod bg-zinc-900 p-2">
@@ -164,11 +162,7 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
           <CloseFilled className="w-5 text-goldenrod" />
         </button>
         <div className="flex flex-col items-center p-4">
-          <p className="text-sm">
-            Changement{s} de niveau detecté{s} depuis la dernière modification de fragments.
-            <br />
-            Peut-être en avez-vous utilisés (des fragments) ?
-          </p>
+          <p className="text-sm">{t.modal.nChangesDetected(notificationsState.length)}</p>
           {isSingleMode ? null : (
             <ForAllButton
               notificationsState={notificationsState}
@@ -195,10 +189,10 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                   <MasteryImg level={n.championLevel} className="h-6" />
                 </span>
                 <Tooltip hoverRef={masteriesRef} placement="top">
-                  Changement de maîtrise {n.leveledUpFrom} à {n.championLevel}
+                  {t.modal.masteryChange(n.leveledUpFrom, n.championLevel)}
                 </Tooltip>
                 <span className="justify-self-end pl-12 pr-4 text-sm">
-                  {t.removeNShards(n.shardsToRemove)}
+                  {t.modal.removeNShards(n.shardsToRemove)}
                 </span>
                 {isSingleMode ? null : (
                   <Toggle isChecked={n.isChecked} toggleChecked={toggleChecked(n.championId)} />
@@ -214,7 +208,8 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                 disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                Non {isLoading ? <Loading className="h-4" /> : null}
+                <span>{t.modal.no}</span>
+                {isLoading ? <Loading className="h-4" /> : null}
               </ButtonSecondary>
               <ButtonPrimary
                 type="button"
@@ -222,7 +217,8 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                 disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                Oui {isLoading ? <Loading className="h-4" /> : null}
+                <span>{t.modal.yes}</span>
+                {isLoading ? <Loading className="h-4" /> : null}
               </ButtonPrimary>
             </div>
           ) : (
@@ -232,7 +228,8 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
               disabled={isLoading}
               className="mt-6 flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75"
             >
-              Confirmer {isLoading ? <Loading className="h-4" /> : null}
+              <span>{t.modal.confirm}</span>
+              {isLoading ? <Loading className="h-4" /> : null}
             </ButtonPrimary>
           )}
         </div>
@@ -250,6 +247,8 @@ const ForAllButton: React.FC<ForAllButtonProps> = ({
   notificationsState,
   setNotificationsState,
 }) => {
+  const { t } = useTranslation('masteries')
+
   const yesForAll = notificationsState.some(n => !n.isChecked)
   const forAllClick = useMemo(
     () =>
@@ -265,7 +264,7 @@ const ForAllButton: React.FC<ForAllButtonProps> = ({
       onClick={forAllClick}
       className="col-span-2 mt-6 self-end border border-goldenrod bg-black px-2 py-1 text-sm hover:bg-goldenrod/75 hover:text-black"
     >
-      {yesForAll ? 'Oui' : 'Non'} pour tout
+      {yesForAll ? t.modal.yesForAll : t.modal.noForAll}
     </button>
   )
 }

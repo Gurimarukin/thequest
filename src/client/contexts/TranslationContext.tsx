@@ -195,13 +195,22 @@ export type Translation = {
       view: Dict<MasteriesQueryView, React.ReactNode>
       viewShort: Dict<MasteriesQueryView, React.ReactNode>
     }
+    modal: {
+      confirm: React.ReactNode
+      masteryChange: (from: ChampionLevelOrZero, to: ChampionLevelOrZero) => React.ReactNode
+      nChangesDetected: (n: number) => React.ReactNode
+      no: React.ReactNode
+      noForAll: React.ReactNode
+      removeNShards: (n: number) => React.ReactNode
+      yes: React.ReactNode
+      yesForAll: React.ReactNode
+    }
     nShards: (n: number) => React.ReactNode
     nTokens: (n: number) => React.ReactNode
     points: (points: number, total?: number) => React.ReactNode
     pointsSinceLastLevel: (points: number, level: number) => string
     pointsUntilNextLevel: (points: number, level: number) => string
     removeShard: React.ReactNode
-    removeNShards: (n: number) => React.ReactNode
     tokenIconAlt: (level: number, options?: { notObtained: boolean }) => string
   }
   notFound: {

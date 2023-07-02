@@ -374,6 +374,26 @@ export const frTranslation: Translation = {
         histogram: 'Histogramme',
       },
     },
+    modal: {
+      confirm: 'Confirmer',
+      masteryChange: (from, to) =>
+        `Changement de maîtrise ${from.toLocaleString(locale)} à ${to.toLocaleString(locale)}`,
+      nChangesDetected: n => {
+        const s = n < 2 ? '' : 's'
+        return (
+          <>
+            Changement{s} de niveau detecté{s} depuis la dernière modification de fragments.
+            <br />
+            Peut-être en avez-vous utilisés (des fragments) ?
+          </>
+        )
+      },
+      no: 'Non',
+      noForAll: 'Non pour tout',
+      removeNShards: n => `enlever ${plural('fragment')(n)}`,
+      yes: 'Oui',
+      yesForAll: 'Oui pour tout',
+    },
     nShards: plural('fragment'),
     nTokens: plural('jeton'),
     points: (points, total) =>
@@ -385,7 +405,6 @@ export const frTranslation: Translation = {
     pointsUntilNextLevel: (points, level) =>
       `${plural('point')(points)} jusqu'au niveau ${level.toLocaleString(locale)}`,
     removeShard: 'Enlever un fragment',
-    removeNShards: n => `enlever ${plural('fragment')(n)}`,
     tokenIconAlt: (level, o) =>
       `Jeton de maîtrise ${level}${o !== undefined && o.notObtained ? ' (non obtenu)' : ''}`,
   },
