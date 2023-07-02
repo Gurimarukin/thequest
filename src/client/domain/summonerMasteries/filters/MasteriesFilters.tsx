@@ -221,7 +221,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               List.reverse,
               List.map(level => (
                 <SelectLevelsButton key={level} levels={[level]}>
-                  {level}
+                  {t.common.number(level)}
                 </SelectLevelsButton>
               )),
             )}
