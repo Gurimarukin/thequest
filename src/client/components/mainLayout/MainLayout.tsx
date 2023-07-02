@@ -29,7 +29,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             <Link to={appRoutes.index}>
               <img
                 src={Assets.yuumi}
-                alt="Icône accueil (Yuumi)"
+                alt={t.layout.yuumiIconAlt}
                 className="h-12 w-12 rounded-sm bg-black"
               />
             </Link>

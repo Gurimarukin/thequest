@@ -3,17 +3,20 @@ import { createContext, useContext } from 'react'
 import type { ChallengeId } from '../../shared/models/api/ChallengeId'
 import { Lang } from '../../shared/models/api/Lang'
 import type { SpellName } from '../../shared/models/api/SpellName'
+import type { GameQueue } from '../../shared/models/api/activeGame/GameQueue'
 import type {
   ChampionFaction,
   ChampionFactionOrNone,
 } from '../../shared/models/api/champion/ChampionFaction'
+import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
+import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
-import type { Dict } from '../../shared/utils/fp'
+import type { Dict, Maybe } from '../../shared/utils/fp'
 
 import { frTranslation } from '../locales/fr'
 import type { ChampionAramCategory } from '../models/ChampionAramCategory'
@@ -56,6 +59,20 @@ export function useTranslation<K extends keyof Translation>(key?: K): Translatio
 }
 
 export type Translation = {
+  activeGame: {
+    bannedBy: (
+      summonerName: string,
+      championName: Maybe<string>,
+      pickTurn: number,
+      highlightClassName: string,
+    ) => React.ReactNode
+    empty: React.ReactNode
+    gameStartedAt: (date: Date) => React.ReactNode
+    loading: React.ReactNode
+    notInGame: React.ReactNode
+    theQuestProgression: React.ReactNode
+    totalMasteryScore: React.ReactNode
+  }
   aram: {
     category: {
       label: Dict<ChampionAramCategory, React.ReactNode>
@@ -76,7 +93,9 @@ export type Translation = {
       ) => React.ReactNode
     }
     championIconAlt: (name: string) => string
-    cooldownSeconds: (cooldown: number) => React.ReactNode
+    championKey: (key: ChampionKey) => string
+    cooldownSeconds: (cooldown: number, highlightClassName: string) => React.ReactNode
+    emptyChampionIconAlt: string
     fraction: (
       numerator: number,
       denominator: number,
@@ -87,6 +106,7 @@ export type Translation = {
       challengeShort: (id: ChallengeId) => React.ReactNode
       faction: Dict<ChampionFaction, React.ReactNode>
       factionOrNone: Dict<ChampionFactionOrNone, React.ReactNode>
+      gameQueue: Dict<`${GameQueue}`, React.ReactNode>
       leagueTier: Dict<LeagueTier, React.ReactNode>
       position: Dict<ChampionPosition, React.ReactNode>
       spell: Dict<SpellName, React.ReactNode>
@@ -97,11 +117,13 @@ export type Translation = {
       activeGame: React.ReactNode
       championMasteries: React.ReactNode
       game: React.ReactNode
+      home: React.ReactNode
       login: React.ReactNode
       logout: React.ReactNode
       profile: React.ReactNode
       searchSummoner: string
       signin: React.ReactNode
+      yuumiIconAlt: string
     }
     league: {
       label: Dict<keyof SummonerLeaguesView, React.ReactNode>
@@ -118,13 +140,23 @@ export type Translation = {
     nChampionsFraction: (n: number, total: number) => React.ReactNode
     nResults: (n: number) => React.ReactNode
     number: (n: number, options?: { withParenthesis: boolean }) => React.ReactNode
+    numberK: (n: number) => React.ReactNode
     percents: (n: number) => React.ReactNode
     positionIconAlt: (position: ChampionPosition) => string
     randomChampion: React.ReactNode
     runeIconAlt: (name: string) => string
     searchChamion: string
     spellIconAlt: (name: string) => string
+    spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
     summonerIconAlt: (name: string) => string
+  }
+  home: {
+    aram: React.ReactNode
+    factions: React.ReactNode
+    globetrotterChallenges: React.ReactNode
+    isntEndorsed: React.ReactNode
+    specificBalanceChanges: React.ReactNode
+    theQuest: React.ReactNode
   }
   masteries: {
     addShard: React.ReactNode

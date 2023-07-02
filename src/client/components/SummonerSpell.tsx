@@ -27,7 +27,9 @@ export const SummonerSpell: React.FC<Props> = ({ spell, className }) => {
       />
       <Tooltip hoverRef={ref} className="grid max-w-xs grid-cols-[auto_auto] gap-1">
         <span className="font-bold">{spell.name}</span>
-        <span className="justify-self-end">{t.cooldownSeconds(spell.cooldown)}</span>
+        <span className="justify-self-end">
+          {t.cooldownSeconds(spell.cooldown, 'text-goldenrod')}
+        </span>
         <span className="col-span-2 whitespace-normal">{spell.description}</span>
       </Tooltip>
     </>

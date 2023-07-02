@@ -9,7 +9,6 @@ import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
@@ -56,6 +55,7 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
+  const { t } = useTranslation('activeGame')
 
   const { data, error, mutate } = useSWRHttp(
     apiRoutes.summoner.byName(platform, summonerName).activeGame.get,
@@ -99,7 +99,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
         Maybe.fold(
           () => (
             <div className="flex justify-center">
-              <pre className="mt-4">pas en partie.</pre>
+              <pre className="mt-4">{t.notInGame}</pre>
             </div>
           ),
           summonerGame => (
@@ -173,6 +173,8 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   },
   reloadGame,
 }) => {
+  const { t } = useTranslation('common')
+
   const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
 
   const summonerSpellByKey = useMemo(
@@ -210,7 +212,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
       )}
     >
       <div className="flex items-center justify-center gap-4 px-3">
-        <h2 className="text-lg text-goldenrod">{GameQueue.label[gameQueueConfigId]}</h2>
+        <h2 className="text-lg text-goldenrod">{t.labels.gameQueue[gameQueueConfigId]}</h2>
         {pipe(
           gameStartTime,
           Maybe.fold(
@@ -274,12 +276,14 @@ type LoadingProps = {
 }
 
 const Loading: React.FC<LoadingProps> = ({ reload }) => {
+  const { t } = useTranslation('activeGame')
+
   useEffect(() => {
     const id = window.setInterval(reload, MsDuration.unwrap(reloadInterval))
     return () => window.clearInterval(id)
   }, [reload])
 
-  return <GameInfo>chargement</GameInfo>
+  return <GameInfo>{t.loading}</GameInfo>
 }
 
 type TimerProps = {
@@ -287,6 +291,8 @@ type TimerProps = {
 }
 
 const Timer: React.FC<TimerProps> = ({ startTime }) => {
+  const { t } = useTranslation('activeGame')
+
   const [gameDuration, setGameDuration] = useState(() => pipe(DayJs.now(), DayJs.diff(startTime)))
 
   useEffect(() => {
@@ -305,9 +311,7 @@ const Timer: React.FC<TimerProps> = ({ startTime }) => {
       <GameInfo ref={timerRef}>
         <pre>{prettyMs(gameDuration)}</pre>
       </GameInfo>
-      <Tooltip hoverRef={timerRef}>
-        Partie commencée à {date.toLocaleTimeString()} ({date.toLocaleDateString()})
-      </Tooltip>
+      <Tooltip hoverRef={timerRef}>{t.gameStartedAt(date)}</Tooltip>
     </>
   )
 }

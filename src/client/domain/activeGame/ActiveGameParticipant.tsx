@@ -15,14 +15,13 @@ import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
-import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
-import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict, List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
@@ -34,6 +33,7 @@ import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
@@ -101,6 +101,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   reverse,
   index,
 }) => {
+  const { t } = useTranslation()
   const { championByKey, assets } = useStaticData()
 
   const percentsRef = useRef<HTMLSpanElement>(null)
@@ -199,7 +200,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <div className="w-9">
           <img
             src={assets.summonerIcon(profileIconId)}
-            alt={`Icône de ${summonerName}`}
+            alt={t.common.summonerIconAlt(summonerName)}
             className="w-full"
           />
         </div>
@@ -217,20 +218,22 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           </a>
           {pipe(
             masteries,
-            Maybe.map(m => (
-              <>
-                <span className="text-grey-400">—</span>
-                <span className="flex gap-1.5">
-                  <span ref={percentsRef}>{round(m.totalPercents, 1)}%</span>
-                  <Tooltip hoverRef={percentsRef}>Progression de La Quête</Tooltip>
-                  <span ref={totalMasteriesRef} className="text-grey-400">
-                    ({m.totalScore})
+            Maybe.fold(
+              () => null,
+              m => (
+                <>
+                  <span className="text-grey-400">—</span>
+                  <span className="flex gap-1.5">
+                    <span ref={percentsRef}>{t.common.percents(round(m.totalPercents, 1))}</span>
+                    <Tooltip hoverRef={percentsRef}>{t.activeGame.theQuestProgression}</Tooltip>
+                    <span ref={totalMasteriesRef} className="text-grey-400">
+                      {t.common.number(m.totalScore, { withParenthesis: true })}
+                    </span>
+                    <Tooltip hoverRef={totalMasteriesRef}>{t.activeGame.totalMasteryScore}</Tooltip>
                   </span>
-                  <Tooltip hoverRef={totalMasteriesRef}>Score total de maîtrise</Tooltip>
-                </span>
-              </>
-            )),
-            Maybe.toNullable,
+                </>
+              ),
+            ),
           )}
         </div>
       </Cell>
@@ -243,9 +246,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           {pipe(
             spell1,
             Maybe.fold(
-              () => (
-                <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell1Id)}</Empty>
-              ),
+              () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
               s => <SummonerSpell spell={s} className="h-full w-full" />,
             ),
           )}
@@ -254,9 +255,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           {pipe(
             spell2,
             Maybe.fold(
-              () => (
-                <Empty className="h-full w-full">Sort {SummonerSpellKey.unwrap(spell2Id)}</Empty>
-              ),
+              () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
               s => <SummonerSpell spell={s} className="h-full w-full" />,
             ),
           )}
@@ -270,7 +269,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               <>
                 <span className="invisible">h</span>
                 <div className="h-16 w-16 bg-black text-2xs">
-                  Champion {ChampionKey.unwrap(championId)}
+                  {t.common.championKey(championId)}
                 </div>
                 <span className="invisible">h</span>
               </>
@@ -281,7 +280,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <div ref={championRef} className="flex flex-col items-center gap-px">
                   <ChampionMasterySquare {...props} />
                   <span className={cx(['invisible', props.championLevel < 5])}>
-                    {round(props.championPoints / 1000, 1).toLocaleString()}k
+                    {t.common.numberK(round(props.championPoints / 1000, 1))}
                   </span>
                 </div>
               </>
