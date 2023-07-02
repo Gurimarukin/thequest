@@ -99,6 +99,7 @@ export type Translation = {
     championKey: (key: ChampionKey) => string
     cooldownSeconds: (cooldown: number, highlightClassName: string) => React.ReactNode
     emptyChampionIconAlt: string
+    error: React.ReactNode
     fraction: (
       numerator: number,
       denominator: number,
@@ -142,6 +143,7 @@ export type Translation = {
     masteryIconAlt: (level: ChampionLevelOrZero) => string
     nChampionsFraction: (n: number, total: number) => React.ReactNode
     nResults: (n: number) => React.ReactNode
+    notFound: React.ReactNode
     number: (n: number, options?: { withParenthesis: boolean }) => React.ReactNode
     numberK: (n: number) => React.ReactNode
     percents: (n: number) => React.ReactNode

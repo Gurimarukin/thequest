@@ -55,7 +55,7 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
-  const { t } = useTranslation('activeGame')
+  const { t } = useTranslation()
 
   const { data, error, mutate } = useSWRHttp(
     apiRoutes.summoner.byName(platform, summonerName).activeGame.get,
@@ -95,11 +95,11 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
 
   return (
     <MainLayout>
-      {basicAsyncRenderer({ data, error })(
+      {basicAsyncRenderer(t.common)({ data, error })(
         Maybe.fold(
           () => (
             <div className="flex justify-center">
-              <pre className="mt-4">{t.notInGame}</pre>
+              <pre className="mt-4">{t.activeGame.notInGame}</pre>
             </div>
           ),
           summonerGame => (
@@ -122,7 +122,7 @@ const WithoutAdditional: React.FC<
 
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
-  const { lang } = useTranslation()
+  const { lang, t } = useTranslation('common')
   const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
 
   useEffect(
@@ -145,7 +145,7 @@ const WithoutAdditional: React.FC<
     }
   }, [navigate, props.platform, summoner.name, summonerNameFromLocation])
 
-  return basicAsyncRenderer(
+  return basicAsyncRenderer(t)(
     useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
       AdditionalStaticData.codec,
       'AdditionalStaticData',

@@ -163,6 +163,7 @@ export const frTranslation: Translation = {
       </>
     ),
     emptyChampionIconAlt: 'Icône de champion vide',
+    error: 'erreur',
     fraction: (numerator, denominator, o) => {
       const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
       return o !== undefined && o.withParenthesis ? `(${res})` : res
@@ -299,6 +300,7 @@ export const frTranslation: Translation = {
     masteryIconAlt: level => `Icône niveau ${level}`,
     nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,
     nResults: plural('résultat'),
+    notFound: 'introuvable.',
     number: (n, o) =>
       o !== undefined && o.withParenthesis
         ? `(${n.toLocaleString(locale)})`

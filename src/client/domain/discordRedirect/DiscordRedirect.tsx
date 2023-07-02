@@ -70,7 +70,7 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
 
   return (
     <>
-      {basicAsyncRenderer({ data, error })(() => (
+      {basicAsyncRenderer(t)({ data, error })(() => (
         <Navigate to={appRoutes.index} replace={true} />
       ))}
       {error !== undefined ? (

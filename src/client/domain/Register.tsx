@@ -99,7 +99,7 @@ export const Register: React.FC = () => {
     [navigate, state.confirmPassword, t.form, validated],
   )
 
-  return basicAsyncRenderer(AsyncState.toSWR(user))(
+  return basicAsyncRenderer(t.common)(AsyncState.toSWR(user))(
     Maybe.fold(
       () => (
         <MainLayout>

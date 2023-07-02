@@ -2,21 +2,19 @@ import { HTTPError } from 'ky'
 import type { SWRResponse } from 'swr'
 
 import { Loading } from '../components/Loading'
+import type { Translation } from '../contexts/TranslationContext'
 
-export function basicAsyncRenderer<A>({
-  data,
-  error,
-}: Pick<SWRResponse<A, unknown>, 'data' | 'error'>): <B>(
-  renderData: (a: A) => B,
-) => React.ReactElement | B {
-  return renderData => {
+export const basicAsyncRenderer =
+  (t: Translation['common']) =>
+  <A,>({ data, error }: Pick<SWRResponse<A, unknown>, 'data' | 'error'>) =>
+  <B,>(renderData: (a: A) => B): React.ReactElement | B => {
     if (error !== undefined) {
       return (
         <div className="flex justify-center">
           {error instanceof HTTPError && error.response.status === 404 ? (
-            <pre className="mt-4">not found.</pre>
+            <pre className="mt-4">{t.notFound}</pre>
           ) : (
-            <pre className="mt-4">error</pre>
+            <pre className="mt-4">{t.error}</pre>
           )}
         </div>
       )
@@ -30,4 +28,3 @@ export function basicAsyncRenderer<A>({
     }
     return renderData(data)
   }
-}

@@ -64,7 +64,7 @@ type Props = {
 export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
   const { maybeUser } = useUser()
-  const { t } = useTranslation('masteries')
+  const { t } = useTranslation()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
     apiRoutes.summoner.byName(platform, summonerName).masteries.get,
@@ -142,26 +142,28 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
           if (optimisticMutation) mutate(data, { revalidate: false })
           console.error(e)
           // TODO: error toaster
-          alert(t.updateShardsError)
+          alert(t.masteries.updateShardsError)
           return Future.notUsed
         }),
       )
     },
-    [data, mutate, platform, t.updateShardsError],
+    [data, mutate, platform, t.masteries.updateShardsError],
   )
 
   return (
     <MainLayout>
-      {basicAsyncRenderer({ data, error })(({ summoner, leagues, masteries, championShards }) => (
-        <SummonerViewComponent
-          platform={platform}
-          summoner={summoner}
-          leagues={leagues}
-          masteries={masteries}
-          championShards={championShards}
-          setChampionsShardsBulk={setChampionsShardsBulk}
-        />
-      ))}
+      {basicAsyncRenderer(t.common)({ data, error })(
+        ({ summoner, leagues, masteries, championShards }) => (
+          <SummonerViewComponent
+            platform={platform}
+            summoner={summoner}
+            leagues={leagues}
+            masteries={masteries}
+            championShards={championShards}
+            setChampionsShardsBulk={setChampionsShardsBulk}
+          />
+        ),
+      )}
     </MainLayout>
   )
 }

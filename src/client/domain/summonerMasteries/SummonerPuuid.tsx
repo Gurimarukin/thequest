@@ -11,6 +11,7 @@ import { Maybe } from '../../../shared/utils/fp'
 import { Navigate } from '../../components/Navigate'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { PartialMasteriesQuery } from '../../models/masteriesQuery/PartialMasteriesQuery'
@@ -25,18 +26,25 @@ type SummonerPuuidProps = {
 
 type Page = 'profile' | 'game'
 
-export const SummonerPuuid: React.FC<SummonerPuuidProps> = ({ platform, puuid, page }) => (
-  <MainLayout>
-    {basicAsyncRenderer(
-      useSWRHttp(apiRoutes.summoner.byPuuid(platform, puuid).masteries.get, {}, [
-        SummonerMasteriesView.codec,
-        'SummonerMasteriesView',
-      ]),
-    )(summonerMasteries => (
-      <SummonerPuuidLoaded platform={platform} summonerMasteries={summonerMasteries} page={page} />
-    ))}
-  </MainLayout>
-)
+export const SummonerPuuid: React.FC<SummonerPuuidProps> = ({ platform, puuid, page }) => {
+  const { t } = useTranslation('common')
+  return (
+    <MainLayout>
+      {basicAsyncRenderer(t)(
+        useSWRHttp(apiRoutes.summoner.byPuuid(platform, puuid).masteries.get, {}, [
+          SummonerMasteriesView.codec,
+          'SummonerMasteriesView',
+        ]),
+      )(summonerMasteries => (
+        <SummonerPuuidLoaded
+          platform={platform}
+          summonerMasteries={summonerMasteries}
+          page={page}
+        />
+      ))}
+    </MainLayout>
+  )
+}
 
 type SummonerPuuidLoadedProps = {
   platform: Platform
