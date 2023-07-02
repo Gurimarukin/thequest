@@ -249,7 +249,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
   },
   className,
 }) => {
-  const { t } = useTranslation('masteries')
+  const { t } = useTranslation()
 
   const hoverRef1 = useRef<HTMLDivElement>(null)
   const hoverRef2 = useRef<HTMLDivElement>(null)
@@ -260,11 +260,16 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
     [
       2 < championLevel
         ? Maybe.some(
-            t.pointsSinceLastLevel(championPointsSinceLastLevel, Math.min(championLevel, 5)),
+            t.masteries.pointsSinceLastLevel(
+              championPointsSinceLastLevel,
+              Math.min(championLevel, 5),
+            ),
           )
         : Maybe.none,
       0 < championLevel && championLevel < 5
-        ? Maybe.some(t.pointsUntilNextLevel(championPointsUntilNextLevel, championLevel + 1))
+        ? Maybe.some(
+            t.masteries.pointsUntilNextLevel(championPointsUntilNextLevel, championLevel + 1),
+          )
         : Maybe.none,
     ],
     List.compact,
@@ -309,7 +314,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
         )}
         <div className="flex items-center">
           <span ref={placementRef} className="p-1.5 text-sm">
-            {championPoints.toLocaleString()}
+            {t.common.number(championPoints)}
           </span>
         </div>
       </div>
