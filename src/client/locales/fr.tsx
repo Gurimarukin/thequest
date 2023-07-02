@@ -407,6 +407,7 @@ export const frTranslation: Translation = {
     removeShard: 'Enlever un fragment',
     tokenIconAlt: (level, o) =>
       `Jeton de maîtrise ${level}${o !== undefined && o.notObtained ? ' (non obtenu)' : ''}`,
+    updateShardsError: 'Erreur lors de la modification des fragments',
   },
   notFound: {
     home: 'Accueil',

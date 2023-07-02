@@ -212,6 +212,7 @@ export type Translation = {
     pointsUntilNextLevel: (points: number, level: number) => string
     removeShard: React.ReactNode
     tokenIconAlt: (level: number, options?: { notObtained: boolean }) => string
+    updateShardsError: React.ReactNode
   }
   notFound: {
     home: React.ReactNode

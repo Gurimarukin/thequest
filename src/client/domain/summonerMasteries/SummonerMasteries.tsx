@@ -30,6 +30,7 @@ import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { config } from '../../config/unsafe'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
@@ -63,6 +64,7 @@ type Props = {
 export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
   const { maybeUser } = useUser()
+  const { t } = useTranslation('masteries')
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
     apiRoutes.summoner.byName(platform, summonerName).masteries.get,
@@ -140,12 +142,12 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
           if (optimisticMutation) mutate(data, { revalidate: false })
           console.error(e)
           // TODO: error toaster
-          alert('Erreur lors de la modification des fragments')
+          alert(t.updateShardsError)
           return Future.notUsed
         }),
       )
     },
-    [data, mutate, platform],
+    [data, mutate, platform, t.updateShardsError],
   )
 
   return (
