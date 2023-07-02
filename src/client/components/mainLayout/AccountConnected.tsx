@@ -12,6 +12,7 @@ import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
 import { useHistory } from '../../contexts/HistoryContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { PersonFilled } from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
@@ -29,6 +30,7 @@ type AccountConnectedProps = {
 export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   const { matchLocation, masteriesQuery } = useHistory()
   const { refreshUser } = useUser()
+  const { t } = useTranslation('common')
 
   const matchSummoner = matchLocation(appParsers.platformSummonerName)
 
@@ -92,7 +94,8 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                   disabled={isLoading}
                   className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75 disabled:bg-grey-disabled"
                 >
-                  Déconnexion {isLoading ? <Loading className="h-4" /> : null}
+                  <span>{t.layout.logout}</span>
+                  {isLoading ? <Loading className="h-4" /> : null}
                 </button>
               </li>
             </ul>

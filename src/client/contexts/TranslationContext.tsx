@@ -90,6 +90,17 @@ export type Translation = {
       spell: Dict<SpellName, React.ReactNode>
       wikiaStatsBalance: Dict<WikiaStatsBalanceKey, React.ReactNode>
     }
+    layout: {
+      account: React.ReactNode
+      activeGame: React.ReactNode
+      championMasteries: React.ReactNode
+      game: React.ReactNode
+      login: React.ReactNode
+      logout: React.ReactNode
+      profile: React.ReactNode
+      searchSummoner: string
+      signin: React.ReactNode
+    }
     league: {
       label: Dict<keyof SummonerLeaguesView, React.ReactNode>
       leaguePoints: (n: number) => React.ReactNode
@@ -104,6 +115,7 @@ export type Translation = {
     nChampionsFraction: (n: number, total: number) => React.ReactNode
     nResults: (n: number) => React.ReactNode
     number: (n: number, options?: { withParenthesis: boolean }) => React.ReactNode
+    summonerIconAlt: (name: string) => string
     percents: (n: number) => React.ReactNode
     positionIconAlt: (position: ChampionPosition) => string
   }

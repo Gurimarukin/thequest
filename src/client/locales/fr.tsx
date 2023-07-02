@@ -145,6 +145,17 @@ export const frTranslation: Translation = {
       spell,
       wikiaStatsBalance,
     },
+    layout: {
+      account: 'Compte',
+      activeGame: 'Partie active',
+      championMasteries: 'Maîtrises de champions',
+      game: 'Partie',
+      login: 'Connexion',
+      logout: 'Déconnexion',
+      profile: 'Profil',
+      searchSummoner: 'Rechercher invocateur',
+      signin: 'Inscription',
+    },
     league: {
       label: {
         soloDuo: 'Classée Solo/Duo',
@@ -167,6 +178,7 @@ export const frTranslation: Translation = {
       o !== undefined && o.withParenthesis
         ? `(${n.toLocaleString(locale)})`
         : n.toLocaleString(locale),
+    summonerIconAlt: name => `Icône de ${name}`,
     percents: n => `${n.toLocaleString(locale)} %`,
     positionIconAlt: p => `Icône position ${position[p]}`,
   },

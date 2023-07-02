@@ -11,6 +11,7 @@ import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import {
@@ -33,6 +34,7 @@ import { Select } from '../Select'
 export const SearchSummoner: React.FC = () => {
   const { navigate, matchLocation, masteriesQuery } = useHistory()
   const { maybeUser, recentSearches } = useUser()
+  const { t } = useTranslation('common')
 
   const [isOpen, setIsOpen] = useState(false)
   const close = useCallback(() => setIsOpen(false), [])
@@ -128,7 +130,7 @@ export const SearchSummoner: React.FC = () => {
             value={summonerName}
             onChange={handleChange}
             onFocus={handleFocus}
-            placeholder="Rechercher invocateur"
+            placeholder={t.layout.searchSummoner}
             className="w-52 border border-goldenrod bg-black pl-2 pr-8"
           />
           <ul
@@ -175,6 +177,7 @@ type SummonerSearchProps = {
 const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const { navigate, matchLocation, masteriesQuery } = useHistory()
   const { maybeUser, addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
+  const { t } = useTranslation('common')
   const staticData = useStaticData()
 
   // with current masteriesQuery
@@ -239,7 +242,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       >
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
-          alt={`Icône de ${summoner.name}`}
+          alt={t.summonerIconAlt(summoner.name)}
           className="w-12"
         />
         <span className="ml-2 grow">{summoner.name}</span>

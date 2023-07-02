@@ -3,6 +3,7 @@ import { pipe } from 'fp-ts/function'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
 import { AsyncState } from '../../models/AsyncState'
@@ -18,6 +19,7 @@ import { SearchSummoner } from './SearchSummoner'
 export const MainLayout: ChildrenFC = ({ children }) => {
   const { matchLocation } = useHistory()
   const { user } = useUser()
+  const { t } = useTranslation('common')
 
   return (
     <div className="flex h-full flex-col">
@@ -43,16 +45,16 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                       <HighlightLink
                         to={appRoutes.platformSummonerName(platform, summonerName, {})}
                         parser={appParsers.platformSummonerName}
-                        tooltip="Maîtrises de champions"
+                        tooltip={t.layout.championMasteries}
                       >
-                        Profil
+                        {t.layout.profile}
                       </HighlightLink>
                       <HighlightLink
                         to={appRoutes.platformSummonerNameGame(platform, summonerName)}
                         parser={appParsers.platformSummonerNameGame}
-                        tooltip="Partie active"
+                        tooltip={t.layout.activeGame}
                       >
-                        Partie
+                        {t.layout.game}
                       </HighlightLink>
                     </>
                   ),
