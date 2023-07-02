@@ -9,6 +9,7 @@ import type { WikiaStatsBalanceKey } from '../../../shared/models/wikia/WikiaSta
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
+import { type Translation, useTranslation } from '../../contexts/TranslationContext'
 import { Assets } from '../../imgs/Assets'
 import { cx } from '../../utils/cx'
 import { partitionStats } from './partitionStats'
@@ -30,8 +31,14 @@ export type AramStatsProps = {
   ) => React.ReactElement
 }
 
-type RenderStat = (name: WikiaStatsBalanceKey) => (value: number) => React.ReactElement
-type RenderSpell = (spell: SpellName) => (html: ChampionSpellHtml) => React.ReactElement
+type RenderStat = (
+  t: Translation,
+  name: WikiaStatsBalanceKey,
+) => (value: number) => React.ReactElement
+type RenderSpell = (
+  t: Translation,
+  spell: SpellName,
+) => (html: ChampionSpellHtml) => React.ReactElement
 
 export const getAramStats = (
   renderStat: RenderStat,
@@ -45,12 +52,14 @@ export const getAramStats = (
     simpleStatsSpellsSplit = false,
     children: renderChildren,
   }) => {
+    const { t } = useTranslation()
+
     const maybeChildren = useMemo(
       () =>
         Maybe.isNone(aram.stats) && Maybe.isNone(aram.spells)
           ? Maybe.none
-          : Maybe.some(separateChildren(aram, splitAt, simpleStatsSpellsSplit)),
-      [aram, simpleStatsSpellsSplit, splitAt],
+          : Maybe.some(separateChildren(t, aram, splitAt, simpleStatsSpellsSplit)),
+      [aram, simpleStatsSpellsSplit, splitAt, t],
     )
 
     return pipe(
@@ -66,6 +75,7 @@ export const getAramStats = (
 const getSeparateChildren =
   (renderStat: RenderStat, renderSpell: RenderSpell) =>
   (
+    t: Translation,
     aram: AramData,
     splitAt: number,
     simpleStatsSpellsSplit: boolean,
@@ -81,7 +91,7 @@ const getSeparateChildren =
                 pipe(
                   Dict.lookup(key, stats),
                   Maybe.map(
-                    flow(renderStat(key), e =>
+                    flow(renderStat(t, key), e =>
                       Either.right<React.ReactElement, React.ReactElement>(e),
                     ),
                   ),
@@ -100,7 +110,7 @@ const getSeparateChildren =
                 pipe(
                   Dict.lookup(spell, spells),
                   Maybe.map(
-                    flow(renderSpell(spell), e =>
+                    flow(renderSpell(t, spell), e =>
                       Either.left<React.ReactElement, React.ReactElement>(e),
                     ),
                   ),
@@ -115,9 +125,7 @@ const getSeparateChildren =
       List.chain(identity),
     )
 
-    if (simpleStatsSpellsSplit) {
-      return List.separate(eithers)
-    }
+    if (simpleStatsSpellsSplit) return List.separate(eithers)
 
     const [children1, children2] = pipe(eithers, List.splitAt(splitAt))
 
@@ -130,12 +138,13 @@ const getSeparateChildren =
   }
 
 export const renderStatIcon = (
+  t: Translation['aram'],
   name: WikiaStatsBalanceKey,
   className?: string,
 ): React.ReactElement => (
   <img
     src={Assets.stats[name]}
-    alt={`Icône stat ${WikiaStatsBalance.label[name]}`}
+    alt={t.statIconAlt(name)}
     className={cx('bg-contain brightness-75 sepia', className)}
   />
 )

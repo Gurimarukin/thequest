@@ -10,6 +10,7 @@ import type { ChampionPosition } from '../../shared/models/api/champion/Champion
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import { List, Maybe } from '../../shared/utils/fp'
 
+import { useTranslation } from '../contexts/TranslationContext'
 import { Assets } from '../imgs/Assets'
 import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
@@ -74,6 +75,8 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   centerShards = false,
   noShadow = false,
 }) => {
+  const { t } = useTranslation('masteries')
+
   const setShardsCount = useMemo(
     () => (setChampionShards !== null ? setChampionShards(championId) : null),
     [championId, setChampionShards],
@@ -131,7 +134,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* chest bottom left */}
         {chestGranted ? (
           <div className="absolute bottom-0 left-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
-            <img src={Assets.chest} alt="Icône de coffre" className="w-4" />
+            <img src={Assets.chest} alt={t.chestIconAlt} className="w-4" />
           </div>
         ) : null}
 
@@ -249,36 +252,40 @@ type TokensProps = {
 }
 
 const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
+  const { t } = useTranslation('masteries')
+
   const render = useCallback(
-    (totalTockens: number, src: string): React.ReactElement => {
-      const alt = `Jeton de maîtrise ${championLevel + 1}`
-      return (
-        <span
-          className={cx(
-            'absolute left-[13px] top-0 flex h-2.5 rounded-br bg-black pl-0.5',
-            ['gap-0.5 pb-0.5 pr-0.5 pt-px', championLevel === 5],
-            ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
-          )}
-        >
-          {pipe(
-            repeatElements(tokensEarned, i => (
-              <img key={i} src={src} alt={alt} className="h-full bg-cover" />
+    (totalTockens: number, src: string): React.ReactElement => (
+      <span
+        className={cx(
+          'absolute left-[13px] top-0 flex h-2.5 rounded-br bg-black pl-0.5',
+          ['gap-0.5 pb-0.5 pr-0.5 pt-px', championLevel === 5],
+          ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
+        )}
+      >
+        {pipe(
+          repeatElements(tokensEarned, i => (
+            <img
+              key={i}
+              src={src}
+              alt={t.tokenIconAlt(championLevel + 1)}
+              className="h-full bg-cover"
+            />
+          )),
+          List.concat(
+            repeatElements(totalTockens - tokensEarned, i => (
+              <img
+                key={totalTockens - i}
+                src={src}
+                alt={t.tokenIconAlt(championLevel + 1, { notObtained: true })}
+                className="h-full bg-cover grayscale"
+              />
             )),
-            List.concat(
-              repeatElements(totalTockens - tokensEarned, i => (
-                <img
-                  key={totalTockens - i}
-                  src={src}
-                  alt={`${alt} (non obtenu)`}
-                  className="h-full bg-cover grayscale"
-                />
-              )),
-            ),
-          )}
-        </span>
-      )
-    },
-    [championLevel, tokensEarned],
+          ),
+        )}
+      </span>
+    ),
+    [championLevel, t, tokensEarned],
   )
 
   if (championLevel === 5) return render(2, Assets.tokens[5])
@@ -297,6 +304,8 @@ type ShardsProps = {
 }
 
 const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShards = false }) => {
+  const { t } = useTranslation('masteries')
+
   const addButtonRef = useRef<HTMLButtonElement>(null)
   const removeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -341,7 +350,7 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
               <AddOutline className="w-full" />
             </button>
             <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
-              Ajouter un fragment
+              {t.addShard}
             </Tooltip>
           </span>
           <span className="h-3 w-px bg-black" />
@@ -355,7 +364,7 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
               <RemoveOutline className="w-full" />
             </button>
             <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
-              Enlever un fragment
+              {t.removeShard}
             </Tooltip>
           </span>
         </div>

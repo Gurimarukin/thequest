@@ -2,7 +2,6 @@ import { flow, pipe } from 'fp-ts/function'
 import { createContext, useContext, useMemo } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
-import { Lang } from '../../shared/models/api/Lang'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { StaticData } from '../../shared/models/api/staticData/StaticData'
 import type { StaticDataChampion } from '../../shared/models/api/staticData/StaticDataChampion'
@@ -15,13 +14,11 @@ import { Maybe } from '../../shared/utils/fp'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
+import { useTranslation } from './TranslationContext'
 
 const { ddragonCdn } = DDragonUtils
 
-const lang: Lang = Lang.default // TODO: based on browser
-
 export type StaticDataContext = {
-  lang: Lang
   champions: List<StaticDataChampion>
   championByKey: (key: ChampionKey) => Maybe<StaticDataChampion>
   assets: {
@@ -35,8 +32,10 @@ export type StaticDataContext = {
 
 const StaticDataContext = createContext<StaticDataContext | undefined>(undefined)
 
-export const StaticDataContextProvider: ChildrenFC = ({ children }) =>
-  basicAsyncRenderer(
+export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
+  const { lang } = useTranslation()
+
+  return basicAsyncRenderer(
     useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -45,6 +44,7 @@ export const StaticDataContextProvider: ChildrenFC = ({ children }) =>
   )(data => (
     <StaticDataContextProviderLoader data={data}>{children}</StaticDataContextProviderLoader>
   ))
+}
 
 type StaticDataContextProviderLoaderProps = {
   data: StaticData
@@ -65,7 +65,6 @@ const StaticDataContextProviderLoader: React.FC<StaticDataContextProviderLoaderP
   )
 
   const value: StaticDataContext = {
-    lang,
     champions,
     championByKey,
     assets: {

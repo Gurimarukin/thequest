@@ -26,7 +26,7 @@ import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
-import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
@@ -122,7 +122,7 @@ const WithoutAdditional: React.FC<
 
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
-  const { lang } = useStaticData()
+  const { lang } = useTranslation()
   const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
 
   useEffect(

@@ -1,6 +1,4 @@
 import type { AramData } from '../../shared/models/api/AramData'
-import { SpellName } from '../../shared/models/api/SpellName'
-import { WikiaStatsBalance } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { List } from '../../shared/utils/fp'
 
 import type { AramStatsProps } from './aramStats/aramStats'
@@ -15,27 +13,26 @@ export const AramTooltip: React.FC<Props> = ({ aram }) => (
 )
 
 const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
-  name => {
-    const icon = renderStatIcon(name, 'h-4, w-4')
-    const label = WikiaStatsBalance.label[name]
+  (t, name) => {
+    const icon = renderStatIcon(t.aram, name, 'h-4, w-4')
     const renderStatValue_ = renderStatValue(name)
     return value => (
       <li key={name} className="contents">
         <div className="flex items-center gap-2 pr-2">
           <span>{icon}</span>
-          <span className="grow">{label}</span>
+          <span className="grow">{t.common.labels.wikiaStatsBalance[name]}</span>
         </div>
         {renderStatValue_(value)}
         <span />
       </li>
     )
   },
-  spell => html =>
+  (t, spell) => html =>
     (
       <li key={spell} className="col-span-3 flex flex-col gap-1 last:mb-1">
         <div className="flex items-center gap-1">
           <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia" />
-          <span>({SpellName.label[spell]}) :</span>
+          <span>{t.aram.spell(spell)}</span>
         </div>
         <span dangerouslySetInnerHTML={{ __html: html.description }} className="wikia" />
       </li>

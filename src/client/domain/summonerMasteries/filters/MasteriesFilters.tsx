@@ -21,6 +21,7 @@ import { Radios, labelValue } from '../../../components/Radios'
 import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
+import { useTranslation } from '../../../contexts/TranslationContext'
 import { useUser } from '../../../contexts/UserContext'
 import { Assets } from '../../../imgs/Assets'
 import {
@@ -44,6 +45,8 @@ type Props = {
 }
 
 export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion }) => {
+  const { t } = useTranslation('common')
+
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { maybeUser } = useUser()
 
@@ -235,7 +238,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                     className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
                   />
                 ),
-              label: ChampionFactionOrNone.label[faction],
+              label: t.labels.factionOrNone[faction],
             })),
           )}
           checked={masteriesQuery.faction}
@@ -257,7 +260,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                   className={cx('w-6', ['brightness-150 contrast-200 grayscale invert', isChecked])}
                 />
               ),
-              label: ChampionPosition.label[position],
+              label: t.labels.position[position],
             })),
           )}
           checked={masteriesQuery.position}

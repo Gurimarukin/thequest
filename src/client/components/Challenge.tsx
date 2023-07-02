@@ -3,11 +3,12 @@ import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
 
 import type { ChallengeId } from '../../shared/models/api/ChallengeId'
-import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
+import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import type { PartialDict } from '../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
+import { useTranslation } from '../contexts/TranslationContext'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
@@ -16,8 +17,6 @@ const imgSrc = (id: ChallengeId, tier: LeagueTier): string =>
 
 type Props = {
   id: ChallengeId
-  name: React.ReactNode
-  description: string
   tier: Maybe<LeagueTier>
   value: Maybe<number>
   thresholds: PartialDict<LeagueTier, number>
@@ -26,13 +25,13 @@ type Props = {
 
 export const Challenge: React.FC<Props> = ({
   id,
-  name,
-  description,
   tier,
   value: maybeValue,
   thresholds,
   iconClassName,
 }) => {
+  const { t } = useTranslation('common')
+
   const hoverRef = useRef<HTMLDivElement>(null)
   const placementRef = useRef<HTMLImageElement>(null)
 
@@ -43,7 +42,7 @@ export const Challenge: React.FC<Props> = ({
       Maybe.getOrElse<LeagueTier>(() => 'BRONZE'),
     ),
   )
-  const alt = `Icône défi ${description}`
+  const alt = t.challenge.iconAlt(id)
 
   const value = pipe(
     maybeValue,
@@ -67,9 +66,7 @@ export const Challenge: React.FC<Props> = ({
           alt={alt}
           className={cx(['grayscale', Maybe.isNone(tier)], iconClassName)}
         />
-        <span>
-          {value} / {total}
-        </span>
+        <span>{t.fraction(value, total)}</span>
       </div>
 
       <Tooltip hoverRef={hoverRef} placementRef={placementRef} className="flex flex-col gap-1">
@@ -84,33 +81,30 @@ export const Challenge: React.FC<Props> = ({
 
           <div className="flex flex-col self-center">
             <div className="flex items-baseline gap-2">
-              <span>Défi</span>
-              <h3 className="text-sm font-bold">{name}</h3>
+              <span>{t.challenge.challenge}</span>
+              <h3 className="text-sm font-bold">{t.labels.challenge(id)}</h3>
             </div>
-            <span className="pt-1 text-sm">{description}</span>
+            <span className="pt-1 text-sm">{t.labels.challengeShort(id)}</span>
             <div className="flex gap-2 pt-2">
               {pipe(
                 tier,
                 Maybe.fold(
                   () => null,
-                  t => <span>{LeagueTier.label[t]}</span>,
+                  t_ => <span>{t.labels.leagueTier[t_]}</span>,
                 ),
               )}
-              <span>
-                {value} / {total}
-              </span>
+              <span>{t.fraction(value, total)}</span>
             </div>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span>Seuils :</span>
+          <span>{t.challenge.thresholds}</span>
           <ul className="flex flex-wrap gap-1.5 italic">
             {pipe(thresholds, DictUtils.partial.entries, entries =>
               entries.map(([key, val], i) => (
                 <li key={key}>
-                  {val} : {LeagueTier.label[key]}
-                  {i === entries.length - 1 ? null : ','}
+                  {t.challenge.valueTier(val ?? 0, key, { withComma: i !== entries.length - 1 })}
                 </li>
               )),
             )}

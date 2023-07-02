@@ -1,7 +1,6 @@
 import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
-import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, IO, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -12,8 +11,6 @@ import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { MigrationPersistence } from '../persistence/MigrationPersistence'
 import { Migration20230611 } from './migrations/Migration20230611'
 import { Migration20230613 } from './migrations/Migration20230613'
-
-const { plural } = StringUtils
 
 export type MigrationService = ReturnType<typeof MigrationService>
 
@@ -67,3 +64,13 @@ export const MigrationService = (
     )
   }
 }
+
+/**
+ * @example
+ * assert.deepStrictEqual(plural('jeton')(1), '1 jeton')
+ * assert.deepStrictEqual(plural('jeton')(3), '3 jetons')
+ */
+const plural =
+  (unit: string) =>
+  (n: number): string =>
+    `${n.toLocaleString()} ${unit}${n < 2 ? '' : 's'}`

@@ -53,16 +53,6 @@ const cleanHtml = (str: string): string =>
       .normalize(),
   )
 
-/**
- * @example
- * assert.deepStrictEqual(plural('jeton')(1), '1 jeton')
- * assert.deepStrictEqual(plural('jeton')(3), '3 jetons')
- */
-const plural =
-  (unit: string) =>
-  (n: number): string =>
-    `${n.toLocaleString()} ${unit}${n < 2 ? '' : 's'}`
-
 const prettyMs = (ms: MsDuration): string => {
   const date = DayJs.of(MsDuration.unwrap(ms))
   const zero = DayJs.of(0)
@@ -92,7 +82,6 @@ export const StringUtils = {
   cleanUTF8ToASCII,
   cleanChampionName,
   cleanHtml,
-  plural,
   prettyMs,
   toLowerCase,
   toUpperCase,

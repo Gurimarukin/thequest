@@ -18,7 +18,3 @@
 - modal: trap focus
 - CacheUtils?
 - clean old cache entries
-
----
-
-https://raw.githubusercontent.com/tbocquet/the-quest/master/the-quest-front/src/champion.json

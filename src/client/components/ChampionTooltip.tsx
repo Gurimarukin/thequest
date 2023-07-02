@@ -1,16 +1,14 @@
 import { pipe } from 'fp-ts/function'
 
-import { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
+import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
-import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
-import { StringUtils } from '../../shared/utils/StringUtils'
+import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
+import { useTranslation } from '../contexts/TranslationContext'
 import { cx } from '../utils/cx'
 import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
-
-const { plural } = StringUtils
 
 type Props = {
   chestGranted: boolean
@@ -37,20 +35,22 @@ export const ChampionTooltip: React.FC<Props> = ({
   positions,
   factions,
 }) => {
+  const { t } = useTranslation()
+
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
-      {Math.round(percents)} %
+      {t.common.percents(Math.round(percents))}
     </span>
   )
 
   const tokenShards = pipe(
     [
       championLevel === 5 || championLevel === 6
-        ? Maybe.some(<span key="tokens">{plural('jeton')(tokensEarned)}</span>)
+        ? Maybe.some(<span key="tokens">{t.masteries.nTokens(tokensEarned)}</span>)
         : Maybe.none,
       pipe(
         filteredShardsCount,
-        Maybe.map(shards => <span key="shards">{plural('fragment')(shards)}</span>),
+        Maybe.map(shards => <span key="shards">{t.masteries.nShards(shards)}</span>),
       ),
     ],
     List.compact,
@@ -76,11 +76,12 @@ export const ChampionTooltip: React.FC<Props> = ({
         </h3>
       </div>
       <p className="border-b border-tooltip px-2 py-1 text-center">
-        {`${championPoints.toLocaleString()}${
+        {t.masteries.points(
+          championPoints,
           0 < championLevel && championLevel < 5
-            ? ` / ${(championPoints + championPointsUntilNextLevel).toLocaleString()}`
-            : ''
-        }  pts`}
+            ? championPoints + championPointsUntilNextLevel
+            : undefined,
+        )}
       </p>
       <div className="flex grow flex-col items-center justify-center gap-1 px-2 py-1">
         {pipe(
@@ -91,7 +92,7 @@ export const ChampionTooltip: React.FC<Props> = ({
           ),
         )}
         <div className="flex items-center gap-2">
-          <span>{chestGranted ? 'coffre obtenu' : 'coffre disponible'}</span>
+          <span>{chestGranted ? t.masteries.chestGranted : t.masteries.chestAvailable}</span>
         </div>
         <ul className="flex w-full max-w-[164px] flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
           {List.isNonEmpty(positions)
@@ -100,7 +101,7 @@ export const ChampionTooltip: React.FC<Props> = ({
                 NonEmptyArray.map(position => (
                   <li key={position} className="flex items-center gap-0.5">
                     <ChampionPositionImg position={position} className="h-6 w-6 shrink-0 p-0.5" />
-                    <span>{ChampionPosition.label[position]}</span>
+                    <span>{t.common.labels.position[position]}</span>
                   </li>
                 )),
               )
@@ -111,7 +112,7 @@ export const ChampionTooltip: React.FC<Props> = ({
                 NonEmptyArray.map(faction => (
                   <li key={faction} className="flex items-center gap-1.5">
                     <ChampionFactionImg faction={faction} className="h-5 w-5 text-wheat-bis" />
-                    <span>{ChampionFaction.label[faction]}</span>
+                    <span>{t.common.labels.faction[faction]}</span>
                   </li>
                 )),
               )
