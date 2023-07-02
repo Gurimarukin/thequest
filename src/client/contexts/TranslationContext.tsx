@@ -233,4 +233,11 @@ export type Translation = {
     withAccountNotLinked: React.ReactNode
     withoutAccount: React.ReactNode
   }
+  summoner: {
+    level: (level: number) => React.ReactNode
+    masteriesExplanation: React.ReactNode
+    masteriesLevel: (level: number) => React.ReactNode
+    percentsProgression: (percents: number) => React.ReactNode
+    summonerLevel: React.ReactNode
+  }
 }

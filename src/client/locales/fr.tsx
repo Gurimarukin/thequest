@@ -125,7 +125,7 @@ export const frTranslation: Translation = {
     loading: 'chargement',
     notInGame: 'pas en partie.',
     theQuestProgression: 'Progression de La Quête',
-    totalMasteryScore: 'Score total de maîtrise',
+    totalMasteryScore: 'Score de maîtrise total',
   },
   aram: {
     category: {
@@ -440,6 +440,31 @@ export const frTranslation: Translation = {
     withAccountLinked: 'Avec un compte lié à Riot Games',
     withAccountNotLinked: 'Avec un compte NON lié à Riot Games',
     withoutAccount: 'Sans compte',
+  },
+  summoner: {
+    level: level => `niveau ${level.toLocaleString(locale)}`,
+    masteriesLevel: level => `Niveau de maîtrise : ${level.toLocaleString(locale)}`,
+    masteriesExplanation: (
+      <>
+        <li>
+          De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de maîtrise.
+        </li>
+        <li>Maîtrise 5 = 50 %</li>
+        <li>Chaque fragment = 3 %</li>
+        <li>
+          Chaque jeton pour la maîtrise 6 = 7 % (maîtrise 5 + 1 jeton = 57 % ; maîtrise 5 + 2 jetons
+          = 64 %)
+        </li>
+        <li>Maîtrise 6 = 67 %</li>
+        <li>
+          Chaque jeton pour la maîtrise 7 = 10 % (maîtrise 6 + 1 jeton = 77 % ; maîtrise 6 + 2
+          jetons = 87 % ; maîtrise 6 + 3 jetons = 97 %)
+        </li>
+        <li>Maîtrise 7 = 100 %</li>
+      </>
+    ),
+    percentsProgression: percents => `Progression : ${percents.toLocaleString(locale)} %`,
+    summonerLevel: 'Niveau d’invocateur',
   },
 }
 
