@@ -181,4 +181,8 @@ export type Translation = {
     removeNShards: (n: number) => React.ReactNode
     tokenIconAlt: (level: number, options?: { notObtained: boolean }) => string
   }
+  notFound: {
+    home: React.ReactNode
+    thisPageDoesntExist: React.ReactNode
+  }
 }

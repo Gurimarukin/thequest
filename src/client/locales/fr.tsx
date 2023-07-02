@@ -351,6 +351,10 @@ export const frTranslation: Translation = {
     tokenIconAlt: (level, o) =>
       `Jeton de maîtrise ${level}${o !== undefined && o.notObtained ? ' (non obtenu)' : ''}`,
   },
+  notFound: {
+    home: 'Accueil',
+    thisPageDoesntExist: 'Cette page n’existe pas.',
+  },
 }
 
 function plural(unit: string) {
