@@ -340,6 +340,40 @@ export const frTranslation: Translation = {
     chestAvailable: 'coffre disponible',
     chestIconAlt: 'Icône de coffre',
     chestGranted: 'coffre obtenu',
+    filters: {
+      all: 'tous',
+      fiveAndSix: '5 et 6',
+      fourAndLess: '4 et moins',
+      level: level => `Niveau ${level}`,
+      order: {
+        desc: 'Tri décroissant',
+        asc: 'Tri croissant',
+      },
+      sixAndLess: '6 et moins',
+      sort: {
+        name: 'Trier par nom',
+        percents: ({ withShards }) =>
+          `Trier par pourcents > ${withShards ? 'fragments > ' : ''}points`,
+        points: 'Trier par points',
+      },
+      sortShort: {
+        name: 'nom',
+        percents: '%',
+        points: 'pts',
+      },
+      view: {
+        aram: 'Vue ARAM',
+        compact: 'Vue compacte',
+        factions: 'Vue factions',
+        histogram: 'Vue histogramme',
+      },
+      viewShort: {
+        aram: 'ARAM',
+        compact: 'Compact',
+        factions: 'Factions',
+        histogram: 'Histogramme',
+      },
+    },
     nShards: plural('fragment'),
     nTokens: plural('jeton'),
     points: (points, total) =>

@@ -21,6 +21,9 @@ import type { Dict, Maybe } from '../../shared/utils/fp'
 import { frTranslation } from '../locales/fr'
 import type { ChampionAramCategory } from '../models/ChampionAramCategory'
 import type { ChildrenFC } from '../models/ChildrenFC'
+import type { MasteriesQueryOrder } from '../models/masteriesQuery/MasteriesQueryOrder'
+import type { MasteriesQuerySort } from '../models/masteriesQuery/MasteriesQuerySort'
+import type { MasteriesQueryView } from '../models/masteriesQuery/MasteriesQueryView'
 
 const lang: Lang = Lang.default // TODO: based on browser
 
@@ -176,6 +179,22 @@ export type Translation = {
     chestAvailable: React.ReactNode
     chestIconAlt: string
     chestGranted: React.ReactNode
+    filters: {
+      all: React.ReactNode
+      fiveAndSix: React.ReactNode
+      fourAndLess: React.ReactNode
+      level: (level: ChampionLevelOrZero) => React.ReactNode
+      order: Dict<MasteriesQueryOrder, React.ReactNode>
+      sixAndLess: React.ReactNode
+      sort: {
+        [K in MasteriesQuerySort]: K extends 'percents'
+          ? (options: { withShards: boolean }) => React.ReactNode
+          : React.ReactNode
+      }
+      sortShort: Dict<MasteriesQuerySort, React.ReactNode>
+      view: Dict<MasteriesQueryView, React.ReactNode>
+      viewShort: Dict<MasteriesQueryView, React.ReactNode>
+    }
     nShards: (n: number) => React.ReactNode
     nTokens: (n: number) => React.ReactNode
     points: (points: number, total?: number) => React.ReactNode
