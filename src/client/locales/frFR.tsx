@@ -83,8 +83,8 @@ const rank: Dict<LeagueRank, string> = {
 
 const spell: Dict<SpellName, string> = {
   I: 'P',
-  Q: 'Q',
-  W: 'W',
+  Q: 'A',
+  W: 'Z',
   E: 'E',
   R: 'R',
 }
@@ -119,13 +119,13 @@ const frFRTranslation: Translation = {
         <span>au tour {pickTurn}</span>
       </>
     ),
-    empty: 'Aucun.',
+    empty: 'aucun',
     gameStartedAt: date =>
       `Partie commencée à ${date.toLocaleTimeString(locale)} (${date.toLocaleDateString(locale)})`,
     loading: 'chargement',
     notInGame: 'pas en partie.',
     theQuestProgression: 'Progression de La Quête',
-    totalMasteryScore: 'Score de maîtrise total',
+    masteryScore: 'Score de maîtrise',
   },
   aram: {
     category: {
@@ -207,7 +207,7 @@ const frFRTranslation: Translation = {
         73: 'Snowdown Showdown (2c2)', // Howling Abyss — 2v2 Snowdown Showdown games
         75: 'Hexakill', // Summoner's Rift — 6v6 Hexakill games
         76: 'Ultra Rapid Fire', // Summoner's Rift — Ultra Rapid Fire games
-        78: 'Un pour Tous: Mode Miroir', // Howling Abyss — One For All: Mirror Mode games
+        78: 'Un Pour Tous : Mode Miroir', // Howling Abyss — One For All: Mirror Mode games
         83: 'Coop vs IA Ultra Rapid Fire', // Summoner's Rift — Co-op vs AI Ultra Rapid Fire games
         91: 'Doom Bots Rank 1', // Summoner's Rift — Doom Bots Rank 1 games — Deprecated in patch 7.19 in favor of queueId 950"
         92: 'Doom Bots Rank 2', // Summoner's Rift — Doom Bots Rank 2 games — Deprecated in patch 7.19 in favor of queueId 950"
@@ -291,7 +291,7 @@ const frFRTranslation: Translation = {
         soloDuo: 'Classée Solo/Duo',
         flex: 'Classée FLEXXX',
       },
-      leaguePoints: n => `${n} LP`,
+      leaguePoints: n => `${n} PL`,
       losses: pluralUnit('défaite'),
       wins: pluralUnit('victoire'),
       serie: 'Série :',
@@ -364,7 +364,7 @@ const frFRTranslation: Translation = {
         points: 'Trier par points',
       },
       sortShort: {
-        name: 'nom',
+        name: 'ABC',
         percents: '%',
         points: 'pts',
       },
@@ -391,7 +391,7 @@ const frFRTranslation: Translation = {
           <>
             Changement{s} de niveau detecté{s} depuis la dernière modification de fragments.
             <br />
-            Peut-être en avez-vous utilisés (des fragments) ?
+            Peut-être en avez-vous dépensés (des fragments) ?
           </>
         )
       },
@@ -410,10 +410,12 @@ const frFRTranslation: Translation = {
     pointsSinceLastLevel: (points, level) =>
       `${plural('point')(points)} depuis le niveau ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('point')(points)} jusqu'au niveau ${level.toLocaleString(locale)}`,
+      `${plural('point')(points)} jusqu’au niveau ${level.toLocaleString(locale)}`,
     removeShard: 'Enlever un fragment',
     tokenIconAlt: (level, o) =>
-      `Jeton de maîtrise ${level}${o !== undefined && o.notObtained ? ' (non obtenu)' : ''}`,
+      `Jeton de maîtrise ${level.toLocaleString(locale)}${
+        o !== undefined && o.notObtained ? ' (non obtenu)' : ''
+      }`,
     updateShardsError: 'Erreur lors de la modification des fragments',
   },
   notFound: {
@@ -433,7 +435,7 @@ const frFRTranslation: Translation = {
     discordServer: 'Serveur Discord',
     discordServerIconAlt: name => `Icône du serveur ${name}`,
     join: 'Rejoindre',
-    keepTrackOfShards: 'Garder le compe des fragments de champions (à la main, désolé)',
+    keepTrackOfShards: 'Garder le compte des fragments de champions (à la main, désolé)',
     quickSummonerAccess: 'Accès rapide au profil d’invocateur lié',
     registrationExplanation: (
       <>
@@ -451,7 +453,7 @@ const frFRTranslation: Translation = {
   },
   summoner: {
     level: level => `niveau ${level.toLocaleString(locale)}`,
-    masteriesLevel: level => `Niveau de maîtrise : ${level.toLocaleString(locale)}`,
+    masteryScore: level => `Mastery score: ${level.toLocaleString(locale)}`,
     masteriesExplanation: (
       <>
         <li>

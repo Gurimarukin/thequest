@@ -99,7 +99,7 @@ export const Summoner: React.FC<Props> = ({
               className="relative -left-2.5 w-[54px]"
             />
           </div>
-          <span className="text-sm">{t.summoner.masteriesLevel(totalMasteryLevel)}</span>
+          <span className="text-sm">{t.summoner.masteryScore(totalMasteryLevel)}</span>
         </Tooltip>
         <span className="flex items-center gap-2">
           <span className="text-sm">{t.summoner.percentsProgression(round(questPercents, 2))}</span>

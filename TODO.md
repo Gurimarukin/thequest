@@ -1,3 +1,4 @@
+- align tenacity and ability haste with other stats (hover)
 - fix champion image load (progression svg visible)
 - highlight selected summoner
 - refresh game

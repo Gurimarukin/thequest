@@ -229,7 +229,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                     <span ref={totalMasteriesRef} className="text-grey-400">
                       {t.common.number(m.totalScore, { withParenthesis: true })}
                     </span>
-                    <Tooltip hoverRef={totalMasteriesRef}>{t.activeGame.totalMasteryScore}</Tooltip>
+                    <Tooltip hoverRef={totalMasteriesRef}>{t.activeGame.masteryScore}</Tooltip>
                   </span>
                 </>
               ),

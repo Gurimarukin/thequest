@@ -13,7 +13,7 @@ import type { ChildrenFC } from '../models/ChildrenFC'
 import type { Translation } from '../models/Translation'
 
 const translations: Dict<Lang, Task<Translation>> = {
-  en_GB: tDefault(() => import('../locales/frFR')),
+  en_GB: tDefault(() => import('../locales/enGB')),
   fr_FR: tDefault(() => import('../locales/frFR')),
 }
 
