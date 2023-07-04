@@ -56,7 +56,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
 
   return (
     <ClickOutside onClickOutside={hideMenu}>
-      <div className="flex items-center gap-4">
+      <div className="relative flex items-center gap-4 self-stretch py-2">
         {pipe(
           user.linkedRiotAccount,
           Maybe.fold(
@@ -80,6 +80,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
             ),
           ),
         )}
+
         <button type="button" onClick={toggleMenu} className="flex items-center gap-3 py-2">
           <span>{user.userName}</span>
         </button>

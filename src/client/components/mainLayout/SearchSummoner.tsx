@@ -116,7 +116,7 @@ export const SearchSummoner: React.FC = () => {
   const showSearches = isOpen && List.isNonEmpty(searches)
 
   return (
-    <div>
+    <div className="py-2">
       <form onSubmit={handleSubmit} className="flex h-8 text-sm">
         <Select<Platform>
           options={Platform.values}

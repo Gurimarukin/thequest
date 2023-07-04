@@ -18,7 +18,7 @@ import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/Sum
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict, Maybe } from '../../shared/utils/fp'
 
-import { frTranslation } from '../locales/fr'
+import { frFRTranslation } from '../locales/frFR'
 import type { ChampionAramCategory } from '../models/ChampionAramCategory'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import type { MasteriesQueryOrder } from '../models/masteriesQuery/MasteriesQueryOrder'
@@ -42,7 +42,7 @@ const TranslationContext = createContext<TranslationContext | undefined>(undefin
 export const TranslationContextProvider: ChildrenFC = ({ children }) => {
   const value: TranslationContext = {
     lang,
-    t: frTranslation,
+    t: frFRTranslation,
   }
 
   return <TranslationContext.Provider value={value}>{children}</TranslationContext.Provider>

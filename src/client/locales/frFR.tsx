@@ -101,7 +101,7 @@ const wikiaStatsBalance: Dict<WikiaStatsBalanceKey, string> = {
   tenacity: 'Tenacité',
 }
 
-export const frTranslation: Translation = {
+export const frFRTranslation: Translation = {
   activeGame: {
     bannedBy: (summonerName, championName, pickTurn, highlightClassName) => (
       <>

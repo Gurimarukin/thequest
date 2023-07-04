@@ -15,7 +15,7 @@ export const AccountDisconnected: React.FC = () => {
 
   return (
     <ClickOutside onClickOutside={hideLogin}>
-      <div>
+      <div className="relative flex items-center self-stretch py-2">
         <button
           type="button"
           onClick={toggleLogin}
@@ -23,8 +23,9 @@ export const AccountDisconnected: React.FC = () => {
         >
           {t.layout.account}
         </button>
+
         {loginIsVisible ? (
-          <Menu>
+          <Menu className="items-center">
             <Link
               to={appRoutes.login}
               className="bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75"

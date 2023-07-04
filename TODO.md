@@ -1,6 +1,9 @@
+- fix champion image load (progression svg visible)
+- highlight selected summoner
 - refresh game
 - react-select
 - uri: ugly encode
+- Menu react-popper?
 - active game drag and drop
 - challenge progression discord notification
 - discord OAuth2: proper state (redirect url)

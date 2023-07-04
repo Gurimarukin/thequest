@@ -14,6 +14,7 @@ import { Loading } from '../Loading'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
+import { Languages } from './Languages'
 import { SearchSummoner } from './SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
@@ -24,18 +25,19 @@ export const MainLayout: ChildrenFC = ({ children }) => {
   return (
     <div className="flex h-full flex-col">
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
-        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between py-2">
+        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between">
           <div className="flex shrink-0 items-center gap-6">
-            <Link to={appRoutes.index}>
+            <Link to={appRoutes.index} className="py-2">
               <img
                 src={Assets.yuumi}
                 alt={t.layout.yuumiIconAlt}
                 className="h-12 w-12 rounded-sm bg-black"
               />
             </Link>
+
             <SearchSummoner />
 
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-4 py-2 text-sm">
               {pipe(
                 matchLocation(appParsers.anyPlatformSummonerName),
                 Maybe.fold(
@@ -63,17 +65,21 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             </div>
           </div>
 
-          {pipe(
-            user,
-            AsyncState.fold(
-              () => <Loading className="h-5" />,
-              () => <AccountDisconnected />,
-              Maybe.fold(
+          <div className="flex items-center gap-4 self-stretch">
+            {pipe(
+              user,
+              AsyncState.fold(
+                () => <Loading className="my-2 h-5" />,
                 () => <AccountDisconnected />,
-                u => <AccountConnected user={u} />,
+                Maybe.fold(
+                  () => <AccountDisconnected />,
+                  u => <AccountConnected user={u} />,
+                ),
               ),
-            ),
-          )}
+            )}
+
+            <Languages />
+          </div>
         </div>
       </header>
       <main className="grow overflow-auto">{children}</main>
