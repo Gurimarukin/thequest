@@ -42,9 +42,7 @@ export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
         revalidateOnReconnect: false,
       })}
     >
-      {data => (
-        <StaticDataContextProviderLoader data={data}>{children}</StaticDataContextProviderLoader>
-      )}
+      {data => <StaticDataLoaded data={data}>{children}</StaticDataLoaded>}
     </AsyncRenderer>
   )
 }
@@ -54,7 +52,7 @@ type StaticDataContextProviderLoaderProps = {
   children?: React.ReactNode
 }
 
-const StaticDataContextProviderLoader: React.FC<StaticDataContextProviderLoaderProps> = ({
+const StaticDataLoaded: React.FC<StaticDataContextProviderLoaderProps> = ({
   data: { version, champions },
   children,
 }) => {

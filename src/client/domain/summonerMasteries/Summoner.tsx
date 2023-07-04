@@ -10,9 +10,9 @@ import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
-import type { Translation } from '../../contexts/TranslationContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { InformationCircleOutline } from '../../imgs/svgIcons'
+import type { Translation } from '../../models/Translation'
 import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils

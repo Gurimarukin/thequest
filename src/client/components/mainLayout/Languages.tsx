@@ -11,8 +11,6 @@ import { ClickOutside } from '../ClickOutside'
 import { Menu } from './Menu'
 
 export const Languages: React.FC = () => {
-  const { lang } = useTranslation()
-
   const [languagesIsVisible, setLanguagesIsVisible] = useState(false)
   const toggleLanguages = useCallback(() => setLanguagesIsVisible(v => !v), [])
   const hideLanguages = useCallback(() => setLanguagesIsVisible(false), [])
@@ -26,27 +24,40 @@ export const Languages: React.FC = () => {
 
         {languagesIsVisible ? (
           <Menu className="right-[calc(1px_-_12px)]">
-            {Lang.values.map(l => {
-              const isSelected = Lang.Eq.equals(l, lang)
-              return (
-                <button
-                  key={l}
-                  type="button"
-                  disabled={isSelected}
-                  className={cx('grid grid-cols-[1fr_auto] gap-3.5 py-0.5 text-start', [
-                    'border-b border-goldenrod-bis',
-                    isSelected,
-                  ])}
-                >
-                  <span>{TranslationUtils.labels.lang[l]}</span>
-                  <span>{langEmoji[l]}</span>
-                </button>
-              )
-            })}
+            {Lang.values.map(l => (
+              <LangButton key={l} l={l} />
+            ))}
           </Menu>
         ) : null}
       </div>
     </ClickOutside>
+  )
+}
+
+type LangButtonProps = {
+  l: Lang
+}
+
+const LangButton: React.FC<LangButtonProps> = ({ l }) => {
+  const { lang, setLang } = useTranslation()
+
+  const handleClick = useCallback(() => setLang(l), [l, setLang])
+
+  const isSelected = Lang.Eq.equals(l, lang)
+
+  return (
+    <button
+      type="button"
+      disabled={isSelected}
+      onClick={handleClick}
+      className={cx(
+        'grid grid-cols-[1fr_auto] gap-3.5 border-b py-0.5 text-start',
+        isSelected ? 'border-goldenrod-bis' : 'border-transparent',
+      )}
+    >
+      <span>{TranslationUtils.labels.lang[l]}</span>
+      <span>{langEmoji[l]}</span>
+    </button>
   )
 }
 

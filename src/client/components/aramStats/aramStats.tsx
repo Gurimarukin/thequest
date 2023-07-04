@@ -9,8 +9,9 @@ import type { WikiaStatsBalanceKey } from '../../../shared/models/wikia/WikiaSta
 import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { type Translation, useTranslation } from '../../contexts/TranslationContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { Assets } from '../../imgs/Assets'
+import { type Translation } from '../../models/Translation'
 import { cx } from '../../utils/cx'
 import { partitionStats } from './partitionStats'
 

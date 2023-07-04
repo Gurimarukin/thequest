@@ -11,7 +11,7 @@ import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import { type Dict, Maybe } from '../../shared/utils/fp'
 
-import type { Translation } from '../contexts/TranslationContext'
+import type { Translation } from '../models/Translation'
 import { TranslationUtils } from '../utils/TranslationUtils'
 
 const locale = 'fr-FR'
@@ -101,7 +101,7 @@ const wikiaStatsBalance: Dict<WikiaStatsBalanceKey, string> = {
   tenacity: 'Tenacité',
 }
 
-export const frFRTranslation: Translation = {
+const frFRTranslation: Translation = {
   activeGame: {
     bannedBy: (summonerName, championName, pickTurn, highlightClassName) => (
       <>
@@ -475,6 +475,8 @@ export const frFRTranslation: Translation = {
     summonerLevel: 'Niveau d’invocateur',
   },
 }
+
+export default frFRTranslation
 
 function plural(unit: string) {
   return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`

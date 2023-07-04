@@ -33,12 +33,23 @@ const e = createEnum(
   // 'zh_TW',
 )
 
-const default_ = 'fr_FR' as const
+const default_: Lang = 'fr_FR'
+
+const fromNavigatorLanguage = (lang: string): Lang => {
+  switch (lang) {
+    case 'fr-FR':
+    case 'fr':
+      return 'fr_FR'
+
+    default:
+      return 'en_GB'
+  }
+}
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 type TestDefaultLangIsLang = Pick<Dict<Lang, string>, typeof default_>
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
-const Lang = { codec: e.codec, values: e.values, Eq: e.Eq, default: default_ }
+const Lang = { ...e, default: default_, fromNavigatorLanguage }
 
 export { Lang }
