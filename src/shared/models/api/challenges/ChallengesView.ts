@@ -1,5 +1,6 @@
 import * as C from 'io-ts/Codec'
 
+import { DictUtils } from '../../../utils/DictUtils'
 import { type Dict, Maybe } from '../../../utils/fp'
 import { ChallengeId } from '../ChallengeId'
 import type { ChampionFaction } from '../champion/ChampionFaction'
@@ -43,6 +44,8 @@ const id: Dict<ChampionFaction, ChallengeId> = {
   zaun: ChallengeId.wrap(303513),
 }
 
-const ChallengesView = { id, codec }
+const idEntries = DictUtils.entries(id)
+
+const ChallengesView = { id, idEntries, codec }
 
 export { ChallengesView }

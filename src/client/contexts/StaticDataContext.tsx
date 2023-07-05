@@ -2,7 +2,6 @@ import { flow, pipe } from 'fp-ts/function'
 import { createContext, useContext, useMemo } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
-import { Lang } from '../../shared/models/api/Lang'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { StaticData } from '../../shared/models/api/staticData/StaticData'
 import type { StaticDataChampion } from '../../shared/models/api/staticData/StaticDataChampion'
@@ -12,16 +11,14 @@ import { ListUtils } from '../../shared/utils/ListUtils'
 import type { List } from '../../shared/utils/fp'
 import { Maybe } from '../../shared/utils/fp'
 
+import { AsyncRenderer } from '../components/AsyncRenderer'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import type { ChildrenFC } from '../models/ChildrenFC'
-import { basicAsyncRenderer } from '../utils/basicAsyncRenderer'
+import { useTranslation } from './TranslationContext'
 
 const { ddragonCdn } = DDragonUtils
 
-const lang: Lang = Lang.default // TODO: based on browser
-
 export type StaticDataContext = {
-  lang: Lang
   champions: List<StaticDataChampion>
   championByKey: (key: ChampionKey) => Maybe<StaticDataChampion>
   assets: {
@@ -35,23 +32,27 @@ export type StaticDataContext = {
 
 const StaticDataContext = createContext<StaticDataContext | undefined>(undefined)
 
-export const StaticDataContextProvider: ChildrenFC = ({ children }) =>
-  basicAsyncRenderer(
-    useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }),
-  )(data => (
-    <StaticDataContextProviderLoader data={data}>{children}</StaticDataContextProviderLoader>
-  ))
+export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
+  const { lang } = useTranslation()
+  return (
+    <AsyncRenderer
+      {...useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
+        revalidateIfStale: false,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+      })}
+    >
+      {data => <StaticDataLoaded data={data}>{children}</StaticDataLoaded>}
+    </AsyncRenderer>
+  )
+}
 
 type StaticDataContextProviderLoaderProps = {
   data: StaticData
   children?: React.ReactNode
 }
 
-const StaticDataContextProviderLoader: React.FC<StaticDataContextProviderLoaderProps> = ({
+const StaticDataLoaded: React.FC<StaticDataContextProviderLoaderProps> = ({
   data: { version, champions },
   children,
 }) => {
@@ -65,7 +66,6 @@ const StaticDataContextProviderLoader: React.FC<StaticDataContextProviderLoaderP
   )
 
   const value: StaticDataContext = {
-    lang,
     champions,
     championByKey,
     assets: {

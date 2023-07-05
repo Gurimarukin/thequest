@@ -21,6 +21,7 @@ import { Radios, labelValue } from '../../../components/Radios'
 import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
+import { useTranslation } from '../../../contexts/TranslationContext'
 import { useUser } from '../../../contexts/UserContext'
 import { Assets } from '../../../imgs/Assets'
 import {
@@ -44,6 +45,8 @@ type Props = {
 }
 
 export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion }) => {
+  const { t } = useTranslation()
+
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
   const { maybeUser } = useUser()
 
@@ -98,30 +101,30 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
         <Radios<MasteriesQueryView> name="view" value={masteriesQuery.view} setValue={setView}>
           {labelValue(
             'compact',
-            <IconLabel tooltip="Vue compacte" className="px-1.5">
+            <IconLabel tooltip={t.masteries.filters.view.compact} className="px-1.5">
               <AppsSharp className="w-4" />
-              <span>Compact</span>
+              <span>{t.masteries.filters.viewShort.compact}</span>
             </IconLabel>,
           )}
           {labelValue(
             'histogram',
-            <IconLabel tooltip="Vue histogramme" className="px-1.5">
+            <IconLabel tooltip={t.masteries.filters.view.histogram} className="px-1.5">
               <StatsChartSharp className="w-5 rotate-90 -scale-x-100" />
-              <span>Histogramme</span>
+              <span>{t.masteries.filters.viewShort.histogram}</span>
             </IconLabel>,
           )}
           {labelValue(
             'aram',
-            <IconLabel tooltip="Vue ARAM" className="px-1.5">
+            <IconLabel tooltip={t.masteries.filters.view.aram} className="px-1.5">
               <HowlingAbyssSimple className="w-[18px]" />
-              <span>ARAM</span>
+              <span>{t.masteries.filters.viewShort.aram}</span>
             </IconLabel>,
           )}
           {labelValue(
             'factions',
-            <IconLabel tooltip="Vue factions" className="px-1.5">
+            <IconLabel tooltip={t.masteries.filters.view.factions} className="px-1.5">
               <MaskedImage src={Assets.runeterra} className="h-[18px] w-[18px]" />
-              <span>Factions</span>
+              <span>{t.masteries.filters.viewShort.factions}</span>
             </IconLabel>,
           )}
         </Radios>
@@ -131,15 +134,23 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             {labelValue(
               'percents',
               <TextLabel
-                tooltip={`Trier par pourcents / ${
-                  Maybe.isSome(maybeUser) ? 'fragments / ' : ''
-                }points`}
+                tooltip={t.masteries.filters.sort.percents({ withShards: Maybe.isSome(maybeUser) })}
               >
-                %
+                {t.masteries.filters.sortShort.percents}
               </TextLabel>,
             )}
-            {labelValue('points', <TextLabel tooltip="Trier par points">pts</TextLabel>)}
-            {labelValue('name', <TextLabel tooltip="Trier par nom">nom</TextLabel>)}
+            {labelValue(
+              'points',
+              <TextLabel tooltip={t.masteries.filters.sort.points}>
+                {t.masteries.filters.sortShort.points}
+              </TextLabel>,
+            )}
+            {labelValue(
+              'name',
+              <TextLabel tooltip={t.masteries.filters.sort.name}>
+                {t.masteries.filters.sortShort.name}
+              </TextLabel>,
+            )}
           </Radios>
 
           <Radios<MasteriesQueryOrder>
@@ -149,13 +160,13 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           >
             {labelValue(
               'desc',
-              <IconLabel tooltip="Tri décroissant" className="w-6">
+              <IconLabel tooltip={t.masteries.filters.order.desc} className="w-6">
                 <CaretDownOutline className="w-5" />
               </IconLabel>,
             )}
             {labelValue(
               'asc',
-              <IconLabel tooltip="Tri croissant" className="w-6">
+              <IconLabel tooltip={t.masteries.filters.order.asc} className="w-6">
                 <CaretUpOutline className="w-5" />
               </IconLabel>,
             )}
@@ -179,7 +190,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                     className={cx('h-full', ['drop-shadow-[0_0_3px_black]', isChecked])}
                   />
                 ),
-                label: `Niveau ${level}`,
+                label: t.masteries.filters.level(level),
               })),
             )}
             checked={masteriesQuery.level}
@@ -196,19 +207,27 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               ['hidden', !levelsMenuIsVisible],
             )}
           >
-            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>6 et moins</SelectLevelsButton>
-            <SelectLevelsButton levels={[5, 6]}>5 et 6</SelectLevelsButton>
-            <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>4 et moins</SelectLevelsButton>
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>
+              {t.masteries.filters.sixAndLess}
+            </SelectLevelsButton>
+            <SelectLevelsButton levels={[5, 6]}>
+              {t.masteries.filters.fiveAndSix}
+            </SelectLevelsButton>
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>
+              {t.masteries.filters.fourAndLess}
+            </SelectLevelsButton>
             {pipe(
               ChampionLevelOrZero.values,
               List.reverse,
               List.map(level => (
                 <SelectLevelsButton key={level} levels={[level]}>
-                  {level}
+                  {t.common.number(level)}
                 </SelectLevelsButton>
               )),
             )}
-            <SelectLevelsButton levels={ChampionLevelOrZero.values}>tous</SelectLevelsButton>
+            <SelectLevelsButton levels={ChampionLevelOrZero.values}>
+              {t.masteries.filters.all}
+            </SelectLevelsButton>
           </ul>
         </div>
 
@@ -235,7 +254,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                     className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
                   />
                 ),
-              label: ChampionFactionOrNone.label[faction],
+              label: t.common.labels.factionOrNone[faction],
             })),
           )}
           checked={masteriesQuery.faction}
@@ -257,7 +276,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                   className={cx('w-6', ['brightness-150 contrast-200 grayscale invert', isChecked])}
                 />
               ),
-              label: ChampionPosition.label[position],
+              label: t.common.labels.position[position],
             })),
           )}
           checked={masteriesQuery.position}

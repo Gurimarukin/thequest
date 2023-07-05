@@ -4,7 +4,7 @@ import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
 import { Business } from '../../shared/Business'
-import { Lang } from '../../shared/models/api/Lang'
+import type { Lang } from '../../shared/models/api/Lang'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
@@ -26,6 +26,8 @@ import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddle
 import type { WithIp } from '../webServer/utils/WithIp'
 import type { StaticDataController } from './StaticDataController'
 
+const lang: Lang = 'fr_FR'
+
 /**
  * `madosayentisuto`: any third party app (needs to be authorized with token)
  */
@@ -41,9 +43,7 @@ const MadosayentisutoController = (
   userService: UserService,
   staticDataController: StaticDataController,
 ) => {
-  const getStaticData: EndedMiddleware = withIpAndToken(
-    staticDataController.staticData(Lang.default),
-  )
+  const getStaticData: EndedMiddleware = withIpAndToken(staticDataController.staticData(lang))
 
   const getUsersProgression: EndedMiddleware = withIpAndToken(
     EndedMiddleware.withBody(NonEmptyArray.decoder(DiscordUserId.codec))(
@@ -82,7 +82,7 @@ const MadosayentisutoController = (
         masteries: masteriesService.findBySummoner(summoner.platform, summoner.id, {
           forceCacheRefresh: true,
         }),
-        staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(Lang.default)),
+        staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),
       }),
       futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
         const filteredByLevel = (level: ChampionLevel): List<ChampionKey> =>

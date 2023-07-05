@@ -5,9 +5,9 @@ import type { LeagueEntryView } from '../../shared/models/api/league/LeagueEntry
 import type { LeagueMiniSeriesProgress } from '../../shared/models/api/league/LeagueMiniSeriesProgress'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
-import type { Dict } from '../../shared/utils/fp'
 import { Maybe } from '../../shared/utils/fp'
 
+import { useTranslation } from '../contexts/TranslationContext'
 import { Assets } from '../imgs/Assets'
 import { CheckMarkSharp, CloseFilled } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
@@ -42,6 +42,8 @@ export const League: React.FC<Props> = ({
   reverse = false,
   className,
 }) => {
+  const { t } = useTranslation('common')
+
   const ref = useRef<HTMLDivElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
@@ -49,31 +51,29 @@ export const League: React.FC<Props> = ({
     Maybe.fold<LeagueEntryView, Attrs>(
       () => ({
         src: Assets.divisions.unranked,
-        alt: 'non classé',
-        description: 'Non classé',
+        alt: t.league.unrankedIconAlt,
+        description: t.league.unranked,
         subDescription: undefined,
       }),
       ({ tier, rank, leaguePoints, wins, losses, miniSeriesProgress }) => {
-        const tierRank = `${LeagueTier.label[tier]}${
-          LeagueTier.isFourRanks(tier) ? ` ${rank}` : ''
-        }`
+        const tierRank = t.league.tierRank(tier, LeagueTier.isFourRanks(tier) ? rank : undefined)
         const games = wins + losses
         return {
           src: LeagueTier.isFourRanks(tier)
             ? Assets.divisions[`${tier}${rank}`]
             : Assets.divisions[tier],
-          alt: tierRank,
+          alt: t.league.tierRankAlt(tier, LeagueTier.isFourRanks(tier) ? rank : undefined),
           tierRank,
           description: (
             <>
               <span>{tierRank}</span>
-              <span>{leaguePoints} LP</span>
+              <span>{t.league.leaguePoints(leaguePoints)}</span>
             </>
           ),
           subDescription: (
             <>
-              <span>{games === 0 ? 0 : Math.round((100 * wins) / games)}%</span>
-              <span className="text-grey-400">({games})</span>
+              <span>{t.percents(games === 0 ? 0 : Math.round((100 * wins) / games))}</span>
+              <span className="text-grey-400">{t.number(games, { withParenthesis: true })}</span>
             </>
           ),
           tooltip: (
@@ -84,7 +84,7 @@ export const League: React.FC<Props> = ({
                   () => null,
                   progress => (
                     <div className="col-span-2 mb-1 flex items-center gap-1 justify-self-center">
-                      <span className="mr-1">Série :</span>
+                      <span className="mr-1">{t.league.serie}</span>
                       {progress.map((p, i) => (
                         // eslint-disable-next-line react/no-array-index-key
                         <span key={i}>{renderProgress(p)}</span>
@@ -93,8 +93,8 @@ export const League: React.FC<Props> = ({
                   ),
                 ),
               )}
-              <WinLoss value={wins} unit="victoire" valueClassName="text-green" />
-              <WinLoss value={losses} unit="défaite" valueClassName="text-red" />
+              <WinLoss value={wins} label={t.league.wins} valueClassName="text-green" />
+              <WinLoss value={losses} label={t.league.losses} valueClassName="text-red mb-0.5" />
             </>
           ),
         }
@@ -121,7 +121,7 @@ export const League: React.FC<Props> = ({
             ['col-start-2', reverse],
           )}
         >
-          <img src={src} alt={`Icône ${alt}`} className="m-[-7.5%] w-[115%] max-w-none" />
+          <img src={src} alt={alt} className="m-[-7.5%] w-[115%] max-w-none" />
         </span>
         <div className={cx('flex flex-col text-xs', ['col-start-1 row-start-1', reverse])}>
           <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
@@ -137,7 +137,7 @@ export const League: React.FC<Props> = ({
             tooltip !== undefined,
           ])}
         >
-          Classée {queueLabel[queue]}
+          {t.league.label[queue]}
         </span>
         {tooltip}
       </Tooltip>
@@ -147,17 +147,14 @@ export const League: React.FC<Props> = ({
 
 type WinLossProps = {
   value: number
-  unit: string
+  label: (n: number) => React.ReactNode
   valueClassName: string
 }
 
-const WinLoss: React.FC<WinLossProps> = ({ value, unit, valueClassName }) => (
+const WinLoss: React.FC<WinLossProps> = ({ value, label, valueClassName }) => (
   <>
     <span className={cx('justify-self-end', valueClassName)}>{value}</span>
-    <span>
-      {unit}
-      {value < 2 ? '' : 's'}
-    </span>
+    <span>{label(value)}</span>
   </>
 )
 
@@ -170,9 +167,4 @@ const renderProgress = (progress: LeagueMiniSeriesProgress): React.ReactElement 
     case 'N':
       return <span>—</span>
   }
-}
-
-const queueLabel: Dict<keyof SummonerLeaguesView, string> = {
-  soloDuo: 'Solo/Duo',
-  flex: 'FLEXXX',
 }

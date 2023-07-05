@@ -4,6 +4,7 @@ import { createElement, forwardRef } from 'react'
 import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 
 import { useStaticData } from '../contexts/StaticDataContext'
+import { useTranslation } from '../contexts/TranslationContext'
 import { cx } from '../utils/cx'
 
 type Props<A extends HTMLTag> = {
@@ -19,13 +20,15 @@ export const CroppedChampionSquare: <A extends HTMLTag = 'div'>(
   { championKey, championName, as = 'div' as A, className, children, ...props }: Props<A>,
   ref: React.ForwardedRef<ExtractElement<A>>,
 ) {
+  const { t } = useTranslation('common')
   const { assets } = useStaticData()
+
   return createElement(
     as,
     { ...props, ref, className: cx('overflow-hidden', className) },
     <img
       src={assets.champion.square(championKey)}
-      alt={`Icône de ${championName}`}
+      alt={t.championIconAlt(championName)}
       className="m-[-6%] w-[112%] max-w-none"
     />,
     children,

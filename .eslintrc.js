@@ -55,6 +55,7 @@ module.exports = {
           'Puuid',
           'SummonerId',
           'SummonerSpellId',
+          'SummonerSpellKey',
           'TagLine',
           'UserId',
           'UserName',

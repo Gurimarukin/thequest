@@ -6,7 +6,7 @@ import type { List } from '../../shared/utils/fp'
 
 type Props = {
   onClickOutside: (e: MouseEvent) => void
-  children?: React.ReactNode
+  children?: React.ReactElement | List<React.ReactElement>
 }
 
 export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {

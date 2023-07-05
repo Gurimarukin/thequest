@@ -20,11 +20,12 @@ import { MainLayout } from '../components/mainLayout/MainLayout'
 import { Tooltip } from '../components/tooltip/Tooltip'
 import { useHistory } from '../contexts/HistoryContext'
 import { useStaticData } from '../contexts/StaticDataContext'
+import { useTranslation } from '../contexts/TranslationContext'
 import { CountWithTotal } from '../models/CountWithTotal'
 import { GenericQuery } from '../models/genericQuery/GenericQuery'
 import { cx } from '../utils/cx'
 
-const { cleanChampionName, plural } = StringUtils
+const { cleanChampionName } = StringUtils
 
 type EnrichedStaticDataChampion = StaticDataChampion & {
   isHidden: boolean
@@ -40,6 +41,7 @@ type FactionOrNoneOrHidden = ChampionFactionOrNone | 'hidden'
 
 export const Factions: React.FC = () => {
   const { genericQuery, updateGenericQuery } = useHistory()
+  const { t } = useTranslation('common')
   const { champions } = useStaticData()
 
   const { filteredAndSortedChampions, factionsCount, searchCount } = useMemo(() => {
@@ -163,7 +165,7 @@ export const Factions: React.FC = () => {
           )}
         </div>
         <div className="self-center text-sm">
-          {plural('champion')(searchCount)} / {champions.length}
+          {t.nChampionsFraction(searchCount, champions.length)}
         </div>
       </div>
     </MainLayout>

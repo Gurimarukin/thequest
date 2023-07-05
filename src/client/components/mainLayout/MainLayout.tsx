@@ -3,6 +3,7 @@ import { pipe } from 'fp-ts/function'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
 import { AsyncState } from '../../models/AsyncState'
@@ -13,27 +14,30 @@ import { Loading } from '../Loading'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
+import { Languages } from './Languages'
 import { SearchSummoner } from './SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
   const { matchLocation } = useHistory()
   const { user } = useUser()
+  const { t } = useTranslation('common')
 
   return (
     <div className="flex h-full flex-col">
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
-        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between py-2">
+        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between">
           <div className="flex shrink-0 items-center gap-6">
-            <Link to={appRoutes.index}>
+            <Link to={appRoutes.index} className="py-2">
               <img
                 src={Assets.yuumi}
-                alt="Icône accueil (Yuumi)"
+                alt={t.layout.yuumiIconAlt}
                 className="h-12 w-12 rounded-sm bg-black"
               />
             </Link>
+
             <SearchSummoner />
 
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-4 py-2 text-sm">
               {pipe(
                 matchLocation(appParsers.anyPlatformSummonerName),
                 Maybe.fold(
@@ -43,16 +47,16 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                       <HighlightLink
                         to={appRoutes.platformSummonerName(platform, summonerName, {})}
                         parser={appParsers.platformSummonerName}
-                        tooltip="Maîtrises de champions"
+                        tooltip={t.layout.championMasteries}
                       >
-                        Profil
+                        {t.layout.profile}
                       </HighlightLink>
                       <HighlightLink
                         to={appRoutes.platformSummonerNameGame(platform, summonerName)}
                         parser={appParsers.platformSummonerNameGame}
-                        tooltip="Partie active"
+                        tooltip={t.layout.activeGame}
                       >
-                        Partie
+                        {t.layout.game}
                       </HighlightLink>
                     </>
                   ),
@@ -61,17 +65,21 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             </div>
           </div>
 
-          {pipe(
-            user,
-            AsyncState.fold(
-              () => <Loading className="h-5" />,
-              () => <AccountDisconnected />,
-              Maybe.fold(
+          <div className="flex items-center gap-4 self-stretch">
+            {pipe(
+              user,
+              AsyncState.fold(
+                () => <Loading className="my-2 h-5" />,
                 () => <AccountDisconnected />,
-                u => <AccountConnected user={u} />,
+                Maybe.fold(
+                  () => <AccountDisconnected />,
+                  u => <AccountConnected user={u} />,
+                ),
               ),
-            ),
-          )}
+            )}
+
+            <Languages />
+          </div>
         </div>
       </header>
       <main className="grow overflow-auto">{children}</main>

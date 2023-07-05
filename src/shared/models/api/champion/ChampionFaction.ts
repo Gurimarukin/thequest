@@ -1,5 +1,4 @@
 import { createEnum } from '../../../utils/createEnum'
-import type { Dict } from '../../../utils/fp'
 
 type ChampionFaction = typeof e.T
 
@@ -19,33 +18,12 @@ const e = createEnum(
   'zaun',
 )
 
-const label: Dict<ChampionFaction, string> = {
-  bandle: 'Bandle',
-  bilgewater: 'Bilgewater',
-  demacia: 'Demacia',
-  freljord: 'Freljord',
-  ionia: 'Ionia',
-  ixtal: 'Ixtal',
-  noxus: 'Noxus',
-  piltover: 'Piltover',
-  shadowIsles: 'Îles Obscures',
-  shurima: 'Shurima',
-  targon: 'Targon',
-  void: 'Néant',
-  zaun: 'Zaun',
-}
-
-const ChampionFaction = { ...e, label }
+const ChampionFaction = e
 
 type ChampionFactionOrNone = typeof eOrNone.T
 
 const eOrNone = createEnum(...e.values, 'none')
 
-const orNoneLabel: Dict<ChampionFactionOrNone, string> = {
-  ...label,
-  none: 'Sans faction',
-}
-
-const ChampionFactionOrNone = { ...eOrNone, label: orNoneLabel }
+const ChampionFactionOrNone = eOrNone
 
 export { ChampionFaction, ChampionFactionOrNone }
