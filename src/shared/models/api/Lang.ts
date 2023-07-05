@@ -1,5 +1,4 @@
 import { createEnum } from '../../utils/createEnum'
-import type { Dict } from '../../utils/fp'
 
 type Lang = typeof e.T
 
@@ -33,8 +32,6 @@ const e = createEnum(
   // 'zh_TW',
 )
 
-const default_: Lang = 'fr_FR'
-
 const fromNavigatorLanguage = (lang: string): Lang => {
   switch (lang) {
     case 'fr-FR':
@@ -46,10 +43,6 @@ const fromNavigatorLanguage = (lang: string): Lang => {
   }
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-type TestDefaultLangIsLang = Pick<Dict<Lang, string>, typeof default_>
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
-const Lang = { ...e, default: default_, fromNavigatorLanguage }
+const Lang = { ...e, fromNavigatorLanguage }
 
 export { Lang }

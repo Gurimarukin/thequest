@@ -1,9 +1,8 @@
-import { apply, io, ord, readonlyMap } from 'fp-ts'
+import { apply, io, ord, predicate, readonlyMap } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../../shared/models/DayJs'
-import { Store } from '../../../shared/models/Store'
 import { ValidatedNea } from '../../../shared/models/ValidatedNea'
 import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
@@ -32,6 +31,7 @@ import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
+import { CacheUtils } from '../../utils/CacheUtils'
 import type { DDragonService } from '../DDragonService'
 import type { MockService } from '../MockService'
 import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
@@ -50,19 +50,22 @@ const StaticDataService = (
 ) => {
   const logger = Logger('StaticDataService')
 
-  const fetchDefautLangStaticData = fetchCached(
-    (version: DDragonVersion): Future<StaticData> =>
-      pipe(
-        ddragonService.champions(Lang.default)(version),
-        Future.map(d => DictUtils.values(d.data)),
-        Future.chain(fetchStaticData(version)),
-      ),
-    version => data => DDragonVersion.Eq.equals(data.value.version, version),
-  )
+  const fetchStaticData: (lang: Lang) => (version: DDragonVersion) => Future<StaticData> =
+    fetchCachedStoredAt(
+      Lang.values,
+      lang => (version: DDragonVersion) =>
+        pipe(
+          ddragonService.champions(lang)(version),
+          Future.map(d => DictUtils.values(d.data)),
+          Future.chain(staticDataFetch(version)),
+        ),
+      version => data => DDragonVersion.Eq.equals(data.value.version, version),
+    )
 
-  const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = fetchCachedSimple(
-    getFetchWikiaChampionsData(logger, httpClient),
-  )
+  const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = fetchCachedStoredAt(
+    [''],
+    () => () => getFetchWikiaChampionsData(logger, httpClient),
+  )('')()
 
   const fetchWikiaChallenges: Future<List<WikiaChallenge>> = getFetchWikiaChallenges(httpClient)
 
@@ -77,7 +80,9 @@ const StaticDataService = (
     getLatest: (lang: Lang): Future<StaticData> =>
       pipe(
         config.mock ? mockService.staticData : futureMaybe.none,
-        futureMaybe.getOrElse(() => getLatest(lang)),
+        futureMaybe.getOrElse(() =>
+          pipe(ddragonService.latestVersion, Future.chain(fetchStaticData(lang))),
+        ),
       ),
 
     getLatestAdditional: (lang: Lang): Future<AdditionalStaticData> =>
@@ -85,21 +90,6 @@ const StaticDataService = (
         config.mock ? mockService.additionalStaticData : futureMaybe.none,
         futureMaybe.getOrElse(() => getLatestAdditional(lang)),
       ),
-  }
-
-  function getLatest(lang: Lang): Future<StaticData> {
-    return pipe(
-      ddragonService.latestVersion,
-      Future.chain(version => {
-        if (Lang.Eq.equals(lang, Lang.default)) return fetchDefautLangStaticData(version)
-
-        return pipe(
-          ddragonService.champions(lang)(version),
-          Future.map(d => DictUtils.values(d.data)),
-          Future.chain(fetchStaticData(version)),
-        )
-      }),
-    )
   }
 
   function getLatestAdditional(lang: Lang): Future<AdditionalStaticData> {
@@ -152,7 +142,7 @@ const StaticDataService = (
     )
   }
 
-  function fetchStaticData(
+  function staticDataFetch(
     version: DDragonVersion,
   ): (ddragonChampions: List<DDragonChampion>) => Future<StaticData> {
     return ddragonChampions =>
@@ -342,53 +332,43 @@ const logChampionErrors: (errors: NonEmptyArray<ChampionError>) => string = flow
 )
 
 /**
- * cache utils
+ * Cache for constants.staticDataCacheTtl
  */
 
-const fetchCachedSimple = <A>(
-  fetch: Future<A>,
-  getCacheFilter?: Predicate<StoredAt<A>>,
-): Future<A> =>
-  fetchCached(() => fetch, getCacheFilter !== undefined ? () => getCacheFilter : undefined)()
-
-const fetchCached = <A, Args extends List<unknown>>(
-  fetch: (...args: Args) => Future<A>,
-  getCacheFilter: (...args: Args) => Predicate<StoredAt<A>> = () => () => true,
-): ((...args: Args) => Future<A>) => {
-  const cache = Store<Maybe<StoredAt<A>>>(Maybe.none)
-
-  return (...args: Args): Future<A> =>
-    pipe(
-      apply.sequenceS(io.Apply)({
-        maybeData: cache.get,
-        now: DayJs.now,
-      }),
-      io.map(({ maybeData, now }) =>
+const fetchCachedStoredAt = <K extends string, A, Args extends List<unknown>>(
+  cacheFor: NonEmptyArray<K>,
+  fetch: (key: K) => (...args: Args) => Future<A>,
+  filterCache: (...args: Args) => Predicate<StoredAt<A>> = () => () => true,
+): ((key: K) => (...args: Args) => Future<A>) => {
+  const res = CacheUtils.fetchCached<K, StoredAt<A>, Args>(
+    cacheFor,
+    k =>
+      (...args_) =>
         pipe(
-          maybeData,
-          Maybe.filter(
-            data =>
-              getCacheFilter(...args)(data) &&
-              pipe(data, StoredAt.isStillValid(constants.staticDataCacheTtl, now)),
-          ),
-          Maybe.map(data => data.value),
-        ),
-      ),
-      Future.fromIO,
-      Future.chain(
-        Maybe.fold(
-          () =>
+          fetch(k)(...args_),
+          Future.chainIOK(value =>
             pipe(
-              fetch(...args),
-              Future.chainFirstIOK(value =>
-                pipe(
-                  DayJs.now,
-                  io.chain(now => cache.set(Maybe.some({ value, storedAt: now }))),
-                ),
-              ),
+              DayJs.now,
+              io.map(storedAt => ({ value, storedAt })),
             ),
-          Future.successful,
+          ),
         ),
-      ),
-    )
+    () =>
+      (...args_) =>
+        pipe(
+          DayJs.now,
+          io.map(now =>
+            pipe(
+              StoredAt.isStillValid(constants.staticDataCacheTtl, now),
+              predicate.and(filterCache(...args_)),
+            ),
+          ),
+        ),
+  )
+  return key =>
+    (...args) =>
+      pipe(
+        res(key)(...args),
+        Future.map(a => a.value),
+      )
 }

@@ -5,7 +5,6 @@ import { Status } from 'hyper-ts'
 import { DayJs } from '../../shared/models/DayJs'
 import { MsDuration } from '../../shared/models/MsDuration'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
-import { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
@@ -348,7 +347,7 @@ function UserController(
     championShards: NonEmptyArray<ChampionShardsPayload>,
   ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShardsPayload>>> {
     return pipe(
-      ddragonService.latestChampions(Lang.default),
+      ddragonService.latestChampions('en_GB' /* whatever (unused) */),
       Future.map(({ value: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,

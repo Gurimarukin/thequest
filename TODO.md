@@ -18,5 +18,4 @@
 - debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
-- CacheUtils?
 - clean old cache entries
