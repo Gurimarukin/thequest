@@ -8,6 +8,7 @@ import { SummonerMasteriesView } from '../../../shared/models/api/summoner/Summo
 import type { Dict } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
+import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { Navigate } from '../../components/Navigate'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
@@ -15,7 +16,6 @@ import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { PartialMasteriesQuery } from '../../models/masteriesQuery/PartialMasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
-import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 
 type SummonerPuuidProps = {
   platform: Platform
@@ -27,14 +27,20 @@ type Page = 'profile' | 'game'
 
 export const SummonerPuuid: React.FC<SummonerPuuidProps> = ({ platform, puuid, page }) => (
   <MainLayout>
-    {basicAsyncRenderer(
-      useSWRHttp(apiRoutes.summoner.byPuuid(platform, puuid).masteries.get, {}, [
+    <AsyncRenderer
+      {...useSWRHttp(apiRoutes.summoner.byPuuid(platform, puuid).masteries.get, {}, [
         SummonerMasteriesView.codec,
         'SummonerMasteriesView',
-      ]),
-    )(summonerMasteries => (
-      <SummonerPuuidLoaded platform={platform} summonerMasteries={summonerMasteries} page={page} />
-    ))}
+      ])}
+    >
+      {summonerMasteries => (
+        <SummonerPuuidLoaded
+          platform={platform}
+          summonerMasteries={summonerMasteries}
+          page={page}
+        />
+      )}
+    </AsyncRenderer>
   </MainLayout>
 )
 

@@ -1,9 +1,11 @@
+- align tenacity and ability haste with other stats (hover)
+- fix champion image load (progression svg visible)
+- highlight selected summoner
 - refresh game
 - react-select
-- translate aram stats
 - uri: ugly encode
+- Menu react-popper?
 - active game drag and drop
-- translation?
 - challenge progression discord notification
 - discord OAuth2: proper state (redirect url)
 - toaster (replace alert)
@@ -16,9 +18,4 @@
 - debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
-- CacheUtils?
 - clean old cache entries
-
----
-
-https://raw.githubusercontent.com/tbocquet/the-quest/master/the-quest-front/src/champion.json

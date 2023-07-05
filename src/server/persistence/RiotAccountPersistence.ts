@@ -7,9 +7,9 @@ import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
-import { RiotAccountDb } from '../models/RiotAccountDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
+import { RiotAccountDb } from '../models/riot/RiotAccountDb'
 import { TagLine } from '../models/riot/TagLine'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 

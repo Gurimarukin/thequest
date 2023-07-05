@@ -1,12 +1,12 @@
 import { apply, io } from 'fp-ts'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import { Store } from '../../shared/models/Store'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import { Lang } from '../../shared/models/api/Lang'
 import type { List } from '../../shared/utils/fp'
-import { Future, Maybe, NonEmptyArray, PartialDict, Tuple } from '../../shared/utils/fp'
+import { Future, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import { StoredAt } from '../models/StoredAt'
@@ -14,6 +14,7 @@ import type { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import type { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import type { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import type { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
+import { CacheUtils } from '../utils/CacheUtils'
 import type { RiotApiService } from './RiotApiService'
 
 type WithVersion<A> = {
@@ -98,40 +99,24 @@ const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: 
 export { DDragonService }
 
 /**
- * Cache only for some langs, until version changes.
+ * Cache for langs, until version changes.
  */
 
 const fetchCached = <A>(
   fetch: (lang: Lang) => (version: DDragonVersion) => Future<A>,
-  cacheForLangs: NonEmptyArray<Lang> = [Lang.default],
 ): ((lang: Lang) => (version: DDragonVersion) => Future<A>) => {
-  const caches = pipe(
-    cacheForLangs,
-    NonEmptyArray.map(lang => Tuple.of(lang, Store<Maybe<WithVersion<A>>>(Maybe.none))),
-    PartialDict.fromEntries,
-  )
-
-  return lang => {
-    const cache = caches[lang]
-
-    if (cache === undefined) return fetch(lang)
-
-    return version =>
+  const res = CacheUtils.fetchCached<Lang, WithVersion<A>, [version: DDragonVersion]>(
+    Lang.values,
+    lang_ => version_ =>
       pipe(
-        Future.fromIO(cache.get),
-        Future.chain(
-          flow(
-            Maybe.filter(v => DDragonVersion.Eq.equals(v.version, version)),
-            Maybe.fold(
-              () =>
-                pipe(
-                  fetch(lang)(version),
-                  Future.chainFirstIOK(value => cache.set(Maybe.some({ value, version }))),
-                ),
-              v => Future.successful(v.value),
-            ),
-          ),
-        ),
-      )
-  }
+        fetch(lang_)(version_),
+        Future.map(value => ({ value, version: version_ })),
+      ),
+    () => version_ => io.of(data => DDragonVersion.Eq.equals(data.version, version_)),
+  )
+  return lang => version =>
+    pipe(
+      res(lang)(version),
+      Future.map(a => a.value),
+    )
 }

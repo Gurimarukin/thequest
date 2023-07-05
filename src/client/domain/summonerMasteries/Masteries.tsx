@@ -9,7 +9,6 @@ import type { ChallengesView } from '../../../shared/models/api/challenges/Chall
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -22,6 +21,7 @@ import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { CountWithTotal } from '../../models/CountWithTotal'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
@@ -32,8 +32,6 @@ import { MasteriesFilters } from './filters/MasteriesFilters'
 import type { FilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 
-const { plural } = StringUtils
-
 type Props = {
   challenges: SWRResponse<ChallengesView, unknown>
   masteries: List<EnrichedChampionMastery>
@@ -42,6 +40,7 @@ type Props = {
 
 export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionShards }) => {
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
+  const { t } = useTranslation('common')
   const { champions } = useStaticData()
 
   const {
@@ -98,7 +97,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
         )}
       </div>
       <div className="self-center text-sm">
-        {plural('champion')(championsCount)} / {champions.length}
+        {t.nChampionsFraction(championsCount, champions.length)}
       </div>
     </>
   )
@@ -250,6 +249,8 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
   },
   className,
 }) => {
+  const { t } = useTranslation()
+
   const hoverRef1 = useRef<HTMLDivElement>(null)
   const hoverRef2 = useRef<HTMLDivElement>(null)
   const hoverRef3 = useRef<HTMLDivElement>(null)
@@ -259,15 +260,15 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
     [
       2 < championLevel
         ? Maybe.some(
-            `${plural('point')(championPointsSinceLastLevel)} depuis le niveau ${Math.min(
-              championLevel,
-              5,
-            )}`,
+            t.masteries.pointsSinceLastLevel(
+              championPointsSinceLastLevel,
+              Math.min(championLevel, 5),
+            ),
           )
         : Maybe.none,
       0 < championLevel && championLevel < 5
         ? Maybe.some(
-            `${plural('point')(championPointsUntilNextLevel)} jusqu'au niveau ${championLevel + 1}`,
+            t.masteries.pointsUntilNextLevel(championPointsUntilNextLevel, championLevel + 1),
           )
         : Maybe.none,
     ],
@@ -313,7 +314,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
         )}
         <div className="flex items-center">
           <span ref={placementRef} className="p-1.5 text-sm">
-            {championPoints.toLocaleString()}
+            {t.common.number(championPoints)}
           </span>
         </div>
       </div>

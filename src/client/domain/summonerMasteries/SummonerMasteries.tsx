@@ -25,18 +25,19 @@ import type { PartialDict, Tuple } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
+import { AsyncRenderer } from '../../compo../../components/AsyncRenderer'
 import { Loading } from '../../components/Loading'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { config } from '../../config/unsafe'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
-import { basicAsyncRenderer } from '../../utils/basicAsyncRenderer'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
@@ -63,6 +64,7 @@ type Props = {
 export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
   const { maybeUser } = useUser()
+  const { t } = useTranslation()
 
   const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
     apiRoutes.summoner.byName(platform, summonerName).masteries.get,
@@ -140,26 +142,28 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
           if (optimisticMutation) mutate(data, { revalidate: false })
           console.error(e)
           // TODO: error toaster
-          alert('Erreur lors de la modification des fragments')
+          alert(t.masteries.updateShardsError)
           return Future.notUsed
         }),
       )
     },
-    [data, mutate, platform],
+    [data, mutate, platform, t.masteries.updateShardsError],
   )
 
   return (
     <MainLayout>
-      {basicAsyncRenderer({ data, error })(({ summoner, leagues, masteries, championShards }) => (
-        <SummonerViewComponent
-          platform={platform}
-          summoner={summoner}
-          leagues={leagues}
-          masteries={masteries}
-          championShards={championShards}
-          setChampionsShardsBulk={setChampionsShardsBulk}
-        />
-      ))}
+      <AsyncRenderer data={data} error={error}>
+        {({ summoner, leagues, masteries, championShards }) => (
+          <SummonerViewComponent
+            platform={platform}
+            summoner={summoner}
+            leagues={leagues}
+            masteries={masteries}
+            championShards={championShards}
+            setChampionsShardsBulk={setChampionsShardsBulk}
+          />
+        )}
+      </AsyncRenderer>
     </MainLayout>
   )
 }

@@ -19,6 +19,7 @@ import { AsyncState } from '../models/AsyncState'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
+import { useTranslation } from './TranslationContext'
 
 const recentSearchesKey = 'recentSearches'
 
@@ -38,6 +39,8 @@ type UserContext = {
 const UserContext = createContext<UserContext | undefined>(undefined)
 
 export const UserContextProvider: ChildrenFC = ({ children }) => {
+  const { t } = useTranslation('common')
+
   const { data, error, mutate } = useSWR(
     apiRoutes.user.self.get,
     ([url, method]) =>
@@ -49,7 +52,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         ),
         Future.orElse(e => {
           console.error(e)
-          alert("Erreur lors de la récupération l'utilisateur") // TODO: toaster
+          alert(t.errors.fetchUserError) // TODO: toaster
           return Future.failed(e)
         }),
         futureRunUnsafe,
@@ -93,11 +96,11 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
         Future.orElse(e => {
           console.error(e)
-          alert("Erreur lors de l'ajout du favori") // TODO: toaster
+          alert(t.errors.addFavoriteError) // TODO: toaster
           return futureMaybe.some(NotUsed)
         }),
       ),
-    [data, mutate],
+    [data, mutate, t.errors.addFavoriteError],
   )
 
   const removeFavoriteSearch = useCallback(
@@ -128,11 +131,11 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
         Future.orElse(e => {
           console.error(e)
-          alert('Erreur lors de la suppression du favori') // TODO: toaster
+          alert(t.errors.removeFavoriteError) // TODO: toaster
           return Future.notUsed
         }),
       ),
-    [data, mutate],
+    [data, mutate, t.errors.removeFavoriteError],
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(

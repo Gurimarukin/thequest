@@ -9,6 +9,7 @@ import { Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
 import { CroppedChampionSquare } from '../../components/CroppedChampionSquare'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { Assets } from '../../imgs/Assets'
 import { cx } from '../../utils/cx'
 
@@ -42,6 +43,7 @@ type BanProps = {
 }
 
 const Ban: React.FC<BanProps> = ({ participant }) => {
+  const { t } = useTranslation()
   const { championByKey } = useStaticData()
 
   const ref = useRef<HTMLLIElement>(null)
@@ -58,17 +60,17 @@ const Ban: React.FC<BanProps> = ({ participant }) => {
           >
             <img
               src={Assets.champion}
-              alt={'Icône de champion vide'}
+              alt={t.common.emptyChampionIconAlt}
               className="h-6 w-6 opacity-50"
             />
           </li>,
-          'Aucun.',
+          t.activeGame.empty,
         ),
       championId => {
         const bannedChampionName = pipe(
           championByKey(championId),
           Maybe.fold(
-            () => `<Champion ${championId}>`,
+            () => t.common.championKey(championId),
             c => c.name,
           ),
         )
@@ -90,20 +92,17 @@ const Ban: React.FC<BanProps> = ({ participant }) => {
   return (
     <>
       {children}
-      <Tooltip hoverRef={ref} className="flex flex-col items-center gap-1">
-        <span className="font-bold">{tooltip}</span>
-        <span className="text-2xs">banni par</span>
-        <span>
-          {participant.summonerName}
-          {pipe(
+      <Tooltip hoverRef={ref} className="flex flex-col items-center gap-1 !text-2xs">
+        <span className="text-xs font-bold">{tooltip}</span>
+        {t.activeGame.bannedBy(
+          participant.summonerName,
+          pipe(
             pickedChampion,
-            Maybe.fold(
-              () => null,
-              c => ` (${c.name})`,
-            ),
-          )}
-        </span>
-        <span className="text-2xs">au tour {participant.bannedChampion.pickTurn}</span>
+            Maybe.map(c => c.name),
+          ),
+          participant.bannedChampion.pickTurn,
+          'text-xs',
+        )}
       </Tooltip>
     </>
   )

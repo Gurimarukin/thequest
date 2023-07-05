@@ -1,11 +1,9 @@
-import { SpellName } from '../../../shared/models/api/SpellName'
-
 import type { AramStatsProps } from './aramStats'
 import { getAramStats, renderStatIcon, renderStatValue } from './aramStats'
 
 export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
-  name => {
-    const icon = renderStatIcon(name, 'h-2.5 w-2.5')
+  (t, name) => {
+    const icon = renderStatIcon(t.aram, name, 'h-2.5 w-2.5')
     const renderStatValue_ = renderStatValue(name)
     return value => (
       <li key={name} className="flex items-center gap-1">
@@ -14,11 +12,11 @@ export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
       </li>
     )
   },
-  spell => html =>
+  (t, spell) => html =>
     (
       <li key={spell} className="flex items-center gap-1">
         <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia compact" />
-        <span>{SpellName.label[spell]}</span>
+        <span>{t.common.labels.spell[spell]}</span>
       </li>
     ),
   4,

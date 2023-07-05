@@ -6,7 +6,6 @@ import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 
 import { DictUtils } from '../../utils/DictUtils'
-import type { Dict } from '../../utils/fp'
 import { List } from '../../utils/fp'
 import { StrictPartial } from '../../utils/ioTsUtils'
 
@@ -47,13 +46,13 @@ const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiaStatsBalance> = C.
   rawCodec,
 )
 
-const Eq: eq.Eq<Key> = string.Eq
+const Eq: eq.Eq<WikiaStatsBalanceKey> = string.Eq
 
-type Key = keyof WikiaStatsBalance
+type WikiaStatsBalanceKey = keyof WikiaStatsBalance
 
 const keys = DictUtils.keys(properties)
 
-const modifierStats: List<Key> = [
+const modifierStats: List<WikiaStatsBalanceKey> = [
   'dmg_dealt',
   'dmg_taken',
   'healing',
@@ -64,27 +63,18 @@ const modifierStats: List<Key> = [
   'tenacity',
 ]
 
-const percentsStats: List<Key> = pipe(modifierStats, List.difference(Eq)(['tenacity']))
+const percentsStats: List<WikiaStatsBalanceKey> = pipe(
+  modifierStats,
+  List.difference(Eq)(['tenacity']),
+)
 
-const malusStats: List<Key> = ['dmg_taken']
+const malusStats: List<WikiaStatsBalanceKey> = ['dmg_taken']
 
-const isModifierStat = (stat: Key): boolean => List.elem(Eq)(stat, modifierStats)
+const isModifierStat = (stat: WikiaStatsBalanceKey): boolean => List.elem(Eq)(stat, modifierStats)
 
-const isPercentsStat = (stat: Key): boolean => List.elem(Eq)(stat, percentsStats)
+const isPercentsStat = (stat: WikiaStatsBalanceKey): boolean => List.elem(Eq)(stat, percentsStats)
 
-const isMalusStat = (stat: Key): boolean => List.elem(Eq)(stat, malusStats)
-
-const label: Dict<Key, string> = {
-  dmg_dealt: 'Damage dealt',
-  dmg_taken: 'Damage taken',
-  healing: 'Healing',
-  shielding: 'Shielding',
-  ability_haste: 'Ability haste',
-  energy_regen: 'Energy regeneration',
-  attack_speed: 'Attack speed',
-  movement_speed: 'Movement speed',
-  tenacity: 'Tenacity',
-}
+const isMalusStat = (stat: WikiaStatsBalanceKey): boolean => List.elem(Eq)(stat, malusStats)
 
 const WikiaStatsBalance = {
   keys,
@@ -92,8 +82,7 @@ const WikiaStatsBalance = {
   isModifierStat,
   isPercentsStat,
   isMalusStat,
-  label,
   Eq,
 }
 
-export { WikiaStatsBalance, type Key as WikiaStatsBalanceKey }
+export { WikiaStatsBalance, WikiaStatsBalanceKey }

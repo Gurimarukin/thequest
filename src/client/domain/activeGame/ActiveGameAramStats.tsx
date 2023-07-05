@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 
-import { SpellName } from '../../../shared/models/api/SpellName'
 import { List } from '../../../shared/utils/fp'
 
 import type { AramStatsProps } from '../../components/aramStats/aramStats'
@@ -15,8 +14,8 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
   const AramStats = useMemo(
     () =>
       getAramStats(
-        name => {
-          const icon = renderStatIcon(name, 'h-full w-full')
+        (t, name) => {
+          const icon = renderStatIcon(t.aram, name, 'h-full w-full')
           const renderStatValue_ = renderStatValue(name, '')
           return value => (
             <li key={name} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
@@ -25,7 +24,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
             </li>
           )
         },
-        spell => html =>
+        (t, spell) => html =>
           (
             <li
               key={spell}
@@ -35,7 +34,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
                 dangerouslySetInnerHTML={{ __html: html.spell }}
                 className="wikia compact h-5 w-5"
               />
-              <span className="">{SpellName.label[spell]}</span>
+              <span>{t.common.labels.spell[spell]}</span>
             </li>
           ),
         5,

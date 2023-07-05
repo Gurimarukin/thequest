@@ -5,14 +5,12 @@ import { flow, pipe } from 'fp-ts/function'
 import type React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe } from '../../shared/utils/fp'
 
+import { useTranslation } from '../contexts/TranslationContext'
 import { CloseFilled, DiceFilled } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
-
-const { plural } = StringUtils
 
 type Props = {
   searchCount: number
@@ -29,6 +27,8 @@ export const SearchChampion: React.FC<Props> = ({
   onChange,
   className,
 }) => {
+  const { t } = useTranslation('common')
+
   const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export const SearchChampion: React.FC<Props> = ({
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
             onFocus={onFocus}
-            placeholder="Rechercher champion"
+            placeholder={t.searchChamion}
             className={cx(
               'w-[151px] justify-self-start rounded-sm border border-grey-disabled bg-transparent py-1 pl-2',
               search === '' ? 'pr-2' : 'pr-7',
@@ -121,7 +121,7 @@ export const SearchChampion: React.FC<Props> = ({
             Maybe.isNone(initialSearch),
           ])}
         >
-          {plural('résultat')(searchCount)}
+          {t.nResults(searchCount)}
         </span>
       </div>
 
@@ -135,7 +135,7 @@ export const SearchChampion: React.FC<Props> = ({
         <DiceFilled className="h-7 transition-transform duration-300 group-enabled:group-hover:animate-dice" />
       </button>
       <Tooltip hoverRef={randomButtonRef} placement="top">
-        Champion aléatoire
+        {t.randomChampion}
       </Tooltip>
     </div>
   )
