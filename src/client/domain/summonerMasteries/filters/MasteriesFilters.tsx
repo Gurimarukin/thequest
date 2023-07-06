@@ -147,7 +147,10 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             )}
             {labelValue(
               'name',
-              <TextLabel tooltip={t.masteries.filters.sort.name}>
+              <TextLabel
+                tooltip={t.masteries.filters.sort.name}
+                className="pt-[3px] font-[baloopaaji2] text-xs font-normal"
+              >
                 {t.masteries.filters.sortShort.name}
               </TextLabel>,
             )}
