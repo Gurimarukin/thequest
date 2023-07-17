@@ -123,6 +123,7 @@ const rawProperties = {
     ofa: maybeBalanceDecoder,
     urf: maybeBalanceDecoder,
     usb: maybeBalanceDecoder,
+    ar: maybeBalanceDecoder,
   }),
   fullname: Maybe.decoder(D.string),
   nickname: Maybe.decoder(D.string),
