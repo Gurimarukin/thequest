@@ -1,3 +1,6 @@
+- sort factions (and champions and ?) by translated name
+- /factions Firefox iOS : xx champions / xx - fix top margin
+
 - align tenacity and ability haste with other stats (hover)
 - fix champion image load (progression svg visible)
 - highlight selected summoner
