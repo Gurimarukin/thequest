@@ -8,10 +8,12 @@ import type { SummonerLeaguesView } from '../../shared/models/api/summoner/Summo
 import { Maybe } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
-import { Assets } from '../imgs/Assets'
 import { CheckMarkSharp, CloseFilled } from '../imgs/svgIcons'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
+
+const miniCrestIcon = (tier: 'unranked' | LeagueTier): string =>
+  `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/${tier.toLowerCase()}.svg`
 
 type Props = {
   /**
@@ -50,19 +52,17 @@ export const League: React.FC<Props> = ({
     league,
     Maybe.fold<LeagueEntryView, Attrs>(
       () => ({
-        src: Assets.divisions.unranked,
+        src: miniCrestIcon('unranked'),
         alt: t.league.unrankedIconAlt,
         description: t.league.unranked,
         subDescription: undefined,
       }),
       ({ tier, rank, leaguePoints, wins, losses, miniSeriesProgress }) => {
-        const tierRank = t.league.tierRank(tier, LeagueTier.isFourRanks(tier) ? rank : undefined)
+        const tierRank = t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)
         const games = wins + losses
         return {
-          src: LeagueTier.isFourRanks(tier)
-            ? Assets.divisions[`${tier}${rank}`]
-            : Assets.divisions[tier],
-          alt: t.league.tierRankAlt(tier, LeagueTier.isFourRanks(tier) ? rank : undefined),
+          src: miniCrestIcon(tier),
+          alt: t.league.tierRankAlt(tier, LeagueTier.isRegularTier(tier) ? rank : undefined),
           tierRank,
           description: (
             <>
@@ -107,21 +107,23 @@ export const League: React.FC<Props> = ({
       <div
         ref={ref}
         className={cx(
-          '-mb-1 grid grid-cols-[auto_auto] items-center',
-          ['gap-2', variant === 'base'],
-          ['gap-1.5', variant === 'small'],
+          '-mb-1 grid grid-cols-[auto_auto] items-center gap-2 overflow-hidden',
           className,
         )}
       >
         <span
           className={cx(
-            'overflow-hidden',
-            ['h-10 w-10', variant === 'base'],
-            ['h-7 w-7', variant === 'small'],
+            'flex justify-center',
+            ['h-12 w-12', variant === 'base'],
+            ['h-8 w-8', variant === 'small'],
             ['col-start-2', reverse],
           )}
         >
-          <img src={src} alt={alt} className="m-[-7.5%] w-[115%] max-w-none" />
+          <img
+            src={src}
+            alt={alt}
+            className={cx('h-full object-contain', Maybe.isNone(league) ? 'w-[56.25%]' : 'w-full')}
+          />
         </span>
         <div className={cx('flex flex-col text-xs', ['col-start-1 row-start-1', reverse])}>
           <span className="flex gap-1.5 whitespace-nowrap">{description}</span>

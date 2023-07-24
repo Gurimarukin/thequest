@@ -11,6 +11,7 @@ import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { MigrationPersistence } from '../persistence/MigrationPersistence'
 import { Migration20230611 } from './migrations/Migration20230611'
 import { Migration20230613 } from './migrations/Migration20230613'
+import { Migration20230724 } from './migrations/Migration20230724'
 
 export type MigrationService = ReturnType<typeof MigrationService>
 
@@ -25,6 +26,7 @@ export const MigrationService = (
   const migrations: List<Migration> = [
     Migration20230611(mongoCollection),
     Migration20230613(mongoCollection),
+    Migration20230724(mongoCollection),
   ]
 
   const applyMigrations: Future<NotUsed> = pipe(

@@ -1,43 +1,8 @@
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
-import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
-import type { FourRanksTier, OneRankTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
-
-const ironIcon = new URL('./divisions/iron_I.png', import.meta.url).toString()
-
-const divisions: Dict<'unranked' | `${FourRanksTier}${LeagueRank}` | OneRankTier, string> = {
-  unranked: new URL('./divisions/unranked.png', import.meta.url).toString(),
-  IRONI: ironIcon,
-  IRONII: ironIcon,
-  IRONIII: ironIcon,
-  IRONIV: ironIcon,
-  BRONZEI: new URL('./divisions/bronze_I.webp', import.meta.url).toString(),
-  BRONZEII: new URL('./divisions/bronze_II.webp', import.meta.url).toString(),
-  BRONZEIII: new URL('./divisions/bronze_III.webp', import.meta.url).toString(),
-  BRONZEIV: new URL('./divisions/bronze_IV.webp', import.meta.url).toString(),
-  SILVERI: new URL('./divisions/silver_I.webp', import.meta.url).toString(),
-  SILVERII: new URL('./divisions/silver_II.webp', import.meta.url).toString(),
-  SILVERIII: new URL('./divisions/silver_III.webp', import.meta.url).toString(),
-  SILVERIV: new URL('./divisions/silver_IV.webp', import.meta.url).toString(),
-  GOLDI: new URL('./divisions/gold_I.webp', import.meta.url).toString(),
-  GOLDII: new URL('./divisions/gold_II.webp', import.meta.url).toString(),
-  GOLDIII: new URL('./divisions/gold_III.webp', import.meta.url).toString(),
-  GOLDIV: new URL('./divisions/gold_IV.webp', import.meta.url).toString(),
-  PLATINUMI: new URL('./divisions/platinum_I.webp', import.meta.url).toString(),
-  PLATINUMII: new URL('./divisions/platinum_II.webp', import.meta.url).toString(),
-  PLATINUMIII: new URL('./divisions/platinum_III.webp', import.meta.url).toString(),
-  PLATINUMIV: new URL('./divisions/platinum_IV.webp', import.meta.url).toString(),
-  DIAMONDI: new URL('./divisions/diamond_I.webp', import.meta.url).toString(),
-  DIAMONDII: new URL('./divisions/diamond_II.webp', import.meta.url).toString(),
-  DIAMONDIII: new URL('./divisions/diamond_III.webp', import.meta.url).toString(),
-  DIAMONDIV: new URL('./divisions/diamond_IV.webp', import.meta.url).toString(),
-  MASTER: new URL('./divisions/master.webp', import.meta.url).toString(),
-  GRANDMASTER: new URL('./divisions/grandmaster.png', import.meta.url).toString(),
-  CHALLENGER: new URL('./divisions/challenger.webp', import.meta.url).toString(),
-}
 
 const factions: Dict<ChampionFaction, string> = {
   bandle: new URL('./factions/bandle.webp', import.meta.url).toString(),
@@ -94,7 +59,6 @@ const tokens = {
 export const Assets = {
   champion: new URL('./champion.webp', import.meta.url).toString(),
   chest: new URL('./chest.png', import.meta.url).toString(),
-  divisions,
   factions,
   globetrotter: new URL('./globetrotter.png', import.meta.url).toString(),
   masteries,

@@ -4,6 +4,7 @@ import { useRef } from 'react'
 
 import type { ChallengeId } from '../../shared/models/api/ChallengeId'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
+import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import type { PartialDict } from '../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
@@ -13,7 +14,7 @@ import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
 const imgSrc = (id: ChallengeId, tier: LeagueTier): string =>
-  `https://ddragon.leagueoflegends.com/cdn/img/challenges-images/${id}-${tier}.png`
+  DDragonUtils.ddragon(`/cdn/img/challenges-images/${id}-${tier}.png`)
 
 type Props = {
   id: ChallengeId

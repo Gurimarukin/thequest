@@ -1,5 +1,7 @@
+- display CHERRY league entry
 - sort factions (and champions and ?) by translated name
 - /factions Firefox iOS : xx champions / xx - fix top margin
+- SVG position icons: https://raw.communitydragon.org/pbe/plugins/rcp-fe-lol-static-assets/global/default/svg/
 
 - align tenacity and ability haste with other stats (hover)
 - fix champion image load (progression svg visible)

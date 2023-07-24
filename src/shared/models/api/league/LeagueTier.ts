@@ -1,21 +1,21 @@
 import { createEnum } from '../../../utils/createEnum'
 import { List } from '../../../utils/fp'
 
-type FourRanksTier = typeof FourRanksTier.T
+type RegularTier = typeof RegularTier.T
 
-const FourRanksTier = createEnum('IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND')
+const RegularTier = createEnum('IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND')
 
-type OneRankTier = typeof OneRankTier.T
+type ApexTier = typeof ApexTier.T
 
-const OneRankTier = createEnum('MASTER', 'GRANDMASTER', 'CHALLENGER')
+const ApexTier = createEnum('MASTER', 'GRANDMASTER', 'CHALLENGER')
 
 type LeagueTier = typeof e.T
 
-const e = createEnum(...FourRanksTier.values, ...OneRankTier.values)
+const e = createEnum(...RegularTier.values, ...ApexTier.values)
 
-const isFourRanks = (tier: LeagueTier): tier is FourRanksTier =>
-  List.elem(e.Eq)(tier, FourRanksTier.values)
+const isRegularTier = (tier: LeagueTier): tier is RegularTier =>
+  List.elem(e.Eq)(tier, RegularTier.values)
 
-const LeagueTier = { ...e, isFourRanks }
+const LeagueTier = { ...e, isRegularTier }
 
-export { FourRanksTier, LeagueTier, OneRankTier }
+export { ApexTier, LeagueTier, RegularTier }
