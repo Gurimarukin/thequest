@@ -164,7 +164,7 @@ export const Factions: React.FC = () => {
             )),
           )}
         </div>
-        <div className="self-center text-sm">
+        <div className="mt-6 self-center text-sm">
           {t.nChampionsFraction(searchCount, champions.length)}
         </div>
       </div>
