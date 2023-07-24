@@ -42,6 +42,7 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { ActiveGame } from '../models/activeGame/ActiveGame'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
+import { LeagueEntry } from '../models/league/LeagueEntry'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
@@ -164,14 +165,8 @@ const SummonerController = (
     return pipe(
       leagueEntryService.findBySummoner(platform, summonerId, options),
       futureMaybe.map(entries => ({
-        soloDuo: pipe(
-          entries,
-          List.findFirst(e => e.queueType === queueTypes.soloDuo),
-        ),
-        flex: pipe(
-          entries,
-          List.findFirst(e => e.queueType === queueTypes.flex),
-        ),
+        soloDuo: pipe(entries, List.findFirst(LeagueEntry.queueTypeEquals(queueTypes.soloDuo))),
+        flex: pipe(entries, List.findFirst(LeagueEntry.queueTypeEquals(queueTypes.flex))),
       })),
     )
   }

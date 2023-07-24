@@ -1,9 +1,11 @@
 import { useRef } from 'react'
 
+import { DDragonUtils } from '../../shared/utils/DDragonUtils'
+
 import { useTranslation } from '../contexts/TranslationContext'
 import { Tooltip } from './tooltip/Tooltip'
 
-const base = 'https://ddragon.leagueoflegends.com/cdn/img/'
+const base = DDragonUtils.ddragon('/cdn/img/')
 
 type Props = {
   icon: string

@@ -60,6 +60,7 @@ const leagueTier: Dict<LeagueTier, string> = {
   SILVER: 'Silver',
   GOLD: 'Gold',
   PLATINUM: 'Platinum',
+  EMERALD: 'Emerald',
   DIAMOND: 'Diamond',
   MASTER: 'Master',
   GRANDMASTER: 'Grand Master',

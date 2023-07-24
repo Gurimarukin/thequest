@@ -1,5 +1,6 @@
 import { string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
+import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 
 import { LeagueMiniSeriesProgress } from '../../../shared/models/api/league/LeagueMiniSeriesProgress'
@@ -9,13 +10,7 @@ import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { LeagueId } from './LeagueId'
 
-type RiotLeagueEntry = D.TypeOf<typeof decoder>
-
-const decoder = D.struct({
-  leagueId: LeagueId.codec,
-  queueType: D.string,
-  tier: LeagueTier.codec,
-  rank: LeagueRank.codec,
+const commonDecoder = D.struct({
   // summonerId: SummonerId.codec,
   // summonerName: D.string,
   leaguePoints: D.number,
@@ -25,19 +20,78 @@ const decoder = D.struct({
   inactive: D.boolean,
   freshBlood: D.boolean,
   hotStreak: D.boolean,
-  miniSeries: Maybe.decoder(
+})
+
+const CHERRY = 'CHERRY'
+
+type RiotLeagueEntryCherry = D.TypeOf<typeof cherryDecoder>
+
+const cherryDecoder = pipe(
+  commonDecoder,
+  D.intersect(
     D.struct({
-      // "target": D.number, // 2 3
-      // "wins": D.number,
-      // "losses": D.number,
-      progress: pipe(
-        D.string,
-        D.map(string.split('')),
-        D.compose(NonEmptyArray.decoder(LeagueMiniSeriesProgress.decoder)),
-      ), // "LNN"
+      queueType: D.literal(CHERRY),
     }),
   ),
-})
+)
+
+type RiotLeagueEntryRanked = D.TypeOf<typeof rankedDecoder>
+
+const rankedDecoder = pipe(
+  commonDecoder,
+  D.intersect(
+    D.struct({
+      leagueId: LeagueId.codec,
+      queueType: D.string,
+      tier: LeagueTier.codec,
+      rank: LeagueRank.codec,
+      miniSeries: Maybe.decoder(
+        D.struct({
+          // "target": D.number, // 2 3
+          // "wins": D.number,
+          // "losses": D.number,
+          progress: pipe(
+            D.string,
+            D.map(string.split('')),
+            D.compose(NonEmptyArray.decoder(LeagueMiniSeriesProgress.decoder)),
+          ), // "LNN"
+        }),
+      ),
+    }),
+  ),
+)
+
+type RiotLeagueEntry =
+  | ({ type: 'cherry' } & Omit<RiotLeagueEntryCherry, 'queueType'>)
+  | ({ type: 'ranked' } & Omit<RiotLeagueEntryRanked, 'miniSeries'> & {
+        miniSeriesProgress: Maybe<NonEmptyArray<LeagueMiniSeriesProgress>>
+      })
+
+const decoder: Decoder<unknown, RiotLeagueEntry> = pipe(
+  D.union(cherryDecoder, rankedDecoder),
+  D.map((e): RiotLeagueEntry => {
+    if (isCherry(e)) {
+      const {
+        queueType: {},
+        ...attrs
+      } = e
+      return { type: 'cherry', ...attrs }
+    }
+
+    const { miniSeries, ...attrs } = e
+    return {
+      type: 'ranked',
+      ...attrs,
+      miniSeriesProgress: pipe(
+        miniSeries,
+        Maybe.map(s => s.progress),
+      ),
+    }
+  }),
+)
+
+const isCherry = (e: RiotLeagueEntryCherry | RiotLeagueEntryRanked): e is RiotLeagueEntryCherry =>
+  e.queueType === CHERRY
 
 const RiotLeagueEntry = { decoder }
 
