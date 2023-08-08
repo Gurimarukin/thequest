@@ -49,12 +49,15 @@ export const Challenge: React.FC<Props> = ({
     maybeValue,
     Maybe.getOrElse(() => 0),
   )
+  const values = DictUtils.partial.values(thresholds)
   const total = pipe(
-    thresholds,
-    DictUtils.partial.values,
+    values,
     List.filter(n => value < n),
     NonEmptyArray.fromReadonlyArray,
     Maybe.map(NonEmptyArray.min(number.Ord)),
+    Maybe.alt(() =>
+      pipe(values, NonEmptyArray.fromReadonlyArray, Maybe.map(NonEmptyArray.max(number.Ord))),
+    ),
     Maybe.getOrElse(() => 0),
   )
 

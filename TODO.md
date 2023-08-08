@@ -1,5 +1,7 @@
+- hover yuumi for aram and factions
 - display CHERRY league entry
 - sort factions (and champions and ?) by translated name
+- sort factions by completion
 - SVG position icons: https://raw.communitydragon.org/pbe/plugins/rcp-fe-lol-static-assets/global/default/svg/
 
 - align tenacity and ability haste with other stats (hover)
