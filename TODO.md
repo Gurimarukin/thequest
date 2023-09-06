@@ -1,4 +1,6 @@
 - hover yuumi for aram and factions
+- change font (sans serif, defined monospace font, emojis)
+- forget about Discord Riot Connection, create BO and link by hand
 - display CHERRY league entry
 - sort factions (and champions and ?) by translated name
 - sort factions by completion

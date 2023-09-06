@@ -454,7 +454,7 @@ const frFRTranslation: Translation = {
   },
   summoner: {
     level: level => `niveau ${level.toLocaleString(locale)}`,
-    masteryScore: level => `Mastery score: ${level.toLocaleString(locale)}`,
+    masteryScore: level => `Score de mâitrise : ${level.toLocaleString(locale)}`,
     masteriesExplanation: (
       <>
         <li>
