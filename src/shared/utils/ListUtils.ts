@@ -1,6 +1,7 @@
 import type { nonEmptyArray } from 'fp-ts'
-import { readonlyMap } from 'fp-ts'
+import { number, ord, readonlyMap } from 'fp-ts'
 import type { Eq } from 'fp-ts/Eq'
+import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 
@@ -111,6 +112,24 @@ const padEnd =
       ? as
       : pipe(as, List.concatW(List.makeBy(maxLength - as.length, () => fillWith)))
 
+const listLengthOrd: Ord<List<unknown>> = pipe(number.Ord, ord.contramap(List.size))
+const commonElems =
+  <A>(eq: Eq<A>) =>
+  (as: List<List<A>>): List<A> => {
+    if (!List.isNonEmpty(as)) return []
+    if (as.length === 1) return NonEmptyArray.head(as)
+
+    const [shortest, remain] = pipe(as, NonEmptyArray.sort(listLengthOrd), NonEmptyArray.unprepend)
+    console.log('shortest =', shortest)
+    if (!List.isNonEmpty(shortest)) return []
+
+    return pipe(
+      shortest,
+      List.filter(a => pipe(remain, List.every(List.elem(eq)(a)))),
+      List.uniq(eq),
+    )
+  }
+
 export const ListUtils = {
   findFirstBy,
   findFirstWithIndex,
@@ -120,6 +139,7 @@ export const ListUtils = {
   multipleGroupBy,
   updateOrAppend,
   padEnd,
+  commonElems,
 }
 
 const has = Object.prototype.hasOwnProperty

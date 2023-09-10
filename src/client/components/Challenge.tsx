@@ -1,6 +1,6 @@
 import { number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import { useRef } from 'react'
+import { forwardRef, useRef } from 'react'
 
 import type { ChallengeId } from '../../shared/models/api/ChallengeId'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
@@ -19,12 +19,40 @@ const imgSrc = (id: ChallengeId, tier: LeagueTier): string =>
 type Props = {
   id: ChallengeId
   tier: Maybe<LeagueTier>
+  className?: string
+}
+
+export const Challenge = forwardRef<HTMLImageElement, Props>(({ id, tier, className }, ref) => {
+  const { t } = useTranslation('common')
+
+  const src = imgSrc(
+    id,
+    pipe(
+      tier,
+      Maybe.getOrElse<LeagueTier>(() => 'BRONZE'),
+    ),
+  )
+  const alt = t.challenge.iconAlt(id)
+
+  return (
+    <img
+      ref={ref}
+      src={src}
+      alt={alt}
+      className={cx(['grayscale', Maybe.isNone(tier)], className)}
+    />
+  )
+})
+
+type ChallengeWithProgressionProps = {
+  id: ChallengeId
+  tier: Maybe<LeagueTier>
   value: Maybe<number>
   thresholds: PartialDict<LeagueTier, number>
   iconClassName?: string
 }
 
-export const Challenge: React.FC<Props> = ({
+export const ChallengeWithProgression: React.FC<ChallengeWithProgressionProps> = ({
   id,
   tier,
   value: maybeValue,
