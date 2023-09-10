@@ -1,4 +1,5 @@
 import { pipe } from 'fp-ts/function'
+import { useRef } from 'react'
 
 import { Maybe } from '../../../shared/utils/fp'
 
@@ -6,11 +7,14 @@ import { useHistory } from '../../contexts/HistoryContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { Assets } from '../../imgs/Assets'
+import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { Link } from '../Link'
 import { Loading } from '../Loading'
+import { MaskedImage } from '../MaskedImage'
+import { Tooltip } from '../tooltip/Tooltip'
 import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
@@ -22,18 +26,37 @@ export const MainLayout: ChildrenFC = ({ children }) => {
   const { user } = useUser()
   const { t } = useTranslation('common')
 
+  const homeRef = useRef<HTMLAnchorElement>(null)
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
         <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between">
           <div className="flex shrink-0 items-center gap-6">
-            <Link to={appRoutes.index} className="py-2">
+            <Link ref={homeRef} to={appRoutes.index} className="py-2">
               <img
                 src={Assets.yuumi}
                 alt={t.layout.yuumiIconAlt}
                 className="h-12 w-12 rounded-sm bg-black"
               />
             </Link>
+            <Tooltip hoverRef={homeRef}>{t.layout.home}</Tooltip>
+
+            <HighlightLink
+              to={appRoutes.aram({})}
+              parser={appParsers.aram}
+              tooltip={t.layout.aramSpecificBalanceChanges}
+            >
+              <HowlingAbyssSimple className="w-5" />
+            </HighlightLink>
+
+            <HighlightLink
+              to={appRoutes.factions({})}
+              parser={appParsers.factions}
+              tooltip={t.layout.globetrotterChallenges}
+            >
+              <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
+            </HighlightLink>
 
             <SearchSummoner />
 

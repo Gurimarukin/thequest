@@ -280,6 +280,8 @@ const frFRTranslation: Translation = {
       championMasteries: 'Maîtrises de champions',
       game: 'Partie',
       home: 'Accueil',
+      aramSpecificBalanceChanges: 'Équilibrages spécifiques ARAM',
+      globetrotterChallenges: 'Défis “Globe-trotteur”',
       login: 'Connexion',
       logout: 'Déconnexion',
       profile: 'Profil',
@@ -335,12 +337,8 @@ const frFRTranslation: Translation = {
     userName: 'Utilisateur :',
   },
   home: {
-    aram: 'ARAM',
-    factions: 'Factions',
-    globetrotterChallenges: 'Défis “Globe-trotteur”',
     isntEndorsed:
       'La Quête isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.',
-    specificBalanceChanges: 'Équilibrages spécifiques',
     theQuest: 'La Quête.',
   },
   masteries: {
