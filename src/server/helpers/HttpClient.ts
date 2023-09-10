@@ -72,7 +72,7 @@ const HttpClient = (Logger: LoggerGetter) => {
             e => (e instanceof HTTPError ? Maybe.some(e.response.statusCode) : Maybe.none),
             res => Maybe.some(res.statusCode),
           ),
-          Maybe.fold(() => IO.notUsed, flow(formatRequest(method, url), logger.trace)),
+          Maybe.fold(() => IO.notUsed, flow(formatRequest(method, url), logger.debug)),
         ),
       ),
       Future.map(res => res.body as string),

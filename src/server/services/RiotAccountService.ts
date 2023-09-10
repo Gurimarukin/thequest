@@ -45,9 +45,9 @@ const RiotAccountService = (
       Future.chain(insertedAfter =>
         riotAccountPersistence.findByGameNameAndTagLine(gameName, tagLine, insertedAfter),
       ),
-      futureMaybe.map(a => ({
-        platform: a.platform,
-        puuid: a.puuid,
+      futureMaybe.map(({ platform, puuid }) => ({
+        platform,
+        puuid,
         summonerCacheWasRefreshed: false,
       })),
       futureMaybe.alt<PlatformWithPuuid>(() =>

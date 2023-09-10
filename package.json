@@ -6,7 +6,7 @@
     "server": {
       "source": "src/server/index.ts",
       "engines": {
-        "node": ">= 16"
+        "node": ">= 18"
       }
     },
     "client": {
@@ -24,7 +24,7 @@
     "createUser": "ts-node -P tsconfig.ts-node.json src/server/createUser.ts",
     "server": "ts-node -P tsconfig.ts-node.json src/server/index.ts",
     "~server": "nodemon -e ts,tsx,js,json -w . -w .env --ignore dist/ --ignore src/client/ -x \"yarn run server\"",
-    "~client": "concurrently -k -n parcel,tsc -c green.bold,cyan.bold \"parcel src/client/index.html --no-autoinstall --dist-dir dist/client\" \"tsc -w --preserveWatchOutput -p tsconfig.client.json\"",
+    "~client": "concurrently -k -n parcel,tsc -c green.bold,cyan.bold \"parcel src/client/index.html --dist-dir dist/client\" \"tsc -w --preserveWatchOutput -p tsconfig.client.json\"",
     "~compile": "tsc -w --preserveWatchOutput -p tsconfig.json",
     "prettier": "prettier --check src test",
     "prettierFix": "prettier --write src test",
@@ -33,9 +33,9 @@
     "jestUnit": "jest --testPathPattern=.*\\.spec\\.ts",
     "jestCoverage": "jest --ci --coverage",
     "style": "yarn run prettier && yarn run lint",
-    "test": "yarn run style && yarn run dc && yarn run jestUnit",
     "dc": "depcruise --config -- src",
-    "dcGraph": "depcruise -x '(node_modules|fs|util|fp\\.ts)' -T dot src | dot -T svg -Gsplines=ortho | depcruise-wrap-stream-in-html > dependencygraph.html"
+    "dcGraph": "depcruise -x '(node_modules|fs|util|fp\\.ts)' -T dot src | dot -T svg -Gsplines=ortho | depcruise-wrap-stream-in-html > dependencygraph.html",
+    "test": "yarn run style && yarn run dc && yarn run jestUnit"
   },
   "repository": {
     "type": "git",
@@ -67,7 +67,7 @@
     "ky": "0.33.2",
     "lodash.debounce": "4.0.8",
     "lua-in-js": "2.2.0",
-    "mongodb": "5.1.0",
+    "mongodb": "5.8.1",
     "monocle-ts": "2.3.13",
     "newtype-ts": "0.3.5",
     "qs": "6.11.0",

@@ -2,6 +2,7 @@
 /.env
 /.eslintcache
 /.parcel-cache
+/dependencygraph.html
 /dist
 /node_modules
 /tsbuild
