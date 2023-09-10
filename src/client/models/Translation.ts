@@ -86,6 +86,8 @@ export type Translation = {
       championMasteries: React.ReactNode
       game: React.ReactNode
       home: React.ReactNode
+      aramSpecificBalanceChanges: React.ReactNode
+      globetrotterChallenges: React.ReactNode
       login: React.ReactNode
       logout: React.ReactNode
       profile: React.ReactNode
@@ -133,11 +135,7 @@ export type Translation = {
     userName: React.ReactNode
   }
   home: {
-    aram: React.ReactNode
-    factions: React.ReactNode
-    globetrotterChallenges: React.ReactNode
     isntEndorsed: React.ReactNode
-    specificBalanceChanges: React.ReactNode
     theQuest: React.ReactNode
   }
   masteries: {

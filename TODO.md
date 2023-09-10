@@ -1,7 +1,6 @@
 - detect TIMATEM
 - challenges page
 - total champion mastery points + OTP ratio
-- hover yuumi for aram and factions
 - change font (sans serif, defined monospace font, emojis)
 - forget about Discord Riot Connection, create BO and link by hand
 - ignore CHERRY league entry
