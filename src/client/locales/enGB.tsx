@@ -444,6 +444,13 @@ const enGBTranslation: Translation = {
     withoutAccount: 'Without account',
   },
   summoner: {
+    masteriesCache: {
+      lastUpdate: insertedAt => `Masteries last update at ${insertedAt.toLocaleTimeString(locale)}`,
+      duration: minutes =>
+        `(cache duration: ${minutes.toLocaleString(locale, {
+          maximumFractionDigits: 2,
+        })} ${pluralUnit('minute')(minutes)})`,
+    },
     level: level => `level ${level.toLocaleString(locale)}`,
     masteryScore: level => `Mastery score: ${level.toLocaleString(locale)}`,
     masteriesExplanation: (

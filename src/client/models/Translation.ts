@@ -199,6 +199,10 @@ export type Translation = {
     withoutAccount: React.ReactNode
   }
   summoner: {
+    masteriesCache: {
+      lastUpdate: (insertedAt: Date) => React.ReactNode
+      duration: (minutes: number) => React.ReactNode
+    }
     level: (level: number) => React.ReactNode
     masteriesExplanation: React.ReactNode
     masteryScore: (level: number) => React.ReactNode
