@@ -31,8 +31,8 @@ export const MainLayout: ChildrenFC = ({ children }) => {
   return (
     <div className="flex h-full flex-col">
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
-        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between">
-          <div className="flex shrink-0 items-center gap-6">
+        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <Link ref={homeRef} to={appRoutes.index} className="py-2">
               <img
                 src={Assets.yuumi}
@@ -57,10 +57,12 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             >
               <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
             </HighlightLink>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-4">
             <SearchSummoner />
 
-            <div className="flex items-center gap-4 py-2 text-sm">
+            <div className="flex flex-wrap items-center gap-4 py-2 text-sm">
               {pipe(
                 matchLocation(appParsers.anyPlatformSummonerName),
                 Maybe.fold(
@@ -88,7 +90,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 self-stretch">
+          <div className="flex flex-wrap items-center gap-4 self-stretch">
             {pipe(
               user,
               AsyncState.fold(
