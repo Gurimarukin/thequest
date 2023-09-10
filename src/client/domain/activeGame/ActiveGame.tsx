@@ -2,7 +2,7 @@
                   functional/no-return-void */
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
@@ -37,6 +37,7 @@ import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
+import { RefreshOutline } from '../../imgs/svgIcons'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { ActiveGameBans } from './ActiveGameBans'
@@ -99,20 +100,32 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
     }
   }, [data, maybeUser, mutate, previousUser])
 
+  const refreshGame = useCallback(() => {
+    mutate(undefined, { revalidate: true })
+  }, [mutate])
+
+  const reloadGame = useCallback(() => {
+    mutate()
+  }, [mutate])
+
   return (
     <MainLayout>
       <AsyncRenderer data={data} error={error}>
         {Maybe.fold(
           () => (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-4">
               <pre className="mt-4">{t.notInGame}</pre>
+              <button type="button" onClick={refreshGame}>
+                <RefreshOutline className="w-6" />
+              </button>
             </div>
           ),
           summonerGame => (
             <WithoutAdditional
               platform={platform}
               summonerGame={summonerGame}
-              reloadGame={mutate}
+              refreshGame={refreshGame}
+              reloadGame={reloadGame}
             />
           ),
         )}
@@ -169,7 +182,10 @@ type ActiveGameComponentProps = {
   additionalStaticData: AdditionalStaticData
   platform: Platform
   summonerGame: SummonerActiveGameView
+  // soft reload: just call swr mutate, but keep already loaded data
   reloadGame: () => void
+  // hard refresh: call swr mutate with undefined, provoking visual refresh
+  refreshGame: () => void
 }
 
 const gridHalfCols = gridTotalCols / 2
@@ -181,6 +197,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     summoner,
     game: { gameStartTime, mapId, gameQueueConfigId, isDraft, participants },
   },
+  refreshGame,
   reloadGame,
 }) => {
   const { t } = useTranslation('common')
@@ -217,6 +234,9 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   return (
     <div className="grid min-h-full grid-rows-[1fr_auto_auto_auto_1fr] gap-4 py-3">
       <div className="flex items-center justify-center gap-4 px-3">
+        <button type="button" onClick={refreshGame}>
+          <RefreshOutline className="w-6" />
+        </button>
         <h2 className="text-lg text-goldenrod">{t.labels.gameQueue[gameQueueConfigId]}</h2>
         {pipe(
           gameStartTime,

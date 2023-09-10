@@ -8,7 +8,6 @@
 - SVG position icons: https://raw.communitydragon.org/pbe/plugins/rcp-fe-lol-static-assets/global/default/svg/
 
 - align tenacity and ability haste with other stats (hover)
-- refresh game
 - react-select
 - uri: ugly encode
 - Menu react-popper?
