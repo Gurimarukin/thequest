@@ -18,7 +18,7 @@ type Props = {
 }
 
 export const ActiveGameBans: React.FC<Props> = ({ participants }) => (
-  <div className="flex flex-wrap justify-between gap-6 px-3">
+  <div className="grid grid-cols-[1fr_1fr] gap-6 px-3">
     {TeamId.values.map((teamId, i) => {
       const teamBans = participants[teamId]
       const reverse = i % 2 === 1
