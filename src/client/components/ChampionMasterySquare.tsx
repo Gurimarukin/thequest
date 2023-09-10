@@ -113,7 +113,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           championKey={championId}
           championName={name}
           className={cx(
-            'relative h-[54px] w-[54px] rounded-bl-lg bg-black',
+            'relative h-[54px] w-[54px] rounded-bl-lg bg-black text-2xs text-transparent',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
         />
