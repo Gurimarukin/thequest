@@ -37,7 +37,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               <img
                 src={Assets.yuumi}
                 alt={t.layout.yuumiIconAlt}
-                className="h-12 w-12 rounded-sm bg-black"
+                className="h-12 w-12 rounded-sm bg-black text-2xs text-transparent"
               />
             </Link>
             <Tooltip hoverRef={homeRef}>{t.layout.home}</Tooltip>
