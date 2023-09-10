@@ -1,6 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
 
+import { DayJs } from '../../../../../src/shared/models/DayJs'
+import { MsDuration } from '../../../../../src/shared/models/MsDuration'
 import type { ChampionKey } from '../../../../../src/shared/models/api/champion/ChampionKey'
 import { ChampionShardsView } from '../../../../../src/shared/models/api/summoner/ChampionShardsView'
 import type { Puuid } from '../../../../../src/shared/models/api/summoner/Puuid'
@@ -45,13 +47,13 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
       )({
         summoner,
         leagues: { soloDuo: Maybe.none, flex: Maybe.none },
-        masteries: [],
+        masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
         championShards: Maybe.none,
       }),
     ).toStrictEqual({
       summoner,
       leagues: { soloDuo: Maybe.none, flex: Maybe.none },
-      masteries: [],
+      masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
       championShards: Maybe.none,
     })
 
@@ -62,13 +64,13 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
       )({
         summoner,
         leagues: { soloDuo: Maybe.none, flex: Maybe.none },
-        masteries: [],
+        masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
         championShards: Maybe.some([shardsOne]),
       }),
     ).toStrictEqual({
       summoner,
       leagues: { soloDuo: Maybe.none, flex: Maybe.none },
-      masteries: [],
+      masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
       championShards: Maybe.some([shardsOne, shardsTwo]),
     })
 
@@ -79,13 +81,13 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
       )({
         summoner,
         leagues: { soloDuo: Maybe.none, flex: Maybe.none },
-        masteries: [],
+        masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
         championShards: Maybe.some([shardsOne, shardsTwo]),
       }),
     ).toStrictEqual({
       summoner,
       leagues: { soloDuo: Maybe.none, flex: Maybe.none },
-      masteries: [],
+      masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
       championShards: Maybe.some([shardsOneBis, shardsTwo]),
     })
   })
