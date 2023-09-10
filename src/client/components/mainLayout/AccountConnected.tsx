@@ -12,9 +12,9 @@ import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
 import { useHistory } from '../../contexts/HistoryContext'
+import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { PersonFilled } from '../../imgs/svgIcons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -31,6 +31,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   const { matchLocation, masteriesQuery } = useHistory()
   const { refreshUser } = useUser()
   const { t } = useTranslation('common')
+  const staticData = useStaticData()
 
   const matchSummoner = matchLocation(appParsers.platformSummonerName)
 
@@ -61,7 +62,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
           user.linkedRiotAccount,
           Maybe.fold(
             () => null,
-            ({ platform, puuid, name }) => (
+            ({ platform, puuid, name, profileIconId }) => (
               <HighlightLink
                 to={(Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
                   ? appRoutes.sPlatformPuuidGame
@@ -74,8 +75,13 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                 )}
                 parser={anyPlatformSummonerNameExact(platform, name)}
                 tooltip={`${name} — ${platform}`}
+                className="!py-1.5"
               >
-                <PersonFilled className="h-5" />
+                <img
+                  src={staticData.assets.summonerIcon(profileIconId)}
+                  alt={t.summonerIconAlt(name)}
+                  className="w-[30px] shadow-even shadow-black"
+                />
               </HighlightLink>
             ),
           ),
