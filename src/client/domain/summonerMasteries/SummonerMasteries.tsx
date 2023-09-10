@@ -172,7 +172,7 @@ type SummonerViewProps = {
   platform: Platform
   summoner: SummonerView
   leagues: SummonerLeaguesView
-  masteries: List<ChampionMasteryView>
+  masteries: SummonerMasteriesView['masteries']
   championShards: Maybe<List<ChampionShardsView>>
   setChampionsShardsBulk: (
     updates: NonEmptyArray<ChampionShardsPayload>,
@@ -222,7 +222,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   }, [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name])
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
-    () => enrichAll(masteries, championShards, masteriesQuery.search, champions),
+    () => enrichAll(masteries.champions, championShards, masteriesQuery.search, champions),
     [championShards, masteries, masteriesQuery.search, champions],
   )
 
@@ -275,7 +275,11 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
           ['hidden', uiIsBlocked],
         )}
       >
-        <Summoner summoner={{ ...summoner, ...enrichedSummoner }} leagues={leagues} />
+        <Summoner
+          summoner={{ ...summoner, ...enrichedSummoner }}
+          leagues={leagues}
+          masteries={masteries}
+        />
         <Masteries
           challenges={challenges}
           masteries={enrichedMasteries}

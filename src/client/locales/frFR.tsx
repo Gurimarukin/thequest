@@ -451,6 +451,14 @@ const frFRTranslation: Translation = {
     withoutAccount: 'Sans compte',
   },
   summoner: {
+    masteriesCache: {
+      lastUpdate: insertedAt =>
+        `Dernière mise à jour des maîtrises à ${insertedAt.toLocaleTimeString(locale)}`,
+      duration: minutes =>
+        `(durée du cache : ${minutes.toLocaleString(locale, {
+          maximumFractionDigits: 2,
+        })} ${pluralUnit('minute')(minutes)})`,
+    },
     level: level => `niveau ${level.toLocaleString(locale)}`,
     masteryScore: level => `Score de maîtrise : ${level.toLocaleString(locale)}`,
     masteriesExplanation: (

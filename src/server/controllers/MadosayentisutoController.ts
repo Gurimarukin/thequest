@@ -84,10 +84,10 @@ const MadosayentisutoController = (
         }),
         staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),
       }),
-      futureMaybe.map(({ masteries, staticData }): TheQuestProgression => {
+      futureMaybe.map(({ masteries: { champions }, staticData }): TheQuestProgression => {
         const filteredByLevel = (level: ChampionLevel): List<ChampionKey> =>
           pipe(
-            masteries,
+            champions,
             List.filterMap(m =>
               ChampionLevel.Eq.equals(m.championLevel, level)
                 ? Maybe.some(m.championId)
@@ -107,7 +107,7 @@ const MadosayentisutoController = (
             DictUtils.entries,
             List.map(([, { key }]) =>
               pipe(
-                masteries,
+                champions,
                 List.findFirst(m => ChampionKey.Eq.equals(m.championId, key)),
                 Maybe.fold(() => 0, Business.championPercents),
               ),
@@ -115,7 +115,7 @@ const MadosayentisutoController = (
             NumberUtils.average,
           ),
           totalMasteryLevel: pipe(
-            masteries,
+            champions,
             List.map(m => m.championLevel),
             monoid.concatAll(number.MonoidSum),
           ),

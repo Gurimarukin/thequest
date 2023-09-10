@@ -375,7 +375,7 @@ function UserController(
   ): Future<Maybe<NonEmptyArray<ChampionShardsLevel>>> {
     return pipe(
       masteriesService.findBySummoner(platform, summonerId),
-      futureMaybe.map(masteries =>
+      futureMaybe.map(({ champions }) =>
         pipe(
           validatedChampionShards,
           NonEmptyArray.map(({ championId, shardsCount }) => ({
@@ -383,7 +383,7 @@ function UserController(
             shardsCount,
             championLevel: pipe(
               pipe(
-                masteries,
+                champions,
                 ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
               )(championId),
               Maybe.map(m => m.championLevel),

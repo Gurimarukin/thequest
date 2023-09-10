@@ -2,12 +2,12 @@ import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
-import type { List, Maybe } from '../../shared/utils/fp'
+import type { Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
-import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
+import type { ChampionMasteries } from '../models/championMastery/ChampionMasteries'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
 import type { RiotApiService } from './RiotApiService'
@@ -36,7 +36,7 @@ const MasteriesService = (
     platform: Platform,
     summonerId: SummonerId,
     { forceCacheRefresh = false, overrideInsertedAfter }: FindOptions = {},
-  ): Future<Maybe<List<ChampionMastery>>> =>
+  ): Future<Maybe<ChampionMasteries>> =>
     pipe(
       forceCacheRefresh
         ? futureMaybe.none
@@ -50,22 +50,21 @@ const MasteriesService = (
             Future.chain(insertedAfter =>
               championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
             ),
-            futureMaybe.map(m => m.champions),
           ),
-      futureMaybe.alt<List<ChampionMastery>>(() =>
+      futureMaybe.alt<Omit<ChampionMasteries, 'cacheDuration'>>(() =>
         pipe(
           riotApiService.riotgames
             .platform(platform)
             .lol.championMasteryV4.championMasteries.bySummoner(summonerId),
-          futureMaybe.chainFirstTaskEitherK(champions =>
-            pipe(
-              Future.fromIO(DayJs.now),
-              Future.chain(insertedAt =>
-                championMasteryPersistence.upsert({ summonerId, champions, insertedAt }),
-              ),
-            ),
+          futureMaybe.bindTo('champions'),
+          futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
+          futureMaybe.chainFirstTaskEitherK(({ champions, insertedAt }) =>
+            championMasteryPersistence.upsert({ summonerId, champions, insertedAt }),
           ),
         ),
+      ),
+      futureMaybe.map(
+        (s): ChampionMasteries => ({ ...s, cacheDuration: riotApiCacheTtl.masteries }),
       ),
     ),
 })

@@ -1,5 +1,8 @@
+import { pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
+import { DayJs } from '../../../shared/models/DayJs'
+import { MsDuration } from '../../../shared/models/MsDuration'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
@@ -20,6 +23,10 @@ const { round } = NumberUtils
 type Props = {
   summoner: EnrichedSummonerView
   leagues: SummonerLeaguesView
+  masteries: {
+    insertedAt: DayJs
+    cacheDuration: MsDuration
+  }
 }
 
 export type EnrichedSummonerView = SummonerView & {
@@ -38,10 +45,12 @@ export const Summoner: React.FC<Props> = ({
     masteriesCount,
   },
   leagues,
+  masteries,
 }) => {
   const { t } = useTranslation()
   const staticData = useStaticData()
 
+  const nameRef = useRef<HTMLSpanElement>(null)
   const levelRef = useRef<HTMLSpanElement>(null)
   const masteriesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLSpanElement>(null)
@@ -61,7 +70,15 @@ export const Summoner: React.FC<Props> = ({
         />
         <div className="grid grid-rows-[1fr_auto] items-center gap-4">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="text-lg text-goldenrod">{name}</span>
+            <span ref={nameRef} className="text-lg text-goldenrod">
+              {name}
+            </span>
+            <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
+              <span>
+                {t.summoner.masteriesCache.lastUpdate(DayJs.unwrap(masteries.insertedAt).toDate())}
+              </span>
+              <span>{t.summoner.masteriesCache.duration(prettyMs(masteries.cacheDuration))}</span>
+            </Tooltip>
             <span className="text-sm text-grey-400">—</span>
             <span ref={levelRef} className="text-sm">
               {t.summoner.level(summonerLevel)}
@@ -133,3 +150,13 @@ const getMasteryImgWithCount =
         <MasteryImg level={level} className={cx('w-full', imgClassName)} />
       </div>
     )
+
+const prettyMs = (ms: MsDuration): number => {
+  const date = DayJs.of(MsDuration.unwrap(ms))
+  const zero = DayJs.of(0)
+
+  const m = pipe(date, DayJs.diff(zero, 'minutes'))
+  const s = DayJs.second.get(date) / 60
+
+  return m + s
+}

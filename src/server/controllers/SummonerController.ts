@@ -146,7 +146,9 @@ const SummonerController = (
         futureEither.bind('championShards', ({ summoner, masteries }) =>
           pipe(
             futureMaybe.fromOption(maybeUser),
-            futureMaybe.chainTaskEitherK(user => findChampionShards(user, summoner, masteries)),
+            futureMaybe.chainTaskEitherK(user =>
+              findChampionShards(user, summoner, masteries.champions),
+            ),
             Future.map(Either.right),
           ),
         ),
@@ -276,20 +278,20 @@ const SummonerController = (
               masteries: pipe(
                 maybeMasteries,
                 Maybe.map(
-                  (masteries): ActiveGameMasteriesView => ({
+                  ({ champions }): ActiveGameMasteriesView => ({
                     totalPercents: pipe(
-                      masteries,
+                      champions,
                       List.map(Business.championPercents),
                       NumberUtils.average,
                     ),
                     totalScore: pipe(
-                      masteries,
+                      champions,
                       List.map(m => m.championLevel),
                       monoid.concatAll(number.MonoidSum),
                     ),
                     champion: pipe(
                       pipe(
-                        masteries,
+                        champions,
                         ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
                       )(participant.championId),
                       Maybe.map(
