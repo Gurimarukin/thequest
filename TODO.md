@@ -9,7 +9,6 @@
 
 - align tenacity and ability haste with other stats (hover)
 - fix champion image load (progression svg visible)
-- highlight selected summoner
 - refresh game
 - react-select
 - uri: ugly encode
@@ -21,7 +20,6 @@
 - game: summoner level?
 - eslint unused argument (even if middle)
 - rework masteries colors
-- linked discord account icon?
 - account menu
 - admin bo
 - debounce setShards and add Loading
