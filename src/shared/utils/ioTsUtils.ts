@@ -312,6 +312,32 @@ export const StrictTuple = { decoder: strictTupleDecoder }
 const refinementFromPredicate = identity as <A>(f: Predicate<A>) => Refinement<A, A>
 
 /**
+ * SetFromArray
+ */
+
+const setFromArrayDecoder =
+  <A>(eq: Eq<A>) =>
+  (decoder: Decoder<unknown, A>): Decoder<unknown, ReadonlySet<A>> =>
+    pipe(List.decoder(decoder), D.map(readonlySet.fromReadonlyArray(eq)))
+
+const setFromArrayEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<List<O>, ReadonlySet<A>> =>
+  pipe(
+    List.encoder(encoder),
+    E.contramap(as => [...as]),
+  )
+
+const setFromArrayCodec =
+  <A>(eq: Eq<A>) =>
+  <O>(codec: Codec<unknown, O, A>): Codec<unknown, List<O>, ReadonlySet<A>> =>
+    C.make(setFromArrayDecoder(eq)(codec), setFromArrayEncoder(codec))
+
+export const SetFromArray = {
+  decoder: setFromArrayDecoder,
+  encoder: setFromArrayEncoder,
+  codec: setFromArrayCodec,
+}
+
+/**
  * MapFromArray
  */
 

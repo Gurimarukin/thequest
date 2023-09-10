@@ -1,5 +1,4 @@
-- detect TIMATEM
-- challenges page
+- challenges page + detect challenges
 - total champion mastery points + OTP ratio
 - change font (sans serif, defined monospace font, emojis)
 - forget about Discord Riot Connection, create BO and link by hand

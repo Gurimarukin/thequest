@@ -9,7 +9,7 @@ import { Maybe } from '../../shared/utils/fp'
 import { useTranslation } from '../contexts/TranslationContext'
 import type { CountWithTotal } from '../models/CountWithTotal'
 import { cx } from '../utils/cx'
-import { Challenge } from './Challenge'
+import { ChallengeWithProgression } from './Challenge'
 import { ChampionFactionImg } from './ChampionFactionImg'
 import { Loading } from './Loading'
 import { Tooltip } from './tooltip/Tooltip'
@@ -53,7 +53,7 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
                   ) : data === undefined ? (
                     <Loading className="h-4" />
                   ) : (
-                    <Challenge
+                    <ChallengeWithProgression
                       id={ChallengesView.id[faction]}
                       tier={pipe(
                         data[faction],
