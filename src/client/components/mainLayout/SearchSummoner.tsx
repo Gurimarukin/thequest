@@ -286,7 +286,7 @@ const renderFavorite = (
     case 'self':
       return (
         <span className="px-3">
-          <PersonFilled className="h-4 text-goldenrod" />
+          <PersonFilled className="h-4" />
         </span>
       )
 
