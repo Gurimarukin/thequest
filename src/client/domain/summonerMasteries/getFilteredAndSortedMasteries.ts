@@ -13,10 +13,12 @@ import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/f
 
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import type { CountWithTotal } from '../../models/CountWithTotal'
+import type { Translation } from '../../models/Translation'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../models/masteriesQuery/MasteriesQuerySort'
 import { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
+import { ChampionFactionUtils } from '../../utils/ChampionFactionUtils'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
 type CategoryOrHidden = ChampionAramCategory | 'hidden'
@@ -39,6 +41,7 @@ const hideInsteadOfGlowViews: ReadonlySet<MasteriesQueryView> = new Set<Masterie
 ])
 
 export const getFilteredAndSortedMasteries = (
+  t: Translation['common'],
   masteries: List<EnrichedChampionMastery>,
   query: MasteriesQuery,
 ): FilteredAndSortedMasteries => {
@@ -79,7 +82,7 @@ export const getFilteredAndSortedMasteries = (
   )
 
   return {
-    filteredAndSortedMasteries: pipe(filteredMasteries, getSort(isHidden, query.view)(ords)),
+    filteredAndSortedMasteries: pipe(filteredMasteries, getSort(t, isHidden, query.view)(ords)),
     championsCount: pipe(
       filteredMasteries,
       List.filter(c => !c.isHidden),
@@ -107,6 +110,7 @@ export const getFilteredAndSortedMasteries = (
 }
 
 const getSort = (
+  t: Translation['common'],
   isHidden: (c: EnrichedChampionMastery) => boolean,
   view: MasteriesQueryView,
 ): ((
@@ -121,7 +125,7 @@ const getSort = (
       return sortAram(isHidden)
 
     case 'factions':
-      return sortFactions(isHidden)
+      return sortFactions(t, isHidden)
   }
 }
 
@@ -143,7 +147,7 @@ const sortAram =
   }
 
 const sortFactions =
-  (isHidden: (c: EnrichedChampionMastery) => boolean) =>
+  (t: Translation['common'], isHidden: (c: EnrichedChampionMastery) => boolean) =>
   (ords: List<Ord<EnrichedChampionMastery>>) =>
   (as: List<EnrichedChampionMastery>): List<EnrichedChampionMastery> => {
     const grouped = pipe(
@@ -168,7 +172,7 @@ const sortFactions =
       ),
     )
     return pipe(
-      ChampionFactionOrNone.values,
+      ChampionFactionOrNone.valuesSortBy([ChampionFactionUtils.Ord.byLabel(t)]),
       List.reduce(List.empty<EnrichedChampionMastery>(), (acc, faction) =>
         pipe(acc, List.concat(pipe(grouped[faction] ?? [], List.sortBy(ords)))),
       ),
