@@ -8,7 +8,7 @@ import type { SummonerLeaguesView } from '../../shared/models/api/summoner/Summo
 import { Maybe } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
-import { CheckMarkSharp, CloseFilled } from '../imgs/svgIcons'
+import { CheckMarkSharp, CloseFilled } from '../imgs/svgs/icons'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 

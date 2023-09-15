@@ -4,7 +4,6 @@
 - ignore CHERRY league entry
 - sort factions (and champions and ?) by translated name
 - sort factions by completion
-- SVG position icons: https://raw.communitydragon.org/pbe/plugins/rcp-fe-lol-static-assets/global/default/svg/
 
 - reload active game when coming from elsewhere
 - align tenacity and ability haste with other stats (hover)

@@ -21,7 +21,7 @@ import {
   StarFilled,
   StarOutline,
   TimeOutline,
-} from '../../imgs/svgIcons'
+} from '../../imgs/svgs/icons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'

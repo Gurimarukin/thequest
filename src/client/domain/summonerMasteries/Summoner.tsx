@@ -14,7 +14,7 @@ import { MasteryImg } from '../../components/MasteryImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { InformationCircleOutline } from '../../imgs/svgIcons'
+import { InformationCircleOutline } from '../../imgs/svgs/icons'
 import type { Translation } from '../../models/Translation'
 import { cx } from '../../utils/cx'
 
