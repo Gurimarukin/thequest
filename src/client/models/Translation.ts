@@ -114,7 +114,6 @@ export type Translation = {
     numberK: (n: number) => React.ReactNode
     numberM: (n: number) => React.ReactNode
     percents: (n: number) => React.ReactNode
-    positionIconAlt: (position: ChampionPosition) => string
     randomChampion: React.ReactNode
     runeIconAlt: (name: string) => string
     searchChamion: string
@@ -142,7 +141,6 @@ export type Translation = {
   masteries: {
     addShard: React.ReactNode
     chestAvailable: React.ReactNode
-    chestIconAlt: string
     chestGranted: React.ReactNode
     filters: {
       all: React.ReactNode

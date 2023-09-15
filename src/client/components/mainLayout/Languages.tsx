@@ -4,7 +4,7 @@ import { Lang } from '../../../shared/models/api/Lang'
 import type { Dict } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
-import { GlobeOutline } from '../../imgs/svgIcons'
+import { GlobeOutline } from '../../imgs/svgs/icons'
 import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 import { ClickOutside } from '../ClickOutside'

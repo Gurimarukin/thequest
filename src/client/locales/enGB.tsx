@@ -315,7 +315,6 @@ const enGBTranslation: Translation = {
     numberK: n => `${n.toLocaleString(locale)}k`,
     numberM: n => `${n.toLocaleString(locale)}M`,
     percents: n => `${n.toLocaleString(locale)}%`,
-    positionIconAlt: p => `${position[p]} position icon`,
     randomChampion: 'Random champion',
     runeIconAlt: name => `${name} run icon`,
     searchChamion: 'Search champion',
@@ -344,7 +343,6 @@ const enGBTranslation: Translation = {
   masteries: {
     addShard: 'Add shard',
     chestAvailable: 'chest available',
-    chestIconAlt: 'Chest icon',
     chestGranted: 'chest granted',
     filters: {
       all: 'all',

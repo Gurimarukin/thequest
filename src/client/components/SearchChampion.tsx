@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Maybe } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
-import { CloseFilled, DiceFilled } from '../imgs/svgIcons'
+import { CloseFilled, DiceFilled } from '../imgs/svgs/icons'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 

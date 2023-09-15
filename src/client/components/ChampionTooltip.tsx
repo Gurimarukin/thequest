@@ -100,7 +100,10 @@ export const ChampionTooltip: React.FC<Props> = ({
                 positions,
                 NonEmptyArray.map(position => (
                   <li key={position} className="flex items-center gap-0.5">
-                    <ChampionPositionImg position={position} className="h-6 w-6 shrink-0 p-0.5" />
+                    <ChampionPositionImg
+                      position={position}
+                      className="h-6 w-6 shrink-0 p-0.5 text-wheat-bis"
+                    />
                     <span>{t.common.labels.position[position]}</span>
                   </li>
                 )),

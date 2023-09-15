@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 import { useTranslation } from '../contexts/TranslationContext'
-import { InformationCircleOutline } from '../imgs/svgIcons'
+import { InformationCircleOutline } from '../imgs/svgs/icons'
 import type { ChampionAramCategory } from '../models/ChampionAramCategory'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'

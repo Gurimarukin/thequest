@@ -1,8 +1,6 @@
-type Props = {
-  className?: string
-}
+import type { SVGIcon } from './SVGIcon'
 
-export const DiscordLogoTitle: React.FC<Props> = ({ className }) => (
+export const DiscordLogoTitle: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 508.67 96.36" className={className}>
     <path
       d="M170.85,20.2h27.3q9.87,0,16.7,3.08a22.5,22.5,0,0,1,10.21,8.58,23.34,23.34,0,0,1,3.4,12.56A23.24,23.24,0,0,1,224.93,57a23.94,23.94,0,0,1-10.79,8.92q-7.24,3.3-17.95,3.29H170.85Zm25.06,36.54q6.65,0,10.22-3.32a11.8,11.8,0,0,0,3.57-9.07,11.5,11.5,0,0,0-3.18-8.5q-3.2-3.18-9.63-3.19h-8.54V56.74Z"

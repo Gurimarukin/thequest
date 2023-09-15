@@ -21,7 +21,7 @@ import { Modal } from '../../components/Modal'
 import { ButtonPrimary, ButtonSecondary } from '../../components/buttons'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { ChevronForwardFilled, CloseFilled, ToggleFilled } from '../../imgs/svgIcons'
+import { ChevronForwardFilled, CloseFilled, ToggleFilled } from '../../imgs/svgs/icons'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 

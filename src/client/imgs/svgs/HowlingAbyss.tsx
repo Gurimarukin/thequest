@@ -1,10 +1,8 @@
+import type { SVGIcon } from './SVGIcon'
+
 const fillOpacity = 0.6
 
-type Props = {
-  className?: string
-}
-
-export const HowlingAbyss: React.FC<Props> = ({ className }) => (
+export const HowlingAbyss: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 91 91" className={className}>
     <g transform="translate(-5,-5)">
       <path
@@ -38,7 +36,7 @@ export const HowlingAbyss: React.FC<Props> = ({ className }) => (
   </svg>
 )
 
-export const HowlingAbyssSimple: React.FC<Props> = ({ className }) => (
+export const HowlingAbyssSimple: SVGIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" className={className}>
     <g transform="translate(-2.5,-2.5)">
       <path

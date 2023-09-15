@@ -24,14 +24,14 @@ import { useHistory } from '../../../contexts/HistoryContext'
 import { useTranslation } from '../../../contexts/TranslationContext'
 import { useUser } from '../../../contexts/UserContext'
 import { Assets } from '../../../imgs/Assets'
+import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
 import {
   AppsSharp,
   CaretDownOutline,
   CaretUpOutline,
   CircleOffOutline,
   StatsChartSharp,
-} from '../../../imgs/svgIcons'
-import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
+} from '../../../imgs/svgs/icons'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
@@ -276,7 +276,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               icon: isChecked => (
                 <ChampionPositionImg
                   position={position}
-                  className={cx('w-6', ['brightness-150 contrast-200 grayscale invert', isChecked])}
+                  className={cx('w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
                 />
               ),
               label: t.common.labels.position[position],

@@ -1,6 +1,5 @@
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
-import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
 
@@ -31,14 +30,6 @@ const masteries: Dict<`${ChampionLevelOrZero}`, string> = {
   7: new URL('./masteries/mastery-7.png', import.meta.url).toString(),
 }
 
-const positions: Dict<ChampionPosition, string> = {
-  top: new URL('./positions/top.png', import.meta.url).toString(),
-  jun: new URL('./positions/jun.png', import.meta.url).toString(),
-  mid: new URL('./positions/mid.png', import.meta.url).toString(),
-  bot: new URL('./positions/bot.png', import.meta.url).toString(),
-  sup: new URL('./positions/sup.png', import.meta.url).toString(),
-}
-
 const stats: Dict<WikiaStatsBalanceKey, string> = {
   dmg_dealt: new URL('./stats/attack_damage.webp', import.meta.url).toString(),
   dmg_taken: new URL('./stats/armor_penetration.webp', import.meta.url).toString(),
@@ -58,11 +49,9 @@ const tokens = {
 
 export const Assets = {
   champion: new URL('./champion.webp', import.meta.url).toString(),
-  chest: new URL('./chest.png', import.meta.url).toString(),
   factions,
   globetrotter: new URL('./globetrotter.png', import.meta.url).toString(),
   masteries,
-  positions,
   runeterra: new URL('./runeterra.png', import.meta.url).toString(),
   stats,
   tokens,

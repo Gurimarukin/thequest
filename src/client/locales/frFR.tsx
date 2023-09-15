@@ -316,7 +316,6 @@ const frFRTranslation: Translation = {
     numberK: n => `${n.toLocaleString(locale)}k`,
     numberM: n => `${n.toLocaleString(locale)}M`,
     percents: n => `${n.toLocaleString(locale)} %`,
-    positionIconAlt: p => `Icône position ${position[p]}`,
     randomChampion: 'Champion aléatoire',
     runeIconAlt: name => `Icône rune ${name}`,
     searchChamion: 'Rechercher champion',
@@ -345,7 +344,6 @@ const frFRTranslation: Translation = {
   masteries: {
     addShard: 'Ajouter un fragment',
     chestAvailable: 'coffre disponible',
-    chestIconAlt: 'Icône de coffre',
     chestGranted: 'coffre obtenu',
     filters: {
       all: 'tous',

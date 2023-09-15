@@ -12,7 +12,8 @@ import { List, Maybe } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
 import { Assets } from '../imgs/Assets'
-import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgIcons'
+import { Chest } from '../imgs/svgs/Chest'
+import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgs/icons'
 import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
 import { CroppedChampionSquare } from './CroppedChampionSquare'
@@ -75,8 +76,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   centerShards = false,
   noShadow = false,
 }) => {
-  const { t } = useTranslation('masteries')
-
   const setShardsCount = useMemo(
     () => (setChampionShards !== null ? setChampionShards(championId) : null),
     [championId, setChampionShards],
@@ -133,8 +132,8 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
         {/* chest bottom left */}
         {chestGranted ? (
-          <div className="absolute bottom-0 left-0 flex h-[15px] w-[18px] flex-col-reverse rounded-tr bg-black">
-            <img src={Assets.chest} alt={t.chestIconAlt} className="w-4" />
+          <div className="absolute bottom-0 left-0 flex h-3.5 w-3.5 flex-col-reverse rounded-tr bg-black">
+            <Chest className="w-3 opacity-80" />
           </div>
         ) : null}
 

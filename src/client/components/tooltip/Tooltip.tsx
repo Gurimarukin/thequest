@@ -10,7 +10,7 @@ import { NonEmptyArray } from '../../../shared/utils/fp'
 
 import type { ReactPopperParams } from '../../hooks/useVisiblePopper'
 import { useVisiblePopper } from '../../hooks/useVisiblePopper'
-import { CaretUpSharpCropped } from '../../imgs/svgIcons'
+import { CaretUpSharpCropped } from '../../imgs/svgs/icons'
 import { cx } from '../../utils/cx'
 
 const tooltipLayerId = 'tooltip-layer'
