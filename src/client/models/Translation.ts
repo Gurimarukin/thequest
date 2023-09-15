@@ -72,7 +72,7 @@ export type Translation = {
     labels: {
       challenge: (id: ChallengeId) => React.ReactNode
       challengeShort: (id: ChallengeId) => React.ReactNode
-      faction: Dict<ChampionFaction, React.ReactNode>
+      faction: Dict<ChampionFaction, string>
       factionOrNone: Dict<ChampionFactionOrNone, React.ReactNode>
       gameQueue: Dict<`${GameQueue}`, React.ReactNode>
       leagueTier: Dict<LeagueTier, React.ReactNode>

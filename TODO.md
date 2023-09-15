@@ -1,12 +1,11 @@
 - challenges page + detect challenges
 - change font (sans serif, defined monospace font, emojis)
 - forget about Discord Riot Connection, create BO and link by hand
-- ignore CHERRY league entry
-- sort factions (and champions and ?) by translated name
 - sort factions by completion
 
 - reload active game when coming from elsewhere
 - align tenacity and ability haste with other stats (hover)
+- ignore CHERRY league entry
 - react-select
 - uri: ugly encode
 - Menu react-popper?

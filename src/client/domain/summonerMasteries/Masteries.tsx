@@ -52,8 +52,8 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
     hideInsteadOfGlow,
     isHidden,
   } = useMemo(
-    () => getFilteredAndSortedMasteries(masteries, masteriesQuery),
-    [masteries, masteriesQuery],
+    () => getFilteredAndSortedMasteries(t, masteries, masteriesQuery),
+    [masteries, masteriesQuery, t],
   )
 
   const randomChampion = useMemo(

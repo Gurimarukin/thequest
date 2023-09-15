@@ -223,7 +223,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
     () => enrichAll(masteries.champions, championShards, masteriesQuery.search, champions),
-    [championShards, masteries, masteriesQuery.search, champions],
+    [championShards, champions, masteries.champions, masteriesQuery.search],
   )
 
   const [uiIsBlocked, setUiIsBlocked] = useState(true)

@@ -23,6 +23,7 @@ import { useStaticData } from '../contexts/StaticDataContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { CountWithTotal } from '../models/CountWithTotal'
 import { GenericQuery } from '../models/genericQuery/GenericQuery'
+import { ChampionFactionUtils } from '../utils/ChampionFactionUtils'
 import { cx } from '../utils/cx'
 
 const { cleanChampionName } = StringUtils
@@ -32,10 +33,11 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
   faction: ChampionFactionOrNone
 }
 
-const enrichedStaticDataChampionFactionLens = pipe(
-  lens.id<EnrichedStaticDataChampion>(),
-  lens.prop('faction'),
-)
+const EnrichedStaticDataChampion = {
+  Lens: {
+    faction: pipe(lens.id<EnrichedStaticDataChampion>(), lens.prop('faction')),
+  },
+}
 
 type FactionOrNoneOrHidden = ChampionFactionOrNone | 'hidden'
 
@@ -54,7 +56,7 @@ export const Factions: React.FC = () => {
             genericQuery.search,
             Maybe.every(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
           ),
-          faction: StaticDataChampion.getFaction(c.factions), // unused
+          faction: StaticDataChampion.getFaction(c.factions),
         }),
       ),
       List.sort(StaticDataChampion.Ord.byName),
@@ -71,7 +73,9 @@ export const Factions: React.FC = () => {
         pipe(
           champions_,
           NonEmptyArray.map(c =>
-            faction === 'hidden' ? c : pipe(c, enrichedStaticDataChampionFactionLens.set(faction)),
+            faction === 'hidden'
+              ? c
+              : pipe(c, EnrichedStaticDataChampion.Lens.faction.set(faction)),
           ),
         ),
       ),
@@ -93,7 +97,7 @@ export const Factions: React.FC = () => {
 
     return {
       filteredAndSortedChampions: pipe(
-        ChampionFactionOrNone.values,
+        ChampionFactionOrNone.valuesSortBy([ChampionFactionUtils.Ord.byLabel(t)]),
         List.reduce(List.empty<EnrichedStaticDataChampion>(), (acc, faction) =>
           pipe(acc, List.concat(grouped[faction] ?? [])),
         ),
@@ -106,7 +110,7 @@ export const Factions: React.FC = () => {
         List.size,
       ),
     }
-  }, [champions, genericQuery.search])
+  }, [champions, genericQuery.search, t])
 
   const onSearchChange = useMemo(
     (): ((search_: Maybe<string>) => void) =>

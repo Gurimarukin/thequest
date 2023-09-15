@@ -1,4 +1,8 @@
+import type { Ord } from 'fp-ts/Ord'
+import { pipe } from 'fp-ts/function'
+
 import { createEnum } from '../../../utils/createEnum'
+import { List } from '../../../utils/fp'
 
 type ChampionFaction = typeof e.T
 
@@ -24,6 +28,10 @@ type ChampionFactionOrNone = typeof eOrNone.T
 
 const eOrNone = createEnum(...e.values, 'none')
 
-const ChampionFactionOrNone = eOrNone
+// sortBy, but always with 'none' as last
+const valuesSortBy = (ords: List<Ord<ChampionFaction>>): List<ChampionFactionOrNone> =>
+  pipe(ChampionFaction.values, List.sortBy(ords), List.append<ChampionFactionOrNone>('none'))
+
+const ChampionFactionOrNone = { ...eOrNone, valuesSortBy }
 
 export { ChampionFaction, ChampionFactionOrNone }
