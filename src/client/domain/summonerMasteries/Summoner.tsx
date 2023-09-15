@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
@@ -32,6 +32,7 @@ type Props = {
 export type EnrichedSummonerView = SummonerView & {
   questPercents: number
   totalMasteryLevel: number
+  totalMasteryPoints: number
   masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
 }
 
@@ -42,6 +43,7 @@ export const Summoner: React.FC<Props> = ({
     summonerLevel,
     questPercents,
     totalMasteryLevel,
+    totalMasteryPoints,
     masteriesCount,
   },
   leagues,
@@ -54,6 +56,15 @@ export const Summoner: React.FC<Props> = ({
   const levelRef = useRef<HTMLSpanElement>(null)
   const masteriesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLSpanElement>(null)
+
+  const numberUnit = useCallback(
+    (pts: number) => {
+      if (1000000 <= pts) return t.common.numberM(round(pts / 1000000, 1))
+      if (1000 <= pts) return t.common.numberK(round(pts / 1000, 1))
+      return t.common.number(pts)
+    },
+    [t.common],
+  )
 
   const MasteryImgWithCount = useMemo(
     () => getMasteryImgWithCount(t.common, masteriesCount),
@@ -116,7 +127,13 @@ export const Summoner: React.FC<Props> = ({
               className="relative -left-2.5 w-[54px]"
             />
           </div>
-          <span className="text-sm">{t.summoner.masteryScore(totalMasteryLevel)}</span>
+          <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
+            <span className="justify-self-end">{t.summoner.masteryScore}</span>
+            <span>{t.common.number(totalMasteryLevel)}</span>
+
+            <span className="justify-self-end">{t.summoner.pointsScore}</span>
+            <span>{numberUnit(totalMasteryPoints)}</span>
+          </div>
         </Tooltip>
         <span className="flex items-center gap-2">
           <span className="text-sm">{t.summoner.percentsProgression(round(questPercents, 2))}</span>

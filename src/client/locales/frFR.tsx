@@ -314,6 +314,7 @@ const frFRTranslation: Translation = {
         ? `(${n.toLocaleString(locale)})`
         : n.toLocaleString(locale),
     numberK: n => `${n.toLocaleString(locale)}k`,
+    numberM: n => `${n.toLocaleString(locale)}M`,
     percents: n => `${n.toLocaleString(locale)} %`,
     positionIconAlt: p => `Icône position ${position[p]}`,
     randomChampion: 'Champion aléatoire',
@@ -460,7 +461,8 @@ const frFRTranslation: Translation = {
         })} ${pluralUnit('minute')(minutes)})`,
     },
     level: level => `niveau ${level.toLocaleString(locale)}`,
-    masteryScore: level => `Score de maîtrise : ${level.toLocaleString(locale)}`,
+    masteryScore: 'Score de maîtrise :',
+    pointsScore: 'Points de maîtrise :',
     masteriesExplanation: (
       <>
         <li>

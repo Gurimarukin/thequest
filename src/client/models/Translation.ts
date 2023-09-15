@@ -112,6 +112,7 @@ export type Translation = {
     notFound: React.ReactNode
     number: (n: number, options?: { withParenthesis: boolean }) => React.ReactNode
     numberK: (n: number) => React.ReactNode
+    numberM: (n: number) => React.ReactNode
     percents: (n: number) => React.ReactNode
     positionIconAlt: (position: ChampionPosition) => string
     randomChampion: React.ReactNode
@@ -205,7 +206,8 @@ export type Translation = {
     }
     level: (level: number) => React.ReactNode
     masteriesExplanation: React.ReactNode
-    masteryScore: (level: number) => React.ReactNode
+    masteryScore: React.ReactNode
+    pointsScore: React.ReactNode
     percentsProgression: (percents: number) => React.ReactNode
     summonerLevel: React.ReactNode
   }
