@@ -133,7 +133,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* chest bottom left */}
         {chestGranted ? (
           <div className="absolute bottom-0 left-0 flex h-3.5 w-3.5 flex-col-reverse rounded-tr bg-black">
-            <Chest className="w-3 opacity-80" />
+            <Chest className="w-3 text-goldenrod opacity-80" />
           </div>
         ) : null}
 
