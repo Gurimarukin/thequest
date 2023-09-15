@@ -405,6 +405,11 @@ const enrichAll = (
         List.map(c => c.championLevel),
         monoid.concatAll(number.MonoidSum),
       ),
+      totalMasteryPoints: pipe(
+        enrichedMasteries_,
+        List.map(c => c.championPoints),
+        monoid.concatAll(number.MonoidSum),
+      ),
       masteriesCount: pipe(
         ChampionLevelOrZero.values,
         List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {

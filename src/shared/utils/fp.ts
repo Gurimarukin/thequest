@@ -33,6 +33,11 @@ export const todo = (...[]: List<unknown>): never => {
   throw Error('Missing implementation')
 }
 
+export const assertUnreachable = (n: never): never => {
+  // eslint-disable-next-line functional/no-throw-statements
+  throw Error(`Unexpected value: ${n}`)
+}
+
 export const inspect =
   (...label: List<unknown>) =>
   <A>(a: A): A => {

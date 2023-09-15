@@ -1,5 +1,4 @@
 - challenges page + detect challenges
-- total champion mastery points + OTP ratio
 - change font (sans serif, defined monospace font, emojis)
 - forget about Discord Riot Connection, create BO and link by hand
 - ignore CHERRY league entry
@@ -7,6 +6,7 @@
 - sort factions by completion
 - SVG position icons: https://raw.communitydragon.org/pbe/plugins/rcp-fe-lol-static-assets/global/default/svg/
 
+- reload active game when coming from elsewhere
 - align tenacity and ability haste with other stats (hover)
 - react-select
 - uri: ugly encode
@@ -19,7 +19,6 @@
 - eslint unused argument (even if middle)
 - rework masteries colors
 - account menu
-- admin bo
 - debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
