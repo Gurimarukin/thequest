@@ -3,7 +3,10 @@ import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, identity, pipe } from 'fp-ts/function'
 import { optional } from 'monocle-ts'
+import type { SWRResponse } from 'swr'
 
+import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
+import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
@@ -27,12 +30,14 @@ type FactionOrNoneOrHidden = ChampionFactionOrNone | 'hidden'
 export type FilteredAndSortedMasteries = {
   filteredAndSortedMasteries: List<EnrichedChampionMastery>
   championsCount: number
-  factionsCount: PartialDict<ChampionFactionOrNone, CountWithTotal>
+  factionsCount: FactionsCount
   searchCount: number
   maybeMaxPoints: Maybe<number>
   hideInsteadOfGlow: boolean
   isHidden: (champion: EnrichedChampionMastery) => boolean
 }
+
+export type FactionsCount = PartialDict<ChampionFactionOrNone, CountWithTotal>
 
 const hideInsteadOfGlowViews: ReadonlySet<MasteriesQueryView> = new Set<MasteriesQueryView>([
   'histogram',
@@ -42,6 +47,7 @@ const hideInsteadOfGlowViews: ReadonlySet<MasteriesQueryView> = new Set<Masterie
 
 export const getFilteredAndSortedMasteries = (
   t: Translation['common'],
+  challenges: SWRResponse<ChallengesView, unknown>,
   masteries: List<EnrichedChampionMastery>,
   query: MasteriesQuery,
 ): FilteredAndSortedMasteries => {
@@ -67,28 +73,29 @@ export const getFilteredAndSortedMasteries = (
     ),
   )
 
-  const factionsCount_: PartialDict<ChampionFactionOrNone, CountWithTotal> = pipe(
-    filteredMasteries,
-    ListUtils.multipleGroupBy(
-      (c): NonEmptyArray<ChampionFactionOrNone> =>
-        List.isNonEmpty(c.factions) ? c.factions : ['none'],
-    ),
-    PartialDict.map(
-      (nea): CountWithTotal => ({
-        count: nea.filter(c => !c.isHidden).length,
-        total: nea.length,
-      }),
-    ),
-  )
-
   return {
-    filteredAndSortedMasteries: pipe(filteredMasteries, getSort(t, isHidden, query.view)(ords)),
+    filteredAndSortedMasteries: pipe(
+      filteredMasteries,
+      getSort(t, challenges, isHidden, query.view)(ords),
+    ),
     championsCount: pipe(
       filteredMasteries,
       List.filter(c => !c.isHidden),
       List.size,
     ),
-    factionsCount: factionsCount_,
+    factionsCount: pipe(
+      filteredMasteries,
+      ListUtils.multipleGroupBy(
+        (c): NonEmptyArray<ChampionFactionOrNone> =>
+          List.isNonEmpty(c.factions) ? c.factions : ['none'],
+      ),
+      PartialDict.map(
+        (nea): CountWithTotal => ({
+          count: nea.filter(c => !c.isHidden).length,
+          total: nea.length,
+        }),
+      ),
+    ),
     searchCount: pipe(
       filteredMasteries,
       List.filter(c => c.glow),
@@ -111,6 +118,7 @@ export const getFilteredAndSortedMasteries = (
 
 const getSort = (
   t: Translation['common'],
+  challenges: SWRResponse<ChallengesView, unknown>,
   isHidden: (c: EnrichedChampionMastery) => boolean,
   view: MasteriesQueryView,
 ): ((
@@ -125,7 +133,7 @@ const getSort = (
       return sortAram(isHidden)
 
     case 'factions':
-      return sortFactions(t, isHidden)
+      return sortFactions(t, challenges, isHidden)
   }
 }
 
@@ -147,7 +155,11 @@ const sortAram =
   }
 
 const sortFactions =
-  (t: Translation['common'], isHidden: (c: EnrichedChampionMastery) => boolean) =>
+  (
+    t: Translation['common'],
+    challenges: SWRResponse<ChallengesView, unknown>,
+    isHidden: (c: EnrichedChampionMastery) => boolean,
+  ) =>
   (ords: List<Ord<EnrichedChampionMastery>>) =>
   (as: List<EnrichedChampionMastery>): List<EnrichedChampionMastery> => {
     const grouped = pipe(
@@ -172,13 +184,37 @@ const sortFactions =
       ),
     )
     return pipe(
-      ChampionFactionOrNone.valuesSortBy([ChampionFactionUtils.Ord.byLabel(t)]),
+      ChampionFactionOrNone.valuesSortBy(factionSortBy(t, challenges)),
       List.reduce(List.empty<EnrichedChampionMastery>(), (acc, faction) =>
         pipe(acc, List.concat(pipe(grouped[faction] ?? [], List.sortBy(ords)))),
       ),
       List.concat(grouped.hidden ?? []),
     )
   }
+
+const factionSortBy = (
+  t: Translation['common'],
+  { data: challenges }: SWRResponse<ChallengesView, unknown>,
+): List<Ord<ChampionFaction>> => {
+  const byLabel = ChampionFactionUtils.Ord.byLabel(t)
+
+  if (challenges === undefined) return [byLabel]
+
+  const byChallengeValue = pipe(
+    number.Ord,
+    ord.contramap((f: ChampionFaction) =>
+      pipe(
+        challenges[f],
+        Maybe.fold(
+          () => 0,
+          c => c.value,
+        ),
+      ),
+    ),
+    ord.reverse,
+  )
+  return [byChallengeValue, byLabel]
+}
 
 type HideInsteadOfGlow = {
   hideInsteadOfGlow: boolean

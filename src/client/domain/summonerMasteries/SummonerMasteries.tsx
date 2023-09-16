@@ -1,12 +1,9 @@
 /* eslint-disable functional/no-expression-statements */
 import { monoid, number } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import type { HttpMethod } from 'ky/distribution/types/options'
 import { optional } from 'monocle-ts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import useSWR from 'swr'
 
-import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
@@ -21,15 +18,14 @@ import type { SummonerView } from '../../../shared/models/api/summoner/SummonerV
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { PartialDict, Tuple } from '../../../shared/utils/fp'
+import type { PartialDict } from '../../../shared/utils/fp'
 import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shared/utils/fp'
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
-import { AsyncRenderer } from '../../compo../../components/AsyncRenderer'
+import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { Loading } from '../../components/Loading'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
-import { config } from '../../config/unsafe'
-import { HistoryState, useHistory } from '../../contexts/HistoryContext'
+import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
@@ -40,7 +36,6 @@ import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
-import { http } from '../../utils/http'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
@@ -48,10 +43,11 @@ import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 import { useChallenges } from './useChallenges'
+import { useSummonerMasteries } from './useSummonerMasteries'
 
 const { cleanChampionName } = StringUtils
 
-// should mutate data before API response
+// if we should mutate data before API response
 type OptimisticMutation = {
   optimisticMutation: boolean
 }
@@ -62,33 +58,10 @@ type Props = {
 }
 
 export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
-  const { historyStateRef, modifyHistoryStateRef } = useHistory()
   const { maybeUser } = useUser()
   const { t } = useTranslation()
 
-  const { data, error, mutate } = useSWR<SummonerMasteriesView, unknown, Tuple<string, HttpMethod>>(
-    apiRoutes.summoner.byName(platform, summonerName).masteries.get,
-    urlWithMethod =>
-      pipe(
-        historyStateRef.current.summonerMasteries,
-        Maybe.fold(
-          () => http(urlWithMethod, {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
-          flow(
-            Future.successful,
-            Future.chainFirstIOK(
-              () => () =>
-                modifyHistoryStateRef(HistoryState.Lens.summonerMasteries.set(Maybe.none)),
-            ),
-          ),
-        ),
-        futureRunUnsafe,
-      ),
-    {
-      revalidateIfStale: !config.isDev,
-      revalidateOnFocus: !config.isDev,
-      revalidateOnReconnect: !config.isDev,
-    },
-  )
+  const { data, error, mutate } = useSummonerMasteries(platform, summonerName)
 
   // Remove shards on user disconnect
   const previousUser = usePrevious(maybeUser)
