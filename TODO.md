@@ -11,7 +11,6 @@
 - active game drag and drop
 - challenge progression discord notification
 - discord OAuth2: proper state (redirect url)
-- toaster (replace alert)
 - game: summoner level?
 - eslint unused argument (even if middle)
 - rework masteries colors
