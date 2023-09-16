@@ -11,6 +11,7 @@ import { List } from '../../shared/utils/fp'
 import { CloseFilled } from '../imgs/svgs/icons'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import { ToasterId } from '../models/ToasterId'
+import { cx } from '../utils/cx'
 
 const defaultDuration = MsDuration.seconds(3)
 
@@ -29,7 +30,7 @@ type ToasterContext = {
   showToaster: (type: ToasterType, content: React.ReactNode, options?: ToasterOptions) => ToasterId
 }
 
-type ToasterType = 'success'
+type ToasterType = 'success' | 'error'
 type ToasterOptions = {
   onClick?: (self: ToasterId) => void
   onClose?: (self: ToasterId) => void
@@ -68,7 +69,12 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
     },
     config: (toaster, index, phase) => key =>
       phase === 'enter' && key === 'ttl'
-        ? { duration: MsDuration.unwrap(toaster.duration ?? defaultDuration) }
+        ? {
+            duration: MsDuration.unwrap(
+              toaster.duration ??
+                (toaster.type === 'error' ? MsDuration.infinity : defaultDuration),
+            ),
+          }
         : config,
   })
 
@@ -103,15 +109,23 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
     <ToasterContext.Provider value={value}>
       {children}
       {createPortal(
-        <div className="absolute right-0 top-0 flex w-[384px] max-w-[100vw] flex-col gap-2 pt-2">
+        <div className="absolute right-0 top-0 flex w-[384px] max-w-[100vw] flex-col">
           {transitions(({ opacity, height, ttl }, toaster) => (
             <animated.div style={{ opacity, height }}>
-              <div ref={onMount(toaster)} className="bg-green p-1 text-wheat shadow-even">
-                <div className="grid grid-cols-[1fr_auto] border border-wheat py-2 pl-2 pr-1">
-                  <div className="text-sm">{toaster.content}</div>
-                  <button type="button" onClick={onClick(ttl, toaster)}>
-                    <CloseFilled className="w-5" />
-                  </button>
+              <div ref={onMount(toaster)} className="pt-1">
+                <div
+                  className={cx(
+                    'p-1 text-wheat shadow-even',
+                    ['bg-green', toaster.type === 'success'],
+                    ['bg-red-ban', toaster.type === 'error'],
+                  )}
+                >
+                  <div className="grid grid-cols-[1fr_auto] border border-wheat py-2 pl-2 pr-1">
+                    <div className="text-sm">{toaster.content}</div>
+                    <button type="button" onClick={onClick(ttl, toaster)}>
+                      <CloseFilled className="w-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </animated.div>
