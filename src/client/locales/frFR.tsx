@@ -414,6 +414,7 @@ const frFRTranslation: Translation = {
       `Jeton de maîtrise ${level.toLocaleString(locale)}${
         o !== undefined && o.notObtained ? ' (non obtenu)' : ''
       }`,
+    updateShardsSucces: 'Fragments modifiés',
     updateShardsError: 'Erreur lors de la modification des fragments',
   },
   notFound: {

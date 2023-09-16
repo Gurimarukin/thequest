@@ -96,7 +96,7 @@ export const Register: React.FC = () => {
         }),
       )
     },
-    [navigate, state.confirmPassword, t.form, validated],
+    [navigate, state.confirmPassword, t, validated],
   )
 
   return (
