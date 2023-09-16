@@ -35,6 +35,8 @@ const codec: Codec<unknown, number, MsDuration> = C.make(
 //     option.map(wrap),
 //   )
 
+const infinity: MsDuration = ms(Infinity)
+
 const seconds = (n: number): MsDuration => ms(1000 * n)
 const minutes = (n: number): MsDuration => seconds(60 * n)
 const hours = (n: number): MsDuration => minutes(60 * n)
@@ -51,6 +53,7 @@ const MsDuration = {
   codec,
   // fromStringDecoder,
   // fromString,
+  infinity,
   ms,
   unwrap,
   seconds,
