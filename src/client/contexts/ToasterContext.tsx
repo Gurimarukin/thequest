@@ -6,6 +6,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import { createPortal } from 'react-dom'
 
 import { MsDuration } from '../../shared/models/MsDuration'
+import type { Dict } from '../../shared/utils/fp'
 import { List } from '../../shared/utils/fp'
 
 import { CloseFilled } from '../imgs/svgs/icons'
@@ -113,14 +114,13 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
           {transitions(({ opacity, height, ttl }, toaster) => (
             <animated.div style={{ opacity, height }}>
               <div ref={onMount(toaster)} className="pt-1">
-                <div
-                  className={cx(
-                    'p-1 text-wheat shadow-even',
-                    ['bg-green', toaster.type === 'success'],
-                    ['bg-red-ban', toaster.type === 'error'],
-                  )}
-                >
-                  <div className="grid grid-cols-[1fr_auto] border border-wheat py-2 pl-2 pr-1">
+                <div className={cx('p-[3px] text-[beige] shadow-even', container[toaster.type])}>
+                  <div
+                    className={cx(
+                      'grid grid-cols-[1fr_auto] border-[3px] py-2 pl-2 pr-1',
+                      border[toaster.type],
+                    )}
+                  >
                     <div className="text-sm">{toaster.content}</div>
                     <button type="button" onClick={onClick(ttl, toaster)}>
                       <CloseFilled className="w-5" />
@@ -135,6 +135,16 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
       )}
     </ToasterContext.Provider>
   )
+}
+
+const container: Dict<ToasterType, string> = {
+  success: 'bg-[forestgreen]',
+  error: 'bg-[#b51414]',
+}
+
+const border: Dict<ToasterType, string> = {
+  success: 'border-[darkgreen]',
+  error: 'border-[darkred]',
 }
 
 export const useToaster = (): ToasterContext => {
