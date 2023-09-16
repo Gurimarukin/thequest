@@ -409,6 +409,7 @@ const enGBTranslation: Translation = {
       `Mastery ${level.toLocaleString(locale)} token${
         o !== undefined && o.notObtained ? ' (non obtenu)' : ''
       }`,
+    updateShardsSucces: 'Shards updated',
     updateShardsError: 'Error while update shards',
   },
   notFound: {

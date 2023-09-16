@@ -27,6 +27,7 @@ import { Loading } from '../../components/Loading'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useToaster } from '../../contexts/ToasterContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
@@ -58,8 +59,9 @@ type Props = {
 }
 
 export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
-  const { maybeUser } = useUser()
   const { t } = useTranslation()
+  const { showToaster } = useToaster()
+  const { maybeUser } = useUser()
 
   const { data, error, mutate } = useSummonerMasteries(platform, summonerName)
 
@@ -109,18 +111,19 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
           if (!optimisticMutation) mutate(newData, { revalidate: false })
           return NotUsed
         }),
-        // TODO: sucess toaster
-        // Future.map(() => {}),
+        Future.map(() => {
+          showToaster('success', t.masteries.updateShardsSucces)
+          return NotUsed
+        }),
         Future.orElse(e => {
           if (optimisticMutation) mutate(data, { revalidate: false })
           console.error(e)
-          // TODO: error toaster
-          alert(t.masteries.updateShardsError)
+          showToaster('error', t.masteries.updateShardsError)
           return Future.notUsed
         }),
       )
     },
-    [data, mutate, platform, t.masteries.updateShardsError],
+    [data, mutate, platform, showToaster, t],
   )
 
   return (

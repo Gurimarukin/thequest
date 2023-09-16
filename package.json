@@ -50,6 +50,7 @@
   "dependencies": {
     "@phc/argon2": "1.0.9",
     "@popperjs/core": "2.11.7",
+    "@react-spring/web": "9.7.3",
     "cookie": "0.5.0",
     "dayjs": "1.11.7",
     "dotenv": "16.0.3",
