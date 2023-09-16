@@ -17,6 +17,7 @@ import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgs/icons'
 import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
 import { CroppedChampionSquare } from './CroppedChampionSquare'
+import { Loading } from './Loading'
 import { Tooltip } from './tooltip/Tooltip'
 
 const { round } = NumberUtils
@@ -34,7 +35,7 @@ export type ChampionMasterySquareProps = {
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
-  setChampionShards: ((champion: ChampionKey) => (count: number) => void) | null
+  setChampionShards: SetChampionShards | null
   /**
    * @default false
    */
@@ -53,6 +54,11 @@ export type ChampionMasterySquareProps = {
    * @default false
    */
   noShadow?: boolean
+}
+
+export type SetChampionShards = {
+  isLoading: boolean
+  run: (champion: ChampionKey) => (count: number) => void
 }
 
 export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
@@ -77,7 +83,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   noShadow = false,
 }) => {
   const setShardsCount = useMemo(
-    () => (setChampionShards !== null ? setChampionShards(championId) : null),
+    () => (setChampionShards !== null ? setChampionShards.run(championId) : null),
     [championId, setChampionShards],
   )
 
@@ -145,6 +151,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
             shards => (
               <Shards
                 shardsCount={shards}
+                isLoading={setChampionShards?.isLoading === true}
                 setShardsCount={setShardsCount}
                 centerShards={centerShards}
               />
@@ -298,11 +305,17 @@ function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
 
 type ShardsProps = {
   shardsCount: number
+  isLoading: boolean
   setShardsCount: ((count: number) => void) | null
   centerShards: boolean
 }
 
-const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShards = false }) => {
+const Shards: React.FC<ShardsProps> = ({
+  shardsCount,
+  isLoading,
+  setShardsCount,
+  centerShards = false,
+}) => {
   const { t } = useTranslation('masteries')
 
   const addButtonRef = useRef<HTMLButtonElement>(null)
@@ -340,31 +353,43 @@ const Shards: React.FC<ShardsProps> = ({ shardsCount, setShardsCount, centerShar
           )}
         >
           <span className={cx('flex bg-black p-px pb-0.5', ['hidden', 9 <= shardsCount])}>
-            <button
-              ref={addButtonRef}
-              type="button"
-              onClick={addShardCount}
-              className="w-3 rounded-t bg-goldenrod text-black"
-            >
-              <AddOutline className="w-full" />
-            </button>
-            <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
-              {t.addShard}
-            </Tooltip>
+            {isLoading ? (
+              <Loading className="w-3 text-goldenrod-bis" />
+            ) : (
+              <>
+                <button
+                  ref={addButtonRef}
+                  type="button"
+                  onClick={addShardCount}
+                  className="w-3 rounded-t bg-goldenrod text-black"
+                >
+                  <AddOutline className="w-full" />
+                </button>
+                <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
+                  {t.addShard}
+                </Tooltip>
+              </>
+            )}
           </span>
           <span className="h-3 w-px bg-black" />
           <span className={cx('flex bg-black p-px', ['hidden', !canRemoveShard])}>
-            <button
-              ref={removeButtonRef}
-              type="button"
-              onClick={removeShardCount}
-              className="w-3 rounded-b bg-goldenrod text-black"
-            >
-              <RemoveOutline className="w-full" />
-            </button>
-            <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
-              {t.removeShard}
-            </Tooltip>
+            {isLoading ? (
+              <Loading className="w-3 text-goldenrod-bis" />
+            ) : (
+              <>
+                <button
+                  ref={removeButtonRef}
+                  type="button"
+                  onClick={removeShardCount}
+                  className="w-3 rounded-b bg-goldenrod text-black"
+                >
+                  <RemoveOutline className="w-full" />
+                </button>
+                <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
+                  {t.removeShard}
+                </Tooltip>
+              </>
+            )}
           </span>
         </div>
       ) : null}

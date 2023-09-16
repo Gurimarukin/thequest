@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                 functional/no-return-void */
-import { number, ord, predicate, string, task } from 'fp-ts'
+import { number, ord, predicate, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { identity, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -11,7 +11,7 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
-import type { Future, List, NotUsed } from '../../../shared/utils/fp'
+import type { List } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
@@ -23,13 +23,6 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { ChevronForwardFilled, CloseFilled, ToggleFilled } from '../../imgs/svgs/icons'
 import { cx } from '../../utils/cx'
-import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
-
-type Props = {
-  notifications: NonEmptyArray<ShardsToRemoveNotification>
-  setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShardsPayload>) => Future<NotUsed>
-  hide: () => void
-}
 
 export type ShardsToRemoveNotification = {
   championId: ChampionKey
@@ -67,8 +60,16 @@ const isCheckedLens = pipe(lens.id<IsChecked>(), lens.prop('isChecked'))
 
 const invert = predicate.not<boolean>(identity)
 
+type Props = {
+  notifications: NonEmptyArray<ShardsToRemoveNotification>
+  shardsIsLoading: boolean
+  setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShardsPayload>) => void
+  hide: () => void
+}
+
 export const ShardsToRemoveModal: React.FC<Props> = ({
   notifications,
+  shardsIsLoading,
   setChampionsShardsBulk,
   hide,
 }) => {
@@ -105,52 +106,32 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
     [],
   )
 
-  const [isLoading, setIsLoading] = useState(false)
-
-  const futureWithLoading = useCallback((f: Future<NotUsed>) => {
-    setIsLoading(true)
-    return pipe(
-      f,
-      task.chainFirstIOK(() => () => setIsLoading(false)),
-      futureRunUnsafe,
-    )
-  }, [])
-
   const noSingleMode = useCallback(() => {
     const n = NonEmptyArray.head(notifications)
-    return pipe(
-      setChampionsShardsBulk([{ championId: n.championId, shardsCount: n.shardsCount }]),
-      futureWithLoading,
-    )
-  }, [futureWithLoading, notifications, setChampionsShardsBulk])
+    return setChampionsShardsBulk([{ championId: n.championId, shardsCount: n.shardsCount }])
+  }, [notifications, setChampionsShardsBulk])
 
   const yesSingleMode = useCallback(() => {
     const n = NonEmptyArray.head(notifications)
-    return pipe(
-      setChampionsShardsBulk([
-        { championId: n.championId, shardsCount: n.shardsCount - n.shardsToRemove },
-      ]),
-      futureWithLoading,
-    )
-  }, [futureWithLoading, notifications, setChampionsShardsBulk])
+    return setChampionsShardsBulk([
+      { championId: n.championId, shardsCount: n.shardsCount - n.shardsToRemove },
+    ])
+  }, [notifications, setChampionsShardsBulk])
 
   const confirmMultipleMode = useCallback(
     () =>
-      pipe(
-        setChampionsShardsBulk(
-          pipe(
-            notificationsState,
-            NonEmptyArray.map(
-              (n): ChampionShardsPayload => ({
-                championId: n.championId,
-                shardsCount: n.isChecked ? n.shardsCount - n.shardsToRemove : n.shardsCount,
-              }),
-            ),
+      setChampionsShardsBulk(
+        pipe(
+          notificationsState,
+          NonEmptyArray.map(
+            (n): ChampionShardsPayload => ({
+              championId: n.championId,
+              shardsCount: n.isChecked ? n.shardsCount - n.shardsToRemove : n.shardsCount,
+            }),
           ),
         ),
-        futureWithLoading,
       ),
-    [futureWithLoading, notificationsState, setChampionsShardsBulk],
+    [notificationsState, setChampionsShardsBulk],
   )
 
   const masteriesRef = useRef<HTMLSpanElement>(null)
@@ -205,31 +186,31 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
               <ButtonSecondary
                 type="button"
                 onClick={noSingleMode}
-                disabled={isLoading}
+                disabled={shardsIsLoading}
                 className="flex items-center gap-2"
               >
                 <span>{t.modal.no}</span>
-                {isLoading ? <Loading className="h-4" /> : null}
+                {shardsIsLoading ? <Loading className="h-4" /> : null}
               </ButtonSecondary>
               <ButtonPrimary
                 type="button"
                 onClick={yesSingleMode}
-                disabled={isLoading}
+                disabled={shardsIsLoading}
                 className="flex items-center gap-2"
               >
                 <span>{t.modal.yes}</span>
-                {isLoading ? <Loading className="h-4" /> : null}
+                {shardsIsLoading ? <Loading className="h-4" /> : null}
               </ButtonPrimary>
             </div>
           ) : (
             <ButtonPrimary
               type="button"
               onClick={confirmMultipleMode}
-              disabled={isLoading}
+              disabled={shardsIsLoading}
               className="mt-6 flex items-center gap-2 bg-goldenrod px-4 py-1 text-black hover:bg-goldenrod/75"
             >
               <span>{t.modal.confirm}</span>
-              {isLoading ? <Loading className="h-4" /> : null}
+              {shardsIsLoading ? <Loading className="h-4" /> : null}
             </ButtonPrimary>
           )}
         </div>
