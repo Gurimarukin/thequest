@@ -1,5 +1,7 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
+import { useSprings } from '@react-spring/web'
+import { useDrag } from '@use-gesture/react'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -7,6 +9,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'r
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
+import type { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
@@ -20,8 +23,10 @@ import { AdditionalStaticData } from '../../../shared/models/api/staticData/Addi
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
+import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
@@ -50,6 +55,8 @@ import {
 } from './ActiveGameParticipant'
 import { useShouldWrap } from './useShouldWrap'
 
+const { swap } = ListUtils
+const { clamp } = NumberUtils
 const { pad10 } = StringUtils
 
 const reloadInterval = MsDuration.seconds(10)
@@ -252,6 +259,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
       <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', xlGridCols)}>
         {TeamId.values.map((teamId, i) => {
           const reverse = i % 2 === 1
+          const participants_ = participants[teamId]
           return (
             <ul
               key={teamId}
@@ -273,21 +281,19 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   style={{ gridColumn: `${gridHalfCols + 1} / ${gridTotalCols + 1}` }}
                 />
               ) : null}
-              {participants[teamId]?.map((participant, j) => (
-                <ActiveGameParticipant
-                  key={participant.summonerName}
+              {participants_ === undefined ? null : (
+                <Participants
+                  platform={platform}
+                  summoner={summoner}
+                  mapId={mapId}
+                  teamId={teamId}
+                  reverse={reverse}
+                  participants={participants_}
                   summonerSpellByKey={summonerSpellByKey}
                   runeStyleById={runeStyleById}
                   runeById={runeById}
-                  platform={platform}
-                  mapId={mapId}
-                  teamId={teamId}
-                  participant={participant}
-                  highlight={participant.summonerName === summoner.name}
-                  reverse={reverse}
-                  index={j}
                 />
-              ))}
+              )}
             </ul>
           )
         })}
@@ -297,6 +303,87 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     </div>
   )
 }
+
+type ParticipantsProps = {
+  platform: Platform
+  summoner: SummonerShort
+  mapId: MapId
+  teamId: TeamId
+  reverse: boolean
+  participants: List<ActiveGameParticipantView>
+  summonerSpellByKey: (key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>
+  runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
+  runeById: (id: RuneId) => Maybe<StaticDataRune>
+}
+
+const Participants: React.FC<ParticipantsProps> = ({
+  platform,
+  summoner,
+  mapId,
+  teamId,
+  reverse,
+  participants,
+  summonerSpellByKey,
+  runeStyleById,
+  runeById,
+}) => {
+  const order = useRef<List<number>>(participants.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
+  const [springs, api] = useSprings(participants.length, fn(order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
+  const bind = useDrag(({ args: [originalIndex], active, movement: [, y] }) => {
+    const curIndex = order.current.indexOf(originalIndex)
+    const curRow = clamp(Math.round((curIndex * 10 + y) / 10), 0, participants.length - 1)
+    const newOrder = swap(order.current, curIndex, curRow)
+    api.start(fn(newOrder, active, originalIndex, curIndex, y)) // Feed springs new style data, they'll animate the view without causing a single render
+    // eslint-disable-next-line functional/immutable-data
+    if (!active) order.current = newOrder
+  })
+
+  return (
+    <>
+      {springs.map(({ zIndex, y }, j) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const participant = participants[j]!
+        return (
+          <ActiveGameParticipant
+            key={participant.summonerName}
+            summonerSpellByKey={summonerSpellByKey}
+            runeStyleById={runeStyleById}
+            runeById={runeById}
+            platform={platform}
+            mapId={mapId}
+            teamId={teamId}
+            participant={participant}
+            highlight={participant.summonerName === summoner.name}
+            reverse={reverse}
+            index={j}
+            springStyle={{ zIndex, y }}
+            gestureProps={bind(j)}
+          />
+        )
+      })}
+    </>
+  )
+}
+
+// HEIGHT: 90
+// GAP: 16
+
+const height = 10
+
+const fn =
+  (order: List<number>, active = false, originalIndex = 0, curIndex = 0, y = 0) =>
+  (index: number) =>
+    active && index === originalIndex
+      ? {
+          y: curIndex * height + y,
+          zIndex: 1,
+          immediate: (key: string) => key === 'y' || key === 'zIndex',
+        }
+      : {
+          y: order.indexOf(index) * height,
+          zIndex: 0,
+          immediate: false,
+        }
 
 type LoadingProps = {
   reload: () => void

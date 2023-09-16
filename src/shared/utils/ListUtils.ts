@@ -129,6 +129,43 @@ const commonElems =
     )
   }
 
+/**
+ * https://github.com/granteagon/move/blob/master/src/index.js
+ *
+ * Note: This is a pure function so a new array will be returned, instead of altering the array argument.
+ *
+ * @param array Array in which to move an item.
+ * @param moveIndex The index of the item to move.
+ * @param toIndex The index to move item at moveIndex to.
+ * @returns
+ */
+const swap = <A>(array: List<A>, moveIndex: number, toIndex: number): List<A> => {
+  const item = array[moveIndex]
+  const length = array.length
+  const diff = moveIndex - toIndex
+
+  if (diff > 0) {
+    // move left
+    return [
+      ...array.slice(0, toIndex),
+      item,
+      ...array.slice(toIndex, moveIndex),
+      ...array.slice(moveIndex + 1, length),
+    ] as List<A>
+  }
+  if (diff < 0) {
+    // move right
+    const targetIndex = toIndex + 1
+    return [
+      ...array.slice(0, moveIndex),
+      ...array.slice(moveIndex + 1, targetIndex),
+      item,
+      ...array.slice(targetIndex, length),
+    ] as List<A>
+  }
+  return array
+}
+
 export const ListUtils = {
   findFirstBy,
   findFirstWithIndex,
@@ -139,6 +176,7 @@ export const ListUtils = {
   updateOrAppend,
   padEnd,
   commonElems,
+  swap,
 }
 
 const has = Object.prototype.hasOwnProperty
