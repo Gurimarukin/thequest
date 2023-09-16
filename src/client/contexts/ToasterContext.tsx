@@ -138,13 +138,13 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
 }
 
 const container: Dict<ToasterType, string> = {
-  success: 'bg-[forestgreen]',
-  error: 'bg-[#b51414]',
+  success: 'bg-green-toaster',
+  error: 'bg-red-toaster',
 }
 
 const border: Dict<ToasterType, string> = {
-  success: 'border-[darkgreen]',
-  error: 'border-[darkred]',
+  success: 'border-green-toaster-bis',
+  error: 'border-red-toaster-bis',
 }
 
 export const useToaster = (): ToasterContext => {
