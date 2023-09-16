@@ -19,6 +19,7 @@ import { AsyncState } from '../models/AsyncState'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
+import { useToaster } from './ToasterContext'
 import { useTranslation } from './TranslationContext'
 
 const recentSearchesKey = 'recentSearches'
@@ -40,6 +41,7 @@ const UserContext = createContext<UserContext | undefined>(undefined)
 
 export const UserContextProvider: ChildrenFC = ({ children }) => {
   const { t } = useTranslation('common')
+  const { showToaster } = useToaster()
 
   const { data, error, mutate } = useSWR(
     apiRoutes.user.self.get,
@@ -52,7 +54,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         ),
         Future.orElse(e => {
           console.error(e)
-          alert(t.errors.fetchUserError) // TODO: toaster
+          showToaster('error', t.errors.fetchUserError)
           return Future.failed(e)
         }),
         futureRunUnsafe,
@@ -96,11 +98,11 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
         Future.orElse(e => {
           console.error(e)
-          alert(t.errors.addFavoriteError) // TODO: toaster
+          showToaster('error', t.errors.addFavoriteError)
           return futureMaybe.some(NotUsed)
         }),
       ),
-    [data, mutate, t.errors.addFavoriteError],
+    [data, mutate, showToaster, t.errors.addFavoriteError],
   )
 
   const removeFavoriteSearch = useCallback(
@@ -131,11 +133,11 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         Maybe.getOrElse(() => Future.failed(Error('Inconsistent state'))),
         Future.orElse(e => {
           console.error(e)
-          alert(t.errors.removeFavoriteError) // TODO: toaster
+          showToaster('error', t.errors.removeFavoriteError)
           return Future.notUsed
         }),
       ),
-    [data, mutate, t.errors.removeFavoriteError],
+    [data, mutate, showToaster, t.errors.removeFavoriteError],
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(
