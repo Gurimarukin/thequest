@@ -29,7 +29,7 @@ import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQu
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
-import type { FilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
+import type { FactionsCount } from './getFilteredAndSortedMasteries'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 
 type Props = {
@@ -52,8 +52,8 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
     hideInsteadOfGlow,
     isHidden,
   } = useMemo(
-    () => getFilteredAndSortedMasteries(t, masteries, masteriesQuery),
-    [masteries, masteriesQuery, t],
+    () => getFilteredAndSortedMasteries(t, challenges, masteries, masteriesQuery),
+    [challenges, masteries, masteriesQuery, t],
   )
 
   const randomChampion = useMemo(
@@ -112,7 +112,7 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
 
 type ChampionProps = {
   challenges: SWRResponse<ChallengesView, unknown>
-  factionsCount: FilteredAndSortedMasteries['factionsCount']
+  factionsCount: FactionsCount
   maybeMaxPoints: Maybe<number>
   isGlowing: boolean
   isHidden: boolean
