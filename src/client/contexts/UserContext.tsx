@@ -102,7 +102,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
           return futureMaybe.some(NotUsed)
         }),
       ),
-    [data, mutate, showToaster, t.errors.addFavoriteError],
+    [data, mutate, showToaster, t],
   )
 
   const removeFavoriteSearch = useCallback(
@@ -137,7 +137,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
           return Future.notUsed
         }),
       ),
-    [data, mutate, showToaster, t.errors.removeFavoriteError],
+    [data, mutate, showToaster, t],
   )
 
   const [recentSearches_, setRecentSearches_] = useLocalStorageState(

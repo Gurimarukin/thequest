@@ -63,12 +63,12 @@ export const Summoner: React.FC<Props> = ({
       if (1000 <= pts) return t.common.numberK(round(pts / 1000, 1))
       return t.common.number(pts)
     },
-    [t.common],
+    [t],
   )
 
   const MasteryImgWithCount = useMemo(
     () => getMasteryImgWithCount(t.common, masteriesCount),
-    [masteriesCount, t.common],
+    [masteriesCount, t],
   )
 
   return (
