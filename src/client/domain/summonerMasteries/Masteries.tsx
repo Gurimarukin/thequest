@@ -1,5 +1,4 @@
-/* eslint-disable functional/no-expression-statements,
-                  functional/no-return-void */
+/* eslint-disable functional/no-expression-statements */
 import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
@@ -15,6 +14,7 @@ import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
+import type { SetChampionShards } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { bgGradientMastery } from '../../components/ChampionTooltip'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
@@ -35,7 +35,7 @@ import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
 type Props = {
   challenges: SWRResponse<ChallengesView, unknown>
   masteries: List<EnrichedChampionMastery>
-  setChampionShards: (champion: ChampionKey) => (count: number) => void
+  setChampionShards: SetChampionShards
 }
 
 export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionShards }) => {
@@ -118,7 +118,7 @@ type ChampionProps = {
   isHidden: boolean
   maybePrev: Maybe<EnrichedChampionMastery>
   champion: EnrichedChampionMastery
-  setChampionShards: (champion: ChampionKey) => (count: number) => void
+  setChampionShards: SetChampionShards
 }
 
 const Champion: React.FC<ChampionProps> = ({

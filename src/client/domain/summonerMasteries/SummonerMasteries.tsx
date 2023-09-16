@@ -1,10 +1,14 @@
+/* eslint-disable functional/no-return-void */
+
 /* eslint-disable functional/no-expression-statements */
-import { monoid, number } from 'fp-ts'
+import { monoid, number, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import debounce from 'lodash.debounce'
 import { optional } from 'monocle-ts'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Business } from '../../../shared/Business'
+import { MsDuration } from '../../../shared/models/MsDuration'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -23,6 +27,7 @@ import { Dict, Future, List, Maybe, NonEmptyArray, NotUsed } from '../../../shar
 
 import { apiUserSelfSummonerChampionsShardsCountPost } from '../../api'
 import { AsyncRenderer } from '../../components/AsyncRenderer'
+import type { SetChampionShards } from '../../components/ChampionMasterySquare'
 import { Loading } from '../../components/Loading'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -47,6 +52,8 @@ import { useChallenges } from './useChallenges'
 import { useSummonerMasteries } from './useSummonerMasteries'
 
 const { cleanChampionName } = StringUtils
+
+const shardsDebounceWait = MsDuration.second(1)
 
 // if we should mutate data before API response
 type OptimisticMutation = {
@@ -77,12 +84,47 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
     }
   }, [data, maybeUser, mutate, previousUser])
 
+  const [shardsIsLoading, setShardsIsLoading] = useState(false)
+  const debouncedSetChampionsShardsBulk = useMemo(
+    () =>
+      debounce(
+        (
+          platform_: Platform,
+          summonerName_: string,
+          updates: NonEmptyArray<ChampionShardsPayload>,
+          optimisticMutation: boolean,
+          oldData: SummonerMasteriesView,
+          newData: SummonerMasteriesView,
+        ): Promise<unknown> => {
+          setShardsIsLoading(true)
+          return pipe(
+            apiUserSelfSummonerChampionsShardsCountPost(platform_, summonerName_, updates),
+            Future.map(() => {
+              if (!optimisticMutation) mutate(newData, { revalidate: false })
+              showToaster('success', t.masteries.updateShardsSucces)
+              return NotUsed
+            }),
+            Future.orElse(e => {
+              if (optimisticMutation) mutate(oldData, { revalidate: false })
+              console.error(e)
+              showToaster('error', t.masteries.updateShardsError)
+              return Future.notUsed
+            }),
+            task.chainFirstIOK(() => () => setShardsIsLoading(false)),
+            futureRunUnsafe,
+          )
+        },
+        MsDuration.unwrap(shardsDebounceWait),
+      ),
+    [mutate, showToaster, t],
+  )
+
   const setChampionsShardsBulk = useCallback(
     (
       updates: NonEmptyArray<ChampionShardsPayload>,
       { optimisticMutation }: OptimisticMutation,
-    ): Future<NotUsed> => {
-      if (data === undefined || Maybe.isNone(data.championShards)) return Future.notUsed
+    ): void => {
+      if (data === undefined || Maybe.isNone(data.championShards)) return
 
       const newData: SummonerMasteriesView = pipe(
         SummonerMasteriesView.Lens.championShards,
@@ -105,25 +147,16 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
 
       if (optimisticMutation) mutate(newData, { revalidate: false })
 
-      return pipe(
-        apiUserSelfSummonerChampionsShardsCountPost(platform, data.summoner.name, updates),
-        Future.map(() => {
-          if (!optimisticMutation) mutate(newData, { revalidate: false })
-          return NotUsed
-        }),
-        Future.map(() => {
-          showToaster('success', t.masteries.updateShardsSucces)
-          return NotUsed
-        }),
-        Future.orElse(e => {
-          if (optimisticMutation) mutate(data, { revalidate: false })
-          console.error(e)
-          showToaster('error', t.masteries.updateShardsError)
-          return Future.notUsed
-        }),
+      debouncedSetChampionsShardsBulk(
+        platform,
+        data.summoner.name,
+        updates,
+        optimisticMutation,
+        data,
+        newData,
       )
     },
-    [data, mutate, platform, showToaster, t],
+    [data, debouncedSetChampionsShardsBulk, mutate, platform],
   )
 
   return (
@@ -136,6 +169,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
             leagues={leagues}
             masteries={masteries}
             championShards={championShards}
+            shardsIsLoading={shardsIsLoading}
             setChampionsShardsBulk={setChampionsShardsBulk}
           />
         )}
@@ -150,10 +184,11 @@ type SummonerViewProps = {
   leagues: SummonerLeaguesView
   masteries: SummonerMasteriesView['masteries']
   championShards: Maybe<List<ChampionShardsView>>
+  shardsIsLoading: boolean
   setChampionsShardsBulk: (
     updates: NonEmptyArray<ChampionShardsPayload>,
     { optimisticMutation }: OptimisticMutation,
-  ) => Future<NotUsed>
+  ) => void
 }
 
 const SummonerViewComponent: React.FC<SummonerViewProps> = ({
@@ -162,6 +197,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   leagues,
   masteries,
   championShards,
+  shardsIsLoading,
   setChampionsShardsBulk,
 }) => {
   const { navigate, masteriesQuery } = useHistory()
@@ -221,19 +257,19 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
     setIsNotificationsHidden(false)
   }, [])
 
-  const setChampionShards = useCallback(
-    (championKey: ChampionKey) => (shardsCount: number) =>
-      pipe(
+  const setChampionShards = useMemo(
+    (): SetChampionShards => ({
+      isLoading: shardsIsLoading,
+      run: (championKey: ChampionKey) => (shardsCount: number) =>
         setChampionsShardsBulk([{ championId: championKey, shardsCount }], {
           optimisticMutation: true,
         }),
-        futureRunUnsafe,
-      ),
-    [setChampionsShardsBulk],
+    }),
+    [setChampionsShardsBulk, shardsIsLoading],
   )
 
   const nonOptimisticSetChampionsShardsBulk = useCallback(
-    (updates: NonEmptyArray<ChampionShardsPayload>): Future<NotUsed> =>
+    (updates: NonEmptyArray<ChampionShardsPayload>): void =>
       setChampionsShardsBulk(updates, { optimisticMutation: false }),
     [setChampionsShardsBulk],
   )
@@ -270,6 +306,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
           n => (
             <ShardsToRemoveModal
               notifications={n}
+              shardsIsLoading={shardsIsLoading}
               setChampionsShardsBulk={nonOptimisticSetChampionsShardsBulk}
               hide={hideNotifications}
             />

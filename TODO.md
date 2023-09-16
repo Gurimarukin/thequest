@@ -15,7 +15,6 @@
 - eslint unused argument (even if middle)
 - rework masteries colors
 - account menu
-- debounce setShards and add Loading
 - limit favorites
 - modal: trap focus
 - clean old cache entries
