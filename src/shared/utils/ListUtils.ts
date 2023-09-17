@@ -120,7 +120,6 @@ const commonElems =
     if (as.length === 1) return NonEmptyArray.head(as)
 
     const [shortest, remain] = pipe(as, NonEmptyArray.sort(listLengthOrd), NonEmptyArray.unprepend)
-    console.log('shortest =', shortest)
     if (!List.isNonEmpty(shortest)) return []
 
     return pipe(
