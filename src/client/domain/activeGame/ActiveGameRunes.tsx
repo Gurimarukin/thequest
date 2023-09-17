@@ -16,6 +16,7 @@ type Props = {
   runeById: (id: RuneId) => Maybe<StaticDataRune>
   perks: PerksView
   reverse: boolean
+  tooltipShouldHide?: boolean
   draggable?: boolean
 }
 
@@ -24,6 +25,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
   runeById,
   perks,
   reverse,
+  tooltipShouldHide,
   draggable,
 }) => {
   const { keyStone, primaryPath, secondaryPath, shards } = useMemo(() => {
@@ -52,11 +54,24 @@ export const ActiveGameRunes: React.FC<Props> = ({
   return (
     <div className={cx('flex gap-1.5', ['flex-row-reverse', reverse])}>
       <div className={cx('flex flex-col gap-2', reverse ? 'pr-1' : 'pl-1')}>
-        <RunePath runes={primaryPath} reverse={reverse} draggable={draggable} className="gap-1" />
-        <RunePath runes={secondaryPath} reverse={reverse} draggable={draggable} className="gap-1" />
+        <RunePath
+          runes={primaryPath}
+          reverse={reverse}
+          tooltipShouldHide={tooltipShouldHide}
+          draggable={draggable}
+          className="gap-1"
+        />
+        <RunePath
+          runes={secondaryPath}
+          reverse={reverse}
+          tooltipShouldHide={tooltipShouldHide}
+          draggable={draggable}
+          className="gap-1"
+        />
         <RunePath
           runes={shards}
           reverse={!reverse}
+          tooltipShouldHide={tooltipShouldHide}
           draggable={draggable}
           className="justify-end gap-1.5"
           liClassName="!w-3 h-3 overflow-hidden"
@@ -73,6 +88,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
                 icon={r.iconPath}
                 name={r.name}
                 description={r.longDesc}
+                tooltipShouldHide={tooltipShouldHide}
                 draggable={draggable}
                 className="w-full"
               />
@@ -116,6 +132,7 @@ const getFindRunes =
 type RunePathProps = {
   runes: List<StaticDataRune>
   reverse: boolean
+  tooltipShouldHide?: boolean
   draggable?: boolean
   className?: string
   liClassName?: string
@@ -125,6 +142,7 @@ type RunePathProps = {
 const RunePath: React.FC<RunePathProps> = ({
   runes,
   reverse,
+  tooltipShouldHide,
   draggable,
   className,
   liClassName,
@@ -141,6 +159,7 @@ const RunePath: React.FC<RunePathProps> = ({
           icon={r.iconPath}
           name={r.name}
           description={r.longDesc}
+          tooltipShouldHide={tooltipShouldHide}
           draggable={draggable}
           className={cx('w-full', runeClassName)}
         />

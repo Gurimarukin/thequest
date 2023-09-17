@@ -335,11 +335,15 @@ const Participants: React.FC<ParticipantsProps> = ({
   runeStyleById,
   runeById,
 }) => {
+  const [isDragging, setIsDragging] = useState(false)
+
   const order = useRef<List<number>>(participants.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
 
   const [springs, api] = useSprings(participants.length, fn(order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
 
   const bind = useDrag(({ args: [activeIndex], active, movement: [, y] }) => {
+    setIsDragging(active)
+
     const currentIndex = order.current.indexOf(activeIndex)
     const currentRow = clamp(
       Math.round((currentIndex * participantHeight + y) / participantHeight),
@@ -347,7 +351,9 @@ const Participants: React.FC<ParticipantsProps> = ({
       participants.length - 1,
     )
     const newOrder = swap(order.current, currentIndex, currentRow)
+
     api.start(fn(newOrder, active, activeIndex, currentIndex, y)) // Feed springs new style data, they'll animate the view without causing a single render
+
     // eslint-disable-next-line functional/immutable-data
     if (!active) order.current = newOrder
   })
@@ -370,6 +376,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             highlight={participant.summonerName === summoner.name}
             reverse={reverse}
             index={j}
+            isDragging={isDragging}
             springStyle={{ zIndex, y }}
             gestureProps={bind(j)}
           />

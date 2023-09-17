@@ -8,11 +8,17 @@ import { Tooltip } from './tooltip/Tooltip'
 
 type Props = {
   spell: StaticDataSummonerSpell
+  tooltipShouldHide?: boolean
   draggable?: boolean
   className?: string
 }
 
-export const SummonerSpell: React.FC<Props> = ({ spell, draggable, className }) => {
+export const SummonerSpell: React.FC<Props> = ({
+  spell,
+  tooltipShouldHide,
+  draggable,
+  className,
+}) => {
   const { t } = useTranslation('common')
   const { assets } = useStaticData()
 
@@ -27,7 +33,11 @@ export const SummonerSpell: React.FC<Props> = ({ spell, draggable, className }) 
         draggable={draggable}
         className={className}
       />
-      <Tooltip hoverRef={ref} className="grid max-w-xs grid-cols-[auto_auto] gap-1">
+      <Tooltip
+        hoverRef={ref}
+        shouldHide={tooltipShouldHide}
+        className="grid max-w-xs grid-cols-[auto_auto] gap-1"
+      >
         <span className="font-bold">{spell.name}</span>
         <span className="justify-self-end">
           {t.cooldownSeconds(spell.cooldown, 'text-goldenrod')}
