@@ -2,7 +2,7 @@
                   functional/no-return-void */
 import { useSprings } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -12,11 +12,8 @@ import { MsDuration } from '../../../shared/models/MsDuration'
 import type { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
-import { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
-import { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
@@ -32,11 +29,9 @@ import type { Dict, List } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { AsyncRenderer } from '../../components/AsyncRenderer'
-import { Challenge } from '../../components/Challenge'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
-import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
@@ -45,7 +40,7 @@ import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { RefreshOutline } from '../../imgs/svgs/icons'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
-import { ActiveGameBans } from './ActiveGameBans'
+import { ActiveGameHeader } from './ActiveGameHeader'
 import {
   ActiveGameParticipant,
   gridColsDesktop,
@@ -248,7 +243,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   )
 
   return (
-    <div className="grid min-h-full grid-rows-[1fr_auto_auto_auto_1fr] gap-4 py-3">
+    <div className="grid min-h-full grid-rows-[1fr_auto_auto_1fr] gap-4 py-3">
       <div className="flex items-center justify-center gap-4 px-3">
         <button type="button" onClick={refreshGame}>
           <RefreshOutline className="w-6" />
@@ -263,7 +258,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         )}
       </div>
 
-      {isDraft ? <ActiveGameBans participants={participants} /> : <span />}
+      <ActiveGameHeader isDraft={isDraft} participants={participants} />
 
       <div
         className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', gridColsDesktop)}
@@ -320,8 +315,6 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
           )
         })}
       </div>
-
-      <GameChallenges participants={participants} />
     </div>
   )
 }
@@ -518,59 +511,3 @@ const GameInfo = forwardRef<HTMLSpanElement, GameInfoProps>(({ children }, ref) 
     ({children})
   </span>
 ))
-
-type GameChallengesProps = {
-  participants: ActiveGameView['participants']
-}
-
-const GameChallenges: React.FC<GameChallengesProps> = ({ participants }) => {
-  const { t } = useTranslation('common')
-  const { championByKey } = useStaticData()
-
-  const factions = useMemo(
-    (): PartialDict<`${TeamId}`, List<ChampionFaction>> =>
-      pipe(
-        participants,
-        PartialDict.map(
-          flow(
-            NonEmptyArray.map(p =>
-              pipe(
-                championByKey(p.championId),
-                Maybe.fold(
-                  () => [],
-                  c => c.factions,
-                ),
-              ),
-            ),
-            ListUtils.commonElems(ChampionFaction.Eq),
-          ),
-        ),
-      ),
-    [championByKey, participants],
-  )
-
-  return (
-    <div className="grid w-full grid-cols-[1fr_1fr] gap-6 px-3 text-sm text-goldenrod">
-      {TeamId.values.map((teamId, i) => {
-        const reverse = i % 2 === 1
-        return (
-          <ul key={teamId} className={cx('flex gap-4', ['justify-end', reverse])}>
-            {(factions[teamId] ?? []).map(faction => (
-              <li
-                key={faction}
-                className={cx('flex items-center gap-1.5', ['flex-row-reverse', reverse])}
-              >
-                <Challenge
-                  id={ChallengesView.id[faction]}
-                  tier={Maybe.some('GOLD')}
-                  className="h-9"
-                />
-                {t.labels.faction[faction]}
-              </li>
-            ))}
-          </ul>
-        )
-      })}
-    </div>
-  )
-}
