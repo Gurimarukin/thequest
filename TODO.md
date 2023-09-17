@@ -1,4 +1,3 @@
-- timeout when reloading game
 - disable hovers on drag
 - challenges page + detect challenges
 - change font (sans serif, defined monospace font, emojis)
