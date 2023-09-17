@@ -81,6 +81,7 @@ type ParticipantProps = {
    * index inside of team
    */
   index: number
+  isDragging: boolean
   springStyle: StyleProps
   gestureProps: ReactDOMAttributes
 }
@@ -106,6 +107,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   highlight,
   reverse,
   index,
+  isDragging,
   springStyle,
   gestureProps,
 }) => {
@@ -116,6 +118,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
   const championRef = useRef<HTMLDivElement>(null)
   const aramRef = useRef<HTMLDivElement>(null)
+
+  const tooltipShouldHide = isDragging
 
   const spell1 = summonerSpellByKey(spell1Id)
   const spell2 = summonerSpellByKey(spell2Id)
@@ -151,6 +155,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             m => ({ ...m, percents: Business.championPercents(m) }),
           ),
         ),
+        tooltipShouldHide,
         centerShards: true,
         noShadow: true,
         draggable: false,
@@ -193,6 +198,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 queue="soloDuo"
                 league={l.soloDuo}
                 reverse={reverse}
+                tooltipShouldHide={tooltipShouldHide}
                 draggable={false}
               />
             ),
@@ -213,6 +219,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 queue="flex"
                 league={l.flex}
                 reverse={reverse}
+                tooltipShouldHide={tooltipShouldHide}
                 draggable={false}
               />
             ),
@@ -256,7 +263,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   <span className="text-grey-400">—</span>
                   <span className="flex gap-1.5">
                     <span ref={percentsRef}>{t.common.percents(round(m.totalPercents, 1))}</span>
-                    <Tooltip hoverRef={percentsRef}>{t.activeGame.theQuestProgression}</Tooltip>
+                    <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
+                      {t.activeGame.theQuestProgression}
+                    </Tooltip>
                     <span ref={totalMasteriesRef} className="text-grey-400">
                       {t.common.number(m.totalScore, { withParenthesis: true })}
                     </span>
@@ -278,7 +287,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             spell1,
             Maybe.fold(
               () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
-              s => <SummonerSpell spell={s} draggable={false} className="h-full w-full" />,
+              s => (
+                <SummonerSpell
+                  spell={s}
+                  tooltipShouldHide={tooltipShouldHide}
+                  draggable={false}
+                  className="h-full w-full"
+                />
+              ),
             ),
           )}
         </li>
@@ -287,7 +303,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             spell2,
             Maybe.fold(
               () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
-              s => <SummonerSpell spell={s} draggable={false} className="h-full w-full" />,
+              s => (
+                <SummonerSpell
+                  spell={s}
+                  tooltipShouldHide={tooltipShouldHide}
+                  draggable={false}
+                  className="h-full w-full"
+                />
+              ),
             ),
           )}
         </li>
@@ -344,7 +367,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 >
                   <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
                 </div>
-                <Tooltip hoverRef={aramRef}>
+                <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
                   <AramTooltip aram={c.aram} />
                 </Tooltip>
               </>
@@ -358,6 +381,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           runeById={runeById}
           perks={perks}
           reverse={reverse}
+          tooltipShouldHide={tooltipShouldHide}
           draggable={false}
         />
       </Cell>

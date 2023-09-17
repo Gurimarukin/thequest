@@ -11,11 +11,19 @@ type Props = {
   icon: string
   name: string
   description: string
+  tooltipShouldHide?: boolean
   draggable?: boolean
   className?: string
 }
 
-export const Rune: React.FC<Props> = ({ icon, name, description, draggable, className }) => {
+export const Rune: React.FC<Props> = ({
+  icon,
+  name,
+  description,
+  tooltipShouldHide,
+  draggable,
+  className,
+}) => {
   const { t } = useTranslation('common')
 
   const ref = useRef<HTMLImageElement>(null)
@@ -29,7 +37,11 @@ export const Rune: React.FC<Props> = ({ icon, name, description, draggable, clas
         draggable={draggable}
         className={className}
       />
-      <Tooltip hoverRef={ref} className="flex max-w-xs flex-col gap-1">
+      <Tooltip
+        hoverRef={ref}
+        shouldHide={tooltipShouldHide}
+        className="flex max-w-xs flex-col gap-1"
+      >
         <span className="font-bold">{name}</span>
         <span dangerouslySetInnerHTML={{ __html: description }} className="whitespace-normal" />
       </Tooltip>

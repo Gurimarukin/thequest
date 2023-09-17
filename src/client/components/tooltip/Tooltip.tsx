@@ -38,6 +38,10 @@ type Props = {
    */
   placement?: Placement
   alwaysVisible?: boolean
+  /**
+   * Calls `hideTooltip` when changed to `true`
+   */
+  shouldHide?: boolean
   className?: string
   children?: React.ReactNode
 }
@@ -48,6 +52,7 @@ export const Tooltip: React.FC<Props> = ({
   openedDuration = MsDuration.seconds(3),
   placement = 'bottom',
   alwaysVisible = false,
+  shouldHide,
   className,
   children,
 }) => {
@@ -83,12 +88,65 @@ export const Tooltip: React.FC<Props> = ({
     options,
   )
 
-  const setupHoverClickListeners = useSetupHoverClickListeners(
-    hoverRefs,
-    setShouldDisplay_,
-    openedDuration,
-    setEventListenersEnabled,
-  )
+  const timer = useRef<number>()
+
+  const hideTooltip = useCallback(() => {
+    window.clearTimeout(timer.current)
+    setEventListenersEnabled(false)
+    setShouldDisplay_(false)
+  }, [])
+
+  // Calls `hideTooltip` when changed to `true`
+  useEffect(() => {
+    if (shouldHide === true) hideTooltip()
+  }, [hideTooltip, shouldHide])
+
+  /**
+   * Function that adds 'click' and 'mouseover/mouseleave' event listeners on 'hoverRef'.
+   * Those listeners will mutate `shouldDisplayRef` inner value to control whether or not the tooltip should be displayed.
+   */
+  const setupHoverClickListeners = useCallback(() => {
+    const hovers = hoverRefs.map(r => r.current)
+
+    function showTooltip(): void {
+      if (hovers.every(h => h === null)) return
+      window.clearTimeout(timer.current)
+      setEventListenersEnabled(true)
+      setShouldDisplay_(true)
+    }
+
+    function clickTooltip(): void {
+      showTooltip()
+
+      // And hide it afterwards.
+      // eslint-disable-next-line functional/immutable-data
+      timer.current = window.setTimeout(() => {
+        hideTooltip()
+      }, MsDuration.unwrap(openedDuration))
+    }
+
+    hovers.forEach(hover => {
+      if (hover === null) return
+
+      // React to hover in / out for desktop users.
+      hover.addEventListener('mouseover', showTooltip, true)
+      hover.addEventListener('mouseleave', hideTooltip, true)
+
+      // React to click / tap for tablet users.
+      hover.addEventListener('click', clickTooltip, true)
+    })
+
+    return () => {
+      window.clearTimeout(timer.current)
+      hovers.forEach(hover => {
+        if (hover === null) return
+
+        hover.removeEventListener('click', clickTooltip, true)
+        hover.removeEventListener('mouseover', showTooltip, true)
+        hover.removeEventListener('mouseleave', hideTooltip, true)
+      })
+    }
+  }, [hideTooltip, hoverRefs, openedDuration])
 
   // Set hover / click listeners to display or hide the tooltip.
   useEffect(setupHoverClickListeners, [setupHoverClickListeners])
@@ -130,67 +188,4 @@ export const Tooltip: React.FC<Props> = ({
   )
 }
 
-/**
- * Returns a function that adds 'click' and 'mouseover/mouseleave' event listeners on 'hoverRef'.
- * Those listeners will mutate `shouldDisplayRef` inner value to control whether or not the tooltip should be displayed.
- */
-const useSetupHoverClickListeners = (
-  hoverRefs: NonEmptyArray<React.RefObject<Element>>,
-  setShouldDisplay: React.Dispatch<React.SetStateAction<boolean>>,
-  openedDuration: MsDuration,
-  setEventListenersEnabled: React.Dispatch<React.SetStateAction<boolean>>,
-): (() => void) =>
-  useCallback(() => {
-    const hovers = hoverRefs.map(r => r.current)
-
-    // eslint-disable-next-line functional/no-let
-    let timer: number | undefined
-
-    function showTooltip(): void {
-      if (hovers.every(h => h === null)) return
-      window.clearTimeout(timer)
-      setEventListenersEnabled(true)
-      setShouldDisplay(true)
-    }
-
-    function hideTooltip(): void {
-      window.clearTimeout(timer)
-      setEventListenersEnabled(false)
-      setShouldDisplay(false)
-    }
-
-    function clickTooltip(): void {
-      showTooltip()
-
-      // And hide it afterwards.
-      timer = window.setTimeout(() => {
-        hideTooltip()
-      }, MsDuration.unwrap(openedDuration))
-    }
-
-    hovers.forEach(hover => {
-      if (hover === null) return
-
-      // React to hover in / out for desktop users.
-      hover.addEventListener('mouseover', showTooltip, true)
-      hover.addEventListener('mouseleave', hideTooltip, true)
-
-      // React to click / tap for tablet users.
-      hover.addEventListener('click', clickTooltip, true)
-    })
-
-    return () => {
-      window.clearTimeout(timer)
-      hovers.forEach(hover => {
-        if (hover === null) return
-
-        hover.removeEventListener('click', clickTooltip, true)
-        hover.removeEventListener('mouseover', showTooltip, true)
-        hover.removeEventListener('mouseleave', hideTooltip, true)
-      })
-    }
-  }, [hoverRefs, openedDuration, setEventListenersEnabled, setShouldDisplay])
-
-function isArray<A>(a: A | NonEmptyArray<A>): a is NonEmptyArray<A> {
-  return Array.isArray(a)
-}
+const isArray = Array.isArray as unknown as <A>(a: A | NonEmptyArray<A>) => a is NonEmptyArray<A>

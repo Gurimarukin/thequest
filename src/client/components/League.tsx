@@ -26,6 +26,7 @@ type Props = {
    * @default false
    */
   reverse?: boolean
+  tooltipShouldHide?: boolean
   draggable?: boolean
   className?: string
 }
@@ -43,6 +44,7 @@ export const League: React.FC<Props> = ({
   queue,
   league,
   reverse = false,
+  tooltipShouldHide,
   draggable,
   className,
 }) => {
@@ -135,7 +137,11 @@ export const League: React.FC<Props> = ({
           ) : null}
         </div>
       </div>
-      <Tooltip hoverRef={ref} className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1">
+      <Tooltip
+        hoverRef={ref}
+        shouldHide={tooltipShouldHide}
+        className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
+      >
         <span
           className={cx('col-span-2 justify-self-center font-bold', [
             'pb-0.5',

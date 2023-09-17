@@ -47,6 +47,7 @@ export type ChampionMasterySquareProps = {
    * @default 'top'
    */
   tooltipPlacement?: Placement
+  tooltipShouldHide?: boolean
   /**
    * @default false
    */
@@ -81,6 +82,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   tooltipHoverRef: overrideHoverRef,
   tooltipPlacementRef,
   tooltipPlacement = 'bottom',
+  tooltipShouldHide,
   centerShards = false,
   noShadow = false,
   draggable,
@@ -168,6 +170,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         hoverRef={hoverRef}
         placementRef={tooltipPlacementRef}
         placement={tooltipPlacement}
+        shouldHide={tooltipShouldHide}
         className="!p-0"
       >
         <ChampionTooltip
