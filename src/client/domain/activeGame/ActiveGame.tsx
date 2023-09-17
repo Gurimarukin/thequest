@@ -403,22 +403,25 @@ const fn =
     currentRow = 0,
     y = 0,
   ) =>
-  (index: number) =>
-    active && index === originalIndex
-      ? {
-          x: teamId === 100 ? dragOffset : -dragOffset,
-          y: (currentIndex - originalIndex) * participantHeight + y,
-          color: dragColor[teamId],
-          zIndex: 2,
-          immediate: (key: string) => key === 'y' || key === 'zIndex',
-        }
-      : {
-          x: 0,
-          y: (order.indexOf(index) - index) * participantHeight,
-          color: active && index === currentRow ? dragOverColor : baseColor[teamId],
-          zIndex: 1,
-          immediate: false,
-        }
+  (index: number) => {
+    if (active && index === originalIndex) {
+      return {
+        x: teamId === 100 ? dragOffset : -dragOffset,
+        y: (currentIndex - originalIndex) * participantHeight + y,
+        color: dragColor[teamId],
+        zIndex: 2,
+        immediate: (key: string) => key === 'y' || key === 'zIndex',
+      }
+    }
+    const indexOf = order.indexOf(index)
+    return {
+      x: 0,
+      y: (indexOf - index) * participantHeight,
+      color: active && indexOf === currentRow ? dragOverColor : baseColor[teamId],
+      zIndex: 1,
+      immediate: false,
+    }
+  }
 
 const baseColor: Dict<`${TeamId}`, string> = {
   100: '#061b3e',

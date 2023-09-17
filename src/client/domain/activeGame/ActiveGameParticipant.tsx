@@ -386,7 +386,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         ref={onBevelMount}
         gridColStart={9}
-        className={cx('bg-transparent [&>*]:text-current', ['justify-self-end', reverse])}
+        className={cx('bg-transparent [&>*]:!text-current', ['justify-self-end', reverse])}
       >
         <div
           className={cx(
