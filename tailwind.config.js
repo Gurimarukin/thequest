@@ -51,8 +51,6 @@ module.exports = {
       'mastery-7': '#204b85',
       'mastery-7-bis': '#043c88',
       'mastery-7-text': colors.blue[500],
-      'team-blue': '#061b3e',
-      'team-red': '#261622',
 
       'discord-blurple': '#5865f2',
       'discord-darkgreen': '#248045',

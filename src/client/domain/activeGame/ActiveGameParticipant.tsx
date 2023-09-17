@@ -16,7 +16,6 @@ import { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
@@ -25,7 +24,7 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import type { Dict, List } from '../../../shared/utils/fp'
+import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
@@ -73,7 +72,6 @@ type ParticipantProps = {
   runeById: (id: RuneId) => Maybe<StaticDataRune>
   platform: Platform
   mapId: MapId
-  teamId: TeamId
   participant: ActiveGameParticipantView
   highlight: boolean
   reverse: boolean
@@ -92,7 +90,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   runeById,
   platform,
   mapId,
-  teamId,
   participant: {
     summonerName,
     profileIconId,
@@ -171,13 +168,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const padding = reverse ? 'pr-2' : 'pl-2'
 
   return (
-    <Li
-      teamId={teamId}
-      reverse={reverse}
-      index={index}
-      springStyle={springStyle}
-      gestureProps={gestureProps}
-    >
+    <Li reverse={reverse} index={index} springStyle={springStyle} gestureProps={gestureProps}>
       <Cell
         gridColStart={1}
         className={
@@ -389,11 +380,11 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         ref={onBevelMount}
         gridColStart={9}
-        className={cx('!bg-transparent', ['justify-self-end', reverse])}
+        className={cx('bg-transparent [&>*]:text-current', ['justify-self-end', reverse])}
       >
         <div
           className={cx(
-            teamBorder[teamId],
+            'border-current',
             reverse ? 'border-l-transparent' : 'border-b-transparent',
           )}
           style={{
@@ -408,7 +399,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 }
 
 type LiProps = {
-  teamId: TeamId
   reverse: boolean
   index: number
   springStyle: StyleProps
@@ -416,7 +406,7 @@ type LiProps = {
   children: List<React.ReactElement> // should be List<CellElement>, but typing is poorly done :/
 }
 
-const Li: React.FC<LiProps> = ({ teamId, reverse, index, springStyle, gestureProps, children }) => (
+const Li: React.FC<LiProps> = ({ reverse, index, springStyle, gestureProps, children }) => (
   <li className="contents">
     {Children.map<CellElement, CellElement>(children as List<CellElement>, element => {
       const { className, style, ...props_ } = element.props
@@ -424,23 +414,13 @@ const Li: React.FC<LiProps> = ({ teamId, reverse, index, springStyle, gesturePro
         ...gestureProps,
         ...props_,
         reverse,
-        className: cx(className, 'touch-none', teamBg[teamId]),
+        className: cx(className, 'bg-current touch-none'),
         style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
       }
       return cloneElement(element, props)
     })}
   </li>
 )
-
-const teamBg: Dict<`${TeamId}`, string> = {
-  100: 'bg-team-blue',
-  200: 'bg-team-red',
-}
-
-const teamBorder: Dict<`${TeamId}`, string> = {
-  100: 'border-team-blue',
-  200: 'border-team-red',
-}
 
 type CellProps = {
   type?: AnimatedComponent<React.ElementType>
@@ -460,10 +440,14 @@ type CellElement = React.DetailedReactHTMLElement<CellElementProps, HTMLElement>
 type HTMLElementProps = React.ClassAttributes<HTMLElement> & React.HTMLAttributes<HTMLElement>
 
 const Cell = forwardRef<HTMLElement, CellProps>(
-  ({ type = animated.div, gridColStart, reverse = false, style, children, ...props_ }, ref) => {
+  (
+    { type = animated.div, gridColStart, reverse = false, className, style, children, ...props_ },
+    ref,
+  ) => {
     const props: HTMLElementProps = {
       ...props_,
       ref,
+      className: cx('[&>*]:text-wheat', className),
       style: {
         ...style,
         gridColumnStart: reverse ? undefined : gridColStart,

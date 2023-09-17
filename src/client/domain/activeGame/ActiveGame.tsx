@@ -28,7 +28,7 @@ import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/Summo
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { List } from '../../../shared/utils/fp'
+import type { Dict, List } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { AsyncRenderer } from '../../components/AsyncRenderer'
@@ -339,7 +339,7 @@ const Participants: React.FC<ParticipantsProps> = ({
 
   const order = useRef<List<number>>(participants.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
 
-  const [springs, api] = useSprings(participants.length, fn(order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
+  const [springs, api] = useSprings(participants.length, fn(teamId, order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
 
   const bind = useDrag(({ args: [activeIndex], active, movement: [, y] }) => {
     setIsDragging(active)
@@ -350,17 +350,21 @@ const Participants: React.FC<ParticipantsProps> = ({
       0,
       participants.length - 1,
     )
-    const newOrder = swap(order.current, currentIndex, currentRow)
 
-    api.start(fn(newOrder, active, activeIndex, currentIndex, y)) // Feed springs new style data, they'll animate the view without causing a single render
+    if (active) {
+      api.start(fn(teamId, order.current, active, activeIndex, currentIndex, currentRow, y)) // Feed springs new style data, they'll animate the view without causing a single render
+    } else {
+      const newOrder = swap(order.current, currentIndex, currentRow)
+      api.start(fn(teamId, newOrder, active, activeIndex, currentIndex, currentRow, y))
 
-    // eslint-disable-next-line functional/immutable-data
-    if (!active) order.current = newOrder
+      // eslint-disable-next-line functional/immutable-data
+      order.current = newOrder
+    }
   })
 
   return (
     <>
-      {springs.map(({ zIndex, y }, j) => {
+      {springs.map((springStyle, j) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const participant = participants[j]!
         return (
@@ -371,13 +375,12 @@ const Participants: React.FC<ParticipantsProps> = ({
             runeById={runeById}
             platform={platform}
             mapId={mapId}
-            teamId={teamId}
             participant={participant}
             highlight={participant.summonerName === summoner.name}
             reverse={reverse}
             index={j}
             isDragging={isDragging}
-            springStyle={{ zIndex, y }}
+            springStyle={springStyle}
             gestureProps={bind(j)}
           />
         )
@@ -388,21 +391,46 @@ const Participants: React.FC<ParticipantsProps> = ({
 
 // height: 90, gap: 16
 const participantHeight = 106
+const dragOffset = 20
 
 const fn =
-  (order: List<number>, active = false, originalIndex = 0, currentIndex = 0, y = 0) =>
+  (
+    teamId: TeamId,
+    order: List<number>,
+    active = false,
+    originalIndex = 0,
+    currentIndex = 0,
+    currentRow = 0,
+    y = 0,
+  ) =>
   (index: number) =>
     active && index === originalIndex
       ? {
+          x: teamId === 100 ? dragOffset : -dragOffset,
           y: (currentIndex - originalIndex) * participantHeight + y,
-          zIndex: 1,
+          color: dragColor[teamId],
+          zIndex: 2,
           immediate: (key: string) => key === 'y' || key === 'zIndex',
         }
       : {
+          x: 0,
           y: (order.indexOf(index) - index) * participantHeight,
-          zIndex: 0,
+          color: active && index === currentRow ? dragOverColor : baseColor[teamId],
+          zIndex: 1,
           immediate: false,
         }
+
+const baseColor: Dict<`${TeamId}`, string> = {
+  100: '#061b3e',
+  200: '#261622',
+}
+
+const dragColor: Dict<`${TeamId}`, string> = {
+  100: '#04285c',
+  200: '#411a21',
+}
+
+const dragOverColor = '#525252'
 
 type LoadingProps = {
   reload: () => void
