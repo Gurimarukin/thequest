@@ -16,9 +16,16 @@ type Props = {
   runeById: (id: RuneId) => Maybe<StaticDataRune>
   perks: PerksView
   reverse: boolean
+  draggable?: boolean
 }
 
-export const ActiveGameRunes: React.FC<Props> = ({ runeStyleById, runeById, perks, reverse }) => {
+export const ActiveGameRunes: React.FC<Props> = ({
+  runeStyleById,
+  runeById,
+  perks,
+  reverse,
+  draggable,
+}) => {
   const { keyStone, primaryPath, secondaryPath, shards } = useMemo(() => {
     const findRunes = getFindRunes(runeStyleById, runeById, perks.perkIds)
 
@@ -45,11 +52,12 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyleById, runeById, perk
   return (
     <div className={cx('flex gap-1.5', ['flex-row-reverse', reverse])}>
       <div className={cx('flex flex-col gap-2', reverse ? 'pr-1' : 'pl-1')}>
-        <RunePath runes={primaryPath} reverse={reverse} className="gap-1" />
-        <RunePath runes={secondaryPath} reverse={reverse} className="gap-1" />
+        <RunePath runes={primaryPath} reverse={reverse} draggable={draggable} className="gap-1" />
+        <RunePath runes={secondaryPath} reverse={reverse} draggable={draggable} className="gap-1" />
         <RunePath
           runes={shards}
           reverse={!reverse}
+          draggable={draggable}
           className="justify-end gap-1.5"
           liClassName="!w-3 h-3 overflow-hidden"
           runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
@@ -61,7 +69,13 @@ export const ActiveGameRunes: React.FC<Props> = ({ runeStyleById, runeById, perk
           Maybe.fold(
             () => <div className="h-full w-full bg-black" />,
             r => (
-              <Rune icon={r.iconPath} name={r.name} description={r.longDesc} className="w-full" />
+              <Rune
+                icon={r.iconPath}
+                name={r.name}
+                description={r.longDesc}
+                draggable={draggable}
+                className="w-full"
+              />
             ),
           ),
         )}
@@ -102,6 +116,7 @@ const getFindRunes =
 type RunePathProps = {
   runes: List<StaticDataRune>
   reverse: boolean
+  draggable?: boolean
   className?: string
   liClassName?: string
   runeClassName?: string
@@ -110,6 +125,7 @@ type RunePathProps = {
 const RunePath: React.FC<RunePathProps> = ({
   runes,
   reverse,
+  draggable,
   className,
   liClassName,
   runeClassName,
@@ -125,6 +141,7 @@ const RunePath: React.FC<RunePathProps> = ({
           icon={r.iconPath}
           name={r.name}
           description={r.longDesc}
+          draggable={draggable}
           className={cx('w-full', runeClassName)}
         />
       </li>

@@ -11,4 +11,31 @@ const round = (n: number, digits = 0): number => {
   return e === 0 ? 0 : Math.round(n * e) / e
 }
 
-export const NumberUtils = { round, average }
+/**
+ * https://github.com/lodash/lodash/blob/master/clamp.js
+ *
+ * Clamps `n` within the inclusive `lower` and `upper` bounds.
+ *
+ * @param n The number to clamp.
+ * @param lower The lower bound.
+ * @param upper The upper bound.
+ * @returns Returns the clamped number.
+ * @example
+ *
+ * clamp(-10, -5, 5)
+ * // => -5
+ *
+ * clamp(10, -5, 5)
+ * // => 5
+ */
+const clamp = (n: number, lower: number, upper: number): number => {
+  // eslint-disable-next-line functional/no-let
+  let res: number = n
+  /* eslint-disable functional/no-expression-statements */
+  res = res <= upper ? res : upper
+  res = res >= lower ? res : lower
+  /* eslint-enable functional/no-expression-statements */
+  return res
+}
+
+export const NumberUtils = { round, average, clamp }

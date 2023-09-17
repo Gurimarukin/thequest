@@ -8,10 +8,11 @@ import { Tooltip } from './tooltip/Tooltip'
 
 type Props = {
   spell: StaticDataSummonerSpell
+  draggable?: boolean
   className?: string
 }
 
-export const SummonerSpell: React.FC<Props> = ({ spell, className }) => {
+export const SummonerSpell: React.FC<Props> = ({ spell, draggable, className }) => {
   const { t } = useTranslation('common')
   const { assets } = useStaticData()
 
@@ -23,6 +24,7 @@ export const SummonerSpell: React.FC<Props> = ({ spell, className }) => {
         ref={ref}
         src={assets.summonerSpell(spell.id)}
         alt={t.spellIconAlt(spell.name)}
+        draggable={draggable}
         className={className}
       />
       <Tooltip hoverRef={ref} className="grid max-w-xs grid-cols-[auto_auto] gap-1">

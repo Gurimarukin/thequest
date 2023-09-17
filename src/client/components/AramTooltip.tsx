@@ -13,8 +13,8 @@ export const AramTooltip: React.FC<Props> = ({ aram }) => (
 )
 
 const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
-  (t, name) => {
-    const icon = renderStatIcon(t.aram, name, 'h-4, w-4')
+  (t, name, draggable) => {
+    const icon = renderStatIcon(t.aram, name, draggable, 'h-4, w-4')
     const renderStatValue_ = renderStatValue(name)
     return value => (
       <li key={name} className="contents">
