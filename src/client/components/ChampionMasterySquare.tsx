@@ -55,6 +55,7 @@ export type ChampionMasterySquareProps = {
    * @default false
    */
   noShadow?: boolean
+  draggable?: boolean
 }
 
 export type SetChampionShards = {
@@ -82,6 +83,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   tooltipPlacement = 'bottom',
   centerShards = false,
   noShadow = false,
+  draggable,
 }) => {
   const setShardsCount = useMemo(
     () => (setChampionShards !== null ? setChampionShards.run(championId) : null),
@@ -118,6 +120,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         <CroppedChampionSquare
           championKey={championId}
           championName={name}
+          isDraggable={draggable}
           className={cx(
             'relative h-[54px] w-[54px] rounded-bl-lg bg-black text-2xs text-transparent',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',

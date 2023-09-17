@@ -1,3 +1,5 @@
+import { type AnimatedComponent, animated } from '@react-spring/web'
+import type { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { pipe } from 'fp-ts/function'
 import {
   Children,
@@ -52,6 +54,8 @@ const bevelWidth = 32 // px
 
 const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
 
+type StyleProps = Parameters<AnimatedComponent<'li'>>[0]['style'] // Merge<CSSProperties, TransformProps>;
+
 type SquarePropsRest = Pick<
   ChampionMasterySquareProps,
   | 'chestGranted'
@@ -77,6 +81,8 @@ type ParticipantProps = {
    * index inside of team
    */
   index: number
+  springStyle: StyleProps
+  gestureProps: ReactDOMAttributes
 }
 
 export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
@@ -100,6 +106,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   highlight,
   reverse,
   index,
+  springStyle,
+  gestureProps,
 }) => {
   const { t } = useTranslation()
   const { championByKey, assets } = useStaticData()
@@ -145,6 +153,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
         centerShards: true,
         noShadow: true,
+        draggable: false,
       }),
     ),
   )
@@ -157,7 +166,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const padding = reverse ? 'pr-2' : 'pl-2'
 
   return (
-    <Li teamId={teamId} reverse={reverse} index={index}>
+    <Li
+      teamId={teamId}
+      reverse={reverse}
+      index={index}
+      springStyle={springStyle}
+      gestureProps={gestureProps}
+    >
       <Cell
         gridColStart={1}
         className={
@@ -172,7 +187,15 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           leagues,
           Maybe.fold(
             () => null,
-            l => <League variant="small" queue="soloDuo" league={l.soloDuo} reverse={reverse} />,
+            l => (
+              <League
+                variant="small"
+                queue="soloDuo"
+                league={l.soloDuo}
+                reverse={reverse}
+                draggable={false}
+              />
+            ),
           ),
         )}
       </Cell>
@@ -184,7 +207,15 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           leagues,
           Maybe.fold(
             () => null,
-            l => <League variant="small" queue="flex" league={l.flex} reverse={reverse} />,
+            l => (
+              <League
+                variant="small"
+                queue="flex"
+                league={l.flex}
+                reverse={reverse}
+                draggable={false}
+              />
+            ),
           ),
         )}
       </Cell>
@@ -200,6 +231,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           <img
             src={assets.summonerIcon(profileIconId)}
             alt={t.common.summonerIconAlt(summonerName)}
+            draggable={false}
             className="w-full"
           />
         </div>
@@ -237,7 +269,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         </div>
       </Cell>
       <Cell
-        type="ul"
+        type={animated.ul}
         gridColStart={4}
         className={cx('flex flex-col items-center justify-between py-[13px]', padding)}
       >
@@ -246,7 +278,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             spell1,
             Maybe.fold(
               () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
-              s => <SummonerSpell spell={s} className="h-full w-full" />,
+              s => <SummonerSpell spell={s} draggable={false} className="h-full w-full" />,
             ),
           )}
         </li>
@@ -255,7 +287,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             spell2,
             Maybe.fold(
               () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
-              s => <SummonerSpell spell={s} className="h-full w-full" />,
+              s => <SummonerSpell spell={s} draggable={false} className="h-full w-full" />,
             ),
           )}
         </li>
@@ -310,7 +342,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                     reverse,
                   ])}
                 >
-                  <ActiveGameAramStats reverse={reverse} aram={c.aram} />
+                  <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
                 </div>
                 <Tooltip hoverRef={aramRef}>
                   <AramTooltip aram={c.aram} />
@@ -326,13 +358,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           runeById={runeById}
           perks={perks}
           reverse={reverse}
+          draggable={false}
         />
       </Cell>
       <Cell gridColStart={8} />
       <Cell
         ref={onBevelMount}
         gridColStart={9}
-        className={cx('bg-transparent', ['justify-self-end', reverse])}
+        className={cx('!bg-transparent', ['justify-self-end', reverse])}
       >
         <div
           className={cx(
@@ -354,18 +387,21 @@ type LiProps = {
   teamId: TeamId
   reverse: boolean
   index: number
+  springStyle: StyleProps
+  gestureProps: ReactDOMAttributes
   children: List<React.ReactElement> // should be List<CellElement>, but typing is poorly done :/
 }
 
-const Li: React.FC<LiProps> = ({ teamId, reverse, index, children }) => (
+const Li: React.FC<LiProps> = ({ teamId, reverse, index, springStyle, gestureProps, children }) => (
   <li className="contents">
     {Children.map<CellElement, CellElement>(children as List<CellElement>, element => {
       const { className, style, ...props_ } = element.props
       const props: RequiredCellElementProps = {
+        ...gestureProps,
         ...props_,
         reverse,
-        className: cx(className, teamBg[teamId]),
-        style: { ...style, gridRowStart: index + 1 },
+        className: cx(className, 'touch-none', teamBg[teamId]),
+        style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
       }
       return cloneElement(element, props)
     })}
@@ -373,17 +409,17 @@ const Li: React.FC<LiProps> = ({ teamId, reverse, index, children }) => (
 )
 
 const teamBg: Dict<`${TeamId}`, string> = {
-  100: 'bg-mastery-7-bis/30',
-  200: 'bg-mastery-5-bis/30',
+  100: 'bg-team-blue',
+  200: 'bg-team-red',
 }
 
 const teamBorder: Dict<`${TeamId}`, string> = {
-  100: 'border-mastery-7-bis/30',
-  200: 'border-mastery-5-bis/30',
+  100: 'border-team-blue',
+  200: 'border-team-red',
 }
 
 type CellProps = {
-  type?: keyof React.ReactHTML
+  type?: AnimatedComponent<React.ElementType>
   gridColStart: number
 } & BaseCellProps &
   HTMLElementProps
@@ -400,7 +436,7 @@ type CellElement = React.DetailedReactHTMLElement<CellElementProps, HTMLElement>
 type HTMLElementProps = React.ClassAttributes<HTMLElement> & React.HTMLAttributes<HTMLElement>
 
 const Cell = forwardRef<HTMLElement, CellProps>(
-  ({ type = 'div', gridColStart, reverse = false, style, children, ...props_ }, ref) => {
+  ({ type = animated.div, gridColStart, reverse = false, style, children, ...props_ }, ref) => {
     const props: HTMLElementProps = {
       ...props_,
       ref,
@@ -410,7 +446,7 @@ const Cell = forwardRef<HTMLElement, CellProps>(
         gridColumnEnd: reverse ? gridTotalCols - gridColStart + 2 : undefined,
       },
     }
-    return createElement<HTMLElementProps, HTMLElement>(type, props, children)
+    return createElement(type, props, children)
   },
 )
 

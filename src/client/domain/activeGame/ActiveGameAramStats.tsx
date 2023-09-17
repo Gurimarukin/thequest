@@ -6,7 +6,7 @@ import type { AramStatsProps } from '../../components/aramStats/aramStats'
 import { getAramStats, renderStatIcon, renderStatValue } from '../../components/aramStats/aramStats'
 import { cx } from '../../utils/cx'
 
-type Props = Pick<AramStatsProps, 'aram'> & {
+type Props = Pick<AramStatsProps, 'aram' | 'draggable'> & {
   reverse: boolean
 }
 
@@ -15,7 +15,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
     () =>
       getAramStats(
         (t, name) => {
-          const icon = renderStatIcon(t.aram, name, 'h-full w-full')
+          const icon = renderStatIcon(t.aram, name, props.draggable, 'h-full w-full')
           const renderStatValue_ = renderStatValue(name, '')
           return value => (
             <li key={name} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
@@ -39,7 +39,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
           ),
         5,
       ),
-    [reverse],
+    [props.draggable, reverse],
   )
 
   return <AramStats {...props}>{renderAramStats}</AramStats>

@@ -2,8 +2,8 @@ import type { AramStatsProps } from './aramStats'
 import { getAramStats, renderStatIcon, renderStatValue } from './aramStats'
 
 export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
-  (t, name) => {
-    const icon = renderStatIcon(t.aram, name, 'h-2.5 w-2.5')
+  (t, name, draggable) => {
+    const icon = renderStatIcon(t.aram, name, draggable, 'h-2.5 w-2.5')
     const renderStatValue_ = renderStatValue(name)
     return value => (
       <li key={name} className="flex items-center gap-1">
