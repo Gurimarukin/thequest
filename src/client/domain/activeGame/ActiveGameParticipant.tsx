@@ -153,6 +153,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
         centerShards: true,
         noShadow: true,
+        draggable: false,
       }),
     ),
   )
@@ -186,7 +187,15 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           leagues,
           Maybe.fold(
             () => null,
-            l => <League variant="small" queue="soloDuo" league={l.soloDuo} reverse={reverse} />,
+            l => (
+              <League
+                variant="small"
+                queue="soloDuo"
+                league={l.soloDuo}
+                reverse={reverse}
+                draggable={false}
+              />
+            ),
           ),
         )}
       </Cell>
@@ -198,7 +207,15 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           leagues,
           Maybe.fold(
             () => null,
-            l => <League variant="small" queue="flex" league={l.flex} reverse={reverse} />,
+            l => (
+              <League
+                variant="small"
+                queue="flex"
+                league={l.flex}
+                reverse={reverse}
+                draggable={false}
+              />
+            ),
           ),
         )}
       </Cell>
@@ -214,6 +231,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           <img
             src={assets.summonerIcon(profileIconId)}
             alt={t.common.summonerIconAlt(summonerName)}
+            draggable={false}
             className="w-full"
           />
         </div>
@@ -260,7 +278,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             spell1,
             Maybe.fold(
               () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
-              s => <SummonerSpell spell={s} className="h-full w-full" />,
+              s => <SummonerSpell spell={s} draggable={false} className="h-full w-full" />,
             ),
           )}
         </li>
@@ -269,7 +287,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             spell2,
             Maybe.fold(
               () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
-              s => <SummonerSpell spell={s} className="h-full w-full" />,
+              s => <SummonerSpell spell={s} draggable={false} className="h-full w-full" />,
             ),
           )}
         </li>
@@ -324,7 +342,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                     reverse,
                   ])}
                 >
-                  <ActiveGameAramStats reverse={reverse} aram={c.aram} />
+                  <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
                 </div>
                 <Tooltip hoverRef={aramRef}>
                   <AramTooltip aram={c.aram} />
@@ -340,6 +358,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           runeById={runeById}
           perks={perks}
           reverse={reverse}
+          draggable={false}
         />
       </Cell>
       <Cell gridColStart={8} />

@@ -22,6 +22,7 @@ export type AramStatsProps = {
    * @default false
    */
   simpleStatsSpellsSplit?: boolean
+  draggable?: boolean
   /**
    * @prop renderChildren
    * Called only if isSome(aram.stats) or isSome(aram.spells).
@@ -35,6 +36,7 @@ export type AramStatsProps = {
 type RenderStat = (
   t: Translation,
   name: WikiaStatsBalanceKey,
+  draggable?: boolean,
 ) => (value: number) => React.ReactElement
 type RenderSpell = (
   t: Translation,
@@ -51,6 +53,7 @@ export const getAramStats = (
     aram,
     splitAt = defaultSplitAt,
     simpleStatsSpellsSplit = false,
+    draggable,
     children: renderChildren,
   }) => {
     const { t } = useTranslation()
@@ -59,8 +62,8 @@ export const getAramStats = (
       () =>
         Maybe.isNone(aram.stats) && Maybe.isNone(aram.spells)
           ? Maybe.none
-          : Maybe.some(separateChildren(t, aram, splitAt, simpleStatsSpellsSplit)),
-      [aram, simpleStatsSpellsSplit, splitAt, t],
+          : Maybe.some(separateChildren(t, aram, splitAt, simpleStatsSpellsSplit, draggable)),
+      [aram, draggable, simpleStatsSpellsSplit, splitAt, t],
     )
 
     return pipe(
@@ -80,6 +83,7 @@ const getSeparateChildren =
     aram: AramData,
     splitAt: number,
     simpleStatsSpellsSplit: boolean,
+    draggable: boolean | undefined,
   ): Separated<List<React.ReactElement>, List<React.ReactElement>> => {
     const eithers = pipe(
       [
@@ -92,7 +96,7 @@ const getSeparateChildren =
                 pipe(
                   Dict.lookup(key, stats),
                   Maybe.map(
-                    flow(renderStat(t, key), e =>
+                    flow(renderStat(t, key, draggable), e =>
                       Either.right<React.ReactElement, React.ReactElement>(e),
                     ),
                   ),
@@ -141,11 +145,13 @@ const getSeparateChildren =
 export const renderStatIcon = (
   t: Translation['aram'],
   name: WikiaStatsBalanceKey,
+  draggable?: boolean,
   className?: string,
 ): React.ReactElement => (
   <img
     src={Assets.stats[name]}
     alt={t.statIconAlt(name)}
+    draggable={draggable}
     className={cx('bg-contain brightness-75 sepia', className)}
   />
 )

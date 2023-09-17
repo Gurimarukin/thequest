@@ -26,6 +26,7 @@ type Props = {
    * @default false
    */
   reverse?: boolean
+  draggable?: boolean
   className?: string
 }
 
@@ -42,6 +43,7 @@ export const League: React.FC<Props> = ({
   queue,
   league,
   reverse = false,
+  draggable,
   className,
 }) => {
   const { t } = useTranslation('common')
@@ -122,6 +124,7 @@ export const League: React.FC<Props> = ({
           <img
             src={src}
             alt={alt}
+            draggable={draggable}
             className={cx('h-full object-contain', Maybe.isNone(league) ? 'w-[56.25%]' : 'w-full')}
           />
         </span>

@@ -11,13 +11,22 @@ type Props<A extends HTMLTag> = {
   championKey: ChampionKey
   championName: string
   as?: A
+  isDraggable?: boolean
   children?: React.ReactNode
 } & HTMLAttributes<ExtractElement<A>>
 
 export const CroppedChampionSquare: <A extends HTMLTag = 'div'>(
   props: React.PropsWithoutRef<Props<A>> & React.RefAttributes<ExtractElement<A>>,
 ) => React.ReactElement | null = forwardRef(function <A extends HTMLTag>(
-  { championKey, championName, as = 'div' as A, className, children, ...props }: Props<A>,
+  {
+    championKey,
+    championName,
+    as = 'div' as A,
+    isDraggable,
+    className,
+    children,
+    ...props
+  }: Props<A>,
   ref: React.ForwardedRef<ExtractElement<A>>,
 ) {
   const { t } = useTranslation('common')
@@ -29,6 +38,7 @@ export const CroppedChampionSquare: <A extends HTMLTag = 'div'>(
     <img
       src={assets.champion.square(championKey)}
       alt={t.championIconAlt(championName)}
+      draggable={isDraggable}
       className="m-[-6%] w-[112%] max-w-none"
     />,
     children,
