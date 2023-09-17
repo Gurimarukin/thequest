@@ -134,36 +134,45 @@ const commonElems =
  *
  * Note: This is a pure function so a new array will be returned, instead of altering the array argument.
  *
- * @param array Array in which to move an item.
+ * @param as Array in which to move an item.
  * @param moveIndex The index of the item to move.
  * @param toIndex The index to move item at moveIndex to.
  * @returns
  */
-const swap = <A>(array: List<A>, moveIndex: number, toIndex: number): List<A> => {
-  const item = array[moveIndex]
-  const length = array.length
+const move = <A>(as: List<A>, moveIndex: number, toIndex: number): List<A> => {
+  const item = as[moveIndex]
+  const length = as.length
   const diff = moveIndex - toIndex
 
   if (diff > 0) {
     // move left
     return [
-      ...array.slice(0, toIndex),
+      ...as.slice(0, toIndex),
       item,
-      ...array.slice(toIndex, moveIndex),
-      ...array.slice(moveIndex + 1, length),
+      ...as.slice(toIndex, moveIndex),
+      ...as.slice(moveIndex + 1, length),
     ] as List<A>
   }
   if (diff < 0) {
     // move right
     const targetIndex = toIndex + 1
     return [
-      ...array.slice(0, moveIndex),
-      ...array.slice(moveIndex + 1, targetIndex),
+      ...as.slice(0, moveIndex),
+      ...as.slice(moveIndex + 1, targetIndex),
       item,
-      ...array.slice(targetIndex, length),
+      ...as.slice(targetIndex, length),
     ] as List<A>
   }
-  return array
+  return as
+}
+
+const swap = <A>(as: List<A>, swapIndex: number, toIndex: number): List<A> => {
+  const res = as.slice()
+  /* eslint-disable @typescript-eslint/no-non-null-assertion, functional/no-expression-statements, functional/immutable-data */
+  res[swapIndex] = as[toIndex]!
+  res[toIndex] = as[swapIndex]!
+  /* eslint-enable functional/no-expression-statements, functional/immutable-data */
+  return res
 }
 
 export const ListUtils = {
@@ -176,6 +185,7 @@ export const ListUtils = {
   updateOrAppend,
   padEnd,
   commonElems,
+  move,
   swap,
 }
 
