@@ -48,10 +48,11 @@ import { cx } from '../../utils/cx'
 import { ActiveGameBans } from './ActiveGameBans'
 import {
   ActiveGameParticipant,
-  gridCols,
-  gridColsReverse,
-  gridTotalCols,
-  xlGridCols,
+  gridColsDesktop,
+  gridColsMobile,
+  gridColsReverseMobile,
+  gridTotalColsDesktop,
+  gridTotalColsReverseMobile,
 } from './ActiveGameParticipant'
 import { useShouldWrap } from './useShouldWrap'
 
@@ -203,7 +204,7 @@ type ActiveGameComponentProps = {
   refreshGame: () => void
 }
 
-const gridHalfCols = gridTotalCols / 2
+const gridHalfColsDesktop = gridTotalColsDesktop / 2
 
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   additionalStaticData,
@@ -264,7 +265,9 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
       {isDraft ? <ActiveGameBans participants={participants} /> : <span />}
 
-      <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', xlGridCols)}>
+      <div
+        className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', gridColsDesktop)}
+      >
         {TeamId.values.map((teamId, i) => {
           const reverse = i % 2 === 1
           const participants_ = participants[teamId]
@@ -272,21 +275,31 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
             <ul
               key={teamId}
               className={
-                shouldWrap ? cx('grid gap-y-1', reverse ? gridColsReverse : gridCols) : 'contents'
+                shouldWrap
+                  ? cx('grid gap-y-1', reverse ? gridColsReverseMobile : gridColsMobile)
+                  : 'contents'
               }
             >
               {i === 0 ? (
                 <span
                   ref={onMountLeft}
                   className="row-start-1"
-                  style={{ gridColumn: `1 / ${gridHalfCols + 1}` }}
+                  style={{
+                    gridColumn: shouldWrap
+                      ? `1 / ${gridTotalColsReverseMobile}`
+                      : `1 / ${gridHalfColsDesktop + 1}`,
+                  }}
                 />
               ) : null}
               {i === 1 ? (
                 <span
                   ref={onMountRight}
                   className="row-start-1"
-                  style={{ gridColumn: `${gridHalfCols + 1} / ${gridTotalCols + 1}` }}
+                  style={{
+                    gridColumn: shouldWrap
+                      ? `2 / ${gridTotalColsReverseMobile + 1}`
+                      : `${gridHalfColsDesktop + 1} / ${gridTotalColsDesktop + 1}`,
+                  }}
                 />
               ) : null}
               {participants_ === undefined ? null : (
@@ -294,6 +307,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   platform={platform}
                   summoner={summoner}
                   mapId={mapId}
+                  shouldWrap={shouldWrap}
                   teamId={teamId}
                   reverse={reverse}
                   participants={participants_}
@@ -316,6 +330,7 @@ type ParticipantsProps = {
   platform: Platform
   summoner: SummonerShort
   mapId: MapId
+  shouldWrap: boolean
   teamId: TeamId
   reverse: boolean
   participants: List<ActiveGameParticipantView>
@@ -328,6 +343,7 @@ const Participants: React.FC<ParticipantsProps> = ({
   platform,
   summoner,
   mapId,
+  shouldWrap,
   teamId,
   reverse,
   participants,
@@ -376,6 +392,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             platform={platform}
             mapId={mapId}
             participant={participant}
+            shouldWrap={shouldWrap}
             highlight={participant.summonerName === summoner.name}
             reverse={reverse}
             index={j}
