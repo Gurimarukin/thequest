@@ -1,3 +1,4 @@
+- timeout when reloading game
 - disable hovers on drag
 - active game: fix hoverRef for champion without displayed points
 - challenges page + detect challenges
