@@ -143,7 +143,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             m => ({ ...m, percents: Business.championPercents(m) }),
           ),
         ),
-        tooltipHoverRef: championRef,
         centerShards: true,
         noShadow: true,
       }),
@@ -274,17 +273,25 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <span className="invisible">h</span>
               </>
             ),
-            props => (
-              <>
-                <span className="invisible">h</span>
-                <div ref={championRef} className="flex flex-col items-center gap-px">
-                  <ChampionMasterySquare {...props} />
-                  <span className={cx(['invisible', props.championLevel < 5])}>
-                    {t.common.numberK(round(props.championPoints / 1000, 1))}
-                  </span>
-                </div>
-              </>
-            ),
+            props => {
+              const hidePoints = props.championLevel < 5
+              return (
+                <>
+                  <span className="invisible">h</span>
+                  {hidePoints ? (
+                    <>
+                      <ChampionMasterySquare {...props} />
+                      <span className="invisible">h</span>
+                    </>
+                  ) : (
+                    <div ref={championRef} className="flex flex-col items-center gap-px">
+                      <ChampionMasterySquare tooltipHoverRef={championRef} {...props} />
+                      <span>{t.common.numberK(round(props.championPoints / 1000, 1))}</span>
+                    </div>
+                  )}
+                </>
+              )
+            },
           ),
         )}
       </Cell>
