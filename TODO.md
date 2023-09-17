@@ -6,7 +6,6 @@
 - detect challenges next to bans
 - otp ratio
 
-- reload active game when coming from elsewhere?
 - align tenacity and ability haste with other stats (hover)
 - ignore CHERRY league entry
 - react-select
