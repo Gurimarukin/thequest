@@ -7,6 +7,7 @@ import {
   createElement,
   forwardRef,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -43,13 +44,13 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-export const gridTotalCols = 18
-
-export const gridCols = 'grid-cols-[repeat(9,auto)_1fr]'
-export const gridColsReverse = 'grid-cols-[1fr_repeat(8,auto)]'
-export const xlGridCols = 'grid-cols-[1fr_repeat(16,auto)_1fr]'
+export const gridTotalCols = 16
 
 const bevelWidth = 32 // px
+
+export const gridCols = 'grid-cols-[repeat(7,auto)_32px_1fr]'
+export const gridColsReverse = 'grid-cols-[1fr_32px_repeat(6,auto)]'
+export const xlGridCols = 'grid-cols-[1fr_repeat(6,auto)_32px_32px_repeat(6,auto)_1fr]'
 
 const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
 
@@ -116,13 +117,19 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const championRef = useRef<HTMLDivElement>(null)
   const aramRef = useRef<HTMLDivElement>(null)
 
-  const tooltipShouldHide = isDragging
-
   const spell1 = summonerSpellByKey(spell1Id)
   const spell2 = summonerSpellByKey(spell2Id)
 
   const champion = championByKey(championId)
+
   const isHowlingAbyss = MapId.isHowlingAbyss(mapId)
+  const tooltipShouldHide = isDragging
+
+  const aramChampion = pipe(
+    champion,
+    Maybe.filter(() => isHowlingAbyss),
+  )
+
   const squareProps = pipe(
     champion,
     Maybe.map(
@@ -164,6 +171,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const onBevelMount = useRefWithResize<HTMLElement>(
     useCallback(e => setBevelHeight(e.offsetHeight), []),
   )
+  const bevelRotate = useMemo(() => Math.atan(bevelWidth / bevelHeight), [bevelHeight])
 
   const padding = reverse ? 'pr-2' : 'pl-2'
 
@@ -175,12 +183,31 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       gestureProps={gestureProps}
       className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
     >
+      <Cell gridColStart={1} className="col-span-7 bg-current shadow-even shadow-black" />
+      <Cell
+        ref={onBevelMount}
+        gridColStart={7}
+        dontResetColor={true}
+        className="col-span-2 overflow-hidden"
+      >
+        <div className="relative" style={{ height: bevelHeight }}>
+          <div
+            className={cx(
+              'absolute h-[500px] w-[500px] bg-current shadow-even shadow-black',
+              reverse ? 'bottom-0 origin-bottom-left' : 'right-0 origin-top-right',
+            )}
+            style={{ transform: `rotate(${bevelRotate}rad)` }}
+          />
+        </div>
+      </Cell>
+
       <Cell
         gridColStart={1}
         className={
           highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
         }
       />
+
       <Cell
         gridColStart={2}
         className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
@@ -347,10 +374,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         )}
       </Cell>
-      <Cell gridColStart={6} className={cx('flex', padding)}>
+      <Cell gridColStart={6} className={cx('flex', [padding, Maybe.isSome(aramChampion)])}>
         {pipe(
-          champion,
-          Maybe.filter(() => isHowlingAbyss),
+          aramChampion,
           Maybe.fold(
             () => null,
             c => (
@@ -382,25 +408,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           draggable={false}
         />
       </Cell>
-      <Cell gridColStart={8} />
-      <Cell
-        ref={onBevelMount}
-        gridColStart={9}
-        dontResetColor={true}
-        className={cx('bg-transparent', ['justify-self-end', reverse])}
-      >
-        <div
-          className={cx(
-            'border-current',
-            reverse ? 'border-l-transparent' : 'border-b-transparent',
-          )}
-          style={{
-            width: bevelWidth,
-            borderLeftWidth: bevelWidth,
-            borderBottomWidth: bevelHeight,
-          }}
-        />
-      </Cell>
     </Li>
   )
 }
@@ -429,7 +436,7 @@ const Li: React.FC<LiProps> = ({
         ...gestureProps,
         ...props_,
         reverse,
-        className: cx(baseClassName, className, 'bg-current select-none touch-none'),
+        className: cx(baseClassName, className, 'select-none touch-none'),
         style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
       }
       return cloneElement(element, props)
