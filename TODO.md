@@ -11,7 +11,6 @@
 - react-select
 - uri: ugly encode
 - Menu react-popper?
-- active game drag and drop
 - challenge progression discord notification
 - discord OAuth2: proper state (redirect url)
 - game: summoner level?
