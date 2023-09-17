@@ -44,13 +44,14 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-export const gridTotalCols = 16
+export const gridTotalColsReverseMobile = 9
+export const gridTotalColsDesktop = 16
 
 const bevelWidth = 32 // px
 
-export const gridCols = 'grid-cols-[repeat(7,auto)_32px_1fr]'
-export const gridColsReverse = 'grid-cols-[1fr_32px_repeat(6,auto)]'
-export const xlGridCols = 'grid-cols-[1fr_repeat(6,auto)_32px_32px_repeat(6,auto)_1fr]'
+export const gridColsMobile = 'grid-cols-[repeat(7,auto)_32px_1fr]'
+export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(7,auto)]'
+export const gridColsDesktop = 'grid-cols-[1fr_repeat(6,auto)_32px_32px_repeat(6,auto)_1fr]'
 
 const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
 
@@ -74,6 +75,7 @@ type ParticipantProps = {
   platform: Platform
   mapId: MapId
   participant: ActiveGameParticipantView
+  shouldWrap: boolean
   highlight: boolean
   reverse: boolean
   /**
@@ -102,6 +104,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     spell2Id,
     perks,
   },
+  shouldWrap,
   highlight,
   reverse,
   index,
@@ -177,6 +180,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   return (
     <Li
+      shouldWrap={shouldWrap}
       reverse={reverse}
       index={index}
       springStyle={springStyle}
@@ -413,6 +417,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 }
 
 type LiProps = {
+  shouldWrap: boolean
   reverse: boolean
   index: number
   springStyle: StyleProps
@@ -422,6 +427,7 @@ type LiProps = {
 }
 
 const Li: React.FC<LiProps> = ({
+  shouldWrap,
   reverse,
   index,
   springStyle,
@@ -435,6 +441,7 @@ const Li: React.FC<LiProps> = ({
       const props: RequiredCellElementProps = {
         ...gestureProps,
         ...props_,
+        shouldWrap,
         reverse,
         className: cx(baseClassName, className, 'select-none touch-none'),
         style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
@@ -455,6 +462,7 @@ type CellProps = {
   HTMLElementProps
 
 type BaseCellProps = {
+  shouldWrap?: boolean
   reverse?: boolean
 }
 
@@ -470,6 +478,7 @@ const Cell = forwardRef<HTMLElement, CellProps>(
     {
       type = animated.div,
       gridColStart,
+      shouldWrap = false,
       reverse = false,
       dontResetColor,
       className,
@@ -486,7 +495,11 @@ const Cell = forwardRef<HTMLElement, CellProps>(
       style: {
         ...style,
         gridColumnStart: reverse ? undefined : gridColStart,
-        gridColumnEnd: reverse ? gridTotalCols - gridColStart + 2 : undefined,
+        gridColumnEnd: reverse
+          ? shouldWrap
+            ? gridTotalColsReverseMobile - gridColStart + 2
+            : gridTotalColsDesktop - gridColStart + 2
+          : undefined,
       },
     }
     return createElement(type, props, children)
