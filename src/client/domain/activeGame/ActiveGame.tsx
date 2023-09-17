@@ -83,6 +83,12 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
     },
   )
 
+  // Force reload on mount
+  useEffect(() => {
+    if (data !== undefined) mutate(undefined, { revalidate: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Remove shards on user disconnect
   const previousUser = usePrevious(maybeUser)
   useEffect(() => {
