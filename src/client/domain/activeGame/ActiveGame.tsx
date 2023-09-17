@@ -59,6 +59,7 @@ const { swap } = ListUtils
 const { clamp } = NumberUtils
 const { pad10 } = StringUtils
 
+const refreshDelay = MsDuration.ms(100)
 const reloadInterval = MsDuration.seconds(10)
 const timerInterval = MsDuration.second(1)
 
@@ -108,7 +109,8 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   }, [data, maybeUser, mutate, previousUser])
 
   const refreshGame = useCallback(() => {
-    mutate(undefined, { revalidate: true })
+    mutate(undefined, { revalidate: false })
+    setTimeout(() => mutate(undefined, { revalidate: true }), MsDuration.unwrap(refreshDelay))
   }, [mutate])
 
   const reloadGame = useCallback(() => {
