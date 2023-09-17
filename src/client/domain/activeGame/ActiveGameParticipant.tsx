@@ -386,7 +386,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         ref={onBevelMount}
         gridColStart={9}
-        className={cx('bg-transparent [&>*]:!text-current', ['justify-self-end', reverse])}
+        dontResetColor={true}
+        className={cx('bg-transparent', ['justify-self-end', reverse])}
       >
         <div
           className={cx(
@@ -428,7 +429,7 @@ const Li: React.FC<LiProps> = ({
         ...gestureProps,
         ...props_,
         reverse,
-        className: cx(baseClassName, className, 'bg-current touch-none'),
+        className: cx(baseClassName, className, 'bg-current select-none touch-none'),
         style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
       }
       return cloneElement(element, props)
@@ -439,6 +440,10 @@ const Li: React.FC<LiProps> = ({
 type CellProps = {
   type?: AnimatedComponent<React.ElementType>
   gridColStart: number
+  /**
+   * @default false
+   */
+  dontResetColor?: boolean
 } & BaseCellProps &
   HTMLElementProps
 
@@ -455,13 +460,22 @@ type HTMLElementProps = React.ClassAttributes<HTMLElement> & React.HTMLAttribute
 
 const Cell = forwardRef<HTMLElement, CellProps>(
   (
-    { type = animated.div, gridColStart, reverse = false, className, style, children, ...props_ },
+    {
+      type = animated.div,
+      gridColStart,
+      reverse = false,
+      dontResetColor,
+      className,
+      style,
+      children,
+      ...props_
+    },
     ref,
   ) => {
     const props: HTMLElementProps = {
       ...props_,
       ref,
-      className: cx('[&>*]:text-wheat', className),
+      className: cx(['[&>*]:text-wheat', dontResetColor !== true], className),
       style: {
         ...style,
         gridColumnStart: reverse ? undefined : gridColStart,
