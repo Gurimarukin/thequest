@@ -8,6 +8,7 @@ import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
+import type { NonEmptyArray } from '../../shared/utils/fp'
 import { List, Maybe } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
@@ -40,7 +41,7 @@ export type ChampionMasterySquareProps = {
    * @default false
    */
   isHistogram?: boolean
-  tooltipHoverRef?: React.RefObject<HTMLDivElement>
+  tooltipHoverRef?: React.RefObject<Element> | NonEmptyArray<React.RefObject<Element>>
   tooltipPlacementRef?: React.RefObject<Element>
   /**
    * @default 'top'
