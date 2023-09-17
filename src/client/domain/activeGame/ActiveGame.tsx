@@ -328,12 +328,18 @@ const Participants: React.FC<ParticipantsProps> = ({
   runeById,
 }) => {
   const order = useRef<List<number>>(participants.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
+
   const [springs, api] = useSprings(participants.length, fn(order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
-  const bind = useDrag(({ args: [originalIndex], active, movement: [, y] }) => {
-    const curIndex = order.current.indexOf(originalIndex)
-    const curRow = clamp(Math.round((curIndex * 10 + y) / 10), 0, participants.length - 1)
-    const newOrder = swap(order.current, curIndex, curRow)
-    api.start(fn(newOrder, active, originalIndex, curIndex, y)) // Feed springs new style data, they'll animate the view without causing a single render
+
+  const bind = useDrag(({ args: [activeIndex], active, movement: [, y] }) => {
+    const currentIndex = order.current.indexOf(activeIndex)
+    const currentRow = clamp(
+      Math.round((currentIndex * participantHeight + y) / participantHeight),
+      0,
+      participants.length - 1,
+    )
+    const newOrder = swap(order.current, currentIndex, currentRow)
+    api.start(fn(newOrder, active, activeIndex, currentIndex, y)) // Feed springs new style data, they'll animate the view without causing a single render
     // eslint-disable-next-line functional/immutable-data
     if (!active) order.current = newOrder
   })
@@ -365,22 +371,20 @@ const Participants: React.FC<ParticipantsProps> = ({
   )
 }
 
-// HEIGHT: 90
-// GAP: 16
-
-const height = 10
+// height: 90, gap: 16
+const participantHeight = 106
 
 const fn =
-  (order: List<number>, active = false, originalIndex = 0, curIndex = 0, y = 0) =>
+  (order: List<number>, active = false, originalIndex = 0, currentIndex = 0, y = 0) =>
   (index: number) =>
     active && index === originalIndex
       ? {
-          y: curIndex * height + y,
+          y: (currentIndex - originalIndex) * participantHeight + y,
           zIndex: 1,
           immediate: (key: string) => key === 'y' || key === 'zIndex',
         }
       : {
-          y: order.indexOf(index) * height,
+          y: (order.indexOf(index) - index) * participantHeight,
           zIndex: 0,
           immediate: false,
         }
