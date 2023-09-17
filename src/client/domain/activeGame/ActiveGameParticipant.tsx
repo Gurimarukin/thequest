@@ -443,7 +443,7 @@ const Li: React.FC<LiProps> = ({
         ...props_,
         shouldWrap,
         reverse,
-        className: cx(baseClassName, className, 'select-none'),
+        className: cx(baseClassName, className, 'touch-pinch-zoom select-none'),
         style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
       }
       return cloneElement(element, props)

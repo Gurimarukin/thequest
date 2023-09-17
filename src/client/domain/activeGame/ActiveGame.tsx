@@ -350,7 +350,9 @@ const Participants: React.FC<ParticipantsProps> = ({
 
   const [springs, api] = useSprings(participants.length, fn(teamId, order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
 
-  const bind = useDrag(({ args: [activeIndex], active, movement: [, y] }) => {
+  const bind = useDrag(({ event, args: [activeIndex], active, movement: [, y] }) => {
+    event.preventDefault()
+
     setIsDragging(active)
 
     const currentIndex = order.current.indexOf(activeIndex)
