@@ -4,7 +4,6 @@
 - detect challenges next to bans
 - otp ratio
 
-- shadow on drag?
 - steal Porofessor's data?
 - align tenacity and ability haste with other stats (hover)
 - ignore CHERRY league entry
