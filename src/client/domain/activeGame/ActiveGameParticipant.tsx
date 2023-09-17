@@ -168,7 +168,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const padding = reverse ? 'pr-2' : 'pl-2'
 
   return (
-    <Li reverse={reverse} index={index} springStyle={springStyle} gestureProps={gestureProps}>
+    <Li
+      reverse={reverse}
+      index={index}
+      springStyle={springStyle}
+      gestureProps={gestureProps}
+      className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+    >
       <Cell
         gridColStart={1}
         className={
@@ -403,10 +409,18 @@ type LiProps = {
   index: number
   springStyle: StyleProps
   gestureProps: ReactDOMAttributes
+  className?: string
   children: List<React.ReactElement> // should be List<CellElement>, but typing is poorly done :/
 }
 
-const Li: React.FC<LiProps> = ({ reverse, index, springStyle, gestureProps, children }) => (
+const Li: React.FC<LiProps> = ({
+  reverse,
+  index,
+  springStyle,
+  gestureProps,
+  className: baseClassName,
+  children,
+}) => (
   <li className="contents">
     {Children.map<CellElement, CellElement>(children as List<CellElement>, element => {
       const { className, style, ...props_ } = element.props
@@ -414,7 +428,7 @@ const Li: React.FC<LiProps> = ({ reverse, index, springStyle, gestureProps, chil
         ...gestureProps,
         ...props_,
         reverse,
-        className: cx(className, 'bg-current touch-none'),
+        className: cx(baseClassName, className, 'bg-current touch-none'),
         style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
       }
       return cloneElement(element, props)
