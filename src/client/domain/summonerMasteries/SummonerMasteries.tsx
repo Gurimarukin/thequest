@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-return-void */
 
 /* eslint-disable functional/no-expression-statements */
-import { monoid, number, ord, task } from 'fp-ts'
+import { monoid, number, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import debounce from 'lodash.debounce'
 import { optional } from 'monocle-ts'
@@ -42,7 +42,7 @@ import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
-import { EnrichedChampionMastery } from './EnrichedChampionMastery'
+import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
 import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
 import { ShardsToRemoveModal } from './ShardsToRemoveModal'
@@ -426,7 +426,7 @@ const enrichAll = (
         monoid.concatAll(number.MonoidSum),
       ),
       totalMasteryPoints,
-      otpIndex: getOtpRatio(enrichedMasteries_, totalMasteryPoints),
+      otpIndex: Business.otpRatio(enrichedMasteries_, totalMasteryPoints),
       masteriesCount: pipe(
         ChampionLevelOrZero.values,
         List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
@@ -437,34 +437,6 @@ const enrichAll = (
     },
     enrichedMasteries: enrichedMasteries_,
   }
-}
-
-const getOtpRatio = (
-  masteries: List<EnrichedChampionMastery>,
-  totalMasteryPoints: number,
-): number =>
-  getOtpRatioRec(
-    totalMasteryPoints / 2,
-    pipe(masteries, List.sort(ord.reverse(EnrichedChampionMastery.Ord.byPoints))),
-    0,
-    0,
-  )
-
-const getOtpRatioRec = (
-  threshold: number,
-  masteries: List<EnrichedChampionMastery>,
-  pointsAcc: number,
-  countAcc: number,
-): number => {
-  if (!List.isNonEmpty(masteries)) return countAcc
-
-  const [head, tail] = NonEmptyArray.unprepend(masteries)
-  const newPointsAcc = pointsAcc + head.championPoints
-  const newCountAcc = countAcc + 1
-
-  if (threshold <= newPointsAcc) return newCountAcc
-
-  return getOtpRatioRec(threshold, tail, newPointsAcc, newCountAcc)
 }
 
 const getNotifications = (

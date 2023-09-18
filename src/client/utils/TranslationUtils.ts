@@ -4,8 +4,13 @@ import { ChallengeId } from '../../shared/models/api/ChallengeId'
 import type { Lang } from '../../shared/models/api/Lang'
 import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
+import { NumberUtils } from '../../shared/utils/NumberUtils'
 import type { Dict } from '../../shared/utils/fp'
 import { List, Maybe, Tuple } from '../../shared/utils/fp'
+
+import type { Translation } from '../models/Translation'
+
+const { round } = NumberUtils
 
 const langLabel: Dict<Lang, string> = {
   en_GB: 'English',
@@ -21,4 +26,10 @@ const challenge =
       Maybe.fold(() => onNone(challengeId), flow(Tuple.fst, onSome)),
     )
 
-export const TranslationUtils = { labels: { lang: langLabel }, challenge }
+const numberUnit = (t: Translation['common']) => (pts: number) => {
+  if (1000000 <= pts) return t.numberM(round(pts / 1000000, 1))
+  if (1000 <= pts) return t.numberK(round(pts / 1000, 1))
+  return t.number(pts)
+}
+
+export const TranslationUtils = { labels: { lang: langLabel }, challenge, numberUnit }

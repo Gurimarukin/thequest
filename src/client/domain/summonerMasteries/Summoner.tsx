@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { useCallback, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
@@ -16,6 +16,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { InformationCircleOutline } from '../../imgs/svgs/icons'
 import type { Translation } from '../../models/Translation'
+import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils
@@ -58,15 +59,6 @@ export const Summoner: React.FC<Props> = ({
   const levelRef = useRef<HTMLSpanElement>(null)
   const masteriesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLSpanElement>(null)
-
-  const numberUnit = useCallback(
-    (pts: number) => {
-      if (1000000 <= pts) return t.common.numberM(round(pts / 1000000, 1))
-      if (1000 <= pts) return t.common.numberK(round(pts / 1000, 1))
-      return t.common.number(pts)
-    },
-    [t],
-  )
 
   const MasteryImgWithCount = useMemo(
     () => getMasteryImgWithCount(t.common, masteriesCount),
@@ -133,8 +125,10 @@ export const Summoner: React.FC<Props> = ({
             <span className="justify-self-end">{t.summoner.masteryScore}</span>
             <span>{t.common.number(totalMasteryLevel)}</span>
 
-            <span className="mt-2 justify-self-end">{t.summoner.pointsScore}</span>
-            <span className="mt-2">{numberUnit(totalMasteryPoints)}</span>
+            <span className="mt-2 justify-self-end">{t.summoner.masteryPoints}</span>
+            <span className="mt-2">
+              {TranslationUtils.numberUnit(t.common)(totalMasteryPoints)}
+            </span>
 
             <span className="mt-2 justify-self-end">{t.summoner.otpIndex}</span>
             <span className="mt-2">{t.common.number(otpIndex)}</span>

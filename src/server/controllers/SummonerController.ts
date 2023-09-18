@@ -277,18 +277,25 @@ const SummonerController = (
               leagues,
               masteries: pipe(
                 maybeMasteries,
-                Maybe.map(
-                  ({ champions }): ActiveGameMasteriesView => ({
-                    totalPercents: pipe(
+                Maybe.map(({ champions }): ActiveGameMasteriesView => {
+                  const totalMasteryPoints = pipe(
+                    champions,
+                    List.map(c => c.championPoints),
+                    monoid.concatAll(number.MonoidSum),
+                  )
+                  return {
+                    questPercents: pipe(
                       champions,
                       List.map(Business.championPercents),
                       NumberUtils.average,
                     ),
-                    totalScore: pipe(
+                    totalMasteryLevel: pipe(
                       champions,
                       List.map(m => m.championLevel),
                       monoid.concatAll(number.MonoidSum),
                     ),
+                    totalMasteryPoints,
+                    otpIndex: Business.otpRatio(champions, totalMasteryPoints),
                     champion: pipe(
                       pipe(
                         champions,
@@ -305,8 +312,8 @@ const SummonerController = (
                         }),
                       ),
                     ),
-                  }),
-                ),
+                  }
+                }),
               ),
               shardsCount: pipe(
                 shardsCount,

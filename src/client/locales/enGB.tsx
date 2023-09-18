@@ -126,7 +126,13 @@ const enGBTranslation: Translation = {
     loading: 'loading',
     notInGame: 'not in game.',
     theQuestProgression: 'The Quest progression',
-    masteryScore: 'Mastery score',
+    totals: (totalMasteryLevel, translatedTotalMasteryPoints) => (
+      <>
+        ({totalMasteryLevel.toLocaleString(locale)} — {translatedTotalMasteryPoints})
+      </>
+    ),
+    masteryScoreAndPoints: 'Mastery score — points',
+    otpIndex: otpIndex => `OTP index: ${otpIndex.toLocaleString(locale)}`,
   },
   aram: {
     category: {
@@ -453,7 +459,7 @@ const enGBTranslation: Translation = {
     },
     level: level => `level ${level.toLocaleString(locale)}`,
     masteryScore: 'Mastery score:',
-    pointsScore: 'Mastery points:',
+    masteryPoints: 'Mastery points:',
     otpIndex: 'OTP index:',
     otpIndexExplanation:
       '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
