@@ -63,6 +63,7 @@ const ValidatedNea = {
   fromOption,
   fromEmptyE,
   fromEmptyErrors,
+  map: Either.map as <A, B>(f: (a: A) => B) => <E>(fa: ValidatedNea<E, A>) => ValidatedNea<E, B>,
   chain: Either.chain as <E, A, B>(
     f: (a: A) => ValidatedNea<E, B>,
   ) => (ma: ValidatedNea<E, A>) => ValidatedNea<E, B>,
