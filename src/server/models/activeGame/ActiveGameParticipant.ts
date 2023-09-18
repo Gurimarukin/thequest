@@ -33,8 +33,8 @@ type ToView = {
 
 const toView =
   ({ leagues, masteries, shardsCount }: ToView) =>
-  (p: ActiveGameParticipant): ActiveGameParticipantView => ({
-    ...p,
+  (participant: ActiveGameParticipant): ActiveGameParticipantView => ({
+    ...participant,
     leagues,
     masteries,
     shardsCount,

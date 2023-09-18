@@ -1,4 +1,4 @@
-import { apply, monoid, number, ord, separated } from 'fp-ts'
+import { apply, monoid, number, ord, separated, task } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
@@ -24,6 +24,7 @@ import { SummonerMasteriesView } from '../../shared/models/api/summoner/Summoner
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
+import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import {
@@ -41,8 +42,11 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { ActiveGame } from '../models/activeGame/ActiveGame'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
+import type { PorofessorActiveGame } from '../models/activeGame/PorofessorActiveGame'
+import { PorofessorActiveGameParticipant } from '../models/activeGame/PorofessorActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import { LeagueEntry } from '../models/league/LeagueEntry'
+import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
@@ -52,6 +56,7 @@ import type { ActiveGameService } from '../services/ActiveGameService'
 import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
+import type { PorofessorActiveGameService } from '../services/PorofessorActiveGameService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { StaticDataService } from '../services/staticDataService/StaticDataService'
@@ -67,14 +72,18 @@ type SummonerController = ReturnType<typeof SummonerController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (
+  Logger: LoggerGetter,
   activeGameService: ActiveGameService,
   challengesService: ChallengesService,
   leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
+  porofessorActiveGameService: PorofessorActiveGameService,
   summonerService: SummonerService,
   staticDataService: StaticDataService,
   userService: UserService,
 ) => {
+  const logger = Logger('SummonerController')
+
   return {
     masteriesByPuuid:
       (platform: Platform, puuid: Puuid) =>
@@ -214,16 +223,49 @@ const SummonerController = (
   ): Future<Maybe<SummonerActiveGameView>> {
     return pipe(
       activeGameService.findBySummoner(summoner.platform, summoner.id),
-      futureMaybe.bindTo('game'),
-      futureMaybe.bind('champions', () =>
-        pipe(staticDataService.wikiaChampions, futureMaybe.fromTaskEither),
+      futureMaybe.chainTaskEitherK(game =>
+        pipe(
+          porofessorActiveGameService.find(game.gameId, summoner.platform, summoner.name),
+          task.chain(
+            Try.fold(
+              e =>
+                pipe(
+                  logger.warn(
+                    'Error while fetching Porofessor game (falling ck to Riot API only):',
+                    e,
+                  ),
+                  Future.fromIOEither,
+                  Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
+                ),
+              Maybe.fold(
+                () =>
+                  pipe(
+                    logger.warn('Porofessor game not found while Riot API returned one'),
+                    Future.fromIOEither,
+                    Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
+                  ),
+                activeGamePorofessor(summoner, maybeUser, game),
+              ),
+            ),
+          ),
+        ),
       ),
-      futureMaybe.chainTaskEitherK(({ game, champions }) =>
+    )
+  }
+
+  function activeGameRiot(
+    summoner: Summoner,
+    maybeUser: Maybe<TokenContent>,
+    game: ActiveGame,
+  ): Future<SummonerActiveGameView> {
+    return pipe(
+      staticDataService.wikiaChampions,
+      Future.chain(champions =>
         pipe(
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(
-              enrichParticipant(summoner.platform, maybeUser, game.insertedAt),
+              enrichParticipantRiot(summoner.platform, maybeUser, game.insertedAt),
             ),
           ),
           Future.map<
@@ -243,7 +285,7 @@ const SummonerController = (
     )
   }
 
-  function enrichParticipant(
+  function enrichParticipantRiot(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
     gameInsertedAt: DayJs,
@@ -254,75 +296,158 @@ const SummonerController = (
           leagues: findLeagues(platform, participant.summonerId, {
             overrideInsertedAfter: gameInsertedAt,
           }),
-          maybeMasteries: masteriesService.findBySummoner(platform, participant.summonerId, {
-            overrideInsertedAfter: gameInsertedAt,
-          }),
-          shardsCount: pipe(
+          masteriesAndShardsCount: findMasteriesAndShardsCount(
+            platform,
             maybeUser,
-            Maybe.fold(
-              () => futureMaybe.none,
-              user =>
-                userService.findChampionShardsForChampion(
-                  user.id,
-                  participant.summonerId,
-                  participant.championId,
-                ),
-            ),
+            gameInsertedAt,
+            participant,
           ),
         }),
-        Future.map(({ leagues, maybeMasteries, shardsCount }) =>
+        Future.map(({ leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
+          pipe(participant, ActiveGameParticipant.toView({ leagues, masteries, shardsCount })),
+        ),
+      )
+  }
+
+  function activeGamePorofessor(
+    summoner: Summoner,
+    maybeUser: Maybe<TokenContent>,
+    game: ActiveGame,
+  ): (porofessorGame: PorofessorActiveGame) => Future<SummonerActiveGameView> {
+    return porofessorGame =>
+      pipe(
+        staticDataService.wikiaChampions,
+        Future.chain(champions =>
           pipe(
-            participant,
-            ActiveGameParticipant.toView({
-              leagues,
-              masteries: pipe(
-                maybeMasteries,
-                Maybe.map(({ champions }): ActiveGameMasteriesView => {
-                  const totalMasteryPoints = pipe(
-                    champions,
-                    List.map(c => c.championPoints),
-                    monoid.concatAll(number.MonoidSum),
-                  )
-                  return {
-                    questPercents: pipe(
-                      champions,
-                      List.map(Business.championPercents),
-                      NumberUtils.average,
-                    ),
-                    totalMasteryLevel: pipe(
-                      champions,
-                      List.map(m => m.championLevel),
-                      monoid.concatAll(number.MonoidSum),
-                    ),
-                    totalMasteryPoints,
-                    otpIndex: Business.otpRatio(champions, totalMasteryPoints),
-                    champion: pipe(
-                      pipe(
-                        champions,
-                        ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
-                      )(participant.championId),
-                      Maybe.map(
-                        (m): ActiveGameChampionMasteryView => ({
-                          championLevel: m.championLevel,
-                          championPoints: m.championPoints,
-                          championPointsSinceLastLevel: m.championPointsSinceLastLevel,
-                          championPointsUntilNextLevel: m.championPointsUntilNextLevel,
-                          chestGranted: m.chestGranted,
-                          tokensEarned: m.tokensEarned,
-                        }),
-                      ),
-                    ),
-                  }
+            porofessorGame.participants,
+            PartialDict.traverse(Future.ApplicativePar)(
+              NonEmptyArray.traverse(Future.ApplicativePar)(
+                enrichParticipantPorofessor(
+                  summoner.platform,
+                  maybeUser,
+                  pipe(DictUtils.values(game.participants), List.flatten),
+                  game.insertedAt,
+                ),
+              ),
+            ),
+            Future.map<
+              PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
+              SummonerActiveGameView
+            >(
+              flow(
+                PartialDict.map(sortParticipants(champions)(game.mapId)),
+                (sorted): SummonerActiveGameView => ({
+                  summoner,
+                  game: {
+                    gameStartTime: game.gameStartTime,
+                    mapId: game.mapId,
+                    gameQueueConfigId: game.gameQueueConfigId,
+                    isDraft: game.isDraft,
+                    participants: sorted,
+                  },
                 }),
               ),
-              shardsCount: pipe(
-                shardsCount,
-                Maybe.map(s => s.count),
-              ),
-            }),
+            ),
           ),
         ),
       )
+  }
+
+  function enrichParticipantPorofessor(
+    platform: Platform,
+    maybeUser: Maybe<TokenContent>,
+    participants: List<ActiveGameParticipant>,
+    gameInsertedAt: DayJs,
+  ): (porofessorParticipant: PorofessorActiveGameParticipant) => Future<ActiveGameParticipantView> {
+    return porofessorParticipant => {
+      const maybeParticipant = pipe(
+        participants,
+        List.findFirst(p => p.summonerName === porofessorParticipant.summonerName),
+      )
+      if (!Maybe.isSome(maybeParticipant)) {
+        return Future.failed(
+          Error(
+            `Porofessor participant: couldn't find matching Riot API participant: ${porofessorParticipant.summonerName}`,
+          ),
+        )
+      }
+      const participant = maybeParticipant.value
+      return pipe(
+        findMasteriesAndShardsCount(platform, maybeUser, gameInsertedAt, participant),
+        Future.map(({ masteries, shardsCount }) =>
+          pipe(
+            porofessorParticipant,
+            PorofessorActiveGameParticipant.toView({ participant, masteries, shardsCount }),
+          ),
+        ),
+      )
+    }
+  }
+
+  function findMasteriesAndShardsCount(
+    platform: Platform,
+    maybeUser: Maybe<TokenContent>,
+    gameInsertedAt: DayJs,
+    participant: ActiveGameParticipant,
+  ): Future<{
+    masteries: Maybe<ActiveGameMasteriesView>
+    shardsCount: Maybe<number>
+  }> {
+    return apply.sequenceS(Future.ApplyPar)({
+      masteries: pipe(
+        masteriesService.findBySummoner(platform, participant.summonerId, {
+          overrideInsertedAfter: gameInsertedAt,
+        }),
+        futureMaybe.map(({ champions }): ActiveGameMasteriesView => {
+          const totalMasteryPoints = pipe(
+            champions,
+            List.map(c => c.championPoints),
+            monoid.concatAll(number.MonoidSum),
+          )
+          return {
+            questPercents: pipe(
+              champions,
+              List.map(Business.championPercents),
+              NumberUtils.average,
+            ),
+            totalMasteryLevel: pipe(
+              champions,
+              List.map(m => m.championLevel),
+              monoid.concatAll(number.MonoidSum),
+            ),
+            totalMasteryPoints,
+            otpIndex: Business.otpRatio(champions, totalMasteryPoints),
+            champion: pipe(
+              pipe(
+                champions,
+                ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
+              )(participant.championId),
+              Maybe.map(
+                (m): ActiveGameChampionMasteryView => ({
+                  championLevel: m.championLevel,
+                  championPoints: m.championPoints,
+                  championPointsSinceLastLevel: m.championPointsSinceLastLevel,
+                  championPointsUntilNextLevel: m.championPointsUntilNextLevel,
+                  chestGranted: m.chestGranted,
+                  tokensEarned: m.tokensEarned,
+                }),
+              ),
+            ),
+          }
+        }),
+      ),
+      shardsCount: pipe(
+        Future.successful(maybeUser),
+        futureMaybe.chain(user =>
+          userService.findChampionShardsForChampion(
+            user.id,
+            participant.summonerId,
+            participant.championId,
+          ),
+        ),
+        futureMaybe.map(s => s.count),
+      ),
+    })
   }
 }
 

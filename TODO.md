@@ -10,7 +10,6 @@
 - Menu react-popper?
 - challenge progression discord notification
 - discord OAuth2: proper state (redirect url)
-- game: summoner level?
 - eslint unused argument (even if middle)
 - rework masteries colors
 - account menu
