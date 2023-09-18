@@ -33,6 +33,7 @@ export type EnrichedSummonerView = SummonerView & {
   questPercents: number
   totalMasteryLevel: number
   totalMasteryPoints: number
+  otpIndex: number
   masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
 }
 
@@ -44,6 +45,7 @@ export const Summoner: React.FC<Props> = ({
     questPercents,
     totalMasteryLevel,
     totalMasteryPoints,
+    otpIndex,
     masteriesCount,
   },
   leagues,
@@ -114,7 +116,7 @@ export const Summoner: React.FC<Props> = ({
         </div>
         <Tooltip
           hoverRef={masteriesRef}
-          className="grid grid-cols-[1fr] justify-items-center gap-2 px-5 pb-4 pt-3"
+          className="flex max-w-xs flex-col items-center gap-2 px-5 pb-4 pt-3"
         >
           <div className="grid grid-cols-[repeat(4,54px)_34px] items-end gap-1">
             <MasteryImgWithCount level={4} imgClassName="-mt-1.5" />
@@ -127,12 +129,18 @@ export const Summoner: React.FC<Props> = ({
               className="relative -left-2.5 w-[54px]"
             />
           </div>
-          <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
+          <div className="grid grid-cols-[auto_auto] gap-x-2 text-sm">
             <span className="justify-self-end">{t.summoner.masteryScore}</span>
             <span>{t.common.number(totalMasteryLevel)}</span>
 
-            <span className="justify-self-end">{t.summoner.pointsScore}</span>
-            <span>{numberUnit(totalMasteryPoints)}</span>
+            <span className="mt-2 justify-self-end">{t.summoner.pointsScore}</span>
+            <span className="mt-2">{numberUnit(totalMasteryPoints)}</span>
+
+            <span className="mt-2 justify-self-end">{t.summoner.otpIndex}</span>
+            <span className="mt-2">{t.common.number(otpIndex)}</span>
+            <span className="col-span-2 mt-1 whitespace-pre-wrap text-center text-xs italic opacity-70">
+              {t.summoner.otpIndexExplanation}
+            </span>
           </div>
         </Tooltip>
         <span className="flex items-center gap-2">

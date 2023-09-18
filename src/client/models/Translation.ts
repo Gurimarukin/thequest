@@ -207,6 +207,8 @@ export type Translation = {
     masteriesExplanation: React.ReactNode
     masteryScore: React.ReactNode
     pointsScore: React.ReactNode
+    otpIndex: React.ReactNode
+    otpIndexExplanation: React.ReactNode
     percentsProgression: (percents: number) => React.ReactNode
     summonerLevel: React.ReactNode
   }
