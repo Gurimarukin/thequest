@@ -128,11 +128,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const isHowlingAbyss = MapId.isHowlingAbyss(mapId)
   const tooltipShouldHide = isDragging
 
-  const aramChampion = pipe(
-    champion,
-    Maybe.filter(() => isHowlingAbyss),
-  )
-
   const squareProps = pipe(
     champion,
     Maybe.map(
@@ -378,30 +373,29 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         )}
       </Cell>
-      <Cell gridColStart={6} className={cx('flex', [padding, Maybe.isSome(aramChampion)])}>
-        {pipe(
-          aramChampion,
-          Maybe.fold(
-            () => null,
-            c => (
-              <>
-                <div
-                  ref={aramRef}
-                  className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
-                    'flex-row-reverse',
-                    reverse,
-                  ])}
-                >
-                  <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
-                </div>
-                <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
-                  <AramTooltip aram={c.aram} />
-                </Tooltip>
-              </>
-            ),
+      {pipe(
+        champion,
+        Maybe.filter(() => isHowlingAbyss),
+        Maybe.fold(
+          () => null,
+          c => (
+            <Cell gridColStart={6} className={cx('flex', padding)}>
+              <div
+                ref={aramRef}
+                className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
+                  'flex-row-reverse',
+                  reverse,
+                ])}
+              >
+                <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
+              </div>
+              <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
+                <AramTooltip aram={c.aram} />
+              </Tooltip>
+            </Cell>
           ),
-        )}
-      </Cell>
+        ),
+      )}
       <Cell gridColStart={7} className={cx('flex items-center py-1', padding)}>
         <ActiveGameRunes
           runeStyleById={runeStyleById}
@@ -423,7 +417,7 @@ type LiProps = {
   springStyle: StyleProps
   gestureProps: ReactDOMAttributes
   className?: string
-  children: List<React.ReactElement> // should be List<CellElement>, but typing is poorly done :/
+  children: List<React.ReactElement | null> // should be List<CellElement>, but typing is poorly done :/
 }
 
 const Li: React.FC<LiProps> = ({
@@ -436,18 +430,25 @@ const Li: React.FC<LiProps> = ({
   children,
 }) => (
   <li className="contents">
-    {Children.map<CellElement, CellElement>(children as List<CellElement>, element => {
-      const { className, style, ...props_ } = element.props
-      const props: RequiredCellElementProps = {
-        ...gestureProps,
-        ...props_,
-        shouldWrap,
-        reverse,
-        className: cx(baseClassName, className, 'touch-pinch-zoom select-none'),
-        style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
-      }
-      return cloneElement(element, props)
-    })}
+    {Children.map<CellElement | null, CellElement | null>(
+      children as List<CellElement | null>,
+      element => {
+        if (element === null) {
+          console.log('element =', element)
+          return null
+        }
+        const { className, style, ...props_ } = element.props
+        const props: RequiredCellElementProps = {
+          ...gestureProps,
+          ...props_,
+          shouldWrap,
+          reverse,
+          className: cx(baseClassName, className, 'touch-pinch-zoom select-none'),
+          style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
+        }
+        return cloneElement(element, props)
+      },
+    )}
   </li>
 )
 
