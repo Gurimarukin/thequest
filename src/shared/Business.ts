@@ -1,4 +1,8 @@
+import { number, ord } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
+
 import type { ChampionLevelOrZero } from './models/api/champion/ChampionLevel'
+import { List, NonEmptyArray } from './utils/fp'
 
 type SimpleChampion = {
   championLevel: ChampionLevelOrZero
@@ -22,4 +26,34 @@ const championPercents = (c: SimpleChampion): number => {
   return (c.championPoints / 21600) * 50
 }
 
-export const Business = { championPercents }
+type ChampionPoints = {
+  championPoints: number
+}
+
+const byPointsOrd = pipe(
+  number.Ord,
+  ord.contramap((c: ChampionPoints) => c.championPoints),
+  ord.reverse,
+)
+
+const otpRatio = (masteries: List<ChampionPoints>, totalMasteryPoints: number): number =>
+  otpRatioRec(totalMasteryPoints / 2, pipe(masteries, List.sort(byPointsOrd)), 0, 0)
+
+const otpRatioRec = (
+  threshold: number,
+  masteries: List<ChampionPoints>,
+  pointsAcc: number,
+  countAcc: number,
+): number => {
+  if (!List.isNonEmpty(masteries)) return countAcc
+
+  const [head, tail] = NonEmptyArray.unprepend(masteries)
+  const newPointsAcc = pointsAcc + head.championPoints
+  const newCountAcc = countAcc + 1
+
+  if (threshold <= newPointsAcc) return newCountAcc
+
+  return otpRatioRec(threshold, tail, newPointsAcc, newCountAcc)
+}
+
+export const Business = { championPercents, otpRatio }

@@ -6,8 +6,10 @@ import { ActiveGameChampionMasteryView } from './ActiveGameChampionMasteryView'
 type ActiveGameMasteriesView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  totalPercents: C.number,
-  totalScore: C.number,
+  questPercents: C.number,
+  totalMasteryLevel: C.number,
+  totalMasteryPoints: C.number,
+  otpIndex: C.number,
   champion: Maybe.codec(ActiveGameChampionMasteryView.codec),
 })
 

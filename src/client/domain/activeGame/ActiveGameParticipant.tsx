@@ -38,6 +38,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { appRoutes } from '../../router/AppRouter'
+import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 import { ActiveGameAramStats } from './ActiveGameAramStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
@@ -285,14 +286,23 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <>
                   <span className="text-grey-400">—</span>
                   <span className="flex gap-1.5">
-                    <span ref={percentsRef}>{t.common.percents(round(m.totalPercents, 1))}</span>
+                    <span ref={percentsRef}>{t.common.percents(round(m.questPercents, 1))}</span>
                     <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
                       {t.activeGame.theQuestProgression}
                     </Tooltip>
                     <span ref={totalMasteriesRef} className="text-grey-400">
-                      {t.common.number(m.totalScore, { withParenthesis: true })}
+                      {t.activeGame.totals(
+                        m.totalMasteryLevel,
+                        TranslationUtils.numberUnit(t.common)(m.totalMasteryPoints),
+                      )}
                     </span>
-                    <Tooltip hoverRef={totalMasteriesRef}>{t.activeGame.masteryScore}</Tooltip>
+                    <Tooltip
+                      hoverRef={totalMasteriesRef}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <span>{t.activeGame.masteryScoreAndPoints}</span>
+                      <span>{t.activeGame.otpIndex(m.otpIndex)}</span>
+                    </Tooltip>
                   </span>
                 </>
               ),

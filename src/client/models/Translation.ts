@@ -33,7 +33,12 @@ export type Translation = {
     loading: React.ReactNode
     notInGame: React.ReactNode
     theQuestProgression: React.ReactNode
-    masteryScore: React.ReactNode
+    totals: (
+      totalMasteryLevel: number,
+      translatedTotalMasteryPoints: React.ReactNode,
+    ) => React.ReactNode
+    masteryScoreAndPoints: React.ReactNode
+    otpIndex: (otpIndex: number) => React.ReactNode
   }
   aram: {
     category: {
@@ -206,7 +211,7 @@ export type Translation = {
     level: (level: number) => React.ReactNode
     masteriesExplanation: React.ReactNode
     masteryScore: React.ReactNode
-    pointsScore: React.ReactNode
+    masteryPoints: React.ReactNode
     otpIndex: React.ReactNode
     otpIndexExplanation: React.ReactNode
     percentsProgression: (percents: number) => React.ReactNode
