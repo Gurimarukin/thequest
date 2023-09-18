@@ -454,6 +454,9 @@ const enGBTranslation: Translation = {
     level: level => `level ${level.toLocaleString(locale)}`,
     masteryScore: 'Mastery score:',
     pointsScore: 'Mastery points:',
+    otpIndex: 'OTP index:',
+    otpIndexExplanation:
+      '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
     masteriesExplanation: (
       <>
         <li>From mastery 0 to mastery 5, percents correspond with mastery points.</li>

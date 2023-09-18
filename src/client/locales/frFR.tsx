@@ -462,6 +462,9 @@ const frFRTranslation: Translation = {
     level: level => `niveau ${level.toLocaleString(locale)}`,
     masteryScore: 'Score de maîtrise :',
     pointsScore: 'Points de maîtrise :',
+    otpIndex: 'Indice d’OTP :',
+    otpIndexExplanation:
+      '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
     masteriesExplanation: (
       <>
         <li>
