@@ -28,6 +28,7 @@ import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import {
+  Dict,
   Either,
   Future,
   List,
@@ -45,7 +46,7 @@ import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipan
 import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
 import { PoroActiveGameParticipant } from '../models/activeGame/PoroActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
-import { LeagueEntry } from '../models/league/LeagueEntry'
+import { LeagueEntry, LeagueEntryRanked } from '../models/league/LeagueEntry'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
@@ -176,9 +177,16 @@ const SummonerController = (
     return pipe(
       leagueEntryService.findBySummoner(platform, summonerId, options),
       futureMaybe.map(entries => ({
-        soloDuo: pipe(entries, List.findFirst(LeagueEntry.queueTypeEquals(queueTypes.soloDuo))),
-        flex: pipe(entries, List.findFirst(LeagueEntry.queueTypeEquals(queueTypes.flex))),
+        soloDuo: pipe(
+          entries,
+          List.findFirst(LeagueEntry.isRankedAndQueueTypeEquals(queueTypes.soloDuo)),
+        ),
+        flex: pipe(
+          entries,
+          List.findFirst(LeagueEntry.isRankedAndQueueTypeEquals(queueTypes.flex)),
+        ),
       })),
+      futureMaybe.map(Dict.map(Maybe.map(LeagueEntryRanked.toView))),
     )
   }
 

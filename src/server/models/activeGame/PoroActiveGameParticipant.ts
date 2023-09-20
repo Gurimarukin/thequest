@@ -1,13 +1,15 @@
+import { pipe } from 'fp-ts/function'
+
 import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
+import type { PoroTag } from '../../../shared/models/api/activeGame/PoroTag'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { PoroLeagues } from '../league/PoroLeagues'
+import { WinRate } from '../league/WinRate'
 import type { ActiveGameParticipant } from './ActiveGameParticipant'
-import type { PoroActiveGameParticipantChampion } from './PoroActiveGameParticipantChampion'
-import type { PoroTag } from './PoroTag'
 
 type PoroActiveGameParticipant = {
   premadeId: Maybe<number>
@@ -18,6 +20,14 @@ type PoroActiveGameParticipant = {
   role: Maybe<ChampionPosition>
   mainRoles: List<ChampionPosition>
   tags: List<PoroTag>
+}
+
+export type PoroActiveGameParticipantChampion = {
+  percents: number
+  played: number
+  kills: number
+  deaths: number
+  assists: number
 }
 
 type ToView = {
@@ -39,6 +49,19 @@ const toView =
     spell1Id: participant.spell1Id,
     spell2Id: participant.spell2Id,
     perks: participant.perks,
+
+    premadeId: poroParticipant.premadeId,
+    summonerLevel: Maybe.some(poroParticipant.summonerLevel),
+    champion: pipe(
+      poroParticipant.champion,
+      Maybe.map(({ kills, deaths, assists, ...winRate }) => {
+        const { wins, losses } = WinRate.toWinsLosses(winRate)
+        return { wins, losses, kills, deaths, assists }
+      }),
+    ),
+    role: poroParticipant.role,
+    mainRoles: poroParticipant.mainRoles,
+    tags: poroParticipant.tags,
   })
 
 const PoroActiveGameParticipant = { toView }

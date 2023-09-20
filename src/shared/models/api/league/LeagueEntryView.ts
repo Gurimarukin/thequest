@@ -14,6 +14,14 @@ const codec = C.struct({
   wins: C.number,
   losses: C.number,
   miniSeriesProgress: Maybe.codec(NonEmptyArray.codec(LeagueMiniSeriesProgress.codec)),
+
+  // poro
+  previousSeason: Maybe.codec(
+    C.struct({
+      tier: LeagueTier.codec,
+      rank: LeagueRank.codec,
+    }),
+  ),
 })
 
 const LeagueEntryView = { codec }
