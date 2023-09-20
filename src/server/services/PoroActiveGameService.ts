@@ -138,12 +138,25 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
   const { window } = domHandler
 
   const spectateButton = 'spectate_button'
+  // const dataSpectateGameid = 'data-spectate-gameid'
 
   return seqS<PoroActiveGame>({
     gameId: pipe(
       window.document.getElementById(spectateButton),
       ValidatedNea.fromNullable([`Element not found: #${spectateButton}`]),
+
       ValidatedNea.chain(datasetGet('spectate-gameid')),
+
+      // ValidatedNea.chain(elt =>
+      //   pipe(
+      //     elt.getAttribute(dataSpectateGameid),
+      //     ValidatedNea.fromNullable([
+      //       `No attribute "${dataSpectateGameid}" for #${spectateButton}`,
+      //     ]),
+      //   ),
+      // ),
+
+      ValidatedNea.chain(decode([NumberFromString.codec, 'NumberFromString'])),
       ValidatedNea.chain(decode([GameId.codec, 'GameId'])),
     ),
     participants: parseParticipants(),
