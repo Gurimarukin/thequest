@@ -200,42 +200,60 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
     teamId: TeamId,
     cardsList: Element | undefined,
   ): ValidatedNea<string, List<Participant>> {
-    if (cardsList === undefined) return ValidatedNea.invalid([`Team ${teamId} not found`])
-
     return pipe(
-      cardsList,
-      DomHandler.querySelectorAll(`:scope > li > div`, window.HTMLElement),
-      ValidatedNea.chain(List.traverse(validation)(parseParticipant)),
+      cardsList === undefined
+        ? ValidatedNea.invalid(['Not found'])
+        : pipe(
+            cardsList,
+            DomHandler.querySelectorAll(`:scope > li > div`, window.HTMLElement),
+            ValidatedNea.chain(List.traverseWithIndex(validation)(parseParticipant)),
+          ),
+      prefixErrors(`Team ${teamId} `),
     )
   }
 
-  function parseParticipant(participant: HTMLElement): ValidatedNea<string, Participant> {
-    return seqS<Participant>({
-      premadeId: pipe(
-        participant.querySelector('.premadeHistoryTagContainer > div'),
-        Maybe.fromNullable,
-        Maybe.chainNullableK(e => e.textContent),
-        Maybe.fold(
-          () => ValidatedNea.valid(Maybe.none),
-          flow(
-            decode([NumberFromString.decoder, 'NumberFromString']),
-            ValidatedNea.map(Maybe.some),
+  function parseParticipant(
+    i: number,
+    participant: HTMLElement,
+  ): ValidatedNea<string, Participant> {
+    const premadeHistoryTagContainerDiv = '.premadeHistoryTagContainer > div'
+    const championBoxLevel = '.championBox .level'
+
+    return pipe(
+      seqS<Participant>({
+        premadeId: pipe(
+          participant.querySelector(premadeHistoryTagContainerDiv),
+          Maybe.fromNullable,
+          Maybe.chainNullableK(e => e.textContent),
+          Maybe.fold(
+            () => ValidatedNea.valid(Maybe.none),
+            flow(
+              decode([NumberFromString.decoder, 'NumberFromString']),
+              ValidatedNea.map(Maybe.some),
+            ),
+          ),
+          prefixErrors(`${premadeHistoryTagContainerDiv}: `),
+        ),
+        summonerName: datasetGet(participant, 'summonername'),
+        summonerLevel: pipe(
+          participant,
+          domHandler.querySelectorEnsureOneTextContent(championBoxLevel),
+          ValidatedNea.fromEither,
+          ValidatedNea.chain(
+            flow(
+              decode([NumberFromString.decoder, 'NumberFromString']),
+              prefixErrors(`${championBoxLevel}:`),
+            ),
           ),
         ),
-      ),
-      summonerName: datasetGet(participant, 'summonername'),
-      summonerLevel: pipe(
-        participant,
-        domHandler.querySelectorEnsureOneTextContent('.championBox .level'),
-        ValidatedNea.fromEither,
-        ValidatedNea.chain(decode([NumberFromString.decoder, 'NumberFromString'])),
-      ),
-      champion: parseChampion(participant),
-      leagues: parseLeagues(participant),
-      role: parseRole(participant),
-      mainRoles: parseRoles(participant),
-      tags: parseTags(participant),
-    })
+        champion: parseChampion(participant),
+        leagues: parseLeagues(participant),
+        role: parseRole(participant),
+        mainRoles: parseRoles(participant),
+        tags: parseTags(participant),
+      }),
+      prefixErrors(`[${i}] `),
+    )
   }
 
   function parseChampion(participant: Element): ValidatedNea<string, Maybe<Champion>> {
@@ -260,13 +278,15 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
   }
 
   function parseKda(participant: Element, className: string): ValidatedNea<string, number> {
+    const selector = `.championBox > .imgFlex > .txt > .content .${className}`
+
     return pipe(
       participant,
-      domHandler.querySelectorEnsureOneTextContent(
-        `.championBox > .imgFlex > .txt > .content .${className}`,
-      ),
+      domHandler.querySelectorEnsureOneTextContent(selector),
       ValidatedNea.fromEither,
-      ValidatedNea.chain(decode([NumberFromString.decoder, 'NumberFromString'])),
+      ValidatedNea.chain(
+        flow(decode([NumberFromString.decoder, 'NumberFromString']), prefixErrors(`${selector}: `)),
+      ),
     )
   }
 
@@ -296,54 +316,58 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
     if (canBeNull) {
       const league = participant.querySelector(selector)
       if (league === null) return ValidatedNea.valid(Maybe.none)
-      return parseLeagueBis(league)
+      return parseLeagueBis(selector)(league)
     }
 
     return pipe(
       participant,
       DomHandler.querySelectorEnsureOne(selector),
       ValidatedNea.fromEither,
-      ValidatedNea.chain(parseLeagueBis),
+      ValidatedNea.chain(parseLeagueBis(selector)),
     )
   }
 
-  function parseLeagueBis(league: Element): ValidatedNea<string, Maybe<Tuple<Queue, League>>> {
-    return pipe(
-      league,
-      domHandler.querySelectorEnsureOneTextContent(':scope > .txt > .title'),
-      ValidatedNea.fromEither,
-      ValidatedNea.chain(title => {
-        if (title === 'Unranked') return ValidatedNea.valid(Maybe.none)
+  function parseLeagueBis(
+    selector: string,
+  ): (league: Element) => ValidatedNea<string, Maybe<Tuple<Queue, League>>> {
+    return league =>
+      pipe(
+        league,
+        domHandler.querySelectorEnsureOneTextContent(':scope > .txt > .title'),
+        ValidatedNea.fromEither,
+        ValidatedNea.chain(title => {
+          if (title === 'Unranked') return ValidatedNea.valid(Maybe.none)
 
-        const previousSeasonRankingImg = league.querySelector<HTMLImageElement>(
-          '.inlinePreviousSeasonRanking > img',
-        )
-        return pipe(
-          apply.sequenceT(validation)(
-            pipe(
-              league,
-              domHandler.querySelectorEnsureOneTextContent(':scope > .txt > .title'),
-              ValidatedNea.fromEither,
-              ValidatedNea.chain(parseQueueTierRankLeaguePoints),
+          const previousSeasonRankingImg = league.querySelector<HTMLImageElement>(
+            '.inlinePreviousSeasonRanking > img',
+          )
+          return pipe(
+            apply.sequenceT(validation)(
+              pipe(
+                league,
+                domHandler.querySelectorEnsureOneTextContent(':scope > .txt > .title'),
+                ValidatedNea.fromEither,
+                ValidatedNea.chain(parseQueueTierRankLeaguePoints),
+              ),
+              parseLeagueWinRate(league),
+              previousSeasonRankingImg === null
+                ? ValidatedNea.valid(Maybe.none)
+                : pipe(parseTierRank(previousSeasonRankingImg.alt), ValidatedNea.map(Maybe.some)),
             ),
-            parseLeagueWinRate(league),
-            previousSeasonRankingImg === null
-              ? ValidatedNea.valid(Maybe.none)
-              : pipe(parseTierRank(previousSeasonRankingImg.alt), ValidatedNea.map(Maybe.some)),
-          ),
-          ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) => {
-            const res: League = {
-              tier,
-              rank,
-              leaguePoints,
-              winRate,
-              previousSeason,
-            }
-            return Maybe.some(Tuple.of(queue, res))
-          }),
-        )
-      }),
-    )
+            ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) => {
+              const res: League = {
+                tier,
+                rank,
+                leaguePoints,
+                winRate,
+                previousSeason,
+              }
+              return Maybe.some(Tuple.of(queue, res))
+            }),
+          )
+        }),
+        prefixErrors(`${selector}: `),
+      )
   }
 
   function parseLeagueWinRate(league: Element): ValidatedNea<string, WinRate> {
@@ -354,9 +378,9 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
         league,
         DomHandler.querySelectorEnsureOne(oneLinerClass),
         ValidatedNea.fromEither,
-        ValidatedNea.chainNullableK(
-          NonEmptyArray.of(`Element "${oneLinerClass}" has no textContent`),
-        )(e => e.lastChild?.textContent?.trim()),
+        ValidatedNea.chainNullableK([`Element "${oneLinerClass}" has no textContent`])(e =>
+          e.lastChild?.textContent?.trim(),
+        ),
         ValidatedNea.chain(parsePlayed),
       ),
       percents: pipe(
@@ -382,7 +406,7 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
 
     return pipe(
       participant.querySelector(titleClass)?.firstChild?.textContent?.trim(),
-      ValidatedNea.fromNullable(NonEmptyArray.of(`Element "${titleClass}" has no textContent`)),
+      ValidatedNea.fromNullable([`Element "${titleClass}" has no textContent`]),
       ValidatedNea.chain(lane =>
         lane === unknownLane
           ? ValidatedNea.valid(Maybe.none)
@@ -390,17 +414,18 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
               lane,
               decode([Lane.decoder, 'Lane']),
               ValidatedNea.map(l => Maybe.some(lanePosition[l])),
+              prefixErrors(`${titleClass}: `),
             ),
       ),
     )
   }
 
   function parseRoles(participant: Element): ValidatedNea<string, List<ChampionPosition>> {
+    const rolesBoxHighlight = '.rolesBox > .imgFlex > .txt > .content > .highlight'
+
     return pipe(
       participant,
-      domHandler.querySelectorEnsureOneTextContent(
-        '.rolesBox > .imgFlex > .txt > .content > .highlight',
-      ),
+      domHandler.querySelectorEnsureOneTextContent(rolesBoxHighlight),
       ValidatedNea.fromEither,
       ValidatedNea.chain(lanes =>
         lanes === unknownLane
@@ -414,6 +439,7 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
             ),
       ),
       ValidatedNea.map(List.map(l => lanePosition[l])),
+      prefixErrors(`${rolesBoxHighlight}: `),
     )
   }
 
@@ -428,14 +454,14 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
       participant,
       DomHandler.querySelectorAll(tagBoxTag, window.HTMLElement),
       ValidatedNea.chain(
-        List.traverse(validation)(tag =>
+        List.traverseWithIndex(validation)((i, tag) =>
           pipe(
             apply.sequenceT(validation)(
               pipe(
                 tag.getAttribute(dataTagNicenessAttr),
-                ValidatedNea.fromNullable(
-                  NonEmptyArray.of(`No attribute "${dataTagNicenessAttr}" for ${tagBoxTag}`),
-                ),
+                ValidatedNea.fromNullable([
+                  `No attribute "${dataTagNicenessAttr}" for ${tagBoxTag}`,
+                ]),
                 ValidatedNea.chain(flow(Number, decode([Niceness.decoder, 'Niceness']))),
               ),
               pipe(
@@ -446,17 +472,13 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
                   seqS({
                     label: pipe(
                       div.textContent,
-                      ValidatedNea.fromNullable(
-                        NonEmptyArray.of(`Empty textContent for ${tagBoxTag} ${divTag}`),
-                      ),
+                      ValidatedNea.fromNullable([`Empty textContent for ${tagBoxTag} ${divTag}`]),
                     ),
                     tooltip: pipe(
                       div.getAttribute(tooltipAttr),
-                      ValidatedNea.fromNullable(
-                        NonEmptyArray.of(
-                          `No attribute "${tooltipAttr}" for ${tagBoxTag} ${divTag}`,
-                        ),
-                      ),
+                      ValidatedNea.fromNullable([
+                        `No attribute "${tooltipAttr}" for ${tagBoxTag} ${divTag}`,
+                      ]),
                     ),
                   }),
                 ),
@@ -465,6 +487,7 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
             ValidatedNea.map(
               ([niceness, { label, tooltip }]): Tag => ({ niceness, label, tooltip }),
             ),
+            prefixErrors(`${tagBoxTag} [${i}]: `),
           ),
         ),
       ),
@@ -613,6 +636,13 @@ const Niceness = createEnum(
   2, // blue (Pro: Faker)
 )
 
+const datasetGet = (elt: HTMLElement, key: string): ValidatedNea<string, string> => {
+  const res = elt.dataset[key]
+  return res === undefined
+    ? ValidatedNea.invalid([`data-${key} not found`])
+    : ValidatedNea.valid(res)
+}
+
 const decode =
   <I, A>([decoder, decoderName]: Tuple<Decoder<I, A>, string>) =>
   (i: I): ValidatedNea<string, A> =>
@@ -621,23 +651,17 @@ const decode =
       Either.mapLeft(() => NonEmptyArray.of(`Expected ${decoderName}, got: ${util.inspect(i)}`)),
     )
 
+function g<A extends Literal>({ values }: { values: List<A> }): string {
+  return `(${values.join('|')})`
+}
+
 const fromOptionRegex = (
   str: string,
   regex: RegExp,
 ): (<A>(ma: Maybe<A>) => ValidatedNea<string, A>) =>
   ValidatedNea.fromOption(() => `${JSON.stringify(str)} didn't match ${util.inspect(regex)}`)
 
-function g<A extends Literal>({ values }: { values: List<A> }): string {
-  return `(${values.join('|')})`
-}
-
-const datasetGet = (elt: HTMLElement, key: string): ValidatedNea<string, string> => {
-  const res = elt.dataset[key]
-  return res === undefined
-    ? ValidatedNea.invalid([
-        `data-${key} not found - dataset: ${util.inspect(elt.dataset)}, ${util.inspect(
-          elt.outerHTML,
-        )}`,
-      ])
-    : ValidatedNea.valid(res)
-}
+const prefixErrors = (
+  prefix: string,
+): (<A>(fa: ValidatedNea<string, A>) => ValidatedNea<string, A>) =>
+  ValidatedNea.mapLeft(NonEmptyArray.map(e => `${prefix}${e}`))

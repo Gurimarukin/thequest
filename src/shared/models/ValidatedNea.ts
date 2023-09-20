@@ -67,6 +67,9 @@ const ValidatedNea = {
   invalid,
   fromEither,
   fromOption,
+  fromNullable: Either.fromNullable as <E>(
+    e: NonEmptyArray<E>,
+  ) => <A>(a: A) => ValidatedNea<E, NonNullable<A>>,
   fromEmptyE,
   fromEmptyErrors,
   map: Either.map as <A, B>(f: (a: A) => B) => <E>(fa: ValidatedNea<E, A>) => ValidatedNea<E, B>,
@@ -74,6 +77,11 @@ const ValidatedNea = {
     f: (a: A) => ValidatedNea<E, B>,
   ) => (ma: ValidatedNea<E, A>) => ValidatedNea<E, B>,
   chainOptionK,
+  chainNullableK: Either.chainNullableK as <E>(
+    e: NonEmptyArray<E>,
+  ) => <A, B>(
+    f: (a: A) => B | null | undefined,
+  ) => (ma: ValidatedNea<E, A>) => ValidatedNea<E, NonNullable<B>>,
   chainEitherK,
   bimap,
   bind: Either.bind as <N extends string, A, E, B>(
