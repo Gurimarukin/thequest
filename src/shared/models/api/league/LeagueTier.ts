@@ -13,9 +13,11 @@ type LeagueTier = typeof e.T
 
 const e = createEnum(...RegularTier.values, ...ApexTier.values)
 
+const isApexTier = (tier: LeagueTier): tier is ApexTier => List.elem(e.Eq)(tier, ApexTier.values)
+
 const isRegularTier = (tier: LeagueTier): tier is RegularTier =>
   List.elem(e.Eq)(tier, RegularTier.values)
 
-const LeagueTier = { ...e, isRegularTier }
+const LeagueTier = { ...e, isApexTier, isRegularTier }
 
 export { ApexTier, LeagueTier, RegularTier }

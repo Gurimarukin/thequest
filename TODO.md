@@ -1,3 +1,5 @@
+- champions sort from Porofessor positions
+- Porofessor: unranked but previous season?
 - challenges page + detect challenges
 - change font (sans serif, defined monospace font, emojis)
 - forget about Discord Riot Connection, create BO and link by hand

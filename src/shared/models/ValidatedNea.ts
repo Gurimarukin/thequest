@@ -56,7 +56,13 @@ type SeqS<E> = <A extends Dict<string, unknown>>(a: ToValidatedDict<E, A>) => Va
 
 const getSeqS = <E = never>(): SeqS<E> => apply.sequenceS(getValidation<E>()) as SeqS<E>
 
+const {
+  left: {},
+  right: {},
+  ...validatedNea
+} = Either
 const ValidatedNea = {
+  ...validatedNea,
   valid,
   invalid,
   fromEither,
@@ -70,6 +76,12 @@ const ValidatedNea = {
   chainOptionK,
   chainEitherK,
   bimap,
+  bind: Either.bind as <N extends string, A, E, B>(
+    name: Exclude<N, keyof A>,
+    f: (a: A) => ValidatedNea<E, B>,
+  ) => (
+    ma: ValidatedNea<E, A>,
+  ) => ValidatedNea<E, { readonly [K in N | keyof A]: K extends keyof A ? A[K] : B }>,
   getValidation,
   getSeqS,
 }
