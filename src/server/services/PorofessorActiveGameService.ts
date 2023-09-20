@@ -1,5 +1,6 @@
 import { apply } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import type { Decoder } from 'io-ts/lib/Decoder'
 import type { Literal } from 'io-ts/lib/Schemable'
 import util from 'util'
 
@@ -28,7 +29,7 @@ import {
   toNotUsed,
 } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
-import { NumberFromString } from '../../shared/utils/ioTsUtils'
+import { NonEmptyArrayFromString, NumberFromString } from '../../shared/utils/ioTsUtils'
 
 import { DomHandler } from '../helpers/DomHandler'
 import type { HttpClient } from '../helpers/HttpClient'
@@ -126,7 +127,7 @@ type Participant = {
   summonerLevel: number
   champion: Maybe<Champion>
   leagues: Leagues
-  role: ChampionPosition
+  role: Maybe<ChampionPosition>
   mainRoles: List<ChampionPosition>
   tags: List<unknown>
 }
@@ -217,7 +218,10 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
           Maybe.chainNullableK(e => e.textContent),
           Maybe.fold(
             () => ValidatedNea.valid(Maybe.none),
-            flow(numberFromString(`${ePrefix}premade history`), ValidatedNea.map(Maybe.some)),
+            flow(
+              decode([NumberFromString.decoder, 'NumberFromString']),
+              ValidatedNea.map(Maybe.some),
+            ),
           ),
         ),
         summonerName:
@@ -228,14 +232,14 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
           participant,
           domHandler.querySelectorEnsureOneTextContent('.championBox .level'),
           ValidatedNea.fromEither,
-          ValidatedNea.chain(numberFromString(`${ePrefix}summoner level`)),
+          ValidatedNea.chain(decode([NumberFromString.decoder, 'NumberFromString'])),
         ),
         champion: parseChampion(participant),
         leagues: parseLeagues(participant),
+        role: parseRole(participant),
+        mainRoles: parseRoles(participant),
 
         // TODO
-        role: ValidatedNea.valid('top'),
-        mainRoles: ValidatedNea.valid(['top']),
         tags: ValidatedNea.valid([]),
       })
     }
@@ -269,7 +273,7 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
         `.championBox > .imgFlex > .txt > .content .${className}`,
       ),
       ValidatedNea.fromEither,
-      ValidatedNea.chain(numberFromString('')),
+      ValidatedNea.chain(decode([NumberFromString.decoder, 'NumberFromString'])),
     )
   }
 
@@ -377,6 +381,46 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
     return pipe(
       leagues,
       List.findFirstMap(([q, l]) => (Queue.Eq.equals(q, queue) ? Maybe.some(l) : Maybe.none)),
+    )
+  }
+
+  function parseRole(participant: Element): ValidatedNea<string, Maybe<ChampionPosition>> {
+    const titleClass = '.rolesBox > .imgFlex > .txt > .title'
+
+    return pipe(
+      participant.querySelector(titleClass)?.firstChild?.textContent?.trim(),
+      ValidatedNea.fromNullable(NonEmptyArray.of(`Element "${titleClass}" has no textContent`)),
+      ValidatedNea.chain(lane =>
+        lane === unknownLane
+          ? ValidatedNea.valid(Maybe.none)
+          : pipe(
+              lane,
+              decode([Lane.decoder, 'Lane']),
+              ValidatedNea.map(l => Maybe.some(lanePosition[l])),
+            ),
+      ),
+    )
+  }
+
+  function parseRoles(participant: Element): ValidatedNea<string, List<ChampionPosition>> {
+    return pipe(
+      participant,
+      domHandler.querySelectorEnsureOneTextContent(
+        '.rolesBox > .imgFlex > .txt > .content > .highlight',
+      ),
+      ValidatedNea.fromEither,
+      ValidatedNea.chain(lanes =>
+        lanes === unknownLane
+          ? ValidatedNea.valid(List.empty<Lane>())
+          : pipe(
+              lanes,
+              decode([
+                NonEmptyArrayFromString.decoder(', ')(Lane.decoder),
+                'NonEmptyArrayFromString<Lane>',
+              ]),
+            ),
+      ),
+      ValidatedNea.map(List.map(l => lanePosition[l])),
     )
   }
 }
@@ -501,12 +545,25 @@ const parsePercents = (str: string): ValidatedNea<string, number> =>
     ValidatedNea.map(Number),
   )
 
-const numberFromString =
-  (prefix: string) =>
-  (str: string): ValidatedNea<string, number> =>
+const unknownLane = 'Unknown'
+
+type Lane = typeof Lane.T
+const Lane = createEnum('Top', 'Jungler', 'Mid', 'AD Carry', 'Support')
+
+const lanePosition: Dict<Lane, ChampionPosition> = {
+  Top: 'top',
+  Jungler: 'jun',
+  Mid: 'mid',
+  'AD Carry': 'bot',
+  Support: 'sup',
+}
+
+const decode =
+  <I, A>([decoder, decoderName]: Tuple<Decoder<I, A>, string>) =>
+  (i: I): ValidatedNea<string, A> =>
     pipe(
-      NumberFromString.decoder.decode(str),
-      Either.mapLeft(() => NonEmptyArray.of(`${prefix} - expected number from string got: ${str}`)),
+      decoder.decode(i),
+      Either.mapLeft(() => NonEmptyArray.of(`Expected ${decoderName}, got: ${util.inspect(i)}`)),
     )
 
 const fromOptionRegex = (

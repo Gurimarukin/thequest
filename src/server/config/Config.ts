@@ -20,6 +20,10 @@ import {
 
 import { ClientSecret } from '../models/discord/ClientSecret'
 
+const separator = ','
+const nonEmptyArrayFromStringDecoder = NonEmptyArrayFromString.decoder(separator)
+const arrayFromStringDecoder = ArrayFromString.decoder(separator)
+
 const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
@@ -102,7 +106,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
       }),
       http: seqS<HttpConfig>({
         port: r(NumberFromString.decoder)('HTTP_PORT'),
-        allowedOrigins: r(Maybe.decoder(NonEmptyArrayFromString.decoder(URLFromString.decoder)))(
+        allowedOrigins: r(Maybe.decoder(nonEmptyArrayFromStringDecoder(URLFromString.decoder)))(
           'HTTP_ALLOWED_ORIGINS',
         ),
       }),
@@ -125,7 +129,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
       ),
       jwtSecret: r(D.string)('JWT_SECRET'),
       madosayentisuto: seqS<MadosayentisutoConfig>({
-        whitelistedIps: r(ArrayFromString.decoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
+        whitelistedIps: r(arrayFromStringDecoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
         token: r(D.string)('MADOSAYENTISUTO_TOKEN'),
       }),
     })
