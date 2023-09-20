@@ -238,7 +238,7 @@ const SummonerController = (
             Try.fold(
               e =>
                 pipe(
-                  logger.warn('Error while fetching Poro game (falling ck to Riot API only):', e),
+                  logger.warn('Error while fetching Poro game (falling back to Riot API only):', e),
                   Future.fromIOEither,
                   Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
                 ),
