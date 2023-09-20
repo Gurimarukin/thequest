@@ -443,10 +443,7 @@ const Li: React.FC<LiProps> = ({
     {Children.map<CellElement | null, CellElement | null>(
       children as List<CellElement | null>,
       element => {
-        if (element === null) {
-          console.log('element =', element)
-          return null
-        }
+        if (element === null) return null
         const { className, style, ...props_ } = element.props
         const props: RequiredCellElementProps = {
           ...gestureProps,
