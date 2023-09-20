@@ -146,6 +146,7 @@ type Leagues = {
 
 type League = TierRank & {
   leaguePoints: number
+  winRate: WinRate
   previousSeason: Maybe<TierRank>
 }
 
@@ -154,8 +155,10 @@ type TierRank = {
   rank: LeagueRank
 }
 
-const cardsListClass = 'div.site-content > ul.cards-list'
-const summonernameKey = 'summonername'
+type WinRate = {
+  percents: number
+  played: number
+}
 
 const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, unknown> => {
   const { window } = domHandler
@@ -165,6 +168,8 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
   })
 
   function parseTeams(): ValidatedNea<string, Dict<`${TeamId}`, List<Participant>>> {
+    const cardsListClass = 'div.site-content > ul.cards-list'
+
     return pipe(
       window.document,
       DomHandler.querySelectorAll(cardsListClass, window.Element),
@@ -200,6 +205,8 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
   function parseParticipant(
     teamId: TeamId,
   ): (i: number, participant: HTMLElement) => ValidatedNea<string, Participant> {
+    const summonernameKey = 'summonername'
+
     return (i, participant) => {
       const ePrefix = `Team ${teamId}[${i}]: `
       const summonerName = participant.dataset[summonernameKey]
@@ -244,7 +251,7 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
           ? ValidatedNea.valid(Maybe.none)
           : pipe(
               seqS({
-                champion: parseChampionWinrate(str),
+                champion: parseChampionWinRate(str),
                 kills: parseKda(participant, 'kills'),
                 deaths: parseKda(participant, 'deaths'),
                 assists: parseKda(participant, 'assists'),
@@ -322,15 +329,17 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
               ValidatedNea.fromEither,
               ValidatedNea.chain(parseQueueTierRankLeaguePoints),
             ),
+            parseLeagueWinRate(league),
             previousSeasonRankingImg === null
               ? ValidatedNea.valid(Maybe.none)
               : pipe(parseTierRank(previousSeasonRankingImg.alt), ValidatedNea.map(Maybe.some)),
           ),
-          ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, previousSeason]) => {
+          ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) => {
             const res: League = {
               tier,
               rank,
               leaguePoints,
+              winRate,
               previousSeason,
             }
             return Maybe.some(Tuple.of(queue, res))
@@ -338,6 +347,30 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
         )
       }),
     )
+  }
+
+  function parseLeagueWinRate(league: Element): ValidatedNea<string, WinRate> {
+    const oneLinerClass = ':scope > .txt > .content > .oneLiner'
+
+    return seqS<WinRate>({
+      played: pipe(
+        league,
+        DomHandler.querySelectorEnsureOne(oneLinerClass),
+        ValidatedNea.fromEither,
+        ValidatedNea.chainNullableK(
+          NonEmptyArray.of(`Element "${oneLinerClass}" has no textContent`),
+        )(e => e.lastChild?.textContent?.trim()),
+        ValidatedNea.chain(parsePlayed),
+      ),
+      percents: pipe(
+        league,
+        domHandler.querySelectorEnsureOneTextContent(
+          ':scope > .txt > .content > .oneLiner > .highlight',
+        ),
+        ValidatedNea.fromEither,
+        ValidatedNea.chain(parsePercents),
+      ),
+    })
   }
 
   function findLeague(leagues: List<Tuple<Queue, League>>, queue: Queue): Maybe<League> {
@@ -348,20 +381,16 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
   }
 }
 
-type ChampionWinrate = {
-  percents: number
-  played: number
-}
+const championWinRateRegex = /^(\d+)% Win \((\d+) Played\)$/
 
 // "46% Win (39 Played)"
-const championWinrateRegex = /^(\d+)% Win \((\d+) Played\)$/
-const parseChampionWinrate = (str: string): ValidatedNea<string, ChampionWinrate> =>
+const parseChampionWinRate = (str: string): ValidatedNea<string, WinRate> =>
   pipe(
     str,
-    StringUtils.matcher2(championWinrateRegex),
-    ValidatedNea.fromOption(() => `${JSON.stringify(str)} didn't match championWinrateRegex`),
+    StringUtils.matcher2(championWinRateRegex),
+    fromOptionRegex(str, championWinRateRegex),
     ValidatedNea.map(
-      ([percents, played]): ChampionWinrate => ({
+      ([percents, played]): WinRate => ({
         // championWinrateRegex ensures these casts are safe
         percents: Number(percents),
         played: Number(played),
@@ -448,6 +477,28 @@ const parseQueueTierRankLeaguePoints = (
         ),
       )
     }),
+  )
+
+const playedRegex = /^\((\d+) Played\)$/
+
+// "(109 Played)"
+const parsePlayed = (str: string): ValidatedNea<string, number> =>
+  pipe(
+    str,
+    StringUtils.matcher1(playedRegex),
+    fromOptionRegex(str, playedRegex),
+    ValidatedNea.map(Number),
+  )
+
+const percentsRegex = /^(\d+)% Win$/
+
+// "58% Win"
+const parsePercents = (str: string): ValidatedNea<string, number> =>
+  pipe(
+    str,
+    StringUtils.matcher1(percentsRegex),
+    fromOptionRegex(str, percentsRegex),
+    ValidatedNea.map(Number),
   )
 
 const numberFromString =
