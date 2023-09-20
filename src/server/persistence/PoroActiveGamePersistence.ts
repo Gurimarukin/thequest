@@ -5,22 +5,22 @@ import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
-import { PorofessorActiveGameDb } from '../models/activeGame/PorofessorActiveGameDb'
+import { PoroActiveGameDb } from '../models/activeGame/PoroActiveGameDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { GameId } from '../models/riot/GameId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
-type PorofessorActiveGamePersistence = ReturnType<typeof PorofessorActiveGamePersistence>
+type PoroActiveGamePersistence = ReturnType<typeof PoroActiveGamePersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const PorofessorActiveGamePersistence = (
+const PoroActiveGamePersistence = (
   Logger: LoggerGetter,
   mongoCollection: MongoCollectionGetter,
 ) => {
-  const logger = Logger('PorofessorActiveGamePersistence')
-  const collection = FpCollection(logger)([PorofessorActiveGameDb.codec, 'PorofessorActiveGameDb'])(
-    mongoCollection('porofessorActiveGame'),
+  const logger = Logger('PoroActiveGamePersistence')
+  const collection = FpCollection(logger)([PoroActiveGameDb.codec, 'PoroActiveGameDb'])(
+    mongoCollection('poroActiveGame'),
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
@@ -30,10 +30,10 @@ const PorofessorActiveGamePersistence = (
   return {
     ensureIndexes,
 
-    findById: (gameId: GameId): Future<Maybe<PorofessorActiveGameDb>> =>
+    findById: (gameId: GameId): Future<Maybe<PoroActiveGameDb>> =>
       collection.findOne({ gameId: GameId.codec.encode(gameId) }),
 
-    upsert: (game: PorofessorActiveGameDb): Future<boolean> =>
+    upsert: (game: PoroActiveGameDb): Future<boolean> =>
       pipe(
         collection.updateOne({ gameId: GameId.codec.encode(game.gameId) }, game, {
           upsert: true,
@@ -49,4 +49,4 @@ const PorofessorActiveGamePersistence = (
   }
 }
 
-export { PorofessorActiveGamePersistence }
+export { PoroActiveGamePersistence }

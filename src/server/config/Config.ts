@@ -34,7 +34,7 @@ export type Config = {
   http: HttpConfig
   db: DbConfig
   riotApi: RiotApiConfig
-  porofessorApiCacheTtlActiveGame: MsDuration
+  poroApiCacheTtlActiveGame: MsDuration
   jwtSecret: string
   madosayentisuto: MadosayentisutoConfig
 }
@@ -123,7 +123,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         }),
         cacheTtl: pipe(infiniteCache, Either.map(riotApiCacheTtl)),
       }),
-      porofessorApiCacheTtlActiveGame: pipe(
+      poroApiCacheTtlActiveGame: pipe(
         infiniteCache,
         Either.map(i => (i ? infinity : MsDuration.hour(1))),
       ),

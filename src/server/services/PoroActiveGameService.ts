@@ -8,6 +8,7 @@ import { DayJs } from '../../shared/models/DayJs'
 import type { MsDuration } from '../../shared/models/MsDuration'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { Platform } from '../../shared/models/api/Platform'
+import { PoroNiceness } from '../../shared/models/api/activeGame/PoroNiceness'
 import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../shared/models/api/league/LeagueRank'
@@ -33,23 +34,30 @@ import { NonEmptyArrayFromString, NumberFromString } from '../../shared/utils/io
 
 import { DomHandler } from '../helpers/DomHandler'
 import type { HttpClient } from '../helpers/HttpClient'
-import type { PorofessorActiveGame } from '../models/activeGame/PorofessorActiveGame'
-import type { PorofessorActiveGameDb } from '../models/activeGame/PorofessorActiveGameDb'
+import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
+import type { PoroActiveGameDb } from '../models/activeGame/PoroActiveGameDb'
+import type { PoroActiveGameParticipant } from '../models/activeGame/PoroActiveGameParticipant'
+import type { PoroActiveGameParticipantChampion } from '../models/activeGame/PoroActiveGameParticipantChampion'
+import type { PoroTag } from '../models/activeGame/PoroTag'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
+import type { PoroLeague } from '../models/league/PoroLeague'
+import type { PoroLeagues } from '../models/league/PoroLeagues'
+import type { TierRank } from '../models/league/TierRank'
+import type { WinRate } from '../models/league/WinRate'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { GameId } from '../models/riot/GameId'
-import type { PorofessorActiveGamePersistence } from '../persistence/PorofessorActiveGamePersistence'
+import type { PoroActiveGamePersistence } from '../persistence/PoroActiveGamePersistence'
 import { getOnError } from '../utils/getOnError'
 
-type PorofessorActiveGameService = ReturnType<typeof of>
+type PoroActiveGameService = ReturnType<typeof of>
 
-const PorofessorActiveGameService = (
+const PoroActiveGameService = (
   cacheTtl: MsDuration,
   Logger: LoggerGetter,
-  porofessorActiveGamePersistence: PorofessorActiveGamePersistence,
+  poroActiveGamePersistence: PoroActiveGamePersistence,
   httpClient: HttpClient,
   cronJobObservable: TObservable<CronJobEvent>,
-): IO<PorofessorActiveGameService> => {
+): IO<PoroActiveGameService> => {
   const logger = Logger('SummonerService')
 
   return pipe(
@@ -57,45 +65,42 @@ const PorofessorActiveGameService = (
     TObservable.subscribe(getOnError(logger))({
       next: ({ date }) =>
         pipe(
-          porofessorActiveGamePersistence.deleteBeforeDate(pipe(date, DayJs.subtract(cacheTtl))),
+          poroActiveGamePersistence.deleteBeforeDate(pipe(date, DayJs.subtract(cacheTtl))),
           Future.map(toNotUsed),
         ),
     }),
-    IO.map(() => of(porofessorActiveGamePersistence, httpClient)),
+    IO.map(() => of(poroActiveGamePersistence, httpClient)),
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const of = (
-  porofessorActiveGamePersistence: PorofessorActiveGamePersistence,
-  httpClient: HttpClient,
-) => {
+const of = (poroActiveGamePersistence: PoroActiveGamePersistence, httpClient: HttpClient) => {
   return {
     find: (
       gameId: GameId,
       platform: Platform,
       summonerName: string,
-    ): Future<Maybe<PorofessorActiveGame>> =>
+    ): Future<Maybe<PoroActiveGame>> =>
       pipe(
-        porofessorActiveGamePersistence.findById(gameId),
-        futureMaybe.alt<PorofessorActiveGame>(() =>
+        poroActiveGamePersistence.findById(gameId),
+        futureMaybe.alt<PoroActiveGame>(() =>
           pipe(
             fetch(platform, summonerName),
             futureMaybe.bindTo('game'),
             futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
             futureMaybe.map(
-              ({ game, insertedAt }): PorofessorActiveGameDb => ({
+              ({ game, insertedAt }): PoroActiveGameDb => ({
                 ...game,
                 insertedAt,
               }),
             ),
-            futureMaybe.chainFirstTaskEitherK(porofessorActiveGamePersistence.upsert),
+            futureMaybe.chainFirstTaskEitherK(poroActiveGamePersistence.upsert),
           ),
         ),
       ),
   }
 
-  function fetch(platform: Platform, summonerName: string): Future<Maybe<PorofessorActiveGame>> {
+  function fetch(platform: Platform, summonerName: string): Future<Maybe<PoroActiveGame>> {
     return pipe(
       httpClient.text([
         `https://porofessor.gg/partial/live-partial/${Platform.encoderLower.encode(
@@ -103,84 +108,36 @@ const of = (
         )}/${summonerName}`,
         'get',
       ]),
-      Future.chainEitherK(parsePorofessorActiveGame),
+      Future.chainEitherK(parsePoroActiveGame),
     )
   }
 }
 
-export { PorofessorActiveGameService }
+export { PoroActiveGameService }
 
 const validation = ValidatedNea.getValidation<string>()
 const seqS = ValidatedNea.getSeqS<string>()
 
-// PorofessorActiveGame
-export const parsePorofessorActiveGame = (html: string): Try<Maybe<PorofessorActiveGame>> => {
+// PoroActiveGame
+export const parsePoroActiveGame = (html: string): Try<Maybe<PoroActiveGame>> => {
   if (html.includes('The summoner is not in-game') || html.includes('Summoner not found')) {
     return Try.success(Maybe.none)
   }
   return pipe(
     html,
     DomHandler.of(),
-    Try.map(parsePorofessorActiveGameBis),
+    Try.map(parsePoroActiveGameBis),
     Try.chain(Either.mapLeft(flow(List.mkString('\n', '\n', ''), Error))),
     Try.map(Maybe.some),
   )
 }
 
-type Participant = {
-  premadeId: Maybe<number>
-  summonerName: string
-  summonerLevel: number
-  champion: Maybe<Champion>
-  leagues: Leagues
-  role: Maybe<ChampionPosition>
-  mainRoles: List<ChampionPosition>
-  tags: List<Tag>
-}
-
-type Champion = {
-  percents: number
-  played: number
-  kills: number
-  deaths: number
-  assists: number
-}
-
-type Leagues = {
-  soloDuo: Maybe<League>
-  flex: Maybe<League>
-}
-
-type League = TierRank & {
-  leaguePoints: number
-  winRate: WinRate
-  previousSeason: Maybe<TierRank>
-}
-
-type TierRank = {
-  tier: LeagueTier
-  rank: LeagueRank
-}
-
-type WinRate = {
-  percents: number
-  played: number
-}
-
-type Tag = {
-  niceness: Niceness
-  label: string
-  tooltip: string
-}
-
-const parsePorofessorActiveGameBis = (
-  domHandler: DomHandler,
-): ValidatedNea<string, PorofessorActiveGame> => {
+const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, PoroActiveGame> => {
   const { window } = domHandler
 
   const spectateButton = 'spectate_button'
 
-  return seqS<PorofessorActiveGame>({
+  return seqS<PoroActiveGame>({
     gameId: pipe(
       window.document.getElementById(spectateButton),
       ValidatedNea.fromNullable([`Element not found: #${spectateButton}`]),
@@ -190,7 +147,7 @@ const parsePorofessorActiveGameBis = (
     participants: parseParticipants(),
   })
 
-  function parseParticipants(): ValidatedNea<string, PorofessorActiveGame['participants']> {
+  function parseParticipants(): ValidatedNea<string, PoroActiveGame['participants']> {
     const cardsListClass = 'div.site-content > ul.cards-list'
 
     return pipe(
@@ -205,7 +162,7 @@ const parsePorofessorActiveGameBis = (
             : ValidatedNea.invalid([`Got more than 2 teams ${cardsListClass}`]),
         ),
       ),
-      ValidatedNea.map(([team100, team200]): PorofessorActiveGame['participants'] => ({
+      ValidatedNea.map(([team100, team200]): PoroActiveGame['participants'] => ({
         100: List.isNonEmpty(team100) ? team100 : undefined,
         200: List.isNonEmpty(team200) ? team200 : undefined,
       })),
@@ -215,7 +172,7 @@ const parsePorofessorActiveGameBis = (
   function parseTeam(
     teamId: TeamId,
     cardsList: Element | undefined,
-  ): ValidatedNea<string, List<Participant>> {
+  ): ValidatedNea<string, List<PoroActiveGameParticipant>> {
     return pipe(
       cardsList === undefined
         ? ValidatedNea.invalid(['Not found'])
@@ -231,12 +188,12 @@ const parsePorofessorActiveGameBis = (
   function parseParticipant(
     i: number,
     participant: HTMLElement,
-  ): ValidatedNea<string, Participant> {
+  ): ValidatedNea<string, PoroActiveGameParticipant> {
     const premadeHistoryTagContainerDiv = '.premadeHistoryTagContainer > div'
     const championBoxLevel = '.championBox .level'
 
     return pipe(
-      seqS<Participant>({
+      seqS<PoroActiveGameParticipant>({
         premadeId: pipe(
           participant.querySelector(premadeHistoryTagContainerDiv),
           Maybe.fromNullable,
@@ -272,7 +229,9 @@ const parsePorofessorActiveGameBis = (
     )
   }
 
-  function parseChampion(participant: Element): ValidatedNea<string, Maybe<Champion>> {
+  function parseChampion(
+    participant: Element,
+  ): ValidatedNea<string, Maybe<PoroActiveGameParticipantChampion>> {
     return pipe(
       participant,
       domHandler.querySelectorEnsureOneTextContent('.championBox > .imgFlex > .txt > .title'),
@@ -306,7 +265,7 @@ const parsePorofessorActiveGameBis = (
     )
   }
 
-  function parseLeagues(participant: Element): ValidatedNea<string, Leagues> {
+  function parseLeagues(participant: Element): ValidatedNea<string, PoroLeagues> {
     return pipe(
       apply.sequenceT(validation)(
         parseLeague(participant, '.rankingsBox > .imgFlex', false),
@@ -315,7 +274,7 @@ const parsePorofessorActiveGameBis = (
       ValidatedNea.map(
         flow(
           List.compact,
-          (leagues): Leagues => ({
+          (leagues): PoroLeagues => ({
             soloDuo: findLeague(leagues, 'Soloqueue'),
             flex: findLeague(leagues, 'Flex'),
           }),
@@ -328,7 +287,7 @@ const parsePorofessorActiveGameBis = (
     participant: Element,
     selector: string,
     canBeNull: boolean,
-  ): ValidatedNea<string, Maybe<Tuple<Queue, League>>> {
+  ): ValidatedNea<string, Maybe<Tuple<Queue, PoroLeague>>> {
     if (canBeNull) {
       const league = participant.querySelector(selector)
       if (league === null) return ValidatedNea.valid(Maybe.none)
@@ -345,7 +304,7 @@ const parsePorofessorActiveGameBis = (
 
   function parseLeagueBis(
     selector: string,
-  ): (league: Element) => ValidatedNea<string, Maybe<Tuple<Queue, League>>> {
+  ): (league: Element) => ValidatedNea<string, Maybe<Tuple<Queue, PoroLeague>>> {
     return league =>
       pipe(
         league,
@@ -371,7 +330,7 @@ const parsePorofessorActiveGameBis = (
                 : pipe(parseTierRank(previousSeasonRankingImg.alt), ValidatedNea.map(Maybe.some)),
             ),
             ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) => {
-              const res: League = {
+              const res: PoroLeague = {
                 tier,
                 rank,
                 leaguePoints,
@@ -410,7 +369,7 @@ const parsePorofessorActiveGameBis = (
     })
   }
 
-  function findLeague(leagues: List<Tuple<Queue, League>>, queue: Queue): Maybe<League> {
+  function findLeague(leagues: List<Tuple<Queue, PoroLeague>>, queue: Queue): Maybe<PoroLeague> {
     return pipe(
       leagues,
       List.findFirstMap(([q, l]) => (Queue.Eq.equals(q, queue) ? Maybe.some(l) : Maybe.none)),
@@ -459,7 +418,7 @@ const parsePorofessorActiveGameBis = (
     )
   }
 
-  function parseTags(participant: Element): ValidatedNea<string, List<Tag>> {
+  function parseTags(participant: Element): ValidatedNea<string, List<PoroTag>> {
     const tagBoxTag = '.tags-box > tag'
     const divTag = 'div.tag'
 
@@ -478,7 +437,7 @@ const parsePorofessorActiveGameBis = (
                 ValidatedNea.fromNullable([
                   `No attribute "${dataTagNicenessAttr}" for ${tagBoxTag}`,
                 ]),
-                ValidatedNea.chain(flow(Number, decode([Niceness.decoder, 'Niceness']))),
+                ValidatedNea.chain(flow(Number, decode([PoroNiceness.decoder, 'Niceness']))),
               ),
               pipe(
                 tag,
@@ -501,7 +460,7 @@ const parsePorofessorActiveGameBis = (
               ),
             ),
             ValidatedNea.map(
-              ([niceness, { label, tooltip }]): Tag => ({ niceness, label, tooltip }),
+              ([niceness, { label, tooltip }]): PoroTag => ({ niceness, label, tooltip }),
             ),
             prefixErrors(`${tagBoxTag} [${i}]: `),
           ),
@@ -643,14 +602,6 @@ const lanePosition: Dict<Lane, ChampionPosition> = {
   'AD Carry': 'bot',
   Support: 'sup',
 }
-
-type Niceness = typeof Niceness.T
-const Niceness = createEnum(
-  -1, // red
-  0, // yellow
-  1, // green
-  2, // blue (Pro: Faker)
-)
 
 const datasetGet =
   (key: string) =>

@@ -42,8 +42,8 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { ActiveGame } from '../models/activeGame/ActiveGame'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
-import type { PorofessorActiveGame } from '../models/activeGame/PorofessorActiveGame'
-import { PorofessorActiveGameParticipant } from '../models/activeGame/PorofessorActiveGameParticipant'
+import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
+import { PoroActiveGameParticipant } from '../models/activeGame/PoroActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import { LeagueEntry } from '../models/league/LeagueEntry'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -56,7 +56,7 @@ import type { ActiveGameService } from '../services/ActiveGameService'
 import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
-import type { PorofessorActiveGameService } from '../services/PorofessorActiveGameService'
+import type { PoroActiveGameService } from '../services/PoroActiveGameService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { StaticDataService } from '../services/staticDataService/StaticDataService'
@@ -77,7 +77,7 @@ const SummonerController = (
   challengesService: ChallengesService,
   leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
-  porofessorActiveGameService: PorofessorActiveGameService,
+  poroActiveGameService: PoroActiveGameService,
   summonerService: SummonerService,
   staticDataService: StaticDataService,
   userService: UserService,
@@ -225,26 +225,23 @@ const SummonerController = (
       activeGameService.findBySummoner(summoner.platform, summoner.id),
       futureMaybe.chainTaskEitherK(game =>
         pipe(
-          porofessorActiveGameService.find(game.gameId, summoner.platform, summoner.name),
+          poroActiveGameService.find(game.gameId, summoner.platform, summoner.name),
           task.chain(
             Try.fold(
               e =>
                 pipe(
-                  logger.warn(
-                    'Error while fetching Porofessor game (falling ck to Riot API only):',
-                    e,
-                  ),
+                  logger.warn('Error while fetching Poro game (falling ck to Riot API only):', e),
                   Future.fromIOEither,
                   Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
                 ),
               Maybe.fold(
                 () =>
                   pipe(
-                    logger.warn('Porofessor game not found while Riot API returned one'),
+                    logger.warn('Poro game not found while Riot API returned one'),
                     Future.fromIOEither,
                     Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
                   ),
-                activeGamePorofessor(summoner, maybeUser, game),
+                activeGamePoro(summoner, maybeUser, game),
               ),
             ),
           ),
@@ -309,20 +306,20 @@ const SummonerController = (
       )
   }
 
-  function activeGamePorofessor(
+  function activeGamePoro(
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
     game: ActiveGame,
-  ): (porofessorGame: PorofessorActiveGame) => Future<SummonerActiveGameView> {
-    return porofessorGame =>
+  ): (poroGame: PoroActiveGame) => Future<SummonerActiveGameView> {
+    return poroGame =>
       pipe(
         staticDataService.wikiaChampions,
         Future.chain(champions =>
           pipe(
-            porofessorGame.participants,
+            poroGame.participants,
             PartialDict.traverse(Future.ApplicativePar)(
               NonEmptyArray.traverse(Future.ApplicativePar)(
-                enrichParticipantPorofessor(
+                enrichParticipantPoro(
                   summoner.platform,
                   maybeUser,
                   pipe(DictUtils.values(game.participants), List.flatten),
@@ -353,21 +350,21 @@ const SummonerController = (
       )
   }
 
-  function enrichParticipantPorofessor(
+  function enrichParticipantPoro(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
     participants: List<ActiveGameParticipant>,
     gameInsertedAt: DayJs,
-  ): (porofessorParticipant: PorofessorActiveGameParticipant) => Future<ActiveGameParticipantView> {
-    return porofessorParticipant => {
+  ): (poroParticipant: PoroActiveGameParticipant) => Future<ActiveGameParticipantView> {
+    return poroParticipant => {
       const maybeParticipant = pipe(
         participants,
-        List.findFirst(p => p.summonerName === porofessorParticipant.summonerName),
+        List.findFirst(p => p.summonerName === poroParticipant.summonerName),
       )
       if (!Maybe.isSome(maybeParticipant)) {
         return Future.failed(
           Error(
-            `Porofessor participant: couldn't find matching Riot API participant: ${porofessorParticipant.summonerName}`,
+            `Poro participant: couldn't find matching Riot API participant: ${poroParticipant.summonerName}`,
           ),
         )
       }
@@ -376,8 +373,8 @@ const SummonerController = (
         findMasteriesAndShardsCount(platform, maybeUser, gameInsertedAt, participant),
         Future.map(({ masteries, shardsCount }) =>
           pipe(
-            porofessorParticipant,
-            PorofessorActiveGameParticipant.toView({ participant, masteries, shardsCount }),
+            poroParticipant,
+            PoroActiveGameParticipant.toView({ participant, masteries, shardsCount }),
           ),
         ),
       )
