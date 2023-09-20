@@ -37,7 +37,7 @@ import type { PorofessorActiveGame } from '../models/activeGame/PorofessorActive
 import type { PorofessorActiveGameDb } from '../models/activeGame/PorofessorActiveGameDb'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import type { GameId } from '../models/riot/GameId'
+import { GameId } from '../models/riot/GameId'
 import type { PorofessorActiveGamePersistence } from '../persistence/PorofessorActiveGamePersistence'
 import { getOnError } from '../utils/getOnError'
 
@@ -96,15 +96,15 @@ const of = (
   }
 
   function fetch(platform: Platform, summonerName: string): Future<Maybe<PorofessorActiveGame>> {
-    const res = pipe(
+    return pipe(
       httpClient.text([
         `https://porofessor.gg/partial/live-partial/${Platform.encoderLower.encode(
           platform,
         )}/${summonerName}`,
         'get',
       ]),
+      Future.chainEitherK(parsePorofessorActiveGame),
     )
-    return Future.todo()
   }
 }
 
@@ -114,11 +114,17 @@ const validation = ValidatedNea.getValidation<string>()
 const seqS = ValidatedNea.getSeqS<string>()
 
 // PorofessorActiveGame
-export const parsePorofessorActiveGame = (html: string): Try<Maybe<unknown>> => {
+export const parsePorofessorActiveGame = (html: string): Try<Maybe<PorofessorActiveGame>> => {
   if (html.includes('The summoner is not in-game') || html.includes('Summoner not found')) {
     return Try.success(Maybe.none)
   }
-  return pipe(html, DomHandler.of(), Try.map(parsePorofessorActiveGameBis), Try.map(Maybe.some))
+  return pipe(
+    html,
+    DomHandler.of(),
+    Try.map(parsePorofessorActiveGameBis),
+    Try.chain(Either.mapLeft(flow(List.mkString('\n', '\n', ''), Error))),
+    Try.map(Maybe.some),
+  )
 }
 
 type Participant = {
@@ -167,32 +173,42 @@ type Tag = {
   tooltip: string
 }
 
-const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, unknown> => {
+const parsePorofessorActiveGameBis = (
+  domHandler: DomHandler,
+): ValidatedNea<string, PorofessorActiveGame> => {
   const { window } = domHandler
 
-  return seqS({
-    teams: parseTeams(),
+  const spectateButton = 'spectate_button'
+
+  return seqS<PorofessorActiveGame>({
+    gameId: pipe(
+      window.document.getElementById(spectateButton),
+      ValidatedNea.fromNullable([`Element not found: #${spectateButton}`]),
+      ValidatedNea.chain(datasetGet('spectate-gameid')),
+      ValidatedNea.chain(decode([GameId.codec, 'GameId'])),
+    ),
+    participants: parseParticipants(),
   })
 
-  function parseTeams(): ValidatedNea<string, Dict<`${TeamId}`, List<Participant>>> {
+  function parseParticipants(): ValidatedNea<string, PorofessorActiveGame['participants']> {
     const cardsListClass = 'div.site-content > ul.cards-list'
 
     return pipe(
       window.document,
       DomHandler.querySelectorAll(cardsListClass, window.Element),
       ValidatedNea.chain(([team100, team200, ...remain]) =>
-        seqS<
-          Dict<`${TeamId}`, List<Participant>> & {
-            _: NotUsed
-          }
-        >({
-          100: parseTeam(100, team100),
-          200: parseTeam(200, team200),
-          _: List.isEmpty(remain)
+        apply.sequenceT(validation)(
+          parseTeam(100, team100),
+          parseTeam(200, team200),
+          List.isEmpty(remain)
             ? ValidatedNea.valid(NotUsed)
             : ValidatedNea.invalid([`Got more than 2 teams ${cardsListClass}`]),
-        }),
+        ),
       ),
+      ValidatedNea.map(([team100, team200]): PorofessorActiveGame['participants'] => ({
+        100: List.isNonEmpty(team100) ? team100 : undefined,
+        200: List.isNonEmpty(team200) ? team200 : undefined,
+      })),
     )
   }
 
@@ -234,7 +250,7 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
           ),
           prefixErrors(`${premadeHistoryTagContainerDiv}: `),
         ),
-        summonerName: datasetGet(participant, 'summonername'),
+        summonerName: pipe(participant, datasetGet('summonername')),
         summonerLevel: pipe(
           participant,
           domHandler.querySelectorEnsureOneTextContent(championBoxLevel),
@@ -636,12 +652,14 @@ const Niceness = createEnum(
   2, // blue (Pro: Faker)
 )
 
-const datasetGet = (elt: HTMLElement, key: string): ValidatedNea<string, string> => {
-  const res = elt.dataset[key]
-  return res === undefined
-    ? ValidatedNea.invalid([`data-${key} not found`])
-    : ValidatedNea.valid(res)
-}
+const datasetGet =
+  (key: string) =>
+  (elt: HTMLElement): ValidatedNea<string, string> => {
+    const res = elt.dataset[key]
+    return res === undefined
+      ? ValidatedNea.invalid([`data-${key} not found`])
+      : ValidatedNea.valid(res)
+  }
 
 const decode =
   <I, A>([decoder, decoderName]: Tuple<Decoder<I, A>, string>) =>
