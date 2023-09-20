@@ -129,7 +129,7 @@ type Participant = {
   leagues: Leagues
   role: Maybe<ChampionPosition>
   mainRoles: List<ChampionPosition>
-  tags: List<unknown>
+  tags: List<Tag>
 }
 
 type Champion = {
@@ -159,6 +159,12 @@ type TierRank = {
 type WinRate = {
   percents: number
   played: number
+}
+
+type Tag = {
+  niceness: Niceness
+  label: string
+  tooltip: string
 }
 
 const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, unknown> => {
@@ -199,50 +205,37 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
     return pipe(
       cardsList,
       DomHandler.querySelectorAll(`:scope > li > div`, window.HTMLElement),
-      ValidatedNea.chain(List.traverseWithIndex(validation)(parseParticipant(teamId))),
+      ValidatedNea.chain(List.traverse(validation)(parseParticipant)),
     )
   }
 
-  function parseParticipant(
-    teamId: TeamId,
-  ): (i: number, participant: HTMLElement) => ValidatedNea<string, Participant> {
-    const summonernameKey = 'summonername'
-
-    return (i, participant) => {
-      const ePrefix = `Team ${teamId}[${i}]: `
-      const summonerName = participant.dataset[summonernameKey]
-      return seqS<Participant>({
-        premadeId: pipe(
-          participant.querySelector('.premadeHistoryTagContainer > div'),
-          Maybe.fromNullable,
-          Maybe.chainNullableK(e => e.textContent),
-          Maybe.fold(
-            () => ValidatedNea.valid(Maybe.none),
-            flow(
-              decode([NumberFromString.decoder, 'NumberFromString']),
-              ValidatedNea.map(Maybe.some),
-            ),
+  function parseParticipant(participant: HTMLElement): ValidatedNea<string, Participant> {
+    return seqS<Participant>({
+      premadeId: pipe(
+        participant.querySelector('.premadeHistoryTagContainer > div'),
+        Maybe.fromNullable,
+        Maybe.chainNullableK(e => e.textContent),
+        Maybe.fold(
+          () => ValidatedNea.valid(Maybe.none),
+          flow(
+            decode([NumberFromString.decoder, 'NumberFromString']),
+            ValidatedNea.map(Maybe.some),
           ),
         ),
-        summonerName:
-          summonerName === undefined
-            ? ValidatedNea.invalid([`${ePrefix}data-${summonernameKey} not found`])
-            : ValidatedNea.valid(summonerName),
-        summonerLevel: pipe(
-          participant,
-          domHandler.querySelectorEnsureOneTextContent('.championBox .level'),
-          ValidatedNea.fromEither,
-          ValidatedNea.chain(decode([NumberFromString.decoder, 'NumberFromString'])),
-        ),
-        champion: parseChampion(participant),
-        leagues: parseLeagues(participant),
-        role: parseRole(participant),
-        mainRoles: parseRoles(participant),
-
-        // TODO
-        tags: ValidatedNea.valid([]),
-      })
-    }
+      ),
+      summonerName: datasetGet(participant, 'summonername'),
+      summonerLevel: pipe(
+        participant,
+        domHandler.querySelectorEnsureOneTextContent('.championBox .level'),
+        ValidatedNea.fromEither,
+        ValidatedNea.chain(decode([NumberFromString.decoder, 'NumberFromString'])),
+      ),
+      champion: parseChampion(participant),
+      leagues: parseLeagues(participant),
+      role: parseRole(participant),
+      mainRoles: parseRoles(participant),
+      tags: parseTags(participant),
+    })
   }
 
   function parseChampion(participant: Element): ValidatedNea<string, Maybe<Champion>> {
@@ -423,6 +416,60 @@ const parsePorofessorActiveGameBis = (domHandler: DomHandler): ValidatedNea<stri
       ValidatedNea.map(List.map(l => lanePosition[l])),
     )
   }
+
+  function parseTags(participant: Element): ValidatedNea<string, List<Tag>> {
+    const tagBoxTag = '.tags-box > tag'
+    const divTag = 'div.tag'
+
+    const dataTagNicenessAttr = 'data-tag-niceness'
+    const tooltipAttr = 'tooltip'
+
+    return pipe(
+      participant,
+      DomHandler.querySelectorAll(tagBoxTag, window.HTMLElement),
+      ValidatedNea.chain(
+        List.traverse(validation)(tag =>
+          pipe(
+            apply.sequenceT(validation)(
+              pipe(
+                tag.getAttribute(dataTagNicenessAttr),
+                ValidatedNea.fromNullable(
+                  NonEmptyArray.of(`No attribute "${dataTagNicenessAttr}" for ${tagBoxTag}`),
+                ),
+                ValidatedNea.chain(flow(Number, decode([Niceness.decoder, 'Niceness']))),
+              ),
+              pipe(
+                tag,
+                DomHandler.querySelectorEnsureOne('div.tag'),
+                ValidatedNea.fromEither,
+                ValidatedNea.chain(div =>
+                  seqS({
+                    label: pipe(
+                      div.textContent,
+                      ValidatedNea.fromNullable(
+                        NonEmptyArray.of(`Empty textContent for ${tagBoxTag} ${divTag}`),
+                      ),
+                    ),
+                    tooltip: pipe(
+                      div.getAttribute(tooltipAttr),
+                      ValidatedNea.fromNullable(
+                        NonEmptyArray.of(
+                          `No attribute "${tooltipAttr}" for ${tagBoxTag} ${divTag}`,
+                        ),
+                      ),
+                    ),
+                  }),
+                ),
+              ),
+            ),
+            ValidatedNea.map(
+              ([niceness, { label, tooltip }]): Tag => ({ niceness, label, tooltip }),
+            ),
+          ),
+        ),
+      ),
+    )
+  }
 }
 
 const championWinRateRegex = /^(\d+)% Win \((\d+) Played\)$/
@@ -558,6 +605,14 @@ const lanePosition: Dict<Lane, ChampionPosition> = {
   Support: 'sup',
 }
 
+type Niceness = typeof Niceness.T
+const Niceness = createEnum(
+  -1, // red
+  0, // yellow
+  1, // green
+  2, // blue (Pro: Faker)
+)
+
 const decode =
   <I, A>([decoder, decoderName]: Tuple<Decoder<I, A>, string>) =>
   (i: I): ValidatedNea<string, A> =>
@@ -574,4 +629,15 @@ const fromOptionRegex = (
 
 function g<A extends Literal>({ values }: { values: List<A> }): string {
   return `(${values.join('|')})`
+}
+
+const datasetGet = (elt: HTMLElement, key: string): ValidatedNea<string, string> => {
+  const res = elt.dataset[key]
+  return res === undefined
+    ? ValidatedNea.invalid([
+        `data-${key} not found - dataset: ${util.inspect(elt.dataset)}, ${util.inspect(
+          elt.outerHTML,
+        )}`,
+      ])
+    : ValidatedNea.valid(res)
 }
