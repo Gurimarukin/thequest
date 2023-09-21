@@ -310,6 +310,12 @@ const frFRTranslation: Translation = {
         `${leagueTier[tier]}${rank_ !== undefined ? ` ${rank[rank_]}` : ''}`,
       unranked: 'Non classé',
       unrankedIconAlt: 'Icône non classé',
+      previousSplit: tierRank => (
+        <>
+          Split précédent :<br />
+          {tierRank}
+        </>
+      ),
     },
     masteryIconAlt: level => `Icône niveau ${level}`,
     nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,

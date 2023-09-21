@@ -110,6 +110,7 @@ export type Translation = {
       tierRankAlt: (tier: LeagueTier, rank?: LeagueRank) => string
       unranked: React.ReactNode
       unrankedIconAlt: string
+      previousSplit: (tierRank: React.ReactNode) => React.ReactNode
     }
     masteryIconAlt: (level: ChampionLevelOrZero) => string
     nChampionsFraction: (n: number, total: number) => React.ReactNode

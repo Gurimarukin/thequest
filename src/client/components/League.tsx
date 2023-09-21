@@ -50,7 +50,9 @@ export const League: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation('common')
 
-  const ref = useRef<HTMLDivElement>(null)
+  const currentSeasonRef = useRef<HTMLDivElement>(null)
+  const currentSeasonIconRef = useRef<HTMLSpanElement>(null)
+  const previousSeasonRef = useRef<HTMLImageElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
     league.currentSeason,
@@ -107,20 +109,23 @@ export const League: React.FC<Props> = ({
   )
 
   return (
-    <>
+    <div
+      className={cx(
+        '-mb-1 flex items-center gap-2 overflow-hidden',
+        ['flex-row-reverse', reverse],
+        className,
+      )}
+    >
       <div
-        ref={ref}
-        className={cx(
-          '-mb-1 grid grid-cols-[auto_auto] items-center gap-2 overflow-hidden',
-          className,
-        )}
+        ref={currentSeasonRef}
+        className={cx('flex items-center gap-2', ['flex-row-reverse', reverse])}
       >
         <span
+          ref={currentSeasonIconRef}
           className={cx(
             'flex justify-center',
             ['h-12 w-12', variant === 'base'],
             ['h-8 w-8', variant === 'small'],
-            ['col-start-2', reverse],
           )}
         >
           <img
@@ -133,7 +138,7 @@ export const League: React.FC<Props> = ({
             )}
           />
         </span>
-        <div className={cx('flex flex-col text-sm', ['col-start-1 row-start-1', reverse])}>
+        <div className="flex flex-col text-sm">
           <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
           {subDescription !== undefined ? (
             <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
@@ -141,7 +146,8 @@ export const League: React.FC<Props> = ({
         </div>
       </div>
       <Tooltip
-        hoverRef={ref}
+        hoverRef={currentSeasonRef}
+        placementRef={currentSeasonIconRef}
         shouldHide={tooltipShouldHide}
         className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
       >
@@ -155,7 +161,39 @@ export const League: React.FC<Props> = ({
         </span>
         {tooltip}
       </Tooltip>
-    </>
+      {pipe(
+        league.previousSeason,
+        Maybe.fold(
+          () => null,
+          ({ tier, rank }) => (
+            <>
+              <div ref={previousSeasonRef} className="flex items-center text-sm text-grey-500">
+                (
+                <img
+                  src={miniCrestIcon(tier)}
+                  alt={t.league.tierRankAlt(
+                    tier,
+                    LeagueTier.isRegularTier(tier) ? rank : undefined,
+                  )}
+                  className={cx(
+                    ['h-10 w-10', variant === 'base'],
+                    ['h-6 w-6', variant === 'small'],
+                  )}
+                />
+                )
+              </div>
+              <Tooltip hoverRef={previousSeasonRef} className="text-center">
+                {t.league.previousSplit(
+                  <b>
+                    {t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)}
+                  </b>,
+                )}
+              </Tooltip>
+            </>
+          ),
+        ),
+      )}
+    </div>
   )
 }
 
