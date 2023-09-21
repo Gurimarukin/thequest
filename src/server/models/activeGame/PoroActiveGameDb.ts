@@ -13,7 +13,7 @@ import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { GameId } from '../riot/GameId'
 
 const poroLeagueCodec = C.struct({
-  currentSeason: Maybe.codec(
+  currentSplit: Maybe.codec(
     C.struct({
       tier: LeagueTier.codec,
       rank: LeagueRank.codec,
@@ -24,7 +24,7 @@ const poroLeagueCodec = C.struct({
       }),
     }),
   ),
-  previousSeason: Maybe.codec(
+  previousSplit: Maybe.codec(
     C.struct({
       tier: LeagueTier.codec,
       rank: LeagueRank.codec,

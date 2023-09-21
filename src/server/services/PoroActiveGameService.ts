@@ -322,15 +322,15 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
         ValidatedNea.chain(title => {
           if (title.startsWith('Unranked')) {
             return pipe(
-              parsePreviousSeason(league, 'previousSeasonRanking'),
+              parsePreviousSplit(league, 'previousSeasonRanking'),
               ValidatedNea.map(
                 Maybe.fold(
                   () => Maybe.none,
                   p =>
                     Maybe.some(
                       Tuple.of<[Queue, PoroLeague]>('Soloqueue', {
-                        currentSeason: Maybe.none,
-                        previousSeason: Maybe.some(p),
+                        currentSplit: Maybe.none,
+                        previousSplit: Maybe.some(p),
                       }),
                     ),
                 ),
@@ -346,13 +346,13 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
                 ValidatedNea.chain(parseQueueTierRankLeaguePoints),
               ),
               parseLeagueWinRate(league),
-              parsePreviousSeason(league, 'inlinePreviousSeasonRanking'),
+              parsePreviousSplit(league, 'inlinePreviousSeasonRanking'),
             ),
-            ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) =>
+            ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSplit]) =>
               Maybe.some(
                 Tuple.of<[Queue, PoroLeague]>(queue, {
-                  currentSeason: Maybe.some({ tier, rank, leaguePoints, winRate }),
-                  previousSeason,
+                  currentSplit: Maybe.some({ tier, rank, leaguePoints, winRate }),
+                  previousSplit,
                 }),
               ),
             ),
@@ -386,7 +386,7 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
     })
   }
 
-  function parsePreviousSeason(
+  function parsePreviousSplit(
     league: Element,
     containerClass: string,
   ): ValidatedNea<string, Maybe<TierRank>> {
@@ -399,7 +399,7 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
     return pipe(
       leagues,
       List.findFirst(([q]) => Queue.Eq.equals(q, queue)),
-      Maybe.fold(() => ({ currentSeason: Maybe.none, previousSeason: Maybe.none }), Tuple.snd),
+      Maybe.fold(() => ({ currentSplit: Maybe.none, previousSplit: Maybe.none }), Tuple.snd),
     )
   }
 

@@ -50,12 +50,12 @@ export const League: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation('common')
 
-  const currentSeasonRef = useRef<HTMLDivElement>(null)
-  const currentSeasonIconRef = useRef<HTMLSpanElement>(null)
-  const previousSeasonRef = useRef<HTMLImageElement>(null)
+  const currentSplitRef = useRef<HTMLDivElement>(null)
+  const currentSplitIconRef = useRef<HTMLSpanElement>(null)
+  const previousSplitRef = useRef<HTMLImageElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
-    league.currentSeason,
+    league.currentSplit,
     Maybe.fold(
       (): Attrs => ({
         src: miniCrestIcon('unranked'),
@@ -117,11 +117,11 @@ export const League: React.FC<Props> = ({
       )}
     >
       <div
-        ref={currentSeasonRef}
+        ref={currentSplitRef}
         className={cx('flex items-center gap-2', ['flex-row-reverse', reverse])}
       >
         <span
-          ref={currentSeasonIconRef}
+          ref={currentSplitIconRef}
           className={cx(
             'flex justify-center',
             ['h-12 w-12', variant === 'base'],
@@ -134,7 +134,7 @@ export const League: React.FC<Props> = ({
             draggable={draggable}
             className={cx(
               'h-full object-contain',
-              Maybe.isNone(league.currentSeason) ? 'w-[56.25%]' : 'w-full',
+              Maybe.isNone(league.currentSplit) ? 'w-[56.25%]' : 'w-full',
             )}
           />
         </span>
@@ -146,8 +146,8 @@ export const League: React.FC<Props> = ({
         </div>
       </div>
       <Tooltip
-        hoverRef={currentSeasonRef}
-        placementRef={currentSeasonIconRef}
+        hoverRef={currentSplitRef}
+        placementRef={currentSplitIconRef}
         shouldHide={tooltipShouldHide}
         className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
       >
@@ -162,12 +162,12 @@ export const League: React.FC<Props> = ({
         {tooltip}
       </Tooltip>
       {pipe(
-        league.previousSeason,
+        league.previousSplit,
         Maybe.fold(
           () => null,
           ({ tier, rank }) => (
             <>
-              <div ref={previousSeasonRef} className="flex items-center text-sm text-grey-500">
+              <div ref={previousSplitRef} className="flex items-center text-sm text-grey-500">
                 (
                 <img
                   src={miniCrestIcon(tier)}
@@ -182,7 +182,7 @@ export const League: React.FC<Props> = ({
                 />
                 )
               </div>
-              <Tooltip hoverRef={previousSeasonRef} className="text-center">
+              <Tooltip hoverRef={previousSplitRef} className="text-center">
                 {t.league.previousSplit(
                   <b>
                     {t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)}

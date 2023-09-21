@@ -10,9 +10,9 @@ type Leagues = {
 }
 
 const toView: (leagues: Leagues) => SummonerLeaguesView = Dict.map(
-  (currentSeason): LeagueView => ({
-    currentSeason,
-    previousSeason: Maybe.none,
+  (currentSplit): LeagueView => ({
+    currentSplit,
+    previousSplit: Maybe.none,
   }),
 )
 

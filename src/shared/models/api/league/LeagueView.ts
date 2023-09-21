@@ -8,7 +8,7 @@ import { LeagueTier } from './LeagueTier'
 type LeagueView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  currentSeason: Maybe.codec(
+  currentSplit: Maybe.codec(
     C.struct({
       tier: LeagueTier.codec,
       rank: LeagueRank.codec,
@@ -20,7 +20,7 @@ const codec = C.struct({
   ),
 
   // poro
-  previousSeason: Maybe.codec(
+  previousSplit: Maybe.codec(
     C.struct({
       tier: LeagueTier.codec,
       rank: LeagueRank.codec,

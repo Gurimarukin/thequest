@@ -7,18 +7,18 @@ import type { TierRank } from './TierRank'
 import { WinRate } from './WinRate'
 
 type PoroLeague = {
-  currentSeason: Maybe<
+  currentSplit: Maybe<
     TierRank & {
       leaguePoints: number
       winRate: WinRate
     }
   >
-  previousSeason: Maybe<TierRank>
+  previousSplit: Maybe<TierRank>
 }
 
-const toView = ({ currentSeason, previousSeason }: PoroLeague): LeagueView => ({
-  currentSeason: pipe(
-    currentSeason,
+const toView = ({ currentSplit, previousSplit }: PoroLeague): LeagueView => ({
+  currentSplit: pipe(
+    currentSplit,
     Maybe.map(c => ({
       tier: c.tier,
       rank: c.rank,
@@ -28,7 +28,7 @@ const toView = ({ currentSeason, previousSeason }: PoroLeague): LeagueView => ({
     })),
   ),
 
-  previousSeason,
+  previousSplit,
 })
 
 const PoroLeague = { toView }
