@@ -210,29 +210,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
       <Cell
         gridColStart={1}
-        className={cx('flex items-start', reverse ? 'flex-row-reverse' : 'justify-end', [
-          cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4'),
-          highlight,
-        ])}
-      >
-        {pipe(
-          premadeId,
-          Maybe.fold(
-            () => null,
-            id => (
-              <div
-                className={cx('flex items-center gap-1 pt-[18px] text-xs', padding, [
-                  'flex-row-reverse',
-                  reverse,
-                ])}
-              >
-                <PeopleSharp className="h-3" />
-                <span>{id}</span>
-              </div>
-            ),
-          ),
-        )}
-      </Cell>
+        className={
+          highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
+        }
+      />
       <Cell
         gridColStart={2}
         className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
@@ -440,6 +421,28 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           tooltipShouldHide={tooltipShouldHide}
           draggable={false}
         />
+      </Cell>
+      <Cell
+        gridColStart={7}
+        className={cx('self-end px-2 pb-2', reverse ? 'justify-self-start' : 'justify-self-end')}
+      >
+        {pipe(
+          premadeId,
+          Maybe.fold(
+            () => null,
+            id => (
+              <div
+                className={cx('flex items-center gap-1 text-xs', padding, [
+                  'flex-row-reverse',
+                  reverse,
+                ])}
+              >
+                <PeopleSharp className="h-3" />
+                <span>{id}</span>
+              </div>
+            ),
+          ),
+        )}
       </Cell>
     </Li>
   )
