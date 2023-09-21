@@ -28,7 +28,6 @@ import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import {
-  Dict,
   Either,
   Future,
   List,
@@ -46,7 +45,8 @@ import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipan
 import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
 import { PoroActiveGameParticipant } from '../models/activeGame/PoroActiveGameParticipant'
 import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
-import { LeagueEntry, LeagueEntryRanked } from '../models/league/LeagueEntry'
+import { LeagueEntry } from '../models/league/LeagueEntry'
+import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
@@ -176,17 +176,19 @@ const SummonerController = (
   ): Future<Maybe<SummonerLeaguesView>> {
     return pipe(
       leagueEntryService.findBySummoner(platform, summonerId, options),
-      futureMaybe.map(entries => ({
-        soloDuo: pipe(
-          entries,
-          List.findFirst(LeagueEntry.isRankedAndQueueTypeEquals(queueTypes.soloDuo)),
-        ),
-        flex: pipe(
-          entries,
-          List.findFirst(LeagueEntry.isRankedAndQueueTypeEquals(queueTypes.flex)),
-        ),
-      })),
-      futureMaybe.map(Dict.map(Maybe.map(LeagueEntryRanked.toView))),
+      futureMaybe.map(
+        (entries): Leagues => ({
+          soloDuo: pipe(
+            entries,
+            List.findFirst(LeagueEntry.isRankedAndQueueTypeEquals(queueTypes.soloDuo)),
+          ),
+          flex: pipe(
+            entries,
+            List.findFirst(LeagueEntry.isRankedAndQueueTypeEquals(queueTypes.flex)),
+          ),
+        }),
+      ),
+      futureMaybe.map(Leagues.toView),
     )
   }
 

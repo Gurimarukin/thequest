@@ -2,12 +2,10 @@ import { refinement } from 'fp-ts'
 import type { Refinement } from 'fp-ts/Refinement'
 import { identity, pipe } from 'fp-ts/function'
 
-import type { LeagueEntryView } from '../../../shared/models/api/league/LeagueEntryView'
 import type { LeagueMiniSeriesProgress } from '../../../shared/models/api/league/LeagueMiniSeriesProgress'
 import type { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
-import type { NonEmptyArray } from '../../../shared/utils/fp'
-import { Maybe } from '../../../shared/utils/fp'
+import type { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import type { LeagueId } from '../riot/LeagueId'
 import type { RiotLeagueEntry } from '../riot/RiotLeagueEntry'
@@ -50,18 +48,5 @@ const isRankedAndQueueTypeEquals = (
   )
 
 const LeagueEntry = { fromRiot, isRankedAndQueueTypeEquals }
-
-const LeagueEntryRanked = {
-  toView: (league: LeagueEntryRanked): LeagueEntryView => ({
-    tier: league.tier,
-    rank: league.rank,
-    leaguePoints: league.leaguePoints,
-    wins: league.wins,
-    losses: league.losses,
-    miniSeriesProgress: league.miniSeriesProgress,
-
-    previousSeason: Maybe.none,
-  }),
-}
 
 export { LeagueEntry, LeagueEntryRanked }

@@ -1,9 +1,9 @@
 import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
 
-import type { LeagueEntryView } from '../../shared/models/api/league/LeagueEntryView'
 import type { LeagueMiniSeriesProgress } from '../../shared/models/api/league/LeagueMiniSeriesProgress'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
+import type { LeagueView } from '../../shared/models/api/league/LeagueView'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import { Maybe } from '../../shared/utils/fp'
 
@@ -21,7 +21,7 @@ type Props = {
    */
   variant?: 'base' | 'small'
   queue: keyof SummonerLeaguesView
-  league: Maybe<LeagueEntryView>
+  league: LeagueView
   /**
    * @default false
    */
@@ -53,9 +53,9 @@ export const League: React.FC<Props> = ({
   const ref = useRef<HTMLDivElement>(null)
 
   const { src, alt, description, subDescription, tooltip } = pipe(
-    league,
-    Maybe.fold<LeagueEntryView, Attrs>(
-      () => ({
+    league.currentSeason,
+    Maybe.fold(
+      (): Attrs => ({
         src: miniCrestIcon('unranked'),
         alt: t.league.unrankedIconAlt,
         description: t.league.unranked,
@@ -127,7 +127,10 @@ export const League: React.FC<Props> = ({
             src={src}
             alt={alt}
             draggable={draggable}
-            className={cx('h-full object-contain', Maybe.isNone(league) ? 'w-[56.25%]' : 'w-full')}
+            className={cx(
+              'h-full object-contain',
+              Maybe.isNone(league.currentSeason) ? 'w-[56.25%]' : 'w-full',
+            )}
           />
         </span>
         <div className={cx('flex flex-col text-sm', ['col-start-1 row-start-1', reverse])}>

@@ -320,11 +320,23 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
         domHandler.querySelectorEnsureOneTextContent(':scope > .txt > .title'),
         ValidatedNea.fromEither,
         ValidatedNea.chain(title => {
-          if (title === 'Unranked') return ValidatedNea.valid(Maybe.none)
-
-          const previousSeasonRankingImg = league.querySelector<HTMLImageElement>(
-            '.inlinePreviousSeasonRanking > img',
-          )
+          if (title.startsWith('Unranked')) {
+            return pipe(
+              parsePreviousSeason(league, 'previousSeasonRanking'),
+              ValidatedNea.map(
+                Maybe.fold(
+                  () => Maybe.none,
+                  p =>
+                    Maybe.some(
+                      Tuple.of<[Queue, PoroLeague]>('Soloqueue', {
+                        currentSeason: Maybe.none,
+                        previousSeason: Maybe.some(p),
+                      }),
+                    ),
+                ),
+              ),
+            )
+          }
           return pipe(
             apply.sequenceT(validation)(
               pipe(
@@ -334,20 +346,16 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
                 ValidatedNea.chain(parseQueueTierRankLeaguePoints),
               ),
               parseLeagueWinRate(league),
-              previousSeasonRankingImg === null
-                ? ValidatedNea.valid(Maybe.none)
-                : pipe(parseTierRank(previousSeasonRankingImg.alt), ValidatedNea.map(Maybe.some)),
+              parsePreviousSeason(league, 'inlinePreviousSeasonRanking'),
             ),
-            ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) => {
-              const res: PoroLeague = {
-                tier,
-                rank,
-                leaguePoints,
-                winRate,
-                previousSeason,
-              }
-              return Maybe.some(Tuple.of(queue, res))
-            }),
+            ValidatedNea.map(([{ queue, tier, rank, leaguePoints }, winRate, previousSeason]) =>
+              Maybe.some(
+                Tuple.of<[Queue, PoroLeague]>(queue, {
+                  currentSeason: Maybe.some({ tier, rank, leaguePoints, winRate }),
+                  previousSeason,
+                }),
+              ),
+            ),
           )
         }),
         prefixErrors(`${selector}: `),
@@ -378,10 +386,20 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
     })
   }
 
-  function findLeague(leagues: List<Tuple<Queue, PoroLeague>>, queue: Queue): Maybe<PoroLeague> {
+  function parsePreviousSeason(
+    league: Element,
+    containerClass: string,
+  ): ValidatedNea<string, Maybe<TierRank>> {
+    const img = league.querySelector<HTMLImageElement>(`.${containerClass} > img`)
+    if (img === null) return ValidatedNea.valid(Maybe.none)
+    return pipe(parseTierRank(img.alt), ValidatedNea.map(Maybe.some))
+  }
+
+  function findLeague(leagues: List<Tuple<Queue, PoroLeague>>, queue: Queue): PoroLeague {
     return pipe(
       leagues,
-      List.findFirstMap(([q, l]) => (Queue.Eq.equals(q, queue) ? Maybe.some(l) : Maybe.none)),
+      List.findFirst(([q]) => Queue.Eq.equals(q, queue)),
+      Maybe.fold(() => ({ currentSeason: Maybe.none, previousSeason: Maybe.none }), Tuple.snd),
     )
   }
 

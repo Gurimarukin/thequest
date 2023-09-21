@@ -1,14 +1,14 @@
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
-import { Dict, Maybe } from '../../../shared/utils/fp'
+import { Dict } from '../../../shared/utils/fp'
 
 import { PoroLeague } from './PoroLeague'
 
 type PoroLeagues = {
-  soloDuo: Maybe<PoroLeague>
-  flex: Maybe<PoroLeague>
+  soloDuo: PoroLeague
+  flex: PoroLeague
 }
 
-const toView: (leagues: PoroLeagues) => SummonerLeaguesView = Dict.map(Maybe.map(PoroLeague.toView))
+const toView: (leagues: PoroLeagues) => SummonerLeaguesView = Dict.map(PoroLeague.toView)
 
 const PoroLeagues = { toView }
 

@@ -5,15 +5,19 @@ import { LeagueMiniSeriesProgress } from './LeagueMiniSeriesProgress'
 import { LeagueRank } from './LeagueRank'
 import { LeagueTier } from './LeagueTier'
 
-type LeagueEntryView = C.TypeOf<typeof codec>
+type LeagueView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  tier: LeagueTier.codec,
-  rank: LeagueRank.codec,
-  leaguePoints: C.number,
-  wins: C.number,
-  losses: C.number,
-  miniSeriesProgress: Maybe.codec(NonEmptyArray.codec(LeagueMiniSeriesProgress.codec)),
+  currentSeason: Maybe.codec(
+    C.struct({
+      tier: LeagueTier.codec,
+      rank: LeagueRank.codec,
+      leaguePoints: C.number,
+      wins: C.number,
+      losses: C.number,
+      miniSeriesProgress: Maybe.codec(NonEmptyArray.codec(LeagueMiniSeriesProgress.codec)),
+    }),
+  ),
 
   // poro
   previousSeason: Maybe.codec(
@@ -24,6 +28,6 @@ const codec = C.struct({
   ),
 })
 
-const LeagueEntryView = { codec }
+const LeagueView = { codec }
 
-export { LeagueEntryView }
+export { LeagueView }
