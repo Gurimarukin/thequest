@@ -233,7 +233,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             rel="noreferrer"
             className="whitespace-nowrap text-lg text-goldenrod"
           >
-            {summonerName === 'NPC TIKTOKER' ? 'MMMMMMMMMMMMMMMM' : summonerName}
+            {summonerName}
           </a>
           <div className={cx('flex items-start gap-2', ['flex-row-reverse', !reverse])}>
             <img
