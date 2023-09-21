@@ -64,6 +64,7 @@ type RiotApiConfig = {
 
 export type PoroApiConfig = {
   baseUrl: string
+  userAgent: string
   cacheTtlActiveGame: MsDuration
 }
 
@@ -130,6 +131,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
       }),
       poroApi: seqS<PoroApiConfig>({
         baseUrl: r(D.string)('PORO_BASE_URL'),
+        userAgent: r(D.string)('PORO_USER_AGENT'),
         cacheTtlActiveGame: pipe(
           infiniteCache,
           Either.map(i => (i ? infinity : MsDuration.hour(1))),
