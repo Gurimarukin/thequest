@@ -18,6 +18,7 @@ import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
@@ -25,12 +26,12 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import type { List } from '../../../shared/utils/fp'
-import { Maybe } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
 import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
+import { ChampionPositionImg } from '../../components/ChampionPositionImg'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { Tooltip } from '../../components/tooltip/Tooltip'
@@ -123,8 +124,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const { t } = useTranslation()
   const { championByKey, assets } = useStaticData()
 
+  const summonerLevelRef = useRef<HTMLSpanElement>(null)
   const percentsRef = useRef<HTMLSpanElement>(null)
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
+  const mainRolesRef = useRef<HTMLUListElement>(null)
   const championRef = useRef<HTMLDivElement>(null)
   const aramRef = useRef<HTMLDivElement>(null)
 
@@ -214,65 +217,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
         }
       />
-      <Cell
-        gridColStart={2}
-        className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
-      >
-        {pipe(
-          leagues,
-          Maybe.fold(
-            () => null,
-            l => (
-              <League
-                variant="small"
-                queue="soloDuo"
-                league={l.soloDuo}
-                reverse={reverse}
-                tooltipShouldHide={tooltipShouldHide}
-                draggable={false}
-              />
-            ),
-          ),
-        )}
-      </Cell>
-      <Cell
-        gridColStart={3}
-        className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
-      >
-        {pipe(
-          leagues,
-          Maybe.fold(
-            () => null,
-            l => (
-              <League
-                variant="small"
-                queue="flex"
-                league={l.flex}
-                reverse={reverse}
-                tooltipShouldHide={tooltipShouldHide}
-                draggable={false}
-              />
-            ),
-          ),
-        )}
-      </Cell>
-      <Cell
-        gridColStart={2}
-        className={cx(
-          'col-span-2 flex items-center gap-2 self-start !bg-transparent pt-2',
-          ['flex-row-reverse', reverse],
-          padding,
-        )}
-      >
-        <div className="w-9">
-          <img
-            src={assets.summonerIcon(profileIconId)}
-            alt={t.common.summonerIconAlt(summonerName)}
-            draggable={false}
-            className="w-full"
-          />
-        </div>
-        <div className={cx('flex items-baseline gap-1.5', ['flex-row-reverse', reverse])}>
+      <Cell gridColStart={2} className={padding}>
+        <div
+          className={cx(
+            'flex flex-col justify-center gap-1 pt-0.5',
+            reverse ? 'items-start' : 'items-end',
+          )}
+        >
           <a
             href={appRoutes.platformSummonerName(platform, summonerName, {
               view: 'histogram',
@@ -282,40 +233,117 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             rel="noreferrer"
             className="whitespace-nowrap text-lg text-goldenrod"
           >
-            {summonerName}
+            {summonerName === 'NPC TIKTOKER' ? 'MMMMMMMMMMMMMMMM' : summonerName}
           </a>
-          {pipe(
-            masteries,
-            Maybe.fold(
-              () => null,
-              m => (
+          <div className={cx('flex items-start gap-2', ['flex-row-reverse', !reverse])}>
+            <img
+              src={assets.summonerIcon(profileIconId)}
+              alt={t.common.summonerIconAlt(summonerName)}
+              draggable={false}
+              className="w-12"
+            />
+            <div className={cx('flex flex-col gap-0.5', reverse ? 'items-start' : 'items-end')}>
+              {pipe(
+                summonerLevel,
+                Maybe.fold(
+                  () => null,
+                  lvl => (
+                    <>
+                      <span ref={summonerLevelRef} className="text-grey-400">
+                        {t.common.level(lvl)}
+                      </span>
+                      <Tooltip hoverRef={summonerLevelRef}>{t.common.summonerLevel}</Tooltip>
+                    </>
+                  ),
+                ),
+              )}
+              {pipe(
+                masteries,
+                Maybe.fold(
+                  () => null,
+                  m => (
+                    <div>
+                      <span className="flex gap-1.5">
+                        <span ref={percentsRef}>
+                          {t.common.percents(round(m.questPercents, 1))}
+                        </span>
+                        <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
+                          {t.activeGame.theQuestProgression}
+                        </Tooltip>
+
+                        <span ref={totalMasteriesRef} className="text-grey-400">
+                          {t.activeGame.totals(
+                            m.totalMasteryLevel,
+                            TranslationUtils.numberUnit(t.common)(m.totalMasteryPoints),
+                          )}
+                        </span>
+                        <Tooltip
+                          hoverRef={totalMasteriesRef}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <span>{t.activeGame.masteryScoreAndPoints}</span>
+                          <span>{t.activeGame.otpIndex(m.otpIndex)}</span>
+                        </Tooltip>
+                      </span>
+                    </div>
+                  ),
+                ),
+              )}
+              {List.isEmpty(mainRoles) ? null : (
                 <>
-                  <span className="text-grey-400">—</span>
-                  <span className="flex gap-1.5">
-                    <span ref={percentsRef}>{t.common.percents(round(m.questPercents, 1))}</span>
-                    <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
-                      {t.activeGame.theQuestProgression}
-                    </Tooltip>
-                    <span ref={totalMasteriesRef} className="text-grey-400">
-                      {t.activeGame.totals(
-                        m.totalMasteryLevel,
-                        TranslationUtils.numberUnit(t.common)(m.totalMasteryPoints),
-                      )}
-                    </span>
-                    <Tooltip
-                      hoverRef={totalMasteriesRef}
-                      className="flex flex-col items-center gap-2"
-                    >
-                      <span>{t.activeGame.masteryScoreAndPoints}</span>
-                      <span>{t.activeGame.otpIndex(m.otpIndex)}</span>
-                    </Tooltip>
-                  </span>
+                  <ul ref={mainRolesRef} className="flex gap-1">
+                    {mainRoles.map(r => (
+                      <li key={r}>
+                        <ChampionPositionImg
+                          position={r}
+                          className={cx('w-4', [
+                            'text-white',
+                            pipe(role, Maybe.elem(ChampionPosition.Eq)(r)),
+                          ])}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                  <Tooltip hoverRef={mainRolesRef}>{t.activeGame.mainRoles}</Tooltip>
                 </>
-              ),
-            ),
-          )}
+              )}
+            </div>
+          </div>
         </div>
       </Cell>
+      {pipe(
+        leagues,
+        Maybe.fold(
+          () => null,
+          ({ soloDuo, flex }) => (
+            <Cell
+              gridColStart={3}
+              className={cx(
+                'flex flex-col justify-center gap-3.5',
+                reverse ? 'items-end' : 'items-start',
+                padding,
+              )}
+            >
+              <League
+                variant="small"
+                queue="soloDuo"
+                league={soloDuo}
+                reverse={reverse}
+                tooltipShouldHide={tooltipShouldHide}
+                draggable={false}
+              />
+              <League
+                variant="small"
+                queue="flex"
+                league={flex}
+                reverse={reverse}
+                tooltipShouldHide={tooltipShouldHide}
+                draggable={false}
+              />
+            </Cell>
+          ),
+        ),
+      )}
       <Cell
         type={animated.ul}
         gridColStart={4}
@@ -422,15 +450,18 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           draggable={false}
         />
       </Cell>
-      <Cell
-        gridColStart={7}
-        className={cx('self-end px-2 pb-2', reverse ? 'justify-self-start' : 'justify-self-end')}
-      >
-        {pipe(
-          premadeId,
-          Maybe.fold(
-            () => null,
-            id => (
+      {pipe(
+        premadeId,
+        Maybe.fold(
+          () => null,
+          id => (
+            <Cell
+              gridColStart={reverse ? 8 : 7}
+              className={cx(
+                'self-end pb-2',
+                reverse ? 'justify-self-start px-3.5' : 'justify-self-end px-2',
+              )}
+            >
               <div
                 className={cx('flex items-center gap-1 text-xs', padding, [
                   'flex-row-reverse',
@@ -440,10 +471,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <PeopleSharp className="h-3" />
                 <span>{id}</span>
               </div>
-            ),
+            </Cell>
           ),
-        )}
-      </Cell>
+        ),
+      )}
     </Li>
   )
 }

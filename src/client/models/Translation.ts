@@ -39,6 +39,7 @@ export type Translation = {
     ) => React.ReactNode
     masteryScoreAndPoints: React.ReactNode
     otpIndex: (otpIndex: number) => React.ReactNode
+    mainRoles: React.ReactNode
   }
   aram: {
     category: {
@@ -125,6 +126,8 @@ export type Translation = {
     searchChamion: string
     spellIconAlt: (name: string) => string
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
+    level: (level: number) => React.ReactNode
+    summonerLevel: React.ReactNode
     summonerIconAlt: (name: string) => string
   }
   form: {
@@ -209,13 +212,11 @@ export type Translation = {
       lastUpdate: (insertedAt: Date) => React.ReactNode
       duration: (minutes: number) => React.ReactNode
     }
-    level: (level: number) => React.ReactNode
     masteriesExplanation: React.ReactNode
     masteryScore: React.ReactNode
     masteryPoints: React.ReactNode
     otpIndex: React.ReactNode
     otpIndexExplanation: React.ReactNode
     percentsProgression: (percents: number) => React.ReactNode
-    summonerLevel: React.ReactNode
   }
 }

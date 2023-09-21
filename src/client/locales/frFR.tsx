@@ -133,6 +133,7 @@ const frFRTranslation: Translation = {
     ),
     masteryScoreAndPoints: 'Score — Points de maîtrise',
     otpIndex: otpIndex => `Indice d’OTP : ${otpIndex.toLocaleString(locale)}`,
+    mainRoles: 'Rôles principaux',
   },
   aram: {
     category: {
@@ -328,6 +329,8 @@ const frFRTranslation: Translation = {
     searchChamion: 'Rechercher champion',
     spellIconAlt: name => `Icône du sort ${name}`,
     spellKey: key => `<Sort ${key}>`,
+    level: level => `niveau ${level.toLocaleString(locale)}`,
+    summonerLevel: 'Niveau d’invocateur',
     summonerIconAlt: name => `Icône de ${name}`,
   },
   form: {
@@ -466,7 +469,6 @@ const frFRTranslation: Translation = {
           maximumFractionDigits: 2,
         })} ${pluralUnit('minute')(minutes)})`,
     },
-    level: level => `niveau ${level.toLocaleString(locale)}`,
     masteryScore: 'Score de maîtrise :',
     masteryPoints: 'Points de maîtrise :',
     otpIndex: 'Indice d’OTP :',
@@ -492,7 +494,6 @@ const frFRTranslation: Translation = {
       </>
     ),
     percentsProgression: percents => `Progression : ${percents.toLocaleString(locale)} %`,
-    summonerLevel: 'Niveau d’invocateur',
   },
 }
 

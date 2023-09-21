@@ -139,7 +139,11 @@ export const League: React.FC<Props> = ({
             reverse ? 'col-start-1 row-start-1 items-end' : 'items-start',
           )}
         >
-          <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
+          <span
+            className={cx('flex gap-1.5 whitespace-nowrap', ['text-grey-400', variant === 'small'])}
+          >
+            {description}
+          </span>
           <span className={cx('flex gap-1', ['flex-row-reverse', reverse])}>
             {subDescription !== undefined ? (
               <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>

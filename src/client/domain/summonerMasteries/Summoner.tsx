@@ -85,9 +85,9 @@ export const Summoner: React.FC<Props> = ({
               <span>{t.summoner.masteriesCache.duration(prettyMs(masteries.cacheDuration))}</span>
             </Tooltip>
             <span className="text-grey-400">—</span>
-            <span ref={levelRef}>{t.summoner.level(summonerLevel)}</span>
+            <span ref={levelRef}>{t.common.level(summonerLevel)}</span>
             <Tooltip hoverRef={levelRef} placement="right">
-              {t.summoner.summonerLevel}
+              {t.common.summonerLevel}
             </Tooltip>
           </div>
           <div className="flex flex-wrap gap-6">

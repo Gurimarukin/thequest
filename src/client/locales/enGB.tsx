@@ -133,6 +133,7 @@ const enGBTranslation: Translation = {
     ),
     masteryScoreAndPoints: 'Mastery score — points',
     otpIndex: otpIndex => `OTP index: ${otpIndex.toLocaleString(locale)}`,
+    mainRoles: 'Main roles',
   },
   aram: {
     category: {
@@ -327,6 +328,8 @@ const enGBTranslation: Translation = {
     searchChamion: 'Search champion',
     spellIconAlt: name => `${name} spell icon`,
     spellKey: key => `<Spell ${key}>`,
+    level: level => `level ${level.toLocaleString(locale)}`,
+    summonerLevel: 'Summoner level',
     summonerIconAlt: name => `${name}’ icon`,
   },
   form: {
@@ -458,7 +461,6 @@ const enGBTranslation: Translation = {
           maximumFractionDigits: 2,
         })} ${pluralUnit('minute')(minutes)})`,
     },
-    level: level => `level ${level.toLocaleString(locale)}`,
     masteryScore: 'Mastery score:',
     masteryPoints: 'Mastery points:',
     otpIndex: 'OTP index:',
@@ -478,7 +480,6 @@ const enGBTranslation: Translation = {
       </>
     ),
     percentsProgression: percents => `Progression: ${percents.toLocaleString(locale)}%`,
-    summonerLevel: 'Summoner level',
   },
 }
 
