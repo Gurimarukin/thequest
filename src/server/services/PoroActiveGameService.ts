@@ -1,11 +1,10 @@
-import { apply } from 'fp-ts'
+import { apply, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/lib/Decoder'
 import type { Literal } from 'io-ts/lib/Schemable'
 import util from 'util'
 
 import { DayJs } from '../../shared/models/DayJs'
-import type { MsDuration } from '../../shared/models/MsDuration'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { Platform } from '../../shared/models/api/Platform'
 import { PoroNiceness } from '../../shared/models/api/activeGame/PoroNiceness'
@@ -33,6 +32,7 @@ import {
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { NonEmptyArrayFromString, NumberFromString } from '../../shared/utils/ioTsUtils'
 
+import type { PoroApiConfig } from '../config/Config'
 import { DomHandler } from '../helpers/DomHandler'
 import type { HttpClient } from '../helpers/HttpClient'
 import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
@@ -54,7 +54,7 @@ import { getOnError } from '../utils/getOnError'
 type PoroActiveGameService = ReturnType<typeof of>
 
 const PoroActiveGameService = (
-  cacheTtl: MsDuration,
+  config: PoroApiConfig,
   Logger: LoggerGetter,
   poroActiveGamePersistence: PoroActiveGamePersistence,
   httpClient: HttpClient,
@@ -67,16 +67,22 @@ const PoroActiveGameService = (
     TObservable.subscribe(getOnError(logger))({
       next: ({ date }) =>
         pipe(
-          poroActiveGamePersistence.deleteBeforeDate(pipe(date, DayJs.subtract(cacheTtl))),
+          poroActiveGamePersistence.deleteBeforeDate(
+            pipe(date, DayJs.subtract(config.cacheTtlActiveGame)),
+          ),
           Future.map(toNotUsed),
         ),
     }),
-    IO.map(() => of(poroActiveGamePersistence, httpClient)),
+    IO.map(() => of(config, poroActiveGamePersistence, httpClient)),
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const of = (poroActiveGamePersistence: PoroActiveGamePersistence, httpClient: HttpClient) => {
+const of = (
+  config: PoroApiConfig,
+  poroActiveGamePersistence: PoroActiveGamePersistence,
+  httpClient: HttpClient,
+) => {
   return {
     find: (
       gameId: GameId,
@@ -103,13 +109,13 @@ const of = (poroActiveGamePersistence: PoroActiveGamePersistence, httpClient: Ht
   }
 
   function fetch(platform: Platform, summonerName: string): Future<Maybe<PoroActiveGame>> {
+    const platformSummoner = `${Platform.encoderLower.encode(platform)}/${summonerName}`
+
     return pipe(
-      httpClient.text([
-        `https://porofessor.gg/partial/live-partial/${Platform.encoderLower.encode(
-          platform,
-        )}/${summonerName}`,
-        'get',
-      ]),
+      httpClient.text([`${config.baseUrl}/live/${platformSummoner}`, 'get']),
+      Future.chain(() =>
+        httpClient.text([`${config.baseUrl}/partial/live-partial/${platformSummoner}`, 'get']),
+      ),
       Future.chainEitherK(parsePoroActiveGame),
     )
   }
@@ -138,24 +144,12 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
   const { window } = domHandler
 
   const spectateButton = 'spectate_button'
-  // const dataSpectateGameid = 'data-spectate-gameid'
 
   return seqS<PoroActiveGame>({
     gameId: pipe(
       window.document.getElementById(spectateButton),
       ValidatedNea.fromNullable([`Element not found: #${spectateButton}`]),
-
-      ValidatedNea.chain(datasetGet('spectate-gameid')),
-
-      // ValidatedNea.chain(elt =>
-      //   pipe(
-      //     elt.getAttribute(dataSpectateGameid),
-      //     ValidatedNea.fromNullable([
-      //       `No attribute "${dataSpectateGameid}" for #${spectateButton}`,
-      //     ]),
-      //   ),
-      // ),
-
+      ValidatedNea.chain(datasetGet('spectateGameid')),
       ValidatedNea.chain(decode([NumberFromString.codec, 'NumberFromString'])),
       ValidatedNea.chain(decode([GameId.codec, 'GameId'])),
     ),
@@ -216,6 +210,7 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
           Maybe.fold(
             () => ValidatedNea.valid(Maybe.none),
             flow(
+              string.trim,
               decode([NumberFromString.decoder, 'NumberFromString']),
               ValidatedNea.map(Maybe.some),
             ),
@@ -463,6 +458,7 @@ const parsePoroActiveGameBis = (domHandler: DomHandler): ValidatedNea<string, Po
                     label: pipe(
                       div.textContent,
                       ValidatedNea.fromNullable([`Empty textContent for ${tagBoxTag} ${divTag}`]),
+                      ValidatedNea.map(string.trim),
                     ),
                     tooltip: pipe(
                       div.getAttribute(tooltipAttr),

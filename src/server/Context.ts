@@ -168,7 +168,7 @@ const load = (config: Config): Future<Context> => {
         cronJobPubSub.observable,
       ),
       PoroActiveGameService(
-        config.poroApiCacheTtlActiveGame,
+        config.poroApi,
         Logger,
         poroActiveGamePersistence,
         httpClient,

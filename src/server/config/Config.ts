@@ -34,7 +34,7 @@ export type Config = {
   http: HttpConfig
   db: DbConfig
   riotApi: RiotApiConfig
-  poroApiCacheTtlActiveGame: MsDuration
+  poroApi: PoroApiConfig
   jwtSecret: string
   madosayentisuto: MadosayentisutoConfig
 }
@@ -60,6 +60,11 @@ type DbConfig = {
 type RiotApiConfig = {
   keys: RiotApiKeysConfig
   cacheTtl: RiotApiCacheTtlConfig
+}
+
+export type PoroApiConfig = {
+  baseUrl: string
+  cacheTtlActiveGame: MsDuration
 }
 
 export type RiotApiKeysConfig = {
@@ -123,10 +128,13 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         }),
         cacheTtl: pipe(infiniteCache, Either.map(riotApiCacheTtl)),
       }),
-      poroApiCacheTtlActiveGame: pipe(
-        infiniteCache,
-        Either.map(i => (i ? infinity : MsDuration.hour(1))),
-      ),
+      poroApi: seqS<PoroApiConfig>({
+        baseUrl: r(D.string)('PORO_BASE_URL'),
+        cacheTtlActiveGame: pipe(
+          infiniteCache,
+          Either.map(i => (i ? infinity : MsDuration.hour(1))),
+        ),
+      }),
       jwtSecret: r(D.string)('JWT_SECRET'),
       madosayentisuto: seqS<MadosayentisutoConfig>({
         whitelistedIps: r(arrayFromStringDecoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
