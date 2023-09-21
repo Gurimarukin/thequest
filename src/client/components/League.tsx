@@ -160,7 +160,7 @@ export const League: React.FC<Props> = ({
                         tier,
                         LeagueTier.isRegularTier(tier) ? rank : undefined,
                       )}
-                      className="relative top-0.5 h-4"
+                      className="h-4"
                     />
                     )
                   </span>
