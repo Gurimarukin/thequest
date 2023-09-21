@@ -309,13 +309,7 @@ const enGBTranslation: Translation = {
         `${leagueTier[tier]}${rank_ !== undefined ? ` ${rank[rank_]}` : ''}`,
       unranked: 'Unranked',
       unrankedIconAlt: 'Unranked icon',
-      previousSplit: tierRank => (
-        <>
-          Previous split:
-          <br />
-          {tierRank}
-        </>
-      ),
+      previousSplit: 'Previous split:',
     },
     masteryIconAlt: level => `Level ${level} icon`,
     nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,

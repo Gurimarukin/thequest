@@ -31,12 +31,12 @@ type Props = {
   className?: string
 }
 
-type Attrs = {
+type CurrentSplitAttrs = {
   src: string
   alt: string
   description: React.ReactNode
   subDescription?: React.ReactNode
-  tooltip?: React.ReactNode
+  currentSplitTooltip?: React.ReactNode
 }
 
 export const League: React.FC<Props> = ({
@@ -54,10 +54,10 @@ export const League: React.FC<Props> = ({
   const currentSplitIconRef = useRef<HTMLSpanElement>(null)
   const previousSplitRef = useRef<HTMLImageElement>(null)
 
-  const { src, alt, description, subDescription, tooltip } = pipe(
+  const { src, alt, description, subDescription, currentSplitTooltip } = pipe(
     league.currentSplit,
     Maybe.fold(
-      (): Attrs => ({
+      (): CurrentSplitAttrs => ({
         src: miniCrestIcon('unranked'),
         alt: t.league.unrankedIconAlt,
         description: t.league.unranked,
@@ -82,7 +82,7 @@ export const League: React.FC<Props> = ({
               <span className="text-grey-400">{t.number(games, { withParenthesis: true })}</span>
             </>
           ),
-          tooltip: (
+          currentSplitTooltip: (
             <>
               {pipe(
                 miniSeriesProgress,
@@ -109,16 +109,10 @@ export const League: React.FC<Props> = ({
   )
 
   return (
-    <div
-      className={cx(
-        '-mb-1 flex items-center gap-2 overflow-hidden',
-        ['flex-row-reverse', reverse],
-        className,
-      )}
-    >
+    <>
       <div
         ref={currentSplitRef}
-        className={cx('flex items-center gap-2', ['flex-row-reverse', reverse])}
+        className={cx('flex items-center gap-2', ['flex-row-reverse', reverse], className)}
       >
         <span
           ref={currentSplitIconRef}
@@ -138,11 +132,36 @@ export const League: React.FC<Props> = ({
             )}
           />
         </span>
-        <div className="flex flex-col text-sm">
+        <div className={cx('flex flex-col text-sm', reverse ? 'items-end' : 'items-start')}>
           <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
-          {subDescription !== undefined ? (
-            <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
-          ) : null}
+          <span className={cx('flex gap-1', ['flex-row-reverse', reverse])}>
+            {subDescription !== undefined ? (
+              <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
+            ) : null}
+            {pipe(
+              league.previousSplit,
+              Maybe.fold(
+                () => null,
+                ({ tier, rank }) => (
+                  <span
+                    ref={previousSplitRef}
+                    className={cx('flex items-center text-grey-400', reverse ? 'mr-2' : 'ml-2')}
+                  >
+                    (
+                    <img
+                      src={miniCrestIcon(tier)}
+                      alt={t.league.tierRankAlt(
+                        tier,
+                        LeagueTier.isRegularTier(tier) ? rank : undefined,
+                      )}
+                      className="relative top-0.5 h-4"
+                    />
+                    )
+                  </span>
+                ),
+              ),
+            )}
+          </span>
         </div>
       </div>
       <Tooltip
@@ -154,46 +173,28 @@ export const League: React.FC<Props> = ({
         <span
           className={cx('col-span-2 justify-self-center font-bold', [
             'pb-0.5',
-            tooltip !== undefined,
+            currentSplitTooltip !== undefined,
           ])}
         >
           {t.league.label[queue]}
         </span>
-        {tooltip}
-      </Tooltip>
-      {pipe(
-        league.previousSplit,
-        Maybe.fold(
-          () => null,
-          ({ tier, rank }) => (
-            <>
-              <div ref={previousSplitRef} className="flex items-center text-sm text-grey-500">
-                (
-                <img
-                  src={miniCrestIcon(tier)}
-                  alt={t.league.tierRankAlt(
-                    tier,
-                    LeagueTier.isRegularTier(tier) ? rank : undefined,
-                  )}
-                  className={cx(
-                    ['h-10 w-10', variant === 'base'],
-                    ['h-6 w-6', variant === 'small'],
-                  )}
-                />
-                )
-              </div>
-              <Tooltip hoverRef={previousSplitRef} className="text-center">
-                {t.league.previousSplit(
-                  <b>
-                    {t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)}
-                  </b>,
-                )}
-              </Tooltip>
-            </>
+        {currentSplitTooltip}
+        {pipe(
+          league.previousSplit,
+          Maybe.fold(
+            () => null,
+            ({ tier, rank }) => (
+              <span className="col-span-2 flex items-center gap-1.5 whitespace-nowrap">
+                <span>{t.league.previousSplit}</span>
+                <span className="font-bold">
+                  {t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)}
+                </span>
+              </span>
+            ),
           ),
-        ),
-      )}
-    </div>
+        )}
+      </Tooltip>
+    </>
   )
 }
 
