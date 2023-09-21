@@ -112,7 +112,7 @@ export const League: React.FC<Props> = ({
     <>
       <div
         ref={currentSplitRef}
-        className={cx('flex items-center gap-2', ['flex-row-reverse', reverse], className)}
+        className={cx('-mb-1 grid grid-cols-[auto_auto] items-center gap-2', className)}
       >
         <span
           ref={currentSplitIconRef}
@@ -120,6 +120,7 @@ export const League: React.FC<Props> = ({
             'flex justify-center',
             ['h-12 w-12', variant === 'base'],
             ['h-8 w-8', variant === 'small'],
+            ['col-start-2', reverse],
           )}
         >
           <img
@@ -132,7 +133,12 @@ export const League: React.FC<Props> = ({
             )}
           />
         </span>
-        <div className={cx('flex flex-col text-sm', reverse ? 'items-end' : 'items-start')}>
+        <div
+          className={cx(
+            'flex flex-col text-sm',
+            reverse ? 'col-start-1 row-start-1 items-end' : 'items-start',
+          )}
+        >
           <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
           <span className={cx('flex gap-1', ['flex-row-reverse', reverse])}>
             {subDescription !== undefined ? (

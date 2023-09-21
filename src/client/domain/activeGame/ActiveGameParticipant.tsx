@@ -37,6 +37,7 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
+import { PeopleSharp } from '../../imgs/svgs/icons'
 import { appRoutes } from '../../router/AppRouter'
 import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
@@ -104,6 +105,12 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     spell1Id,
     spell2Id,
     perks,
+    premadeId,
+    summonerLevel,
+    champion: championRankedStats,
+    role,
+    mainRoles,
+    tags,
   },
   shouldWrap,
   highlight,
@@ -203,11 +210,29 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
       <Cell
         gridColStart={1}
-        className={
-          highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
-        }
-      />
-
+        className={cx('flex items-start', reverse ? 'flex-row-reverse' : 'justify-end', [
+          cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4'),
+          highlight,
+        ])}
+      >
+        {pipe(
+          premadeId,
+          Maybe.fold(
+            () => null,
+            id => (
+              <div
+                className={cx('flex items-center gap-1 pt-[18px] text-xs', padding, [
+                  'flex-row-reverse',
+                  reverse,
+                ])}
+              >
+                <PeopleSharp className="h-3" />
+                <span>{id}</span>
+              </div>
+            ),
+          ),
+        )}
+      </Cell>
       <Cell
         gridColStart={2}
         className={cx('flex items-end pb-2 pt-6', ['justify-end', reverse], padding)}
