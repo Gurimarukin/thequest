@@ -351,7 +351,49 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         ),
       )}
-      <Cell gridColStart={4} className={cx('flex flex-col gap-px text-xs leading-3', padding)}>
+      {pipe(
+        championRankedStats,
+        Maybe.fold(
+          () => null,
+          ({ wins, losses, kills, deaths, assists }) => {
+            const played = wins + losses
+            const percents = played === 0 ? 0 : Math.round((100 * wins) / played)
+            return (
+              <Cell
+                gridColStart={4}
+                className={cx('flex flex-col justify-center text-sm', padding)}
+              >
+                <div
+                  ref={championWinRateRef}
+                  className={cx('flex flex-col', reverse ? 'items-start' : 'items-end')}
+                >
+                  <div className="text-grey-400">
+                    <span className="text-green">{t.common.number(kills)}</span> /{' '}
+                    <span className="text-red">{t.common.number(deaths)}</span> /{' '}
+                    <span className="text-goldenrod">{t.common.number(assists)}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <span>{t.common.percents(percents)}</span>
+                    <span className="text-grey-400">
+                      {t.common.number(played, { withParenthesis: true })}
+                    </span>
+                  </div>
+                </div>
+                <Tooltip
+                  hoverRef={championWinRateRef}
+                  className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
+                >
+                  <span className="justify-self-end text-green">{wins}</span>
+                  <span>{t.common.league.wins(wins)}</span>
+                  <span className="justify-self-end text-red">{losses}</span>
+                  <span>{t.common.league.losses(losses)}</span>
+                </Tooltip>
+              </Cell>
+            )
+          },
+        ),
+      )}
+      <Cell gridColStart={5} className={cx('flex flex-col gap-px text-xs leading-3', padding)}>
         {pipe(
           squareProps,
           Maybe.fold(
@@ -386,48 +428,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         )}
       </Cell>
-      {pipe(
-        championRankedStats,
-        Maybe.fold(
-          () => null,
-          ({ wins, losses, kills, deaths, assists }) => {
-            const played = wins + losses
-            const percents = played === 0 ? 0 : Math.round((100 * wins) / played)
-            return (
-              <Cell
-                gridColStart={5}
-                className={cx('flex flex-col justify-center text-sm', padding)}
-              >
-                <div
-                  ref={championWinRateRef}
-                  className={cx('flex flex-col', reverse ? 'items-end' : 'items-start')}
-                >
-                  <div className="text-grey-400">
-                    <span className="text-green">{t.common.number(kills)}</span> /{' '}
-                    <span className="text-red">{t.common.number(deaths)}</span> /{' '}
-                    <span className="text-goldenrod">{t.common.number(assists)}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <span>{t.common.percents(percents)}</span>
-                    <span className="text-grey-400">
-                      {t.common.number(played, { withParenthesis: true })}
-                    </span>
-                  </div>
-                </div>
-                <Tooltip
-                  hoverRef={championWinRateRef}
-                  className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
-                >
-                  <span className="justify-self-end text-green">{wins}</span>
-                  <span>{t.common.league.wins(wins)}</span>
-                  <span className="justify-self-end text-red">{losses}</span>
-                  <span>{t.common.league.losses(losses)}</span>
-                </Tooltip>
-              </Cell>
-            )
-          },
-        ),
-      )}
       {pipe(
         champion,
         // Maybe.filter(() => isHowlingAbyss),
