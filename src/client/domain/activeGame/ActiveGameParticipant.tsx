@@ -351,45 +351,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         ),
       )}
-      <Cell
-        type={animated.ul}
-        gridColStart={4}
-        className={cx('flex flex-col items-center justify-between py-[13px]', padding)}
-      >
-        <li className="h-7 w-7">
-          {pipe(
-            spell1,
-            Maybe.fold(
-              () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
-              s => (
-                <SummonerSpell
-                  spell={s}
-                  tooltipShouldHide={tooltipShouldHide}
-                  draggable={false}
-                  className="h-full w-full"
-                />
-              ),
-            ),
-          )}
-        </li>
-        <li className="h-7 w-7">
-          {pipe(
-            spell2,
-            Maybe.fold(
-              () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
-              s => (
-                <SummonerSpell
-                  spell={s}
-                  tooltipShouldHide={tooltipShouldHide}
-                  draggable={false}
-                  className="h-full w-full"
-                />
-              ),
-            ),
-          )}
-        </li>
-      </Cell>
-      <Cell gridColStart={5} className={cx('flex flex-col gap-px text-xs leading-3', padding)}>
+      <Cell gridColStart={4} className={cx('flex flex-col gap-px text-xs leading-3', padding)}>
         {pipe(
           squareProps,
           Maybe.fold(
@@ -433,7 +395,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             const percents = played === 0 ? 0 : Math.round((100 * wins) / played)
             return (
               <Cell
-                gridColStart={6}
+                gridColStart={5}
                 className={cx('flex flex-col justify-center text-sm', padding)}
               >
                 <div
@@ -472,7 +434,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         Maybe.fold(
           () => null,
           c => (
-            <Cell gridColStart={7} className={cx('flex', padding)}>
+            <Cell gridColStart={6} className={cx('flex', padding)}>
               <div
                 ref={aramRef}
                 className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
@@ -489,6 +451,44 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         ),
       )}
+      <Cell
+        type={animated.ul}
+        gridColStart={7}
+        className={cx('flex flex-col items-center justify-between py-[13px]', padding)}
+      >
+        <li className="h-7 w-7">
+          {pipe(
+            spell1,
+            Maybe.fold(
+              () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
+              s => (
+                <SummonerSpell
+                  spell={s}
+                  tooltipShouldHide={tooltipShouldHide}
+                  draggable={false}
+                  className="h-full w-full"
+                />
+              ),
+            ),
+          )}
+        </li>
+        <li className="h-7 w-7">
+          {pipe(
+            spell2,
+            Maybe.fold(
+              () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
+              s => (
+                <SummonerSpell
+                  spell={s}
+                  tooltipShouldHide={tooltipShouldHide}
+                  draggable={false}
+                  className="h-full w-full"
+                />
+              ),
+            ),
+          )}
+        </li>
+      </Cell>
       <Cell gridColStart={8} className={cx('flex items-center py-1', padding)}>
         <ActiveGameRunes
           runeStyleById={runeStyleById}
