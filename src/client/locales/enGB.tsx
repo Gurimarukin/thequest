@@ -134,6 +134,7 @@ const enGBTranslation: Translation = {
     masteryScoreAndPoints: 'Mastery score — points',
     otpIndex: otpIndex => `OTP index: ${otpIndex.toLocaleString(locale)}`,
     mainRoles: 'Main roles',
+    aramChanges: 'ARAM changes',
   },
   aram: {
     category: {

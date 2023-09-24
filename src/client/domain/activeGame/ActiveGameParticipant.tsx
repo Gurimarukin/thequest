@@ -459,6 +459,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
               </div>
               <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
+                <div className="mb-1 mt-0.5 text-center font-bold">{t.activeGame.aramChanges}</div>
                 <AramTooltip aram={c.aram} />
               </Tooltip>
             </Cell>

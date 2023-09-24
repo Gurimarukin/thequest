@@ -40,6 +40,7 @@ export type Translation = {
     masteryScoreAndPoints: React.ReactNode
     otpIndex: (otpIndex: number) => React.ReactNode
     mainRoles: React.ReactNode
+    aramChanges: React.ReactNode
   }
   aram: {
     category: {

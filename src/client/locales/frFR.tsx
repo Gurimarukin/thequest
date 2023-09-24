@@ -84,7 +84,7 @@ const rank: Dict<LeagueRank, string> = {
 
 const spell: Dict<SpellName, string> = {
   I: 'P',
-  Q: 'A',
+  Q: 'Q',
   W: 'Z',
   E: 'E',
   R: 'R',
@@ -134,6 +134,7 @@ const frFRTranslation: Translation = {
     masteryScoreAndPoints: 'Score — Points de maîtrise',
     otpIndex: otpIndex => `Indice d’OTP : ${otpIndex.toLocaleString(locale)}`,
     mainRoles: 'Rôles principaux',
+    aramChanges: 'Équilibrage ARAM',
   },
   aram: {
     category: {
