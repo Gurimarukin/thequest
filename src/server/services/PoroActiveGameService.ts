@@ -112,11 +112,16 @@ const of = (
     const platformSummoner = `${Platform.encoderLower.encode(platform)}/${summonerName}`
 
     return pipe(
-      httpClient.text([`${config.baseUrl}/partial/live-partial/${platformSummoner}`, 'get'], {
-        headers: { 'User-Agent': config.userAgent },
-      }),
+      getWithUserAgent(`/live/${platformSummoner}`),
+      Future.chain(() => getWithUserAgent(`/partial/live-partial/${platformSummoner}`)),
       Future.chainEitherK(parsePoroActiveGame),
     )
+  }
+
+  function getWithUserAgent(url: string): Future<string> {
+    return httpClient.text([`${config.baseUrl}/${url}`, 'get'], {
+      headers: { 'User-Agent': config.userAgent },
+    })
   }
 }
 
