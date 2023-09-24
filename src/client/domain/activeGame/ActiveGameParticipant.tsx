@@ -454,14 +454,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         Maybe.fold(
           () => null,
           c => (
-            <Cell gridColStart={6} className={cx('flex', padding)}>
-              <div
-                ref={aramRef}
-                className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
-                  'flex-row-reverse',
-                  reverse,
-                ])}
-              >
+            <Cell gridColStart={6} className={cx('flex flex-col justify-center', padding)}>
+              <div ref={aramRef} className="py-1 text-2xs">
                 <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
               </div>
               <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
