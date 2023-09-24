@@ -184,7 +184,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   )
   const bevelRotate = useMemo(() => Math.atan(bevelWidth / bevelHeight), [bevelHeight])
 
-  const padding = reverse ? 'pr-2' : 'pl-2'
+  const padding = reverse ? 'pr-2.5' : 'pl-2.5'
 
   return (
     <Li
