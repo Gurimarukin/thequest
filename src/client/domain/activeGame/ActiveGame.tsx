@@ -47,7 +47,7 @@ import {
   gridColsMobile,
   gridColsReverseMobile,
   gridTotalColsDesktop,
-  gridTotalColsReverseMobile,
+  gridTotalColsMobile,
 } from './ActiveGameParticipant'
 import { useShouldWrap } from './useShouldWrap'
 
@@ -281,7 +281,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   className="row-start-1"
                   style={{
                     gridColumn: shouldWrap
-                      ? `1 / ${gridTotalColsReverseMobile}`
+                      ? `1 / ${gridTotalColsMobile}`
                       : `1 / ${gridHalfColsDesktop + 1}`,
                   }}
                 />
@@ -292,7 +292,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   className="row-start-1"
                   style={{
                     gridColumn: shouldWrap
-                      ? `2 / ${gridTotalColsReverseMobile + 1}`
+                      ? `2 / ${gridTotalColsMobile + 1}`
                       : `${gridHalfColsDesktop + 1} / ${gridTotalColsDesktop + 1}`,
                   }}
                 />

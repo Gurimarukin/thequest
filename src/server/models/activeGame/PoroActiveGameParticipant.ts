@@ -52,7 +52,7 @@ const toView =
 
     premadeId: poroParticipant.premadeId,
     summonerLevel: Maybe.some(poroParticipant.summonerLevel),
-    champion: pipe(
+    championRankedStats: pipe(
       poroParticipant.champion,
       Maybe.map(({ kills, deaths, assists, ...winRate }) => {
         const { wins, losses } = WinRate.toWinsLosses(winRate)

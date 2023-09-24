@@ -48,7 +48,7 @@ const toView =
 
     premadeId: Maybe.none,
     summonerLevel: Maybe.none,
-    champion: Maybe.none,
+    championRankedStats: Maybe.none,
     role: Maybe.none,
     mainRoles: [],
     tags: [],

@@ -30,7 +30,7 @@ const codec = C.struct({
   // poro
   premadeId: Maybe.codec(C.number),
   summonerLevel: Maybe.codec(C.number),
-  champion: Maybe.codec(
+  championRankedStats: Maybe.codec(
     C.struct({
       wins: C.number,
       losses: C.number,

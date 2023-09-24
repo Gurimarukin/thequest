@@ -47,14 +47,14 @@ import { ActiveGameRunes } from './ActiveGameRunes'
 
 const { round } = NumberUtils
 
-export const gridTotalColsReverseMobile = 9
-export const gridTotalColsDesktop = 16
+export const gridTotalColsMobile = 10
+export const gridTotalColsDesktop = 18
 
 const bevelWidth = 32 // px
 
-export const gridColsMobile = 'grid-cols-[repeat(7,auto)_32px_1fr]'
-export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(7,auto)]'
-export const gridColsDesktop = 'grid-cols-[1fr_repeat(6,auto)_32px_32px_repeat(6,auto)_1fr]'
+export const gridColsMobile = 'grid-cols-[repeat(8,auto)_32px_1fr]'
+export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(8,auto)]'
+export const gridColsDesktop = 'grid-cols-[1fr_repeat(7,auto)_32px_32px_repeat(7,auto)_1fr]'
 
 const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
 
@@ -108,7 +108,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     perks,
     premadeId,
     summonerLevel,
-    champion: championRankedStats,
+    championRankedStats,
     role,
     mainRoles,
     tags,
@@ -129,6 +129,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
   const mainRolesRef = useRef<HTMLUListElement>(null)
   const championRef = useRef<HTMLDivElement>(null)
+  const championWinRateRef = useRef<HTMLDivElement>(null)
   const aramRef = useRef<HTMLDivElement>(null)
 
   const spell1 = summonerSpellByKey(spell1Id)
@@ -193,10 +194,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       gestureProps={gestureProps}
       className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
     >
-      <Cell gridColStart={1} className="col-span-7 bg-current shadow-even shadow-black" />
+      <Cell gridColStart={1} className="col-span-8 bg-current shadow-even shadow-black" />
       <Cell
         ref={onBevelMount}
-        gridColStart={7}
+        gridColStart={8}
         dontResetColor={true}
         className="col-span-2 overflow-hidden"
       >
@@ -423,12 +424,54 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         )}
       </Cell>
       {pipe(
+        championRankedStats,
+        Maybe.fold(
+          () => null,
+          ({ wins, losses, kills, deaths, assists }) => {
+            const played = wins + losses
+            const percents = played === 0 ? 0 : Math.round((100 * wins) / played)
+            return (
+              <Cell
+                gridColStart={6}
+                className={cx('flex flex-col justify-center text-sm', padding)}
+              >
+                <div
+                  ref={championWinRateRef}
+                  className={cx('flex flex-col', reverse ? 'items-end' : 'items-start')}
+                >
+                  <div className="text-grey-400">
+                    <span className="text-green">{t.common.number(kills)}</span> /{' '}
+                    <span className="text-red">{t.common.number(deaths)}</span> /{' '}
+                    <span className="text-goldenrod">{t.common.number(assists)}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <span>{t.common.percents(percents)}</span>
+                    <span className="text-grey-400">
+                      {t.common.number(played, { withParenthesis: true })}
+                    </span>
+                  </div>
+                </div>
+                <Tooltip
+                  hoverRef={championWinRateRef}
+                  className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
+                >
+                  <span className="justify-self-end text-green">{wins}</span>
+                  <span>{t.common.league.wins(wins)}</span>
+                  <span className="justify-self-end text-red">{losses}</span>
+                  <span>{t.common.league.losses(losses)}</span>
+                </Tooltip>
+              </Cell>
+            )
+          },
+        ),
+      )}
+      {pipe(
         champion,
-        Maybe.filter(() => isHowlingAbyss),
+        // Maybe.filter(() => isHowlingAbyss),
         Maybe.fold(
           () => null,
           c => (
-            <Cell gridColStart={6} className={cx('flex', padding)}>
+            <Cell gridColStart={7} className={cx('flex', padding)}>
               <div
                 ref={aramRef}
                 className={cx('flex w-full items-center gap-1.5 py-1 text-2xs', [
@@ -445,7 +488,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           ),
         ),
       )}
-      <Cell gridColStart={7} className={cx('flex items-center py-1', padding)}>
+      <Cell gridColStart={8} className={cx('flex items-center py-1', padding)}>
         <ActiveGameRunes
           runeStyleById={runeStyleById}
           runeById={runeById}
@@ -461,7 +504,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           () => null,
           id => (
             <Cell
-              gridColStart={reverse ? 8 : 7}
+              gridColStart={reverse ? 9 : 8}
               className={cx(
                 'self-end pb-2',
                 reverse ? 'justify-self-start px-3.5' : 'justify-self-end px-2',
@@ -569,7 +612,7 @@ const Cell = forwardRef<HTMLElement, CellProps>(
         gridColumnStart: reverse ? undefined : gridColStart,
         gridColumnEnd: reverse
           ? shouldWrap
-            ? gridTotalColsReverseMobile - gridColStart + 2
+            ? gridTotalColsMobile - gridColStart + 2
             : gridTotalColsDesktop - gridColStart + 2
           : undefined,
       },
