@@ -366,7 +366,7 @@ const enGBTranslation: Translation = {
         points: 'Sort by points',
       },
       sortShort: {
-        name: 'ABC',
+        name: 'abc',
         percents: '%',
         points: 'pts',
       },
@@ -461,8 +461,7 @@ const enGBTranslation: Translation = {
     masteryScore: 'Mastery score:',
     masteryPoints: 'Mastery points:',
     otpIndex: 'OTP index:',
-    otpIndexExplanation:
-      '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
+    otpIndexExplanation: '(number of champions cumulating half the total number of mastery points)',
     masteriesExplanation: (
       <>
         <li>From mastery 0 to mastery 5, percents correspond with mastery points.</li>

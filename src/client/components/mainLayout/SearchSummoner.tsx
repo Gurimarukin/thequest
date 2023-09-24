@@ -117,7 +117,7 @@ export const SearchSummoner: React.FC = () => {
 
   return (
     <div className="py-2">
-      <form onSubmit={handleSubmit} className="flex h-8 text-sm">
+      <form onSubmit={handleSubmit} className="flex h-8">
         <Select<Platform>
           options={Platform.values}
           value={platform}

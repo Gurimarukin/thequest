@@ -169,7 +169,7 @@ export const Register: React.FC = () => {
                   <tr className="contents">
                     <Td className="flex-col gap-3 border-b border-l border-goldenrod pb-12 pl-6">
                       <span className="self-start">{t.register.discordHallOfFameRanking}</span>
-                      <div className="flex items-center self-start rounded bg-discord-darkgrey px-6 py-5 font-[baloopaaji2] text-white">
+                      <div className="flex items-center self-start rounded bg-discord-darkgrey px-6 py-5 text-white">
                         <img
                           src={lesQuaisAbattoirs.image}
                           alt={t.register.discordServerIconAlt(lesQuaisAbattoirs.name)}

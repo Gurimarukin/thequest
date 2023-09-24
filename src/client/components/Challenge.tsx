@@ -114,9 +114,9 @@ export const ChallengeWithProgression: React.FC<ChallengeWithProgressionProps> =
           <div className="flex flex-col self-center">
             <div className="flex items-baseline gap-2">
               <span>{t.challenge.challenge}</span>
-              <h3 className="text-sm font-bold">{t.labels.challenge(id)}</h3>
+              <h3 className="font-bold">{t.labels.challenge(id)}</h3>
             </div>
-            <span className="pt-1 text-sm">{t.labels.challengeShort(id)}</span>
+            <span className="pt-1">{t.labels.challengeShort(id)}</span>
             <div className="flex gap-2 pt-2">
               {pipe(
                 tier,
@@ -130,7 +130,7 @@ export const ChallengeWithProgression: React.FC<ChallengeWithProgressionProps> =
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 text-xs">
           <span>{t.challenge.thresholds}</span>
           <ul className="flex flex-wrap gap-1.5 italic">
             {pipe(thresholds, DictUtils.partial.entries, entries =>

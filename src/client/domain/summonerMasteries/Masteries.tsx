@@ -96,9 +96,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
           )),
         )}
       </div>
-      <div className="self-center text-sm">
-        {t.nChampionsFraction(championsCount, champions.length)}
-      </div>
+      <div className="self-center">{t.nChampionsFraction(championsCount, champions.length)}</div>
     </>
   )
 }
@@ -189,6 +187,7 @@ const Champion: React.FC<ChampionProps> = ({
             isHistogram={isHistogram}
             tooltipPlacementRef={containerRef}
             tooltipPlacement="top"
+            centerLevel={false}
           />
 
           <div className={isAram ? 'contents' : 'hidden'}>
@@ -313,7 +312,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
           ),
         )}
         <div className="flex items-center">
-          <span ref={placementRef} className="p-1.5 text-sm">
+          <span ref={placementRef} className="p-1.5">
             {t.common.number(championPoints)}
           </span>
         </div>

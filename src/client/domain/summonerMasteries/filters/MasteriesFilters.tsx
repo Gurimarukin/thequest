@@ -147,10 +147,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             )}
             {labelValue(
               'name',
-              <TextLabel
-                tooltip={t.masteries.filters.sort.name}
-                className="pt-[3px] font-[baloopaaji2] text-xs font-normal"
-              >
+              <TextLabel tooltip={t.masteries.filters.sort.name}>
                 {t.masteries.filters.sortShort.name}
               </TextLabel>,
             )}
@@ -374,7 +371,7 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
     <>
       <span
         ref={hoverRef}
-        className={cx('flex h-6 items-center justify-center gap-1.5 text-xs', className)}
+        className={cx('flex h-6 items-center justify-center gap-1.5 text-sm', className)}
       >
         {children}
       </span>

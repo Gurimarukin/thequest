@@ -127,7 +127,7 @@ export const Aram: React.FC = () => {
             )),
           )}
         </div>
-        <div className="mt-6 self-center text-sm">
+        <div className="mt-6 self-center">
           {t.nChampionsFraction(searchCount, champions.length)}
         </div>
       </div>
