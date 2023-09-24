@@ -1,10 +1,11 @@
+- url encode summoner name (client and server side)
 - champions sort from Poro positions
 - challenges page + detect challenges
 - change font (sans serif, defined monospace font, emojis)
 - forget about Discord Riot Connection, create BO and link by hand
 
-- fix mobile participants drag n drop
 - align tenacity and ability haste with other stats (hover)
+- unlink ban and player
 - ignore CHERRY league entry
 - react-select
 - uri: ugly encode

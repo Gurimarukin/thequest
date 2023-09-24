@@ -260,9 +260,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
       <ActiveGameHeader isDraft={isDraft} participants={participants} />
 
-      <div
-        className={shouldWrap ? 'flex flex-col gap-1' : cx('grid gap-x-0 gap-y-4', gridColsDesktop)}
-      >
+      <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid', gridColsDesktop)}>
         {TeamId.values.map((teamId, i) => {
           const reverse = i % 2 === 1
           const participants_ = participants[teamId]
@@ -271,12 +269,12 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
               key={teamId}
               className={
                 shouldWrap
-                  ? cx('grid gap-y-1', reverse ? gridColsReverseMobile : gridColsMobile)
+                  ? cx('grid', reverse ? gridColsReverseMobile : gridColsMobile)
                   : 'contents'
               }
             >
               {i === 0 ? (
-                <span
+                <li
                   ref={onMountLeft}
                   className="row-start-1"
                   style={{
@@ -287,7 +285,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                 />
               ) : null}
               {i === 1 ? (
-                <span
+                <li
                   ref={onMountRight}
                   className="row-start-1"
                   style={{
@@ -348,7 +346,12 @@ const Participants: React.FC<ParticipantsProps> = ({
 
   const order = useRef<List<number>>(participants.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
 
-  const [springs, api] = useSprings(participants.length, fn(teamId, order.current)) // Create springs, each corresponds to an item, controlling its transform, etc.
+  const participantHeight = shouldWrap ? participantHeightMobile : participantHeightDesktop
+
+  const [springs, api] = useSprings(
+    participants.length,
+    fn(participantHeight, teamId, order.current),
+  ) // Create springs, each corresponds to an item, controlling its transform, etc.
 
   const bind = useDrag(({ event, args: [activeIndex], active, movement: [, y] }) => {
     event.preventDefault()
@@ -363,10 +366,23 @@ const Participants: React.FC<ParticipantsProps> = ({
     )
 
     if (active) {
-      api.start(fn(teamId, order.current, active, activeIndex, currentIndex, currentRow, y)) // Feed springs new style data, they'll animate the view without causing a single render
+      api.start(
+        fn(
+          participantHeight,
+          teamId,
+          order.current,
+          active,
+          activeIndex,
+          currentIndex,
+          currentRow,
+          y,
+        ),
+      ) // Feed springs new style data, they'll animate the view without causing a single render
     } else {
       const newOrder = swap(order.current, currentIndex, currentRow)
-      api.start(fn(teamId, newOrder, active, activeIndex, currentIndex, currentRow, y))
+      api.start(
+        fn(participantHeight, teamId, newOrder, active, activeIndex, currentIndex, currentRow, y),
+      )
 
       // eslint-disable-next-line functional/immutable-data
       order.current = newOrder
@@ -401,12 +417,14 @@ const Participants: React.FC<ParticipantsProps> = ({
   )
 }
 
-// height: 90, gap: 16
-const participantHeight = 106
+// line 1, line 2, spacer
+const participantHeightMobile = 90 + 24 + 4
+const participantHeightDesktop = 90 + 24 + 16
 const dragOffset = 20
 
 const fn =
   (
+    participantHeight: number,
     teamId: TeamId,
     order: List<number>,
     active = false,

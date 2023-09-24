@@ -44,6 +44,7 @@ import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 import { ActiveGameAramStats } from './ActiveGameAramStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
+import { ActiveGameTag } from './ActiveGameTag'
 
 const { round } = NumberUtils
 
@@ -189,12 +190,15 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     <Li
       shouldWrap={shouldWrap}
       reverse={reverse}
-      index={index}
+      gridRowStart={3 * index + 1}
       springStyle={springStyle}
       gestureProps={gestureProps}
       className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
     >
-      <Cell gridColStart={1} className="col-span-8 bg-current shadow-even shadow-black" />
+      <Cell
+        gridColStart={1}
+        className="col-span-8 row-span-2 bg-current shadow-even shadow-black"
+      />
       <Cell
         ref={onBevelMount}
         gridColStart={8}
@@ -518,6 +522,24 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           draggable={false}
         />
       </Cell>
+
+      {List.isEmpty(tags) ? null : (
+        <Cell gridRowOffset={1} gridColStart={1} className="col-span-8 text-xs">
+          <ul
+            className={cx('flex items-center justify-center gap-1 p-1', [
+              'flex-row-reverse',
+              reverse,
+            ])}
+          >
+            {tags.map((tag, i) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <ActiveGameTag key={i} {...tag} />
+            ))}
+          </ul>
+        </Cell>
+      )}
+
+      <Cell gridRowOffset={2} gridColStart={1} className={shouldWrap ? 'h-1' : 'h-4'} />
     </Li>
   )
 }
@@ -525,7 +547,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 type LiProps = {
   shouldWrap: boolean
   reverse: boolean
-  index: number
+  gridRowStart: number
   springStyle: StyleProps
   gestureProps: ReactDOMAttributes
   className?: string
@@ -535,7 +557,7 @@ type LiProps = {
 const Li: React.FC<LiProps> = ({
   shouldWrap,
   reverse,
-  index,
+  gridRowStart,
   springStyle,
   gestureProps,
   className: baseClassName,
@@ -546,14 +568,19 @@ const Li: React.FC<LiProps> = ({
       children as List<CellElement | null>,
       element => {
         if (element === null) return null
-        const { className, style, ...props_ } = element.props
+        const { gridRowOffset = 0, className, style, ...props_ } = element.props
         const props: RequiredCellElementProps = {
           ...gestureProps,
           ...props_,
+          gridRowOffset,
           shouldWrap,
           reverse,
           className: cx(baseClassName, className, 'touch-pinch-zoom select-none'),
-          style: { ...style, gridRowStart: index + 1, ...(springStyle as React.CSSProperties) },
+          style: {
+            ...style,
+            gridRowStart: gridRowStart + gridRowOffset,
+            ...(springStyle as React.CSSProperties),
+          },
         }
         return cloneElement(element, props)
       },
@@ -572,6 +599,10 @@ type CellProps = {
   HTMLElementProps
 
 type BaseCellProps = {
+  /**
+   * @default 0
+   */
+  gridRowOffset?: number
   shouldWrap?: boolean
   reverse?: boolean
 }
