@@ -219,23 +219,39 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         }
       />
       <Cell gridColStart={2} className={padding}>
-        <div
-          className={cx(
-            'flex flex-col justify-center gap-1 pt-0.5',
-            reverse ? 'items-start' : 'items-end',
-          )}
-        >
-          <a
-            href={appRoutes.platformSummonerName(platform, summonerName, {
-              view: 'histogram',
-              level: allLevels,
-            })}
-            target="_blank"
-            rel="noreferrer"
-            className="whitespace-nowrap text-lg text-goldenrod"
-          >
-            {summonerName}
-          </a>
+        <div className="flex flex-col justify-center gap-1 pt-0.5">
+          <div className={cx('flex items-center gap-3', ['flex-row-reverse', reverse])}>
+            {pipe(
+              premadeId,
+              Maybe.fold(
+                () => null,
+                id => (
+                  <div
+                    className={cx('flex items-center gap-1 text-xs text-white', padding, [
+                      'flex-row-reverse',
+                      !reverse,
+                    ])}
+                  >
+                    <PeopleSharp className="h-3" />
+                    <span>{id}</span>
+                  </div>
+                ),
+              ),
+            )}
+            <div className={cx('flex grow', reverse ? 'justify-start' : 'justify-end')}>
+              <a
+                href={appRoutes.platformSummonerName(platform, summonerName, {
+                  view: 'histogram',
+                  level: allLevels,
+                })}
+                target="_blank"
+                rel="noreferrer"
+                className="whitespace-nowrap text-lg text-goldenrod"
+              >
+                {summonerName}
+              </a>
+            </div>
+          </div>
           <div className={cx('flex items-start gap-2', ['flex-row-reverse', !reverse])}>
             <img
               src={assets.summonerIcon(profileIconId)}
@@ -489,7 +505,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           )}
         </li>
       </Cell>
-      <Cell gridColStart={8} className={cx('flex items-center py-1', padding)}>
+      <Cell
+        gridColStart={8}
+        className={cx('col-span-2 flex items-center py-1', reverse ? 'pl-4' : 'pr-4', padding)}
+      >
         <ActiveGameRunes
           runeStyleById={runeStyleById}
           runeById={runeById}
@@ -499,31 +518,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           draggable={false}
         />
       </Cell>
-      {pipe(
-        premadeId,
-        Maybe.fold(
-          () => null,
-          id => (
-            <Cell
-              gridColStart={reverse ? 9 : 8}
-              className={cx(
-                'self-end pb-2',
-                reverse ? 'justify-self-start px-3.5' : 'justify-self-end px-2',
-              )}
-            >
-              <div
-                className={cx('flex items-center gap-1 text-xs', padding, [
-                  'flex-row-reverse',
-                  reverse,
-                ])}
-              >
-                <PeopleSharp className="h-3" />
-                <span>{id}</span>
-              </div>
-            </Cell>
-          ),
-        ),
-      )}
     </Li>
   )
 }
