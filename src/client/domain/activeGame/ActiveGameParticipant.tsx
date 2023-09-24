@@ -219,7 +219,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         gridColStart={1}
         className={
-          highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
+          highlight
+            ? cx('row-span-2 border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4')
+            : undefined
         }
       />
       <Cell gridColStart={2} className={padding}>
