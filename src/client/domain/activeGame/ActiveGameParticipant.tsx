@@ -242,7 +242,12 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               draggable={false}
               className="w-12"
             />
-            <div className={cx('flex flex-col gap-0.5', reverse ? 'items-start' : 'items-end')}>
+            <div
+              className={cx(
+                'flex flex-col gap-0.5 text-sm leading-4',
+                reverse ? 'items-start' : 'items-end',
+              )}
+            >
               {pipe(
                 summonerLevel,
                 Maybe.fold(
