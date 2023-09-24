@@ -225,7 +225,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         }
       />
       <Cell gridColStart={2} className={padding}>
-        <div className="flex flex-col justify-center gap-1 pt-0.5">
+        <div className="flex flex-col justify-center gap-1 pt-1">
           <div className={cx('flex items-center gap-3', ['flex-row-reverse', reverse])}>
             {pipe(
               premadeId,
@@ -252,7 +252,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 })}
                 target="_blank"
                 rel="noreferrer"
-                className="whitespace-nowrap text-lg text-goldenrod"
+                className="whitespace-nowrap text-lg leading-6 text-goldenrod"
               >
                 {summonerName}
               </a>
