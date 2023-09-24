@@ -325,7 +325,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             <Cell
               gridColStart={3}
               className={cx(
-                'flex flex-col justify-center gap-3.5',
+                'flex flex-col justify-center gap-2.5',
                 reverse ? 'items-end' : 'items-start',
                 padding,
               )}
@@ -337,6 +337,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 reverse={reverse}
                 tooltipShouldHide={tooltipShouldHide}
                 draggable={false}
+                className="-mt-0.5"
               />
               <League
                 variant="small"
