@@ -95,7 +95,7 @@ export const SearchChampion: React.FC<Props> = ({
   return (
     <div className={cx('flex flex-wrap items-center gap-3', className)}>
       <div className="relative flex flex-col items-center text-xs">
-        <div className="flex items-center">
+        <div className="grid items-center">
           <input
             ref={searchRef}
             type="text"
@@ -105,12 +105,12 @@ export const SearchChampion: React.FC<Props> = ({
             onFocus={onFocus}
             placeholder={t.searchChamion}
             className={cx(
-              'w-[151px] justify-self-start rounded-sm border border-grey-disabled bg-transparent py-1 pl-2',
+              'w-[136px] justify-self-start rounded-sm border border-grey-disabled bg-transparent py-0.5 pl-2 area-1',
               search === '' ? 'pr-2' : 'pr-7',
             )}
           />
           {search !== '' ? (
-            <button type="button" onClick={emptySearch} className="-ml-6">
+            <button type="button" onClick={emptySearch} className="mr-1 justify-self-end area-1">
               <CloseFilled className="h-5 text-wheat" />
             </button>
           ) : null}

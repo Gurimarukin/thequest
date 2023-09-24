@@ -33,7 +33,7 @@ export function HighlightLink<A>({
         {...props}
         disabled={matches}
         className={cx(
-          'flex border-b py-3',
+          'flex border-b py-1.5',
           matches ? 'border-goldenrod-bis' : 'border-transparent',
           className,
         )}

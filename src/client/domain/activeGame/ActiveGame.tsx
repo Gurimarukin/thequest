@@ -248,7 +248,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         <button type="button" onClick={refreshGame}>
           <RefreshOutline className="w-6" />
         </button>
-        <h2 className="text-lg text-goldenrod">{t.labels.gameQueue[gameQueueConfigId]}</h2>
+        <h2 className="text-xl text-goldenrod">{t.labels.gameQueue[gameQueueConfigId]}</h2>
         {pipe(
           gameStartTime,
           Maybe.fold(

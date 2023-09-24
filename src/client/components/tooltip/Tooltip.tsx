@@ -155,7 +155,7 @@ export const Tooltip: React.FC<Props> = ({
     <div
       ref={tooltipRef}
       className={cx(
-        'group z-40 whitespace-nowrap border border-tooltip bg-zinc-900 px-2 py-1 text-xs text-wheat shadow-even shadow-black transition-opacity duration-300',
+        'group z-40 whitespace-nowrap border border-tooltip bg-zinc-900 px-2 py-1 text-sm text-wheat shadow-even shadow-black transition-opacity duration-300',
         shouldDisplay ? 'visible opacity-100' : 'invisible opacity-0',
         className,
       )}

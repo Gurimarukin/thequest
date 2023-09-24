@@ -368,7 +368,7 @@ const frFRTranslation: Translation = {
         points: 'Trier par points',
       },
       sortShort: {
-        name: 'ABC',
+        name: 'abc',
         percents: '%',
         points: 'pts',
       },

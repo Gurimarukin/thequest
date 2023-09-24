@@ -75,7 +75,7 @@ export const Summoner: React.FC<Props> = ({
         />
         <div className="grid grid-rows-[1fr_auto] items-center gap-4">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span ref={nameRef} className="text-lg text-goldenrod">
+            <span ref={nameRef} className="text-2xl text-goldenrod">
               {name}
             </span>
             <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
@@ -84,10 +84,8 @@ export const Summoner: React.FC<Props> = ({
               </span>
               <span>{t.summoner.masteriesCache.duration(prettyMs(masteries.cacheDuration))}</span>
             </Tooltip>
-            <span className="text-sm text-grey-400">—</span>
-            <span ref={levelRef} className="text-sm">
-              {t.summoner.level(summonerLevel)}
-            </span>
+            <span className="text-grey-400">—</span>
+            <span ref={levelRef}>{t.summoner.level(summonerLevel)}</span>
             <Tooltip hoverRef={levelRef} placement="right">
               {t.summoner.summonerLevel}
             </Tooltip>
@@ -121,7 +119,7 @@ export const Summoner: React.FC<Props> = ({
               className="relative -left-2.5 w-[54px]"
             />
           </div>
-          <div className="grid grid-cols-[auto_auto] gap-x-2 text-sm">
+          <div className="grid grid-cols-[auto_auto] gap-x-2">
             <span className="justify-self-end">{t.summoner.masteryScore}</span>
             <span>{t.common.number(totalMasteryLevel)}</span>
 
@@ -138,7 +136,7 @@ export const Summoner: React.FC<Props> = ({
           </div>
         </Tooltip>
         <span className="flex items-center gap-2">
-          <span className="text-sm">{t.summoner.percentsProgression(round(questPercents, 2))}</span>
+          <span>{t.summoner.percentsProgression(round(questPercents, 2))}</span>
           <span ref={infoRef}>
             <InformationCircleOutline className="h-6" />
           </span>
@@ -165,7 +163,7 @@ const getMasteryImgWithCount =
   ({ level, imgClassName, className }) =>
     (
       <div className={cx('flex flex-col items-center', className)}>
-        <span className="text-xs">{t.number(masteriesCount[level])}</span>
+        <span className="text-sm">{t.number(masteriesCount[level])}</span>
         <MasteryImg level={level} className={cx('w-full', imgClassName)} />
       </div>
     )

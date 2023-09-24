@@ -62,7 +62,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
           <div className="flex flex-wrap items-center gap-4">
             <SearchSummoner />
 
-            <div className="flex flex-wrap items-center gap-4 py-2 text-sm">
+            <div className="flex flex-wrap items-center gap-4 py-2">
               {pipe(
                 matchLocation(appParsers.anyPlatformSummonerName),
                 Maybe.fold(

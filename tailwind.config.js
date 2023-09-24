@@ -65,11 +65,17 @@ module.exports = {
         'popper-left': "popper-placement^='left'",
         'popper-right': "popper-placement^='right'",
       },
+      gridArea: {
+        1: '1 / 1', // useful for superposing multiple elements in a grid element
+      },
       backgroundImage: {
         landing: "url('./imgs/bg-landing.jpg')",
       },
       fontSize: {
-        '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
+        '2xs': ['.625rem', { lineHeight: '0.75rem' }],
+      },
+      lineHeight: {
+        2.5: '.625rem',
       },
       boxShadow: {
         even: '0 0 8px 0 var(--tw-shadow-color)',
@@ -101,11 +107,25 @@ module.exports = {
     },
   },
   plugins: [
-    plugin(function ({ matchUtilities, theme }) {
+    /**
+     * Plugin for grid-area:
+     * - `area-{name}`: define grid-area (customize in theme)
+     */
+    plugin(({ matchUtilities, theme }) =>
+      matchUtilities({ area: gridArea => ({ gridArea }) }, { values: theme('gridArea') }),
+    ),
+
+    /**
+     * Plugin for text-shadow:
+     * - `text-shadow-{name}`: add some text-shadow (customize in theme)
+     * - `shadow-{color}`: text-shadow color
+     */
+
+    plugin(({ matchUtilities, theme }) =>
       matchUtilities(
         { 'text-shadow': textShadow => ({ textShadow }) },
         { values: theme('textShadow') },
-      )
-    }),
+      ),
+    ),
   ],
 }

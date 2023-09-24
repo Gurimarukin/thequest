@@ -49,6 +49,10 @@ export type ChampionMasterySquareProps = {
   tooltipPlacement?: Placement
   tooltipShouldHide?: boolean
   /**
+   * @default true
+   */
+  centerLevel?: boolean
+  /**
    * @default false
    */
   centerShards?: boolean
@@ -83,6 +87,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   tooltipPlacementRef,
   tooltipPlacement = 'bottom',
   tooltipShouldHide,
+  centerLevel = true,
   centerShards = false,
   noShadow = false,
   draggable,
@@ -102,11 +107,11 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
   return (
     <>
-      <div ref={hoverRef_} className="relative flex h-16 w-16 items-center justify-center">
+      <div ref={hoverRef_} className="grid h-16 w-16">
         {/* level border */}
         <div
           className={cx(
-            'absolute inset-0 flex flex-col justify-end overflow-hidden rounded-bl-xl bg-black',
+            'h-full w-full overflow-hidden rounded-bl-xl bg-black area-1',
             isHistogram ? 'rounded-br-xl' : 'rounded-tr-xl',
             ['shadow-even shadow-black', !noShadow],
           )}
@@ -124,27 +129,31 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           championName={name}
           isDraggable={draggable}
           className={cx(
-            'relative h-[54px] w-[54px] rounded-bl-lg bg-black text-2xs text-transparent',
+            'h-[54px] w-[54px] self-center justify-self-center rounded-bl-lg bg-black text-2xs text-transparent area-1',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',
           )}
         />
 
-        {/* champion level top left */}
-        <div
-          className={cx(
-            'absolute left-0 top-0 flex h-4 w-3.5 justify-center overflow-hidden rounded-br-lg bg-black pr-0.5 text-xs font-bold',
-            championLevelNumberColor(championLevel),
-          )}
-        >
-          <span className="-mt-0.5">{championLevel}</span>
-        </div>
+        {/* top left */}
+        <div className="flex items-start self-start justify-self-start area-1">
+          {/* champion level */}
+          <div
+            className={cx(
+              'flex overflow-hidden rounded-br-lg bg-black pb-1 pr-1 text-sm font-bold leading-2.5',
+              ['pl-0.5 pt-0.5', centerLevel],
+              championLevelNumberColor(championLevel),
+            )}
+          >
+            <span>{championLevel}</span>
+          </div>
 
-        {/* tokens next to champion level */}
-        <Tokens championLevel={championLevel} tokensEarned={tokensEarned} />
+          {/* tokens next to champion level */}
+          <Tokens championLevel={championLevel} tokensEarned={tokensEarned} />
+        </div>
 
         {/* chest bottom left */}
         {chestGranted ? (
-          <div className="absolute bottom-0 left-0 flex h-3.5 w-3.5 flex-col-reverse rounded-tr bg-black">
+          <div className="flex h-3.5 w-3.5 flex-col-reverse self-end justify-self-start rounded-tr bg-black area-1">
             <Chest className="w-3 text-goldenrod opacity-90" />
           </div>
         ) : null}
@@ -271,7 +280,7 @@ const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
     (totalTockens: number, src: string): React.ReactElement => (
       <span
         className={cx(
-          'absolute left-[13px] top-0 flex h-2.5 rounded-br bg-black pl-0.5',
+          'flex h-2.5 rounded-br bg-black pl-0.5',
           ['gap-0.5 pb-0.5 pr-0.5 pt-px', championLevel === 5],
           ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
         )}
@@ -346,17 +355,17 @@ const Shards: React.FC<ShardsProps> = ({
       </span>
       <span
         className={cx(
-          'flex h-4 w-3.5 rounded-tl-lg bg-black pl-0.5 text-xs',
+          'flex h-3.5 w-3.5 rounded-tl-lg bg-black pl-0.5 text-sm',
           centerShards ? 'justify-center' : 'justify-end group-hover:justify-center',
         )}
       >
-        <span className="mt-0.5">{shardsCount}</span>
+        <span>{shardsCount}</span>
       </span>
       {setShardsCount !== null ? (
         <div
           className={cx(
             'absolute -right-px z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex',
-            ['-bottom-3.5', canRemoveShard],
+            ['-bottom-4', canRemoveShard],
           )}
         >
           <span className={cx('flex bg-black p-px pb-0.5', ['hidden', 9 <= shardsCount])}>
@@ -372,7 +381,7 @@ const Shards: React.FC<ShardsProps> = ({
                 >
                   <AddOutline className="w-full" />
                 </button>
-                <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-2xs">
+                <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-xs">
                   {t.addShard}
                 </Tooltip>
               </>
@@ -392,7 +401,7 @@ const Shards: React.FC<ShardsProps> = ({
                 >
                   <RemoveOutline className="w-full" />
                 </button>
-                <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-2xs">
+                <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-xs">
                   {t.removeShard}
                 </Tooltip>
               </>

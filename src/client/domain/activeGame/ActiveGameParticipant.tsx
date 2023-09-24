@@ -266,7 +266,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             className="w-full"
           />
         </div>
-        <div className={cx('flex items-baseline gap-1.5 text-xs', ['flex-row-reverse', reverse])}>
+        <div className={cx('flex items-baseline gap-1.5', ['flex-row-reverse', reverse])}>
           <a
             href={appRoutes.platformSummonerName(platform, summonerName, {
               view: 'histogram',
@@ -274,7 +274,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             })}
             target="_blank"
             rel="noreferrer"
-            className="whitespace-nowrap text-base text-goldenrod"
+            className="whitespace-nowrap text-lg text-goldenrod"
           >
             {summonerName}
           </a>
@@ -348,7 +348,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           )}
         </li>
       </Cell>
-      <Cell gridColStart={5} className={cx('flex flex-col gap-px text-2xs', padding)}>
+      <Cell gridColStart={5} className={cx('flex flex-col gap-px text-xs leading-3', padding)}>
         {pipe(
           squareProps,
           Maybe.fold(

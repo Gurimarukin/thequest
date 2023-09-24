@@ -130,7 +130,7 @@ export const League: React.FC<Props> = ({
             className={cx('h-full object-contain', Maybe.isNone(league) ? 'w-[56.25%]' : 'w-full')}
           />
         </span>
-        <div className={cx('flex flex-col text-xs', ['col-start-1 row-start-1', reverse])}>
+        <div className={cx('flex flex-col text-sm', ['col-start-1 row-start-1', reverse])}>
           <span className="flex gap-1.5 whitespace-nowrap">{description}</span>
           {subDescription !== undefined ? (
             <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
