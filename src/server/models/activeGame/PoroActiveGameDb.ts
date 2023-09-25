@@ -75,13 +75,8 @@ type PoroActiveGameDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   gameId: GameId.codec,
-  // mapId: MapId.codec,
-  // gameStartTime: Maybe.codec(DayJsFromDate.codec),
-  // gameQueueConfigId: GameQueue.codec,
-  // isDraft: C.boolean,
   participants: C.readonly(C.partial(participantsProperties)),
   insertedAt: DayJsFromDate.codec,
-  // updatedAt: DayJsFromDate.codec,
 })
 
 const PoroActiveGameDb = { codec }

@@ -5,6 +5,7 @@
 
 - align tenacity and ability haste with other stats (hover)
 - ignore CHERRY league entry
+- translate poro tags
 - react-select
 - uri: ugly encode
 - Menu react-popper?
