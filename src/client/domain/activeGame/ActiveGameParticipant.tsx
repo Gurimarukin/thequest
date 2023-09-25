@@ -1,16 +1,7 @@
 import { type AnimatedComponent, animated } from '@react-spring/web'
 import type { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { pipe } from 'fp-ts/function'
-import {
-  Children,
-  cloneElement,
-  createElement,
-  forwardRef,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { Children, cloneElement, createElement, forwardRef, useRef } from 'react'
 
 import { Business } from '../../../shared/Business'
 import { MapId } from '../../../shared/models/api/MapId'
@@ -37,7 +28,6 @@ import { SummonerSpell } from '../../components/SummonerSpell'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { PeopleSharp } from '../../imgs/svgs/icons'
 import { appRoutes } from '../../router/AppRouter'
 import { TranslationUtils } from '../../utils/TranslationUtils'
@@ -48,14 +38,12 @@ import { ActiveGameTag } from './ActiveGameTag'
 
 const { round } = NumberUtils
 
-export const gridTotalColsMobile = 10
-export const gridTotalColsDesktop = 18
+export const gridTotalColsMobile = 9
+export const gridTotalColsDesktop = 17
 
-const bevelWidth = 32 // px
-
-export const gridColsMobile = 'grid-cols-[repeat(8,auto)_32px_1fr]'
-export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(8,auto)]'
-export const gridColsDesktop = 'grid-cols-[1fr_repeat(7,auto)_32px_32px_repeat(7,auto)_1fr]'
+export const gridColsMobile = 'grid-cols-[repeat(8,auto)_1fr]'
+export const gridColsReverseMobile = 'grid-cols-[1fr_repeat(8,auto)]'
+export const gridColsDesktop = 'grid-cols-[1fr_repeat(7,auto)_16px_repeat(7,auto)_1fr]'
 
 const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
 
@@ -178,12 +166,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     ),
   )
 
-  const [bevelHeight, setBevelHeight] = useState(0)
-  const onBevelMount = useRefWithResize<HTMLElement>(
-    useCallback(e => setBevelHeight(e.offsetHeight), []),
-  )
-  const bevelRotate = useMemo(() => Math.atan(bevelWidth / bevelHeight), [bevelHeight])
-
   const padding = reverse ? 'pr-2.5' : 'pl-2.5'
 
   return (
@@ -197,24 +179,11 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     >
       <Cell
         gridColStart={1}
-        className="col-span-8 row-span-2 bg-current shadow-even shadow-black"
+        className={cx(
+          'col-span-8 row-span-2 bg-current shadow-even shadow-black',
+          reverse ? 'rounded-l-3xl' : 'rounded-r-3xl',
+        )}
       />
-      <Cell
-        ref={onBevelMount}
-        gridColStart={8}
-        dontResetColor={true}
-        className="col-span-2 overflow-hidden"
-      >
-        <div className="relative" style={{ height: bevelHeight }}>
-          <div
-            className={cx(
-              'absolute h-[500px] w-[500px] bg-current shadow-even shadow-black',
-              reverse ? 'bottom-0 origin-bottom-left' : 'right-0 origin-top-right',
-            )}
-            style={{ transform: `rotate(${bevelRotate}rad)` }}
-          />
-        </div>
-      </Cell>
 
       <Cell
         gridColStart={1}
@@ -508,7 +477,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </Cell>
       <Cell
         gridColStart={8}
-        className={cx('col-span-2 flex items-center py-1', reverse ? 'pl-4' : 'pr-4', padding)}
+        className={cx('flex items-center py-1', reverse ? 'pl-3' : 'pr-3', padding)}
       >
         <ActiveGameRunes
           runeStyleById={runeStyleById}
@@ -520,13 +489,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         />
       </Cell>
 
+      {/* tags */}
       {List.isEmpty(tags) ? null : (
         <Cell gridRowOffset={1} gridColStart={1} className="col-span-8 text-xs">
           <ul
-            className={cx('flex items-center justify-center gap-1 p-1', [
-              'flex-row-reverse',
-              reverse,
-            ])}
+            className={cx(
+              'flex items-center justify-end gap-1 pb-2 pt-1',
+              reverse ? 'flex-row-reverse pl-4 pr-2' : 'pl-2 pr-4',
+            )}
           >
             {tags.map((tag, i) => (
               // eslint-disable-next-line react/no-array-index-key
@@ -536,6 +506,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         </Cell>
       )}
 
+      {/* spacer */}
       <Cell gridRowOffset={2} gridColStart={1} className={shouldWrap ? 'h-1' : 'h-4'} />
     </Li>
   )

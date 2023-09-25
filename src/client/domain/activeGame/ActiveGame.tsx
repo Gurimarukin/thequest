@@ -418,8 +418,8 @@ const Participants: React.FC<ParticipantsProps> = ({
 }
 
 // line 1, line 2, spacer
-const participantHeightMobile = 90 + 24 + 4
-const participantHeightDesktop = 90 + 24 + 16
+const participantHeightMobile = 90 + 28 + 4
+const participantHeightDesktop = 90 + 28 + 16
 const dragOffset = 20
 
 const fn =

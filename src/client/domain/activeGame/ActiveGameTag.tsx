@@ -13,7 +13,10 @@ export const ActiveGameTag: React.FC<Props> = ({ niceness, label, tooltip }) => 
   const ref = useRef<HTMLLIElement>(null)
   return (
     <>
-      <li ref={ref} className={cx('rounded-sm px-0.5 text-wheat', nicenessClassName[niceness])}>
+      <li
+        ref={ref}
+        className={cx('rounded-sm px-0.5 text-wheat saturate-[.7]', nicenessClassName[niceness])}
+      >
         {label}
       </li>
       <Tooltip hoverRef={ref} className="max-w-xs">

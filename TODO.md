@@ -1,4 +1,3 @@
-- fix bevel
 - url encode summoner name (client and server side)
 - champions sort from Poro positions
 - challenges page + detect challenges
