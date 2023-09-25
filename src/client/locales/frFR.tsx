@@ -1,5 +1,3 @@
-import { pipe } from 'fp-ts/function'
-
 import type { SpellName } from '../../shared/models/api/SpellName'
 import type {
   ChampionFaction,
@@ -9,7 +7,7 @@ import type { ChampionPosition } from '../../shared/models/api/champion/Champion
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
-import { type Dict, Maybe } from '../../shared/utils/fp'
+import { type Dict } from '../../shared/utils/fp'
 
 import type { Translation } from '../models/Translation'
 import { TranslationUtils } from '../utils/TranslationUtils'
@@ -104,22 +102,7 @@ const wikiaStatsBalance: Dict<WikiaStatsBalanceKey, string> = {
 
 const frFRTranslation: Translation = {
   activeGame: {
-    bannedBy: (summonerName, championName, pickTurn, highlightClassName) => (
-      <>
-        <span>banni par</span>
-        <span className={highlightClassName}>
-          {summonerName}
-          {pipe(
-            championName,
-            Maybe.fold(
-              () => null,
-              name => ` (${name})`,
-            ),
-          )}
-        </span>
-        <span>au tour {pickTurn}</span>
-      </>
-    ),
+    bannedAtTurn: pickTurn => `Banni au tour ${pickTurn}`,
     empty: 'aucun',
     gameStartedAt: date =>
       `Partie commencée à ${date.toLocaleTimeString(locale)} (${date.toLocaleDateString(locale)})`,

@@ -206,7 +206,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   platform,
   summonerGame: {
     summoner,
-    game: { gameStartTime, mapId, gameQueueConfigId, isDraft, participants },
+    game: { gameStartTime, mapId, gameQueueConfigId, isDraft, bannedChampions, participants },
   },
   refreshGame,
   reloadGame,
@@ -258,7 +258,11 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         )}
       </div>
 
-      <ActiveGameHeader isDraft={isDraft} participants={participants} />
+      <ActiveGameHeader
+        isDraft={isDraft}
+        bannedChampions={bannedChampions}
+        participants={participants}
+      />
 
       <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid', gridColsDesktop)}>
         {TeamId.values.map((teamId, i) => {

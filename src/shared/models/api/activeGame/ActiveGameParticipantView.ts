@@ -9,7 +9,6 @@ import { PerksView } from '../perk/PerksView'
 import { SummonerLeaguesView } from '../summoner/SummonerLeaguesView'
 import { SummonerSpellKey } from '../summonerSpell/SummonerSpellKey'
 import { ActiveGameMasteriesView } from './ActiveGameMasteriesView'
-import { BannedChampion } from './BannedChampion'
 import { PoroTag } from './PoroTag'
 
 type ActiveGameParticipantView = C.TypeOf<typeof codec>
@@ -20,7 +19,6 @@ const codec = C.struct({
   profileIconId: C.number,
   leagues: Maybe.codec(SummonerLeaguesView.codec),
   championId: ChampionKey.codec,
-  bannedChampion: BannedChampion.codec,
   masteries: Maybe.codec(ActiveGameMasteriesView.codec),
   shardsCount: Maybe.codec(C.number),
   spell1Id: SummonerSpellKey.codec,

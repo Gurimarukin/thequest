@@ -4,6 +4,7 @@ import { Maybe } from '../../../utils/fp'
 import { ChampionKey } from '../champion/ChampionKey'
 
 type BannedChampion = C.TypeOf<typeof codec>
+type BannedChampionOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
   pickTurn: C.number,
@@ -17,4 +18,4 @@ const empty: BannedChampion = {
 
 const BannedChampion = { codec, empty }
 
-export { BannedChampion }
+export { BannedChampion, BannedChampionOutput }

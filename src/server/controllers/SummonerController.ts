@@ -344,6 +344,7 @@ const SummonerController = (
             mapId: game.mapId,
             gameQueueConfigId: game.gameQueueConfigId,
             isDraft: game.isDraft,
+            bannedChampions: game.bannedChampions,
             participants,
           },
         })),

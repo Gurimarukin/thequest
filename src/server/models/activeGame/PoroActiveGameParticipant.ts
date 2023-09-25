@@ -43,7 +43,6 @@ const toView =
     profileIconId: participant.profileIconId,
     leagues: Maybe.some(PoroLeagues.toView(poroParticipant.leagues)),
     championId: participant.championId,
-    bannedChampion: participant.bannedChampion,
     masteries,
     shardsCount,
     spell1Id: participant.spell1Id,

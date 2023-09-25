@@ -3,12 +3,12 @@ import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { MapId } from '../../../../shared/models/api/MapId'
-import { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
+import type { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
-import { ListUtils } from '../../../../shared/utils/ListUtils'
-import { Either, List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
+import type { NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
+import { Either, List, Maybe } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
 import { GameId } from '../GameId'
@@ -54,6 +54,7 @@ const rawDecoder = D.struct({
 
 type RiotCurrentGameInfo = Omit<RawCurrentGameInfo, 'bannedChampions' | 'participants'> & {
   isDraft: boolean
+  bannedChampions: PartialDict<`${TeamId}`, NonEmptyArray<BannedChampion>>
   participants: PartialDict<`${TeamId}`, NonEmptyArray<RiotCurrentGameParticipant>>
 }
 
@@ -72,24 +73,8 @@ const decoder = pipe(
     return {
       ...game,
       isDraft: List.isNonEmpty(bannedChampions),
-      participants: pipe(
-        groupedParticipants,
-        PartialDict.mapWithIndex((teamId, participants_) => {
-          const bans = pipe(
-            groupedBannedChampions[teamId] ?? [],
-            ListUtils.padEnd(participants_.length, BannedChampion.empty),
-          ) as NonEmptyArray<BannedChampion>
-
-          return NonEmptyArray.zipWith(
-            participants_,
-            bans,
-            (participant, bannedChampion): RiotCurrentGameParticipant => ({
-              ...participant,
-              bannedChampion,
-            }),
-          )
-        }),
-      ),
+      bannedChampions: groupedBannedChampions,
+      participants: groupedParticipants,
     }
   }),
 )

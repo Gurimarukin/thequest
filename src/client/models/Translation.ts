@@ -13,7 +13,7 @@ import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
-import type { Dict, Maybe } from '../../shared/utils/fp'
+import type { Dict } from '../../shared/utils/fp'
 
 import type { ChampionAramCategory } from './ChampionAramCategory'
 import type { MasteriesQueryOrder } from './masteriesQuery/MasteriesQueryOrder'
@@ -22,12 +22,7 @@ import type { MasteriesQueryView } from './masteriesQuery/MasteriesQueryView'
 
 export type Translation = {
   activeGame: {
-    bannedBy: (
-      summonerName: string,
-      championName: Maybe<string>,
-      pickTurn: number,
-      highlightClassName: string,
-    ) => React.ReactNode
+    bannedAtTurn: (pickTurn: number) => React.ReactNode
     empty: React.ReactNode
     gameStartedAt: (date: Date) => React.ReactNode
     loading: React.ReactNode

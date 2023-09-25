@@ -1,6 +1,5 @@
 import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import type { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
@@ -16,7 +15,6 @@ type ActiveGameParticipant = {
   summonerName: string
   profileIconId: number
   championId: ChampionKey
-  bannedChampion: BannedChampion
   spell1Id: SummonerSpellKey
   spell2Id: SummonerSpellKey
   perks: {
@@ -39,7 +37,6 @@ const toView =
     profileIconId: participant.profileIconId,
     leagues,
     championId: participant.championId,
-    bannedChampion: participant.bannedChampion,
     masteries,
     shardsCount,
     spell1Id: participant.spell1Id,

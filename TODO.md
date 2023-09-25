@@ -4,7 +4,6 @@
 - forget about Discord Riot Connection, create BO and link by hand
 
 - align tenacity and ability haste with other stats (hover)
-- unlink ban and player
 - ignore CHERRY league entry
 - react-select
 - uri: ugly encode
