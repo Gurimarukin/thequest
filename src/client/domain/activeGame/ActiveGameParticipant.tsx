@@ -452,7 +452,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </Cell>
       {pipe(
         champion,
-        // Maybe.filter(() => isHowlingAbyss),
+        Maybe.filter(() => isHowlingAbyss),
         Maybe.fold(
           () => null,
           c => (
@@ -616,6 +616,8 @@ const Cell = forwardRef<HTMLElement, CellProps>(
     {
       type = animated.div,
       gridColStart,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      gridRowOffset: _,
       shouldWrap = false,
       reverse = false,
       dontResetColor,
