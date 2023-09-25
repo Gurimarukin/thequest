@@ -56,19 +56,40 @@ type SeqS<E> = <A extends Dict<string, unknown>>(a: ToValidatedDict<E, A>) => Va
 
 const getSeqS = <E = never>(): SeqS<E> => apply.sequenceS(getValidation<E>()) as SeqS<E>
 
+const {
+  left: {},
+  right: {},
+  ...validatedNea
+} = Either
 const ValidatedNea = {
+  ...validatedNea,
   valid,
   invalid,
   fromEither,
   fromOption,
+  fromNullable: Either.fromNullable as <E>(
+    e: NonEmptyArray<E>,
+  ) => <A>(a: A) => ValidatedNea<E, NonNullable<A>>,
   fromEmptyE,
   fromEmptyErrors,
+  map: Either.map as <A, B>(f: (a: A) => B) => <E>(fa: ValidatedNea<E, A>) => ValidatedNea<E, B>,
   chain: Either.chain as <E, A, B>(
     f: (a: A) => ValidatedNea<E, B>,
   ) => (ma: ValidatedNea<E, A>) => ValidatedNea<E, B>,
   chainOptionK,
+  chainNullableK: Either.chainNullableK as <E>(
+    e: NonEmptyArray<E>,
+  ) => <A, B>(
+    f: (a: A) => B | null | undefined,
+  ) => (ma: ValidatedNea<E, A>) => ValidatedNea<E, NonNullable<B>>,
   chainEitherK,
   bimap,
+  bind: Either.bind as <N extends string, A, E, B>(
+    name: Exclude<N, keyof A>,
+    f: (a: A) => ValidatedNea<E, B>,
+  ) => (
+    ma: ValidatedNea<E, A>,
+  ) => ValidatedNea<E, { readonly [K in N | keyof A]: K extends keyof A ? A[K] : B }>,
   getValidation,
   getSeqS,
 }

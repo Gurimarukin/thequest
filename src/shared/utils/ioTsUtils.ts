@@ -156,23 +156,28 @@ export const NumberFromString = {
  * ArrayFromString
  */
 
-const prepareArray: (i: string) => List<string> = flow(
-  string.split(','),
-  NonEmptyArray.map(string.trim),
-  List.filter(predicate.not(string.isEmpty)),
-)
+const prepareArray = (separator: string): ((i: string) => List<string>) =>
+  flow(
+    string.split(separator),
+    NonEmptyArray.map(string.trim),
+    List.filter(predicate.not(string.isEmpty)),
+  )
 
-const arrayFromStringDecoder = <A>(decoder: Decoder<unknown, A>): Decoder<unknown, List<A>> =>
-  pipe(D.string, D.map(prepareArray), D.compose(List.decoder(decoder)))
+const arrayFromStringDecoder =
+  (separator: string) =>
+  <A>(decoder: Decoder<unknown, A>): Decoder<unknown, List<A>> =>
+    pipe(D.string, D.map(prepareArray(separator)), D.compose(List.decoder(decoder)))
 
-const arrayFromStringEncoder = <A>(encoder: Encoder<string, A>): Encoder<string, List<A>> => ({
-  encode: flow(List.map(encoder.encode), List.mkString(',')),
-})
+const arrayFromStringEncoder =
+  (separator: string) =>
+  <A>(encoder: Encoder<string, A>): Encoder<string, List<A>> => ({
+    encode: flow(List.map(encoder.encode), List.mkString(separator)),
+  })
 
-const arrayFromStringCodec = <A>(
-  codec: Codec<unknown, string, A>,
-): Codec<unknown, string, List<A>> =>
-  C.make(arrayFromStringDecoder(codec), arrayFromStringEncoder(codec))
+const arrayFromStringCodec =
+  (separator: string) =>
+  <A>(codec: Codec<unknown, string, A>): Codec<unknown, string, List<A>> =>
+    C.make(arrayFromStringDecoder(separator)(codec), arrayFromStringEncoder(separator)(codec))
 
 export const ArrayFromString = {
   decoder: arrayFromStringDecoder,
@@ -184,22 +189,21 @@ export const ArrayFromString = {
  * SetFromString
  */
 
-const setFromStringDecoder = <A>(
-  decoder: Decoder<unknown, A>,
-  eq_: Eq<A>,
-): Decoder<unknown, ReadonlySet<A>> =>
-  pipe(arrayFromStringDecoder(decoder), D.map(readonlySet.fromReadonlyArray(eq_)))
+const setFromStringDecoder =
+  (separator: string) =>
+  <A>(decoder: Decoder<unknown, A>, eq_: Eq<A>): Decoder<unknown, ReadonlySet<A>> =>
+    pipe(arrayFromStringDecoder(separator)(decoder), D.map(readonlySet.fromReadonlyArray(eq_)))
 
 const setFromStringEncoder =
+  (separator: string) =>
   <A>(ord: Ord<A>) =>
   (encoder: Encoder<string, A>): Encoder<string, ReadonlySet<A>> =>
-    pipe(arrayFromStringEncoder(encoder), E.contramap(readonlySet.toReadonlyArray(ord)))
+    pipe(arrayFromStringEncoder(separator)(encoder), E.contramap(readonlySet.toReadonlyArray(ord)))
 
-const setFromStringCodec = <A>(
-  codec: Codec<unknown, string, A>,
-  ord: Ord<A>,
-): Codec<unknown, string, ReadonlySet<A>> =>
-  C.make(setFromStringDecoder(codec, ord), setFromStringEncoder(ord)(codec))
+const setFromStringCodec =
+  (separator: string) =>
+  <A>(codec: Codec<unknown, string, A>, ord: Ord<A>): Codec<unknown, string, ReadonlySet<A>> =>
+    C.make(setFromStringDecoder(separator)(codec, ord), setFromStringEncoder(separator)(ord)(codec))
 
 export const SetFromString = {
   decoder: setFromStringDecoder,
@@ -211,10 +215,10 @@ export const SetFromString = {
  * NonEmptyArrayFromString
  */
 
-const nonEmptyArrayFromStringDecoder = <A>(
-  decoder: Decoder<unknown, A>,
-): Decoder<unknown, NonEmptyArray<A>> =>
-  pipe(D.string, D.map(prepareArray), D.compose(NonEmptyArray.decoder(decoder)))
+const nonEmptyArrayFromStringDecoder =
+  (separator: string) =>
+  <A>(decoder: Decoder<unknown, A>): Decoder<unknown, NonEmptyArray<A>> =>
+    pipe(D.string, D.map(prepareArray(separator)), D.compose(NonEmptyArray.decoder(decoder)))
 
 export const NonEmptyArrayFromString = { decoder: nonEmptyArrayFromStringDecoder }
 

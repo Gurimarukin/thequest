@@ -13,7 +13,7 @@ import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
-import type { Dict, Maybe } from '../../shared/utils/fp'
+import type { Dict } from '../../shared/utils/fp'
 
 import type { ChampionAramCategory } from './ChampionAramCategory'
 import type { MasteriesQueryOrder } from './masteriesQuery/MasteriesQueryOrder'
@@ -22,12 +22,7 @@ import type { MasteriesQueryView } from './masteriesQuery/MasteriesQueryView'
 
 export type Translation = {
   activeGame: {
-    bannedBy: (
-      summonerName: string,
-      championName: Maybe<string>,
-      pickTurn: number,
-      highlightClassName: string,
-    ) => React.ReactNode
+    bannedAtTurn: (pickTurn: number) => React.ReactNode
     empty: React.ReactNode
     gameStartedAt: (date: Date) => React.ReactNode
     loading: React.ReactNode
@@ -39,6 +34,8 @@ export type Translation = {
     ) => React.ReactNode
     masteryScoreAndPoints: React.ReactNode
     otpIndex: (otpIndex: number) => React.ReactNode
+    mainRoles: React.ReactNode
+    aramChanges: React.ReactNode
   }
   aram: {
     category: {
@@ -110,6 +107,7 @@ export type Translation = {
       tierRankAlt: (tier: LeagueTier, rank?: LeagueRank) => string
       unranked: React.ReactNode
       unrankedIconAlt: string
+      previousSplit: React.ReactNode
     }
     masteryIconAlt: (level: ChampionLevelOrZero) => string
     nChampionsFraction: (n: number, total: number) => React.ReactNode
@@ -124,6 +122,8 @@ export type Translation = {
     searchChamion: string
     spellIconAlt: (name: string) => string
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
+    level: (level: number) => React.ReactNode
+    summonerLevel: React.ReactNode
     summonerIconAlt: (name: string) => string
   }
   form: {
@@ -208,13 +208,11 @@ export type Translation = {
       lastUpdate: (insertedAt: Date) => React.ReactNode
       duration: (minutes: number) => React.ReactNode
     }
-    level: (level: number) => React.ReactNode
     masteriesExplanation: React.ReactNode
     masteryScore: React.ReactNode
     masteryPoints: React.ReactNode
     otpIndex: React.ReactNode
     otpIndexExplanation: React.ReactNode
     percentsProgression: (percents: number) => React.ReactNode
-    summonerLevel: React.ReactNode
   }
 }

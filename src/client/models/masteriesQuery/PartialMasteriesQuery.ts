@@ -20,6 +20,8 @@ import { MasteriesQueryOrder } from './MasteriesQueryOrder'
 import { MasteriesQuerySort } from './MasteriesQuerySort'
 import { MasteriesQueryView } from './MasteriesQueryView'
 
+const setFromStringCodec = SetFromString.codec(',')
+
 type PartialMasteriesQuery = D.TypeOf<typeof decoder>
 
 const properties = {
@@ -61,7 +63,7 @@ function setFromStringOrAllCodec<A>(
   ord: Ord<A>,
   allValues: ReadonlySet<A>,
 ): Codec<unknown, string, ReadonlySet<A>> {
-  const setCodec = SetFromString.codec(codec, ord)
+  const setCodec = setFromStringCodec(codec, ord)
   const setEq = readonlySet.getEq(ord)
   return C.make(
     D.union(

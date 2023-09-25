@@ -2,6 +2,7 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
 import { MapId } from '../../../shared/models/api/MapId'
+import type { BannedChampionOutput } from '../../../shared/models/api/activeGame/BannedChampion'
 import { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
@@ -24,7 +25,6 @@ const participantCodec = C.struct({
   summonerName: C.string,
   profileIconId: C.number,
   championId: ChampionKey.codec,
-  bannedChampion: BannedChampion.codec,
   spell1Id: SummonerSpellKey.codec,
   spell2Id: SummonerSpellKey.codec,
   perks: C.struct({
@@ -35,6 +35,14 @@ const participantCodec = C.struct({
 })
 
 type ActiveGameDb = C.TypeOf<typeof codec>
+
+const bannedChampionsProperties: Dict<
+  `${TeamId}`,
+  Codec<unknown, NonEmptyArray<BannedChampionOutput>, NonEmptyArray<BannedChampion>>
+> = {
+  100: NonEmptyArray.codec(BannedChampion.codec),
+  200: NonEmptyArray.codec(BannedChampion.codec),
+}
 
 const participantsProperties: Dict<
   `${TeamId}`,
@@ -50,6 +58,7 @@ const codec = C.struct({
   gameStartTime: Maybe.codec(DayJsFromDate.codec),
   gameQueueConfigId: GameQueue.codec,
   isDraft: C.boolean,
+  bannedChampions: C.readonly(C.partial(bannedChampionsProperties)),
   participants: C.readonly(C.partial(participantsProperties)),
   insertedAt: DayJsFromDate.codec,
   updatedAt: DayJsFromDate.codec,

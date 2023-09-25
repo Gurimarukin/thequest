@@ -1,4 +1,4 @@
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import { lens } from 'monocle-ts'
 
@@ -20,6 +20,10 @@ import {
 
 import { ClientSecret } from '../models/discord/ClientSecret'
 
+const separator = ','
+const nonEmptyArrayFromStringDecoder = NonEmptyArrayFromString.decoder(separator)
+const arrayFromStringDecoder = ArrayFromString.decoder(separator)
+
 const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
@@ -30,6 +34,7 @@ export type Config = {
   http: HttpConfig
   db: DbConfig
   riotApi: RiotApiConfig
+  poroApi: PoroApiConfig
   jwtSecret: string
   madosayentisuto: MadosayentisutoConfig
 }
@@ -57,6 +62,12 @@ type RiotApiConfig = {
   cacheTtl: RiotApiCacheTtlConfig
 }
 
+export type PoroApiConfig = {
+  baseUrl: string
+  userAgent: string
+  cacheTtlActiveGame: MsDuration
+}
+
 export type RiotApiKeysConfig = {
   lol: string
   account: string // You need a legends of runeterra or valorant app for account-v1
@@ -79,8 +90,12 @@ export type MadosayentisutoConfig = {
 }
 
 const parse = (dict: PartialDict<string, string>): Try<Config> =>
-  parseConfig(dict)(r =>
-    seqS<Config>({
+  parseConfig(dict)(r => {
+    const infiniteCache = pipe(
+      r(Maybe.decoder(BooleanFromString.decoder))('INFINITE_CACHE'),
+      Either.map(Maybe.getOrElse(() => false)),
+    )
+    return seqS<Config>({
       isDev: pipe(
         r(Maybe.decoder(BooleanFromString.decoder))('IS_DEV'),
         Either.map(Maybe.getOrElse(() => false)),
@@ -97,7 +112,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
       }),
       http: seqS<HttpConfig>({
         port: r(NumberFromString.decoder)('HTTP_PORT'),
-        allowedOrigins: r(Maybe.decoder(NonEmptyArrayFromString.decoder(URLFromString.decoder)))(
+        allowedOrigins: r(Maybe.decoder(nonEmptyArrayFromStringDecoder(URLFromString.decoder)))(
           'HTTP_ALLOWED_ORIGINS',
         ),
       }),
@@ -112,39 +127,38 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
           lol: r(D.string)('RIOT_API_KEYS_LOL'),
           account: r(D.string)('RIOT_API_KEYS_ACCOUNT'),
         }),
-        cacheTtl: pipe(
-          r(Maybe.decoder(BooleanFromString.decoder))('INFINITE_CACHE'),
-          Either.map(
-            flow(
-              Maybe.getOrElse(() => false),
-              riotApiCacheTtl,
-            ),
-          ),
+        cacheTtl: pipe(infiniteCache, Either.map(riotApiCacheTtl)),
+      }),
+      poroApi: seqS<PoroApiConfig>({
+        baseUrl: r(D.string)('PORO_BASE_URL'),
+        userAgent: r(D.string)('PORO_USER_AGENT'),
+        cacheTtlActiveGame: pipe(
+          infiniteCache,
+          Either.map(i => (i ? infinity : MsDuration.hour(1))),
         ),
       }),
       jwtSecret: r(D.string)('JWT_SECRET'),
       madosayentisuto: seqS<MadosayentisutoConfig>({
-        whitelistedIps: r(ArrayFromString.decoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
+        whitelistedIps: r(arrayFromStringDecoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
         token: r(D.string)('MADOSAYENTISUTO_TOKEN'),
       }),
-    }),
-  )
+    })
+  })
 
-const riotApiCacheTtl = (infiniteCache: boolean): RiotApiCacheTtlConfig => {
-  const infinity = MsDuration.days(99 * 365)
-  return {
-    ddragonLatestVersion: infiniteCache ? infinity : MsDuration.hour(1),
+const infinity = MsDuration.days(99 * 365)
 
-    activeGame: infiniteCache ? infinity : MsDuration.minutes(3),
-    activeGameLoading: infiniteCache ? infinity : MsDuration.seconds(5),
-    challenges: infiniteCache ? infinity : MsDuration.seconds(3),
-    leagueEntries: infiniteCache ? infinity : MsDuration.minutes(3),
-    masteries: infiniteCache ? infinity : MsDuration.minutes(3),
-    summoner: infiniteCache ? infinity : MsDuration.minutes(9),
+const riotApiCacheTtl = (infiniteCache: boolean): RiotApiCacheTtlConfig => ({
+  ddragonLatestVersion: infiniteCache ? infinity : MsDuration.hour(1),
 
-    account: infinity,
-  }
-}
+  activeGame: infiniteCache ? infinity : MsDuration.minutes(3),
+  activeGameLoading: infiniteCache ? infinity : MsDuration.seconds(5),
+  challenges: infiniteCache ? infinity : MsDuration.seconds(3),
+  leagueEntries: infiniteCache ? infinity : MsDuration.minutes(3),
+  masteries: infiniteCache ? infinity : MsDuration.minutes(3),
+  summoner: infiniteCache ? infinity : MsDuration.minutes(9),
+
+  account: infinity,
+})
 
 const load: IO<Config> = pipe(loadDotEnv, IO.map(parse), IO.chain(IO.fromEither))
 

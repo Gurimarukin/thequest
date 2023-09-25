@@ -1,5 +1,3 @@
-import { pipe } from 'fp-ts/function'
-
 import type { SpellName } from '../../shared/models/api/SpellName'
 import type {
   ChampionFaction,
@@ -9,7 +7,7 @@ import type { ChampionPosition } from '../../shared/models/api/champion/Champion
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
-import { type Dict, Maybe } from '../../shared/utils/fp'
+import { type Dict } from '../../shared/utils/fp'
 
 import type { Translation } from '../models/Translation'
 import { TranslationUtils } from '../utils/TranslationUtils'
@@ -84,7 +82,7 @@ const rank: Dict<LeagueRank, string> = {
 
 const spell: Dict<SpellName, string> = {
   I: 'P',
-  Q: 'A',
+  Q: 'Q',
   W: 'Z',
   E: 'E',
   R: 'R',
@@ -104,22 +102,7 @@ const wikiaStatsBalance: Dict<WikiaStatsBalanceKey, string> = {
 
 const frFRTranslation: Translation = {
   activeGame: {
-    bannedBy: (summonerName, championName, pickTurn, highlightClassName) => (
-      <>
-        <span>banni par</span>
-        <span className={highlightClassName}>
-          {summonerName}
-          {pipe(
-            championName,
-            Maybe.fold(
-              () => null,
-              name => ` (${name})`,
-            ),
-          )}
-        </span>
-        <span>au tour {pickTurn}</span>
-      </>
-    ),
+    bannedAtTurn: pickTurn => `Banni au tour ${pickTurn}`,
     empty: 'aucun',
     gameStartedAt: date =>
       `Partie commencée à ${date.toLocaleTimeString(locale)} (${date.toLocaleDateString(locale)})`,
@@ -133,6 +116,8 @@ const frFRTranslation: Translation = {
     ),
     masteryScoreAndPoints: 'Score — Points de maîtrise',
     otpIndex: otpIndex => `Indice d’OTP : ${otpIndex.toLocaleString(locale)}`,
+    mainRoles: 'Rôles principaux',
+    aramChanges: 'Équilibrage ARAM',
   },
   aram: {
     category: {
@@ -310,6 +295,7 @@ const frFRTranslation: Translation = {
         `${leagueTier[tier]}${rank_ !== undefined ? ` ${rank[rank_]}` : ''}`,
       unranked: 'Non classé',
       unrankedIconAlt: 'Icône non classé',
+      previousSplit: 'Split précédent :',
     },
     masteryIconAlt: level => `Icône niveau ${level}`,
     nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,
@@ -327,6 +313,8 @@ const frFRTranslation: Translation = {
     searchChamion: 'Rechercher champion',
     spellIconAlt: name => `Icône du sort ${name}`,
     spellKey: key => `<Sort ${key}>`,
+    level: level => `niveau ${level.toLocaleString(locale)}`,
+    summonerLevel: 'Niveau d’invocateur',
     summonerIconAlt: name => `Icône de ${name}`,
   },
   form: {
@@ -465,7 +453,6 @@ const frFRTranslation: Translation = {
           maximumFractionDigits: 2,
         })} ${pluralUnit('minute')(minutes)})`,
     },
-    level: level => `niveau ${level.toLocaleString(locale)}`,
     masteryScore: 'Score de maîtrise :',
     masteryPoints: 'Points de maîtrise :',
     otpIndex: 'Indice d’OTP :',
@@ -491,7 +478,6 @@ const frFRTranslation: Translation = {
       </>
     ),
     percentsProgression: percents => `Progression : ${percents.toLocaleString(locale)} %`,
-    summonerLevel: 'Niveau d’invocateur',
   },
 }
 

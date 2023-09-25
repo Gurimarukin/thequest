@@ -39,12 +39,14 @@ const fromRiot: (e: RiotLeagueEntry) => LeagueEntry = identity
 
 const isRanked = (e: LeagueEntry): e is LeagueEntryRanked => e.type === 'ranked'
 
-const queueTypeEquals = (queueType: string): Refinement<LeagueEntry, LeagueEntryRanked> =>
+const isRankedAndQueueTypeEquals = (
+  queueType: string,
+): Refinement<LeagueEntry, LeagueEntryRanked> =>
   pipe(
     isRanked,
     refinement.compose((e: LeagueEntryRanked): e is LeagueEntryRanked => e.queueType === queueType),
   )
 
-const LeagueEntry = { fromRiot, queueTypeEquals }
+const LeagueEntry = { fromRiot, isRankedAndQueueTypeEquals }
 
-export { LeagueEntry }
+export { LeagueEntry, LeagueEntryRanked }

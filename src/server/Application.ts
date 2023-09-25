@@ -28,6 +28,7 @@ export const Application = ({
   healthCheckService,
   leagueEntryService,
   masteriesService,
+  poroActiveGameService,
   staticDataService,
   summonerService,
   userService,
@@ -39,10 +40,12 @@ export const Application = ({
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(staticDataService)
   const summonerController = SummonerController(
+    Logger,
     activeGameService,
     challengesService,
     leagueEntryService,
     masteriesService,
+    poroActiveGameService,
     summonerService,
     staticDataService,
     userService,
