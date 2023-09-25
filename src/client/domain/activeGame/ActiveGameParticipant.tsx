@@ -177,10 +177,25 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       gestureProps={gestureProps}
       className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
     >
+      {/* tags */}
+
+      {List.isEmpty(tags) ? null : (
+        <Cell gridRowOffset={1} gridColStart={1} className="col-span-8 text-xs">
+          <ul className={cx('flex items-center gap-1 px-1 pb-1', ['flex-row-reverse', reverse])}>
+            {tags.map((tag, i) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <ActiveGameTag key={i} {...tag} />
+            ))}
+          </ul>
+        </Cell>
+      )}
+
+      {/* line 1 */}
+
       <Cell
         gridColStart={1}
         className={cx(
-          'col-span-8 row-span-2 bg-current shadow-even shadow-black',
+          'col-span-8 bg-current shadow-even shadow-black',
           reverse ? 'rounded-l-3xl' : 'rounded-r-3xl',
         )}
       />
@@ -188,9 +203,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         gridColStart={1}
         className={
-          highlight
-            ? cx('row-span-2 border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4')
-            : undefined
+          highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
         }
       />
       <Cell gridColStart={2} className={padding}>
@@ -489,24 +502,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         />
       </Cell>
 
-      {/* tags */}
-      {List.isEmpty(tags) ? null : (
-        <Cell gridRowOffset={1} gridColStart={1} className="col-span-8 text-xs">
-          <ul
-            className={cx(
-              'flex items-center justify-end gap-1 pb-2 pt-1',
-              reverse ? 'flex-row-reverse pl-4 pr-2' : 'pl-2 pr-4',
-            )}
-          >
-            {tags.map((tag, i) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <ActiveGameTag key={i} {...tag} />
-            ))}
-          </ul>
-        </Cell>
-      )}
-
       {/* spacer */}
+
       <Cell gridRowOffset={2} gridColStart={1} className={shouldWrap ? 'h-1' : 'h-4'} />
     </Li>
   )
