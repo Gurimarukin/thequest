@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import { useRef } from 'react'
 
 import type { LeagueMiniSeriesProgress } from '../../shared/models/api/league/LeagueMiniSeriesProgress'
+import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { LeagueView } from '../../shared/models/api/league/LeagueView'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
@@ -10,10 +11,9 @@ import { Maybe } from '../../shared/utils/fp'
 import { useTranslation } from '../contexts/TranslationContext'
 import { CheckMarkSharp, CloseFilled } from '../imgs/svgs/icons'
 import { cx } from '../utils/cx'
+import type { LeagueImgProps } from './LeagueImg'
+import { LeagueImg } from './LeagueImg'
 import { Tooltip } from './tooltip/Tooltip'
-
-const miniCrestIcon = (tier: 'unranked' | LeagueTier): string =>
-  `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/${tier.toLowerCase()}.svg`
 
 type Props = {
   /**
@@ -32,8 +32,8 @@ type Props = {
 }
 
 type CurrentSplitAttrs = {
-  src: string
-  alt: string
+  tier: LeagueImgProps['tier']
+  rank: LeagueRank
   description: React.ReactNode
   subDescription?: React.ReactNode
   currentSplitTooltip?: React.ReactNode
@@ -54,22 +54,25 @@ export const League: React.FC<Props> = ({
   const currentSplitIconRef = useRef<HTMLSpanElement>(null)
   const previousSplitRef = useRef<HTMLImageElement>(null)
 
-  const { src, alt, description, subDescription, currentSplitTooltip } = pipe(
+  const { tier, rank, description, subDescription, currentSplitTooltip } = pipe(
     league.currentSplit,
     Maybe.fold(
       (): CurrentSplitAttrs => ({
-        src: miniCrestIcon('unranked'),
-        alt: t.league.unrankedIconAlt,
+        tier: 'unranked',
+        rank: 'I',
         description: t.league.unranked,
         subDescription: undefined,
       }),
-      ({ tier, rank, leaguePoints, wins, losses, miniSeriesProgress }) => {
-        const tierRank = t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)
+
+      ({ leaguePoints, wins, losses, miniSeriesProgress, ...s }): CurrentSplitAttrs => {
+        const tierRank = t.league.tierRank(
+          s.tier,
+          LeagueTier.isRegularTier(s.tier) ? s.rank : undefined,
+        )
         const games = wins + losses
         return {
-          src: miniCrestIcon(tier),
-          alt: t.league.tierRankAlt(tier, LeagueTier.isRegularTier(tier) ? rank : undefined),
-          tierRank,
+          tier: s.tier,
+          rank: s.rank,
           description: (
             <>
               <span>{tierRank}</span>
@@ -114,25 +117,17 @@ export const League: React.FC<Props> = ({
         ref={currentSplitRef}
         className={cx('-mb-1 grid grid-cols-[auto_auto] items-center gap-2', className)}
       >
-        <span
+        <LeagueImg
           ref={currentSplitIconRef}
+          tier={tier}
+          rank={rank}
+          draggable={draggable}
           className={cx(
-            'flex justify-center',
-            ['h-12 w-12', variant === 'base'],
-            ['h-8 w-8', variant === 'small'],
+            ['h-14 w-14', variant === 'base'],
+            ['h-10 w-10', variant === 'small'],
             ['col-start-2', reverse],
           )}
-        >
-          <img
-            src={src}
-            alt={alt}
-            draggable={draggable}
-            className={cx(
-              'h-full object-contain',
-              Maybe.isNone(league.currentSplit) ? 'w-[56.25%]' : 'w-full',
-            )}
-          />
-        </span>
+        />
         <div
           className={cx(
             'flex flex-col text-sm',
@@ -152,19 +147,17 @@ export const League: React.FC<Props> = ({
               league.previousSplit,
               Maybe.fold(
                 () => null,
-                ({ tier, rank }) => (
+                s => (
                   <span
                     ref={previousSplitRef}
                     className={cx('flex items-center text-grey-400', reverse ? 'mr-2' : 'ml-2')}
                   >
                     (
-                    <img
-                      src={miniCrestIcon(tier)}
-                      alt={t.league.tierRankAlt(
-                        tier,
-                        LeagueTier.isRegularTier(tier) ? rank : undefined,
-                      )}
-                      className="h-4"
+                    <LeagueImg
+                      tier={s.tier}
+                      rank={s.rank}
+                      draggable={draggable}
+                      className="h-5 w-5"
                     />
                     )
                   </span>
@@ -193,11 +186,11 @@ export const League: React.FC<Props> = ({
           league.previousSplit,
           Maybe.fold(
             () => null,
-            ({ tier, rank }) => (
+            s => (
               <span className="col-span-2 flex items-center gap-1.5 whitespace-nowrap">
                 <span>{t.league.previousSplit}</span>
                 <span className="font-bold">
-                  {t.league.tierRank(tier, LeagueTier.isRegularTier(tier) ? rank : undefined)}
+                  {t.league.tierRank(s.tier, LeagueTier.isRegularTier(s.tier) ? s.rank : undefined)}
                 </span>
               </span>
             ),
