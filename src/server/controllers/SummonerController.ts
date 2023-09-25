@@ -323,40 +323,30 @@ const SummonerController = (
   ): (poroGame: PoroActiveGame) => Future<SummonerActiveGameView> {
     return poroGame =>
       pipe(
-        staticDataService.wikiaChampions,
-        Future.chain(champions =>
-          pipe(
-            poroGame.participants,
-            PartialDict.traverse(Future.ApplicativePar)(
-              NonEmptyArray.traverse(Future.ApplicativePar)(
-                enrichParticipantPoro(
-                  summoner.platform,
-                  maybeUser,
-                  pipe(DictUtils.values(game.participants), List.flatten),
-                  game.insertedAt,
-                ),
-              ),
-            ),
-            Future.map<
-              PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
-              SummonerActiveGameView
-            >(
-              flow(
-                PartialDict.map(sortParticipants(champions)(game.mapId)),
-                (sorted): SummonerActiveGameView => ({
-                  summoner,
-                  game: {
-                    gameStartTime: game.gameStartTime,
-                    mapId: game.mapId,
-                    gameQueueConfigId: game.gameQueueConfigId,
-                    isDraft: game.isDraft,
-                    participants: sorted,
-                  },
-                }),
-              ),
+        poroGame.participants,
+        PartialDict.traverse(Future.ApplicativePar)(
+          NonEmptyArray.traverse(Future.ApplicativePar)(
+            enrichParticipantPoro(
+              summoner.platform,
+              maybeUser,
+              pipe(DictUtils.values(game.participants), List.flatten),
+              game.insertedAt,
             ),
           ),
         ),
+        Future.map<
+          PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
+          SummonerActiveGameView
+        >(participants => ({
+          summoner,
+          game: {
+            gameStartTime: game.gameStartTime,
+            mapId: game.mapId,
+            gameQueueConfigId: game.gameQueueConfigId,
+            isDraft: game.isDraft,
+            participants,
+          },
+        })),
       )
   }
 
