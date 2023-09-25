@@ -1,8 +1,8 @@
 import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 
-import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
+import type { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
 import { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
@@ -20,10 +20,11 @@ import { cx } from '../../utils/cx'
 
 type Props = {
   isDraft: boolean
+  bannedChampions: ActiveGameView['bannedChampions']
   participants: ActiveGameView['participants']
 }
 
-export const ActiveGameHeader: React.FC<Props> = ({ isDraft, participants }) => {
+export const ActiveGameHeader: React.FC<Props> = ({ isDraft, bannedChampions, participants }) => {
   const { t } = useTranslation('common')
   const { championByKey } = useStaticData()
 
@@ -52,7 +53,7 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, participants }) => 
   return (
     <div className="flex flex-wrap gap-6 px-3 text-sm text-goldenrod">
       {TeamId.values.map((teamId, i) => {
-        const teamBans = participants[teamId]
+        const teamBans = bannedChampions[teamId]
         const reverse = i % 2 === 1
         return (
           <div
@@ -64,8 +65,8 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, participants }) => 
                 {teamBans !== undefined
                   ? pipe(
                       teamBans,
-                      NonEmptyArray.map(participant => (
-                        <Ban key={participant.summonerName} participant={participant} />
+                      NonEmptyArray.map(bannedChampion => (
+                        <Ban key={bannedChampion.pickTurn} bannedChampion={bannedChampion} />
                       )),
                     )
                   : null}
@@ -94,18 +95,17 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, participants }) => 
 }
 
 type BanProps = {
-  participant: ActiveGameParticipantView
+  bannedChampion: BannedChampion
 }
 
-const Ban: React.FC<BanProps> = ({ participant }) => {
+const Ban: React.FC<BanProps> = ({ bannedChampion }) => {
   const { t } = useTranslation()
   const { championByKey } = useStaticData()
 
   const ref = useRef<HTMLLIElement>(null)
 
-  const pickedChampion = championByKey(participant.championId)
   const [children, tooltip] = pipe(
-    participant.bannedChampion.championId,
+    bannedChampion.championId,
     Maybe.fold(
       () =>
         Tuple.of(
@@ -147,17 +147,9 @@ const Ban: React.FC<BanProps> = ({ participant }) => {
   return (
     <>
       {children}
-      <Tooltip hoverRef={ref} className="flex flex-col items-center gap-1 !text-2xs">
-        <span className="text-xs font-bold">{tooltip}</span>
-        {t.activeGame.bannedBy(
-          participant.summonerName,
-          pipe(
-            pickedChampion,
-            Maybe.map(c => c.name),
-          ),
-          participant.bannedChampion.pickTurn,
-          'text-xs',
-        )}
+      <Tooltip hoverRef={ref} className="flex flex-col items-center gap-1">
+        <span className="font-bold">{tooltip}</span>
+        <span className="text-xs">{t.activeGame.bannedAtTurn(bannedChampion.pickTurn)}</span>
       </Tooltip>
     </>
   )

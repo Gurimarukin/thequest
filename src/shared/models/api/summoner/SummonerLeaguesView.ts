@@ -1,14 +1,13 @@
 import * as C from 'io-ts/Codec'
 
 import { DictUtils } from '../../../utils/DictUtils'
-import { Maybe } from '../../../utils/fp'
-import { LeagueEntryView } from '../league/LeagueEntryView'
+import { LeagueView } from '../league/LeagueView'
 
 type SummonerLeaguesView = C.TypeOf<typeof codec>
 
 const properties = {
-  soloDuo: Maybe.codec(LeagueEntryView.codec),
-  flex: Maybe.codec(LeagueEntryView.codec),
+  soloDuo: LeagueView.codec,
+  flex: LeagueView.codec,
 }
 
 const codec = C.struct(properties)

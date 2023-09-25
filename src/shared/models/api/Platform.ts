@@ -2,6 +2,7 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
+import type { Encoder } from 'io-ts/lib/Encoder'
 
 import { StringUtils } from '../../utils/StringUtils'
 import { createEnum } from '../../utils/createEnum'
@@ -18,13 +19,15 @@ const decoderLower: Decoder<unknown, PlatformLower> = D.literal(
   ...(e.values.map(StringUtils.toLowerCase) as any),
 )
 
+const encoderLower: Encoder<PlatformLower, PlatformOrLower> = { encode: StringUtils.toLowerCase }
+
 const orLowerCaseCodec: Codec<unknown, PlatformLower, PlatformOrLower> = C.make(
   D.union(e.decoder, decoderLower),
-  { encode: StringUtils.toLowerCase },
+  encoderLower,
 )
 
 const defaultPlatform: Platform = 'EUW'
 
-const Platform = { ...e, orLowerCaseCodec, defaultPlatform }
+const Platform = { ...e, encoderLower, orLowerCaseCodec, defaultPlatform }
 
 export { Platform, PlatformLower, PlatformOrLower }

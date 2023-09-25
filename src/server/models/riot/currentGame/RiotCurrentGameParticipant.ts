@@ -1,6 +1,5 @@
 import * as D from 'io-ts/Decoder'
 
-import type { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import { RuneId } from '../../../../shared/models/api/perk/RuneId'
@@ -36,9 +35,7 @@ const rawDecoder = D.struct({
   gameCustomizationObjects: List.decoder(rawGameCustomizationObjectDecoder), // List of Game Customizations
 })
 
-type RiotCurrentGameParticipant = Omit<RawCurrentGameParticipant, 'teamId'> & {
-  bannedChampion: BannedChampion
-}
+type RiotCurrentGameParticipant = Omit<RawCurrentGameParticipant, 'teamId'>
 
 const RiotCurrentGameParticipant = { rawDecoder }
 
