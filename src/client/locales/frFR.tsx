@@ -135,7 +135,7 @@ const frFRTranslation: Translation = {
           <>
             Champions avec autant de buffs que de nerfs (ou avec des modifications de compétences
             pour lesquelles il est difficile de déterminer automatiquement si c’est un buff ou un
-            nerf <EmojiUpsideDown />)
+            nerf  <EmojiUpsideDown />)
           </>
         ),
         balanced: 'Champions avec aucun équilibrage',

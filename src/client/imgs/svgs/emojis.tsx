@@ -1,7 +1,7 @@
 import { cx } from '../../utils/cx'
 import type { SVGIcon } from './SVGIcon'
 
-const baseClassName = 'h-[1.5em] inline'
+const baseClassName = 'h-[1em] inline'
 
 export const EmojiFlagFr: SVGIcon = ({ className }) => (
   <svg
@@ -71,7 +71,7 @@ export const EmojiFlagGb: SVGIcon = ({ className }) => (
 export const EmojiUpsideDown: SVGIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 72 72"
+    viewBox="12 12 48 48"
     className={cx(baseClassName, className)}
   >
     <circle cx="36" cy="36" r="23" fill="#FCEA2B" />

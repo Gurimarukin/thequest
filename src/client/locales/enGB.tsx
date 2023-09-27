@@ -134,7 +134,7 @@ const enGBTranslation: Translation = {
         other: (
           <>
             Champions with as many buffs as nerfs (or with skill modifications for which it’s
-            difficult to automatically determine whether it’s a buff or a nerf <EmojiUpsideDown />)
+            difficult to automatically determine whether it’s a buff or a nerf  <EmojiUpsideDown />)
           </>
         ),
         balanced: 'Champions with no balance changes',

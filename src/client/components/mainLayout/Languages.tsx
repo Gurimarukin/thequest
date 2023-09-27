@@ -12,7 +12,7 @@ import { ClickOutside } from '../ClickOutside'
 import { Menu } from './Menu'
 
 export const Languages: React.FC = () => {
-  const [languagesIsVisible, setLanguagesIsVisible] = useState(true)
+  const [languagesIsVisible, setLanguagesIsVisible] = useState(false)
   const toggleLanguages = useCallback(() => setLanguagesIsVisible(v => !v), [])
   const hideLanguages = useCallback(() => setLanguagesIsVisible(false), [])
 
@@ -57,12 +57,12 @@ const LangButton: React.FC<LangButtonProps> = ({ l }) => {
       )}
     >
       <span>{TranslationUtils.labels.lang[l]}</span>
-      <span>{langEmoji[l]}</span>
+      <span className="flex">{langEmoji[l]}</span>
     </button>
   )
 }
 
 const langEmoji: Dict<Lang, React.ReactNode> = {
-  en_GB: <EmojiFlagGb />,
-  fr_FR: <EmojiFlagFr />,
+  en_GB: <EmojiFlagGb className="!h-6" />,
+  fr_FR: <EmojiFlagFr className="!h-6" />,
 }

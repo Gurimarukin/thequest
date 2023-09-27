@@ -1,3 +1,6 @@
+- fonts: champion level is cropped top
+- active game force refresh but with delay
+- active game refresh delay : parallel
 - url encode summoner name (client and server side)
 - challenges page + detect challenges
 - forget about Discord Riot Connection, create BO and link by hand
