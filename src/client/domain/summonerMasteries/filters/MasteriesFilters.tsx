@@ -199,11 +199,11 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             onMouseEnter={handleMasteriesMouseEnter}
             tooltipPlacement="top"
             iconClassName="px-[5px] pt-1 pb-0.5"
-            className="relative z-20"
+            className="relative z-30"
           />
           <ul
             className={cx(
-              'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
+              'absolute z-20 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
               ['hidden', !levelsMenuIsVisible],
             )}
           >
