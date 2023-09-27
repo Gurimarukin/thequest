@@ -5,7 +5,7 @@ import type { Dict } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
 import { EmojiFlagFr, EmojiFlagGb } from '../../imgs/svgs/emojis'
-import { LanguageFilled } from '../../imgs/svgs/icons'
+import { LanguageOutline } from '../../imgs/svgs/icons'
 import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 import { ClickOutside } from '../ClickOutside'
@@ -20,7 +20,7 @@ export const Languages: React.FC = () => {
     <ClickOutside onClickOutside={hideLanguages}>
       <div className="relative flex items-center self-stretch py-2">
         <button type="button" onClick={toggleLanguages}>
-          <LanguageFilled className="h-5" />
+          <LanguageOutline className="h-5" />
         </button>
 
         {languagesIsVisible ? (
