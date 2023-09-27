@@ -124,7 +124,6 @@ const enGBTranslation: Translation = {
     ),
     mainRoles: 'Main roles:',
     currentRole: 'Current role:',
-    aramChanges: 'ARAM changes',
   },
   aram: {
     category: {

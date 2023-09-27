@@ -37,7 +37,6 @@ export type Translation = {
     otpIndex: (otpIndex: number, highlightClassName?: string) => React.ReactNode
     mainRoles: React.ReactNode
     currentRole: React.ReactNode
-    aramChanges: React.ReactNode
   }
   aram: {
     category: {

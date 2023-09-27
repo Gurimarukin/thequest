@@ -278,7 +278,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               </a>
             </div>
           </div>
-          <div className={cx('flex items-start gap-2', ['flex-row-reverse', !reverse])}>
+          <div className={cx('flex items-center gap-2', ['flex-row-reverse', !reverse])}>
             <img
               src={assets.summonerIcon(profileIconId)}
               alt={t.common.summonerIconAlt(summonerName)}
@@ -459,9 +459,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   hoverRef={championWinRateRef}
                   className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
                 >
-                  <span className="justify-self-end text-green">{wins}</span>
+                  <span className="justify-self-end font-semibold text-green">{wins}</span>
                   <span>{t.common.league.wins(wins)}</span>
-                  <span className="justify-self-end text-red">{losses}</span>
+                  <span className="justify-self-end font-semibold text-red">{losses}</span>
                   <span>{t.common.league.losses(losses)}</span>
                 </Tooltip>
               </Cell>
@@ -517,7 +517,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
               </div>
               <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
-                <div className="mb-1 mt-0.5 text-center font-bold">{t.activeGame.aramChanges}</div>
                 <AramTooltip aram={c.aram} />
               </Tooltip>
             </Cell>

@@ -124,7 +124,6 @@ const frFRTranslation: Translation = {
     ),
     mainRoles: 'Rôles principaux :',
     currentRole: 'Rôle actuel :',
-    aramChanges: 'Équilibrage ARAM',
   },
   aram: {
     category: {
