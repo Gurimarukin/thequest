@@ -75,6 +75,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                 )}
                 parser={anyPlatformSummonerNameExact(platform, name)}
                 tooltip={`${name} — ${platform}`}
+                className="py-1.5"
               >
                 <img
                   src={staticData.assets.summonerIcon(profileIconId)}

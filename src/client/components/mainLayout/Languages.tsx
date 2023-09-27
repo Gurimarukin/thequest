@@ -52,7 +52,7 @@ const LangButton: React.FC<LangButtonProps> = ({ l }) => {
       disabled={isSelected}
       onClick={handleClick}
       className={cx(
-        'grid grid-cols-[1fr_auto] gap-3.5 border-b py-0.5 text-start',
+        'grid grid-cols-[1fr_auto] gap-3.5 border-b text-start',
         isSelected ? 'border-goldenrod-bis' : 'border-transparent',
       )}
     >

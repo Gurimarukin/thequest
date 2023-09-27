@@ -33,8 +33,8 @@ export function HighlightLink<A>({
         {...props}
         disabled={matches}
         className={cx(
-          'flex border-b py-1.5',
-          matches ? 'border-goldenrod-bis' : 'border-transparent',
+          'flex border-y border-t-transparent font-medium',
+          matches ? 'border-b-goldenrod-bis' : 'border-b-transparent',
           className,
         )}
       />
