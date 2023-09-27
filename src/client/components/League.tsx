@@ -118,7 +118,12 @@ export const League: React.FC<Props> = ({
     <>
       <div
         ref={currentSplitRef}
-        className={cx('-mb-1 grid grid-cols-[auto_auto] items-center gap-2', className)}
+        className={cx(
+          '-mb-1 grid grid-cols-[auto_auto] items-center',
+          ['gap-3', variant === 'base'],
+          ['gap-2', variant === 'small'],
+          className,
+        )}
       >
         <LeagueImg
           ref={currentSplitIconRef}
@@ -127,16 +132,18 @@ export const League: React.FC<Props> = ({
           draggable={draggable}
           className={cx(
             ['h-16 w-16', variant === 'base'],
-            ['h-10 w-10', variant === 'small'],
+            ['h-9 w-9', variant === 'small'],
             ['col-start-2', reverse],
           )}
         />
         <div
           className={cx(
             'flex text-sm',
+            ['col-start-1 row-start-1', reverse],
             isSomeCurrentSplit
-              ? cx('flex-col', reverse ? 'col-start-1 row-start-1 items-end' : 'items-start')
-              : 'items-center gap-2',
+              ? cx('flex-col', reverse ? 'items-end' : 'items-start')
+              : cx('items-center gap-2', ['flex-row-reverse', reverse]),
+            ['leading-4', variant === 'small'],
           )}
         >
           <span

@@ -31,10 +31,12 @@ export type Translation = {
     totals: (
       totalMasteryLevel: number,
       translatedTotalMasteryPoints: React.ReactNode,
+      highlightClassName?: string,
     ) => React.ReactNode
     masteryScoreAndPoints: React.ReactNode
-    otpIndex: (otpIndex: number) => React.ReactNode
+    otpIndex: (otpIndex: number, highlightClassName?: string) => React.ReactNode
     mainRoles: React.ReactNode
+    currentRole: React.ReactNode
     aramChanges: React.ReactNode
   }
   aram: {

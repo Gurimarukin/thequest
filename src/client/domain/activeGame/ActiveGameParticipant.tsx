@@ -3,6 +3,7 @@ import type { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/sr
 import { pipe } from 'fp-ts/function'
 import {
   Children,
+  Fragment,
   cloneElement,
   createElement,
   forwardRef,
@@ -197,8 +198,17 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     >
       {/* tags */}
       {List.isEmpty(tags) ? null : (
-        <Cell gridRowOffset={1} gridColStart={1} className="col-span-8 text-xs">
-          <ul className={cx('flex items-center gap-1 px-2 pb-1', ['flex-row-reverse', reverse])}>
+        <Cell
+          gridRowOffset={1}
+          gridColStart={1}
+          className={cx('text-xs', reverse ? 'col-span-9' : 'col-span-8')}
+        >
+          <ul
+            className={cx('flex items-center justify-end gap-1 px-2 pb-1', [
+              'flex-row-reverse',
+              reverse,
+            ])}
+          >
             {tags.map((tag, i) => (
               // eslint-disable-next-line react/no-array-index-key
               <ActiveGameTag key={i} {...tag} />
@@ -242,13 +252,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 () => null,
                 id => (
                   <div
-                    className={cx('flex items-center gap-1 text-xs text-white', padding, [
-                      'flex-row-reverse',
-                      !reverse,
-                    ])}
+                    className={cx(
+                      'flex items-center gap-1 text-xs font-semibold text-white',
+                      padding,
+                      ['flex-row-reverse', !reverse],
+                    )}
                   >
                     <PeopleSharp className="h-3" />
-                    <span>{id}</span>
+                    <span className="mt-0.5">{id}</span>
                   </div>
                 ),
               ),
@@ -261,7 +272,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 })}
                 target="_blank"
                 rel="noreferrer"
-                className="whitespace-nowrap text-lg leading-6 text-goldenrod"
+                className="whitespace-nowrap text-lg font-semibold leading-6 text-goldenrod"
               >
                 {summonerName}
               </a>
@@ -276,7 +287,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             />
             <div
               className={cx(
-                'flex flex-col gap-0.5 text-sm leading-4',
+                'flex flex-col text-sm leading-3',
                 reverse ? 'items-start' : 'items-end',
               )}
             >
@@ -287,7 +298,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   lvl => (
                     <>
                       <span ref={summonerLevelRef} className="text-grey-400">
-                        {t.common.level(lvl)}
+                        {t.common.level(lvl, 'font-semibold')}
                       </span>
                       <Tooltip hoverRef={summonerLevelRef}>{t.common.summonerLevel}</Tooltip>
                     </>
@@ -299,9 +310,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 Maybe.fold(
                   () => null,
                   m => (
-                    <div>
+                    <div className="mt-[5px]">
                       <span className="flex gap-1.5">
-                        <span ref={percentsRef}>
+                        <span ref={percentsRef} className="font-semibold">
                           {t.common.percents(round(m.questPercents, 1))}
                         </span>
                         <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
@@ -312,6 +323,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                           {t.activeGame.totals(
                             m.totalMasteryLevel,
                             TranslationUtils.numberUnit(t.common)(m.totalMasteryPoints),
+                            'font-semibold',
                           )}
                         </span>
                         <Tooltip
@@ -319,7 +331,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                           className="flex flex-col items-center gap-2"
                         >
                           <span>{t.activeGame.masteryScoreAndPoints}</span>
-                          <span>{t.activeGame.otpIndex(m.otpIndex)}</span>
+                          <span>{t.activeGame.otpIndex(m.otpIndex, 'font-semibold')}</span>
                         </Tooltip>
                       </span>
                     </div>
@@ -328,20 +340,52 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               )}
               {List.isEmpty(mainRoles) ? null : (
                 <>
-                  <ul ref={mainRolesRef} className="flex gap-1">
-                    {mainRoles.map(r => (
-                      <li key={r}>
-                        <ChampionPositionImg
-                          position={r}
-                          className={cx('w-4', [
-                            'text-white',
-                            pipe(role, Maybe.elem(ChampionPosition.Eq)(r)),
-                          ])}
-                        />
-                      </li>
-                    ))}
+                  <ul ref={mainRolesRef} className="mt-[3px] flex items-start gap-1">
+                    {mainRoles.map(r => {
+                      const isCurrent = pipe(role, Maybe.elem(ChampionPosition.Eq)(r))
+                      return (
+                        <li key={r} className="relative flex flex-col items-center">
+                          <ChampionPositionImg
+                            position={r}
+                            className={cx('w-4', ['text-cyan-200', isCurrent])}
+                          />
+                          {isCurrent ? (
+                            <span className="absolute -bottom-1 h-0.5 w-0.5 rounded-1/2 bg-cyan-200" />
+                          ) : null}
+                        </li>
+                      )
+                    })}
                   </ul>
-                  <Tooltip hoverRef={mainRolesRef}>{t.activeGame.mainRoles}</Tooltip>
+                  <Tooltip hoverRef={mainRolesRef}>
+                    <div>
+                      {t.activeGame.mainRoles}{' '}
+                      {mainRoles.map((r, i) => {
+                        const isCurrent = pipe(role, Maybe.elem(ChampionPosition.Eq)(r))
+                        return (
+                          <Fragment key={r}>
+                            <span className={cx('font-semibold', ['text-cyan-200', isCurrent])}>
+                              {t.common.labels.position[r]}
+                            </span>
+                            {i !== mainRoles.length - 1 ? ', ' : null}
+                          </Fragment>
+                        )
+                      })}
+                    </div>
+                    {pipe(
+                      role,
+                      Maybe.fold(
+                        () => null,
+                        r => (
+                          <div>
+                            {t.activeGame.currentRole}{' '}
+                            <span className="font-semibold text-cyan-200">
+                              {t.common.labels.position[r]}
+                            </span>
+                          </div>
+                        ),
+                      ),
+                    )}
+                  </Tooltip>
                 </>
               )}
             </div>
@@ -356,7 +400,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             <Cell
               gridColStart={3}
               className={cx(
-                'flex flex-col justify-center gap-2.5',
+                'flex flex-col justify-center gap-3',
                 reverse ? 'items-end' : 'items-start',
                 padding,
               )}
@@ -376,6 +420,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 league={flex}
                 reverse={reverse}
                 tooltipShouldHide={tooltipShouldHide}
+                text-cyan-200={true}
                 draggable={false}
               />
             </Cell>
@@ -399,12 +444,12 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   className={cx('flex flex-col', reverse ? 'items-start' : 'items-end')}
                 >
                   <div className="text-grey-400">
-                    <span className="text-green">{t.common.number(kills)}</span> /{' '}
-                    <span className="text-red">{t.common.number(deaths)}</span> /{' '}
-                    <span className="text-goldenrod">{t.common.number(assists)}</span>
+                    <span className="font-semibold text-green">{t.common.number(kills)}</span> /{' '}
+                    <span className="font-semibold text-red">{t.common.number(deaths)}</span> /{' '}
+                    <span className="font-semibold text-goldenrod">{t.common.number(assists)}</span>
                   </div>
                   <div className="flex gap-1">
-                    <span>{t.common.percents(percents)}</span>
+                    <span className="font-semibold">{t.common.percents(percents)}</span>
                     <span className="text-grey-400">
                       {t.common.number(played, { withParenthesis: true })}
                     </span>
@@ -450,7 +495,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   ) : (
                     <div ref={championRef} className="flex flex-col items-center gap-px">
                       <ChampionMasterySquare tooltipHoverRef={championRef} {...props} />
-                      <span>{t.common.numberK(round(props.championPoints / 1000, 1))}</span>
+                      <span className="font-medium">
+                        {t.common.numberK(round(props.championPoints / 1000, 1))}
+                      </span>
                     </div>
                   )}
                 </>
@@ -480,7 +527,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         type={animated.ul}
         gridColStart={7}
-        className={cx('flex flex-col items-center justify-between py-[13px]', padding)}
+        className={cx('flex flex-col items-center justify-center gap-2', padding)}
       >
         <li className="h-7 w-7">
           {pipe(

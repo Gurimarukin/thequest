@@ -12,6 +12,7 @@ module.exports = {
       transparent: 'transparent',
       white: 'white',
 
+      'cyan-200': colors.cyan[200],
       goldenrod: 'goldenrod',
       'goldenrod-bis': '#b58703',
       green: colors.green[600],

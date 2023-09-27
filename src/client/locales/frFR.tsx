@@ -110,14 +110,20 @@ const frFRTranslation: Translation = {
     loading: 'chargement',
     notInGame: 'pas en partie.',
     theQuestProgression: 'Progression de La Quête',
-    totals: (totalMasteryLevel, translatedTotalMasteryPoints) => (
+    totals: (totalMasteryLevel, translatedTotalMasteryPoints, highlightClassName) => (
       <>
-        ({totalMasteryLevel.toLocaleString(locale)} — {translatedTotalMasteryPoints})
+        (<span className={highlightClassName}>{totalMasteryLevel.toLocaleString(locale)}</span> —{' '}
+        <span className={highlightClassName}>{translatedTotalMasteryPoints}</span>)
       </>
     ),
     masteryScoreAndPoints: 'Score — Points de maîtrise',
-    otpIndex: otpIndex => `Indice d’OTP : ${otpIndex.toLocaleString(locale)}`,
-    mainRoles: 'Rôles principaux',
+    otpIndex: (otpIndex, highlightClassName) => (
+      <>
+        Indice d’OTP : <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
+      </>
+    ),
+    mainRoles: 'Rôles principaux :',
+    currentRole: 'Rôle actuel :',
     aramChanges: 'Équilibrage ARAM',
   },
   aram: {
