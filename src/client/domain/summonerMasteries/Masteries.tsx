@@ -96,7 +96,9 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
           )),
         )}
       </div>
-      <div className="self-center">{t.nChampionsFraction(championsCount, champions.length)}</div>
+      <div className="self-center text-sm">
+        {t.nChampionsFraction(championsCount, champions.length)}
+      </div>
     </>
   )
 }
