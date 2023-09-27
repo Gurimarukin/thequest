@@ -139,7 +139,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           {/* champion level */}
           <div
             className={cx(
-              'flex overflow-hidden rounded-br-lg bg-black pb-1 pr-1 text-sm font-bold leading-2.5',
+              'flex overflow-hidden rounded-br-lg bg-black pb-[3px] pr-[5px] text-sm font-bold leading-2.5',
               ['pl-0.5 pt-0.5', centerLevel],
               championLevelNumberColor(championLevel),
             )}
@@ -226,13 +226,13 @@ const LevelSVG: React.FC<LevelSVGProps> = ({
       strokeDasharray={totalLength}
       strokeDashoffset={
         totalLength -
-        0.95 *
+        0.96 *
           levelPercents({
             championPointsSinceLastLevel,
             championPointsUntilNextLevel,
           })
       }
-      className="origin-center rotate-[-127deg]"
+      className="origin-center rotate-[-128.5deg]"
     />
   </svg>
 )
@@ -280,9 +280,9 @@ const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
     (totalTockens: number, src: string): React.ReactElement => (
       <span
         className={cx(
-          'flex h-2.5 rounded-br bg-black pl-0.5',
-          ['gap-0.5 pb-0.5 pr-0.5 pt-px', championLevel === 5],
-          ['gap-[3px] pb-px pr-[3px]', championLevel === 6],
+          '-ml-1 flex h-2.5 rounded-br bg-black',
+          ['gap-0.5 pb-0.5 pl-1 pr-0.5 pt-px', championLevel === 5],
+          ['gap-[3px] pb-px pl-[5px] pr-[3px]', championLevel === 6],
         )}
       >
         {pipe(
@@ -347,68 +347,74 @@ const Shards: React.FC<ShardsProps> = ({
   )
 
   const canRemoveShard = 1 <= shardsCount
+  const canAddShard = shardsCount < 9
 
   return (
-    <div className="group absolute bottom-0 right-0 flex items-end">
-      <span className="-mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
+    <div className="group flex items-end self-end justify-self-end area-1">
+      <span className="z-10 -mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="h-2.5 w-2.5 rotate-180" />
       </span>
-      <span
-        className={cx(
-          'flex h-3.5 w-3.5 rounded-tl-lg bg-black pl-0.5 text-sm',
-          centerShards ? 'justify-center' : 'justify-end group-hover:justify-center',
-        )}
-      >
-        <span>{shardsCount}</span>
-      </span>
-      {setShardsCount !== null ? (
+      <div className="relative flex h-3.5 w-3.5 rounded-tl-lg bg-black pl-0.5 text-sm font-medium">
+        {setShardsCount !== null ? (
+          <div
+            className={cx(
+              'absolute -right-px z-10 hidden flex-col items-end overflow-hidden group-hover:flex',
+              ['rounded-t-[5px]', canAddShard],
+              canRemoveShard ? '-bottom-[15px] rounded-b-[5px]' : 'bottom-0',
+            )}
+          >
+            <span className={cx('flex bg-black p-px pb-0.5', ['hidden', !canAddShard])}>
+              {isLoading ? (
+                <Loading className="w-3 text-goldenrod-bis" />
+              ) : (
+                <>
+                  <button
+                    ref={addButtonRef}
+                    type="button"
+                    onClick={addShardCount}
+                    className="w-3 rounded-t bg-goldenrod text-black"
+                  >
+                    <AddOutline className="w-full" />
+                  </button>
+                  <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-xs">
+                    {t.addShard}
+                  </Tooltip>
+                </>
+              )}
+            </span>
+            <span
+              className={cx('w-px bg-black', !canAddShard && canRemoveShard ? 'h-3.5' : 'h-2.5')}
+            />
+            <span className={cx('flex bg-black p-px pt-0.5', ['hidden', !canRemoveShard])}>
+              {isLoading ? (
+                <Loading className="w-3 text-goldenrod-bis" />
+              ) : (
+                <>
+                  <button
+                    ref={removeButtonRef}
+                    type="button"
+                    onClick={removeShardCount}
+                    className="w-3 rounded-b bg-goldenrod text-black"
+                  >
+                    <RemoveOutline className="w-full" />
+                  </button>
+                  <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-xs">
+                    {t.removeShard}
+                  </Tooltip>
+                </>
+              )}
+            </span>
+          </div>
+        ) : null}
         <div
           className={cx(
-            'absolute -right-px z-10 hidden flex-col items-end overflow-hidden rounded-[5px] group-hover:flex',
-            ['-bottom-4', canRemoveShard],
+            'absolute bottom-0 w-full pr-0.5 leading-2.5',
+            centerShards ? 'text-center' : 'text-end group-hover:text-center',
           )}
         >
-          <span className={cx('flex bg-black p-px pb-0.5', ['hidden', 9 <= shardsCount])}>
-            {isLoading ? (
-              <Loading className="w-3 text-goldenrod-bis" />
-            ) : (
-              <>
-                <button
-                  ref={addButtonRef}
-                  type="button"
-                  onClick={addShardCount}
-                  className="w-3 rounded-t bg-goldenrod text-black"
-                >
-                  <AddOutline className="w-full" />
-                </button>
-                <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-xs">
-                  {t.addShard}
-                </Tooltip>
-              </>
-            )}
-          </span>
-          <span className="h-3 w-px bg-black" />
-          <span className={cx('flex bg-black p-px', ['hidden', !canRemoveShard])}>
-            {isLoading ? (
-              <Loading className="w-3 text-goldenrod-bis" />
-            ) : (
-              <>
-                <button
-                  ref={removeButtonRef}
-                  type="button"
-                  onClick={removeShardCount}
-                  className="w-3 rounded-b bg-goldenrod text-black"
-                >
-                  <RemoveOutline className="w-full" />
-                </button>
-                <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-xs">
-                  {t.removeShard}
-                </Tooltip>
-              </>
-            )}
-          </span>
+          {shardsCount}
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
