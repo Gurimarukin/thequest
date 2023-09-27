@@ -122,7 +122,7 @@ export type Translation = {
     searchChamion: string
     spellIconAlt: (name: string) => string
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
-    level: (level: number) => React.ReactNode
+    level: (level: number, highlightClassName?: string) => React.ReactNode
     summonerLevel: React.ReactNode
     summonerIconAlt: (name: string) => string
   }
@@ -213,6 +213,6 @@ export type Translation = {
     masteryPoints: React.ReactNode
     otpIndex: React.ReactNode
     otpIndexExplanation: React.ReactNode
-    percentsProgression: (percents: number) => React.ReactNode
+    percentsProgression: (percents: number, highlightClassName: string) => React.ReactNode
   }
 }

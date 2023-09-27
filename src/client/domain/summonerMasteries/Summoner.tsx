@@ -7,7 +7,7 @@ import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/Ch
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import type { Dict } from '../../../shared/utils/fp'
+import { type Dict } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
@@ -73,9 +73,9 @@ export const Summoner: React.FC<Props> = ({
           alt={t.common.summonerIconAlt(name)}
           className="h-24 w-24 rounded border border-goldenrod-bis"
         />
-        <div className="grid grid-rows-[1fr_auto] items-center gap-4">
+        <div className="grid grid-rows-[1fr_auto]">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span ref={nameRef} className="text-2xl text-goldenrod">
+            <span ref={nameRef} className="text-xl font-bold text-goldenrod">
               {name}
             </span>
             <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
@@ -85,7 +85,7 @@ export const Summoner: React.FC<Props> = ({
               <span>{t.summoner.masteriesCache.duration(prettyMs(masteries.cacheDuration))}</span>
             </Tooltip>
             <span className="text-grey-400">—</span>
-            <span ref={levelRef}>{t.common.level(summonerLevel)}</span>
+            <span ref={levelRef}>{t.common.level(summonerLevel, 'font-semibold')}</span>
             <Tooltip hoverRef={levelRef} placement="right">
               {t.common.summonerLevel}
             </Tooltip>
@@ -121,22 +121,22 @@ export const Summoner: React.FC<Props> = ({
           </div>
           <div className="grid grid-cols-[auto_auto] gap-x-2">
             <span className="justify-self-end">{t.summoner.masteryScore}</span>
-            <span>{t.common.number(totalMasteryLevel)}</span>
+            <span className="font-semibold">{t.common.number(totalMasteryLevel)}</span>
 
-            <span className="mt-2 justify-self-end">{t.summoner.masteryPoints}</span>
-            <span className="mt-2">
+            <span className="mt-1 justify-self-end">{t.summoner.masteryPoints}</span>
+            <span className="mt-1 font-semibold">
               {TranslationUtils.numberUnit(t.common)(totalMasteryPoints)}
             </span>
 
-            <span className="mt-2 justify-self-end">{t.summoner.otpIndex}</span>
-            <span className="mt-2">{t.common.number(otpIndex)}</span>
-            <span className="col-span-2 mt-1 whitespace-pre-wrap text-center text-xs italic opacity-70">
+            <span className="mt-1 justify-self-end">{t.summoner.otpIndex}</span>
+            <span className="mt-1 font-semibold">{t.common.number(otpIndex)}</span>
+            <span className="col-span-2 whitespace-pre-wrap text-center text-xs italic opacity-70">
               {t.summoner.otpIndexExplanation}
             </span>
           </div>
         </Tooltip>
         <span className="flex items-center gap-2">
-          <span>{t.summoner.percentsProgression(round(questPercents, 2))}</span>
+          <span>{t.summoner.percentsProgression(round(questPercents, 2), 'font-semibold')}</span>
           <span ref={infoRef}>
             <InformationCircleOutline className="h-6" />
           </span>
@@ -163,7 +163,7 @@ const getMasteryImgWithCount =
   ({ level, imgClassName, className }) =>
     (
       <div className={cx('flex flex-col items-center', className)}>
-        <span className="text-sm">{t.number(masteriesCount[level])}</span>
+        <span className="text-sm font-semibold">{t.number(masteriesCount[level])}</span>
         <MasteryImg level={level} className={cx('w-full', imgClassName)} />
       </div>
     )

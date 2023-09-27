@@ -319,7 +319,11 @@ const frFRTranslation: Translation = {
     searchChamion: 'Rechercher champion',
     spellIconAlt: name => `Icône du sort ${name}`,
     spellKey: key => `<Sort ${key}>`,
-    level: level => `niveau ${level.toLocaleString(locale)}`,
+    level: (level, highlightClassName) => (
+      <>
+        niveau <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+      </>
+    ),
     summonerLevel: 'Niveau d’invocateur',
     summonerIconAlt: name => `Icône de ${name}`,
   },
@@ -483,7 +487,12 @@ const frFRTranslation: Translation = {
         <li>Maîtrise 7 = 100 %</li>
       </>
     ),
-    percentsProgression: percents => `Progression : ${percents.toLocaleString(locale)} %`,
+    percentsProgression: (percents, highlightClassName) => (
+      <>
+        Progression :{' '}
+        <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+      </>
+    ),
   },
 }
 

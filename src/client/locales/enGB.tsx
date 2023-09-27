@@ -317,7 +317,11 @@ const enGBTranslation: Translation = {
     searchChamion: 'Search champion',
     spellIconAlt: name => `${name} spell icon`,
     spellKey: key => `<Spell ${key}>`,
-    level: level => `level ${level.toLocaleString(locale)}`,
+    level: (level, highlightClassName) => (
+      <>
+        level <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+      </>
+    ),
     summonerLevel: 'Summoner level',
     summonerIconAlt: name => `${name}’ icon`,
   },
@@ -468,7 +472,11 @@ const enGBTranslation: Translation = {
         <li>Mastery 7 = 100%</li>
       </>
     ),
-    percentsProgression: percents => `Progression: ${percents.toLocaleString(locale)}%`,
+    percentsProgression: (percents, highlightClassName) => (
+      <>
+        Progression: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+      </>
+    ),
   },
 }
 
