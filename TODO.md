@@ -1,19 +1,19 @@
 - active game force refresh but with delay
 - active game refresh delay : parallel
+- react-select
 - url encode summoner name (client and server side)
+- uri: ugly encode
+
 - challenges page + detect challenges
+- translate poro tags
+- menu react-popper?
+- challenge progression discord notification
+- account menu
 - forget about Discord Riot Connection, create BO and link by hand
 
-- ignore CHERRY league entry
-- translate poro tags
-- react-select
-- uri: ugly encode
-- Menu react-popper?
-- challenge progression discord notification
-- discord OAuth2: proper state (redirect url)
-- eslint unused argument (even if middle)
-- rework masteries colors
-- account menu
 - limit favorites
 - modal: trap focus
+- ignore CHERRY league entry
+- discord OAuth2: proper state (redirect url)
 - clean old cache entries
+- eslint unused argument (even if middle)
