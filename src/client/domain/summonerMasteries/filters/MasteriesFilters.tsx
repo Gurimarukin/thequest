@@ -319,7 +319,7 @@ const getSelectLevelsButton =
           onClick={handleClick}
           disabled={isSelected}
           className={cx(
-            'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm',
+            'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm font-medium',
             isSelected ? 'bg-goldenrod-bis text-black' : 'hover:bg-black',
           )}
         >
@@ -354,7 +354,7 @@ const TextLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
     <>
       <span
         ref={hoverRef}
-        className={cx('flex h-6 w-10 items-center justify-center text-sm', className)}
+        className={cx('flex h-6 w-10 items-center justify-center text-sm font-semibold', className)}
       >
         {children}
       </span>
@@ -371,7 +371,10 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
     <>
       <span
         ref={hoverRef}
-        className={cx('flex h-6 items-center justify-center gap-1.5 text-sm', className)}
+        className={cx(
+          'flex h-6 items-center justify-center gap-1.5 text-sm font-medium',
+          className,
+        )}
       >
         {children}
       </span>
