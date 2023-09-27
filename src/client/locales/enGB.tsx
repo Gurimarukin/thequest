@@ -399,10 +399,15 @@ const enGBTranslation: Translation = {
     },
     nShards: plural('shard'),
     nTokens: plural('token'),
-    points: (points, total) =>
-      `${points.toLocaleString(locale)}${
-        total !== undefined ? ` / ${total.toLocaleString(locale)}` : ''
-      } points`,
+    points: (points, total, highlightClassName) => (
+      <>
+        <span className={highlightClassName}>
+          {points.toLocaleString(locale)}
+          {total !== undefined ? ` / ${total.toLocaleString(locale)}` : null}
+        </span>{' '}
+        points
+      </>
+    ),
     pointsSinceLastLevel: (points, level) =>
       `${plural('point')(points)} since level ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>

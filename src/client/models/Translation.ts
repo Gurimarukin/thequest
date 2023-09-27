@@ -175,7 +175,7 @@ export type Translation = {
     }
     nShards: (n: number) => React.ReactNode
     nTokens: (n: number) => React.ReactNode
-    points: (points: number, total?: number) => React.ReactNode
+    points: (points: number, total?: number, highlightClassName?: string) => React.ReactNode
     pointsSinceLastLevel: (points: number, level: number) => string
     pointsUntilNextLevel: (points: number, level: number) => string
     removeShard: React.ReactNode

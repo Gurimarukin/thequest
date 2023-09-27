@@ -405,10 +405,15 @@ const frFRTranslation: Translation = {
     },
     nShards: plural('fragment'),
     nTokens: plural('jeton'),
-    points: (points, total) =>
-      `${points.toLocaleString(locale)}${
-        total !== undefined ? ` / ${total.toLocaleString(locale)}` : ''
-      } points`,
+    points: (points, total, highlightClassName) => (
+      <>
+        <span className={highlightClassName}>
+          {points.toLocaleString(locale)}
+          {total !== undefined ? ` / ${total.toLocaleString(locale)}` : null}
+        </span>{' '}
+        points
+      </>
+    ),
     pointsSinceLastLevel: (points, level) =>
       `${plural('point')(points)} depuis le niveau ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>
