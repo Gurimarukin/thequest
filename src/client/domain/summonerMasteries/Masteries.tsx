@@ -312,7 +312,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
           ),
         )}
         <div className="flex items-center">
-          <span ref={placementRef} className="p-1.5">
+          <span ref={placementRef} className="pl-1.5 pt-1 font-semibold">
             {t.common.number(championPoints)}
           </span>
         </div>

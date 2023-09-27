@@ -353,7 +353,7 @@ const Shards: React.FC<ShardsProps> = ({
     <div className="group relative flex h-2.5 flex-row-reverse items-end self-end justify-self-end area-1">
       <div
         className={cx(
-          'absolute -right-px hidden flex-col justify-center overflow-hidden bg-black p-px group-hover:flex',
+          'absolute -right-px z-10 hidden flex-col justify-center overflow-hidden bg-black p-px group-hover:flex',
           ['gap-4', canAddShard === canRemoveShard],
           canAddShard ? '-top-4 rounded-t-[5px]' : '-bottom-4 rounded-tl-[5px]',
           ['rounded-b-[5px]', canRemoveShard],
@@ -400,7 +400,7 @@ const Shards: React.FC<ShardsProps> = ({
       </div>
       <div
         className={cx(
-          'relative flex items-center justify-center overflow-hidden rounded-tl-lg bg-black pt-1 font-semibold',
+          'relative z-10 flex items-center justify-center overflow-hidden rounded-tl-lg bg-black pt-1 font-semibold',
           centerShards
             ? 'w-4 pl-1'
             : cx('pl-1.5 group-hover:w-4 group-hover:pl-1', ['group-hover:pt-0.5', canAddShard]),
@@ -408,7 +408,7 @@ const Shards: React.FC<ShardsProps> = ({
       >
         <span className="text-[15px] leading-[9px]">{shardsCount}</span>
       </div>
-      <span className="relative mr-[-3px] rounded-tl bg-black pl-px pt-px">
+      <span className="relative z-10 mr-[-3px] rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="h-2.5 w-2.5 rotate-180" />
       </span>
     </div>
