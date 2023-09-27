@@ -180,7 +180,7 @@ const Champion: React.FC<ChampionProps> = ({
         {/* glow */}
         <Glow isGlowing={isGlowing} />
 
-        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs">
+        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats">
           <ChampionMasterySquare
             {...champion}
             setChampionShards={setChampionShards}

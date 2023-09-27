@@ -350,71 +350,67 @@ const Shards: React.FC<ShardsProps> = ({
   const canAddShard = shardsCount < 9
 
   return (
-    <div className="group flex items-end self-end justify-self-end area-1">
-      <span className="z-10 -mr-0.5 overflow-hidden rounded-tl bg-black pl-px pt-px">
+    <div className="group relative flex h-2.5 flex-row-reverse items-end self-end justify-self-end area-1">
+      <div
+        className={cx(
+          'absolute -right-px hidden flex-col justify-center overflow-hidden bg-black p-px group-hover:flex',
+          ['gap-4', canAddShard === canRemoveShard],
+          canAddShard ? '-top-4 rounded-t-[5px]' : '-bottom-4 rounded-tl-[5px]',
+          ['rounded-b-[5px]', canRemoveShard],
+        )}
+      >
+        <span className={cx('flex', ['mb-3', !canRemoveShard], ['hidden', !canAddShard])}>
+          {isLoading ? (
+            <Loading className="w-3 text-goldenrod-bis" />
+          ) : (
+            <>
+              <button
+                ref={addButtonRef}
+                type="button"
+                onClick={addShardCount}
+                className="w-3 rounded-t bg-goldenrod text-black"
+              >
+                <AddOutline className="w-full" />
+              </button>
+              <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-xs">
+                {t.addShard}
+              </Tooltip>
+            </>
+          )}
+        </span>
+        <span className={cx('flex', ['mt-[15px]', !canAddShard], ['hidden', !canRemoveShard])}>
+          {isLoading ? (
+            <Loading className="w-3 text-goldenrod-bis" />
+          ) : (
+            <>
+              <button
+                ref={removeButtonRef}
+                type="button"
+                onClick={removeShardCount}
+                className="w-3 rounded-b bg-goldenrod text-black"
+              >
+                <RemoveOutline className="w-full" />
+              </button>
+              <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-xs">
+                {t.removeShard}
+              </Tooltip>
+            </>
+          )}
+        </span>
+      </div>
+      <div
+        className={cx(
+          'relative flex items-center justify-center overflow-hidden rounded-tl-lg bg-black pt-1 font-semibold',
+          centerShards
+            ? 'w-4 pl-1'
+            : cx('pl-1.5 group-hover:w-4 group-hover:pl-1', ['group-hover:pt-0.5', canAddShard]),
+        )}
+      >
+        <span className="text-[15px] leading-[9px]">{shardsCount}</span>
+      </div>
+      <span className="relative mr-[-3px] rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="h-2.5 w-2.5 rotate-180" />
       </span>
-      <div className="relative flex h-3.5 w-3.5 rounded-tl-lg bg-black pl-0.5 text-sm font-medium">
-        {setShardsCount !== null ? (
-          <div
-            className={cx(
-              'absolute -right-px z-10 hidden flex-col items-end overflow-hidden group-hover:flex',
-              ['rounded-t-[5px]', canAddShard],
-              canRemoveShard ? '-bottom-[15px] rounded-b-[5px]' : 'bottom-0',
-            )}
-          >
-            <span className={cx('flex bg-black p-px pb-0.5', ['hidden', !canAddShard])}>
-              {isLoading ? (
-                <Loading className="w-3 text-goldenrod-bis" />
-              ) : (
-                <>
-                  <button
-                    ref={addButtonRef}
-                    type="button"
-                    onClick={addShardCount}
-                    className="w-3 rounded-t bg-goldenrod text-black"
-                  >
-                    <AddOutline className="w-full" />
-                  </button>
-                  <Tooltip hoverRef={addButtonRef} placement="right" className="z-10 !text-xs">
-                    {t.addShard}
-                  </Tooltip>
-                </>
-              )}
-            </span>
-            <span
-              className={cx('w-px bg-black', !canAddShard && canRemoveShard ? 'h-3.5' : 'h-2.5')}
-            />
-            <span className={cx('flex bg-black p-px pt-0.5', ['hidden', !canRemoveShard])}>
-              {isLoading ? (
-                <Loading className="w-3 text-goldenrod-bis" />
-              ) : (
-                <>
-                  <button
-                    ref={removeButtonRef}
-                    type="button"
-                    onClick={removeShardCount}
-                    className="w-3 rounded-b bg-goldenrod text-black"
-                  >
-                    <RemoveOutline className="w-full" />
-                  </button>
-                  <Tooltip hoverRef={removeButtonRef} placement="right" className="z-10 !text-xs">
-                    {t.removeShard}
-                  </Tooltip>
-                </>
-              )}
-            </span>
-          </div>
-        ) : null}
-        <div
-          className={cx(
-            'absolute bottom-0 z-10 w-full pr-px leading-[9px]',
-            centerShards ? 'text-center' : 'text-end group-hover:text-center',
-          )}
-        >
-          {shardsCount}
-        </div>
-      </div>
     </div>
   )
 }
