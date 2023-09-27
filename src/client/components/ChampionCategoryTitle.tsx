@@ -22,7 +22,7 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
 
   return (
     <div className={cx('col-span-full flex pb-1', className)}>
-      <h2 ref={hoverRef} className="flex items-center gap-2">
+      <h2 ref={hoverRef} className="flex items-center gap-2 font-semibold">
         <span>{t.category.label[category]}</span>
         <span ref={placementRef}>
           <InformationCircleOutline className="h-4" />

@@ -167,13 +167,13 @@ export const renderStatValue = (
     return (
       <span
         className={cx(
-          'flex gap-0.5 justify-self-end font-lib-mono',
+          'flex justify-self-end font-lib-mono',
           (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
           className,
         )}
       >
         <span>
-          {n < 0 ? '' : '+'}
+          {n < 0 ? null : '+'}
           {n}
         </span>
         {pipe(

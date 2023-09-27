@@ -347,7 +347,7 @@ const getRenderChildrenCompact =
     (
       <ul
         ref={ref}
-        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1"
+        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1 text-2xs"
       >
         {children}
       </ul>

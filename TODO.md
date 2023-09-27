@@ -5,7 +5,6 @@
 - challenges page + detect challenges
 - forget about Discord Riot Connection, create BO and link by hand
 
-- align tenacity and ability haste with other stats (hover)
 - ignore CHERRY league entry
 - translate poro tags
 - react-select
