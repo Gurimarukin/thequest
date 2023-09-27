@@ -167,7 +167,7 @@ export const renderStatValue = (
     return (
       <span
         className={cx(
-          'flex gap-0.5 justify-self-end font-mono',
+          'flex gap-0.5 justify-self-end font-lib-mono',
           (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
           className,
         )}
