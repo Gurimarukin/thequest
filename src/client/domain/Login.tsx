@@ -130,7 +130,7 @@ export const Login: React.FC = () => {
 
               <div className="flex w-full max-w-xl flex-col items-center">
                 <span>{t.noAccount}</span>
-                <Link to={appRoutes.register} className="underline">
+                <Link to={appRoutes.register} className="font-medium underline">
                   {t.register}
                 </Link>
               </div>
