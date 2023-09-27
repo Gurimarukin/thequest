@@ -408,7 +408,7 @@ const Shards: React.FC<ShardsProps> = ({
         ) : null}
         <div
           className={cx(
-            'absolute bottom-0 w-full pr-0.5 leading-2.5',
+            'absolute bottom-0 z-10 w-full pr-px leading-[9px]',
             centerShards ? 'text-center' : 'text-end group-hover:text-center',
           )}
         >
