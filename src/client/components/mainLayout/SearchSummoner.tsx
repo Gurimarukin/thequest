@@ -131,7 +131,10 @@ export const SearchSummoner: React.FC = () => {
             onChange={handleChange}
             onFocus={handleFocus}
             placeholder={t.layout.searchSummoner}
-            className="w-52 border border-goldenrod bg-black pl-2 pr-8 area-1"
+            className={cx('w-60 border border-goldenrod bg-black pl-2 pr-8 area-1', [
+              'font-normal',
+              summonerName === '',
+            ])}
           />
           <ul
             className={cx(
