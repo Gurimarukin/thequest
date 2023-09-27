@@ -1,4 +1,3 @@
-- active game shards are missing
 - active game force refresh but with delay
 - active game refresh delay : parallel
 - url encode summoner name (client and server side)
