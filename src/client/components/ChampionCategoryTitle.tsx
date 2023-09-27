@@ -30,6 +30,7 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
         <Tooltip
           hoverRef={hoverRef}
           placementRef={placementRef}
+          alwaysVisible={category === 'other'}
           className="max-w-xl !whitespace-normal break-normal py-2"
         >
           {t.category.description[category]}

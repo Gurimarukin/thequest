@@ -9,6 +9,7 @@ import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import { type Dict } from '../../shared/utils/fp'
 
+import { EmojiUpsideDown } from '../imgs/svgs/emojis'
 import type { Translation } from '../models/Translation'
 import { TranslationUtils } from '../utils/TranslationUtils'
 
@@ -130,8 +131,12 @@ const enGBTranslation: Translation = {
       description: {
         buffed: 'Champions with more buffs than nerfs',
         nerfed: 'Champions with more nerfs than buffs',
-        other:
-          'Champions with as many buffs as nerfs (or with skill modifications for which it’s difficult to automatically determine whether it’s a buff or a nerf 🙃)',
+        other: (
+          <>
+            Champions with as many buffs as nerfs (or with skill modifications for which it’s
+            difficult to automatically determine whether it’s a buff or a nerf <EmojiUpsideDown />)
+          </>
+        ),
         balanced: 'Champions with no balance changes',
       },
     },

@@ -4,14 +4,15 @@ import { Lang } from '../../../shared/models/api/Lang'
 import type { Dict } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
-import { GlobeOutline } from '../../imgs/svgs/icons'
+import { EmojiFlagFr, EmojiFlagGb } from '../../imgs/svgs/emojis'
+import { LanguageFilled } from '../../imgs/svgs/icons'
 import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 import { ClickOutside } from '../ClickOutside'
 import { Menu } from './Menu'
 
 export const Languages: React.FC = () => {
-  const [languagesIsVisible, setLanguagesIsVisible] = useState(false)
+  const [languagesIsVisible, setLanguagesIsVisible] = useState(true)
   const toggleLanguages = useCallback(() => setLanguagesIsVisible(v => !v), [])
   const hideLanguages = useCallback(() => setLanguagesIsVisible(false), [])
 
@@ -19,7 +20,7 @@ export const Languages: React.FC = () => {
     <ClickOutside onClickOutside={hideLanguages}>
       <div className="relative flex items-center self-stretch py-2">
         <button type="button" onClick={toggleLanguages}>
-          <GlobeOutline className="h-5" />
+          <LanguageFilled className="h-5" />
         </button>
 
         {languagesIsVisible ? (
@@ -61,7 +62,7 @@ const LangButton: React.FC<LangButtonProps> = ({ l }) => {
   )
 }
 
-const langEmoji: Dict<Lang, string> = {
-  en_GB: '🇬🇧',
-  fr_FR: '🇫🇷',
+const langEmoji: Dict<Lang, React.ReactNode> = {
+  en_GB: <EmojiFlagGb />,
+  fr_FR: <EmojiFlagFr />,
 }
