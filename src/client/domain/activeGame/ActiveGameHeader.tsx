@@ -51,17 +51,17 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, bannedChampions, pa
   )
 
   return (
-    <div className="flex flex-wrap gap-6 px-3 text-sm text-goldenrod">
+    <div className="flex flex-wrap gap-16 px-3 text-sm text-goldenrod">
       {TeamId.values.map((teamId, i) => {
         const teamBans = bannedChampions[teamId]
         const reverse = i % 2 === 1
         return (
           <div
             key={teamId}
-            className={cx('flex grow items-center gap-8', ['flex-row-reverse', reverse])}
+            className={cx('flex grow basis-0 items-center gap-8', ['flex-row-reverse', !reverse])}
           >
             {isDraft ? (
-              <ul className={cx('flex flex-wrap gap-1', ['flex-row-reverse', reverse])}>
+              <ul className="flex flex-wrap gap-1">
                 {teamBans !== undefined
                   ? pipe(
                       teamBans,
@@ -72,18 +72,18 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, bannedChampions, pa
                   : null}
               </ul>
             ) : null}
-            <ul key={teamId} className={cx('flex gap-4', ['justify-end', reverse])}>
+            <ul key={teamId} className={cx('flex gap-4', ['justify-end', !reverse])}>
               {(factions[teamId] ?? []).map(faction => (
                 <li
                   key={faction}
-                  className={cx('flex items-center gap-1.5', ['flex-row-reverse', reverse])}
+                  className={cx('flex items-center gap-1.5', ['flex-row-reverse', !reverse])}
                 >
                   <Challenge
                     id={ChallengesView.id[faction]}
                     tier={Maybe.some('GOLD')}
                     className="h-9"
                   />
-                  {t.labels.faction[faction]}
+                  <span className="font-semibold">{t.labels.faction[faction]}</span>
                 </li>
               ))}
             </ul>
@@ -148,7 +148,7 @@ const Ban: React.FC<BanProps> = ({ bannedChampion }) => {
     <>
       {children}
       <Tooltip hoverRef={ref} className="flex flex-col items-center gap-1">
-        <span className="font-bold">{tooltip}</span>
+        <span className="font-medium">{tooltip}</span>
         <span className="text-xs">{t.activeGame.bannedAtTurn(bannedChampion.pickTurn)}</span>
       </Tooltip>
     </>

@@ -98,7 +98,7 @@ export const ChallengeWithProgression: React.FC<ChallengeWithProgressionProps> =
           alt={alt}
           className={cx(['grayscale', Maybe.isNone(tier)], iconClassName)}
         />
-        <span>{t.fraction(value, total)}</span>
+        <span className="font-semibold">{t.fraction(value, total)}</span>
       </div>
 
       <Tooltip hoverRef={hoverRef} placementRef={placementRef} className="flex flex-col gap-1">

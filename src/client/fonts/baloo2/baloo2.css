@@ -1,0 +1,29 @@
+@font-face {
+  font-family: baloo2;
+  src: url('./400-normal.ttf');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: baloo2;
+  src: url('./500-medium.ttf');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: baloo2;
+  src: url('./600-semibold.ttf');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: baloo2;
+  src: url('./700-bold.ttf');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: baloo2;
+  src: url('./800-extrabold.ttf');
+  font-weight: 800;
+}

@@ -31,11 +31,12 @@ export type Translation = {
     totals: (
       totalMasteryLevel: number,
       translatedTotalMasteryPoints: React.ReactNode,
+      highlightClassName?: string,
     ) => React.ReactNode
     masteryScoreAndPoints: React.ReactNode
-    otpIndex: (otpIndex: number) => React.ReactNode
+    otpIndex: (otpIndex: number, highlightClassName?: string) => React.ReactNode
     mainRoles: React.ReactNode
-    aramChanges: React.ReactNode
+    currentRole: React.ReactNode
   }
   aram: {
     category: {
@@ -122,7 +123,7 @@ export type Translation = {
     searchChamion: string
     spellIconAlt: (name: string) => string
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
-    level: (level: number) => React.ReactNode
+    level: (level: number, highlightClassName?: string) => React.ReactNode
     summonerLevel: React.ReactNode
     summonerIconAlt: (name: string) => string
   }
@@ -175,7 +176,7 @@ export type Translation = {
     }
     nShards: (n: number) => React.ReactNode
     nTokens: (n: number) => React.ReactNode
-    points: (points: number, total?: number) => React.ReactNode
+    points: (points: number, total?: number, highlightClassName?: string) => React.ReactNode
     pointsSinceLastLevel: (points: number, level: number) => string
     pointsUntilNextLevel: (points: number, level: number) => string
     removeShard: React.ReactNode
@@ -213,6 +214,6 @@ export type Translation = {
     masteryPoints: React.ReactNode
     otpIndex: React.ReactNode
     otpIndexExplanation: React.ReactNode
-    percentsProgression: (percents: number) => React.ReactNode
+    percentsProgression: (percents: number, highlightClassName: string) => React.ReactNode
   }
 }

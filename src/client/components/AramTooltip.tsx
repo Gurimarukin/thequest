@@ -15,7 +15,7 @@ export const AramTooltip: React.FC<Props> = ({ aram }) => (
 const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
   (t, name, draggable) => {
     const icon = renderStatIcon(t.aram, name, draggable, 'h-4, w-4')
-    const renderStatValue_ = renderStatValue(name)
+    const renderStatValue_ = renderStatValue(name, 'gap-[3px]')
     return value => (
       <li key={name} className="contents">
         <div className="flex items-center gap-2 pr-2">

@@ -9,6 +9,7 @@ import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import { type Dict } from '../../shared/utils/fp'
 
+import { EmojiUpsideDown } from '../imgs/svgs/emojis'
 import type { Translation } from '../models/Translation'
 import { TranslationUtils } from '../utils/TranslationUtils'
 
@@ -109,15 +110,20 @@ const frFRTranslation: Translation = {
     loading: 'chargement',
     notInGame: 'pas en partie.',
     theQuestProgression: 'Progression de La Quête',
-    totals: (totalMasteryLevel, translatedTotalMasteryPoints) => (
+    totals: (totalMasteryLevel, translatedTotalMasteryPoints, highlightClassName) => (
       <>
-        ({totalMasteryLevel.toLocaleString(locale)} — {translatedTotalMasteryPoints})
+        (<span className={highlightClassName}>{totalMasteryLevel.toLocaleString(locale)}</span> —{' '}
+        <span className={highlightClassName}>{translatedTotalMasteryPoints}</span>)
       </>
     ),
     masteryScoreAndPoints: 'Score — Points de maîtrise',
-    otpIndex: otpIndex => `Indice d’OTP : ${otpIndex.toLocaleString(locale)}`,
-    mainRoles: 'Rôles principaux',
-    aramChanges: 'Équilibrage ARAM',
+    otpIndex: (otpIndex, highlightClassName) => (
+      <>
+        Indice d’OTP : <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
+      </>
+    ),
+    mainRoles: 'Rôles principaux :',
+    currentRole: 'Rôle actuel :',
   },
   aram: {
     category: {
@@ -130,8 +136,13 @@ const frFRTranslation: Translation = {
       description: {
         buffed: 'Champions avec plus de buffs que de nerfs',
         nerfed: 'Champions avec plus de nerfs que de buffs',
-        other:
-          'Champions avec autant de buffs que de nerfs (ou avec des modifications de compétences pour lesquelles il est difficile de déterminer automatiquement si c’est un buff ou un nerf 🙃)',
+        other: (
+          <>
+            Champions avec autant de buffs que de nerfs (ou avec des modifications de compétences
+            pour lesquelles il est difficile de déterminer automatiquement si c’est un buff ou un
+            nerf  <EmojiUpsideDown />)
+          </>
+        ),
         balanced: 'Champions avec aucun équilibrage',
       },
     },
@@ -313,7 +324,11 @@ const frFRTranslation: Translation = {
     searchChamion: 'Rechercher champion',
     spellIconAlt: name => `Icône du sort ${name}`,
     spellKey: key => `<Sort ${key}>`,
-    level: level => `niveau ${level.toLocaleString(locale)}`,
+    level: (level, highlightClassName) => (
+      <>
+        niveau <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+      </>
+    ),
     summonerLevel: 'Niveau d’invocateur',
     summonerIconAlt: name => `Icône de ${name}`,
   },
@@ -395,10 +410,15 @@ const frFRTranslation: Translation = {
     },
     nShards: plural('fragment'),
     nTokens: plural('jeton'),
-    points: (points, total) =>
-      `${points.toLocaleString(locale)}${
-        total !== undefined ? ` / ${total.toLocaleString(locale)}` : ''
-      } points`,
+    points: (points, total, highlightClassName) => (
+      <>
+        <span className={highlightClassName}>
+          {points.toLocaleString(locale)}
+          {total !== undefined ? ` / ${total.toLocaleString(locale)}` : null}
+        </span>{' '}
+        points
+      </>
+    ),
     pointsSinceLastLevel: (points, level) =>
       `${plural('point')(points)} depuis le niveau ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>
@@ -477,7 +497,12 @@ const frFRTranslation: Translation = {
         <li>Maîtrise 7 = 100 %</li>
       </>
     ),
-    percentsProgression: percents => `Progression : ${percents.toLocaleString(locale)} %`,
+    percentsProgression: (percents, highlightClassName) => (
+      <>
+        Progression :{' '}
+        <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+      </>
+    ),
   },
 }
 

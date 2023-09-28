@@ -199,11 +199,11 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             onMouseEnter={handleMasteriesMouseEnter}
             tooltipPlacement="top"
             iconClassName="px-[5px] pt-1 pb-0.5"
-            className="relative z-20"
+            className="relative z-30"
           />
           <ul
             className={cx(
-              'absolute z-10 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
+              'absolute z-20 flex w-full flex-col overflow-hidden rounded-b-md border-t border-black bg-zinc-700 shadow-even shadow-black',
               ['hidden', !levelsMenuIsVisible],
             )}
           >
@@ -319,7 +319,7 @@ const getSelectLevelsButton =
           onClick={handleClick}
           disabled={isSelected}
           className={cx(
-            'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm',
+            'flex items-center justify-between gap-1 py-1.5 pl-4 pr-2 text-left text-sm font-medium',
             isSelected ? 'bg-goldenrod-bis text-black' : 'hover:bg-black',
           )}
         >
@@ -354,7 +354,7 @@ const TextLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
     <>
       <span
         ref={hoverRef}
-        className={cx('flex h-6 w-10 items-center justify-center text-sm', className)}
+        className={cx('flex h-6 w-10 items-center justify-center text-sm font-semibold', className)}
       >
         {children}
       </span>
@@ -371,7 +371,10 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
     <>
       <span
         ref={hoverRef}
-        className={cx('flex h-6 items-center justify-center gap-1.5 text-sm', className)}
+        className={cx(
+          'flex h-6 items-center justify-center gap-1.5 text-sm font-medium',
+          className,
+        )}
       >
         {children}
       </span>
