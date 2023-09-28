@@ -3925,10 +3925,10 @@ human-signals@^2.1.0:
   resolved "https://registry.yarnpkg.com/human-signals/-/human-signals-2.1.0.tgz#dc91fcba42e4d06e4abaed33b3e7a3c02f514ea0"
   integrity sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==
 
-hyper-ts@0.7.8:
-  version "0.7.8"
-  resolved "https://registry.yarnpkg.com/hyper-ts/-/hyper-ts-0.7.8.tgz#0a9e482a592fc52d6558ce0ffc6563e47bbf9f02"
-  integrity sha512-YfHch3uMhvKEa2EeVOMrCNF2aRKDUMEiIFSAKtdCCPpegJUWDX9XCLD/N5kIoW3OWasSPsM44GB0BJnN+ue3fw==
+hyper-ts@0.7.9:
+  version "0.7.9"
+  resolved "https://registry.yarnpkg.com/hyper-ts/-/hyper-ts-0.7.9.tgz#ac2e1beee41c3e8587bce753704a2fee1625a531"
+  integrity sha512-RpRQDvV/+9pYKh1X5bZ0v9rOGQ/ZZ6hxeKubU2omcjhT9JdN7mxaj+rOFbWLdv79wU28mD32PY6tow2k58etdQ==
 
 iconv-lite@0.4.24:
   version "0.4.24"

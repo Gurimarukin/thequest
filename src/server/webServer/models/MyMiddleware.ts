@@ -9,8 +9,8 @@ import { flow, identity, pipe } from 'fp-ts/function'
 import type * as http from 'http'
 import type { Connection, CookieOptions, HeadersOpen, ResponseEnded, StatusOpen } from 'hyper-ts'
 import { MediaType, Status } from 'hyper-ts'
-import * as M from 'hyper-ts/lib/Middleware'
-import { toRequestHandler as toRequestHandler_ } from 'hyper-ts/lib/express'
+import * as M from 'hyper-ts/Middleware'
+import { toRequestHandler as toRequestHandler_ } from 'hyper-ts/express'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
@@ -291,7 +291,7 @@ const withBody =
 
 const EndedMiddleware = { withBody }
 
-export { MyMiddleware, EndedMiddleware }
+export { EndedMiddleware, MyMiddleware }
 
 const requestChunks = (req: http.IncomingMessage): Future<List<unknown>> =>
   Future.tryCatch(

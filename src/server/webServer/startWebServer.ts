@@ -6,7 +6,7 @@ import { Route as FpTsRoute, parse, zero } from 'fp-ts-routing'
 import { flow, identity, pipe } from 'fp-ts/function'
 import type * as http from 'http'
 import { Status } from 'hyper-ts'
-import type { ExpressConnection } from 'hyper-ts/lib/express'
+import type { ExpressConnection } from 'hyper-ts/express'
 import type { Duplex } from 'stream'
 
 import { Method } from '../../shared/models/Method'
