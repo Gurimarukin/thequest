@@ -1,5 +1,3 @@
-- active game force refresh but with delay
-- active game refresh delay : parallel
 - react-select
 - url encode summoner name (client and server side)
 - uri: ugly encode
