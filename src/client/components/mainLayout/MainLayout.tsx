@@ -32,7 +32,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
     <div className="flex h-full flex-col">
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
         <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-6">
             <Link ref={homeRef} to={appRoutes.index} className="py-2">
               <img
                 src={Assets.yuumi}
@@ -42,52 +42,56 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             </Link>
             <Tooltip hoverRef={homeRef}>{t.layout.home}</Tooltip>
 
-            <HighlightLink
-              to={appRoutes.aram({})}
-              parser={appParsers.aram}
-              tooltip={t.layout.aramSpecificBalanceChanges}
-            >
-              <HowlingAbyssSimple className="w-5" />
-            </HighlightLink>
+            <div className="flex items-center gap-4">
+              <HighlightLink
+                to={appRoutes.aram({})}
+                parser={appParsers.aram}
+                tooltip={t.layout.aramSpecificBalanceChanges}
+                className="py-2"
+              >
+                <HowlingAbyssSimple className="w-5" />
+              </HighlightLink>
 
-            <HighlightLink
-              to={appRoutes.factions({})}
-              parser={appParsers.factions}
-              tooltip={t.layout.globetrotterChallenges}
-            >
-              <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
-            </HighlightLink>
+              <HighlightLink
+                to={appRoutes.factions({})}
+                parser={appParsers.factions}
+                tooltip={t.layout.globetrotterChallenges}
+                className="py-2"
+              >
+                <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
+              </HighlightLink>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
             <SearchSummoner />
 
-            <div className="flex flex-wrap items-center gap-4 py-2">
-              {pipe(
-                matchLocation(appParsers.anyPlatformSummonerName),
-                Maybe.fold(
-                  () => null,
-                  ({ platform, summonerName }) => (
-                    <>
-                      <HighlightLink
-                        to={appRoutes.platformSummonerName(platform, summonerName, {})}
-                        parser={appParsers.platformSummonerName}
-                        tooltip={t.layout.championMasteries}
-                      >
-                        {t.layout.profile}
-                      </HighlightLink>
-                      <HighlightLink
-                        to={appRoutes.platformSummonerNameGame(platform, summonerName)}
-                        parser={appParsers.platformSummonerNameGame}
-                        tooltip={t.layout.activeGame}
-                      >
-                        {t.layout.game}
-                      </HighlightLink>
-                    </>
-                  ),
+            {pipe(
+              matchLocation(appParsers.anyPlatformSummonerName),
+              Maybe.fold(
+                () => null,
+                ({ platform, summonerName }) => (
+                  <div className="flex flex-wrap items-center gap-4 py-2">
+                    <HighlightLink
+                      to={appRoutes.platformSummonerName(platform, summonerName, {})}
+                      parser={appParsers.platformSummonerName}
+                      tooltip={t.layout.championMasteries}
+                      className="mt-0.5 py-0.5"
+                    >
+                      {t.layout.profile}
+                    </HighlightLink>
+                    <HighlightLink
+                      to={appRoutes.platformSummonerNameGame(platform, summonerName)}
+                      parser={appParsers.platformSummonerNameGame}
+                      tooltip={t.layout.activeGame}
+                      className="mt-0.5 py-0.5"
+                    >
+                      {t.layout.game}
+                    </HighlightLink>
+                  </div>
                 ),
-              )}
-            </div>
+              ),
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-4 self-stretch">

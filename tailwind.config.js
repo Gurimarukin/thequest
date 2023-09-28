@@ -12,6 +12,7 @@ module.exports = {
       transparent: 'transparent',
       white: 'white',
 
+      'cyan-200': colors.cyan[200],
       goldenrod: 'goldenrod',
       'goldenrod-bis': '#b58703',
       green: colors.green[600],
@@ -59,6 +60,10 @@ module.exports = {
       'discord-red': '#ed4245',
     },
     extend: {
+      fontFamily: {
+        baloo: 'baloo2',
+        'lib-mono': 'liberationMono',
+      },
       data: {
         'popper-top': "popper-placement^='top'",
         'popper-bottom': "popper-placement^='bottom'",
@@ -67,9 +72,6 @@ module.exports = {
       },
       gridArea: {
         1: '1 / 1', // useful for superposing multiple elements in a grid element
-      },
-      backgroundImage: {
-        landing: "url('./imgs/bg-landing.jpg')",
       },
       fontSize: {
         '2xs': ['.625rem', { lineHeight: '0.75rem' }],

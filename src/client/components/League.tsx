@@ -63,7 +63,6 @@ export const League: React.FC<Props> = ({
         description: t.league.unranked,
         subDescription: undefined,
       }),
-
       ({ leaguePoints, wins, losses, miniSeriesProgress, ...s }): CurrentSplitAttrs => {
         const tierRank = t.league.tierRank(
           s.tier,
@@ -80,10 +79,12 @@ export const League: React.FC<Props> = ({
             </>
           ),
           subDescription: (
-            <>
-              <span>{t.percents(games === 0 ? 0 : Math.round((100 * wins) / games))}</span>
+            <span className="flex items-center gap-1">
+              <span className="font-semibold">
+                {t.percents(games === 0 ? 0 : Math.round((100 * wins) / games))}
+              </span>
               <span className="text-grey-400">{t.number(games, { withParenthesis: true })}</span>
-            </>
+            </span>
           ),
           currentSplitTooltip: (
             <>
@@ -111,11 +112,18 @@ export const League: React.FC<Props> = ({
     ),
   )
 
+  const isSomeCurrentSplit = Maybe.isSome(league.currentSplit)
+
   return (
     <>
       <div
         ref={currentSplitRef}
-        className={cx('-mb-1 grid grid-cols-[auto_auto] items-center gap-2', className)}
+        className={cx(
+          '-mb-1 grid grid-cols-[auto_auto] items-center',
+          ['gap-3', variant === 'base'],
+          ['gap-2', variant === 'small'],
+          className,
+        )}
       >
         <LeagueImg
           ref={currentSplitIconRef}
@@ -123,41 +131,44 @@ export const League: React.FC<Props> = ({
           rank={rank}
           draggable={draggable}
           className={cx(
-            ['h-14 w-14', variant === 'base'],
-            ['h-10 w-10', variant === 'small'],
+            ['h-16 w-16', variant === 'base'],
+            ['h-9 w-9', variant === 'small'],
             ['col-start-2', reverse],
           )}
         />
         <div
           className={cx(
-            'flex flex-col text-sm',
-            reverse ? 'col-start-1 row-start-1 items-end' : 'items-start',
+            'flex text-sm',
+            ['col-start-1 row-start-1', reverse],
+            isSomeCurrentSplit
+              ? cx('flex-col', reverse ? 'items-end' : 'items-start')
+              : cx('items-center gap-2', ['flex-row-reverse', reverse]),
+            ['leading-4', variant === 'small'],
           )}
         >
           <span
-            className={cx('flex gap-1.5 whitespace-nowrap', ['text-grey-400', variant === 'small'])}
+            className={cx(
+              'flex gap-1.5 whitespace-nowrap',
+              ['font-semibold', isSomeCurrentSplit],
+              ['text-grey-400', variant === 'small'],
+            )}
           >
             {description}
           </span>
-          <span className={cx('flex gap-1', ['flex-row-reverse', reverse])}>
-            {subDescription !== undefined ? (
-              <span className={cx('flex gap-1', ['justify-end', reverse])}>{subDescription}</span>
-            ) : null}
+          <span className={cx('flex gap-3', ['flex-row-reverse', reverse])}>
+            {subDescription}
             {pipe(
               league.previousSplit,
               Maybe.fold(
                 () => null,
                 s => (
-                  <span
-                    ref={previousSplitRef}
-                    className={cx('flex items-center text-grey-400', reverse ? 'mr-2' : 'ml-2')}
-                  >
+                  <span ref={previousSplitRef} className="flex items-center text-grey-400">
                     (
                     <LeagueImg
                       tier={s.tier}
                       rank={s.rank}
                       draggable={draggable}
-                      className="h-5 w-5"
+                      className="mx-0.5 h-5 w-5"
                     />
                     )
                   </span>
@@ -171,14 +182,9 @@ export const League: React.FC<Props> = ({
         hoverRef={currentSplitRef}
         placementRef={currentSplitIconRef}
         shouldHide={tooltipShouldHide}
-        className="grid grid-cols-[auto_auto] gap-x-1.5 gap-y-1"
+        className="grid grid-cols-[auto_auto] gap-x-1.5"
       >
-        <span
-          className={cx('col-span-2 justify-self-center font-bold', [
-            'pb-0.5',
-            currentSplitTooltip !== undefined,
-          ])}
-        >
+        <span className="col-span-2 justify-self-center font-semibold">
           {t.league.label[queue]}
         </span>
         {currentSplitTooltip}
@@ -189,7 +195,7 @@ export const League: React.FC<Props> = ({
             s => (
               <span className="col-span-2 flex items-center gap-1.5 whitespace-nowrap">
                 <span>{t.league.previousSplit}</span>
-                <span className="font-bold">
+                <span className="font-semibold">
                   {t.league.tierRank(s.tier, LeagueTier.isRegularTier(s.tier) ? s.rank : undefined)}
                 </span>
               </span>
@@ -209,7 +215,7 @@ type WinLossProps = {
 
 const WinLoss: React.FC<WinLossProps> = ({ value, label, valueClassName }) => (
   <>
-    <span className={cx('justify-self-end', valueClassName)}>{value}</span>
+    <span className={cx('justify-self-end font-semibold', valueClassName)}>{value}</span>
     <span>{label(value)}</span>
   </>
 )

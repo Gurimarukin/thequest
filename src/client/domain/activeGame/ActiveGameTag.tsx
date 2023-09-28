@@ -16,7 +16,7 @@ export const ActiveGameTag: React.FC<Props> = ({ niceness, label, tooltip }) => 
       <li
         ref={ref}
         className={cx(
-          'rounded-b px-0.5 text-wheat shadow-even shadow-black saturate-[.7]',
+          'rounded-b px-0.5 text-white shadow-even shadow-black saturate-[.7]',
           nicenessClassName[niceness],
         )}
       >

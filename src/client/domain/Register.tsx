@@ -183,7 +183,7 @@ export const Register: React.FC = () => {
                           href={lesQuaisAbattoirs.inviteLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="ml-8 rounded bg-discord-darkgreen px-3 py-2 text-sm"
+                          className="ml-8 rounded bg-discord-darkgreen px-3 py-2 text-sm font-medium"
                         >
                           {t.register.join}
                         </a>
@@ -262,7 +262,7 @@ export const Register: React.FC = () => {
               </form>
               <div className="flex w-full max-w-xl flex-col items-center">
                 <span>{t.form.alreadyAnAccount}</span>
-                <Link to={appRoutes.login} className="underline">
+                <Link to={appRoutes.login} className="font-medium underline">
                   {t.form.login}
                 </Link>
               </div>
@@ -278,7 +278,7 @@ export const Register: React.FC = () => {
 }
 
 const Th: ChildrenFC = ({ children }) => (
-  <th className="flex items-center justify-center px-2 pb-3 font-normal">{children}</th>
+  <th className="flex items-center justify-center px-2 pb-3 font-medium">{children}</th>
 )
 
 type TdProps = EmptyTdProps & {

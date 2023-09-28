@@ -116,14 +116,14 @@ export const SearchSummoner: React.FC = () => {
   const showSearches = isOpen && List.isNonEmpty(searches)
 
   return (
-    <div className="py-2">
-      <form onSubmit={handleSubmit} className="flex h-8">
-        <Select<Platform>
-          options={Platform.values}
-          value={platform}
-          setValue={setPlatform}
-          className="border-y border-l border-goldenrod bg-black pl-1"
-        />
+    <form onSubmit={handleSubmit} className="flex h-8 font-medium">
+      <Select<Platform>
+        options={Platform.values}
+        value={platform}
+        setValue={setPlatform}
+        className="border-y border-l border-goldenrod bg-black pl-1"
+      />
+      <div className="grid">
         <ClickOutside onClickOutside={close}>
           <input
             type="text"
@@ -131,7 +131,10 @@ export const SearchSummoner: React.FC = () => {
             onChange={handleChange}
             onFocus={handleFocus}
             placeholder={t.layout.searchSummoner}
-            className="w-52 border border-goldenrod bg-black pl-2 pr-8"
+            className={cx('w-60 border border-goldenrod bg-black pl-2 pr-8 area-1', [
+              'font-normal',
+              summonerName === '',
+            ])}
           />
           <ul
             className={cx(
@@ -143,11 +146,11 @@ export const SearchSummoner: React.FC = () => {
             {concatWithHr(searches)}
           </ul>
         </ClickOutside>
-        <button type="submit" className="-ml-7">
+        <button type="submit" className="mr-1 justify-self-end area-1">
           <SearchOutline className="h-6 text-goldenrod" />
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
   )
 }
 

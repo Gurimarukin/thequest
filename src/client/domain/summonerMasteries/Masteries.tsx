@@ -96,7 +96,9 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
           )),
         )}
       </div>
-      <div className="self-center">{t.nChampionsFraction(championsCount, champions.length)}</div>
+      <div className="self-center text-sm">
+        {t.nChampionsFraction(championsCount, champions.length)}
+      </div>
     </>
   )
 }
@@ -180,7 +182,7 @@ const Champion: React.FC<ChampionProps> = ({
         {/* glow */}
         <Glow isGlowing={isGlowing} />
 
-        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats text-2xs">
+        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats">
           <ChampionMasterySquare
             {...champion}
             setChampionShards={setChampionShards}
@@ -312,7 +314,7 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
           ),
         )}
         <div className="flex items-center">
-          <span ref={placementRef} className="p-1.5">
+          <span ref={placementRef} className="pl-1.5 pt-1 font-semibold">
             {t.common.number(championPoints)}
           </span>
         </div>
@@ -347,7 +349,7 @@ const getRenderChildrenCompact =
     (
       <ul
         ref={ref}
-        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1"
+        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1 text-2xs"
       >
         {children}
       </ul>

@@ -1,0 +1,11 @@
+@font-face {
+  font-family: liberationMono;
+  src: url('./400-normal.ttf');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: liberationMono;
+  src: url('./700-bold.ttf');
+  font-weight: 700;
+}

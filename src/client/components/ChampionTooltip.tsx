@@ -38,7 +38,7 @@ export const ChampionTooltip: React.FC<Props> = ({
   const { t } = useTranslation()
 
   const percentsElement = (
-    <span className="relative flex items-center py-0.5 pl-1.5 shadow-black text-shadow">
+    <span className="relative flex items-center py-0.5 pl-1.5 font-semibold shadow-black text-shadow">
       {t.common.percents(Math.round(percents))}
     </span>
   )
@@ -81,6 +81,7 @@ export const ChampionTooltip: React.FC<Props> = ({
           0 < championLevel && championLevel < 5
             ? championPoints + championPointsUntilNextLevel
             : undefined,
+          'font-semibold',
         )}
       </p>
       <div className="flex grow flex-col items-center justify-center gap-1 px-2 py-1">
