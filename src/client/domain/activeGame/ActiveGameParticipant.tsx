@@ -3,7 +3,6 @@ import type { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/sr
 import { pipe } from 'fp-ts/function'
 import {
   Children,
-  Fragment,
   cloneElement,
   createElement,
   forwardRef,
@@ -18,8 +17,6 @@ import { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
-import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
@@ -32,19 +29,16 @@ import { List, Maybe } from '../../../shared/utils/fp'
 import { AramTooltip } from '../../components/AramTooltip'
 import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
-import { ChampionPositionImg } from '../../components/ChampionPositionImg'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
-import { PeopleSharp } from '../../imgs/svgs/icons'
-import { appRoutes } from '../../router/AppRouter'
-import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
 import { ActiveGameAramStats } from './ActiveGameAramStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
+import { ActiveGameSummoner } from './ActiveGameSummoner'
 import { ActiveGameTag } from './ActiveGameTag'
 
 const { round } = NumberUtils
@@ -57,8 +51,6 @@ const bevelWidth = 32 // px
 export const gridColsMobile = 'grid-cols-[repeat(8,auto)_32px_1fr]'
 export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(8,auto)]'
 export const gridColsDesktop = 'grid-cols-[1fr_repeat(7,auto)_32px_32px_repeat(7,auto)_1fr]'
-
-const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
 
 type StyleProps = Parameters<AnimatedComponent<'li'>>[0]['style'] // Merge<CSSProperties, TransformProps>;
 
@@ -124,12 +116,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   gestureProps,
 }) => {
   const { t } = useTranslation()
-  const { championByKey, assets } = useStaticData()
+  const { championByKey } = useStaticData()
 
-  const summonerLevelRef = useRef<HTMLSpanElement>(null)
-  const percentsRef = useRef<HTMLSpanElement>(null)
-  const totalMasteriesRef = useRef<HTMLSpanElement>(null)
-  const mainRolesRef = useRef<HTMLUListElement>(null)
   const championRef = useRef<HTMLDivElement>(null)
   const championWinRateRef = useRef<HTMLDivElement>(null)
   const aramRef = useRef<HTMLDivElement>(null)
@@ -244,153 +232,21 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         }
       />
       <Cell gridColStart={2} className={padding}>
-        <div className="flex flex-col justify-center gap-1 pt-2">
-          <div className={cx('flex items-center gap-3', ['flex-row-reverse', reverse])}>
-            {pipe(
-              premadeId,
-              Maybe.fold(
-                () => null,
-                id => (
-                  <div
-                    className={cx(
-                      'flex items-center gap-1 text-xs font-semibold text-white',
-                      padding,
-                      ['flex-row-reverse', !reverse],
-                    )}
-                  >
-                    <PeopleSharp className="h-3" />
-                    <span className="mt-0.5">{id}</span>
-                  </div>
-                ),
-              ),
-            )}
-            <div className={cx('flex grow', reverse ? 'justify-start' : 'justify-end')}>
-              <a
-                href={appRoutes.platformSummonerName(platform, summonerName, {
-                  view: 'histogram',
-                  level: allLevels,
-                })}
-                target="_blank"
-                rel="noreferrer"
-                className="whitespace-nowrap text-lg font-semibold leading-6 text-goldenrod"
-              >
-                {summonerName}
-              </a>
-            </div>
-          </div>
-          <div className={cx('flex items-center gap-2', ['flex-row-reverse', !reverse])}>
-            <img
-              src={assets.summonerIcon(profileIconId)}
-              alt={t.common.summonerIconAlt(summonerName)}
-              draggable={false}
-              className="w-12"
-            />
-            <div
-              className={cx(
-                'flex flex-col text-sm leading-3',
-                reverse ? 'items-start' : 'items-end',
-              )}
-            >
-              {pipe(
-                summonerLevel,
-                Maybe.fold(
-                  () => null,
-                  lvl => (
-                    <>
-                      <span ref={summonerLevelRef} className="text-grey-400">
-                        {t.common.level(lvl, 'font-semibold')}
-                      </span>
-                      <Tooltip hoverRef={summonerLevelRef}>{t.common.summonerLevel}</Tooltip>
-                    </>
-                  ),
-                ),
-              )}
-              {pipe(
-                masteries,
-                Maybe.fold(
-                  () => null,
-                  m => (
-                    <div className="mt-[5px]">
-                      <span className="flex gap-1.5">
-                        <span ref={percentsRef} className="font-semibold">
-                          {t.common.percents(round(m.questPercents, 1))}
-                        </span>
-                        <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
-                          {t.activeGame.theQuestProgression}
-                        </Tooltip>
-
-                        <span ref={totalMasteriesRef} className="text-grey-400">
-                          {t.activeGame.totals(
-                            m.totalMasteryLevel,
-                            TranslationUtils.numberUnit(t.common)(m.totalMasteryPoints),
-                            'font-semibold',
-                          )}
-                        </span>
-                        <Tooltip
-                          hoverRef={totalMasteriesRef}
-                          className="flex flex-col items-center gap-2"
-                        >
-                          <span>{t.activeGame.masteryScoreAndPoints}</span>
-                          <span>{t.activeGame.otpIndex(m.otpIndex, 'font-semibold')}</span>
-                        </Tooltip>
-                      </span>
-                    </div>
-                  ),
-                ),
-              )}
-              {List.isEmpty(mainRoles) ? null : (
-                <>
-                  <ul ref={mainRolesRef} className="mt-[3px] flex items-start gap-1">
-                    {mainRoles.map(r => {
-                      const isCurrent = pipe(role, Maybe.elem(ChampionPosition.Eq)(r))
-                      return (
-                        <li key={r} className="relative flex flex-col items-center">
-                          <ChampionPositionImg
-                            position={r}
-                            className={cx('w-4', ['text-cyan-200', isCurrent])}
-                          />
-                          {isCurrent ? (
-                            <span className="absolute -bottom-1 h-0.5 w-0.5 rounded-1/2 bg-cyan-200" />
-                          ) : null}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                  <Tooltip hoverRef={mainRolesRef}>
-                    <div>
-                      {t.activeGame.mainRoles}{' '}
-                      {mainRoles.map((r, i) => {
-                        const isCurrent = pipe(role, Maybe.elem(ChampionPosition.Eq)(r))
-                        return (
-                          <Fragment key={r}>
-                            <span className={cx('font-semibold', ['text-cyan-200', isCurrent])}>
-                              {t.common.labels.position[r]}
-                            </span>
-                            {i !== mainRoles.length - 1 ? ', ' : null}
-                          </Fragment>
-                        )
-                      })}
-                    </div>
-                    {pipe(
-                      role,
-                      Maybe.fold(
-                        () => null,
-                        r => (
-                          <div>
-                            {t.activeGame.currentRole}{' '}
-                            <span className="font-semibold text-cyan-200">
-                              {t.common.labels.position[r]}
-                            </span>
-                          </div>
-                        ),
-                      ),
-                    )}
-                  </Tooltip>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <ActiveGameSummoner
+          {...{
+            platform,
+            summonerName,
+            profileIconId,
+            masteries,
+            premadeId,
+            summonerLevel,
+            role,
+            mainRoles,
+            reverse,
+            tooltipShouldHide,
+            padding,
+          }}
+        />
       </Cell>
       {pipe(
         leagues,
