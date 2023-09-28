@@ -29,6 +29,7 @@ import type { Dict, List } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { AsyncRenderer } from '../../components/AsyncRenderer'
+import { Pre } from '../../components/Pre'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -119,7 +120,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
         {Maybe.fold(
           () => (
             <div className="flex flex-col items-center gap-4">
-              <pre className="mt-4">{t.notInGame}</pre>
+              <Pre className="mt-4">{t.notInGame}</Pre>
               <button type="button" onClick={refreshGame}>
                 <RefreshOutline className="w-6" />
               </button>

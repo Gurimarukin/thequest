@@ -6,6 +6,10 @@ module.exports = {
   mode: 'jit',
   content: ['./src/client/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
+    fontFamily: {
+      baloo: 'baloo2',
+      'lib-mono': 'liberationMono',
+    },
     colors: {
       black: 'black',
       current: 'currentColor',
@@ -60,10 +64,6 @@ module.exports = {
       'discord-red': '#ed4245',
     },
     extend: {
-      fontFamily: {
-        baloo: 'baloo2',
-        'lib-mono': 'liberationMono',
-      },
       data: {
         'popper-top': "popper-placement^='top'",
         'popper-bottom': "popper-placement^='bottom'",

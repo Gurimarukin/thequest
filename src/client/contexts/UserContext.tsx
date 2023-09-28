@@ -13,6 +13,7 @@ import { Future, List, Maybe, NotUsed, Tuple } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { apiUserSelfFavoritesDelete, apiUserSelfFavoritesPut } from '../api'
+import { Pre } from '../components/Pre'
 import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import { AsyncState } from '../models/AsyncState'
@@ -195,7 +196,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   if (error !== undefined) {
     return (
       <div className="flex justify-center">
-        <pre className="mt-4">error</pre>
+        <Pre className="mt-4">error</Pre>
       </div>
     )
   }

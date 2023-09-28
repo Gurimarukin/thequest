@@ -8,6 +8,7 @@ import { Lang } from '../../shared/models/api/Lang'
 import type { Dict } from '../../shared/utils/fp'
 
 import { Loading } from '../components/Loading'
+import { Pre } from '../components/Pre'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import type { ChildrenFC } from '../models/ChildrenFC'
 import type { Translation } from '../models/Translation'
@@ -44,7 +45,7 @@ export const TranslationContextProvider: ChildrenFC = ({ children }) => {
   if (error !== undefined) {
     return (
       <div className="flex justify-center">
-        <pre className="mt-4">error.</pre>
+        <Pre className="mt-4">error.</Pre>
       </div>
     )
   }

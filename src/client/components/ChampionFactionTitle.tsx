@@ -12,6 +12,7 @@ import { cx } from '../utils/cx'
 import { ChallengeWithProgression } from './Challenge'
 import { ChampionFactionImg } from './ChampionFactionImg'
 import { Loading } from './Loading'
+import { Pre } from './Pre'
 import { Tooltip } from './tooltip/Tooltip'
 
 export type ChampionFactionTitleProps = {
@@ -49,7 +50,7 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
                 () => null,
                 ({ data, error }) =>
                   error !== undefined ? (
-                    <pre>error</pre>
+                    <Pre>error</Pre>
                   ) : data === undefined ? (
                     <Loading className="h-4" />
                   ) : (
