@@ -112,8 +112,10 @@ const of = (
     const platformSummoner = `${Platform.encoderLower.encode(platform)}/${summonerName}`
 
     return pipe(
-      getWithUserAgent(`/live/${platformSummoner}`),
-      Future.chain(() => getWithUserAgent(`/partial/live-partial/${platformSummoner}`)),
+      getWithUserAgent(`/live/${platformSummoner}/ranked-only/season`),
+      Future.chain(() =>
+        getWithUserAgent(`/partial/live-partial/${platformSummoner}/ranked-only/season`),
+      ),
       Future.chainEitherK(parsePoroActiveGame),
     )
   }
