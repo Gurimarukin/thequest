@@ -560,7 +560,7 @@ const parseTierRank = (str: string): ValidatedNea<string, TierRank> =>
   )
 
 const rankLeaguePointsQueueRegex = (isApex: boolean): RegExp =>
-  new RegExp(`^ ${isApex ? '' : `${g(LeagueRank)} `}(\\d+) LP \\(${g(Queue)}\\).*$`)
+  new RegExp(`^ ${isApex ? '' : `${g(LeagueRank)} `}(-?\\d+) LP \\(${g(Queue)}\\).*$`)
 
 // "Emerald II 10 LP (Soloqueue) S13.1:"
 // "GrandMaster 10 LP (Soloqueue) S13.1:"
