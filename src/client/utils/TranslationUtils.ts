@@ -14,6 +14,7 @@ const { round } = NumberUtils
 
 const langLabel: Dict<Lang, string> = {
   en_GB: 'English',
+  es_ES: 'ESPAGNYÕLO',
   fr_FR: 'Français',
 }
 

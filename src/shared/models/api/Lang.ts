@@ -12,7 +12,7 @@ const e = createEnum(
   // 'en_PH',
   // 'en_SG',
   // 'es_AR',
-  // 'es_ES',
+  'es_ES',
   // 'es_MX',
   'fr_FR',
   // 'hu_HU',
@@ -34,6 +34,10 @@ const e = createEnum(
 
 const fromNavigatorLanguage = (lang: string): Lang => {
   switch (lang) {
+    case 'es-ES':
+    case 'es':
+      return 'es_ES'
+
     case 'fr-FR':
     case 'fr':
       return 'fr_FR'
