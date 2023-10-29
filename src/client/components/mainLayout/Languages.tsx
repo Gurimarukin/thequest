@@ -4,7 +4,7 @@ import { Lang } from '../../../shared/models/api/Lang'
 import type { Dict } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
-import { EmojiFlagFr, EmojiFlagGb } from '../../imgs/svgs/emojis'
+import { EmojiFlagEs, EmojiFlagFr, EmojiFlagGb } from '../../imgs/svgs/emojis'
 import { LanguageOutline } from '../../imgs/svgs/icons'
 import { TranslationUtils } from '../../utils/TranslationUtils'
 import { cx } from '../../utils/cx'
@@ -64,5 +64,6 @@ const LangButton: React.FC<LangButtonProps> = ({ l }) => {
 
 const langEmoji: Dict<Lang, React.ReactNode> = {
   en_GB: <EmojiFlagGb className="!h-6" />,
+  es_ES: <EmojiFlagEs className="!h-6" />,
   fr_FR: <EmojiFlagFr className="!h-6" />,
 }
