@@ -48,9 +48,15 @@ export const gridTotalColsDesktop = 18
 
 const bevelWidth = 32 // px
 
-export const gridColsMobile = 'grid-cols-[repeat(8,auto)_32px_1fr]'
-export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(8,auto)]'
-export const gridColsDesktop = 'grid-cols-[1fr_repeat(7,auto)_32px_32px_repeat(7,auto)_1fr]'
+export const gridColsMobile: React.CSSProperties = {
+  gridTemplateColumns: `repeat(8,auto) ${bevelWidth}px 1fr`,
+}
+export const gridColsReverseMobile: React.CSSProperties = {
+  gridTemplateColumns: `1fr ${bevelWidth}px repeat(8,auto)`,
+}
+export const gridColsDesktop: React.CSSProperties = {
+  gridTemplateColumns: `1fr repeat(7,auto) ${bevelWidth}px ${bevelWidth}px repeat(7,auto) 1fr`,
+}
 
 type StyleProps = Parameters<AnimatedComponent<'li'>>[0]['style'] // Merge<CSSProperties, TransformProps>;
 
@@ -299,7 +305,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   ref={championWinRateRef}
                   className={cx('flex flex-col', reverse ? 'items-start' : 'items-end')}
                 >
-                  <div className="text-grey-400">
+                  <div className="whitespace-nowrap text-grey-400">
                     <span className="font-semibold text-green">{t.common.number(kills)}</span> /{' '}
                     <span className="font-semibold text-red">{t.common.number(deaths)}</span> /{' '}
                     <span className="font-semibold text-goldenrod">{t.common.number(assists)}</span>

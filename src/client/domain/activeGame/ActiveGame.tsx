@@ -40,7 +40,6 @@ import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { RefreshOutline } from '../../imgs/svgs/icons'
 import { appRoutes } from '../../router/AppRouter'
-import { cx } from '../../utils/cx'
 import { ActiveGameHeader } from './ActiveGameHeader'
 import {
   ActiveGameParticipant,
@@ -261,18 +260,18 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         participants={participants}
       />
 
-      <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid', gridColsDesktop)}>
+      <div
+        className={shouldWrap ? 'flex flex-col gap-1' : 'grid'}
+        style={shouldWrap ? undefined : gridColsDesktop}
+      >
         {TeamId.values.map((teamId, i) => {
           const reverse = i % 2 === 1
           const participants_ = participants[teamId]
           return (
             <ul
               key={teamId}
-              className={
-                shouldWrap
-                  ? cx('grid', reverse ? gridColsReverseMobile : gridColsMobile)
-                  : 'contents'
-              }
+              className={shouldWrap ? 'grid' : 'contents'}
+              style={shouldWrap ? (reverse ? gridColsReverseMobile : gridColsMobile) : undefined}
             >
               {i === 0 ? (
                 <li
