@@ -285,7 +285,7 @@ const SummonerController = (
               PartialDict.map(sortParticipants(champions)(game.mapId)),
               (sorted): SummonerActiveGameView => ({
                 summoner,
-                game: pipe(game, ActiveGame.toView(sorted)),
+                game: pipe(game, ActiveGame.toView(sorted, false)),
               }),
             ),
           ),
@@ -348,6 +348,7 @@ const SummonerController = (
             isDraft: game.isDraft,
             bannedChampions: game.bannedChampions,
             participants,
+            isPoroOK: true,
           },
         })),
       )
