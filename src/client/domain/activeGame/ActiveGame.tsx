@@ -65,10 +65,10 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
-  const { t } = useTranslation('activeGame')
+  const { t, lang } = useTranslation('activeGame')
 
   const { data, error, mutate } = useSWRHttp(
-    apiRoutes.summoner.byName(platform, summonerName).activeGame.get,
+    apiRoutes.summoner.byName(platform, summonerName).activeGame.lang(lang).get,
     {},
     [Maybe.decoder(SummonerActiveGameView.codec), 'Maybe<SummonerActiveGameView>'],
     {
