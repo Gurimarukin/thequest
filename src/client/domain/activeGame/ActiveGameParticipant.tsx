@@ -24,6 +24,7 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
+import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
@@ -43,14 +44,16 @@ import { ActiveGameTag } from './ActiveGameTag'
 
 const { round } = NumberUtils
 
-export const gridTotalColsMobile = 10
-export const gridTotalColsDesktop = 18
+const gridTotalCols = 9
 
 const bevelWidth = 32 // px
 
-export const gridColsMobile = 'grid-cols-[repeat(8,auto)_32px_1fr]'
-export const gridColsReverseMobile = 'grid-cols-[1fr_32px_repeat(8,auto)]'
-export const gridColsDesktop = 'grid-cols-[1fr_repeat(7,auto)_32px_32px_repeat(7,auto)_1fr]'
+type Reverse = boolean
+
+export const gridCols: Dict<`${Reverse}`, React.CSSProperties> = {
+  false: { gridTemplateColumns: `1fr repeat(7,auto) ${bevelWidth}px` },
+  true: { gridTemplateColumns: `${bevelWidth}px repeat(7,auto) 1fr` },
+}
 
 type StyleProps = Parameters<AnimatedComponent<'li'>>[0]['style'] // Merge<CSSProperties, TransformProps>;
 
@@ -79,6 +82,7 @@ type ParticipantProps = {
    * index inside of team
    */
   index: number
+  isLast: boolean
   isDragging: boolean
   springStyle: StyleProps
   gestureProps: ReactDOMAttributes
@@ -111,6 +115,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   highlight,
   reverse,
   index,
+  isLast,
   isDragging,
   springStyle,
   gestureProps,
@@ -177,22 +182,21 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   return (
     <Li
-      shouldWrap={shouldWrap}
       reverse={reverse}
       gridRowStart={3 * index + 1}
       springStyle={springStyle}
       gestureProps={gestureProps}
       className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
     >
-      {/* tags */}
-      {List.isEmpty(tags) ? null : (
-        <Cell
-          gridRowOffset={1}
-          gridColStart={1}
-          className={cx('text-xs', reverse ? 'col-span-9' : 'col-span-8')}
-        >
+      {/* line 2 (tags) */}
+      <Cell
+        gridRowOffset={1}
+        gridColStart={1}
+        className={cx('h-4 text-xs', reverse ? 'col-span-9' : 'col-span-8')}
+      >
+        {List.isNonEmpty(tags) ? (
           <ul
-            className={cx('flex items-center justify-end gap-1 px-2 pb-1', [
+            className={cx('flex items-center justify-end gap-1 px-2', [
               'flex-row-reverse',
               reverse,
             ])}
@@ -202,8 +206,8 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               <ActiveGameTag key={i} {...tag} />
             ))}
           </ul>
-        </Cell>
-      )}
+        ) : null}
+      </Cell>
 
       {/* line 1 */}
 
@@ -225,12 +229,12 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         </div>
       </Cell>
 
-      <Cell
-        gridColStart={1}
-        className={
-          highlight ? cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4') : undefined
-        }
-      />
+      {highlight ? (
+        <Cell
+          gridColStart={1}
+          className={cx('border-goldenrod-bis', reverse ? 'border-r-4' : 'border-l-4')}
+        />
+      ) : null}
       <Cell gridColStart={2} className={padding}>
         <ActiveGameSummoner
           {...{
@@ -299,7 +303,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                   ref={championWinRateRef}
                   className={cx('flex flex-col', reverse ? 'items-start' : 'items-end')}
                 >
-                  <div className="text-grey-400">
+                  <div className="whitespace-nowrap text-grey-400">
                     <span className="font-semibold text-green">{t.common.number(kills)}</span> /{' '}
                     <span className="font-semibold text-red">{t.common.number(deaths)}</span> /{' '}
                     <span className="font-semibold text-goldenrod">{t.common.number(assists)}</span>
@@ -432,13 +436,14 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </Cell>
 
       {/* spacer */}
-      <Cell gridRowOffset={2} gridColStart={1} className={shouldWrap ? 'h-1' : 'h-4'} />
+      {!isLast ? (
+        <Cell gridRowOffset={2} gridColStart={1} className={shouldWrap ? 'h-1' : 'h-4'} />
+      ) : null}
     </Li>
   )
 }
 
 type LiProps = {
-  shouldWrap: boolean
   reverse: boolean
   gridRowStart: number
   springStyle: StyleProps
@@ -448,7 +453,6 @@ type LiProps = {
 }
 
 const Li: React.FC<LiProps> = ({
-  shouldWrap,
   reverse,
   gridRowStart,
   springStyle,
@@ -466,7 +470,6 @@ const Li: React.FC<LiProps> = ({
           ...gestureProps,
           ...props_,
           gridRowOffset,
-          shouldWrap,
           reverse,
           className: cx(baseClassName, className, 'touch-pinch-zoom select-none'),
           style: {
@@ -496,7 +499,6 @@ type BaseCellProps = {
    * @default 0
    */
   gridRowOffset?: number
-  shouldWrap?: boolean
   reverse?: boolean
 }
 
@@ -514,7 +516,6 @@ const Cell = forwardRef<HTMLElement, CellProps>(
       gridColStart,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       gridRowOffset: _,
-      shouldWrap = false,
       reverse = false,
       dontResetColor,
       className,
@@ -531,11 +532,7 @@ const Cell = forwardRef<HTMLElement, CellProps>(
       style: {
         ...style,
         gridColumnStart: reverse ? undefined : gridColStart,
-        gridColumnEnd: reverse
-          ? shouldWrap
-            ? gridTotalColsMobile - gridColStart + 2
-            : gridTotalColsDesktop - gridColStart + 2
-          : undefined,
+        gridColumnEnd: reverse ? gridTotalCols - gridColStart + 2 : undefined,
       },
     }
     return createElement(type, props, children)

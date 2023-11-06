@@ -4,26 +4,27 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 type ShouldWrap = {
   shouldWrap: boolean
+  onMountContainer: (e: HTMLElement | null) => void
   onMountLeft: (e: HTMLElement | null) => void
   onMountRight: (e: HTMLElement | null) => void
 }
 
 export const useShouldWrap = (): ShouldWrap => {
-  const [shouldWrap, setShouldWrap] = useState(true)
+  const [shouldWrap, setShouldWrap] = useState(false)
 
+  const containerRef = useRef<HTMLElement | null>(null)
   const leftRef = useRef<HTMLElement | null>(null)
   const rightRef = useRef<HTMLElement | null>(null)
 
   const updateShouldWrap = useCallback(() => {
-    const left = leftRef.current
-    const right = rightRef.current
-
-    if (left !== null && right !== null) {
-      const leftWidth = left.offsetWidth
+    if (containerRef.current !== null && leftRef.current !== null && rightRef.current !== null) {
+      const container = containerRef.current.getBoundingClientRect()
+      const left = leftRef.current.getBoundingClientRect()
+      const right = rightRef.current.getBoundingClientRect()
 
       setShouldWrap(shouldWrap_ => {
-        if (shouldWrap_ && leftWidth < right.getBoundingClientRect().left) return false
-        if (!shouldWrap_ && window.innerWidth < leftWidth + right.offsetWidth) return true
+        if (shouldWrap_ && left.right < right.left) return false
+        if (!shouldWrap_ && container.width < left.width + right.width) return true
         return shouldWrap_
       })
     }
@@ -36,6 +37,14 @@ export const useShouldWrap = (): ShouldWrap => {
 
   return {
     shouldWrap,
+    onMountContainer: useCallback(
+      (e: HTMLElement | null) => {
+        // eslint-disable-next-line functional/immutable-data
+        containerRef.current = e
+        updateShouldWrap()
+      },
+      [updateShouldWrap],
+    ),
     onMountLeft: useCallback(
       (e: HTMLElement | null) => {
         // eslint-disable-next-line functional/immutable-data

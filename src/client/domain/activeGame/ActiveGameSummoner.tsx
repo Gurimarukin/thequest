@@ -121,14 +121,14 @@ export const ActiveGameSummoner: React.FC<Props> = ({
               m => (
                 <div className="mt-[5px]">
                   <span className="flex gap-1.5">
-                    <span ref={percentsRef} className="font-semibold">
+                    <span ref={percentsRef} className="whitespace-nowrap font-semibold">
                       {t.common.percents(round(m.questPercents, 1))}
                     </span>
                     <Tooltip hoverRef={percentsRef} shouldHide={tooltipShouldHide}>
                       {t.activeGame.theQuestProgression}
                     </Tooltip>
 
-                    <span ref={totalMasteriesRef} className="text-grey-400">
+                    <span ref={totalMasteriesRef} className="whitespace-nowrap text-grey-400">
                       {t.activeGame.totals(
                         m.totalMasteryLevel,
                         TranslationUtils.numberUnit(t.common)(m.totalMasteryPoints),

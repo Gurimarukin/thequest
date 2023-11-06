@@ -9,7 +9,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'r
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
-import type { MapId } from '../../../shared/models/api/MapId'
+import { MapId } from '../../../shared/models/api/MapId'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
@@ -42,14 +42,12 @@ import { RefreshOutline } from '../../imgs/svgs/icons'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { ActiveGameHeader } from './ActiveGameHeader'
+import { ActiveGameParticipant, gridCols } from './ActiveGameParticipant'
 import {
-  ActiveGameParticipant,
-  gridColsDesktop,
-  gridColsMobile,
-  gridColsReverseMobile,
-  gridTotalColsDesktop,
-  gridTotalColsMobile,
-} from './ActiveGameParticipant'
+  ActiveGamePositions,
+  participantHeightDesktop,
+  participantHeightMobile,
+} from './ActiveGamePositions'
 import { useShouldWrap } from './useShouldWrap'
 
 const { swap } = ListUtils
@@ -194,8 +192,6 @@ type ActiveGameComponentProps = {
   refreshGame: () => void
 }
 
-const gridHalfColsDesktop = gridTotalColsDesktop / 2
-
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   additionalStaticData,
   platform,
@@ -208,7 +204,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 }) => {
   const { t } = useTranslation('common')
 
-  const { shouldWrap, onMountLeft, onMountRight } = useShouldWrap()
+  const { shouldWrap, onMountContainer, onMountLeft, onMountRight } = useShouldWrap()
 
   const summonerSpellByKey = useMemo(
     (): ((key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>) =>
@@ -237,6 +233,8 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     [additionalStaticData.runes],
   )
 
+  const shouldShowPositions = MapId.isSummonersRift(mapId)
+
   return (
     <div className="grid min-h-full grid-rows-[1fr_auto_auto_1fr] gap-4 py-3">
       <div className="flex items-center justify-center gap-4 px-3">
@@ -261,41 +259,44 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         participants={participants}
       />
 
-      <div className={shouldWrap ? 'flex flex-col gap-1' : cx('grid', gridColsDesktop)}>
+      <div
+        ref={onMountContainer}
+        className={shouldWrap ? 'flex flex-col items-start gap-1' : 'grid grid-cols-2'}
+      >
         {TeamId.values.map((teamId, i) => {
           const reverse = i % 2 === 1
           const participants_ = participants[teamId]
+          const mountRef = i === 0 ? onMountLeft : i === 1 ? onMountRight : undefined
           return (
             <ul
               key={teamId}
-              className={
-                shouldWrap
-                  ? cx('grid', reverse ? gridColsReverseMobile : gridColsMobile)
-                  : 'contents'
-              }
+              className={cx('grid', ['self-end', shouldWrap && reverse])}
+              style={{
+                ...(shouldShowPositions && !shouldWrap
+                  ? {
+                      gridRowStart: Math.floor((i + 2) / 2),
+                      gridRowEnd: `span ${participants_?.length ?? 0}`,
+                    }
+                  : {}),
+                gridColumnStart: reverse ? 2 : 1,
+                ...gridCols[`${reverse}`],
+              }}
             >
-              {i === 0 ? (
-                <li
-                  ref={onMountLeft}
-                  className="row-start-1"
-                  style={{
-                    gridColumn: shouldWrap
-                      ? `1 / ${gridTotalColsMobile}`
-                      : `1 / ${gridHalfColsDesktop + 1}`,
-                  }}
+              {mountRef !== undefined ? (
+                <li ref={mountRef} className="col-span-full row-start-1" />
+              ) : null}
+
+              {shouldShowPositions && shouldWrap ? (
+                <ActiveGamePositions
+                  shouldWrap={shouldWrap}
+                  rowMultiple={3}
+                  iconClassName={cx(
+                    'col-span-full col-start-1 pt-[39px]',
+                    reverse ? 'justify-self-start -ml-2.5' : 'justify-self-end -mr-2.5',
+                  )}
                 />
               ) : null}
-              {i === 1 ? (
-                <li
-                  ref={onMountRight}
-                  className="row-start-1"
-                  style={{
-                    gridColumn: shouldWrap
-                      ? `2 / ${gridTotalColsMobile + 1}`
-                      : `${gridHalfColsDesktop + 1} / ${gridTotalColsDesktop + 1}`,
-                  }}
-                />
-              ) : null}
+
               {participants_ === undefined ? null : (
                 <Participants
                   platform={platform}
@@ -313,6 +314,13 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
             </ul>
           )
         })}
+
+        {shouldShowPositions && !shouldWrap ? (
+          <ActiveGamePositions
+            shouldWrap={shouldWrap}
+            iconClassName="col-span-2 justify-self-center col-start-1 pt-[39px]"
+          />
+        ) : null}
       </div>
     </div>
   )
@@ -408,6 +416,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             highlight={participant.summonerName === summoner.name}
             reverse={reverse}
             index={j}
+            isLast={j === springs.length - 1}
             isDragging={isDragging}
             springStyle={springStyle}
             gestureProps={bind(j)}
@@ -418,9 +427,6 @@ const Participants: React.FC<ParticipantsProps> = ({
   )
 }
 
-// line 1, line 2, spacer
-const participantHeightMobile = 98 + 20 + 4
-const participantHeightDesktop = 98 + 20 + 16
 const dragOffset = 20
 
 const fn =

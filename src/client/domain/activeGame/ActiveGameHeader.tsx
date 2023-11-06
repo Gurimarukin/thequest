@@ -58,7 +58,7 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, bannedChampions, pa
         return (
           <div
             key={teamId}
-            className={cx('flex grow basis-0 items-center gap-8', ['flex-row-reverse', !reverse])}
+            className={cx('flex grow basis-0 items-center gap-8', ['flex-row-reverse', reverse])}
           >
             {isDraft ? (
               <ul className="flex flex-wrap gap-1">
@@ -76,7 +76,7 @@ export const ActiveGameHeader: React.FC<Props> = ({ isDraft, bannedChampions, pa
               {(factions[teamId] ?? []).map(faction => (
                 <li
                   key={faction}
-                  className={cx('flex items-center gap-1.5', ['flex-row-reverse', !reverse])}
+                  className={cx('flex items-center gap-1.5', ['flex-row-reverse', reverse])}
                 >
                   <Challenge
                     id={ChallengesView.id[faction]}
