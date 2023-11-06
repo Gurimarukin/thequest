@@ -84,7 +84,7 @@ const rank: Dict<LeagueRank, string> = {
 const spell: Dict<SpellName, string> = {
   I: 'P',
   Q: 'Q',
-  W: 'Z',
+  W: 'W',
   E: 'E',
   R: 'R',
 }
@@ -139,9 +139,9 @@ const esESTranslation: Translation = {
         nerfed: 'MA CAMPEONE NO BUENE MAXO',
         other: (
           <>
-            Champions avec autant de buffs que de nerfs (ou avec des modifications de compétences
-            pour lesquelles il est difficile de déterminer automatiquement si c’est un buff ou un
-            nerf  <EmojiUpsideDown />)
+            CAMPEONES CON TANTOS BUFFS COMO NERFS (O CON MODIFICACIONES DE HABILIDADES PARA LAS QUE
+            ES DIFÍCIL DETERMINAR AUTOMÁTICAMENTE SI SE TRATA DE UN BUFF O UN NERF {' '}
+            <EmojiUpsideDown />)
           </>
         ),
         balanced: 'PERFECTO CAMPEONE',
@@ -152,9 +152,9 @@ const esESTranslation: Translation = {
   },
   common: {
     challenge: {
-      challenge: 'Défi',
+      challenge: 'DESAFÍO',
       iconAlt: id => `Icône défi ${challengeShort(id)}`,
-      thresholds: 'Seuils :',
+      thresholds: 'UMBRALES :',
       valueTier: (value, tier, o) =>
         `${value} : ${leagueTier[tier]}${o !== undefined && o.withComma ? ',' : ''}`,
     },
@@ -162,7 +162,7 @@ const esESTranslation: Translation = {
     championKey: key => `<Champion ${key}>`,
     cooldownSeconds: (cooldown, highlightClassName) => (
       <>
-        <span className={highlightClassName}>récupération :</span> {cooldown.toLocaleString(locale)}
+        <span className={highlightClassName}>RECUPERACIÓN :</span> {cooldown.toLocaleString(locale)}
         s
       </>
     ),
@@ -186,7 +186,7 @@ const esESTranslation: Translation = {
       faction: factionOrNone,
       factionOrNone,
       gameQueue: {
-        0: 'Personnalisée', // Custom games
+        0: 'PERSONALIZADO', // Custom games
         2: '5v5 A CIEGAS', // Summoner's Rift — 5v5 Blind Pick games — Deprecated in patch 7.19 in favor of queueId 430"
         4: '5v5 CLASIFICATORIA SOLO / DUO', // Summoner's Rift — 5v5 Ranked Solo games — Deprecated in favor of queueId 420"
         6: '5v5 CLASIFICATORIA FLEXEIBLE', // Summoner's Rift — 5v5 Ranked Premade games — Game mode deprecated"
@@ -327,24 +327,24 @@ const esESTranslation: Translation = {
     spellKey: key => `<SORTO ${key}>`,
     level: (level, highlightClassName) => (
       <>
-        niveau <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+        NIVEL <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
       </>
     ),
     summonerLevel: 'INVOCADOR LEVELITO',
     summonerIconAlt: name => `ICONO DEL ${name}`,
   },
   form: {
-    alreadyAnAccount: 'Déjà un compte ?',
-    confirmPassword: 'Confirmation mot de passe :',
-    login: 'Se connecter',
-    loginWithDiscord: discordLogo => <>Se connecter avec {discordLogo}</>,
-    noAccount: 'Pas de compte ?',
-    or: 'ou',
-    password: 'Mot de passe :',
-    passwordsShouldBeIdentical: 'Les mots de passe doivent être identiques',
-    register: 'S’inscrire',
-    registerWithDiscord: discordLogo => <>S’inscrire avec {discordLogo}</>,
-    userName: 'Utilisateur :',
+    alreadyAnAccount: '¿YA TIENE UNA CUENTA?',
+    confirmPassword: 'CONFIRMAR CONTRASEÑA :',
+    login: 'INICIAR SESIÓN',
+    loginWithDiscord: discordLogo => <>CONECTAR CON {discordLogo}</>,
+    noAccount: '¿NO TIENE CUENTA?',
+    or: 'O',
+    password: 'CONTRASEÑA :',
+    passwordsShouldBeIdentical: 'LAS CONTRASEÑAS DEBEN SER IDÉNTICAS',
+    register: 'INSCRÍBETE',
+    registerWithDiscord: discordLogo => <>REGISTRARSE CON {discordLogo}</>,
+    userName: 'USUARIO :',
   },
   home: {
     isntEndorsed:
@@ -396,9 +396,9 @@ const esESTranslation: Translation = {
         const s = n < 2 ? '' : 's'
         return (
           <>
-            Changement{s} de niveau detecté{s} depuis la dernière modification de fragments.
+            CAMBIO{s} DE NIVEL DETECTADO{s} DESDE LA ÚLTIMA MODIFICACIÓN DEL FRAGMENTO.
             <br />
-            Peut-être en avez-vous dépensés (des fragments) ?
+            ¿QUIZÁ HAYA GASTADO ALGUNOS (FRAGMENTOS)?
           </>
         )
       },
@@ -416,7 +416,7 @@ const esESTranslation: Translation = {
           {points.toLocaleString(locale)}
           {total !== undefined ? ` / ${total.toLocaleString(locale)}` : null}
         </span>{' '}
-        points
+        PUNTOS
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
@@ -437,70 +437,66 @@ const esESTranslation: Translation = {
   },
   register: {
     accessRecentSearches: recentSearches =>
-      `Voir les ${recentSearches.toLocaleString(
+      `VER LAS ${recentSearches.toLocaleString(
         locale,
-      )} recherches les plus récentes (stockage local du navigateur)`,
-    accessSummonerDetails: 'Accéder à tous les détails d’un invocateur via la recherche',
-    addSummonerToFavorites: 'Ajouter des invocateur en favori',
-    customiseChampionPositions: 'Personnaliser les champions associés à un rôle',
+      )} BÚSQUEDAS MÁS RECIENTES (ALMACENAMIENTO LOCAL DEL NAVEGADOR)`,
+    accessSummonerDetails: 'BUSCAR TODOS LOS DATOS DE UN INVOCADOR',
+    addSummonerToFavorites: 'AÑADIR INVOCADORES COMO FAVORITOS',
+    customiseChampionPositions: 'PERSONALIZAR LOS CAMPEONES ASOCIADOS A UNA FUNCIÓN',
     discordHallOfFameRanking:
-      'Classement dans le temple de la renommée sur le serveur Discord du capitaine :',
-    discordServer: 'Serveur Discord',
+      'CLASIFICACIÓN EN EL SALÓN DE LA FAMA DEL SERVIDOR DISCORD DEL CAPITÁN :',
+    discordServer: 'SERVIDOR DISCORD',
     discordServerIconAlt: name => `Icône du serveur ${name}`,
-    join: 'Rejoindre',
-    keepTrackOfShards: 'Garder le compte des fragments de champions (à la main, désolé)',
-    quickSummonerAccess: 'Accès rapide au profil d’invocateur lié',
+    join: 'CONTACTO',
+    keepTrackOfShards: 'SEGUIMIENTO DE LOS FRAGMENTOS DE CAMPEONES (A MANO, LO SIENTO)',
+    quickSummonerAccess: 'ACCESO RÁPIDO AL PERFIL DE INVOCADOR VINCULADO',
     registrationExplanation: (
       <>
-        Avoir un compte lié à un compte Discord, lui-même lié à un compte Riot Games, permet d’avoir
-        accès à plus de fonctionnalités.
+        TENER UNA CUENTA VINCULADA A UNA CUENTA DE DISCORD, QUE A SU VEZ ESTÁ VINCULADA A UNA CUENTA
+        DE Riot Games, TE DA ACCESO A ACCESO A MÁS FUNCIONES.
         <br />
-        Comme Riot Games, c’est tout pourri, il n’est pas possible de lier directement un compte
-        Riot Games. Il faut passer par un compte Discord et que celui-ci soit lié à un compte Riot
+        COMO Riot Games ESTÁ TODO PODRIDO, NO ES POSIBLE VINCULAR DIRECTAMENTE UNA CUENTA DE Riot
+        Games DIRECTAMENTE. TIENES QUE USAR UNA CUENTA DE DISCORD Y VINCULARLA A UNA CUENTA DE Riot
         Games.
       </>
     ),
-    withAccountLinked: 'Avec un compte lié à Riot Games',
-    withAccountNotLinked: 'Avec un compte NON lié à Riot Games',
-    withoutAccount: 'Sans compte',
+    withAccountLinked: 'CON UNA CUENTA VINCULADA A Riot Games',
+    withAccountNotLinked: 'CON UNA CUENTA NO VINCULADA A Riot Games',
+    withoutAccount: 'SIN CUENTA',
   },
   summoner: {
     masteriesCache: {
       lastUpdate: insertedAt =>
-        `Dernière mise à jour des maîtrises à ${insertedAt.toLocaleTimeString(locale)}`,
+        `ÚLTIMA ACTUALIZACIÓN DE LOS TÍTULOS DE MÁSTER EN ${insertedAt.toLocaleTimeString(locale)}`,
       duration: minutes =>
-        `(durée du cache : ${minutes.toLocaleString(locale, {
+        `(DURACIÓN DE LA CACHÉ : ${minutes.toLocaleString(locale, {
           maximumFractionDigits: 2,
-        })} ${pluralUnit('minute')(minutes)})`,
+        })} ${pluralUnit('MINUTO')(minutes)})`,
     },
-    masteryScore: 'Score de maîtrise :',
-    masteryPoints: 'Points de maîtrise :',
-    otpIndex: 'Indice d’OTP :',
+    masteryScore: 'PUNTUACIÓN DE MAESTRÍA :',
+    masteryPoints: 'PUNTOS DE MAESTRÍA :',
+    otpIndex: 'ÍNDICE DE OTP :',
     otpIndexExplanation:
-      '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
+      '(NÚMERO DE CAMPEONES QUE ACUMULAN LA MITAD DEL NÚMERO TOTAL DE PUNTOS DE MAESTRÍA)',
     masteriesExplanation: (
       <>
+        <li>DEL DOMINIO 0 AL DOMINIO 5, LOS PORCENTAJES CORRESPONDEN A LOS PUNTOS DE DOMINIO.</li>
+        <li>MAESTRÍA 5 = 50 %</li>
+        <li>CADA FRAGMENTO = 3 %</li>
         <li>
-          De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de maîtrise.
+          CADA FICHA DE MAESTRÍA 6 = 7% (MAESTRÍA 5 + 1 FICHA = 57%; MAESTRÍA 5 + 2 FICHAS = 64 %)
         </li>
-        <li>Maîtrise 5 = 50 %</li>
-        <li>Chaque fragment = 3 %</li>
+        <li>MAESTRÍA 6 = 67 %</li>
         <li>
-          Chaque jeton pour la maîtrise 6 = 7 % (maîtrise 5 + 1 jeton = 57 % ; maîtrise 5 + 2 jetons
-          = 64 %)
+          CADA FICHA DE MAESTRÍA 7 = 10% (MAESTRÍA 6 + 1 FICHA = 77%; MAESTRÍA 6 + 2 FICHAS = 87%;
+          MAESTRÍA 6 + 3 FICHAS = 97%)
         </li>
-        <li>Maîtrise 6 = 67 %</li>
-        <li>
-          Chaque jeton pour la maîtrise 7 = 10 % (maîtrise 6 + 1 jeton = 77 % ; maîtrise 6 + 2
-          jetons = 87 % ; maîtrise 6 + 3 jetons = 97 %)
-        </li>
-        <li>Maîtrise 7 = 100 %</li>
+        <li>MAESTRÍA 7 = 100 %</li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (
       <>
-        Progression :{' '}
-        <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+        PROGRESO : <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
       </>
     ),
   },
