@@ -22,10 +22,14 @@ type ActiveGame = {
 }
 
 const toView =
-  (participants: PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>) =>
+  (
+    participants: PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
+    isPoroOK: boolean,
+  ) =>
   (game: ActiveGame): ActiveGameView => ({
     ...game,
     participants,
+    isPoroOK,
   })
 
 const ActiveGame = { toView }

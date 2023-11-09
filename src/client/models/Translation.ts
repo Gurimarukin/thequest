@@ -22,6 +22,7 @@ import type { MasteriesQueryView } from './masteriesQuery/MasteriesQueryView'
 
 export type Translation = {
   activeGame: {
+    poroIconAlt: string
     bannedAtTurn: (pickTurn: number) => React.ReactNode
     empty: React.ReactNode
     gameStartedAt: (date: Date) => React.ReactNode

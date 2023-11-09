@@ -1,6 +1,7 @@
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
+import { Lang } from '../../../shared/models/api/Lang'
 import { PoroNiceness } from '../../../shared/models/api/activeGame/PoroNiceness'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
@@ -74,6 +75,7 @@ const participantsProperties: Dict<
 type PoroActiveGameDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
+  lang: Lang.codec,
   gameId: GameId.codec,
   participants: C.readonly(C.partial(participantsProperties)),
   insertedAt: DayJsFromDate.codec,

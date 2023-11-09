@@ -1,7 +1,9 @@
 import { number, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
+import type { Lang } from './models/api/Lang'
 import type { ChampionLevelOrZero } from './models/api/champion/ChampionLevel'
+import type { Dict } from './utils/fp'
 import { List, NonEmptyArray } from './utils/fp'
 
 type SimpleChampion = {
@@ -56,4 +58,10 @@ const otpRatioRec = (
   return otpRatioRec(threshold, tail, newPointsAcc, newCountAcc)
 }
 
-export const Business = { championPercents, otpRatio }
+const poroLang: Dict<Lang, string> = {
+  en_GB: 'en',
+  es_ES: 'es',
+  fr_FR: 'fr',
+}
+
+export const Business = { championPercents, otpRatio, poroLang }
