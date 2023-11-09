@@ -7,10 +7,12 @@ import { lens } from 'monocle-ts'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { Business } from '../../../shared/Business'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
+import type { Lang } from '../../../shared/models/api/Lang'
 import { MapId } from '../../../shared/models/api/MapId'
-import type { Platform } from '../../../shared/models/api/Platform'
+import { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
@@ -32,13 +34,15 @@ import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { Pre } from '../../components/Pre'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
+import { config } from '../../config/unsafe'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
-import { RefreshOutline } from '../../imgs/svgs/icons'
+import { Assets } from '../../imgs/Assets'
+import { CheckMarkSharp, CloseFilled, RefreshOutline } from '../../imgs/svgs/icons'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { ActiveGameHeader } from './ActiveGameHeader'
@@ -65,7 +69,7 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   const { maybeUser } = useUser()
-  const { t, lang } = useTranslation('activeGame')
+  const { lang, t } = useTranslation('activeGame')
 
   const { data, error, mutate } = useSWRHttp(
     apiRoutes.summoner.byName(platform, summonerName).activeGame.lang(lang).get,
@@ -197,12 +201,20 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   platform,
   summonerGame: {
     summoner,
-    game: { gameStartTime, mapId, gameQueueConfigId, isDraft, bannedChampions, participants },
+    game: {
+      gameStartTime,
+      mapId,
+      gameQueueConfigId,
+      isDraft,
+      bannedChampions,
+      participants,
+      isPoroOK,
+    },
   },
   refreshGame,
   reloadGame,
 }) => {
-  const { t } = useTranslation('common')
+  const { lang, t } = useTranslation()
 
   const { shouldWrap, onMountContainer, onMountLeft, onMountRight } = useShouldWrap()
 
@@ -242,7 +254,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
           <RefreshOutline className="w-6" />
         </button>
         <h2 className="text-xl font-bold text-goldenrod">
-          {t.labels.gameQueue[gameQueueConfigId]}
+          {t.common.labels.gameQueue[gameQueueConfigId]}
         </h2>
         {pipe(
           gameStartTime,
@@ -251,6 +263,17 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
             startTime => <Timer startTime={startTime} />,
           ),
         )}
+
+        <div className="flex items-center gap-0.5">
+          <a href={poroLink(lang, platform, summoner.name)} target="_blank" rel="noreferrer">
+            <img src={Assets.poro} alt={t.activeGame.poroIconAlt} className="h-5" />
+          </a>
+          {isPoroOK ? (
+            <CheckMarkSharp className="w-3 text-green" />
+          ) : (
+            <CloseFilled className="w-3 text-red" />
+          )}
+        </div>
       </div>
 
       <ActiveGameHeader
@@ -325,6 +348,11 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     </div>
   )
 }
+
+const poroLink = (lang: Lang, platform: Platform, summonerName: string): string =>
+  `${config.poroApiBaseUrl}/${Business.poroLang[lang]}/live/${Platform.encoderLower.encode(
+    platform,
+  )}/${summonerName}/ranked-only/season`
 
 type ParticipantsProps = {
   platform: Platform

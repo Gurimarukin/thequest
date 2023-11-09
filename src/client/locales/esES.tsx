@@ -103,6 +103,7 @@ const wikiaStatsBalance: Dict<WikiaStatsBalanceKey, string> = {
 
 const esESTranslation: Translation = {
   activeGame: {
+    poroIconAlt: 'ICONO DE PORO',
     bannedAtTurn: pickTurn => `NO BIENVENUTO ${pickTurn}`,
     empty: 'NADA',
     gameStartedAt: date =>

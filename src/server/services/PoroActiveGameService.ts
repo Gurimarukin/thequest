@@ -4,6 +4,7 @@ import type { Decoder } from 'io-ts/lib/Decoder'
 import type { Literal } from 'io-ts/lib/Schemable'
 import util from 'util'
 
+import { Business } from '../../shared/Business'
 import { DayJs } from '../../shared/models/DayJs'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import { Lang } from '../../shared/models/api/Lang'
@@ -174,13 +175,15 @@ const of = (
   }
 
   function fetch(lang: Lang, platform: Platform, summonerName: string): Future<string> {
-    const lang_ = poroLang[lang]
+    const poroLang = Business.poroLang[lang]
     const platformSummoner = `${Platform.encoderLower.encode(platform)}/${summonerName}`
 
     return pipe(
-      getWithUserAgent(`/${lang_}/live/${platformSummoner}/ranked-only/season`),
+      getWithUserAgent(`/${poroLang}/live/${platformSummoner}/ranked-only/season`),
       Future.chain(() =>
-        getWithUserAgent(`/partial/${lang_}/live-partial/${platformSummoner}/ranked-only/season`),
+        getWithUserAgent(
+          `/partial/${poroLang}/live-partial/${platformSummoner}/ranked-only/season`,
+        ),
       ),
     )
   }
@@ -195,11 +198,6 @@ const of = (
 export { PoroActiveGameService }
 
 const defaultLang: Lang = 'en_GB'
-const poroLang: Dict<Lang, string> = {
-  en_GB: 'en',
-  es_ES: 'es',
-  fr_FR: 'fr',
-}
 
 type PoroActiveGameOnlyTags = {
   participants: PartialDict<`${TeamId}`, NonEmptyArray<PoroActiveGameParticipantOnlyTags>>

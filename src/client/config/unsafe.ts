@@ -11,6 +11,7 @@ const inlined: Dict<string, string | undefined> = {
   API_HOST: process.env['API_HOST'],
   CLIENT_ID: process.env['CLIENT_ID'],
   REDIRECT_URI: process.env['REDIRECT_URI'],
+  PORO_BASE_URL: process.env['PORO_BASE_URL'],
 }
 
 export const config: Config = pipe(inlined, Config.parse, Try.getUnsafe)
