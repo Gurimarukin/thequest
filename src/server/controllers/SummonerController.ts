@@ -6,6 +6,7 @@ import { Status } from 'hyper-ts'
 
 import { Business } from '../../shared/Business'
 import type { DayJs } from '../../shared/models/DayJs'
+import type { Lang } from '../../shared/models/api/Lang'
 import { MapId } from '../../shared/models/api/MapId'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
@@ -114,13 +115,13 @@ const SummonerController = (
       ),
 
     activeGame:
-      (platform: Platform, summonerName: string) =>
+      (lang: Lang, platform: Platform, summonerName: string) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
         pipe(
           summonerService.findByName(platform, summonerName),
           Future.map(Either.fromOption(() => 'Summoner not found')),
           futureEither.chain(summoner =>
-            pipe(activeGame(summoner, maybeUser), Future.map(Either.right)),
+            pipe(activeGame(lang, summoner, maybeUser), Future.map(Either.right)),
           ),
           M.fromTaskEither,
           M.ichain(
@@ -228,6 +229,7 @@ const SummonerController = (
   }
 
   function activeGame(
+    lang: Lang,
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
   ): Future<Maybe<SummonerActiveGameView>> {
@@ -235,7 +237,7 @@ const SummonerController = (
       activeGameService.findBySummoner(summoner.platform, summoner.id),
       futureMaybe.chainTaskEitherK(game =>
         pipe(
-          poroActiveGameService.find(game.gameId, summoner.platform, summoner.name),
+          poroActiveGameService.find(lang, game.gameId, summoner.platform, summoner.name),
           task.chain(
             Try.fold(
               e =>
@@ -283,7 +285,7 @@ const SummonerController = (
               PartialDict.map(sortParticipants(champions)(game.mapId)),
               (sorted): SummonerActiveGameView => ({
                 summoner,
-                game: pipe(game, ActiveGame.toView(sorted)),
+                game: pipe(game, ActiveGame.toView(sorted, false)),
               }),
             ),
           ),
@@ -346,6 +348,7 @@ const SummonerController = (
             isDraft: game.isDraft,
             bannedChampions: game.bannedChampions,
             participants,
+            isPoroOK: true,
           },
         })),
       )

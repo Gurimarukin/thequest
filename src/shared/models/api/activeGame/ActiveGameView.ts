@@ -41,6 +41,7 @@ const codec = C.struct({
   isDraft: C.boolean,
   bannedChampions: C.readonly(C.partial(bannedChampionsProperties)),
   participants: C.readonly(C.partial(participantsProperties)),
+  isPoroOK: C.boolean,
 })
 
 const ActiveGameView = { codec }

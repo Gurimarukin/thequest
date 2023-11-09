@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { Lang } from '../../shared/models/api/Lang'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Either, Future, Maybe, Tuple } from '../../shared/utils/fp'
@@ -30,15 +31,17 @@ const PoroActiveGamePersistence = (
   const collection = FpCollection(logger)(codecWithName)(mongoCollection('poroActiveGame'))
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { gameId: -1 }, unique: true },
+    { key: { lang: -1, gameId: -1 }, unique: true },
   ])
 
   return {
     ensureIndexes,
 
-    findById: (gameId: GameId): Future<Maybe<PoroActiveGameDb>> =>
+    find: (lang: Lang, gameId: GameId): Future<Maybe<PoroActiveGameDb>> =>
       pipe(
-        collection.collection.future(c => c.findOne({ gameId: GameId.codec.encode(gameId) })),
+        collection.collection.future(c =>
+          c.findOne({ lang: Lang.encoder.encode(lang), gameId: GameId.codec.encode(gameId) }),
+        ),
         Future.chainFirstIOEitherK(res => logger.trace('Found one', ellipse(JSON.stringify(res)))),
         Future.map(Maybe.fromNullable),
         futureMaybe.chainEitherK(u =>

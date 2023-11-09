@@ -40,8 +40,8 @@ export const Routes = (
     m(api.summoner.byName.challenges.get, ({ platform, summonerName }) =>
       summonerController.challenges(platform, summonerName),
     ),
-    m(api.summoner.byName.activeGame.get, ({ platform, summonerName }) =>
-      maybeWithAuth(summonerController.activeGame(platform, summonerName)),
+    m(api.summoner.byName.activeGame.lang.get, ({ lang, platform, summonerName }) =>
+      maybeWithAuth(summonerController.activeGame(lang, platform, summonerName)),
     ),
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),

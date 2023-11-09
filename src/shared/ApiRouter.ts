@@ -45,7 +45,10 @@ const summonerByPuuidMasteriesGet = m(
 )
 const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get')
 const summonerByNameChallengesGet = m(summonerByName.then(lit('challenges')), 'get')
-const summonerByNameActiveGameGet = m(summonerByName.then(lit('active-game')), 'get')
+const summonerByNameActiveGameLangGet = m(
+  summonerByName.then(lit('active-game')).then(codec('lang', Lang.codec)),
+  'get',
+)
 const userSelfGet = m(userSelf, 'get')
 const userSelfFavoritesPut = m(userSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(userSelfFavorites, 'delete')
@@ -85,7 +88,7 @@ export const apiParsers = {
     byName: {
       masteries: { get: p(summonerByNameMasteriesGet) },
       challenges: { get: p(summonerByNameChallengesGet) },
-      activeGame: { get: p(summonerByNameActiveGameGet) },
+      activeGame: { lang: { get: p(summonerByNameActiveGameLangGet) } },
     },
   },
   user: {
@@ -139,7 +142,11 @@ export const apiRoutes = {
       return {
         masteries: { get: r(summonerByNameMasteriesGet, { platform, summonerName }) },
         challenges: { get: r(summonerByNameChallengesGet, { platform, summonerName }) },
-        activeGame: { get: r(summonerByNameActiveGameGet, { platform, summonerName }) },
+        activeGame: {
+          lang: (lang: Lang) => ({
+            get: r(summonerByNameActiveGameLangGet, { lang, platform, summonerName }),
+          }),
+        },
       }
     },
   },

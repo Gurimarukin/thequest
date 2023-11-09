@@ -15,6 +15,7 @@ export type Config = {
   apiHost: URL
   clientId: DiscordUserId
   redirectUri: string
+  poroApiBaseUrl: string
 }
 
 const parse = (rawConfig: PartialDict<string, string>): Try<Config> =>
@@ -27,6 +28,7 @@ const parse = (rawConfig: PartialDict<string, string>): Try<Config> =>
       apiHost: r(URLFromString.decoder)('API_HOST'),
       clientId: r(DiscordUserId.codec)('CLIENT_ID'),
       redirectUri: r(D.string)('REDIRECT_URI'),
+      poroApiBaseUrl: r(D.string)('PORO_BASE_URL'),
     }),
   )
 
