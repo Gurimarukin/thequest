@@ -122,7 +122,6 @@ module.exports = {
      * - `text-shadow-{name}`: add some text-shadow (customize in theme)
      * - `shadow-{color}`: text-shadow color
      */
-
     plugin(({ matchUtilities, theme }) =>
       matchUtilities(
         { 'text-shadow': textShadow => ({ textShadow }) },
