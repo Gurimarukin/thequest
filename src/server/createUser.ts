@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { exit } from 'process'
+import process from 'process'
 
 import type { NotUsed } from '../shared/utils/fp'
 import { Future } from '../shared/utils/fp'
@@ -13,14 +13,13 @@ const main: Future<NotUsed> = pipe(
   Future.map(Config.Lens.logLevel.set('debug')),
   Future.chain(Context.load),
   Future.chain(({ Logger, userService }) => {
-    const logger = Logger('Application')
+    const logger = Logger('createUser')
     return pipe(
       userService.createUserInteractive,
-      Future.orElseIOEitherK(e => logger.error(e)),
       Future.chainIOEitherK(() => logger.info('Done')),
     )
   }),
-  Future.map(() => exit(0)),
+  Future.map(() => process.exit(0)),
 )
 
 // eslint-disable-next-line functional/no-expression-statements
