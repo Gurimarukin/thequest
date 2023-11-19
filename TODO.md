@@ -1,9 +1,10 @@
+- riot id
+
 - react-select
 - url encode summoner name (client and server side)
 - uri: ugly encode
 
 - challenges page + detect challenges
-- translate poro tags
 - menu react-popper?
 - challenge progression discord notification
 - account menu

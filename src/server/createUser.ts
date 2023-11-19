@@ -1,4 +1,5 @@
 import { pipe } from 'fp-ts/function'
+import { exit } from 'process'
 
 import type { NotUsed } from '../shared/utils/fp'
 import { Future } from '../shared/utils/fp'
@@ -19,6 +20,7 @@ const main: Future<NotUsed> = pipe(
       Future.chainIOEitherK(() => logger.info('Done')),
     )
   }),
+  Future.map(() => exit(0)),
 )
 
 // eslint-disable-next-line functional/no-expression-statements
