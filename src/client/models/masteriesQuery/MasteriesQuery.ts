@@ -4,7 +4,7 @@ import { lens } from 'monocle-ts'
 
 import type { MyPartial } from '../../../shared/models/MyPartial'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { Dict, List, Maybe } from '../../../shared/utils/fp'
 
@@ -17,19 +17,19 @@ type MasteriesQuery = {
   sort: MasteriesQuerySort
   order: MasteriesQueryOrder
   view: MasteriesQueryView
-  level: ReadonlySet<ChampionLevelOrZero>
+  level: ReadonlySet<ChampionLevel>
   faction: ReadonlySet<ChampionFactionOrNone>
   position: ReadonlySet<ChampionPosition>
   search: Maybe<string>
 }
 
-const levelDefault: ReadonlySet<ChampionLevelOrZero> = new Set(
+const levelDefault: ReadonlySet<ChampionLevel> = new Set(
   pipe(
-    ChampionLevelOrZero.values,
+    ChampionLevel.values,
     List.filter(l => l !== 7),
   ),
 )
-const levelEq = readonlySet.getEq(ChampionLevelOrZero.Eq)
+const levelEq = readonlySet.getEq(ChampionLevel.Eq)
 
 const positionDefault: ReadonlySet<ChampionPosition> = new Set(ChampionPosition.values)
 const positionEq = readonlySet.getEq(ChampionPosition.Eq)

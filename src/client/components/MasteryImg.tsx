@@ -1,11 +1,11 @@
-import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 
 import { useTranslation } from '../contexts/TranslationContext'
 import { Assets } from '../imgs/Assets'
 import { cx } from '../utils/cx'
 
 type Props = {
-  level: ChampionLevelOrZero
+  level: ChampionLevel
   className?: string
 }
 

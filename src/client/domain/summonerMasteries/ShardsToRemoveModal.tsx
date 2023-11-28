@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import type { List } from '../../../shared/utils/fp'
@@ -27,7 +27,7 @@ import { cx } from '../../utils/cx'
 export type ShardsToRemoveNotification = {
   championId: ChampionKey
   name: string
-  championLevel: ChampionLevelOrZero
+  championLevel: ChampionLevel
   championPoints: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
@@ -37,7 +37,7 @@ export type ShardsToRemoveNotification = {
   shardsCount: number
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
-  leveledUpFrom: ChampionLevelOrZero
+  leveledUpFrom: ChampionLevel
   shardsToRemove: number
 }
 

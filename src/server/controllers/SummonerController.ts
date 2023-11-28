@@ -16,7 +16,7 @@ import { SummonerActiveGameView } from '../../shared/models/api/activeGame/Summo
 import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
@@ -207,7 +207,7 @@ const SummonerController = (
             ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
           )(champion),
           Maybe.map(m => m.championLevel),
-          Maybe.getOrElse((): ChampionLevelOrZero => 0),
+          Maybe.getOrElse((): ChampionLevel => 0),
           shouldNotifyChampionLeveledUp(count)(updatedWhenChampionLevel),
           Try.map(
             (maybeShardsToRemove): ChampionShardsView => ({
@@ -459,8 +459,8 @@ export { SummonerController }
  */
 export const shouldNotifyChampionLeveledUp =
   (shardsCount: number) =>
-  (oldLevel: ChampionLevelOrZero) =>
-  (newLevel: ChampionLevelOrZero): Try<Maybe<number>> => {
+  (oldLevel: ChampionLevel) =>
+  (newLevel: ChampionLevel): Try<Maybe<number>> => {
     if (newLevel < oldLevel) {
       return Try.failure(
         Error(`shouldNotifyChampionLeveledUp: oldLevel should be equal to or lower than newLevel`),

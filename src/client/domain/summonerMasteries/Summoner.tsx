@@ -3,7 +3,7 @@ import { useMemo, useRef } from 'react'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
-import type { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
@@ -35,7 +35,7 @@ export type EnrichedSummonerView = SummonerView & {
   totalMasteryLevel: number
   totalMasteryPoints: number
   otpIndex: number
-  masteriesCount: Dict<`${ChampionLevelOrZero}`, number>
+  masteriesCount: Dict<`${ChampionLevel}`, number>
 }
 
 export const Summoner: React.FC<Props> = ({
@@ -150,7 +150,7 @@ export const Summoner: React.FC<Props> = ({
 }
 
 type MasteryImgWithCountProps = {
-  level: ChampionLevelOrZero
+  level: ChampionLevel
   imgClassName?: string
   className?: string
 }
@@ -158,7 +158,7 @@ type MasteryImgWithCountProps = {
 const getMasteryImgWithCount =
   (
     t: Translation['common'],
-    masteriesCount: Dict<`${ChampionLevelOrZero}`, number>,
+    masteriesCount: Dict<`${ChampionLevel}`, number>,
   ): React.FC<MasteryImgWithCountProps> =>
   ({ level, imgClassName, className }) =>
     (

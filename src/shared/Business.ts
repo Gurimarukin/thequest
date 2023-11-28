@@ -2,12 +2,12 @@ import { number, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
 import type { Lang } from './models/api/Lang'
-import type { ChampionLevelOrZero } from './models/api/champion/ChampionLevel'
+import type { ChampionLevel } from './models/api/champion/ChampionLevel'
 import type { Dict } from './utils/fp'
 import { List, NonEmptyArray } from './utils/fp'
 
 type SimpleChampion = {
-  championLevel: ChampionLevelOrZero
+  championLevel: ChampionLevel
   championPoints: number
   tokensEarned: number
 }
