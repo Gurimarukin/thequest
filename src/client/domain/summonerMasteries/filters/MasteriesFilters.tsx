@@ -8,7 +8,7 @@ import type React from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { ChampionFactionOrNone } from '../../../../shared/models/api/champion/ChampionFaction'
-import { ChampionLevelOrZero } from '../../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
 import type { NonEmptyArray } from '../../../../shared/utils/fp'
 import { List, Maybe } from '../../../../shared/utils/fp'
@@ -57,7 +57,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
   const hideLevelsMenu = useCallback(() => setLevelsMenuIsVisible(false), [])
 
   const toggleMasteryChecked = useCallback(
-    (f: Endomorphism<ReadonlySet<ChampionLevelOrZero>>): void => {
+    (f: Endomorphism<ReadonlySet<ChampionLevel>>): void => {
       updateMasteriesQuery(pipe(MasteriesQuery.Lens.level, lens.modify(f)))
       hideLevelsMenu()
     },
@@ -176,10 +176,10 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div onMouseLeave={hideLevelsMenu} className="relative">
-          <Checkboxes<ChampionLevelOrZero>
-            eq={ChampionLevelOrZero.Eq}
+          <Checkboxes<ChampionLevel>
+            eq={ChampionLevel.Eq}
             values={pipe(
-              ChampionLevelOrZero.values,
+              ChampionLevel.values,
               List.reverse,
               List.map(level => ({
                 key: level,
@@ -217,7 +217,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               {t.masteries.filters.fourAndLess}
             </SelectLevelsButton>
             {pipe(
-              ChampionLevelOrZero.values,
+              ChampionLevel.values,
               List.reverse,
               List.map(level => (
                 <SelectLevelsButton key={level} levels={[level]}>
@@ -225,7 +225,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                 </SelectLevelsButton>
               )),
             )}
-            <SelectLevelsButton levels={ChampionLevelOrZero.values}>
+            <SelectLevelsButton levels={ChampionLevel.values}>
               {t.masteries.filters.all}
             </SelectLevelsButton>
           </ul>
@@ -297,20 +297,20 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
 }
 
 type SelectLevelsButtonProps = {
-  levels: NonEmptyArray<ChampionLevelOrZero>
+  levels: NonEmptyArray<ChampionLevel>
   children?: React.ReactNode
 }
 
 const getSelectLevelsButton =
   (
-    selectedLevels: ReadonlySet<ChampionLevelOrZero>,
-    setLevels: (levels: ReadonlySet<ChampionLevelOrZero>) => void,
+    selectedLevels: ReadonlySet<ChampionLevel>,
+    setLevels: (levels: ReadonlySet<ChampionLevel>) => void,
   ): React.FC<SelectLevelsButtonProps> =>
   ({ levels, children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const levelsSet = useMemo(() => new Set(levels), levels)
     const handleClick = useCallback(() => setLevels(levelsSet), [levelsSet])
-    const isSelected = readonlySet.getEq(ChampionLevelOrZero.Eq).equals(selectedLevels, levelsSet)
+    const isSelected = readonlySet.getEq(ChampionLevel.Eq).equals(selectedLevels, levelsSet)
 
     return (
       <li className="group contents">
@@ -327,7 +327,7 @@ const getSelectLevelsButton =
           <span className="flex gap-1">
             {pipe(
               levelsSet,
-              readonlySet.toReadonlyArray<ChampionLevelOrZero>(ord.reverse(number.Ord)),
+              readonlySet.toReadonlyArray<ChampionLevel>(ord.reverse(number.Ord)),
               List.map(level => (
                 <MasteryImg
                   key={level}

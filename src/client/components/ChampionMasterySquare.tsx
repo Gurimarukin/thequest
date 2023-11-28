@@ -5,7 +5,7 @@ import { useCallback, useMemo, useRef } from 'react'
 
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import type { NonEmptyArray } from '../../shared/utils/fp'
@@ -27,7 +27,7 @@ export type ChampionMasterySquareProps = {
   championId: ChampionKey
   chestGranted: boolean
   tokensEarned: number
-  championLevel: ChampionLevelOrZero
+  championLevel: ChampionLevel
   championPoints: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
@@ -200,7 +200,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 }
 
 type LevelSVGProps = {
-  championLevel: ChampionLevelOrZero
+  championLevel: ChampionLevel
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
 }
@@ -251,7 +251,7 @@ const levelPercents = ({
   return round((100 * championPointsSinceLastLevel) / levelRange)
 }
 
-const championLevelBgColor = (championLevel: ChampionLevelOrZero): string | undefined => {
+const championLevelBgColor = (championLevel: ChampionLevel): string | undefined => {
   if (championLevel === 7) return 'text-mastery-7'
   if (championLevel === 6) return 'text-mastery-6'
   if (championLevel === 5) return 'text-mastery-5'
@@ -260,7 +260,7 @@ const championLevelBgColor = (championLevel: ChampionLevelOrZero): string | unde
   return 'text-mastery-3'
 }
 
-const championLevelNumberColor = (championLevel: ChampionLevelOrZero): string => {
+const championLevelNumberColor = (championLevel: ChampionLevel): string => {
   if (championLevel === 7) return 'text-mastery-7-text'
   if (championLevel === 6) return 'text-mastery-6-text'
   if (championLevel === 5) return 'text-mastery-5-text'

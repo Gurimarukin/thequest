@@ -1,5 +1,5 @@
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
-import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
 
@@ -19,7 +19,7 @@ const factions: Dict<ChampionFaction, string> = {
   zaun: new URL('./factions/zaun.webp', import.meta.url).toString(),
 }
 
-const masteries: Dict<`${ChampionLevelOrZero}`, string> = {
+const masteries: Dict<`${ChampionLevel}`, string> = {
   0: new URL('./masteries/mastery-0.png', import.meta.url).toString(),
   1: new URL('./masteries/mastery-1.png', import.meta.url).toString(),
   2: new URL('./masteries/mastery-2.png', import.meta.url).toString(),

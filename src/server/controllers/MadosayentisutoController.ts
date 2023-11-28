@@ -85,15 +85,6 @@ const MadosayentisutoController = (
         staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),
       }),
       futureMaybe.map(({ masteries: { champions }, staticData }): TheQuestProgression => {
-        const filteredByLevel = (level: ChampionLevel): List<ChampionKey> =>
-          pipe(
-            champions,
-            List.filterMap(m =>
-              ChampionLevel.Eq.equals(m.championLevel, level)
-                ? Maybe.some(m.championId)
-                : Maybe.none,
-            ),
-          )
         return {
           userId: discord.id,
           summoner: {
@@ -124,6 +115,17 @@ const MadosayentisutoController = (
             mastery6: filteredByLevel(6),
             mastery5: filteredByLevel(5),
           },
+        }
+
+        function filteredByLevel(level: ChampionLevel): List<ChampionKey> {
+          return pipe(
+            champions,
+            List.filterMap(m =>
+              ChampionLevel.Eq.equals(m.championLevel, level)
+                ? Maybe.some(m.championId)
+                : Maybe.none,
+            ),
+          )
         }
       }),
     )

@@ -12,7 +12,7 @@ import { MsDuration } from '../../../shared/models/MsDuration'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
@@ -323,7 +323,7 @@ type EnrichedAll = {
 }
 
 type PartialMasteriesGrouped = PartialDict<
-  `${ChampionLevelOrZero}`,
+  `${ChampionLevel}`,
   NonEmptyArray<EnrichedChampionMastery>
 >
 
@@ -409,7 +409,7 @@ const enrichAll = (
   const grouped: PartialMasteriesGrouped = pipe(
     enrichedMasteries_,
     NonEmptyArray.fromReadonlyArray,
-    Maybe.map(List.groupBy(c => ChampionLevelOrZero.stringify(c.championLevel))),
+    Maybe.map(List.groupBy(c => ChampionLevel.stringify(c.championLevel))),
     Maybe.getOrElse(() => ({})),
   )
 
@@ -428,8 +428,8 @@ const enrichAll = (
       totalMasteryPoints,
       otpIndex: Business.otpRatio(enrichedMasteries_, totalMasteryPoints),
       masteriesCount: pipe(
-        ChampionLevelOrZero.values,
-        List.reduce(Dict.empty<`${ChampionLevelOrZero}`, number>(), (acc, key) => {
+        ChampionLevel.values,
+        List.reduce(Dict.empty<`${ChampionLevel}`, number>(), (acc, key) => {
           const value: number = grouped[key]?.length ?? 0
           return { ...acc, [key]: value }
         }),

@@ -8,7 +8,7 @@ import type { SWRResponse } from 'swr'
 import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
 import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
@@ -257,10 +257,10 @@ const getSortBy = (
 }
 
 const levelFilterPredicate =
-  (levels: ReadonlySet<ChampionLevelOrZero>): Predicate<EnrichedChampionMastery> =>
+  (levels: ReadonlySet<ChampionLevel>): Predicate<EnrichedChampionMastery> =>
   c =>
-    readonlySet.size(levels) === ChampionLevelOrZero.values.length ||
-    readonlySet.elem(ChampionLevelOrZero.Eq)(c.championLevel, levels)
+    readonlySet.size(levels) === ChampionLevel.values.length ||
+    readonlySet.elem(ChampionLevel.Eq)(c.championLevel, levels)
 
 const factionFilterPredicate =
   (factions: ReadonlySet<ChampionFactionOrNone>): Predicate<EnrichedChampionMastery> =>

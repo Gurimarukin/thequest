@@ -3,7 +3,7 @@ import { Fragment, useRef } from 'react'
 
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeGame/ActiveGameMasteriesView'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
@@ -19,7 +19,7 @@ import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils
 
-const allLevels = new Set<ChampionLevelOrZero>(ChampionLevelOrZero.values)
+const allLevels = new Set<ChampionLevel>(ChampionLevel.values)
 
 type Props = {
   platform: Platform

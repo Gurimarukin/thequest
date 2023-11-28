@@ -9,7 +9,7 @@ import * as E from 'io-ts/Encoder'
 import qs from 'qs'
 
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
-import { ChampionLevelOrZero } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { PartialDict } from '../../../shared/utils/fp'
 import { Dict } from '../../../shared/utils/fp'
@@ -29,9 +29,9 @@ const properties = {
   order: MasteriesQueryOrder.codec,
   view: MasteriesQueryView.codec,
   level: setFromStringOrAllCodec(
-    ChampionLevelOrZero.stringCodec,
-    ChampionLevelOrZero.Ord,
-    new Set(ChampionLevelOrZero.values),
+    ChampionLevel.stringCodec,
+    ChampionLevel.Ord,
+    new Set(ChampionLevel.values),
   ),
   faction: setFromStringOrAllCodec(
     ChampionFactionOrNone.codec,

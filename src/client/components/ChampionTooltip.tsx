@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
-import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
@@ -13,7 +13,7 @@ import { ChampionPositionImg } from './ChampionPositionImg'
 type Props = {
   chestGranted: boolean
   tokensEarned: number
-  championLevel: ChampionLevelOrZero
+  championLevel: ChampionLevel
   championPoints: number
   championPointsUntilNextLevel: number
   name: string
@@ -127,7 +127,7 @@ export const ChampionTooltip: React.FC<Props> = ({
   )
 }
 
-export const bgGradientMastery = (level: ChampionLevelOrZero): string | undefined => {
+export const bgGradientMastery = (level: ChampionLevel): string | undefined => {
   if (level === 7) return 'bg-gradient-to-r from-mastery-7 to-mastery-7-bis'
   if (level === 6) return 'bg-gradient-to-r from-mastery-6 to-mastery-6-bis'
   if (level === 5) return 'bg-gradient-to-r from-mastery-5 to-mastery-5-bis'

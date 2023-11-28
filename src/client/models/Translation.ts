@@ -6,7 +6,7 @@ import type {
   ChampionFactionOrNone,
 } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevelOrZero } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
@@ -111,7 +111,7 @@ export type Translation = {
       unrankedIconAlt: string
       previousSplit: React.ReactNode
     }
-    masteryIconAlt: (level: ChampionLevelOrZero) => string
+    masteryIconAlt: (level: ChampionLevel) => string
     nChampionsFraction: (n: number, total: number) => React.ReactNode
     nResults: (n: number) => React.ReactNode
     notFound: React.ReactNode
@@ -153,7 +153,7 @@ export type Translation = {
       all: React.ReactNode
       fiveAndSix: React.ReactNode
       fourAndLess: React.ReactNode
-      level: (level: ChampionLevelOrZero) => React.ReactNode
+      level: (level: ChampionLevel) => React.ReactNode
       order: Dict<MasteriesQueryOrder, React.ReactNode>
       sixAndLess: React.ReactNode
       sort: {
@@ -167,7 +167,7 @@ export type Translation = {
     }
     modal: {
       confirm: React.ReactNode
-      masteryChange: (from: ChampionLevelOrZero, to: ChampionLevelOrZero) => React.ReactNode
+      masteryChange: (from: ChampionLevel, to: ChampionLevel) => React.ReactNode
       nChangesDetected: (n: number) => React.ReactNode
       no: React.ReactNode
       noForAll: React.ReactNode
