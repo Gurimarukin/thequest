@@ -16,6 +16,7 @@ import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPassword
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
@@ -286,7 +287,7 @@ function UserController(
 
   function setSummonerChampionsShardsCount(
     platform: Platform,
-    summonerName: string,
+    summonerName: SummonerName,
   ): (user: TokenContent) => EndedMiddleware {
     return user =>
       EndedMiddleware.withBody(NonEmptyArray.decoder(ChampionShardsPayload.codec))(championShards =>

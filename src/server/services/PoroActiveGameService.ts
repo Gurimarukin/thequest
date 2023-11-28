@@ -15,6 +15,7 @@ import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
+import { SummonerName } from '../../shared/models/riot/SummonerName'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { createEnum } from '../../shared/utils/createEnum'
@@ -91,7 +92,7 @@ const of = (
       lang: Lang,
       gameId: GameId,
       platform: Platform,
-      summonerName: string,
+      summonerName: SummonerName,
     ): Future<Maybe<PoroActiveGame>> =>
       findCached(
         lang,
@@ -137,7 +138,7 @@ const of = (
   function fetchAndParseUniqLang(
     lang: Lang,
     platform: Platform,
-    summonerName: string,
+    summonerName: SummonerName,
   ): Future<Maybe<PoroActiveGame>> {
     return pipe(fetch(lang, platform, summonerName), Future.chainEitherK(parsePoroActiveGame))
   }
@@ -145,7 +146,7 @@ const of = (
   function fetchAndParseTranslatedTags(
     lang: Lang,
     platform: Platform,
-    summonerName: string,
+    summonerName: SummonerName,
   ): (activeGameDefaultLang: PoroActiveGame) => Future<Maybe<PoroActiveGame>> {
     return activeGameDefaultLang =>
       pipe(
@@ -174,7 +175,7 @@ const of = (
       )
   }
 
-  function fetch(lang: Lang, platform: Platform, summonerName: string): Future<string> {
+  function fetch(lang: Lang, platform: Platform, summonerName: SummonerName): Future<string> {
     const poroLang = Business.poroLang[lang]
     const platformSummoner = `${Platform.encoderLower.encode(platform)}/${summonerName}`
 
@@ -290,7 +291,11 @@ function parsePoroActiveGameBis(domHandler: DomHandler): ValidatedNea<string, Po
           ),
           prefixErrors(`${premadeHistoryTagContainerDiv}: `),
         ),
-        summonerName: pipe(participant, datasetGet('summonername')),
+        summonerName: pipe(
+          participant,
+          datasetGet('summonername'),
+          ValidatedNea.map(SummonerName.wrap),
+        ),
         summonerLevel: pipe(
           participant,
           domHandler.querySelectorEnsureOneTextContent(championBoxLevel),

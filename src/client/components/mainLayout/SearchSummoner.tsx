@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Platform } from '../../../shared/models/api/Platform'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
@@ -46,11 +47,13 @@ export const SearchSummoner: React.FC = () => {
   )
 
   const summonerNameFromLocation = platformSummonerNameFromLocation?.summonerName
-  const [summonerName, setSummonerName] = useState(summonerNameFromLocation ?? '')
+  const [summonerName, setSummonerName] = useState(
+    summonerNameFromLocation !== undefined ? SummonerName.unwrap(summonerNameFromLocation) : '',
+  )
 
   useEffect(() => {
     if (summonerNameFromLocation !== undefined) {
-      setSummonerName(summonerNameFromLocation)
+      setSummonerName(SummonerName.unwrap(summonerNameFromLocation))
     }
   }, [summonerNameFromLocation])
 
@@ -72,7 +75,7 @@ export const SearchSummoner: React.FC = () => {
           ? appRoutes.platformSummonerNameGame
           : appRoutes.platformSummonerName)(
           platform,
-          summonerName,
+          SummonerName.wrap(summonerName),
           Maybe.isSome(matchLocation(appParsers.platformSummonerName))
             ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
             : {},
@@ -248,7 +251,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
           alt={t.summonerIconAlt(summoner.name)}
           className="w-12"
         />
-        <span className="ml-2 grow">{summoner.name}</span>
+        <span className="ml-2 grow">{SummonerName.unwrap(summoner.name)}</span>
         <span className="ml-4">{summoner.platform}</span>
       </Link>
       {Maybe.isSome(maybeUser)

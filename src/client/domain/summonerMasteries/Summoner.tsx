@@ -6,6 +6,7 @@ import { MsDuration } from '../../../shared/models/MsDuration'
 import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { type Dict } from '../../../shared/utils/fp'
 
@@ -76,7 +77,7 @@ export const Summoner: React.FC<Props> = ({
         <div className="grid grid-rows-[1fr_auto]">
           <div className="flex flex-wrap items-baseline gap-2">
             <span ref={nameRef} className="text-xl font-bold text-goldenrod">
-              {name}
+              {SummonerName.unwrap(name)}
             </span>
             <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
               <span>

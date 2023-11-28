@@ -12,6 +12,7 @@ import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
 
@@ -126,7 +127,7 @@ export type Translation = {
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
     level: (level: number, highlightClassName?: string) => React.ReactNode
     summonerLevel: React.ReactNode
-    summonerIconAlt: (name: string) => string
+    summonerIconAlt: (name: SummonerName) => string
   }
   form: {
     alreadyAnAccount: React.ReactNode

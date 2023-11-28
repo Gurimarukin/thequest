@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
+import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { config } from '../../config/unsafe'
@@ -14,7 +15,7 @@ import { http } from '../../utils/http'
 
 export const useSummonerMasteries = (
   platform: Platform,
-  summonerName: string,
+  summonerName: SummonerName,
 ): SWRResponse<SummonerMasteriesView, unknown> => {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
 

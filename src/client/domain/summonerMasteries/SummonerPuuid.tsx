@@ -5,6 +5,7 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
+import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { Dict } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
@@ -74,7 +75,7 @@ const SummonerPuuidLoaded: React.FC<SummonerPuuidLoadedProps> = ({
 
 const redirectUrl: Dict<
   Page,
-  (platform: Platform, summonerName: string, query: PartialMasteriesQuery) => string
+  (platform: Platform, summonerName: SummonerName, query: PartialMasteriesQuery) => string
 > = {
   profile: appRoutes.platformSummonerName,
   game: appRoutes.platformSummonerNameGame,

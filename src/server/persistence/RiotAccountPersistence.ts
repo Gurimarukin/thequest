@@ -1,8 +1,9 @@
 import { pipe } from 'fp-ts/function'
-import * as E from 'io-ts/Encoder'
 
 import type { DayJs } from '../../shared/models/DayJs'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { GameName } from '../../shared/models/riot/GameName'
+import { TagLine } from '../../shared/models/riot/TagLine'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 
@@ -10,7 +11,6 @@ import { FpCollection } from '../helpers/FpCollection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { RiotAccountDb } from '../models/riot/RiotAccountDb'
-import { TagLine } from '../models/riot/TagLine'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 type RiotAccountPersistence = ReturnType<typeof RiotAccountPersistence>
@@ -31,12 +31,12 @@ const RiotAccountPersistence = (Logger: LoggerGetter, mongoCollection: MongoColl
     ensureIndexes,
 
     findByGameNameAndTagLine: (
-      gameName: string,
+      gameName: GameName,
       tagLine: TagLine,
       insertedAfter: DayJs,
     ): Future<Maybe<RiotAccountDb>> =>
       collection.findOne({
-        gameName: E.id<string>().encode(gameName),
+        gameName: GameName.codec.encode(gameName),
         tagLine: TagLine.codec.encode(tagLine),
         insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
       }),

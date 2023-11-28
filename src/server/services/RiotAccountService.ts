@@ -3,13 +3,14 @@ import { pipe } from 'fp-ts/function'
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
+import type { GameName } from '../../shared/models/riot/GameName'
+import type { TagLine } from '../../shared/models/riot/TagLine'
 import type { Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import { Shard } from '../models/riot/Shard'
-import type { TagLine } from '../models/riot/TagLine'
 import type { RiotAccountPersistence } from '../persistence/RiotAccountPersistence'
 import type { RiotApiService } from './RiotApiService'
 import type { SummonerService } from './SummonerService'
@@ -34,7 +35,7 @@ const RiotAccountService = (
   summonerService: SummonerService,
 ) => ({
   findByGameNameAndTagLine: (
-    gameName: string,
+    gameName: GameName,
     tagLine: TagLine,
     // should force cache refresh for summmoner (with lolApiKey encrypted puuid)
     { forceCacheRefresh }: ForceCacheRefresh,

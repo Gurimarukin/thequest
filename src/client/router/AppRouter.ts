@@ -1,8 +1,9 @@
 import type { Match, Parser } from 'fp-ts-routing'
-import { end, format, lit, str } from 'fp-ts-routing'
+import { end, format, lit } from 'fp-ts-routing'
 
 import { Platform } from '../../shared/models/api/Platform'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { SummonerName } from '../../shared/models/riot/SummonerName'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
 
@@ -20,7 +21,7 @@ const sPlatformPuuidMatch = lit('s')
   .then(codec('puuid', Puuid.codec))
 const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
 const platformSummonerNameMatch = codec('platform', Platform.orLowerCaseCodec).then(
-  str('summonerName'),
+  codec('summonerName', SummonerName.codec),
 )
 const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
 const aramMatch = lit('aram')
@@ -46,7 +47,7 @@ const platformSummonerNameGame = p(platformSummonerNameGameMatch)
 
 const anyPlatformSummonerName: Parser<{
   platform: Platform
-  summonerName: string
+  summonerName: SummonerName
 }> = platformSummonerName
   .alt(platformSummonerNameGame)
   .map(({ platform, ...a }) => ({ ...a, platform: StringUtils.toUpperCase(platform) }))
@@ -80,13 +81,17 @@ export const appRoutes = {
     ),
   sPlatformPuuidGame: (platform: Platform, puuid: Puuid) =>
     format(sPlatformPuuidGameMatch.formatter, { platform, puuid }),
-  platformSummonerName: (platform: Platform, summonerName: string, query: PartialMasteriesQuery) =>
+  platformSummonerName: (
+    platform: Platform,
+    summonerName: SummonerName,
+    query: PartialMasteriesQuery,
+  ) =>
     withQuery(
       format(platformSummonerNameMatch.formatter, { platform, summonerName }),
       PartialMasteriesQuery,
       query,
     ),
-  platformSummonerNameGame: (platform: Platform, summonerName: string) =>
+  platformSummonerNameGame: (platform: Platform, summonerName: SummonerName) =>
     format(platformSummonerNameGameMatch.formatter, { platform, summonerName }),
   aram: (query: PartialGenericQuery) =>
     withQuery(format(aramMatch.formatter, {}), PartialGenericQuery, query),

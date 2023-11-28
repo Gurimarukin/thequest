@@ -23,6 +23,7 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
@@ -93,14 +94,14 @@ const SummonerController = (
         pipe(summonerService.findByPuuid(platform, puuid), findMasteries(platform, maybeUser)),
 
     masteriesByName:
-      (platform: Platform, summonerName: string) =>
+      (platform: Platform, summonerName: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
         pipe(
           summonerService.findByName(platform, summonerName),
           findMasteries(platform, maybeUser),
         ),
 
-    challenges: (platform: Platform, summonerName: string): EndedMiddleware =>
+    challenges: (platform: Platform, summonerName: SummonerName): EndedMiddleware =>
       pipe(
         summonerService.findByName(platform, summonerName),
         Future.map(Either.fromOption(() => 'Summoner not found')),
@@ -115,7 +116,7 @@ const SummonerController = (
       ),
 
     activeGame:
-      (lang: Lang, platform: Platform, summonerName: string) =>
+      (lang: Lang, platform: Platform, summonerName: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
         pipe(
           summonerService.findByName(platform, summonerName),

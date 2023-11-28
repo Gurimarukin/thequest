@@ -8,6 +8,7 @@ import type { Maybe } from '../../shared/utils/fp'
 import { Future, IO, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -61,7 +62,7 @@ const of = (
   return {
     findByName: (
       platform: Platform,
-      summonerName: string,
+      summonerName: SummonerName,
       { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
     ): Future<Maybe<Summoner>> =>
       findAndCache(

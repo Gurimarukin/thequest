@@ -1,10 +1,10 @@
 import { pipe } from 'fp-ts/function'
-import * as C from 'io-ts/Codec'
 import type { CollationOptions } from 'mongodb'
 
 import type { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
 
@@ -47,13 +47,13 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
 
     findByName: (
       platform: Platform,
-      name: string,
+      name: SummonerName,
       insertedAfter: DayJs,
     ): Future<Maybe<SummonerDb>> =>
       collection.findOne(
         {
           platform: Platform.codec.encode(platform),
-          name: C.string.encode(name),
+          name: SummonerName.codec.encode(name),
           insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
         },
         { collation: platformAndNameIndexCollation },

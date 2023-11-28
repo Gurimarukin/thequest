@@ -10,6 +10,7 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -22,7 +23,7 @@ type ParticipantOutput = C.OutputOf<typeof participantCodec>
 
 const participantCodec = C.struct({
   summonerId: SummonerId.codec,
-  summonerName: C.string,
+  summonerName: SummonerName.codec,
   profileIconId: C.number,
   championId: ChampionKey.codec,
   spell1Id: SummonerSpellKey.codec,

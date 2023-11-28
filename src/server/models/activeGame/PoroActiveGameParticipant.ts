@@ -4,6 +4,7 @@ import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeG
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { PoroTag } from '../../../shared/models/api/activeGame/PoroTag'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
@@ -13,7 +14,7 @@ import type { ActiveGameParticipant } from './ActiveGameParticipant'
 
 type PoroActiveGameParticipant = {
   premadeId: Maybe<number>
-  summonerName: string
+  summonerName: SummonerName
   summonerLevel: number
   champion: Maybe<PoroActiveGameParticipantChampion>
   leagues: PoroLeagues

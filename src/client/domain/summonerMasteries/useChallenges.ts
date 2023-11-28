@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
+import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { type Tuple3 } from '../../../shared/utils/fp'
 
 import { config } from '../../config/unsafe'
@@ -15,7 +16,7 @@ import { http } from '../../utils/http'
 
 export const useChallenges = (
   platform: Platform,
-  summonerName: string,
+  summonerName: SummonerName,
 ): SWRResponse<ChallengesView, unknown> => {
   const { masteriesQuery } = useHistory()
 

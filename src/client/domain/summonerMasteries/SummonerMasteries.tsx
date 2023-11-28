@@ -19,6 +19,7 @@ import { ChampionShardsView } from '../../../shared/models/api/summoner/Champion
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
+import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -62,7 +63,7 @@ type OptimisticMutation = {
 
 type Props = {
   platform: Platform
-  summonerName: string
+  summonerName: SummonerName
 }
 
 export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
@@ -90,7 +91,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
       debounce(
         (
           platform_: Platform,
-          summonerName_: string,
+          summonerName_: SummonerName,
           updates: NonEmptyArray<ChampionShardsPayload>,
           optimisticMutation: boolean,
           oldData: SummonerMasteriesView,

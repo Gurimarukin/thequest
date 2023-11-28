@@ -12,6 +12,9 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
+import { GameName } from '../../shared/models/riot/GameName'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
+import { TagLine } from '../../shared/models/riot/TagLine'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
 import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
@@ -22,7 +25,6 @@ import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { DiscordConnection } from '../models/discord/DiscordConnection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { TheQuestProgressionError } from '../models/madosayentisuto/TheQuestProgressionError'
-import { TagLine } from '../models/riot/TagLine'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import { TokenContent } from '../models/user/TokenContent'
@@ -44,7 +46,7 @@ export type SummonerWithDiscordInfos = {
     id: SummonerId
     platform: Platform
     puuid: Puuid
-    name: string
+    name: SummonerName
     profileIconId: number
   }
   discord: UserDiscordInfos
@@ -329,7 +331,7 @@ export { UserService }
 const fromStringRegex = /^(.+)#([^#]+)$/
 
 type GameNameAndTagLine = {
-  gameName: string
+  gameName: GameName
   tagLine: TagLine
 }
 
@@ -342,7 +344,8 @@ const riotGamesConnectionNameDecoder: Decoder<string, GameNameAndTagLine> = pipe
       StringUtils.matcher2(fromStringRegex),
       Maybe.fold(
         () => D.failure(str, 'TupleFromStringWithHashtag'),
-        ([gameName, tagLine]) => D.success({ gameName, tagLine: TagLine.wrap(tagLine) }),
+        ([gameName, tagLine]) =>
+          D.success({ gameName: GameName.wrap(gameName), tagLine: TagLine.wrap(tagLine) }),
       ),
     ),
   ),

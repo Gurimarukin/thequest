@@ -3,6 +3,7 @@ import type { Platform } from '../shared/models/api/Platform'
 import { ChampionShardsPayload } from '../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../shared/models/api/summoner/PlatformWithPuuid'
 import { LoginPasswordPayload } from '../shared/models/api/user/LoginPasswordPayload'
+import type { SummonerName } from '../shared/models/riot/SummonerName'
 import type { Future } from '../shared/utils/fp'
 import { NonEmptyArray } from '../shared/utils/fp'
 
@@ -24,7 +25,7 @@ export const apiUserSelfFavoritesDelete = (platformWithPuuid: PlatformWithPuuid)
 
 export const apiUserSelfSummonerChampionsShardsCountPost = (
   platform: Platform,
-  summonerName: string,
+  summonerName: SummonerName,
   championsShards: NonEmptyArray<ChampionShardsPayload>,
 ): Future<unknown> =>
   http(apiRoutes.user.self.summoner(platform, summonerName).championsShardsCount.post, {

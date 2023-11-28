@@ -4,6 +4,9 @@ import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
+import type { GameName } from '../../shared/models/riot/GameName'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
+import type { TagLine } from '../../shared/models/riot/TagLine'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Dict, Future, Maybe } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
@@ -19,7 +22,6 @@ import { RiotChallenges } from '../models/riot/RiotChallenges'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotLeagueEntry } from '../models/riot/RiotLeagueEntry'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
-import type { TagLine } from '../models/riot/TagLine'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
 import { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
@@ -194,7 +196,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                   statusesToOption(404),
                 ),
 
-              byName: (summonerName: string): Future<Maybe<RiotSummoner>> =>
+              byName: (summonerName: SummonerName): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
                     [
@@ -231,7 +233,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
           accountV1: {
             accounts: {
               byRiotId:
-                (gameName: string) =>
+                (gameName: GameName) =>
                 (tagLine: TagLine): Future<Maybe<RiotAccount>> =>
                   pipe(
                     httpClient.http(

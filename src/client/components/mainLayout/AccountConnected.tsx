@@ -1,5 +1,5 @@
 /* eslint-disable functional/no-expression-statements */
-import { eq, string, task } from 'fp-ts'
+import { eq, task } from 'fp-ts'
 import type { Route } from 'fp-ts-routing'
 import { Parser } from 'fp-ts-routing'
 import type { Eq } from 'fp-ts/Eq'
@@ -8,6 +8,7 @@ import { useCallback, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import type { UserView } from '../../../shared/models/api/user/UserView'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
@@ -113,24 +114,24 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   )
 }
 
-type PlatformSummonerName<P extends Platform, S extends string> = {
+type PlatformSummonerName<P extends Platform> = {
   platform: P
-  summonerName: S
+  summonerName: SummonerName
 }
 
-const platformSummonerNameEq: Eq<PlatformSummonerName<Platform, string>> = eq.struct({
+const platformSummonerNameEq: Eq<PlatformSummonerName<Platform>> = eq.struct({
   platform: Platform.Eq,
-  summonerName: string.Eq,
+  summonerName: SummonerName.Eq,
 })
 
-function anyPlatformSummonerNameExact<P extends Platform, S extends string>(
+function anyPlatformSummonerNameExact<P extends Platform>(
   platform: P,
-  summonerName: S,
-): Parser<PlatformSummonerName<P, S>> {
+  summonerName: SummonerName,
+): Parser<PlatformSummonerName<P>> {
   return new Parser(r =>
     pipe(
       appParsers.anyPlatformSummonerName.run(r),
-      Maybe.filter((tuple): tuple is [PlatformSummonerName<P, S>, Route] =>
+      Maybe.filter((tuple): tuple is [PlatformSummonerName<P>, Route] =>
         platformSummonerNameEq.equals(tuple[0], { platform, summonerName }),
       ),
     ),

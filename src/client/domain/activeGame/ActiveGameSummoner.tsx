@@ -5,6 +5,7 @@ import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
 
@@ -23,7 +24,7 @@ const allLevels = new Set<ChampionLevel>(ChampionLevel.values)
 
 type Props = {
   platform: Platform
-  summonerName: string
+  summonerName: SummonerName
   profileIconId: number
   masteries: Maybe<ActiveGameMasteriesView>
   premadeId: Maybe<number>
@@ -86,7 +87,7 @@ export const ActiveGameSummoner: React.FC<Props> = ({
             rel="noreferrer"
             className="whitespace-nowrap text-lg font-semibold leading-6 text-goldenrod"
           >
-            {summonerName}
+            {SummonerName.unwrap(summonerName)}
           </a>
         </div>
       </div>

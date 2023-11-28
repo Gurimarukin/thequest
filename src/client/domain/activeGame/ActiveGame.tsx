@@ -24,6 +24,7 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -64,7 +65,7 @@ const timerInterval = MsDuration.second(1)
 
 type Props = {
   platform: Platform
-  summonerName: string
+  summonerName: SummonerName
 }
 
 export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
@@ -165,7 +166,10 @@ const WithoutAdditional: React.FC<
 
   // Correct case of summoner's name in url
   useEffect(() => {
-    if (summonerNameFromLocation !== summoner.name) {
+    if (
+      summonerNameFromLocation !== undefined &&
+      SummonerName.Eq.equals(summonerNameFromLocation, summoner.name)
+    ) {
       navigate(appRoutes.platformSummonerNameGame(props.platform, summoner.name), {
         replace: true,
       })
@@ -349,7 +353,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   )
 }
 
-const poroLink = (lang: Lang, platform: Platform, summonerName: string): string =>
+const poroLink = (lang: Lang, platform: Platform, summonerName: SummonerName): string =>
   `${config.poroApiBaseUrl}/${Business.poroLang[lang]}/live/${Platform.encoderLower.encode(
     platform,
   )}/${summonerName}/ranked-only/season`
@@ -433,7 +437,7 @@ const Participants: React.FC<ParticipantsProps> = ({
         const participant = participants[j]!
         return (
           <ActiveGameParticipant
-            key={participant.summonerName}
+            key={SummonerName.unwrap(participant.summonerName)}
             summonerSpellByKey={summonerSpellByKey}
             runeStyleById={runeStyleById}
             runeById={runeById}
@@ -441,7 +445,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             mapId={mapId}
             participant={participant}
             shouldWrap={shouldWrap}
-            highlight={participant.summonerName === summoner.name}
+            highlight={SummonerName.Eq.equals(participant.summonerName, summoner.name)}
             reverse={reverse}
             index={j}
             isLast={j === springs.length - 1}
