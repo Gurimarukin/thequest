@@ -1,4 +1,5 @@
 - riot id
+- going back to game tab and then refreshing doesnt trigger visual reload
 
 - react-select
 - url encode summoner name (client and server side)
