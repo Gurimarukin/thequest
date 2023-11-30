@@ -7,7 +7,7 @@ import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -39,7 +39,7 @@ type ParticipantOutput = C.OutputOf<typeof participantCodec>
 
 const participantCodec = C.struct({
   premadeId: Maybe.codec(C.number),
-  summonerName: SummonerName.codec,
+  riotId: RiotId.fromStringCodec,
   summonerLevel: C.number,
   champion: Maybe.codec(
     C.struct({

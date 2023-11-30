@@ -287,7 +287,7 @@ function UserController(
 
   function setSummonerChampionsShardsCount(
     platform: Platform,
-    summonerName: SummonerName,
+    name: SummonerName,
   ): (user: TokenContent) => EndedMiddleware {
     return user =>
       EndedMiddleware.withBody(NonEmptyArray.decoder(ChampionShardsPayload.codec))(championShards =>
@@ -308,7 +308,7 @@ function UserController(
           futureEither.bindTo('validatedChampionShards'),
           futureEither.bind('summoner', () =>
             pipe(
-              summonerService.findByName(platform, summonerName),
+              summonerService.findByName(platform, name),
               Future.map(Either.fromOption(() => Tuple.of(Status.NotFound, 'Summoner not found'))),
             ),
           ),

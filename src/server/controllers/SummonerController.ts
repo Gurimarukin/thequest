@@ -1,7 +1,7 @@
 import { apply, monoid, number, ord, separated, task } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
 import { Business } from '../../shared/Business'
@@ -13,7 +13,6 @@ import type { ActiveGameChampionMasteryView } from '../../shared/models/api/acti
 import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
-import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
@@ -23,6 +22,7 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { RiotId } from '../../shared/models/riot/RiotId'
 import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
@@ -60,6 +60,7 @@ import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { PoroActiveGameService } from '../services/PoroActiveGameService'
+import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { StaticDataService } from '../services/staticDataService/StaticDataService'
@@ -81,6 +82,7 @@ const SummonerController = (
   leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
   poroActiveGameService: PoroActiveGameService,
+  riotAccountService: RiotAccountService,
   summonerService: SummonerService,
   staticDataService: StaticDataService,
   userService: UserService,
@@ -94,16 +96,13 @@ const SummonerController = (
         pipe(summonerService.findByPuuid(platform, puuid), findMasteries(platform, maybeUser)),
 
     masteriesByName:
-      (platform: Platform, summonerName: SummonerName) =>
+      (platform: Platform, name: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(
-          summonerService.findByName(platform, summonerName),
-          findMasteries(platform, maybeUser),
-        ),
+        pipe(summonerService.findByName(platform, name), findMasteries(platform, maybeUser)),
 
-    challenges: (platform: Platform, summonerName: SummonerName): EndedMiddleware =>
+    challenges: (platform: Platform, name: SummonerName): EndedMiddleware =>
       pipe(
-        summonerService.findByName(platform, summonerName),
+        summonerService.findByName(platform, name),
         Future.map(Either.fromOption(() => 'Summoner not found')),
         futureEither.chain(summoner =>
           pipe(
@@ -116,13 +115,20 @@ const SummonerController = (
       ),
 
     activeGame:
-      (lang: Lang, platform: Platform, summonerName: SummonerName) =>
+      (lang: Lang, platform: Platform, name: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
         pipe(
-          summonerService.findByName(platform, summonerName),
+          summonerService.findByName(platform, name),
+          futureMaybe.bindTo('summoner'),
+          futureMaybe.bind('riotAccount', ({ summoner }) =>
+            riotAccountService.findByPuuid(summoner.puuid),
+          ),
           Future.map(Either.fromOption(() => 'Summoner not found')),
-          futureEither.chain(summoner =>
-            pipe(activeGame(lang, summoner, maybeUser), Future.map(Either.right)),
+          futureEither.chain(({ summoner, riotAccount }) =>
+            pipe(
+              activeGame(lang, riotAccount.riotId, summoner, maybeUser),
+              Future.map(Either.right),
+            ),
           ),
           M.fromTaskEither,
           M.ichain(
@@ -231,6 +237,7 @@ const SummonerController = (
 
   function activeGame(
     lang: Lang,
+    riotId: RiotId,
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
   ): Future<Maybe<SummonerActiveGameView>> {
@@ -238,7 +245,7 @@ const SummonerController = (
       activeGameService.findBySummoner(summoner.platform, summoner.id),
       futureMaybe.chainTaskEitherK(game =>
         pipe(
-          poroActiveGameService.find(lang, game.gameId, summoner.platform, summoner.name),
+          poroActiveGameService.find(lang, game.gameId, summoner.platform, riotId),
           task.chain(
             Try.fold(
               e =>
@@ -269,27 +276,25 @@ const SummonerController = (
     game: ActiveGame,
   ): Future<SummonerActiveGameView> {
     return pipe(
-      staticDataService.wikiaChampions,
-      Future.chain(champions =>
-        pipe(
+      apply.sequenceS(Future.ApplyPar)({
+        champions: staticDataService.wikiaChampions,
+        participants: pipe(
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(
               enrichParticipantRiot(summoner.platform, maybeUser, game.insertedAt),
             ),
           ),
-          Future.map<
-            PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
-            SummonerActiveGameView
-          >(
-            flow(
-              PartialDict.map(sortParticipants(champions)(game.mapId)),
-              (sorted): SummonerActiveGameView => ({
-                summoner,
-                game: pipe(game, ActiveGame.toView(sorted, false)),
-              }),
-            ),
-          ),
+        ),
+      }),
+      Future.map(({ champions, participants }) =>
+        pipe(
+          participants,
+          PartialDict.map(sortParticipants(champions)(game.mapId)),
+          (sorted): SummonerActiveGameView => ({
+            summoner,
+            game: pipe(game, ActiveGame.toView(sorted, false)),
+          }),
         ),
       ),
     )
@@ -319,6 +324,10 @@ const SummonerController = (
       )
   }
 
+  type EnrichedActiveGameParticipant = ActiveGameParticipant & {
+    riotId: Maybe<RiotId>
+  }
+
   function activeGamePoro(
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
@@ -326,50 +335,66 @@ const SummonerController = (
   ): (poroGame: PoroActiveGame) => Future<SummonerActiveGameView> {
     return poroGame =>
       pipe(
-        poroGame.participants,
-        PartialDict.traverse(Future.ApplicativePar)(
-          NonEmptyArray.traverse(Future.ApplicativePar)(
-            enrichParticipantPoro(
-              summoner.platform,
-              maybeUser,
-              pipe(DictUtils.values(game.participants), List.flatten),
-              game.insertedAt,
+        DictUtils.values(game.participants),
+        List.flatten,
+        List.traverse(Future.ApplicativePar)(p =>
+          pipe(
+            riotAccountService.findByPuuid(p.puuid),
+            Future.map(
+              (maybeAccount): EnrichedActiveGameParticipant => ({
+                ...p,
+                riotId: pipe(
+                  maybeAccount,
+                  Maybe.map(a => a.riotId),
+                ),
+              }),
             ),
           ),
         ),
-        Future.map<
-          PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
-          SummonerActiveGameView
-        >(participants => ({
-          summoner,
-          game: {
-            gameStartTime: game.gameStartTime,
-            mapId: game.mapId,
-            gameQueueConfigId: game.gameQueueConfigId,
-            isDraft: game.isDraft,
-            bannedChampions: game.bannedChampions,
-            participants,
-            isPoroOK: true,
-          },
-        })),
+        Future.chain(participants =>
+          pipe(
+            poroGame.participants,
+            PartialDict.traverse(Future.ApplicativePar)(
+              NonEmptyArray.traverse(Future.ApplicativePar)(
+                enrichParticipantPoro(summoner.platform, maybeUser, participants, game.insertedAt),
+              ),
+            ),
+          ),
+        ),
+        Future.map<SummonerActiveGameView['game']['participants'], SummonerActiveGameView>(
+          participants => ({
+            summoner,
+            game: {
+              gameStartTime: game.gameStartTime,
+              mapId: game.mapId,
+              gameQueueConfigId: game.gameQueueConfigId,
+              isDraft: game.isDraft,
+              bannedChampions: game.bannedChampions,
+              participants,
+              isPoroOK: true,
+            },
+          }),
+        ),
       )
   }
 
   function enrichParticipantPoro(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
-    participants: List<ActiveGameParticipant>,
+    participants: List<EnrichedActiveGameParticipant>,
     gameInsertedAt: DayJs,
   ): (poroParticipant: PoroActiveGameParticipant) => Future<ActiveGameParticipantView> {
     return poroParticipant => {
       const maybeParticipant = pipe(
         participants,
-        List.findFirst(p => p.summonerName === poroParticipant.summonerName),
+        List.findFirst(p => Maybe.elem(RiotId.Eq)(poroParticipant.riotId, p.riotId)),
       )
       if (!Maybe.isSome(maybeParticipant)) {
         return Future.failed(
           Error(
-            `Poro participant: couldn't find matching Riot API participant: ${poroParticipant.summonerName}`,
+            `Poro participant: couldn't find matching Riot API participant: ${RiotId.stringify(
+              poroParticipant.riotId,
+            )}`,
           ),
         )
       }

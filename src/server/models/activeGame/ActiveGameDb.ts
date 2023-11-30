@@ -9,6 +9,7 @@ import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
+import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { Dict } from '../../../shared/utils/fp'
@@ -22,6 +23,7 @@ type Participant = C.TypeOf<typeof participantCodec>
 type ParticipantOutput = C.OutputOf<typeof participantCodec>
 
 const participantCodec = C.struct({
+  puuid: Puuid.codec,
   summonerId: SummonerId.codec,
   summonerName: SummonerName.codec,
   profileIconId: C.number,

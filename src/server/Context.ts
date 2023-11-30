@@ -71,7 +71,6 @@ const of = (
     config.riotApi.cacheTtl,
     riotAccountPersistence,
     riotApiService,
-    summonerService,
   )
 
   const challengesService = ChallengesService(
@@ -111,6 +110,7 @@ const of = (
     leagueEntryService,
     masteriesService,
     poroActiveGameService,
+    riotAccountService,
     staticDataService,
     summonerService,
     userService,

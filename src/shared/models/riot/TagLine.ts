@@ -1,3 +1,6 @@
+import { eq, string } from 'fp-ts'
+import type { Endomorphism } from 'fp-ts/Endomorphism'
+import { identity, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
 
@@ -5,10 +8,15 @@ import { fromNewtype } from '../../utils/ioTsUtils'
 
 type TagLine = Newtype<{ readonly TagLine: unique symbol }, string>
 
-const { wrap } = iso<TagLine>()
+const { wrap, unwrap } = iso<TagLine>()
+const modify = identity as (f: Endomorphism<string>) => Endomorphism<TagLine>
 
 const codec = fromNewtype<TagLine>(C.string)
 
-const TagLine = { wrap, codec }
+const trim = modify(string.trim)
+
+const Eq: eq.Eq<TagLine> = pipe(string.Eq, eq.contramap(unwrap))
+
+const TagLine = { wrap, codec, trim, Eq }
 
 export { TagLine }

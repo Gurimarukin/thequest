@@ -15,7 +15,7 @@ import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
-import { SummonerName } from '../../shared/models/riot/SummonerName'
+import { RiotId } from '../../shared/models/riot/RiotId'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { createEnum } from '../../shared/utils/createEnum'
@@ -92,20 +92,20 @@ const of = (
       lang: Lang,
       gameId: GameId,
       platform: Platform,
-      summonerName: SummonerName,
+      riotId: RiotId,
     ): Future<Maybe<PoroActiveGame>> =>
       findCached(
         lang,
         gameId,
       )(() =>
         Lang.Eq.equals(lang, defaultLang)
-          ? fetchAndParseUniqLang(lang, platform, summonerName)
+          ? fetchAndParseUniqLang(lang, platform, riotId)
           : pipe(
               findCached(
                 defaultLang,
                 gameId,
-              )(() => fetchAndParseUniqLang(defaultLang, platform, summonerName)),
-              futureMaybe.chain(fetchAndParseTranslatedTags(lang, platform, summonerName)),
+              )(() => fetchAndParseUniqLang(defaultLang, platform, riotId)),
+              futureMaybe.chain(fetchAndParseTranslatedTags(lang, platform, riotId)),
             ),
       ),
   }
@@ -138,19 +138,19 @@ const of = (
   function fetchAndParseUniqLang(
     lang: Lang,
     platform: Platform,
-    summonerName: SummonerName,
+    riotId: RiotId,
   ): Future<Maybe<PoroActiveGame>> {
-    return pipe(fetch(lang, platform, summonerName), Future.chainEitherK(parsePoroActiveGame))
+    return pipe(fetch(lang, platform, riotId), Future.chainEitherK(parsePoroActiveGame))
   }
 
   function fetchAndParseTranslatedTags(
     lang: Lang,
     platform: Platform,
-    summonerName: SummonerName,
+    riotId: RiotId,
   ): (activeGameDefaultLang: PoroActiveGame) => Future<Maybe<PoroActiveGame>> {
     return activeGameDefaultLang =>
       pipe(
-        fetch(lang, platform, summonerName),
+        fetch(lang, platform, riotId),
         Future.chainEitherK(parsePoroActiveGameOnlyTags),
         futureMaybe.map(
           (onlyTags): PoroActiveGame => ({
@@ -175,16 +175,14 @@ const of = (
       )
   }
 
-  function fetch(lang: Lang, platform: Platform, summonerName: SummonerName): Future<string> {
+  function fetch(lang: Lang, platform: Platform, { gameName, tagLine }: RiotId): Future<string> {
     const poroLang = Business.poroLang[lang]
-    const platformSummoner = `${Platform.encoderLower.encode(platform)}/${summonerName}`
+    const platformRiotId = `${Platform.encoderLower.encode(platform)}/${gameName}-${tagLine}`
 
     return pipe(
-      getWithUserAgent(`/${poroLang}/live/${platformSummoner}/ranked-only/season`),
+      getWithUserAgent(`/${poroLang}/live/${platformRiotId}/ranked-only/season`),
       Future.chain(() =>
-        getWithUserAgent(
-          `/partial/${poroLang}/live-partial/${platformSummoner}/ranked-only/season`,
-        ),
+        getWithUserAgent(`/partial/${poroLang}/live-partial/${platformRiotId}/ranked-only/season`),
       ),
     )
   }
@@ -291,10 +289,10 @@ function parsePoroActiveGameBis(domHandler: DomHandler): ValidatedNea<string, Po
           ),
           prefixErrors(`${premadeHistoryTagContainerDiv}: `),
         ),
-        summonerName: pipe(
+        riotId: pipe(
           participant,
           datasetGet('summonername'),
-          ValidatedNea.map(SummonerName.wrap),
+          ValidatedNea.chain(decode([RiotId.fromStringCodec, 'RiotId'])),
         ),
         summonerLevel: pipe(
           participant,

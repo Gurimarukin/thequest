@@ -28,12 +28,12 @@ import { iso } from 'newtype-ts'
 
 import { MsDuration } from '../models/MsDuration'
 
-export const todo = (...[]: List<unknown>): never => {
+export function todo(...[]: List<unknown>): never {
   // eslint-disable-next-line functional/no-throw-statements
   throw Error('Missing implementation')
 }
 
-export const assertUnreachable = (n: never): never => {
+export function assertUnreachable(n: never): never {
   // eslint-disable-next-line functional/no-throw-statements
   throw Error(`Unexpected value: ${n}`)
 }
@@ -44,6 +44,14 @@ export const inspect =
     console.log(...label, a)
     return a
   }
+
+export function immutableAssign<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  A extends (...args: List<any>) => unknown,
+  B extends Dict<string, unknown>,
+>(f: A, b: B): A & B {
+  return Object.assign(f.bind({}) as A, b)
+}
 
 export type NotUsed = Newtype<{ readonly NotUsed: unique symbol }, void>
 

@@ -3,12 +3,12 @@ import { pipe } from 'fp-ts/function'
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import type { Maybe } from '../../shared/utils/fp'
 import { Future, IO, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
-import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -21,10 +21,6 @@ import type { RiotApiService } from './RiotApiService'
 
 type ForceCacheRefresh = {
   forceCacheRefresh: boolean
-}
-
-type UseAccountApiKey = {
-  useAccountApiKey: boolean
 }
 
 type SummonerService = ReturnType<typeof of>
@@ -60,39 +56,33 @@ const of = (
   riotApiService: RiotApiService,
 ) => {
   return {
+    /**
+     * @deprecated SummonerName will be removed
+     */
+    // eslint-disable-next-line deprecation/deprecation
     findByName: (
       platform: Platform,
-      summonerName: SummonerName,
+      name: SummonerName,
       { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
     ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
-        insertedAfter => summonerPersistence.findByName(platform, summonerName, insertedAfter),
-        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byName(summonerName),
+        insertedAfter => summonerPersistence.findByName(platform, name, insertedAfter),
+        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byName(name),
         { forceCacheRefresh },
       ),
 
     findByPuuid: (
       platform: Platform,
       puuid: Puuid,
-      {
-        forceCacheRefresh,
-        useAccountApiKey = false,
-      }: ForceCacheRefresh & Partial<UseAccountApiKey> = { forceCacheRefresh: false },
+      { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
     ): Future<Maybe<Summoner>> =>
-      useAccountApiKey
-        ? pipe(
-            riotApiService.riotgames
-              .platform(platform)
-              .lol.summonerV4.summoners.byPuuid(puuid, { useAccountApiKey }),
-            futureMaybe.map(s => ({ ...s, platform })),
-          )
-        : findAndCache(
-            platform,
-            insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
-            riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
-            { forceCacheRefresh },
-          ),
+      findAndCache(
+        platform,
+        insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
+        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
+        { forceCacheRefresh },
+      ),
 
     deleteByPuuid: summonerPersistence.deleteByPuuid,
   }
@@ -119,18 +109,7 @@ const of = (
           fromApi,
           futureMaybe.let('platform', () => platform),
           futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
-          futureMaybe.chainFirstTaskEitherK(
-            ({ id, puuid, name, profileIconId, summonerLevel, insertedAt }) =>
-              summonerPersistence.upsert({
-                id,
-                puuid,
-                platform,
-                name,
-                profileIconId,
-                summonerLevel,
-                insertedAt,
-              }),
-          ),
+          futureMaybe.chainFirstTaskEitherK(summonerPersistence.upsert),
         ),
       ),
     )

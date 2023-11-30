@@ -4,6 +4,7 @@ import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import { RuneId } from '../../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../../shared/models/api/perk/RuneStyleId'
+import { Puuid } from '../../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { SummonerName } from '../../../../shared/models/riot/SummonerName'
 import { List } from '../../../../shared/utils/fp'
@@ -24,6 +25,7 @@ const rawPerksDecoder = D.struct({
 type RawCurrentGameParticipant = D.TypeOf<typeof rawDecoder>
 
 const rawDecoder = D.struct({
+  puuid: Puuid.codec,
   championId: ChampionKey.codec, // The ID of the champion played by this participant
   perks: rawPerksDecoder, // Perks/Runes Reforged Information
   profileIconId: D.number, // The ID of the profile icon used by this participant

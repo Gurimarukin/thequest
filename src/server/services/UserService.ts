@@ -1,8 +1,6 @@
 import { apply, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { HTTPError } from 'got'
-import type { Decoder } from 'io-ts/Decoder'
-import * as D from 'io-ts/Decoder'
 import readline from 'readline'
 
 import { DayJs } from '../../shared/models/DayJs'
@@ -12,10 +10,8 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { ClearPassword } from '../../shared/models/api/user/ClearPassword'
 import type { Token } from '../../shared/models/api/user/Token'
 import { UserName } from '../../shared/models/api/user/UserName'
-import { GameName } from '../../shared/models/riot/GameName'
+import { RiotId } from '../../shared/models/riot/RiotId'
 import type { SummonerName } from '../../shared/models/riot/SummonerName'
-import { TagLine } from '../../shared/models/riot/TagLine'
-import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
 import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -39,6 +35,7 @@ import type { DiscordService } from './DiscordService'
 import type { RiotAccountService } from './RiotAccountService'
 import type { SummonerService } from './SummonerService'
 
+const linkedRiotAccountPlatform: Platform = 'EUW'
 const accountTokenTtl = MsDuration.days(30)
 
 export type SummonerWithDiscordInfos = {
@@ -224,20 +221,16 @@ const UserService = (
   ) => Future<Maybe<Either<TheQuestProgressionError, Summoner>>> {
     return riotGamesConnection =>
       pipe(
-        riotGamesConnectionNameDecoder.decode(riotGamesConnection.name),
+        RiotId.fromStringCodec.decode(riotGamesConnection.name),
         Either.mapLeft(() =>
           Error(
-            `Couldn't decode RiotGamesConnectionName for user ${discord.username}#${discord.discriminator} (${discord.id}) - value: ${riotGamesConnection.name}`,
+            `Couldn't decode RiotId for user ${discord.username}#${discord.discriminator} (${discord.id}) - value: ${riotGamesConnection.name}`,
           ),
         ),
         Future.fromEither,
-        Future.chain(({ gameName, tagLine }) =>
-          riotAccountService.findByGameNameAndTagLine(gameName, tagLine, { forceCacheRefresh }),
-        ),
-        futureMaybe.chain(({ puuid, platform, summonerCacheWasRefreshed }) =>
-          summonerService.findByPuuid(platform, puuid, {
-            forceCacheRefresh: forceCacheRefresh && !summonerCacheWasRefreshed,
-          }),
+        Future.chain(riotAccountService.findByRiotId),
+        futureMaybe.chain(({ puuid }) =>
+          summonerService.findByPuuid(linkedRiotAccountPlatform, puuid, { forceCacheRefresh }),
         ),
         Future.chainFirstIOEitherK(
           Maybe.fold(
@@ -327,29 +320,6 @@ const UserService = (
 }
 
 export { UserService }
-
-const fromStringRegex = /^(.+)#([^#]+)$/
-
-type GameNameAndTagLine = {
-  gameName: GameName
-  tagLine: TagLine
-}
-
-// name is `<gameName>#<tagLine>` (from Riot account)
-const riotGamesConnectionNameDecoder: Decoder<string, GameNameAndTagLine> = pipe(
-  D.id<string>(),
-  D.parse(str =>
-    pipe(
-      str,
-      StringUtils.matcher2(fromStringRegex),
-      Maybe.fold(
-        () => D.failure(str, 'TupleFromStringWithHashtag'),
-        ([gameName, tagLine]) =>
-          D.success({ gameName: GameName.wrap(gameName), tagLine: TagLine.wrap(tagLine) }),
-      ),
-    ),
-  ),
-)
 
 const prompt = (label: string): Future<string> =>
   pipe(

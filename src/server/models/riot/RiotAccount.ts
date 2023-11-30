@@ -1,17 +1,20 @@
-import * as D from 'io-ts/Decoder'
+import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 
-import { Puuid } from '../../../shared/models/api/summoner/Puuid'
-import { GameName } from '../../../shared/models/riot/GameName'
-import { TagLine } from '../../../shared/models/riot/TagLine'
+import type { RiotRiotAccount } from './RiotRiotAccounts'
 
-type RiotAccount = D.TypeOf<typeof decoder>
+type RiotAccount = {
+  puuid: Puuid
+  riotId: RiotId
+}
 
-const decoder = D.struct({
-  puuid: Puuid.codec,
-  gameName: GameName.codec,
-  tagLine: TagLine.codec,
-})
+function fromApi(account: RiotRiotAccount): RiotAccount {
+  return {
+    puuid: account.puuid,
+    riotId: RiotId(account.gameName, account.tagLine),
+  }
+}
 
-const RiotAccount = { decoder }
+const RiotAccount = { fromApi }
 
 export { RiotAccount }

@@ -1,3 +1,6 @@
+import { eq, string } from 'fp-ts'
+import type { Endomorphism } from 'fp-ts/Endomorphism'
+import { identity, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
 
@@ -5,10 +8,15 @@ import { fromNewtype } from '../../utils/ioTsUtils'
 
 type GameName = Newtype<{ readonly GameName: unique symbol }, string>
 
-const { wrap } = iso<GameName>()
+const { wrap, unwrap } = iso<GameName>()
+const modify = identity as (f: Endomorphism<string>) => Endomorphism<GameName>
 
 const codec = fromNewtype<GameName>(C.string)
 
-const GameName = { wrap, codec }
+const trim = modify(string.trim)
+
+const Eq: eq.Eq<GameName> = pipe(string.Eq, eq.contramap(unwrap))
+
+const GameName = { wrap, unwrap, codec, trim, Eq }
 
 export { GameName }

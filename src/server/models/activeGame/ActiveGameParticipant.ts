@@ -3,6 +3,7 @@ import type { ActiveGameParticipantView } from '../../../shared/models/api/activ
 import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { RuneId } from '../../../shared/models/api/perk/RuneId'
 import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
+import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { SummonerName } from '../../../shared/models/riot/SummonerName'
@@ -12,6 +13,7 @@ import { Maybe } from '../../../shared/utils/fp'
 import type { SummonerId } from '../summoner/SummonerId'
 
 type ActiveGameParticipant = {
+  puuid: Puuid
   summonerId: SummonerId
   summonerName: SummonerName
   profileIconId: number

@@ -7,7 +7,7 @@
 /**
  * copypasta from: https://github.com/AlexGalays/spacelift/blob/be302c4807b23114de27dda6a90b315c3af56631/src/union.ts
  */
-import type { EnforceNonEmptyDict } from '../models/EnforceNonEmptyDict'
+import type { EnforceNonEmptyDict } from '../models/typeFest'
 import type { Dict, List } from './fp'
 
 export type UnionDescription = Dict<string, (...args: List<any>) => any>
