@@ -1,4 +1,5 @@
 - riot id
+- active game summoner without poro fix style
 - going back to game tab and then refreshing doesnt trigger visual reload
 - active game url doesn't get replaced by proper summoner name
 

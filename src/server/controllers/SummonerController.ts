@@ -415,6 +415,7 @@ const SummonerController = (
         participants,
         List.findFirst(p => RiotId.Eq.equals(RiotId.trim(p.riotId), poroParticipant.riotId)),
       )
+
       if (!Maybe.isSome(maybeParticipant)) {
         return Future.failed(
           Error(
@@ -424,7 +425,9 @@ const SummonerController = (
           ),
         )
       }
+
       const participant = maybeParticipant.value
+
       return pipe(
         findMasteriesAndShardsCount(platform, maybeUser, gameInsertedAt, participant),
         Future.map(({ masteries, shardsCount }) =>
