@@ -1,8 +1,12 @@
+import type { Override } from '../../shared/models/typeFest'
+
 import { cx } from '../utils/cx'
 
-type Props = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> & {
-  type: Exclude<React.ButtonHTMLAttributes<HTMLButtonElement>['type'], undefined>
-}
+type Props = Override<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'type',
+  Exclude<React.ButtonHTMLAttributes<HTMLButtonElement>['type'], undefined>
+>
 
 const getButton =
   (baseClassName: string): React.FC<Props> =>

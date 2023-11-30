@@ -2,10 +2,10 @@ import { readonlySet } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
-import type { MyPartial } from '../../../shared/models/MyPartial'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
+import type { RequiredPartial } from '../../../shared/models/typeFest'
 import { Dict, List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteriesQueryOrder } from './MasteriesQueryOrder'
@@ -48,7 +48,7 @@ const fromPartial = (partial: PartialMasteriesQuery): MasteriesQuery => ({
 })
 
 const toPartial = (query: MasteriesQuery): PartialMasteriesQuery => {
-  const res: MyPartial<PartialMasteriesQuery> = {
+  const res: RequiredPartial<PartialMasteriesQuery> = {
     sort: query.sort === MasteriesQuerySort.default ? undefined : query.sort,
     order: query.order === MasteriesQueryOrder.default ? undefined : query.order,
     view: query.view === MasteriesQueryView.default ? undefined : query.view,

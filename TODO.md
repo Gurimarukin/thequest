@@ -1,6 +1,8 @@
 - riot id
 - going back to game tab and then refreshing doesnt trigger visual reload
+- active game url doesn't get replaced by proper summoner name
 
+- use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
 - react-select
 - url encode summoner name (client and server side)
 - uri: ugly encode

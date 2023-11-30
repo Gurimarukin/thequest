@@ -5,6 +5,7 @@ import { pipe } from 'fp-ts/function'
 import { useEffect, useMemo } from 'react'
 
 import type { Platform, PlatformLower } from '../../shared/models/api/Platform'
+import type { Override } from '../../shared/models/typeFest'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe, Tuple } from '../../shared/utils/fp'
 
@@ -92,9 +93,7 @@ type Platformable = {
   platform: Platform | PlatformLower
 }
 
-type UppercasePlatform<A extends Platformable> = Omit<A, 'platform'> & {
-  platform: Uppercase<A['platform']>
-}
+type UppercasePlatform<A extends Platformable> = Override<A, 'platform', Uppercase<A['platform']>>
 
 // Redirect if upper case
 function withPlatformLower<A extends Platformable>(
