@@ -466,6 +466,7 @@ const frFRTranslation: Translation = {
     withoutAccount: 'Sans compte',
   },
   summoner: {
+    summonerName: 'Ancien nom d’invocateur :',
     masteriesCache: {
       lastUpdate: insertedAt =>
         `Dernière mise à jour des maîtrises à ${insertedAt.toLocaleTimeString(locale)}`,

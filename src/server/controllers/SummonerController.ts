@@ -93,12 +93,28 @@ const SummonerController = (
     masteriesByPuuid:
       (platform: Platform, puuid: Puuid) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(summonerService.findByPuuid(platform, puuid), findMasteries(platform, maybeUser)),
+        pipe(
+          apply.sequenceT(futureMaybe.ApplyPar)(
+            summonerService.findByPuuid(platform, puuid),
+            riotAccountService.findByPuuid(puuid),
+          ),
+          futureMaybe.map(([summoner, account]) => ({ ...summoner, riotId: account.riotId })),
+          findMasteries(platform, maybeUser),
+        ),
 
     masteriesByName:
       (platform: Platform, name: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(summonerService.findByName(platform, name), findMasteries(platform, maybeUser)),
+        pipe(
+          summonerService.findByName(platform, name),
+          futureMaybe.bind('riotId', summoner =>
+            pipe(
+              riotAccountService.findByPuuid(summoner.puuid),
+              futureMaybe.map(a => a.riotId),
+            ),
+          ),
+          findMasteries(platform, maybeUser),
+        ),
 
     challenges: (platform: Platform, name: SummonerName): EndedMiddleware =>
       pipe(
@@ -143,7 +159,7 @@ const SummonerController = (
   function findMasteries(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
-  ): (futureSummoner: Future<Maybe<Summoner>>) => EndedMiddleware {
+  ): (futureSummoner: Future<Maybe<Summoner & { riotId: RiotId }>>) => EndedMiddleware {
     return futureSummoner =>
       pipe(
         futureSummoner,
@@ -308,6 +324,10 @@ const SummonerController = (
     return participant =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
+          riotAccount: pipe(
+            riotAccountService.findByPuuid(participant.puuid),
+            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(participant.puuid))),
+          ),
           leagues: findLeagues(platform, participant.summonerId, {
             overrideInsertedAfter: gameInsertedAt,
           }),
@@ -318,14 +338,27 @@ const SummonerController = (
             participant,
           ),
         }),
-        Future.map(({ leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
-          pipe(participant, ActiveGameParticipant.toView({ leagues, masteries, shardsCount })),
+        Future.map(
+          ({ riotAccount, leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
+            pipe(
+              participant,
+              ActiveGameParticipant.toView({
+                riotId: riotAccount.riotId,
+                leagues,
+                masteries,
+                shardsCount,
+              }),
+            ),
         ),
       )
   }
 
+  function couldntFindAccountError(puuid: Puuid): Error {
+    return Error(`Couldn't find Riot account for summoner: ${puuid}`)
+  }
+
   type EnrichedActiveGameParticipant = ActiveGameParticipant & {
-    riotId: Maybe<RiotId>
+    riotId: RiotId
   }
 
   function activeGamePoro(
@@ -340,15 +373,8 @@ const SummonerController = (
         List.traverse(Future.ApplicativePar)(p =>
           pipe(
             riotAccountService.findByPuuid(p.puuid),
-            Future.map(
-              (maybeAccount): EnrichedActiveGameParticipant => ({
-                ...p,
-                riotId: pipe(
-                  maybeAccount,
-                  Maybe.map(a => a.riotId),
-                ),
-              }),
-            ),
+            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.puuid))),
+            Future.map((a): EnrichedActiveGameParticipant => ({ ...p, riotId: a.riotId })),
           ),
         ),
         Future.chain(participants =>
@@ -387,7 +413,7 @@ const SummonerController = (
     return poroParticipant => {
       const maybeParticipant = pipe(
         participants,
-        List.findFirst(p => Maybe.elem(RiotId.Eq)(poroParticipant.riotId, p.riotId)),
+        List.findFirst(p => RiotId.Eq.equals(RiotId.trim(p.riotId), poroParticipant.riotId)),
       )
       if (!Maybe.isSome(maybeParticipant)) {
         return Future.failed(

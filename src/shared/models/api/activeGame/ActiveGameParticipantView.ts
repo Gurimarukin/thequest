@@ -3,6 +3,7 @@ import * as C from 'io-ts/Codec'
 import { lens } from 'monocle-ts'
 
 import { List, Maybe } from '../../../utils/fp'
+import { RiotId } from '../../riot/RiotId'
 import { SummonerName } from '../../riot/SummonerName'
 import { ChampionKey } from '../champion/ChampionKey'
 import { ChampionPosition } from '../champion/ChampionPosition'
@@ -16,6 +17,7 @@ type ActiveGameParticipantView = C.TypeOf<typeof codec>
 type ActiveGameParticipantViewOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
+  riotId: RiotId.fromStringCodec,
   summonerName: SummonerName.codec,
   profileIconId: C.number,
   leagues: Maybe.codec(SummonerLeaguesView.codec),

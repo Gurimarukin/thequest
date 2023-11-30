@@ -5,7 +5,6 @@ import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../utils/ioTsUtils'
-import { GameName } from './GameName'
 
 type SummonerName = Newtype<{ readonly SummonerName: unique symbol }, string>
 
@@ -14,18 +13,11 @@ const modify = identity as (f: Endomorphism<string>) => Endomorphism<SummonerNam
 
 const codec = fromNewtype<SummonerName>(C.string)
 
-/**
- * @deprecated SummonerName will be removed
- */
-function fromGameName(name: GameName): SummonerName {
-  return wrap(GameName.unwrap(name))
-}
-
 const whiteSpaces = /\s+/g
 const clean = modify(name => name.toLowerCase().replaceAll(whiteSpaces, ''))
 
 const Eq: eq.Eq<SummonerName> = pipe(string.Eq, eq.contramap(unwrap))
 
-const SummonerName = { wrap, unwrap, codec, fromGameName, clean, Eq }
+const SummonerName = { wrap, unwrap, codec, clean, Eq }
 
 export { SummonerName }

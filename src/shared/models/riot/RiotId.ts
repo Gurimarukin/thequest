@@ -50,6 +50,10 @@ const fromStringCodec: Codec<unknown, string, RiotId> = C.make(
   fromStringEncoder,
 )
 
+function trim({ gameName, tagLine }: RiotId): RiotId {
+  return { gameName: GameName.trim(gameName), tagLine: TagLine.trim(tagLine) }
+}
+
 const Eq: eq.Eq<RiotId> = eq.struct({
   gameName: GameName.Eq,
   tagLine: TagLine.Eq,
@@ -58,6 +62,7 @@ const Eq: eq.Eq<RiotId> = eq.struct({
 const RiotId = immutableAssign(construct, {
   fromStringCodec,
   stringify,
+  trim,
   Eq,
 })
 

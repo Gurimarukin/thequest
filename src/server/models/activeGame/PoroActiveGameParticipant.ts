@@ -5,7 +5,6 @@ import type { ActiveGameParticipantView } from '../../../shared/models/api/activ
 import type { PoroTag } from '../../../shared/models/api/activeGame/PoroTag'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { RiotId } from '../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
@@ -41,7 +40,8 @@ type ToView = {
 const toView =
   ({ participant, masteries, shardsCount }: ToView) =>
   (poroParticipant: PoroActiveGameParticipant): ActiveGameParticipantView => ({
-    summonerName: SummonerName.fromGameName(poroParticipant.riotId.gameName),
+    riotId: poroParticipant.riotId,
+    summonerName: participant.summonerName,
     profileIconId: participant.profileIconId,
     leagues: Maybe.some(PoroLeagues.toView(poroParticipant.leagues)),
     championId: participant.championId,

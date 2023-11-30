@@ -17,6 +17,6 @@ const trim = modify(string.trim)
 
 const Eq: eq.Eq<TagLine> = pipe(string.Eq, eq.contramap(unwrap))
 
-const TagLine = { wrap, codec, trim, Eq }
+const TagLine = { wrap, unwrap, codec, trim, Eq }
 
 export { TagLine }
