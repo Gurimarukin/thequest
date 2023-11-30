@@ -331,6 +331,7 @@ const frFRTranslation: Translation = {
       </>
     ),
     summonerLevel: 'Niveau d’invocateur',
+    oldSummonerName: 'Ancien nom d’invocateur :',
     summonerIconAlt: name => `Icône de ${name}`,
   },
   form: {
@@ -466,7 +467,6 @@ const frFRTranslation: Translation = {
     withoutAccount: 'Sans compte',
   },
   summoner: {
-    summonerName: 'Ancien nom d’invocateur :',
     masteriesCache: {
       lastUpdate: insertedAt =>
         `Dernière mise à jour des maîtrises à ${insertedAt.toLocaleTimeString(locale)}`,

@@ -7,6 +7,7 @@ import type { ChampionLevel } from '../../../shared/models/api/champion/Champion
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { GameName } from '../../../shared/models/riot/GameName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
@@ -74,7 +75,7 @@ export const Summoner: React.FC<Props> = ({
       <div className="flex flex-wrap gap-4">
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
-          alt={t.common.summonerIconAlt(name)}
+          alt={t.common.summonerIconAlt(RiotId.stringify(riotId))}
           className="h-24 w-24 rounded border border-goldenrod-bis"
         />
         <div className="grid grid-rows-[1fr_auto]">
@@ -87,7 +88,7 @@ export const Summoner: React.FC<Props> = ({
             </div>
             <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
               <div className="flex items-baseline gap-2">
-                <span>{t.summoner.summonerName}</span>
+                <span>{t.common.oldSummonerName}</span>
                 <span className="whitespace-pre text-lg font-bold text-goldenrod">
                   {SummonerName.unwrap(name)}
                 </span>

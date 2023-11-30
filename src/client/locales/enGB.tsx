@@ -329,6 +329,7 @@ const enGBTranslation: Translation = {
       </>
     ),
     summonerLevel: 'Summoner level',
+    oldSummonerName: 'Old summoner name:',
     summonerIconAlt: name => `${name}’ icon`,
   },
   form: {
@@ -458,7 +459,6 @@ const enGBTranslation: Translation = {
     withoutAccount: 'Without account',
   },
   summoner: {
-    summonerName: 'Old summoner name:',
     masteriesCache: {
       lastUpdate: insertedAt => `Masteries last update at ${insertedAt.toLocaleTimeString(locale)}`,
       duration: minutes =>

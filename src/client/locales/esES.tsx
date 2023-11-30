@@ -331,6 +331,7 @@ const esESTranslation: Translation = {
       </>
     ),
     summonerLevel: 'INVOCADOR LEVELITO',
+    oldSummonerName: 'Antiguo nombre de invocador:',
     summonerIconAlt: name => `ICONO DEL ${name}`,
   },
   form: {
@@ -465,7 +466,6 @@ const esESTranslation: Translation = {
     withoutAccount: 'SIN CUENTA',
   },
   summoner: {
-    summonerName: 'Antiguo nombre de invocador:',
     masteriesCache: {
       lastUpdate: insertedAt =>
         `ÚLTIMA ACTUALIZACIÓN DE LOS TÍTULOS DE MÁSTER EN ${insertedAt.toLocaleTimeString(locale)}`,

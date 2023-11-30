@@ -80,7 +80,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
               >
                 <img
                   src={staticData.assets.summonerIcon(profileIconId)}
-                  alt={t.summonerIconAlt(name)}
+                  alt={t.summonerIconAlt(`${name}`)} // TODO: SummonerShort riotId
                   className="w-[30px] shadow-even shadow-black"
                 />
               </HighlightLink>

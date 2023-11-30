@@ -248,7 +248,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       >
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
-          alt={t.summonerIconAlt(summoner.name)}
+          alt={t.summonerIconAlt(`${summoner.name}`)} // TODO: SummonerShort riotId
           className="w-12"
         />
         <span className="ml-2 grow">{SummonerName.unwrap(summoner.name)}</span>
