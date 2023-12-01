@@ -12,6 +12,7 @@ import {
   taskEither,
 } from 'fp-ts'
 import type { Applicative2 } from 'fp-ts/Applicative'
+import type { Eq } from 'fp-ts/Eq'
 import type { Kind2, URIS2 } from 'fp-ts/HKT'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
@@ -172,6 +173,10 @@ const listEncoder: <O, A>(encoder: Encoder<O, A>) => Encoder<List<O>, List<A>> =
 export const List = {
   ...readonlyArray,
   empty: <A = never>(): List<A> => readonlyArray.empty,
+  differenceW: readonlyArray.difference as <C>(E: Eq<C>) => {
+    <A extends C, B extends C>(xs: List<B>): (ys: List<A>) => List<A>
+    <A extends C, B extends C>(xs: List<A>, ys: List<B>): List<A>
+  },
   groupBy: readonlyNonEmptyArray.groupBy as <A, K extends string>(
     f: (a: A) => K,
   ) => (as: List<A>) => PartialDict<K, NonEmptyArray<A>>,

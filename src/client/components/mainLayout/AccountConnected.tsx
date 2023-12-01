@@ -8,7 +8,10 @@ import { useCallback, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import type { UserView } from '../../../shared/models/api/user/UserView'
+import { GameName } from '../../../shared/models/riot/GameName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { TagLine } from '../../../shared/models/riot/TagLine'
 import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
@@ -63,7 +66,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
           user.linkedRiotAccount,
           Maybe.fold(
             () => null,
-            ({ platform, puuid, name, profileIconId }) => (
+            ({ platform, puuid, riotId, name, profileIconId }) => (
               <HighlightLink
                 to={(Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
                   ? appRoutes.sPlatformPuuidGame
@@ -75,12 +78,23 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                     : {},
                 )}
                 parser={anyPlatformSummonerNameExact(platform, name)}
-                tooltip={`${name} — ${platform}`}
+                tooltip={
+                  <div className="flex items-baseline gap-1.5">
+                    <div className="flex items-baseline gap-px">
+                      <span className="font-medium text-goldenrod">
+                        {GameName.unwrap(riotId.gameName)}
+                      </span>
+                      <span className="text-grey-500">#{TagLine.unwrap(riotId.tagLine)}</span>
+                    </div>
+                    <span>—</span>
+                    <span>{platform}</span>
+                  </div>
+                }
                 className="py-1.5"
               >
                 <img
                   src={staticData.assets.summonerIcon(profileIconId)}
-                  alt={t.summonerIconAlt(`${name}`)} // TODO: SummonerShort riotId
+                  alt={t.summonerIconAlt(RiotId.stringify(riotId))}
                   className="w-[30px] shadow-even shadow-black"
                 />
               </HighlightLink>

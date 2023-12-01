@@ -1,6 +1,5 @@
 import { apply, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import { HTTPError } from 'got'
 import readline from 'readline'
 
 import { DayJs } from '../../shared/models/DayJs'
@@ -13,15 +12,14 @@ import { UserName } from '../../shared/models/api/user/UserName'
 import { RiotId } from '../../shared/models/riot/RiotId'
 import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
-import { Either, Future, IO, List, Maybe, toNotUsed } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe, toNotUsed } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { JwtHelper } from '../helpers/JwtHelper'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { DiscordConnection } from '../models/discord/DiscordConnection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import { TheQuestProgressionError } from '../models/madosayentisuto/TheQuestProgressionError'
-import type { Summoner } from '../models/summoner/Summoner'
+import type { SummonerWithRiotId } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
@@ -43,6 +41,7 @@ export type SummonerWithDiscordInfos = {
     id: SummonerId
     platform: Platform
     puuid: Puuid
+    riotId: RiotId
     name: SummonerName
     profileIconId: number
   }
@@ -195,18 +194,14 @@ const UserService = (
     // Either.left if we couldn't find a valid c.name for existing riotgames connection for discord user
     getLinkedRiotAccount:
       ({ forceCacheRefresh }: ForceCacheRefresh) =>
-      (
-        user: User<UserLogin>,
-      ): Future<Maybe<Either<TheQuestProgressionError, SummonerWithDiscordInfos>>> =>
+      (user: User<UserLogin>): Future<Maybe<SummonerWithDiscordInfos>> =>
         pipe(
           withRefreshDiscordToken(user)(discord =>
             pipe(
               discordService.users.me.connections.get(discord.accessToken),
               Future.map(List.findFirst(c => c.type === 'riotgames')),
               futureMaybe.chain(fetchRiotGamesAccount(discord, { forceCacheRefresh })),
-              futureMaybe.map(
-                Either.map((summoner): SummonerWithDiscordInfos => ({ summoner, discord })),
-              ),
+              futureMaybe.map((summoner): SummonerWithDiscordInfos => ({ summoner, discord })),
             ),
           ),
           Maybe.getOrElseW(() => futureMaybe.none),
@@ -216,9 +211,7 @@ const UserService = (
   function fetchRiotGamesAccount(
     discord: UserDiscordInfos,
     { forceCacheRefresh }: ForceCacheRefresh,
-  ): (
-    riotGamesConnection: DiscordConnection,
-  ) => Future<Maybe<Either<TheQuestProgressionError, Summoner>>> {
+  ): (riotGamesConnection: DiscordConnection) => Future<Maybe<SummonerWithRiotId>> {
     return riotGamesConnection =>
       pipe(
         RiotId.fromStringCodec.decode(riotGamesConnection.name),
@@ -228,32 +221,12 @@ const UserService = (
           ),
         ),
         Future.fromEither,
-        Future.chain(riotAccountService.findByRiotId),
-        futureMaybe.chain(({ puuid }) =>
+        Future.bindTo('riotId'),
+        Future.chain(({ riotId }) => riotAccountService.findByRiotId(riotId)),
+        futureMaybe.bind('summoner', ({ puuid }) =>
           summonerService.findByPuuid(linkedRiotAccountPlatform, puuid, { forceCacheRefresh }),
         ),
-        Future.chainFirstIOEitherK(
-          Maybe.fold(
-            () => logger.warn(`Summoner not found for account ${riotGamesConnection.name}`),
-            () => IO.notUsed,
-          ),
-        ),
-        futureMaybe.map(Either.right),
-        Future.orElse(e =>
-          e instanceof HTTPError && e.response.statusCode === 403
-            ? pipe(
-                logger.warn(
-                  `Got 403 Forbidden from Riot API - accountApiKey might need to be refreshed`,
-                ),
-                Future.fromIOEither,
-                Future.map(() =>
-                  Maybe.some(
-                    Either.left(TheQuestProgressionError.of(discord.id, riotGamesConnection.name)),
-                  ),
-                ),
-              )
-            : Future.failed(e),
-        ),
+        futureMaybe.map(({ summoner, riotId }): SummonerWithRiotId => ({ ...summoner, riotId })),
       )
   }
 

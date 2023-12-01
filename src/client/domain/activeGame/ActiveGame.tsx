@@ -24,6 +24,7 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import type { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
@@ -158,10 +159,11 @@ const WithoutAdditional: React.FC<
       addRecentSearch({
         platform: props.platform,
         puuid: summoner.puuid,
+        riotId: summoner.riotId,
         name: summoner.name,
         profileIconId: summoner.profileIconId,
       }),
-    [addRecentSearch, props.platform, summoner.name, summoner.profileIconId, summoner.puuid],
+    [addRecentSearch, props.platform, summoner],
   )
 
   // Correct case of summoner's name in url
@@ -269,7 +271,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         )}
 
         <div className="flex items-center gap-0.5">
-          <a href={poroLink(lang, platform, summoner.name)} target="_blank" rel="noreferrer">
+          <a href={poroLink(lang, platform, summoner.riotId)} target="_blank" rel="noreferrer">
             <img src={Assets.poro} alt={t.activeGame.poroIconAlt} className="h-5" />
           </a>
           {isPoroOK ? (
@@ -353,10 +355,10 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   )
 }
 
-const poroLink = (lang: Lang, platform: Platform, summonerName: SummonerName): string =>
+const poroLink = (lang: Lang, platform: Platform, { gameName, tagLine }: RiotId): string =>
   `${config.poroApiBaseUrl}/${Business.poroLang[lang]}/live/${Platform.encoderLower.encode(
     platform,
-  )}/${summonerName}/ranked-only/season`
+  )}/${gameName}-${tagLine}/ranked-only/season`
 
 type ParticipantsProps = {
   platform: Platform

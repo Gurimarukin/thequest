@@ -1,7 +1,12 @@
 - riot id
+- unloged recent searches style
 - active game summoner without poro fix style
 - going back to game tab and then refreshing doesnt trigger visual reload
+- removeFavoriteSearch no platform, only puuid
 - active game url doesn't get replaced by proper summoner name
+- remove self from SearchSummoner
+
+- full summoner name removal
 
 - use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
 - react-select

@@ -212,10 +212,11 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
       addRecentSearch({
         platform,
         puuid: summoner.puuid,
+        riotId: summoner.riotId,
         name: summoner.name,
         profileIconId: summoner.profileIconId,
       }),
-    [addRecentSearch, platform, summoner.name, summoner.profileIconId, summoner.puuid],
+    [addRecentSearch, platform, summoner],
   )
 
   const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName

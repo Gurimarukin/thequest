@@ -50,7 +50,7 @@ import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import { LeagueEntry } from '../models/league/LeagueEntry'
 import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import type { Summoner } from '../models/summoner/Summoner'
+import type { Summoner, SummonerWithRiotId } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { WikiaChampionData } from '../models/wikia/WikiaChampionData'
@@ -159,7 +159,7 @@ const SummonerController = (
   function findMasteries(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
-  ): (futureSummoner: Future<Maybe<Summoner & { riotId: RiotId }>>) => EndedMiddleware {
+  ): (futureSummoner: Future<Maybe<SummonerWithRiotId>>) => EndedMiddleware {
     return futureSummoner =>
       pipe(
         futureSummoner,
@@ -268,16 +268,16 @@ const SummonerController = (
                 pipe(
                   logger.warn('Error while fetching Poro game (falling back to Riot API only):', e),
                   Future.fromIOEither,
-                  Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
+                  Future.chain(() => activeGameRiot(riotId, summoner, maybeUser, game)),
                 ),
               Maybe.fold(
                 () =>
                   pipe(
                     logger.warn('Poro game not found while Riot API returned one'),
                     Future.fromIOEither,
-                    Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
+                    Future.chain(() => activeGameRiot(riotId, summoner, maybeUser, game)),
                   ),
-                activeGamePoro(summoner, maybeUser, game),
+                activeGamePoro(riotId, summoner, maybeUser, game),
               ),
             ),
           ),
@@ -287,6 +287,7 @@ const SummonerController = (
   }
 
   function activeGameRiot(
+    riotId: RiotId,
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
     game: ActiveGame,
@@ -308,7 +309,7 @@ const SummonerController = (
           participants,
           PartialDict.map(sortParticipants(champions)(game.mapId)),
           (sorted): SummonerActiveGameView => ({
-            summoner,
+            summoner: { ...summoner, riotId },
             game: pipe(game, ActiveGame.toView(sorted, false)),
           }),
         ),
@@ -362,6 +363,7 @@ const SummonerController = (
   }
 
   function activeGamePoro(
+    riotId: RiotId,
     summoner: Summoner,
     maybeUser: Maybe<TokenContent>,
     game: ActiveGame,
@@ -389,7 +391,7 @@ const SummonerController = (
         ),
         Future.map<SummonerActiveGameView['game']['participants'], SummonerActiveGameView>(
           participants => ({
-            summoner,
+            summoner: { ...summoner, riotId },
             game: {
               gameStartTime: game.gameStartTime,
               mapId: game.mapId,

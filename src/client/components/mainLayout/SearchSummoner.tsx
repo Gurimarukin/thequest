@@ -6,8 +6,10 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
-import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
+import { GameName } from '../../../shared/models/riot/GameName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { TagLine } from '../../../shared/models/riot/TagLine'
 import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
@@ -23,6 +25,7 @@ import {
   StarOutline,
   TimeOutline,
 } from '../../imgs/svgs/icons'
+import { PartialSummonerShort } from '../../models/PartialSummonerShort'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
@@ -89,8 +92,10 @@ export const SearchSummoner: React.FC = () => {
     pipe(
       maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
-      // eslint-disable-next-line react/jsx-key
-      Maybe.map(s => <SummonerSearch type="self" summoner={s} />),
+      Maybe.map(s => (
+        // eslint-disable-next-line react/jsx-key
+        <SummonerSearch type="self" summoner={PartialSummonerShort.fromSummonerShort(s)} />
+      )),
     ),
     pipe(
       maybeUser,
@@ -98,7 +103,11 @@ export const SearchSummoner: React.FC = () => {
       Maybe.map(favoriteSearches => (
         <>
           {favoriteSearches.map(s => (
-            <SummonerSearch key={Puuid.unwrap(s.puuid)} type="favorite" summoner={s} />
+            <SummonerSearch
+              key={Puuid.unwrap(s.puuid)}
+              type="favorite"
+              summoner={PartialSummonerShort.fromSummonerShort(s)}
+            />
           ))}
         </>
       )),
@@ -177,7 +186,7 @@ const concatWithHr = (es: List<React.ReactElement>): React.ReactElement | null =
 
 type SummonerSearchProps = {
   type: 'self' | 'favorite' | 'recent'
-  summoner: SummonerShort
+  summoner: PartialSummonerShort
 }
 
 const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
@@ -204,7 +213,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const removeRecent = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      removeRecentSearch(summoner)
+      removeRecentSearch(summoner.puuid)
     },
     [removeRecentSearch, summoner],
   )
@@ -214,14 +223,23 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const addFavorite = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
+
+      if (Maybe.isNone(summoner.riotId)) {
+        return navigateToSummoner()
+      }
+
       setFavoriteIsLoading(true)
       return pipe(
-        addFavoriteSearch(summoner),
+        addFavoriteSearch({ ...summoner, riotId: summoner.riotId.value }),
         // on not found
-        Future.map(Maybe.getOrElseW(() => navigate(puuidRoute(summoner.platform, summoner.puuid)))),
+        Future.map(Maybe.getOrElseW(() => navigateToSummoner())),
         task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )
+
+      function navigateToSummoner(): void {
+        return navigate(puuidRoute(summoner.platform, summoner.puuid))
+      }
     },
     [addFavoriteSearch, navigate, puuidRoute, summoner],
   )
@@ -244,15 +262,37 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       {renderRecent(type, removeRecent)}
       <Link
         to={puuidRoute(summoner.platform, summoner.puuid)}
-        className="flex items-center hover:underline"
+        className="group flex items-center leading-4"
       >
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
-          alt={t.summonerIconAlt(`${summoner.name}`)} // TODO: SummonerShort riotId
+          alt={t.summonerIconAlt(
+            pipe(
+              summoner.riotId,
+              Maybe.fold(() => SummonerName.unwrap(summoner.name), RiotId.stringify),
+            ),
+          )}
           className="w-12"
         />
-        <span className="ml-2 grow">{SummonerName.unwrap(summoner.name)}</span>
-        <span className="ml-4">{summoner.platform}</span>
+        <div className="ml-2 flex grow items-baseline gap-0.5">
+          {pipe(
+            summoner.riotId,
+            Maybe.fold(
+              () => <span className={linkClassName}>{SummonerName.unwrap(summoner.name)}</span>,
+              riotId => (
+                <>
+                  <span className={cx(linkClassName, 'text-goldenrod')}>
+                    {GameName.unwrap(riotId.gameName)}
+                  </span>
+                  <span className="font-normal text-grey-500">
+                    #{TagLine.unwrap(riotId.tagLine)}
+                  </span>
+                </>
+              ),
+            ),
+          )}
+        </div>
+        <span className={cx(linkClassName, 'ml-4 font-normal')}>{summoner.platform}</span>
       </Link>
       {Maybe.isSome(maybeUser)
         ? renderFavorite(type, favoriteIsLoading, addFavorite, removeFavorite)
@@ -260,6 +300,8 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
     </li>
   )
 }
+
+const linkClassName = 'border-y border-y-transparent group-hover:border-b-current'
 
 const renderRecent = (
   type: SummonerSearchProps['type'],

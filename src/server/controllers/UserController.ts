@@ -27,14 +27,15 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 import { constants } from '../config/constants'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import type { Summoner } from '../models/summoner/Summoner'
 import { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
+import type { UserId } from '../models/user/UserId'
 import type { DDragonService } from '../services/DDragonService'
 import type { DiscordService } from '../services/DiscordService'
 import type { MasteriesService } from '../services/MasteriesService'
+import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -49,6 +50,7 @@ function UserController(
   ddragonService: DDragonService,
   discordService: DiscordService,
   masteriesService: MasteriesService,
+  riotAccountService: RiotAccountService,
   summonerService: SummonerService,
   userService: UserService,
 ) {
@@ -137,10 +139,9 @@ function UserController(
         futureEither.chainTaskEitherK(u =>
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.successful(User.userName(u)),
-            favoriteSearches: fetchFavoriteSearches(u.favoriteSearches),
+            favoriteSearches: fetchFavoriteSearches(u.id, u.favoriteSearches),
             linkedRiotAccount: pipe(
               userService.getLinkedRiotAccount({ forceCacheRefresh: false })(u),
-              futureMaybe.chainOptionK(Maybe.fromEither),
               futureMaybe.map(a => a.summoner),
             ),
           }),
@@ -155,10 +156,7 @@ function UserController(
           userService.findById(user_.id),
           Future.map(Either.fromOption(() => 'User not found')),
           futureEither.chainTaskEitherK(
-            flow(
-              userService.getLinkedRiotAccount({ forceCacheRefresh: false }),
-              futureMaybe.chainOptionK(Maybe.fromEither),
-            ),
+            userService.getLinkedRiotAccount({ forceCacheRefresh: false }),
           ),
           futureEither.bindTo('linkedRiotAccount'),
           futureEither.bind('summonerToFavorite', () =>
@@ -257,17 +255,22 @@ function UserController(
   }
 
   function fetchFavoriteSearches(
+    userId: UserId,
     favoriteSearches: List<PlatformWithPuuid>,
   ): Future<List<SummonerShort>> {
     return pipe(
       favoriteSearches,
       List.traverse(Future.ApplicativePar)(({ platform, puuid }) =>
         pipe(
-          summonerService.findByPuuid(platform, puuid),
+          apply.sequenceT(futureMaybe.ApplyPar)(
+            summonerService.findByPuuid(platform, puuid),
+            riotAccountService.findByPuuid(puuid),
+          ),
           Future.map(
-            Maybe.fold<Summoner, Either<PlatformWithPuuid, SummonerShort>>(
-              () => Either.left({ platform, puuid }),
-              Either.right,
+            Maybe.foldW(
+              () => Either.left<PlatformWithPuuid, never>({ platform, puuid }),
+              ([summoner, { riotId }]) =>
+                Either.right<never, SummonerShort>({ ...summoner, riotId }),
             ),
           ),
         ),
@@ -276,7 +279,7 @@ function UserController(
         const { left, right } = List.separate(eithers)
         return pipe(
           apply.sequenceT(Future.ApplyPar)(
-            userService.removeAllFavoriteSearches(left),
+            userService.removeAllFavoriteSearches(userId, left),
             summonerService.deleteByPuuid(left),
           ),
           Future.map(() => right),
