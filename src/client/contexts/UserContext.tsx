@@ -61,7 +61,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         http([url, method], { retry: 0 }, [UserView.codec, 'UserView']),
         statusesToOption(401, 404), // no token or user not found
         futureMaybe.map(
-          pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),
+          pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byRiotIdOrd))),
         ),
         Future.orElse(e => {
           console.error(e)
@@ -94,7 +94,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
-                    lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
+                    lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byRiotIdOrd))),
                   )(oldData),
                 ),
                 { revalidate: false },

@@ -27,16 +27,6 @@ const byRiotIdOrd: ord.Ord<SummonerShort> = pipe(
   ),
 )
 
-/**
- * @deprecated use riotId instead
- */
-const byNameOrd: ord.Ord<SummonerShort> = pipe(
-  string.Ord,
-  ord.contramap((s: SummonerShort) =>
-    StringUtils.cleanUTF8ToASCII(SummonerName.unwrap(s.name)).toLowerCase(),
-  ),
-)
-
-const SummonerShort = { codecProperties, codec, byRiotIdOrd, byNameOrd }
+const SummonerShort = { codecProperties, codec, byRiotIdOrd }
 
 export { SummonerShort }
