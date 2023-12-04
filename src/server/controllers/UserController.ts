@@ -318,7 +318,7 @@ function UserController(
           ),
           futureEither.bind('championShardsLevel', ({ validatedChampionShards, summoner }) =>
             pipe(
-              getChampionShardsLevel(platform, summoner.id, validatedChampionShards),
+              getChampionShardsLevel(platform, summoner.puuid, validatedChampionShards),
               Future.map(Either.fromOption(() => Tuple.of(Status.NotFound, 'Masteries not found'))),
             ),
           ),
@@ -375,11 +375,11 @@ function UserController(
 
   function getChampionShardsLevel(
     platform: Platform,
-    summonerId: SummonerId,
+    puuid: Puuid,
     validatedChampionShards: NonEmptyArray<ChampionShard>,
   ): Future<Maybe<NonEmptyArray<ChampionShardsLevel>>> {
     return pipe(
-      masteriesService.findBySummoner(platform, summonerId),
+      masteriesService.findBySummoner(platform, puuid),
       futureMaybe.map(({ champions }) =>
         pipe(
           validatedChampionShards,

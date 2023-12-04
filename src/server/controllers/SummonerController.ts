@@ -201,7 +201,7 @@ const SummonerController = (
       ),
       futureEither.bind('masteries', ({ summoner }) =>
         pipe(
-          masteriesService.findBySummoner(platform, summoner.id),
+          masteriesService.findBySummoner(platform, summoner.puuid),
           Future.map(Either.fromOption(() => 'Masteries not found')),
         ),
       ),
@@ -487,7 +487,7 @@ const SummonerController = (
   }> {
     return apply.sequenceS(Future.ApplyPar)({
       masteries: pipe(
-        masteriesService.findBySummoner(platform, participant.summonerId, {
+        masteriesService.findBySummoner(platform, participant.puuid, {
           overrideInsertedAfter: gameInsertedAt,
         }),
         futureMaybe.map(({ champions }): ActiveGameMasteriesView => {

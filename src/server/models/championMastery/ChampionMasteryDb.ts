@@ -2,16 +2,16 @@ import * as C from 'io-ts/Codec'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
+import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { List } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { SummonerId } from '../summoner/SummonerId'
 
 type ChampionMasteryDb = C.TypeOf<typeof codec>
 type ChampionMasteryDbOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
-  summonerId: SummonerId.codec,
+  puuid: Puuid.codec,
   champions: List.codec(
     C.struct({
       championId: ChampionKey.codec,

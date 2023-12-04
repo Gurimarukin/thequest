@@ -72,7 +72,7 @@ const MadosayentisutoController = (
     return pipe(
       // TODO: maybe log failed requests below
       apply.sequenceS(futureMaybe.ApplyPar)({
-        masteries: masteriesService.findBySummoner(summoner.platform, summoner.id, {
+        masteries: masteriesService.findBySummoner(summoner.platform, summoner.puuid, {
           forceCacheRefresh: true,
         }),
         staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),

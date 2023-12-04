@@ -112,7 +112,7 @@ export const apiParsers = {
       activeGame: { lang: { get: p(summonerByRiotIdActiveGameLangGet) } },
     },
     /**
-     * @deprecated
+     * @deprecated SummonerName will be removed
      */
     // eslint-disable-next-line deprecation/deprecation
     byName: {

@@ -13,6 +13,7 @@ export const Migration20231128 = (mongoCollection: MongoCollectionGetter): Migra
   migrate: pipe(
     apply.sequenceT(Future.ApplyPar)(
       MigrationUtils.dropCollection(mongoCollection, 'activeGame'),
+      MigrationUtils.dropCollection(mongoCollection, 'championMastery'),
       MigrationUtils.dropCollection(mongoCollection, 'poroActiveGame'),
     ),
     Future.map(toNotUsed),
