@@ -4,6 +4,7 @@ import { identity, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
 
+import { immutableAssign } from '../../utils/fp'
 import { fromNewtype } from '../../utils/ioTsUtils'
 
 type SummonerName = Newtype<{ readonly SummonerName: unique symbol }, string>
@@ -18,6 +19,6 @@ const clean = modify(name => name.toLowerCase().replaceAll(whiteSpaces, ''))
 
 const Eq: eq.Eq<SummonerName> = pipe(string.Eq, eq.contramap(unwrap))
 
-const SummonerName = { wrap, unwrap, codec, clean, Eq }
+const SummonerName = immutableAssign(wrap, { unwrap, codec, clean, Eq })
 
 export { SummonerName }

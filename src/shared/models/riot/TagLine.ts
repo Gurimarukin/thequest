@@ -4,6 +4,7 @@ import { identity, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
 
+import { immutableAssign } from '../../utils/fp'
 import { fromNewtype } from '../../utils/ioTsUtils'
 
 type TagLine = Newtype<{ readonly TagLine: unique symbol }, string>
@@ -20,6 +21,6 @@ const clean = modify(name => name.toLowerCase().replaceAll(whiteSpaces, ''))
 
 const Eq: eq.Eq<TagLine> = pipe(string.Eq, eq.contramap(unwrap))
 
-const TagLine = { wrap, unwrap, codec, trim, clean, Eq }
+const TagLine = immutableAssign(wrap, { unwrap, codec, trim, clean, Eq })
 
 export { TagLine }

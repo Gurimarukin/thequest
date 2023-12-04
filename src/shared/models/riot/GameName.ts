@@ -4,6 +4,7 @@ import { identity, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
 
+import { immutableAssign } from '../../utils/fp'
 import { fromNewtype } from '../../utils/ioTsUtils'
 
 type GameName = Newtype<{ readonly GameName: unique symbol }, string>
@@ -20,6 +21,6 @@ const clean = modify(name => name.toLowerCase().replaceAll(whiteSpaces, ''))
 
 const Eq: eq.Eq<GameName> = pipe(string.Eq, eq.contramap(unwrap))
 
-const GameName = { wrap, unwrap, codec, trim, clean, Eq }
+const GameName = immutableAssign(wrap, { unwrap, codec, trim, clean, Eq })
 
 export { GameName }

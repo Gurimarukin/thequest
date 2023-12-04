@@ -12,10 +12,10 @@ import { expectT } from '../../expectT'
 describe('riotIdUrlCodec', () => {
   it('should decode', () => {
     expectT(riotIdUrlCodec.decode('GameName-Tag')).toStrictEqual(
-      Either.right(RiotId(GameName.wrap('GameName'), TagLine.wrap('Tag'))),
+      Either.right(RiotId(GameName('GameName'), TagLine('Tag'))),
     )
     expectT(riotIdUrlCodec.decode('Gam-eN-ame-Tag')).toStrictEqual(
-      Either.right(RiotId(GameName.wrap('Gam-eN-ame'), TagLine.wrap('Tag'))),
+      Either.right(RiotId(GameName('Gam-eN-ame'), TagLine('Tag'))),
     )
     expectT(riotIdUrlCodec.decode('GameName#Tag')).toStrictEqual(
       D.failure('GameName#Tag', 'RiotIdUrl'),

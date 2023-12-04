@@ -23,7 +23,7 @@ function construct(gameName: GameName, tagLine: TagLine): RiotId {
 }
 
 function fromRawTuple([gameName, tagLine]: Tuple<string, string>): RiotId {
-  return { gameName: GameName.wrap(gameName), tagLine: TagLine.wrap(tagLine) }
+  return { gameName: GameName(gameName), tagLine: TagLine(tagLine) }
 }
 
 // {3-16}#{3-5}

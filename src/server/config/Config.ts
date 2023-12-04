@@ -50,7 +50,7 @@ export type HttpConfig = {
   allowedOrigins: Maybe<NonEmptyArray<URL>>
 }
 
-type DbConfig = {
+export type DbConfig = {
   host: string
   dbName: string
   user: string

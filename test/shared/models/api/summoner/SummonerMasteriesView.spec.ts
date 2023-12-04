@@ -5,9 +5,13 @@ import { DayJs } from '../../../../../src/shared/models/DayJs'
 import { MsDuration } from '../../../../../src/shared/models/MsDuration'
 import type { ChampionKey } from '../../../../../src/shared/models/api/champion/ChampionKey'
 import { ChampionShardsView } from '../../../../../src/shared/models/api/summoner/ChampionShardsView'
-import type { Puuid } from '../../../../../src/shared/models/api/summoner/Puuid'
+import { Puuid } from '../../../../../src/shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../../../../src/shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../../../src/shared/models/api/summoner/SummonerView'
+import { GameName } from '../../../../../src/shared/models/riot/GameName'
+import { RiotId } from '../../../../../src/shared/models/riot/RiotId'
+import { SummonerName } from '../../../../../src/shared/models/riot/SummonerName'
+import { TagLine } from '../../../../../src/shared/models/riot/TagLine'
 import { ListUtils } from '../../../../../src/shared/utils/ListUtils'
 import { Maybe } from '../../../../../src/shared/utils/fp'
 
@@ -16,8 +20,9 @@ import { expectT } from '../../../../expectT'
 describe('SummonerMasteriesView.Lens.championShards.counts', () => {
   it('should lens', () => {
     const summoner: SummonerView = {
-      puuid: '' as unknown as Puuid,
-      name: '',
+      puuid: Puuid(''),
+      riotId: RiotId(GameName(''), TagLine('')),
+      name: SummonerName(''),
       profileIconId: 0,
       summonerLevel: 0,
     }

@@ -81,7 +81,7 @@ export const SearchSummoner: React.FC = () => {
 
       const to = pipe(
         RiotId.fromStringDecoder.decode(summoner),
-        Either.mapLeft(() => SummonerName.wrap(summoner)),
+        Either.mapLeft(() => SummonerName(summoner)),
         Either.fold(
           (name): To => ({
             profile: appRoutes.platformSummonerName(

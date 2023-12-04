@@ -6,12 +6,14 @@
 - remove self from SearchSummoner
 - `points / max` ("/" font-normal)
 - `titleWithElementParser` translation
+- replace all `wrap`s with `immutableAssign`
 
 - full summoner name removal
 
 - use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
 - react-select
-- url encode summoner name (client and server side)
+- are `fromIO`s useful (simply use `myIo()`)?
+- url encode riot id (client and server side)
 - uri: ugly encode
 
 - challenges page + detect challenges
