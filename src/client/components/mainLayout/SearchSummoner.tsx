@@ -10,13 +10,13 @@ import { GameName } from '../../../shared/models/riot/GameName'
 import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
-import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Either, Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
+import { usePlatformWithRiotIdFromLocation } from '../../hooks/usePlatformWithRiotIdFromLocation'
 import {
   CloseFilled,
   PersonFilled,
@@ -25,8 +25,8 @@ import {
   StarOutline,
   TimeOutline,
 } from '../../imgs/svgs/icons'
-import { PartialSummonerShort } from '../../models/PartialSummonerShort'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
+import { PartialSummonerShort } from '../../models/summoner/PartialSummonerShort'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -43,25 +43,25 @@ export const SearchSummoner: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const close = useCallback(() => setIsOpen(false), [])
 
-  const platformSummonerNameFromLocation = usePlatformSummonerNameFromLocation()
+  const platformWithRiotIdFromLocation = usePlatformWithRiotIdFromLocation()
 
   const [platform, setPlatform] = useState<Platform>(
-    platformSummonerNameFromLocation?.platform ?? Platform.defaultPlatform,
+    platformWithRiotIdFromLocation?.platform ?? Platform.defaultPlatform,
   )
 
-  const summonerNameFromLocation = platformSummonerNameFromLocation?.summonerName
-  const [summonerName, setSummonerName] = useState(
-    summonerNameFromLocation !== undefined ? SummonerName.unwrap(summonerNameFromLocation) : '',
+  const riotIdFromLocation = platformWithRiotIdFromLocation?.riotId
+  const [summoner, setSummoner] = useState(
+    riotIdFromLocation !== undefined ? RiotId.stringify(riotIdFromLocation) : '',
   )
 
   useEffect(() => {
-    if (summonerNameFromLocation !== undefined) {
-      setSummonerName(SummonerName.unwrap(summonerNameFromLocation))
+    if (riotIdFromLocation !== undefined) {
+      setSummoner(RiotId.stringify(riotIdFromLocation))
     }
-  }, [summonerNameFromLocation])
+  }, [riotIdFromLocation])
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSummonerName(e.target.value),
+    (e: React.ChangeEvent<HTMLInputElement>) => setSummoner(e.target.value),
     [],
   )
 
@@ -73,19 +73,44 @@ export const SearchSummoner: React.FC = () => {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      navigate(
-        (Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
-          ? appRoutes.platformSummonerNameGame
-          : appRoutes.platformSummonerName)(
-          platform,
-          SummonerName.wrap(summonerName),
-          Maybe.isSome(matchLocation(appParsers.platformSummonerName))
-            ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
-            : {},
+
+      type To = {
+        profile: string
+        game: string
+      }
+
+      const to = pipe(
+        RiotId.fromStringDecoder.decode(summoner),
+        Either.mapLeft(() => SummonerName.wrap(summoner)),
+        Either.fold(
+          (name): To => ({
+            profile: appRoutes.platformSummonerName(
+              platform,
+              name,
+              MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
+            ),
+            game: appRoutes.platformSummonerNameGame(platform, name),
+          }),
+          (riotId): To => ({
+            profile: appRoutes.platformRiotId(
+              platform,
+              riotId,
+              MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
+            ),
+            game: appRoutes.platformRiotIdGame(platform, riotId),
+          }),
         ),
       )
+
+      const parser = appParsers.platformRiotIdGame.map(() => to.game)
+
+      pipe(
+        matchLocation(parser),
+        Maybe.getOrElse(() => to.profile),
+        navigate,
+      )
     },
-    [masteriesQuery, matchLocation, navigate, platform, summonerName],
+    [masteriesQuery, matchLocation, navigate, platform, summoner],
   )
 
   const searches: List<React.ReactElement> = List.compact([
@@ -139,13 +164,13 @@ export const SearchSummoner: React.FC = () => {
         <ClickOutside onClickOutside={close}>
           <input
             type="text"
-            value={summonerName}
+            value={summoner}
             onChange={handleChange}
             onFocus={handleFocus}
             placeholder={t.layout.searchSummoner}
             className={cx('w-60 border border-goldenrod bg-black pl-2 pr-8 area-1', [
               'font-normal',
-              summonerName === '',
+              summoner === '',
             ])}
           />
           <ul

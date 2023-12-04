@@ -8,6 +8,7 @@ import { lens } from 'monocle-ts'
 import qs from 'qs'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import type { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { Either, Maybe } from '../../shared/utils/fp'
 
@@ -133,17 +134,20 @@ export const useHistory = (): HistoryContext => {
 }
 
 type HistoryState = {
-  summonerMasteries: Maybe<SummonerMasteriesView>
+  masteries: Maybe<SummonerMasteriesView>
+  game: Maybe<SummonerActiveGameView>
 }
 
 const empty: HistoryState = {
-  summonerMasteries: Maybe.none,
+  masteries: Maybe.none,
+  game: Maybe.none,
 }
 
 const HistoryState = {
   empty,
   Lens: {
-    summonerMasteries: pipe(lens.id<HistoryState>(), lens.prop('summonerMasteries')),
+    masteries: pipe(lens.id<HistoryState>(), lens.prop('masteries')),
+    game: pipe(lens.id<HistoryState>(), lens.prop('game')),
   },
 }
 

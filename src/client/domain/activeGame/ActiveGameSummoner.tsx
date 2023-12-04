@@ -86,7 +86,7 @@ export const ActiveGameSummoner: React.FC<Props> = ({
         <div className={cx('flex grow', reverse ? 'justify-start' : 'justify-end')}>
           <a
             ref={riotIdRef}
-            href={appRoutes.platformSummonerName(platform, summonerName, {
+            href={appRoutes.platformRiotId(platform, riotId, {
               view: 'histogram',
               level: allLevels,
             })}

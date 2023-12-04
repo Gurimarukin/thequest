@@ -15,8 +15,11 @@ const codec = fromNewtype<TagLine>(C.string)
 
 const trim = modify(string.trim)
 
+const whiteSpaces = /\s+/g
+const clean = modify(name => name.toLowerCase().replaceAll(whiteSpaces, ''))
+
 const Eq: eq.Eq<TagLine> = pipe(string.Eq, eq.contramap(unwrap))
 
-const TagLine = { wrap, unwrap, codec, trim, Eq }
+const TagLine = { wrap, unwrap, codec, trim, clean, Eq }
 
 export { TagLine }

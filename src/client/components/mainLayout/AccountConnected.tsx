@@ -1,18 +1,16 @@
 /* eslint-disable functional/no-expression-statements */
-import { eq, task } from 'fp-ts'
-import type { Route } from 'fp-ts-routing'
+import { task } from 'fp-ts'
 import { Parser } from 'fp-ts-routing'
-import type { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useState } from 'react'
 
-import { Platform } from '../../../shared/models/api/Platform'
+import type { Platform } from '../../../shared/models/api/Platform'
 import type { UserView } from '../../../shared/models/api/user/UserView'
 import { GameName } from '../../../shared/models/riot/GameName'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
-import { Future, Maybe } from '../../../shared/utils/fp'
+import { Either, Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -20,6 +18,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
+import { PlatformWithSummoner } from '../../models/summoner/PlatformWithSummoner'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
@@ -77,7 +76,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                     ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
                     : {},
                 )}
-                parser={anyPlatformSummonerNameExact(platform, name)}
+                parser={anyPlatformSummonerNameExact(platform, riotId, name)}
                 tooltip={
                   <div className="flex items-baseline gap-1.5">
                     <div className="flex items-baseline gap-px">
@@ -128,25 +127,18 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   )
 }
 
-type PlatformSummonerName<P extends Platform> = {
-  platform: P
-  summonerName: SummonerName
-}
-
-const platformSummonerNameEq: Eq<PlatformSummonerName<Platform>> = eq.struct({
-  platform: Platform.Eq,
-  summonerName: SummonerName.Eq,
-})
-
-function anyPlatformSummonerNameExact<P extends Platform>(
-  platform: P,
-  summonerName: SummonerName,
-): Parser<PlatformSummonerName<P>> {
+function anyPlatformSummonerNameExact(
+  platform: Platform,
+  riotId: RiotId,
+  name: SummonerName,
+): Parser<PlatformWithSummoner> {
   return new Parser(r =>
     pipe(
-      appParsers.anyPlatformSummonerName.run(r),
-      Maybe.filter((tuple): tuple is [PlatformSummonerName<P>, Route] =>
-        platformSummonerNameEq.equals(tuple[0], { platform, summonerName }),
+      appParsers.anyPlatformSummoner.run(r),
+      Maybe.filter(
+        ([a]) =>
+          PlatformWithSummoner.Eq.equals(a, { platform, summoner: Either.right(riotId) }) ||
+          PlatformWithSummoner.Eq.equals(a, { platform, summoner: Either.left(name) }),
       ),
     ),
   )

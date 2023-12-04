@@ -36,9 +36,6 @@ const ActiveGamePersistence = (Logger: LoggerGetter, mongoCollection: MongoColle
   return {
     ensureIndexes,
 
-    /**
-     * @deprecated TODO: use PUUID instead
-     */
     findBySummonerId: (
       summonerId: SummonerId,
       insertedAfter: DayJs,

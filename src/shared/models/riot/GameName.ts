@@ -15,8 +15,11 @@ const codec = fromNewtype<GameName>(C.string)
 
 const trim = modify(string.trim)
 
+const whiteSpaces = /\s+/g
+const clean = modify(name => name.toLowerCase().replaceAll(whiteSpaces, ''))
+
 const Eq: eq.Eq<GameName> = pipe(string.Eq, eq.contramap(unwrap))
 
-const GameName = { wrap, unwrap, codec, trim, Eq }
+const GameName = { wrap, unwrap, codec, trim, clean, Eq }
 
 export { GameName }

@@ -8,15 +8,16 @@ import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionShard } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsPayload } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
 import { Token } from '../../shared/models/api/user/Token'
 import { UserView } from '../../shared/models/api/user/UserView'
 import type { OAuth2Code } from '../../shared/models/discord/OAuth2Code'
-import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { Either, Future, List, Maybe, NonEmptyArray, Tuple } from '../../shared/utils/fp'
@@ -213,7 +214,7 @@ function UserController(
         ),
       ),
 
-    setSummonerChampionsShardsCount,
+    setChampionsShardsCount,
 
     loginDiscord,
     loginPassword,
@@ -288,12 +289,12 @@ function UserController(
     )
   }
 
-  function setSummonerChampionsShardsCount(
+  function setChampionsShardsCount(
     platform: Platform,
-    name: SummonerName,
+    puuid: Puuid,
   ): (user: TokenContent) => EndedMiddleware {
     return user =>
-      EndedMiddleware.withBody(NonEmptyArray.decoder(ChampionShardsPayload.codec))(championShards =>
+      EndedMiddleware.withBody(ChampionShardsPayload.codec)(championShards =>
         pipe(
           validateChampionKeys(championShards),
           Future.map(
@@ -311,7 +312,7 @@ function UserController(
           futureEither.bindTo('validatedChampionShards'),
           futureEither.bind('summoner', () =>
             pipe(
-              summonerService.findByName(platform, name),
+              summonerService.findByPuuid(platform, puuid),
               Future.map(Either.fromOption(() => Tuple.of(Status.NotFound, 'Summoner not found'))),
             ),
           ),
@@ -348,10 +349,10 @@ function UserController(
   }
 
   function validateChampionKeys(
-    championShards: NonEmptyArray<ChampionShardsPayload>,
-  ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShardsPayload>>> {
+    championShards: NonEmptyArray<ChampionShard>,
+  ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShard>>> {
     return pipe(
-      ddragonService.latestChampions('en_GB' /* whatever (unused) */),
+      ddragonService.latestChampions('en_GB' /* whatever, because unused */),
       Future.map(({ value: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,
@@ -375,7 +376,7 @@ function UserController(
   function getChampionShardsLevel(
     platform: Platform,
     summonerId: SummonerId,
-    validatedChampionShards: NonEmptyArray<ChampionShardsPayload>,
+    validatedChampionShards: NonEmptyArray<ChampionShard>,
   ): Future<Maybe<NonEmptyArray<ChampionShardsLevel>>> {
     return pipe(
       masteriesService.findBySummoner(platform, summonerId),

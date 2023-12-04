@@ -1,7 +1,7 @@
 import type { ParserWithMethod } from '../../shared/ApiRouter'
 import { apiParsers as api } from '../../shared/ApiRouter'
 import { MsDuration } from '../../shared/models/MsDuration'
-import type { List } from '../../shared/utils/fp'
+import { type List } from '../../shared/utils/fp'
 
 import type { HealthCheckController } from '../controllers/HealthCheckController'
 import type { MadosayentisutoController } from '../controllers/MadosayentisutoController'
@@ -31,23 +31,36 @@ export const Routes = (
     m(api.staticData.lang.additional.get, ({ lang }) =>
       staticDataController.additionalStaticData(lang),
     ),
+
     m(api.summoner.byPuuid.masteries.get, ({ platform, puuid }) =>
       maybeWithAuth(summonerController.masteriesByPuuid(platform, puuid)),
     ),
+    m(api.summoner.byPuuid.challenges.get, ({ platform, puuid }) =>
+      summonerController.challengesByPuuid(platform, puuid),
+    ),
+    m(api.summoner.byPuuid.activeGame.lang.get, ({ platform, puuid, lang }) =>
+      maybeWithAuth(summonerController.activeGameByPuuid(lang, platform, puuid)),
+    ),
+
     m(api.summoner.byName.masteries.get, ({ platform, summonerName }) =>
       maybeWithAuth(summonerController.masteriesByName(platform, summonerName)),
     ),
-    m(api.summoner.byName.challenges.get, ({ platform, summonerName }) =>
-      summonerController.challenges(platform, summonerName),
+    m(api.summoner.byName.activeGame.lang.get, ({ platform, summonerName, lang }) =>
+      maybeWithAuth(summonerController.activeGameByName(lang, platform, summonerName)),
     ),
-    m(api.summoner.byName.activeGame.lang.get, ({ lang, platform, summonerName }) =>
-      maybeWithAuth(summonerController.activeGame(lang, platform, summonerName)),
+
+    m(api.summoner.byRiotId.masteries.get, ({ platform, riotId }) =>
+      maybeWithAuth(summonerController.masteriesByRiotId(platform, riotId)),
     ),
+    m(api.summoner.byRiotId.activeGame.lang.get, ({ platform, riotId, lang }) =>
+      maybeWithAuth(summonerController.activeGameByRiotId(lang, platform, riotId)),
+    ),
+
     m(api.user.self.get, () => withAuth(userController.getSelf)),
     m(api.user.self.favorites.put, () => withAuth(userController.addFavoriteSelf)),
     m(api.user.self.favorites.delete, () => withAuth(userController.removeFavoriteSelf)),
-    m(api.user.self.summoner.championsShardsCount.post, ({ platform, summonerName }) =>
-      withAuth(userController.setSummonerChampionsShardsCount(platform, summonerName)),
+    m(api.user.self.summoner.championsShardsCount.post, ({ platform, puuid }) =>
+      withAuth(userController.setChampionsShardsCount(platform, puuid)),
     ),
     m(api.user.login.discord.post, () =>
       rateLimiter(2, MsDuration.minute(1))(userController.loginDiscord),

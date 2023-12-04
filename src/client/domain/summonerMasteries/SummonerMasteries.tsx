@@ -14,12 +14,13 @@ import type { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
-import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
+import type { ChampionShard } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsView } from '../../../shared/models/api/summoner/ChampionShardsView'
+import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
-import type { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -36,7 +37,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useToaster } from '../../contexts/ToasterContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
+import { usePlatformWithRiotIdFromLocation } from '../../hooks/usePlatformWithRiotIdFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
@@ -63,15 +64,15 @@ type OptimisticMutation = {
 
 type Props = {
   platform: Platform
-  summonerName: SummonerName
+  riotId: RiotId
 }
 
-export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) => {
+export const SummonerMasteries: React.FC<Props> = ({ platform, riotId }) => {
   const { t } = useTranslation()
   const { showToaster } = useToaster()
   const { maybeUser } = useUser()
 
-  const { data, error, mutate } = useSummonerMasteries(platform, summonerName)
+  const { data, error, mutate } = useSummonerMasteries(platform, riotId)
 
   // Remove shards on user disconnect
   const previousUser = usePrevious(maybeUser)
@@ -91,15 +92,15 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
       debounce(
         (
           platform_: Platform,
-          summonerName_: SummonerName,
-          updates: NonEmptyArray<ChampionShardsPayload>,
+          puuid: Puuid,
+          updates: NonEmptyArray<ChampionShard>,
           optimisticMutation: boolean,
           oldData: SummonerMasteriesView,
           newData: SummonerMasteriesView,
         ): Promise<unknown> => {
           setShardsIsLoading(true)
           return pipe(
-            apiUserSelfSummonerChampionsShardsCountPost(platform_, summonerName_, updates),
+            apiUserSelfSummonerChampionsShardsCountPost(platform_, puuid, updates),
             Future.map(() => {
               if (!optimisticMutation) mutate(newData, { revalidate: false })
               showToaster('success', t.masteries.updateShardsSucces)
@@ -121,10 +122,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
   )
 
   const setChampionsShardsBulk = useCallback(
-    (
-      updates: NonEmptyArray<ChampionShardsPayload>,
-      { optimisticMutation }: OptimisticMutation,
-    ): void => {
+    (updates: NonEmptyArray<ChampionShard>, { optimisticMutation }: OptimisticMutation): void => {
       if (data === undefined || Maybe.isNone(data.championShards)) return
 
       const newData: SummonerMasteriesView = pipe(
@@ -150,7 +148,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, summonerName }) =
 
       debouncedSetChampionsShardsBulk(
         platform,
-        data.summoner.name,
+        data.summoner.puuid,
         updates,
         optimisticMutation,
         data,
@@ -187,7 +185,7 @@ type SummonerViewProps = {
   championShards: Maybe<List<ChampionShardsView>>
   shardsIsLoading: boolean
   setChampionsShardsBulk: (
-    updates: NonEmptyArray<ChampionShardsPayload>,
+    updates: NonEmptyArray<ChampionShard>,
     { optimisticMutation }: OptimisticMutation,
   ) => void
 }
@@ -205,7 +203,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   const { addRecentSearch } = useUser()
   const { champions } = useStaticData()
 
-  const challenges = useChallenges(platform, summoner.name)
+  const challenges = useChallenges(platform, summoner.puuid)
 
   useEffect(
     () =>
@@ -219,21 +217,21 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
     [addRecentSearch, platform, summoner],
   )
 
-  const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
+  const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
 
   // Correct case of summoner's name in url
   useEffect(() => {
-    if (summonerNameFromLocation !== summoner.name) {
+    if (riotIdFromLocation !== undefined && RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)) {
       navigate(
-        appRoutes.platformSummonerName(
+        appRoutes.platformRiotId(
           platform,
-          summoner.name,
+          summoner.riotId,
           MasteriesQuery.toPartial(masteriesQuery),
         ),
         { replace: true },
       )
     }
-  }, [summonerNameFromLocation, masteriesQuery, navigate, platform, summoner.name])
+  }, [masteriesQuery, navigate, platform, riotIdFromLocation, summoner.riotId])
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
     () => enrichAll(masteries.champions, championShards, masteriesQuery.search, champions),
@@ -271,7 +269,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   )
 
   const nonOptimisticSetChampionsShardsBulk = useCallback(
-    (updates: NonEmptyArray<ChampionShardsPayload>): void =>
+    (updates: NonEmptyArray<ChampionShard>): void =>
       setChampionsShardsBulk(updates, { optimisticMutation: false }),
     [setChampionsShardsBulk],
   )

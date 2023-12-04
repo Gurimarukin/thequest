@@ -4,6 +4,8 @@
 - removeFavoriteSearch no platform, only puuid
 - active game url doesn't get replaced by proper summoner name
 - remove self from SearchSummoner
+- `points / max` ("/" font-normal)
+- `titleWithElementParser` translation
 
 - full summoner name removal
 

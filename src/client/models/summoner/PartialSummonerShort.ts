@@ -1,8 +1,8 @@
 import * as C from 'io-ts/Codec'
 
-import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
-import { RiotId } from '../../shared/models/riot/RiotId'
-import { Maybe } from '../../shared/utils/fp'
+import { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
+import { RiotId } from '../../../shared/models/riot/RiotId'
+import { Maybe } from '../../../shared/utils/fp'
 
 export type PartialSummonerShort = C.TypeOf<typeof codec>
 

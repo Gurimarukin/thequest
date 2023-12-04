@@ -3,8 +3,9 @@ import type { SWRResponse } from 'swr'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import type { Lang } from '../../../shared/models/api/Lang'
 import type { Platform } from '../../../shared/models/api/Platform'
-import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
+import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import type { RiotId } from '../../../shared/models/riot/RiotId'
 import { Future, Maybe } from '../../../shared/utils/fp'
 
@@ -13,23 +14,24 @@ import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 
-export const useSummonerMasteries = (
+export function useActiveGame(
+  lang: Lang,
   platform: Platform,
   riotId: RiotId,
-): SWRResponse<SummonerMasteriesView, unknown> => {
+): SWRResponse<SummonerActiveGameView, unknown> {
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
 
   return useSWR(
-    apiRoutes.summoner.byRiotId(platform)(riotId).masteries.get,
+    apiRoutes.summoner.byRiotId(platform)(riotId).activeGame(lang).get,
     ([url, method]) =>
       pipe(
-        historyStateRef.current.masteries,
+        historyStateRef.current.game,
         Maybe.fold(
-          () => http([url, method], {}, [SummonerMasteriesView.codec, 'SummonerMasteriesView']),
+          () => http([url, method], {}, [SummonerActiveGameView.codec, 'SummonerActiveGameView']),
           flow(
             Future.successful,
             Future.chainFirstIOK(
-              () => () => modifyHistoryStateRef(HistoryState.Lens.masteries.set(Maybe.none)),
+              () => () => modifyHistoryStateRef(HistoryState.Lens.game.set(Maybe.none)),
             ),
           ),
         ),

@@ -214,7 +214,7 @@ const UserService = (
   ): (riotGamesConnection: DiscordConnection) => Future<Maybe<SummonerWithRiotId>> {
     return riotGamesConnection =>
       pipe(
-        RiotId.fromStringCodec.decode(riotGamesConnection.name),
+        RiotId.fromStringDecoder.decode(riotGamesConnection.name),
         Either.mapLeft(() =>
           Error(
             `Couldn't decode RiotId for user ${discord.username}#${discord.discriminator} (${discord.id}) - value: ${riotGamesConnection.name}`,
