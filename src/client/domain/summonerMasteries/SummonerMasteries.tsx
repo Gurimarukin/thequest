@@ -219,9 +219,12 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
 
   const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
 
-  // Correct case of summoner's name in url
+  // Correct Riot ID's case in url
   useEffect(() => {
-    if (riotIdFromLocation !== undefined && RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)) {
+    if (
+      riotIdFromLocation !== undefined &&
+      !RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)
+    ) {
       navigate(
         appRoutes.platformRiotId(
           platform,

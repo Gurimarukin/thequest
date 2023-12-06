@@ -73,7 +73,7 @@ type Props = {
 
 export const ActiveGame: React.FC<Props> = ({ platform, riotId }) => {
   const { maybeUser } = useUser()
-  const { lang, t } = useTranslation('activeGame')
+  const { lang } = useTranslation()
 
   const { data, error, mutate } = useActiveGame(lang, platform, riotId)
 
@@ -112,43 +112,30 @@ export const ActiveGame: React.FC<Props> = ({ platform, riotId }) => {
   return (
     <MainLayout>
       <AsyncRenderer data={data} error={error}>
-        {summonerGame =>
-          pipe(
-            summonerGame.game,
-            Maybe.fold(
-              () => (
-                <div className="flex flex-col items-center gap-4">
-                  <Pre className="mt-4">{t.notInGame}</Pre>
-                  <button type="button" onClick={refreshGame}>
-                    <RefreshOutline className="w-6" />
-                  </button>
-                </div>
-              ),
-              game => (
-                <WithoutAdditional
-                  platform={platform}
-                  summoner={summonerGame.summoner}
-                  game={game}
-                  refreshGame={refreshGame}
-                  reloadGame={reloadGame}
-                />
-              ),
-            ),
-          )
-        }
+        {summonerGame => (
+          <Loaded
+            platform={platform}
+            summoner={summonerGame.summoner}
+            game={summonerGame.game}
+            refreshGame={refreshGame}
+            reloadGame={reloadGame}
+          />
+        )}
       </AsyncRenderer>
     </MainLayout>
   )
 }
 
-const WithoutAdditional: React.FC<
-  Omit<ActiveGameComponentProps, 'additionalStaticData'>
+const Loaded: React.FC<
+  Omit<ActiveGameComponentProps, 'additionalStaticData' | 'game'> & {
+    game: Maybe<ActiveGameView>
+  }
 > = props => {
-  const { summoner } = props
+  const { summoner, refreshGame } = props
 
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
-  const { lang } = useTranslation()
+  const { t } = useTranslation('activeGame')
   const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
 
   useEffect(
@@ -163,14 +150,40 @@ const WithoutAdditional: React.FC<
     [addRecentSearch, props.platform, summoner],
   )
 
-  // Correct case of summoner's name in url
+  // Correct Riot ID's case in url
   useEffect(() => {
-    if (riotIdFromLocation !== undefined && RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)) {
+    if (
+      riotIdFromLocation !== undefined &&
+      !RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)
+    ) {
       navigate(appRoutes.platformRiotIdGame(props.platform, summoner.riotId), {
         replace: true,
       })
     }
   }, [navigate, props.platform, riotIdFromLocation, summoner.riotId])
+
+  return pipe(
+    props.game,
+    Maybe.fold(
+      () => (
+        <div className="flex flex-col items-center gap-4">
+          <Pre className="mt-4">{t.notInGame}</Pre>
+          <button type="button" onClick={refreshGame}>
+            <RefreshOutline className="w-6" />
+          </button>
+        </div>
+      ),
+      game => <WithoutAdditional {...props} game={game} />,
+    ),
+  )
+}
+
+const WithoutAdditional: React.FC<
+  Omit<ActiveGameComponentProps, 'additionalStaticData' | 'game'> & {
+    game: ActiveGameView
+  }
+> = props => {
+  const { lang } = useTranslation()
 
   return (
     <AsyncRenderer
