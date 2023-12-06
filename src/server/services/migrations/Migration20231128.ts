@@ -15,6 +15,7 @@ export const Migration20231128 = (mongoCollection: MongoCollectionGetter): Migra
       MigrationUtils.dropCollection(mongoCollection, 'activeGame'),
       MigrationUtils.dropCollection(mongoCollection, 'championMastery'),
       MigrationUtils.dropCollection(mongoCollection, 'poroActiveGame'),
+      MigrationUtils.dropCollection(mongoCollection, 'riotAccount'),
     ),
     Future.map(toNotUsed),
   ),
