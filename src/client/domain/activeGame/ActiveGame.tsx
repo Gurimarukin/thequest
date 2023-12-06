@@ -453,7 +453,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             mapId={mapId}
             participant={participant}
             shouldWrap={shouldWrap}
-            highlight={SummonerName.Eq.equals(participant.summonerName, summoner.name)}
+            highlight={RiotId.Eq.equals(participant.riotId, summoner.riotId)}
             reverse={reverse}
             index={j}
             isLast={j === springs.length - 1}
