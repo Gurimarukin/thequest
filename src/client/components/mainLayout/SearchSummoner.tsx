@@ -118,7 +118,7 @@ export const SearchSummoner: React.FC = () => {
       maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
       Maybe.map(s => (
-        // eslint-disable-next-line react/jsx-key
+        // eslint-disable-next-line react/jsx-key, deprecation/deprecation
         <SummonerSearch type="self" summoner={PartialSummonerShort.fromSummonerShort(s)} />
       )),
     ),
@@ -131,6 +131,7 @@ export const SearchSummoner: React.FC = () => {
             <SummonerSearch
               key={Puuid.unwrap(s.puuid)}
               type="favorite"
+              // eslint-disable-next-line deprecation/deprecation
               summoner={PartialSummonerShort.fromSummonerShort(s)}
             />
           ))}
@@ -211,6 +212,7 @@ const concatWithHr = (es: List<React.ReactElement>): React.ReactElement | null =
 
 type SummonerSearchProps = {
   type: 'self' | 'favorite' | 'recent'
+  // eslint-disable-next-line deprecation/deprecation
   summoner: PartialSummonerShort
 }
 

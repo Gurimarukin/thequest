@@ -103,10 +103,6 @@ const SummonerController = (
           findMasteries(platform, maybeUser),
         ),
 
-    /**
-     * @deprecated
-     */
-    // eslint-disable-next-line deprecation/deprecation
     masteriesByName:
       (platform: Platform, name: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
@@ -157,10 +153,6 @@ const SummonerController = (
           findActiveGame(lang, maybeUser),
         ),
 
-    /**
-     * @deprecated
-     */
-    // eslint-disable-next-line deprecation/deprecation
     activeGameByName:
       (lang: Lang, platform: Platform, name: SummonerName) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>

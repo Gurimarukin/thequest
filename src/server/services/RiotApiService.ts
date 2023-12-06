@@ -101,9 +101,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
         lol: {
           championMasteryV4: {
             championMasteries: {
-              /**
-               * @deprecated Endpoint will be removed on 2023-12-15
-               */
+              /** @deprecated Endpoint will be removed on 2023-12-15 */
               // eslint-disable-next-line deprecation/deprecation
               bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
                 pipe(
@@ -195,9 +193,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
           summonerV4: {
             summoners: {
-              /**
-               * @deprecated ⚠️ Consistently looking up summoner ids that don't exist will result in a blacklist.
-               */
+              /** @deprecated ⚠️ Consistently looking up summoner ids that don't exist will result in a blacklist. */
               // eslint-disable-next-line deprecation/deprecation
               byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
                 pipe(
@@ -209,9 +205,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                   statusesToOption(404),
                 ),
 
-              /**
-               * @deprecated SummonerName will be removed
-               */
+              /** @deprecated SummonerName will be removed */
               // eslint-disable-next-line deprecation/deprecation
               byName: (name: SummonerName): Future<Maybe<RiotSummoner>> =>
                 pipe(

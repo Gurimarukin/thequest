@@ -35,6 +35,7 @@ const staticDataLang = api.then(lit('staticData')).then(langM)
 
 const summoner = api.then(lit('summoner'))
 const summonerByPuuid = summoner.then(lit('byPuuid')).then(platformM).then(puuidM)
+/** @deprecated SummonerName will be removed */
 const summonerByName = summoner
   .then(lit('byName'))
   .then(platformM)
@@ -62,7 +63,9 @@ const summonerByPuuidActiveGameLangGet = m(
   'get',
 )
 
+// eslint-disable-next-line deprecation/deprecation
 const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get')
+// eslint-disable-next-line deprecation/deprecation
 const summonerByNameActiveGameLangGet = m(summonerByName.then(lit('activeGame')).then(langM), 'get')
 
 const summonerByRiotIdMasteriesGet = m(summonerByRiotId.then(lit('masteries')), 'get')
@@ -111,10 +114,6 @@ export const apiParsers = {
       masteries: { get: p(summonerByRiotIdMasteriesGet) },
       activeGame: { lang: { get: p(summonerByRiotIdActiveGameLangGet) } },
     },
-    /**
-     * @deprecated SummonerName will be removed
-     */
-    // eslint-disable-next-line deprecation/deprecation
     byName: {
       masteries: { get: p(summonerByNameMasteriesGet) },
       activeGame: { lang: { get: p(summonerByNameActiveGameLangGet) } },
@@ -175,10 +174,6 @@ export const apiRoutes = {
         }),
       }
     },
-    /**
-     * @deprecated
-     */
-    // eslint-disable-next-line deprecation/deprecation
     byName: (platform: Platform) => (summonerName_: SummonerName) => {
       const summonerName = SummonerName.clean(summonerName_)
       return {

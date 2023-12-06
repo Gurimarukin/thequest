@@ -56,10 +56,6 @@ const of = (
   riotApiService: RiotApiService,
 ) => {
   return {
-    /**
-     * @deprecated SummonerName will be removed
-     */
-    // eslint-disable-next-line deprecation/deprecation
     findByName: (
       platform: Platform,
       name: SummonerName,
@@ -67,7 +63,9 @@ const of = (
     ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
+        // eslint-disable-next-line deprecation/deprecation
         insertedAfter => summonerPersistence.findByName(platform, name, insertedAfter),
+        // eslint-disable-next-line deprecation/deprecation
         riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byName(name),
         { forceCacheRefresh },
       ),

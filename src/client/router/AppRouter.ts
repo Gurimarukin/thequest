@@ -52,7 +52,9 @@ const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
 const platformRiotIdMatch = platformM.then(codec('riotId', riotIdUrlCodec))
 const platformRiotIdGameMatch = platformRiotIdMatch.then(lit('game'))
 
+/** @deprecated SummonerName will be removed */
 const platformSummonerNameMatch = platformM.then(codec('summonerName', SummonerName.codec))
+// eslint-disable-next-line deprecation/deprecation
 const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
 
 const aramMatch = lit('aram')
@@ -68,15 +70,8 @@ export const appMatches = {
   platformRiotId: platformRiotIdMatch.then(end),
   platformRiotIdGame: platformRiotIdGameMatch.then(end),
 
-  /**
-   * @deprecated
-   */
   // eslint-disable-next-line deprecation/deprecation
   platformSummonerName: platformSummonerNameMatch.then(end),
-  /**
-   * @deprecated
-   */
-  // eslint-disable-next-line deprecation/deprecation
   platformSummonerNameGame: platformSummonerNameGameMatch.then(end),
 }
 
@@ -89,6 +84,7 @@ export const appMatches = {
 const platformRiotId = p(platformRiotIdMatch)
 const platformRiotIdGame = p(platformRiotIdGameMatch)
 
+// eslint-disable-next-line deprecation/deprecation
 const platformSummonerName = p(platformSummonerNameMatch)
 const platformSummonerNameGame = p(platformSummonerNameGameMatch)
 
@@ -127,15 +123,7 @@ export const appParsers = {
   platformRiotId,
   platformRiotIdGame,
 
-  /**
-   * @deprecated
-   */
-  // eslint-disable-next-line deprecation/deprecation
   platformSummonerName,
-  /**
-   * @deprecated
-   */
-  // eslint-disable-next-line deprecation/deprecation
   platformSummonerNameGame,
 
   aram: p(aramMatch),
@@ -173,24 +161,17 @@ export const appRoutes = {
   platformRiotIdGame: (platform: Platform, riotId: RiotId) =>
     format(platformRiotIdGameMatch.formatter, { platform, riotId }),
 
-  /**
-   * @deprecated
-   */
-  // eslint-disable-next-line deprecation/deprecation
   platformSummonerName: (
     platform: Platform,
     summonerName: SummonerName,
     query: PartialMasteriesQuery,
   ) =>
     withQuery(
+      // eslint-disable-next-line deprecation/deprecation
       format(platformSummonerNameMatch.formatter, { platform, summonerName }),
       PartialMasteriesQuery,
       query,
     ),
-  /**
-   * @deprecated
-   */
-  // eslint-disable-next-line deprecation/deprecation
   platformSummonerNameGame: (platform: Platform, summonerName: SummonerName) =>
     format(platformSummonerNameGameMatch.formatter, { platform, summonerName }),
 

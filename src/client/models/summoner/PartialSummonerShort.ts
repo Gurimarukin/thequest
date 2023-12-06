@@ -16,7 +16,5 @@ function fromSummonerShort(summoner: SummonerShort): PartialSummonerShort {
   return { ...summoner, riotId: Maybe.some(summoner.riotId) }
 }
 
-/**
- * @deprecated remove SummonerName
- */
+/** @deprecated SummonerName will be removed */
 export const PartialSummonerShort = { codec, fromSummonerShort }

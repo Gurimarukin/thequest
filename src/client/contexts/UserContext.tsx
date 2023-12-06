@@ -29,6 +29,7 @@ import { useTranslation } from './TranslationContext'
 const recentSearchesKey = 'recentSearches'
 
 const recentSearchesCodec = Tuple.of(
+  // eslint-disable-next-line deprecation/deprecation
   List.codec(PartialSummonerShort.codec),
   'List<PartialSummonerShort>',
 )
@@ -43,6 +44,7 @@ type UserContext = {
   maybeUser: Maybe<UserView>
   addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
   removeFavoriteSearch: (summoner: PlatformWithPuuid) => Future<NotUsed>
+  // eslint-disable-next-line deprecation/deprecation
   recentSearches: List<PartialSummonerShort>
   addRecentSearch: (summoner: SummonerShort) => void
   removeRecentSearch: (puuid: Puuid) => void
@@ -156,7 +158,9 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
     (summoner: SummonerShort) =>
       setRecentSearches_(
         flow(
+          // eslint-disable-next-line deprecation/deprecation
           List.prepend(PartialSummonerShort.fromSummonerShort(summoner)),
+          // eslint-disable-next-line deprecation/deprecation
           List.uniq<PartialSummonerShort>(byPuuidEq),
           List.takeLeft(constants.recentSearchesMaxCount),
         ),
@@ -179,6 +183,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   const maybeUser = useMemo(() => pipe(user, AsyncState.toOption, Maybe.flatten), [user])
 
   const recentSearches = useMemo(
+    // eslint-disable-next-line deprecation/deprecation
     (): List<PartialSummonerShort> =>
       pipe(
         recentSearches_,

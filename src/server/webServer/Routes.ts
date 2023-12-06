@@ -42,11 +42,9 @@ export const Routes = (
       maybeWithAuth(summonerController.activeGameByPuuid(lang, platform, puuid)),
     ),
 
-    // eslint-disable-next-line deprecation/deprecation
     m(api.summoner.byName.masteries.get, ({ platform, summonerName }) =>
       maybeWithAuth(summonerController.masteriesByName(platform, summonerName)),
     ),
-    // eslint-disable-next-line deprecation/deprecation
     m(api.summoner.byName.activeGame.lang.get, ({ platform, summonerName, lang }) =>
       maybeWithAuth(summonerController.activeGameByName(lang, platform, summonerName)),
     ),

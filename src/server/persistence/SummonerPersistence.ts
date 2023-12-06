@@ -34,9 +34,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
   return {
     ensureIndexes,
 
-    /**
-     * @deprecated SummonerName will be removed
-     */
+    /** @deprecated SummonerName will be removed */
     // eslint-disable-next-line deprecation/deprecation
     findByName: (
       platform: Platform,
