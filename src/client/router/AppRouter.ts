@@ -1,10 +1,6 @@
 import type { Match, Parser } from 'fp-ts-routing'
 import { end, format, lit } from 'fp-ts-routing'
-import { flow, pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
-import * as C from 'io-ts/Codec'
-import * as D from 'io-ts/Decoder'
-import * as E from 'io-ts/Encoder'
 
 import { Platform } from '../../shared/models/api/Platform'
 import type { PlatformWithRiotId } from '../../shared/models/api/summoner/PlatformWithRiotId'
@@ -13,7 +9,7 @@ import { RiotId } from '../../shared/models/riot/RiotId'
 import { SummonerName } from '../../shared/models/riot/SummonerName'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
-import { Either, Maybe } from '../../shared/utils/fp'
+import { Either } from '../../shared/utils/fp'
 
 import { PartialGenericQuery } from '../models/genericQuery/PartialGenericQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
@@ -21,24 +17,7 @@ import type { PlatformWithSummoner } from '../models/summoner/PlatformWithSummon
 
 const { codec } = RouterUtils
 
-const riotIdRegex = /^(.+)-([^-]+)$/
-
-export const riotIdUrlCodec: Codec<unknown, string, RiotId> = C.make(
-  pipe(
-    D.string,
-    D.parse(str =>
-      pipe(
-        str,
-        StringUtils.matcher2(riotIdRegex),
-        Maybe.fold(() => D.failure(str, 'RiotIdUrl'), flow(RiotId.fromRawTuple, D.success)),
-      ),
-    ),
-  ),
-  pipe(
-    E.id<string>(),
-    E.contramap(({ gameName, tagLine }: RiotId) => `${gameName}-${tagLine}`),
-  ),
-)
+export const riotIdCodec: Codec<unknown, string, RiotId> = RiotId.getFromStringCodec('-')
 
 /**
  * matches
@@ -49,7 +28,7 @@ const platformM = codec('platform', Platform.orLowerCaseCodec)
 const sPlatformPuuidMatch = lit('s').then(platformM).then(codec('puuid', Puuid.codec))
 const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
 
-const platformRiotIdMatch = platformM.then(codec('riotId', riotIdUrlCodec))
+const platformRiotIdMatch = platformM.then(codec('riotId', riotIdCodec))
 const platformRiotIdGameMatch = platformRiotIdMatch.then(lit('game'))
 
 /** @deprecated SummonerName will be removed */

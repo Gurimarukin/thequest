@@ -5,20 +5,20 @@ import { RiotId } from '../../../src/shared/models/riot/RiotId'
 import { TagLine } from '../../../src/shared/models/riot/TagLine'
 import { Either } from '../../../src/shared/utils/fp'
 
-import { riotIdUrlCodec } from '../../../src/client/router/AppRouter'
+import { riotIdCodec } from '../../../src/client/router/AppRouter'
 
 import { expectT } from '../../expectT'
 
 describe('riotIdUrlCodec', () => {
   it('should decode', () => {
-    expectT(riotIdUrlCodec.decode('GameName-Tag')).toStrictEqual(
+    expectT(riotIdCodec.decode('GameName-Tag')).toStrictEqual(
       Either.right(RiotId(GameName('GameName'), TagLine('Tag'))),
     )
-    expectT(riotIdUrlCodec.decode('Gam-eN-ame-Tag')).toStrictEqual(
+    expectT(riotIdCodec.decode('Gam-eN-ame-Tag')).toStrictEqual(
       Either.right(RiotId(GameName('Gam-eN-ame'), TagLine('Tag'))),
     )
-    expectT(riotIdUrlCodec.decode('GameName#Tag')).toStrictEqual(
-      D.failure('GameName#Tag', 'RiotIdUrl'),
+    expectT(riotIdCodec.decode('GameName#Tag')).toStrictEqual(
+      D.failure('GameName#Tag', 'RiotId[-]'),
     )
   })
 })

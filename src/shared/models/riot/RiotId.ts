@@ -1,5 +1,5 @@
 import { eq } from 'fp-ts'
-import { flow, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import type { Decoder } from 'io-ts/Decoder'
@@ -8,7 +8,6 @@ import type { Encoder } from 'io-ts/Encoder'
 import * as E from 'io-ts/Encoder'
 
 import { StringUtils } from '../../utils/StringUtils'
-import type { Tuple } from '../../utils/fp'
 import { Maybe, immutableAssign } from '../../utils/fp'
 import { GameName } from './GameName'
 import { TagLine } from './TagLine'
@@ -22,37 +21,43 @@ function construct(gameName: GameName, tagLine: TagLine): RiotId {
   return { gameName, tagLine }
 }
 
-function fromRawTuple([gameName, tagLine]: Tuple<string, string>): RiotId {
-  return { gameName: GameName(gameName), tagLine: TagLine(tagLine) }
-}
+type Sep = '#' | '-'
 
 // {3-16}#{3-5}
-const regex = /^(.+)#([^#]+)$/
-
-const fromStringDecoder: Decoder<string, RiotId> = {
-  decode: str =>
-    pipe(
-      str,
-      StringUtils.matcher2(regex),
-      Maybe.fold(() => D.failure(str, 'RiotId'), flow(fromRawTuple, D.success)),
-    ),
+function regex(sep: Sep): RegExp {
+  return RegExp(`^(.+)${sep}([^${sep}]+)$`)
 }
 
-const fromStringUnknownDecoder: Decoder<unknown, RiotId> = pipe(
-  D.string,
-  D.compose(fromStringDecoder),
-)
-
-function stringify({ gameName, tagLine }: RiotId): string {
-  return `${gameName}#${tagLine}`
+function getFromStringDecoder(sep: Sep): Decoder<string, RiotId> {
+  return {
+    decode: str =>
+      pipe(
+        str,
+        StringUtils.matcher2(regex(sep)),
+        Maybe.fold(
+          () => D.failure(str, `RiotId[${sep}]`),
+          ([gameName, tagLine]) => D.success(construct(GameName(gameName), TagLine(tagLine))),
+        ),
+      ),
+  }
 }
 
-const fromStringEncoder: Encoder<string, RiotId> = pipe(E.id<string>(), E.contramap(stringify))
+function getFromStringUnknownDecoder(sep: Sep): Decoder<unknown, RiotId> {
+  return pipe(D.string, D.compose(getFromStringDecoder(sep)))
+}
 
-const fromStringCodec: Codec<unknown, string, RiotId> = C.make(
-  fromStringUnknownDecoder,
-  fromStringEncoder,
-)
+const getStringify =
+  (sep: Sep) =>
+  ({ gameName, tagLine }: RiotId): string =>
+    `${gameName}${sep}${tagLine}`
+
+function getFromStringEncoder(sep: Sep): Encoder<string, RiotId> {
+  return pipe(E.id<string>(), E.contramap(getStringify(sep)))
+}
+
+function getFromStringCodec(sep: Sep): Codec<unknown, string, RiotId> {
+  return C.make(getFromStringUnknownDecoder(sep), getFromStringEncoder(sep))
+}
 
 function trim({ gameName, tagLine }: RiotId): RiotId {
   return { gameName: GameName.trim(gameName), tagLine: TagLine.trim(tagLine) }
@@ -68,10 +73,10 @@ const Eq: eq.Eq<RiotId> = eq.struct({
 })
 
 const RiotId = immutableAssign(construct, {
-  fromRawTuple,
-  fromStringDecoder,
-  fromStringCodec,
-  stringify,
+  getFromStringCodec,
+  fromStringDecoder: getFromStringDecoder('#'),
+  fromStringCodec: getFromStringCodec('#'),
+  stringify: getStringify('#'),
   trim,
   clean,
   Eq,

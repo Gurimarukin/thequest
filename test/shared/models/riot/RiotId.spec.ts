@@ -16,7 +16,7 @@ describe('RiotId.fromStringDecoder', () => {
       Either.right(RiotId(GameName('Gam#eN#ame'), TagLine('Tag'))),
     )
     expectT(RiotId.fromStringDecoder.decode('GameName-Tag')).toStrictEqual(
-      D.failure('GameName-Tag', 'RiotId'),
+      D.failure('GameName-Tag', 'RiotId[#]'),
     )
   })
 })
