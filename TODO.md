@@ -7,6 +7,7 @@
 - `points / max` ("/" font-normal)
 - `titleWithElementParser` translation
 - replace all `wrap`s with `immutableAssign`
+- retry db connection
 
 - full summoner name removal
 

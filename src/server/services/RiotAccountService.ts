@@ -29,19 +29,6 @@ function RiotAccountService(
         insertedAfter => riotAccountPersistence.findByRiotId(riotId, insertedAfter),
         riotApiService.riotgames.regional.riot.accountV1.accounts.byRiotId(gameName)(tagLine),
       )
-      // const { gameName, tagLine } = riotId
-      // return pipe(
-      //   Future.fromIO(DayJs.now),
-      //   Future.map(DayJs.subtract(riotApiCacheTtl.account)),
-      //   Future.chain(insertedAfter => riotAccountPersistence.findByRiotId(riotId, insertedAfter)),
-      //   futureMaybe.alt<RiotAccount>(() =>
-      //     pipe(
-      //       riotApiService.riotgames.regional.riot.accountV1.accounts.byRiotId(gameName)(tagLine),
-      //       futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
-      //       futureMaybe.chainFirstTaskEitherK(riotAccountPersistence.upsert),
-      //     ),
-      //   ),
-      // )
     },
 
     findByPuuid: (puuid: Puuid): Future<Maybe<RiotAccount>> =>
