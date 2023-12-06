@@ -12,6 +12,7 @@ import {
   taskEither,
 } from 'fp-ts'
 import type { Applicative2 } from 'fp-ts/Applicative'
+import type { Eq } from 'fp-ts/Eq'
 import type { Kind2, URIS2 } from 'fp-ts/HKT'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
@@ -28,12 +29,12 @@ import { iso } from 'newtype-ts'
 
 import { MsDuration } from '../models/MsDuration'
 
-export const todo = (...[]: List<unknown>): never => {
+export function todo(...[]: List<unknown>): never {
   // eslint-disable-next-line functional/no-throw-statements
   throw Error('Missing implementation')
 }
 
-export const assertUnreachable = (n: never): never => {
+export function assertUnreachable(n: never): never {
   // eslint-disable-next-line functional/no-throw-statements
   throw Error(`Unexpected value: ${n}`)
 }
@@ -44,6 +45,14 @@ export const inspect =
     console.log(...label, a)
     return a
   }
+
+export function immutableAssign<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  A extends (...args: List<any>) => unknown,
+  B extends Dict<string, unknown>,
+>(f: A, b: B): A & B {
+  return Object.assign(f.bind({}) as A, b)
+}
 
 export type NotUsed = Newtype<{ readonly NotUsed: unique symbol }, void>
 
@@ -164,6 +173,10 @@ const listEncoder: <O, A>(encoder: Encoder<O, A>) => Encoder<List<O>, List<A>> =
 export const List = {
   ...readonlyArray,
   empty: <A = never>(): List<A> => readonlyArray.empty,
+  differenceW: readonlyArray.difference as <C>(E: Eq<C>) => {
+    <A extends C, B extends C>(xs: List<B>): (ys: List<A>) => List<A>
+    <A extends C, B extends C>(xs: List<A>, ys: List<B>): List<A>
+  },
   groupBy: readonlyNonEmptyArray.groupBy as <A, K extends string>(
     f: (a: A) => K,
   ) => (as: List<A>) => PartialDict<K, NonEmptyArray<A>>,

@@ -1,29 +1,32 @@
-import { eq, ord, string } from 'fp-ts'
+import { ord, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
 import { StringUtils } from '../../../utils/StringUtils'
+import { RiotId } from '../../riot/RiotId'
+import { SummonerName } from '../../riot/SummonerName'
 import { Platform } from '../Platform'
 import { Puuid } from './Puuid'
 
 type SummonerShort = C.TypeOf<typeof codec>
 
-const codec = C.struct({
+const codecProperties = {
   platform: Platform.codec,
   puuid: Puuid.codec,
-  name: C.string,
+  riotId: RiotId.fromStringCodec,
+  name: SummonerName.codec,
   profileIconId: C.number,
-})
+}
 
-const byPuuidEq: eq.Eq<SummonerShort> = eq.struct<Pick<SummonerShort, 'puuid'>>({
-  puuid: Puuid.Eq,
-})
+const codec = C.struct(codecProperties)
 
-const byNameOrd: ord.Ord<SummonerShort> = pipe(
+const byRiotIdOrd: ord.Ord<SummonerShort> = pipe(
   string.Ord,
-  ord.contramap((s: SummonerShort) => StringUtils.cleanUTF8ToASCII(s.name).toLowerCase()),
+  ord.contramap((s: SummonerShort) =>
+    StringUtils.cleanUTF8ToASCII(RiotId.stringify(s.riotId)).toLowerCase(),
+  ),
 )
 
-const SummonerShort = { codec, byPuuidEq, byNameOrd }
+const SummonerShort = { codecProperties, codec, byRiotIdOrd }
 
 export { SummonerShort }

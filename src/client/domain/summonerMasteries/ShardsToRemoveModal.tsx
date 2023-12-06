@@ -10,7 +10,7 @@ import type { ChampionFaction } from '../../../shared/models/api/champion/Champi
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
-import type { ChampionShardsPayload } from '../../../shared/models/api/summoner/ChampionShardsPayload'
+import type { ChampionShard } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -63,7 +63,7 @@ const invert = predicate.not<boolean>(identity)
 type Props = {
   notifications: NonEmptyArray<ShardsToRemoveNotification>
   shardsIsLoading: boolean
-  setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShardsPayload>) => void
+  setChampionsShardsBulk: (updates: NonEmptyArray<ChampionShard>) => void
   hide: () => void
 }
 
@@ -124,7 +124,7 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
         pipe(
           notificationsState,
           NonEmptyArray.map(
-            (n): ChampionShardsPayload => ({
+            (n): ChampionShard => ({
               championId: n.championId,
               shardsCount: n.isChecked ? n.shardsCount - n.shardsToRemove : n.shardsCount,
             }),

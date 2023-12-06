@@ -67,22 +67,22 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             <SearchSummoner />
 
             {pipe(
-              matchLocation(appParsers.anyPlatformSummonerName),
+              matchLocation(appParsers.anyPlatformRiotId),
               Maybe.fold(
                 () => null,
-                ({ platform, summonerName }) => (
+                ({ platform, riotId }) => (
                   <div className="flex flex-wrap items-center gap-4 py-2">
                     <HighlightLink
-                      to={appRoutes.platformSummonerName(platform, summonerName, {})}
-                      parser={appParsers.platformSummonerName}
+                      to={appRoutes.platformRiotId(platform, riotId, {})}
+                      parser={appParsers.platformRiotId}
                       tooltip={t.layout.championMasteries}
                       className="mt-0.5 py-0.5"
                     >
                       {t.layout.profile}
                     </HighlightLink>
                     <HighlightLink
-                      to={appRoutes.platformSummonerNameGame(platform, summonerName)}
-                      parser={appParsers.platformSummonerNameGame}
+                      to={appRoutes.platformRiotIdGame(platform, riotId)}
+                      parser={appParsers.platformRiotIdGame}
                       tooltip={t.layout.activeGame}
                       className="mt-0.5 py-0.5"
                     >

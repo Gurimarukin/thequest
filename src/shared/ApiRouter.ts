@@ -1,10 +1,14 @@
 import type { Match, Parser } from 'fp-ts-routing'
-import { end, format, lit, str } from 'fp-ts-routing'
+import { end, format, lit } from 'fp-ts-routing'
 
 import type { Method } from './models/Method'
 import { Lang } from './models/api/Lang'
 import { Platform } from './models/api/Platform'
 import { Puuid } from './models/api/summoner/Puuid'
+import { GameName } from './models/riot/GameName'
+import { RiotId } from './models/riot/RiotId'
+import { SummonerName } from './models/riot/SummonerName'
+import { TagLine } from './models/riot/TagLine'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
 
@@ -16,13 +20,28 @@ const { codec } = RouterUtils
 
 // intermediate
 
+const langM = codec('lang', Lang.codec)
+const platformM = codec('platform', Platform.codec)
+const puuidM = codec('puuid', Puuid.codec)
+const riotIdM = codec('gameName', GameName.codec)
+  .then(codec('tagLine', TagLine.codec))
+  .imap(
+    ({ gameName, tagLine }) => ({ riotId: RiotId(gameName, tagLine) }),
+    ({ riotId }) => riotId,
+  )
+
 const api = lit('api')
-const staticDataLang = api.then(lit('staticData')).then(codec('lang', Lang.codec))
+const staticDataLang = api.then(lit('staticData')).then(langM)
+
 const summoner = api.then(lit('summoner'))
+const summonerByPuuid = summoner.then(lit('byPuuid')).then(platformM).then(puuidM)
+/** @deprecated SummonerName will be removed */
 const summonerByName = summoner
   .then(lit('byName'))
-  .then(codec('platform', Platform.codec))
-  .then(str('summonerName'))
+  .then(platformM)
+  .then(codec('summonerName', SummonerName.codec))
+const summonerByRiotId = summoner.then(lit('byRiotId')).then(platformM).then(riotIdM)
+
 const user = api.then(lit('user'))
 const userSelf = user.then(lit('self'))
 const userSelfFavorites = userSelf.then(lit('favorites'))
@@ -33,31 +52,33 @@ const madosayentisuto = api.then(lit('madosayentisuto'))
 // final
 
 const healthcheckGet = m(api.then(lit('healthcheck')), 'get')
+
 const staticDataLangGet = m(staticDataLang, 'get')
 const staticDataLangAdditionalGet = m(staticDataLang.then(lit('additional')), 'get')
-const summonerByPuuidMasteriesGet = m(
-  summoner
-    .then(lit('byPuuid'))
-    .then(codec('platform', Platform.codec))
-    .then(codec('puuid', Puuid.codec))
-    .then(lit('masteries')),
+
+const summonerByPuuidMasteriesGet = m(summonerByPuuid.then(lit('masteries')), 'get')
+const summonerByPuuidChallengesGet = m(summonerByPuuid.then(lit('challenges')), 'get')
+const summonerByPuuidActiveGameLangGet = m(
+  summonerByPuuid.then(lit('activeGame').then(langM)),
   'get',
 )
+
+// eslint-disable-next-line deprecation/deprecation
 const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get')
-const summonerByNameChallengesGet = m(summonerByName.then(lit('challenges')), 'get')
-const summonerByNameActiveGameLangGet = m(
-  summonerByName.then(lit('active-game')).then(codec('lang', Lang.codec)),
+// eslint-disable-next-line deprecation/deprecation
+const summonerByNameActiveGameLangGet = m(summonerByName.then(lit('activeGame')).then(langM), 'get')
+
+const summonerByRiotIdMasteriesGet = m(summonerByRiotId.then(lit('masteries')), 'get')
+const summonerByRiotIdActiveGameLangGet = m(
+  summonerByRiotId.then(lit('activeGame').then(langM)),
   'get',
 )
+
 const userSelfGet = m(userSelf, 'get')
 const userSelfFavoritesPut = m(userSelfFavorites, 'put')
 const userSelfFavoritesDelete = m(userSelfFavorites, 'delete')
 const userSelfSummonerChampionsShardsCountPost = m(
-  userSelf
-    .then(lit('summoner'))
-    .then(codec('platform', Platform.codec))
-    .then(str('summonerName'))
-    .then(lit('championsShardsCount')),
+  userSelf.then(lit('summoner')).then(platformM).then(puuidM).then(lit('championsShardsCount')),
   'post',
 )
 const userLoginDiscordPost = m(userLogin.then(lit('discord')), 'post')
@@ -84,10 +105,17 @@ export const apiParsers = {
     },
   },
   summoner: {
-    byPuuid: { masteries: { get: p(summonerByPuuidMasteriesGet) } },
+    byPuuid: {
+      masteries: { get: p(summonerByPuuidMasteriesGet) },
+      challenges: { get: p(summonerByPuuidChallengesGet) },
+      activeGame: { lang: { get: p(summonerByPuuidActiveGameLangGet) } },
+    },
+    byRiotId: {
+      masteries: { get: p(summonerByRiotIdMasteriesGet) },
+      activeGame: { lang: { get: p(summonerByRiotIdActiveGameLangGet) } },
+    },
     byName: {
       masteries: { get: p(summonerByNameMasteriesGet) },
-      challenges: { get: p(summonerByNameChallengesGet) },
       activeGame: { lang: { get: p(summonerByNameActiveGameLangGet) } },
     },
   },
@@ -125,28 +153,34 @@ export const apiParsers = {
  */
 
 export const apiRoutes = {
-  staticData: {
-    lang: (lang: Lang) => ({
-      get: r(staticDataLangGet, { lang }),
-      additional: { get: r(staticDataLangAdditionalGet, { lang }) },
-    }),
-  },
+  staticData: (lang: Lang) => ({
+    get: r(staticDataLangGet, { lang }),
+    additional: { get: r(staticDataLangAdditionalGet, { lang }) },
+  }),
   summoner: {
-    byPuuid: (platform: Platform, puuid: Puuid) => ({
-      masteries: {
-        get: r(summonerByPuuidMasteriesGet, { platform, puuid }),
-      },
+    byPuuid: (platform: Platform) => (puuid: Puuid) => ({
+      masteries: { get: r(summonerByPuuidMasteriesGet, { platform, puuid }) },
+      challenges: { get: r(summonerByPuuidChallengesGet, { platform, puuid }) },
+      activeGame: (lang: Lang) => ({
+        get: r(summonerByPuuidActiveGameLangGet, { platform, puuid, lang }),
+      }),
     }),
-    byName: (platform: Platform, summonerName_: string) => {
-      const summonerName = cleanSummonerName(summonerName_)
+    byRiotId: (platform: Platform) => (riotId_: RiotId) => {
+      const riotId = RiotId.clean(riotId_)
+      return {
+        masteries: { get: r(summonerByRiotIdMasteriesGet, { platform, riotId }) },
+        activeGame: (lang: Lang) => ({
+          get: r(summonerByRiotIdActiveGameLangGet, { platform, riotId, lang }),
+        }),
+      }
+    },
+    byName: (platform: Platform) => (summonerName_: SummonerName) => {
+      const summonerName = SummonerName.clean(summonerName_)
       return {
         masteries: { get: r(summonerByNameMasteriesGet, { platform, summonerName }) },
-        challenges: { get: r(summonerByNameChallengesGet, { platform, summonerName }) },
-        activeGame: {
-          lang: (lang: Lang) => ({
-            get: r(summonerByNameActiveGameLangGet, { lang, platform, summonerName }),
-          }),
-        },
+        activeGame: (lang: Lang) => ({
+          get: r(summonerByNameActiveGameLangGet, { platform, summonerName, lang }),
+        }),
       }
     },
   },
@@ -157,14 +191,11 @@ export const apiRoutes = {
         put: r(userSelfFavoritesPut, {}),
         delete: r(userSelfFavoritesDelete, {}),
       },
-      summoner: (platform: Platform, summonerName_: string) => {
-        const summonerName = cleanSummonerName(summonerName_)
-        return {
-          championsShardsCount: {
-            post: r(userSelfSummonerChampionsShardsCountPost, { platform, summonerName }),
-          },
-        }
-      },
+      summoner: (platform: Platform) => (puuid: Puuid) => ({
+        championsShardsCount: {
+          post: r(userSelfSummonerChampionsShardsCountPost, { platform, puuid }),
+        },
+      }),
     },
     login: {
       discord: { post: r(userLoginDiscordPost, {}) },
@@ -181,9 +212,6 @@ export const apiRoutes = {
 /**
  * Helpers
  */
-
-const whiteSpaces = /\s+/g
-const cleanSummonerName = (name: string): string => name.toLowerCase().replaceAll(whiteSpaces, '')
 
 type WithMethod<A> = Tuple<A, Method>
 type MatchWithMethod<A> = WithMethod<Match<A>>

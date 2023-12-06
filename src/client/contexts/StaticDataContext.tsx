@@ -36,7 +36,7 @@ export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
   const { lang } = useTranslation()
   return (
     <AsyncRenderer
-      {...useSWRHttp(apiRoutes.staticData.lang(lang).get, {}, [StaticData.codec, 'StaticData'], {
+      {...useSWRHttp(apiRoutes.staticData(lang).get, {}, [StaticData.codec, 'StaticData'], {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,

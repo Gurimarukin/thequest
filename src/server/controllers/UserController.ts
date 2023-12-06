@@ -8,8 +8,10 @@ import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionShard } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsPayload } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
@@ -26,14 +28,14 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 import { constants } from '../config/constants'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import type { Summoner } from '../models/summoner/Summoner'
-import { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
+import type { UserId } from '../models/user/UserId'
 import type { DDragonService } from '../services/DDragonService'
 import type { DiscordService } from '../services/DiscordService'
 import type { MasteriesService } from '../services/MasteriesService'
+import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -48,6 +50,7 @@ function UserController(
   ddragonService: DDragonService,
   discordService: DiscordService,
   masteriesService: MasteriesService,
+  riotAccountService: RiotAccountService,
   summonerService: SummonerService,
   userService: UserService,
 ) {
@@ -136,10 +139,9 @@ function UserController(
         futureEither.chainTaskEitherK(u =>
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.successful(User.userName(u)),
-            favoriteSearches: fetchFavoriteSearches(u.favoriteSearches),
+            favoriteSearches: fetchFavoriteSearches(u.id, u.favoriteSearches),
             linkedRiotAccount: pipe(
               userService.getLinkedRiotAccount({ forceCacheRefresh: false })(u),
-              futureMaybe.chainOptionK(Maybe.fromEither),
               futureMaybe.map(a => a.summoner),
             ),
           }),
@@ -154,10 +156,7 @@ function UserController(
           userService.findById(user_.id),
           Future.map(Either.fromOption(() => 'User not found')),
           futureEither.chainTaskEitherK(
-            flow(
-              userService.getLinkedRiotAccount({ forceCacheRefresh: false }),
-              futureMaybe.chainOptionK(Maybe.fromEither),
-            ),
+            userService.getLinkedRiotAccount({ forceCacheRefresh: false }),
           ),
           futureEither.bindTo('linkedRiotAccount'),
           futureEither.bind('summonerToFavorite', () =>
@@ -178,7 +177,7 @@ function UserController(
               Maybe.fold(
                 () => addFavoriteSearch,
                 ({ summoner: summonerSelf }) =>
-                  SummonerId.Eq.equals(summonerToFavorite.id, summonerSelf.id)
+                  Puuid.Eq.equals(summonerToFavorite.puuid, summonerSelf.puuid)
                     ? futureEither.left('')
                     : addFavoriteSearch,
               ),
@@ -214,7 +213,7 @@ function UserController(
         ),
       ),
 
-    setSummonerChampionsShardsCount,
+    setChampionsShardsCount,
 
     loginDiscord,
     loginPassword,
@@ -256,17 +255,22 @@ function UserController(
   }
 
   function fetchFavoriteSearches(
+    userId: UserId,
     favoriteSearches: List<PlatformWithPuuid>,
   ): Future<List<SummonerShort>> {
     return pipe(
       favoriteSearches,
       List.traverse(Future.ApplicativePar)(({ platform, puuid }) =>
         pipe(
-          summonerService.findByPuuid(platform, puuid),
+          apply.sequenceT(futureMaybe.ApplyPar)(
+            summonerService.findByPuuid(platform, puuid),
+            riotAccountService.findByPuuid(puuid),
+          ),
           Future.map(
-            Maybe.fold<Summoner, Either<PlatformWithPuuid, SummonerShort>>(
-              () => Either.left({ platform, puuid }),
-              Either.right,
+            Maybe.foldW(
+              () => Either.left<PlatformWithPuuid, never>({ platform, puuid }),
+              ([summoner, { riotId }]) =>
+                Either.right<never, SummonerShort>({ ...summoner, riotId }),
             ),
           ),
         ),
@@ -275,7 +279,7 @@ function UserController(
         const { left, right } = List.separate(eithers)
         return pipe(
           apply.sequenceT(Future.ApplyPar)(
-            userService.removeAllFavoriteSearches(left),
+            userService.removeAllFavoriteSearches(userId, left),
             summonerService.deleteByPuuid(left),
           ),
           Future.map(() => right),
@@ -284,12 +288,12 @@ function UserController(
     )
   }
 
-  function setSummonerChampionsShardsCount(
+  function setChampionsShardsCount(
     platform: Platform,
-    summonerName: string,
+    puuid: Puuid,
   ): (user: TokenContent) => EndedMiddleware {
     return user =>
-      EndedMiddleware.withBody(NonEmptyArray.decoder(ChampionShardsPayload.codec))(championShards =>
+      EndedMiddleware.withBody(ChampionShardsPayload.codec)(championShards =>
         pipe(
           validateChampionKeys(championShards),
           Future.map(
@@ -307,13 +311,13 @@ function UserController(
           futureEither.bindTo('validatedChampionShards'),
           futureEither.bind('summoner', () =>
             pipe(
-              summonerService.findByName(platform, summonerName),
+              summonerService.findByPuuid(platform, puuid),
               Future.map(Either.fromOption(() => Tuple.of(Status.NotFound, 'Summoner not found'))),
             ),
           ),
           futureEither.bind('championShardsLevel', ({ validatedChampionShards, summoner }) =>
             pipe(
-              getChampionShardsLevel(platform, summoner.id, validatedChampionShards),
+              getChampionShardsLevel(platform, summoner.puuid, validatedChampionShards),
               Future.map(Either.fromOption(() => Tuple.of(Status.NotFound, 'Masteries not found'))),
             ),
           ),
@@ -344,10 +348,10 @@ function UserController(
   }
 
   function validateChampionKeys(
-    championShards: NonEmptyArray<ChampionShardsPayload>,
-  ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShardsPayload>>> {
+    championShards: NonEmptyArray<ChampionShard>,
+  ): Future<ValidatedNea<ChampionKey, NonEmptyArray<ChampionShard>>> {
     return pipe(
-      ddragonService.latestChampions('en_GB' /* whatever (unused) */),
+      ddragonService.latestChampions('en_GB' /* whatever, because unused */),
       Future.map(({ value: dataChampions }) => {
         const validChampionKeys = pipe(
           dataChampions.data,
@@ -370,11 +374,11 @@ function UserController(
 
   function getChampionShardsLevel(
     platform: Platform,
-    summonerId: SummonerId,
-    validatedChampionShards: NonEmptyArray<ChampionShardsPayload>,
+    puuid: Puuid,
+    validatedChampionShards: NonEmptyArray<ChampionShard>,
   ): Future<Maybe<NonEmptyArray<ChampionShardsLevel>>> {
     return pipe(
-      masteriesService.findBySummoner(platform, summonerId),
+      masteriesService.findBySummoner(platform, puuid),
       futureMaybe.map(({ champions }) =>
         pipe(
           validatedChampionShards,

@@ -1,5 +1,5 @@
 import { apply, monoid, number, string } from 'fp-ts'
-import { flow, identity, pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
@@ -13,12 +13,11 @@ import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import type { Future } from '../../shared/utils/fp'
-import { Either, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { MadosayentisutoConfig } from '../config/Config'
-import type { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
-import { TheQuestProgressionResult } from '../models/madosayentisuto/TheQuestProgressionResult'
+import { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
 import type { DDragonService } from '../services/DDragonService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { SummonerWithDiscordInfos, UserService } from '../services/UserService'
@@ -51,18 +50,12 @@ const MadosayentisutoController = (
         userService.findAllByLoginDiscordId,
         TObservable.chainTaskEitherK(userService.getLinkedRiotAccount({ forceCacheRefresh: true })),
         TObservable.chainTaskEitherK(
-          Maybe.fold(
-            () => futureMaybe.none,
-            Either.fold(
-              flow(TheQuestProgressionResult.summonerNotFound, futureMaybe.some),
-              flow(toProgression, futureMaybe.map(TheQuestProgressionResult.ok)),
-            ),
-          ),
+          flow(futureMaybe.fromOption, futureMaybe.chain(toProgression)),
         ),
-        TObservable.filterMap(identity),
+        TObservable.compact,
         Sink.readonlyArray,
         M.fromTaskEither,
-        M.ichain(M.json(List.encoder(TheQuestProgressionResult.encoder))),
+        M.ichain(M.json(List.encoder(TheQuestProgression.encoder))),
       ),
     ),
   )
@@ -79,7 +72,7 @@ const MadosayentisutoController = (
     return pipe(
       // TODO: maybe log failed requests below
       apply.sequenceS(futureMaybe.ApplyPar)({
-        masteries: masteriesService.findBySummoner(summoner.platform, summoner.id, {
+        masteries: masteriesService.findBySummoner(summoner.platform, summoner.puuid, {
           forceCacheRefresh: true,
         }),
         staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),

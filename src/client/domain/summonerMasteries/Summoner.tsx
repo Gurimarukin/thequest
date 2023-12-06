@@ -6,6 +6,10 @@ import { MsDuration } from '../../../shared/models/MsDuration'
 import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
+import { GameName } from '../../../shared/models/riot/GameName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { TagLine } from '../../../shared/models/riot/TagLine'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { type Dict } from '../../../shared/utils/fp'
 
@@ -40,6 +44,7 @@ export type EnrichedSummonerView = SummonerView & {
 
 export const Summoner: React.FC<Props> = ({
   summoner: {
+    riotId,
     name,
     profileIconId,
     summonerLevel,
@@ -55,7 +60,7 @@ export const Summoner: React.FC<Props> = ({
   const { t } = useTranslation()
   const staticData = useStaticData()
 
-  const nameRef = useRef<HTMLSpanElement>(null)
+  const nameRef = useRef<HTMLDivElement>(null)
   const levelRef = useRef<HTMLSpanElement>(null)
   const masteriesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLSpanElement>(null)
@@ -70,19 +75,30 @@ export const Summoner: React.FC<Props> = ({
       <div className="flex flex-wrap gap-4">
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
-          alt={t.common.summonerIconAlt(name)}
+          alt={t.common.summonerIconAlt(RiotId.stringify(riotId))}
           className="h-24 w-24 rounded border border-goldenrod-bis"
         />
         <div className="grid grid-rows-[1fr_auto]">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span ref={nameRef} className="text-xl font-bold text-goldenrod">
-              {name}
-            </span>
+            <div ref={nameRef} className="flex items-baseline gap-0.5 whitespace-pre">
+              <span className="text-xl font-bold text-goldenrod">
+                {GameName.unwrap(riotId.gameName)}
+              </span>
+              <span className="text-lg text-grey-500">#{TagLine.unwrap(riotId.tagLine)}</span>
+            </div>
             <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
-              <span>
+              <div className="flex items-baseline gap-2">
+                <span>{t.common.oldSummonerName}</span>
+                <span className="whitespace-pre text-lg font-bold text-goldenrod">
+                  {SummonerName.unwrap(name)}
+                </span>
+              </div>
+              <span className="text-grey-500">
                 {t.summoner.masteriesCache.lastUpdate(DayJs.unwrap(masteries.insertedAt).toDate())}
               </span>
-              <span>{t.summoner.masteriesCache.duration(prettyMs(masteries.cacheDuration))}</span>
+              <span className="text-grey-500">
+                {t.summoner.masteriesCache.duration(prettyMs(masteries.cacheDuration))}
+              </span>
             </Tooltip>
             <span className="text-grey-400">—</span>
             <span ref={levelRef}>{t.common.level(summonerLevel, 'font-semibold')}</span>

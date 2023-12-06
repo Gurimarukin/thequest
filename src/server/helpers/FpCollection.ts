@@ -4,6 +4,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import type {
   BulkWriteOptions,
   ClientSession,
+  CollationOptions,
   DeleteOptions,
   DeleteResult,
   Filter,
@@ -237,4 +238,20 @@ const fpCollectionHelpersFindAll =
     )
   }
 
-export const FpCollectionHelpers = { getPath, findAll: fpCollectionHelpersFindAll }
+// https://www.mongodb.com/docs/manual/reference/collation
+const caseInsensitiveCollation: CollationOptions = {
+  locale: 'en',
+
+  // level 1: compare base characters only, ignoring other differences such as diacritics and case
+  // level 2: also compare diacritics (but not case)
+  strength: 2,
+
+  // whitespace and punctuation are not considered as base characters
+  alternate: 'shifted',
+}
+
+export const FpCollectionHelpers = {
+  getPath,
+  findAll: fpCollectionHelpersFindAll,
+  caseInsensitiveCollation,
+}

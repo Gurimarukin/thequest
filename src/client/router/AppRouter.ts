@@ -1,28 +1,41 @@
 import type { Match, Parser } from 'fp-ts-routing'
-import { end, format, lit, str } from 'fp-ts-routing'
+import { end, format, lit } from 'fp-ts-routing'
+import type { Codec } from 'io-ts/Codec'
 
 import { Platform } from '../../shared/models/api/Platform'
+import type { PlatformWithRiotId } from '../../shared/models/api/summoner/PlatformWithRiotId'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { RiotId } from '../../shared/models/riot/RiotId'
+import { SummonerName } from '../../shared/models/riot/SummonerName'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
+import { Either } from '../../shared/utils/fp'
 
 import { PartialGenericQuery } from '../models/genericQuery/PartialGenericQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
+import type { PlatformWithSummoner } from '../models/summoner/PlatformWithSummoner'
 
 const { codec } = RouterUtils
+
+export const riotIdCodec: Codec<unknown, string, RiotId> = RiotId.getFromStringCodec('-')
 
 /**
  * matches
  */
 
-const sPlatformPuuidMatch = lit('s')
-  .then(codec('platform', Platform.orLowerCaseCodec))
-  .then(codec('puuid', Puuid.codec))
+const platformM = codec('platform', Platform.orLowerCaseCodec)
+
+const sPlatformPuuidMatch = lit('s').then(platformM).then(codec('puuid', Puuid.codec))
 const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
-const platformSummonerNameMatch = codec('platform', Platform.orLowerCaseCodec).then(
-  str('summonerName'),
-)
+
+const platformRiotIdMatch = platformM.then(codec('riotId', riotIdCodec))
+const platformRiotIdGameMatch = platformRiotIdMatch.then(lit('game'))
+
+/** @deprecated SummonerName will be removed */
+const platformSummonerNameMatch = platformM.then(codec('summonerName', SummonerName.codec))
+// eslint-disable-next-line deprecation/deprecation
 const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
+
 const aramMatch = lit('aram')
 const factionsMatch = lit('factions')
 const loginMatch = lit('login')
@@ -32,38 +45,74 @@ const discordRedirectMatch = lit('discordRedirect')
 export const appMatches = {
   sPlatformPuuid: sPlatformPuuidMatch.then(end),
   sPlatformPuuidGame: sPlatformPuuidGameMatch.then(end),
+
+  platformRiotId: platformRiotIdMatch.then(end),
+  platformRiotIdGame: platformRiotIdGameMatch.then(end),
+
+  // eslint-disable-next-line deprecation/deprecation
   platformSummonerName: platformSummonerNameMatch.then(end),
   platformSummonerNameGame: platformSummonerNameGameMatch.then(end),
 }
 
 /**
- * parser
+ * parsers
+ *
+ * Don't forget .then(end).parser (or use p)
  */
 
-// don't forget .then(end).parser (or use p)
+const platformRiotId = p(platformRiotIdMatch)
+const platformRiotIdGame = p(platformRiotIdGameMatch)
+
+// eslint-disable-next-line deprecation/deprecation
 const platformSummonerName = p(platformSummonerNameMatch)
 const platformSummonerNameGame = p(platformSummonerNameGameMatch)
 
-const anyPlatformSummonerName: Parser<{
-  platform: Platform
-  summonerName: string
-}> = platformSummonerName
-  .alt(platformSummonerNameGame)
-  .map(({ platform, ...a }) => ({ ...a, platform: StringUtils.toUpperCase(platform) }))
+const anyPlatformRiotId: Parser<PlatformWithRiotId> = platformRiotId
+  .alt(platformRiotIdGame)
+  .map(({ platform, riotId }) => ({
+    platform: StringUtils.toUpperCase(platform),
+    riotId,
+  }))
+
+const anyPlatformSummoner: Parser<PlatformWithSummoner> =
+  // Right<RiotId>
+  anyPlatformRiotId
+    .map(
+      ({ platform, riotId }): PlatformWithSummoner => ({
+        platform,
+        summoner: Either.right(riotId),
+      }),
+    )
+    // Left<SummonerName>
+    .alt(
+      platformSummonerName.alt(platformSummonerNameGame).map(
+        ({ platform, summonerName }): PlatformWithSummoner => ({
+          platform: StringUtils.toUpperCase(platform),
+          summoner: Either.left(summonerName),
+        }),
+      ),
+    )
 
 export const appParsers = {
   index: end.parser,
+
   sPlatformPuuid: p(sPlatformPuuidMatch),
   sPlatformPuuidGame: p(sPlatformPuuidGameMatch),
+
+  platformRiotId,
+  platformRiotIdGame,
+
   platformSummonerName,
   platformSummonerNameGame,
+
   aram: p(aramMatch),
   factions: p(factionsMatch),
   login: p(loginMatch),
   register: p(registerMatch),
   discordRedirect: p(discordRedirectMatch),
 
-  anyPlatformSummonerName,
+  anyPlatformRiotId,
+  anyPlatformSummoner,
 }
 
 /**
@@ -72,6 +121,7 @@ export const appParsers = {
 
 export const appRoutes = {
   index: format(end.formatter, {}),
+
   sPlatformPuuid: (platform: Platform, puuid: Puuid, query: PartialMasteriesQuery) =>
     withQuery(
       format(sPlatformPuuidMatch.formatter, { platform, puuid }),
@@ -80,14 +130,30 @@ export const appRoutes = {
     ),
   sPlatformPuuidGame: (platform: Platform, puuid: Puuid) =>
     format(sPlatformPuuidGameMatch.formatter, { platform, puuid }),
-  platformSummonerName: (platform: Platform, summonerName: string, query: PartialMasteriesQuery) =>
+
+  platformRiotId: (platform: Platform, riotId: RiotId, query: PartialMasteriesQuery) =>
     withQuery(
+      format(platformRiotIdMatch.formatter, { platform, riotId }),
+      PartialMasteriesQuery,
+      query,
+    ),
+  platformRiotIdGame: (platform: Platform, riotId: RiotId) =>
+    format(platformRiotIdGameMatch.formatter, { platform, riotId }),
+
+  platformSummonerName: (
+    platform: Platform,
+    summonerName: SummonerName,
+    query: PartialMasteriesQuery,
+  ) =>
+    withQuery(
+      // eslint-disable-next-line deprecation/deprecation
       format(platformSummonerNameMatch.formatter, { platform, summonerName }),
       PartialMasteriesQuery,
       query,
     ),
-  platformSummonerNameGame: (platform: Platform, summonerName: string) =>
+  platformSummonerNameGame: (platform: Platform, summonerName: SummonerName) =>
     format(platformSummonerNameGameMatch.formatter, { platform, summonerName }),
+
   aram: (query: PartialGenericQuery) =>
     withQuery(format(aramMatch.formatter, {}), PartialGenericQuery, query),
   factions: (query: PartialGenericQuery) =>

@@ -3,7 +3,7 @@
 import { useSprings } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
 import { pipe } from 'fp-ts/function'
-import { lens } from 'monocle-ts'
+import { optional } from 'monocle-ts'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
@@ -14,6 +14,7 @@ import type { Lang } from '../../../shared/models/api/Lang'
 import { MapId } from '../../../shared/models/api/MapId'
 import { Platform } from '../../../shared/models/api/Platform'
 import { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
+import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
@@ -24,6 +25,8 @@ import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { RiotId } from '../../../shared/models/riot/RiotId'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -38,7 +41,7 @@ import { config } from '../../config/unsafe'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
+import { usePlatformWithRiotIdFromLocation } from '../../hooks/usePlatformWithRiotIdFromLocation'
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { Assets } from '../../imgs/Assets'
@@ -52,6 +55,7 @@ import {
   participantHeightDesktop,
   participantHeightMobile,
 } from './ActiveGamePositions'
+import { useActiveGame } from './useActiveGame'
 import { useShouldWrap } from './useShouldWrap'
 
 const { swap } = ListUtils
@@ -64,23 +68,14 @@ const timerInterval = MsDuration.second(1)
 
 type Props = {
   platform: Platform
-  summonerName: string
+  riotId: RiotId
 }
 
-export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
+export const ActiveGame: React.FC<Props> = ({ platform, riotId }) => {
   const { maybeUser } = useUser()
-  const { lang, t } = useTranslation('activeGame')
+  const { lang } = useTranslation()
 
-  const { data, error, mutate } = useSWRHttp(
-    apiRoutes.summoner.byName(platform, summonerName).activeGame.lang(lang).get,
-    {},
-    [Maybe.decoder(SummonerActiveGameView.codec), 'Maybe<SummonerActiveGameView>'],
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
-  )
+  const { data, error, mutate } = useActiveGame(lang, platform, riotId)
 
   // Remove shards on user disconnect
   const previousUser = usePrevious(maybeUser)
@@ -89,19 +84,17 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
       data !== undefined &&
       Maybe.isNone(maybeUser) &&
       Maybe.isSome(Maybe.flatten(previousUser)) &&
-      Maybe.isSome(data)
+      Maybe.isSome(data.game)
     ) {
       mutate(
-        Maybe.some(
-          pipe(
-            SummonerActiveGameView.Lens.game.participants,
-            lens.modify(
-              PartialDict.map(
-                NonEmptyArray.map(ActiveGameParticipantView.Lens.shardsCount.set(Maybe.none)),
-              ),
+        pipe(
+          SummonerActiveGameView.Lens.game.participants,
+          optional.modify(
+            PartialDict.map(
+              NonEmptyArray.map(ActiveGameParticipantView.Lens.shardsCount.set(Maybe.none)),
             ),
-          )(data.value),
-        ),
+          ),
+        )(data),
         { revalidate: false },
       )
     }
@@ -119,62 +112,82 @@ export const ActiveGame: React.FC<Props> = ({ platform, summonerName }) => {
   return (
     <MainLayout>
       <AsyncRenderer data={data} error={error}>
-        {Maybe.fold(
-          () => (
-            <div className="flex flex-col items-center gap-4">
-              <Pre className="mt-4">{t.notInGame}</Pre>
-              <button type="button" onClick={refreshGame}>
-                <RefreshOutline className="w-6" />
-              </button>
-            </div>
-          ),
-          summonerGame => (
-            <WithoutAdditional
-              platform={platform}
-              summonerGame={summonerGame}
-              refreshGame={refreshGame}
-              reloadGame={reloadGame}
-            />
-          ),
+        {summonerGame => (
+          <Loaded
+            platform={platform}
+            summoner={summonerGame.summoner}
+            game={summonerGame.game}
+            refreshGame={refreshGame}
+            reloadGame={reloadGame}
+          />
         )}
       </AsyncRenderer>
     </MainLayout>
   )
 }
 
-const WithoutAdditional: React.FC<
-  Omit<ActiveGameComponentProps, 'additionalStaticData'>
+const Loaded: React.FC<
+  Omit<ActiveGameComponentProps, 'additionalStaticData' | 'game'> & {
+    game: Maybe<ActiveGameView>
+  }
 > = props => {
-  const { summoner } = props.summonerGame
+  const { summoner, refreshGame } = props
 
   const { navigate } = useHistory()
   const { addRecentSearch } = useUser()
-  const { lang } = useTranslation()
-  const summonerNameFromLocation = usePlatformSummonerNameFromLocation()?.summonerName
+  const { t } = useTranslation('activeGame')
+  const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
 
   useEffect(
     () =>
       addRecentSearch({
         platform: props.platform,
         puuid: summoner.puuid,
+        riotId: summoner.riotId,
         name: summoner.name,
         profileIconId: summoner.profileIconId,
       }),
-    [addRecentSearch, props.platform, summoner.name, summoner.profileIconId, summoner.puuid],
+    [addRecentSearch, props.platform, summoner],
   )
 
-  // Correct case of summoner's name in url
+  // Correct Riot ID's case in url
   useEffect(() => {
-    if (summonerNameFromLocation !== summoner.name) {
-      navigate(appRoutes.platformSummonerNameGame(props.platform, summoner.name), {
+    if (
+      riotIdFromLocation !== undefined &&
+      !RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)
+    ) {
+      navigate(appRoutes.platformRiotIdGame(props.platform, summoner.riotId), {
         replace: true,
       })
     }
-  }, [navigate, props.platform, summoner.name, summonerNameFromLocation])
+  }, [navigate, props.platform, riotIdFromLocation, summoner.riotId])
+
+  return pipe(
+    props.game,
+    Maybe.fold(
+      () => (
+        <div className="flex flex-col items-center gap-4">
+          <Pre className="mt-4">{t.notInGame}</Pre>
+          <button type="button" onClick={refreshGame}>
+            <RefreshOutline className="w-6" />
+          </button>
+        </div>
+      ),
+      game => <WithoutAdditional {...props} game={game} />,
+    ),
+  )
+}
+
+const WithoutAdditional: React.FC<
+  Omit<ActiveGameComponentProps, 'additionalStaticData' | 'game'> & {
+    game: ActiveGameView
+  }
+> = props => {
+  const { lang } = useTranslation()
 
   return (
     <AsyncRenderer
-      {...useSWRHttp(apiRoutes.staticData.lang(lang).additional.get, {}, [
+      {...useSWRHttp(apiRoutes.staticData(lang).additional.get, {}, [
         AdditionalStaticData.codec,
         'AdditionalStaticData',
       ])}
@@ -189,7 +202,8 @@ const WithoutAdditional: React.FC<
 type ActiveGameComponentProps = {
   additionalStaticData: AdditionalStaticData
   platform: Platform
-  summonerGame: SummonerActiveGameView
+  summoner: SummonerShort
+  game: ActiveGameView
   // soft reload: just call swr mutate, but keep already loaded data
   reloadGame: () => void
   // hard refresh: call swr mutate with undefined, provoking visual refresh
@@ -199,17 +213,15 @@ type ActiveGameComponentProps = {
 const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   additionalStaticData,
   platform,
-  summonerGame: {
-    summoner,
-    game: {
-      gameStartTime,
-      mapId,
-      gameQueueConfigId,
-      isDraft,
-      bannedChampions,
-      participants,
-      isPoroOK,
-    },
+  summoner,
+  game: {
+    gameStartTime,
+    mapId,
+    gameQueueConfigId,
+    isDraft,
+    bannedChampions,
+    participants,
+    isPoroOK,
   },
   refreshGame,
   reloadGame,
@@ -265,7 +277,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         )}
 
         <div className="flex items-center gap-0.5">
-          <a href={poroLink(lang, platform, summoner.name)} target="_blank" rel="noreferrer">
+          <a href={poroLink(lang, platform, summoner.riotId)} target="_blank" rel="noreferrer">
             <img src={Assets.poro} alt={t.activeGame.poroIconAlt} className="h-5" />
           </a>
           {isPoroOK ? (
@@ -349,10 +361,10 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   )
 }
 
-const poroLink = (lang: Lang, platform: Platform, summonerName: string): string =>
+const poroLink = (lang: Lang, platform: Platform, { gameName, tagLine }: RiotId): string =>
   `${config.poroApiBaseUrl}/${Business.poroLang[lang]}/live/${Platform.encoderLower.encode(
     platform,
-  )}/${summonerName}/ranked-only/season`
+  )}/${gameName}-${tagLine}/ranked-only/season`
 
 type ParticipantsProps = {
   platform: Platform
@@ -433,7 +445,7 @@ const Participants: React.FC<ParticipantsProps> = ({
         const participant = participants[j]!
         return (
           <ActiveGameParticipant
-            key={participant.summonerName}
+            key={SummonerName.unwrap(participant.summonerName)}
             summonerSpellByKey={summonerSpellByKey}
             runeStyleById={runeStyleById}
             runeById={runeById}
@@ -441,7 +453,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             mapId={mapId}
             participant={participant}
             shouldWrap={shouldWrap}
-            highlight={participant.summonerName === summoner.name}
+            highlight={RiotId.Eq.equals(participant.riotId, summoner.riotId)}
             reverse={reverse}
             index={j}
             isLast={j === springs.length - 1}

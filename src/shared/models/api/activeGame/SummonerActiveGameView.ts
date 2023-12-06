@@ -1,7 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
-import { lens } from 'monocle-ts'
+import { lens, optional } from 'monocle-ts'
 
+import { Maybe } from '../../../utils/fp'
 import { SummonerShort } from '../summoner/SummonerShort'
 import { ActiveGameView } from './ActiveGameView'
 
@@ -9,7 +10,7 @@ type SummonerActiveGameView = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   summoner: SummonerShort.codec,
-  game: ActiveGameView.codec,
+  game: Maybe.codec(ActiveGameView.codec),
 })
 
 const Lens = {
@@ -17,7 +18,8 @@ const Lens = {
     participants: pipe(
       lens.id<SummonerActiveGameView>(),
       lens.prop('game'),
-      lens.prop('participants'),
+      lens.some,
+      optional.prop('participants'),
     ),
   },
 }

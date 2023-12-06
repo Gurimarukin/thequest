@@ -1,17 +1,18 @@
 import { pipe } from 'fp-ts/function'
-import * as E from 'io-ts/Encoder'
 
 import type { DayJs } from '../../shared/models/DayJs'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { RiotId } from '../../shared/models/riot/RiotId'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 
-import { FpCollection } from '../helpers/FpCollection'
+import { FpCollection, FpCollectionHelpers } from '../helpers/FpCollection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { RiotAccountDb } from '../models/riot/RiotAccountDb'
-import { TagLine } from '../models/riot/TagLine'
 import { DayJsFromDate } from '../utils/ioTsUtils'
+
+const { caseInsensitiveCollation } = FpCollectionHelpers
 
 type RiotAccountPersistence = ReturnType<typeof RiotAccountPersistence>
 
@@ -23,21 +24,25 @@ const RiotAccountPersistence = (Logger: LoggerGetter, mongoCollection: MongoColl
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { gameName: -1, tagLine: -1 }, unique: true },
     { key: { puuid: -1 }, unique: true },
+    { key: { riotId: -1 }, unique: true, collation: caseInsensitiveCollation },
   ])
 
   return {
     ensureIndexes,
 
-    findByGameNameAndTagLine: (
-      gameName: string,
-      tagLine: TagLine,
-      insertedAfter: DayJs,
-    ): Future<Maybe<RiotAccountDb>> =>
+    findByRiotId: (riotId: RiotId, insertedAfter: DayJs): Future<Maybe<RiotAccountDb>> =>
+      collection.findOne(
+        {
+          riotId: RiotId.fromStringCodec.encode(riotId),
+          insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
+        },
+        { collation: caseInsensitiveCollation },
+      ),
+
+    findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<RiotAccountDb>> =>
       collection.findOne({
-        gameName: E.id<string>().encode(gameName),
-        tagLine: TagLine.codec.encode(tagLine),
+        puuid: Puuid.codec.encode(puuid),
         insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
       }),
 
@@ -45,6 +50,7 @@ const RiotAccountPersistence = (Logger: LoggerGetter, mongoCollection: MongoColl
       pipe(
         collection.updateOne({ puuid: Puuid.codec.encode(account.puuid) }, account, {
           upsert: true,
+          collation: caseInsensitiveCollation,
         }),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),

@@ -1,8 +1,20 @@
 - riot id
+- active game summoner without poro fix style
 - going back to game tab and then refreshing doesnt trigger visual reload
+- removeFavoriteSearch no platform, only puuid
+- active game url doesn't get replaced by proper summoner name
+- remove self from SearchSummoner
+- `points / max` ("/" font-normal)
+- `titleWithElementParser` translation
+- replace all `wrap`s with `immutableAssign`
+- retry db connection
 
+- full summoner name removal
+
+- use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
 - react-select
-- url encode summoner name (client and server side)
+- are `fromIO`s useful (simply use `myIo()`)?
+- url encode riot id (client and server side)
 - uri: ugly encode
 
 - challenges page + detect challenges

@@ -18,7 +18,9 @@ export const useLocalStorageState = <O, A>(
 ): Tuple<A, React.Dispatch<React.SetStateAction<A>>> => {
   const [a, setA] = useState<A>(() => {
     const item = localStorage.getItem(key)
+
     if (item === null) return init(initialState)
+
     return pipe(
       json.parse(item),
       Either.mapLeft(Either.toError),

@@ -331,6 +331,7 @@ const frFRTranslation: Translation = {
       </>
     ),
     summonerLevel: 'Niveau d’invocateur',
+    oldSummonerName: 'Ancien nom d’invocateur :',
     summonerIconAlt: name => `Icône de ${name}`,
   },
   form: {

@@ -4,6 +4,9 @@ import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
+import type { GameName } from '../../shared/models/riot/GameName'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
+import type { TagLine } from '../../shared/models/riot/TagLine'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Dict, Future, Maybe } from '../../shared/utils/fp'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
@@ -12,14 +15,11 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 import type { Config } from '../config/Config'
 import type { HttpClient } from '../helpers/HttpClient'
 import { statusesToOption } from '../helpers/HttpClient'
-import { ActiveShards } from '../models/riot/ActiveShard'
-import type { Game } from '../models/riot/Game'
-import { RiotAccount } from '../models/riot/RiotAccount'
 import { RiotChallenges } from '../models/riot/RiotChallenges'
 import { RiotChampionMastery } from '../models/riot/RiotChampionMastery'
 import { RiotLeagueEntry } from '../models/riot/RiotLeagueEntry'
+import { RiotRiotAccount } from '../models/riot/RiotRiotAccounts'
 import { RiotSummoner } from '../models/riot/RiotSummoner'
-import type { TagLine } from '../models/riot/TagLine'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
 import { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
@@ -51,15 +51,11 @@ const plateformEndpoint: Dict<Platform, string> = {
 const platformUrl = (platform: Platform, path: string): string =>
   `https://${plateformEndpoint[platform]}${path}`
 
-type UseAccountApiKey = {
-  useAccountApiKey: boolean
-}
-
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const RiotApiService = (config: Config, httpClient: HttpClient, mockService: MockService) => {
-  const { lol: lolKey, account: accountKey } = config.riotApi.keys
+  const lolKey = config.riotApi.key
 
   const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
     [ddragon('/api/versions.json'), 'get'],
@@ -105,6 +101,8 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
         lol: {
           championMasteryV4: {
             championMasteries: {
+              /** @deprecated Endpoint will be removed on 2023-12-15 */
+              // eslint-disable-next-line deprecation/deprecation
               bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
                 pipe(
                   httpClient.http(
@@ -112,6 +110,22 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                       platformUrl(
                         platform,
                         `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
+                      ),
+                      'get',
+                    ],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
+                  ),
+                  statusesToOption(404),
+                ),
+
+              byPuuid: (puuid: Puuid): Future<Maybe<List<RiotChampionMastery>>> =>
+                pipe(
+                  httpClient.http(
+                    [
+                      platformUrl(
+                        platform,
+                        `/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
                       ),
                       'get',
                     ],
@@ -179,10 +193,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
           summonerV4: {
             summoners: {
-              /**
-               * ⚠️  Consistently looking up summoner ids that don't exist will result in a blacklist.
-               * @deprecated
-               */
+              /** @deprecated ⚠️ Consistently looking up summoner ids that don't exist will result in a blacklist. */
               // eslint-disable-next-line deprecation/deprecation
               byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
                 pipe(
@@ -194,28 +205,24 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                   statusesToOption(404),
                 ),
 
-              byName: (summonerName: string): Future<Maybe<RiotSummoner>> =>
+              /** @deprecated SummonerName will be removed */
+              // eslint-disable-next-line deprecation/deprecation
+              byName: (name: SummonerName): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
-                    [
-                      platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${summonerName}`),
-                      'get',
-                    ],
+                    [platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${name}`), 'get'],
                     { headers: { [xRiotToken]: lolKey } },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
                   statusesToOption(404),
                 ),
 
-              byPuuid: (
-                puuid: Puuid,
-                { useAccountApiKey }: UseAccountApiKey = { useAccountApiKey: false },
-              ): Future<Maybe<RiotSummoner>> =>
+              byPuuid: (puuid: Puuid): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.http(
                     [platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${puuid}`), 'get'],
                     {
-                      headers: { [xRiotToken]: useAccountApiKey ? accountKey : lolKey },
+                      headers: { [xRiotToken]: lolKey },
                     },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
@@ -231,38 +238,29 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
           accountV1: {
             accounts: {
               byRiotId:
-                (gameName: string) =>
-                (tagLine: TagLine): Future<Maybe<RiotAccount>> =>
+                (gameName: GameName) =>
+                (tagLine: TagLine): Future<Maybe<RiotRiotAccount>> =>
                   pipe(
                     httpClient.http(
                       [
                         regionalUrl(`/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`),
                         'get',
                       ],
-                      { headers: { [xRiotToken]: accountKey } },
-                      [RiotAccount.decoder, 'RiotAccount'],
+                      { headers: { [xRiotToken]: lolKey } },
+                      [RiotRiotAccount.decoder, 'RiotRiotAccount'],
                     ),
                     statusesToOption(404),
                   ),
-            },
 
-            activeShards: {
-              byGame: (game: Game) => ({
-                byPuuid: (puuid: Puuid): Future<Maybe<ActiveShards>> =>
-                  pipe(
-                    httpClient.http(
-                      [
-                        regionalUrl(
-                          `/riot/account/v1/active-shards/by-game/${game}/by-puuid/${puuid}`,
-                        ),
-                        'get',
-                      ],
-                      { headers: { [xRiotToken]: accountKey } },
-                      [ActiveShards.decoder, 'ActiveShards'],
-                    ),
-                    statusesToOption(404),
+              byPuuid: (puuid: Puuid): Future<Maybe<RiotRiotAccount>> =>
+                pipe(
+                  httpClient.http(
+                    [regionalUrl(`/riot/account/v1/accounts/by-puuid/${puuid}`), 'get'],
+                    { headers: { [xRiotToken]: lolKey } },
+                    [RiotRiotAccount.decoder, 'RiotRiotAccount'],
                   ),
-              }),
+                  statusesToOption(404),
+                ),
             },
           },
         },

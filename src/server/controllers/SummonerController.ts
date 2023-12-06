@@ -12,8 +12,8 @@ import type { Platform } from '../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameMasteriesView } from '../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../shared/models/api/activeGame/ActiveGameParticipantView'
+import type { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGameView'
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
-import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
@@ -23,6 +23,8 @@ import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { RiotId } from '../../shared/models/riot/RiotId'
+import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
@@ -49,7 +51,7 @@ import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import { LeagueEntry } from '../models/league/LeagueEntry'
 import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import type { Summoner } from '../models/summoner/Summoner'
+import type { Summoner, SummonerWithRiotId } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { WikiaChampionData } from '../models/wikia/WikiaChampionData'
@@ -59,6 +61,7 @@ import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
 import type { MasteriesService } from '../services/MasteriesService'
 import type { PoroActiveGameService } from '../services/PoroActiveGameService'
+import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
 import type { UserService } from '../services/UserService'
 import type { StaticDataService } from '../services/staticDataService/StaticDataService'
@@ -80,6 +83,7 @@ const SummonerController = (
   leagueEntryService: LeagueEntryService,
   masteriesService: MasteriesService,
   poroActiveGameService: PoroActiveGameService,
+  riotAccountService: RiotAccountService,
   summonerService: SummonerService,
   staticDataService: StaticDataService,
   userService: UserService,
@@ -90,19 +94,42 @@ const SummonerController = (
     masteriesByPuuid:
       (platform: Platform, puuid: Puuid) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(summonerService.findByPuuid(platform, puuid), findMasteries(platform, maybeUser)),
-
-    masteriesByName:
-      (platform: Platform, summonerName: string) =>
-      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
         pipe(
-          summonerService.findByName(platform, summonerName),
+          apply.sequenceT(futureMaybe.ApplyPar)(
+            summonerService.findByPuuid(platform, puuid),
+            riotAccountService.findByPuuid(puuid),
+          ),
+          futureMaybe.map(([summoner, account]) => ({ ...summoner, riotId: account.riotId })),
           findMasteries(platform, maybeUser),
         ),
 
-    challenges: (platform: Platform, summonerName: string): EndedMiddleware =>
+    masteriesByName:
+      (platform: Platform, name: SummonerName) =>
+      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
+        pipe(
+          summonerService.findByName(platform, name),
+          futureMaybe.bind('riotId', summoner =>
+            pipe(
+              riotAccountService.findByPuuid(summoner.puuid),
+              futureMaybe.map(a => a.riotId),
+            ),
+          ),
+          findMasteries(platform, maybeUser),
+        ),
+
+    masteriesByRiotId:
+      (platform: Platform, riotId_: RiotId) =>
+      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
+        pipe(
+          riotAccountService.findByRiotId(riotId_),
+          futureMaybe.bind('summoner', ({ puuid }) => summonerService.findByPuuid(platform, puuid)),
+          futureMaybe.map(({ riotId, summoner }) => ({ ...summoner, riotId })),
+          findMasteries(platform, maybeUser),
+        ),
+
+    challengesByPuuid: (platform: Platform, puuid: Puuid): EndedMiddleware =>
       pipe(
-        summonerService.findByName(platform, summonerName),
+        summonerService.findByPuuid(platform, puuid),
         Future.map(Either.fromOption(() => 'Summoner not found')),
         futureEither.chain(summoner =>
           pipe(
@@ -114,60 +141,74 @@ const SummonerController = (
         M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(ChallengesView.codec))),
       ),
 
-    activeGame:
-      (lang: Lang, platform: Platform, summonerName: string) =>
+    activeGameByPuuid:
+      (lang: Lang, platform: Platform, puuid: Puuid) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
         pipe(
-          summonerService.findByName(platform, summonerName),
-          Future.map(Either.fromOption(() => 'Summoner not found')),
-          futureEither.chain(summoner =>
-            pipe(activeGame(lang, summoner, maybeUser), Future.map(Either.right)),
+          apply.sequenceT(futureMaybe.ApplyPar)(
+            summonerService.findByPuuid(platform, puuid),
+            riotAccountService.findByPuuid(puuid),
           ),
-          M.fromTaskEither,
-          M.ichain(
-            Either.fold(
-              M.sendWithStatus(Status.NotFound),
-              M.json(Maybe.encoder(SummonerActiveGameView.codec)),
+          futureMaybe.map(([summoner, { riotId }]) => ({ ...summoner, riotId })),
+          findActiveGame(lang, maybeUser),
+        ),
+
+    activeGameByName:
+      (lang: Lang, platform: Platform, name: SummonerName) =>
+      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
+        pipe(
+          summonerService.findByName(platform, name),
+          futureMaybe.bind('riotId', summoner =>
+            pipe(
+              riotAccountService.findByPuuid(summoner.puuid),
+              futureMaybe.map(a => a.riotId),
             ),
           ),
+          findActiveGame(lang, maybeUser),
+        ),
+
+    activeGameByRiotId:
+      (lang: Lang, platform: Platform, riotId_: RiotId) =>
+      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
+        pipe(
+          riotAccountService.findByRiotId(riotId_),
+          futureMaybe.bind('summoner', ({ puuid }) => summonerService.findByPuuid(platform, puuid)),
+          futureMaybe.map(({ riotId, summoner }) => ({ ...summoner, riotId })),
+          findActiveGame(lang, maybeUser),
         ),
   }
 
   function findMasteries(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
-  ): (futureSummoner: Future<Maybe<Summoner>>) => EndedMiddleware {
-    return futureSummoner =>
-      pipe(
-        futureSummoner,
-        Future.map(Either.fromOption(() => 'Summoner not found')),
-        futureEither.bindTo('summoner'),
-        futureEither.bind('leagues', ({ summoner }) =>
-          pipe(
-            findLeagues(platform, summoner.id),
-            Future.map(Either.fromOption(() => 'Leagues not found')),
+  ): (summoner: Future<Maybe<SummonerWithRiotId>>) => EndedMiddleware {
+    return flow(
+      Future.map(Either.fromOption(() => 'Summoner not found')),
+      futureEither.bindTo('summoner'),
+      futureEither.bind('leagues', ({ summoner }) =>
+        pipe(
+          findLeagues(platform, summoner.id),
+          Future.map(Either.fromOption(() => 'Leagues not found')),
+        ),
+      ),
+      futureEither.bind('masteries', ({ summoner }) =>
+        pipe(
+          masteriesService.findBySummoner(platform, summoner.puuid),
+          Future.map(Either.fromOption(() => 'Masteries not found')),
+        ),
+      ),
+      futureEither.bind('championShards', ({ summoner, masteries }) =>
+        pipe(
+          futureMaybe.fromOption(maybeUser),
+          futureMaybe.chainTaskEitherK(user =>
+            findChampionShards(user, summoner, masteries.champions),
           ),
+          Future.map(Either.right),
         ),
-        futureEither.bind('masteries', ({ summoner }) =>
-          pipe(
-            masteriesService.findBySummoner(platform, summoner.id),
-            Future.map(Either.fromOption(() => 'Masteries not found')),
-          ),
-        ),
-        futureEither.bind('championShards', ({ summoner, masteries }) =>
-          pipe(
-            futureMaybe.fromOption(maybeUser),
-            futureMaybe.chainTaskEitherK(user =>
-              findChampionShards(user, summoner, masteries.champions),
-            ),
-            Future.map(Either.right),
-          ),
-        ),
-        M.fromTaskEither,
-        M.ichain(
-          Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerMasteriesView.codec)),
-        ),
-      )
+      ),
+      M.fromTaskEither,
+      M.ichain(Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerMasteriesView.codec))),
+    )
   }
 
   function findLeagues(
@@ -228,32 +269,51 @@ const SummonerController = (
     )
   }
 
+  function findActiveGame(
+    lang: Lang,
+    maybeUser: Maybe<TokenContent>,
+  ): (summoner: Future<Maybe<SummonerWithRiotId>>) => EndedMiddleware {
+    return flow(
+      Future.map(Either.fromOption(() => 'Summoner not found')),
+      futureEither.chain(summoner =>
+        pipe(
+          activeGame(lang, summoner, maybeUser),
+          Future.map(game => Either.right<never, SummonerActiveGameView>({ summoner, game })),
+        ),
+      ),
+      M.fromTaskEither,
+      M.ichain(
+        Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerActiveGameView.codec)),
+      ),
+    )
+  }
+
   function activeGame(
     lang: Lang,
-    summoner: Summoner,
+    summoner: SummonerWithRiotId,
     maybeUser: Maybe<TokenContent>,
-  ): Future<Maybe<SummonerActiveGameView>> {
+  ): Future<Maybe<ActiveGameView>> {
     return pipe(
       activeGameService.findBySummoner(summoner.platform, summoner.id),
       futureMaybe.chainTaskEitherK(game =>
         pipe(
-          poroActiveGameService.find(lang, game.gameId, summoner.platform, summoner.name),
+          poroActiveGameService.find(lang, game.gameId, summoner.platform, summoner.riotId),
           task.chain(
             Try.fold(
               e =>
                 pipe(
                   logger.warn('Error while fetching Poro game (falling back to Riot API only):', e),
                   Future.fromIOEither,
-                  Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
+                  Future.chain(() => activeGameRiot(summoner.platform, maybeUser, game)),
                 ),
               Maybe.fold(
                 () =>
                   pipe(
                     logger.warn('Poro game not found while Riot API returned one'),
                     Future.fromIOEither,
-                    Future.chain(() => activeGameRiot(summoner, maybeUser, game)),
+                    Future.chain(() => activeGameRiot(summoner.platform, maybeUser, game)),
                   ),
-                activeGamePoro(summoner, maybeUser, game),
+                activeGamePoro(summoner.platform, maybeUser, game),
               ),
             ),
           ),
@@ -263,32 +323,27 @@ const SummonerController = (
   }
 
   function activeGameRiot(
-    summoner: Summoner,
+    platform: Platform,
     maybeUser: Maybe<TokenContent>,
     game: ActiveGame,
-  ): Future<SummonerActiveGameView> {
+  ): Future<ActiveGameView> {
     return pipe(
-      staticDataService.wikiaChampions,
-      Future.chain(champions =>
-        pipe(
+      apply.sequenceS(Future.ApplyPar)({
+        champions: staticDataService.wikiaChampions,
+        participants: pipe(
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(
-              enrichParticipantRiot(summoner.platform, maybeUser, game.insertedAt),
+              enrichParticipantRiot(platform, maybeUser, game.insertedAt),
             ),
           ),
-          Future.map<
-            PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
-            SummonerActiveGameView
-          >(
-            flow(
-              PartialDict.map(sortParticipants(champions)(game.mapId)),
-              (sorted): SummonerActiveGameView => ({
-                summoner,
-                game: pipe(game, ActiveGame.toView(sorted, false)),
-              }),
-            ),
-          ),
+        ),
+      }),
+      Future.map(({ champions, participants }) =>
+        pipe(
+          participants,
+          PartialDict.map(sortParticipants(champions)(game.mapId)),
+          (sorted): ActiveGameView => pipe(game, ActiveGame.toView(sorted, false)),
         ),
       ),
     )
@@ -302,6 +357,10 @@ const SummonerController = (
     return participant =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
+          riotAccount: pipe(
+            riotAccountService.findByPuuid(participant.puuid),
+            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(participant.puuid))),
+          ),
           leagues: findLeagues(platform, participant.summonerId, {
             overrideInsertedAfter: gameInsertedAt,
           }),
@@ -312,44 +371,63 @@ const SummonerController = (
             participant,
           ),
         }),
-        Future.map(({ leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
-          pipe(participant, ActiveGameParticipant.toView({ leagues, masteries, shardsCount })),
+        Future.map(
+          ({ riotAccount, leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
+            pipe(
+              participant,
+              ActiveGameParticipant.toView({
+                riotId: riotAccount.riotId,
+                leagues,
+                masteries,
+                shardsCount,
+              }),
+            ),
         ),
       )
   }
 
+  function couldntFindAccountError(puuid: Puuid): Error {
+    return Error(`Couldn't find Riot account for summoner: ${puuid}`)
+  }
+
+  type EnrichedActiveGameParticipant = ActiveGameParticipant & {
+    riotId: RiotId
+  }
+
   function activeGamePoro(
-    summoner: Summoner,
+    platform: Platform,
     maybeUser: Maybe<TokenContent>,
     game: ActiveGame,
-  ): (poroGame: PoroActiveGame) => Future<SummonerActiveGameView> {
+  ): (poroGame: PoroActiveGame) => Future<ActiveGameView> {
     return poroGame =>
       pipe(
-        poroGame.participants,
-        PartialDict.traverse(Future.ApplicativePar)(
-          NonEmptyArray.traverse(Future.ApplicativePar)(
-            enrichParticipantPoro(
-              summoner.platform,
-              maybeUser,
-              pipe(DictUtils.values(game.participants), List.flatten),
-              game.insertedAt,
+        DictUtils.values(game.participants),
+        List.flatten,
+        List.traverse(Future.ApplicativePar)(p =>
+          pipe(
+            riotAccountService.findByPuuid(p.puuid),
+            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.puuid))),
+            Future.map((a): EnrichedActiveGameParticipant => ({ ...p, riotId: a.riotId })),
+          ),
+        ),
+        Future.chain(participants =>
+          pipe(
+            poroGame.participants,
+            PartialDict.traverse(Future.ApplicativePar)(
+              NonEmptyArray.traverse(Future.ApplicativePar)(
+                enrichParticipantPoro(platform, maybeUser, participants, game.insertedAt),
+              ),
             ),
           ),
         ),
-        Future.map<
-          PartialDict<`${TeamId}`, NonEmptyArray<ActiveGameParticipantView>>,
-          SummonerActiveGameView
-        >(participants => ({
-          summoner,
-          game: {
-            gameStartTime: game.gameStartTime,
-            mapId: game.mapId,
-            gameQueueConfigId: game.gameQueueConfigId,
-            isDraft: game.isDraft,
-            bannedChampions: game.bannedChampions,
-            participants,
-            isPoroOK: true,
-          },
+        Future.map<ActiveGameView['participants'], ActiveGameView>(participants => ({
+          gameStartTime: game.gameStartTime,
+          mapId: game.mapId,
+          gameQueueConfigId: game.gameQueueConfigId,
+          isDraft: game.isDraft,
+          bannedChampions: game.bannedChampions,
+          participants,
+          isPoroOK: true,
         })),
       )
   }
@@ -357,22 +435,27 @@ const SummonerController = (
   function enrichParticipantPoro(
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
-    participants: List<ActiveGameParticipant>,
+    participants: List<EnrichedActiveGameParticipant>,
     gameInsertedAt: DayJs,
   ): (poroParticipant: PoroActiveGameParticipant) => Future<ActiveGameParticipantView> {
     return poroParticipant => {
       const maybeParticipant = pipe(
         participants,
-        List.findFirst(p => p.summonerName === poroParticipant.summonerName),
+        List.findFirst(p => RiotId.Eq.equals(RiotId.trim(p.riotId), poroParticipant.riotId)),
       )
+
       if (!Maybe.isSome(maybeParticipant)) {
         return Future.failed(
           Error(
-            `Poro participant: couldn't find matching Riot API participant: ${poroParticipant.summonerName}`,
+            `Poro participant: couldn't find matching Riot API participant: ${RiotId.stringify(
+              poroParticipant.riotId,
+            )}`,
           ),
         )
       }
+
       const participant = maybeParticipant.value
+
       return pipe(
         findMasteriesAndShardsCount(platform, maybeUser, gameInsertedAt, participant),
         Future.map(({ masteries, shardsCount }) =>
@@ -396,7 +479,7 @@ const SummonerController = (
   }> {
     return apply.sequenceS(Future.ApplyPar)({
       masteries: pipe(
-        masteriesService.findBySummoner(platform, participant.summonerId, {
+        masteriesService.findBySummoner(platform, participant.puuid, {
           overrideInsertedAfter: gameInsertedAt,
         }),
         futureMaybe.map(({ champions }): ActiveGameMasteriesView => {

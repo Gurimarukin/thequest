@@ -6,14 +6,17 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { Platform } from '../../../shared/models/api/Platform'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
-import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
-import { Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { GameName } from '../../../shared/models/riot/GameName'
+import { RiotId } from '../../../shared/models/riot/RiotId'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { TagLine } from '../../../shared/models/riot/TagLine'
+import { Either, Future, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { usePlatformSummonerNameFromLocation } from '../../hooks/usePlatformSummonerNameFromLocation'
+import { usePlatformWithRiotIdFromLocation } from '../../hooks/usePlatformWithRiotIdFromLocation'
 import {
   CloseFilled,
   PersonFilled,
@@ -23,6 +26,7 @@ import {
   TimeOutline,
 } from '../../imgs/svgs/icons'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
+import { PartialSummonerShort } from '../../models/summoner/PartialSummonerShort'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -39,23 +43,25 @@ export const SearchSummoner: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const close = useCallback(() => setIsOpen(false), [])
 
-  const platformSummonerNameFromLocation = usePlatformSummonerNameFromLocation()
+  const platformWithRiotIdFromLocation = usePlatformWithRiotIdFromLocation()
 
   const [platform, setPlatform] = useState<Platform>(
-    platformSummonerNameFromLocation?.platform ?? Platform.defaultPlatform,
+    platformWithRiotIdFromLocation?.platform ?? Platform.defaultPlatform,
   )
 
-  const summonerNameFromLocation = platformSummonerNameFromLocation?.summonerName
-  const [summonerName, setSummonerName] = useState(summonerNameFromLocation ?? '')
+  const riotIdFromLocation = platformWithRiotIdFromLocation?.riotId
+  const [summoner, setSummoner] = useState(
+    riotIdFromLocation !== undefined ? RiotId.stringify(riotIdFromLocation) : '',
+  )
 
   useEffect(() => {
-    if (summonerNameFromLocation !== undefined) {
-      setSummonerName(summonerNameFromLocation)
+    if (riotIdFromLocation !== undefined) {
+      setSummoner(RiotId.stringify(riotIdFromLocation))
     }
-  }, [summonerNameFromLocation])
+  }, [riotIdFromLocation])
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSummonerName(e.target.value),
+    (e: React.ChangeEvent<HTMLInputElement>) => setSummoner(e.target.value),
     [],
   )
 
@@ -67,27 +73,54 @@ export const SearchSummoner: React.FC = () => {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      navigate(
-        (Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
-          ? appRoutes.platformSummonerNameGame
-          : appRoutes.platformSummonerName)(
-          platform,
-          summonerName,
-          Maybe.isSome(matchLocation(appParsers.platformSummonerName))
-            ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
-            : {},
+
+      type To = {
+        profile: string
+        game: string
+      }
+
+      const to = pipe(
+        RiotId.fromStringDecoder.decode(summoner),
+        Either.mapLeft(() => SummonerName(summoner)),
+        Either.fold(
+          (name): To => ({
+            profile: appRoutes.platformSummonerName(
+              platform,
+              name,
+              MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
+            ),
+            game: appRoutes.platformSummonerNameGame(platform, name),
+          }),
+          (riotId): To => ({
+            profile: appRoutes.platformRiotId(
+              platform,
+              riotId,
+              MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
+            ),
+            game: appRoutes.platformRiotIdGame(platform, riotId),
+          }),
         ),
       )
+
+      const parser = appParsers.platformRiotIdGame.map(() => to.game)
+
+      pipe(
+        matchLocation(parser),
+        Maybe.getOrElse(() => to.profile),
+        navigate,
+      )
     },
-    [masteriesQuery, matchLocation, navigate, platform, summonerName],
+    [masteriesQuery, matchLocation, navigate, platform, summoner],
   )
 
   const searches: List<React.ReactElement> = List.compact([
     pipe(
       maybeUser,
       Maybe.chain(u => u.linkedRiotAccount),
-      // eslint-disable-next-line react/jsx-key
-      Maybe.map(s => <SummonerSearch type="self" summoner={s} />),
+      Maybe.map(s => (
+        // eslint-disable-next-line react/jsx-key, deprecation/deprecation
+        <SummonerSearch type="self" summoner={PartialSummonerShort.fromSummonerShort(s)} />
+      )),
     ),
     pipe(
       maybeUser,
@@ -95,7 +128,12 @@ export const SearchSummoner: React.FC = () => {
       Maybe.map(favoriteSearches => (
         <>
           {favoriteSearches.map(s => (
-            <SummonerSearch key={Puuid.unwrap(s.puuid)} type="favorite" summoner={s} />
+            <SummonerSearch
+              key={Puuid.unwrap(s.puuid)}
+              type="favorite"
+              // eslint-disable-next-line deprecation/deprecation
+              summoner={PartialSummonerShort.fromSummonerShort(s)}
+            />
           ))}
         </>
       )),
@@ -127,19 +165,19 @@ export const SearchSummoner: React.FC = () => {
         <ClickOutside onClickOutside={close}>
           <input
             type="text"
-            value={summonerName}
+            value={summoner}
             onChange={handleChange}
             onFocus={handleFocus}
             placeholder={t.layout.searchSummoner}
             className={cx('w-60 border border-goldenrod bg-black pl-2 pr-8 area-1', [
               'font-normal',
-              summonerName === '',
+              summoner === '',
             ])}
           />
           <ul
             className={cx(
               'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] min-w-[336px] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
-              Maybe.isSome(maybeUser) ? 'grid-cols-[auto_auto_auto]' : 'grid-cols-[auto_auto] pr-3',
+              Maybe.isSome(maybeUser) ? 'grid-cols-[auto_auto_auto]' : 'grid-cols-[auto_1fr] pr-3',
               showSearches ? 'grid' : 'hidden',
             )}
           >
@@ -174,7 +212,8 @@ const concatWithHr = (es: List<React.ReactElement>): React.ReactElement | null =
 
 type SummonerSearchProps = {
   type: 'self' | 'favorite' | 'recent'
-  summoner: SummonerShort
+  // eslint-disable-next-line deprecation/deprecation
+  summoner: PartialSummonerShort
 }
 
 const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
@@ -201,7 +240,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const removeRecent = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      removeRecentSearch(summoner)
+      removeRecentSearch(summoner.puuid)
     },
     [removeRecentSearch, summoner],
   )
@@ -211,14 +250,23 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
   const addFavorite = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
+
+      if (Maybe.isNone(summoner.riotId)) {
+        return navigateToSummoner()
+      }
+
       setFavoriteIsLoading(true)
       return pipe(
-        addFavoriteSearch(summoner),
+        addFavoriteSearch({ ...summoner, riotId: summoner.riotId.value }),
         // on not found
-        Future.map(Maybe.getOrElseW(() => navigate(puuidRoute(summoner.platform, summoner.puuid)))),
+        Future.map(Maybe.getOrElseW(() => navigateToSummoner())),
         task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )
+
+      function navigateToSummoner(): void {
+        return navigate(puuidRoute(summoner.platform, summoner.puuid))
+      }
     },
     [addFavoriteSearch, navigate, puuidRoute, summoner],
   )
@@ -241,15 +289,37 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       {renderRecent(type, removeRecent)}
       <Link
         to={puuidRoute(summoner.platform, summoner.puuid)}
-        className="flex items-center hover:underline"
+        className="group flex items-center leading-4"
       >
         <img
           src={staticData.assets.summonerIcon(summoner.profileIconId)}
-          alt={t.summonerIconAlt(summoner.name)}
+          alt={t.summonerIconAlt(
+            pipe(
+              summoner.riotId,
+              Maybe.fold(() => SummonerName.unwrap(summoner.name), RiotId.stringify),
+            ),
+          )}
           className="w-12"
         />
-        <span className="ml-2 grow">{summoner.name}</span>
-        <span className="ml-4">{summoner.platform}</span>
+        <div className="ml-2 flex grow items-baseline gap-0.5">
+          {pipe(
+            summoner.riotId,
+            Maybe.fold(
+              () => <span className={linkClassName}>{SummonerName.unwrap(summoner.name)}</span>,
+              riotId => (
+                <>
+                  <span className={cx(linkClassName, 'text-goldenrod')}>
+                    {GameName.unwrap(riotId.gameName)}
+                  </span>
+                  <span className="font-normal text-grey-500">
+                    #{TagLine.unwrap(riotId.tagLine)}
+                  </span>
+                </>
+              ),
+            ),
+          )}
+        </div>
+        <span className={cx(linkClassName, 'ml-4 font-normal')}>{summoner.platform}</span>
       </Link>
       {Maybe.isSome(maybeUser)
         ? renderFavorite(type, favoriteIsLoading, addFavorite, removeFavorite)
@@ -257,6 +327,8 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
     </li>
   )
 }
+
+const linkClassName = 'border-y border-y-transparent group-hover:border-b-current'
 
 const renderRecent = (
   type: SummonerSearchProps['type'],

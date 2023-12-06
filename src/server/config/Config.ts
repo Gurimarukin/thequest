@@ -50,7 +50,7 @@ export type HttpConfig = {
   allowedOrigins: Maybe<NonEmptyArray<URL>>
 }
 
-type DbConfig = {
+export type DbConfig = {
   host: string
   dbName: string
   user: string
@@ -58,7 +58,7 @@ type DbConfig = {
 }
 
 type RiotApiConfig = {
-  keys: RiotApiKeysConfig
+  key: string
   cacheTtl: RiotApiCacheTtlConfig
 }
 
@@ -66,11 +66,6 @@ export type PoroApiConfig = {
   baseUrl: string
   userAgent: string
   cacheTtlActiveGame: MsDuration
-}
-
-export type RiotApiKeysConfig = {
-  lol: string
-  account: string // You need a legends of runeterra or valorant app for account-v1
 }
 
 export type RiotApiCacheTtlConfig = {
@@ -123,10 +118,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         password: r(D.string)('DB_PASSWORD'),
       }),
       riotApi: seqS<RiotApiConfig>({
-        keys: seqS<RiotApiKeysConfig>({
-          lol: r(D.string)('RIOT_API_KEYS_LOL'),
-          account: r(D.string)('RIOT_API_KEYS_ACCOUNT'),
-        }),
+        key: r(D.string)('RIOT_API_KEY'),
         cacheTtl: pipe(infiniteCache, Either.map(riotApiCacheTtl)),
       }),
       poroApi: seqS<PoroApiConfig>({
@@ -150,14 +142,13 @@ const infinity = MsDuration.days(99 * 365)
 const riotApiCacheTtl = (infiniteCache: boolean): RiotApiCacheTtlConfig => ({
   ddragonLatestVersion: infiniteCache ? infinity : MsDuration.hour(1),
 
+  account: infiniteCache ? infinity : MsDuration.hours(3),
   activeGame: infiniteCache ? infinity : MsDuration.minutes(3),
   activeGameLoading: infiniteCache ? infinity : MsDuration.seconds(5),
   challenges: infiniteCache ? infinity : MsDuration.seconds(3),
   leagueEntries: infiniteCache ? infinity : MsDuration.minutes(3),
   masteries: infiniteCache ? infinity : MsDuration.minutes(3),
   summoner: infiniteCache ? infinity : MsDuration.minutes(9),
-
-  account: infinity,
 })
 
 const load: IO<Config> = pipe(loadDotEnv, IO.map(parse), IO.chain(IO.fromEither))

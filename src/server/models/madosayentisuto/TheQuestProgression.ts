@@ -3,6 +3,7 @@ import * as E from 'io-ts/Encoder'
 import { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
+import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { List } from '../../../shared/utils/fp'
 
 import { SummonerId } from '../summoner/SummonerId'
@@ -14,7 +15,7 @@ const encoder = E.struct({
   summoner: E.struct({
     id: SummonerId.codec,
     platform: Platform.codec,
-    name: E.id<string>(),
+    name: SummonerName.codec,
     profileIconId: E.id<number>(),
   }),
   percents: E.id<number>(),

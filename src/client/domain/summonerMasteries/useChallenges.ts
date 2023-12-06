@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
+import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { type Tuple3 } from '../../../shared/utils/fp'
 
 import { config } from '../../config/unsafe'
@@ -15,13 +16,13 @@ import { http } from '../../utils/http'
 
 export const useChallenges = (
   platform: Platform,
-  summonerName: string,
+  puuid: Puuid,
 ): SWRResponse<ChallengesView, unknown> => {
   const { masteriesQuery } = useHistory()
 
   return useSWR<ChallengesView, unknown, Tuple3<string, HttpMethod, boolean>>(
     [
-      ...apiRoutes.summoner.byName(platform, summonerName).challenges.get,
+      ...apiRoutes.summoner.byPuuid(platform)(puuid).challenges.get,
       getShouldFetchChallenges(masteriesQuery.view),
     ],
     ([url, method, shouldFetchChallenges]) =>

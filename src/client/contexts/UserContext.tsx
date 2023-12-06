@@ -1,12 +1,14 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { predicate } from 'fp-ts'
+import { eq, predicate } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 import { createContext, useCallback, useContext, useMemo } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
+import type { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
 import { Future, List, Maybe, NotUsed, Tuple } from '../../shared/utils/fp'
@@ -18,6 +20,7 @@ import { constants } from '../config/constants'
 import { useLocalStorageState } from '../hooks/useLocalStorageState'
 import { AsyncState } from '../models/AsyncState'
 import type { ChildrenFC } from '../models/ChildrenFC'
+import { PartialSummonerShort } from '../models/summoner/PartialSummonerShort'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 import { http, statusesToOption } from '../utils/http'
 import { useToaster } from './ToasterContext'
@@ -25,17 +28,26 @@ import { useTranslation } from './TranslationContext'
 
 const recentSearchesKey = 'recentSearches'
 
-const recentSearchesCodec = Tuple.of(List.codec(SummonerShort.codec), 'List<SummonerShort>')
+const recentSearchesCodec = Tuple.of(
+  // eslint-disable-next-line deprecation/deprecation
+  List.codec(PartialSummonerShort.codec),
+  'List<PartialSummonerShort>',
+)
+
+const byPuuidEq = eq.struct({
+  puuid: Puuid.Eq,
+})
 
 type UserContext = {
   refreshUser: Future<Maybe<UserView> | undefined>
   user: AsyncState<unknown, Maybe<UserView>>
   maybeUser: Maybe<UserView>
   addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
-  removeFavoriteSearch: (summoner: SummonerShort) => Future<NotUsed>
-  recentSearches: List<SummonerShort>
+  removeFavoriteSearch: (summoner: PlatformWithPuuid) => Future<NotUsed>
+  // eslint-disable-next-line deprecation/deprecation
+  recentSearches: List<PartialSummonerShort>
   addRecentSearch: (summoner: SummonerShort) => void
-  removeRecentSearch: (summoner: SummonerShort) => void
+  removeRecentSearch: (puuid: Puuid) => void
 }
 
 const UserContext = createContext<UserContext | undefined>(undefined)
@@ -51,7 +63,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         http([url, method], { retry: 0 }, [UserView.codec, 'UserView']),
         statusesToOption(401, 404), // no token or user not found
         futureMaybe.map(
-          pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byNameOrd))),
+          pipe(UserView.Lens.favoriteSearches, lens.modify(List.sort(SummonerShort.byRiotIdOrd))),
         ),
         Future.orElse(e => {
           console.error(e)
@@ -73,10 +85,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
         Maybe.fromNullable(data),
         Maybe.flatten,
         Maybe.filter(
-          flow(
-            UserView.Lens.favoriteSearches.get,
-            predicate.not(List.elem(SummonerShort.byPuuidEq)(summoner)),
-          ),
+          flow(UserView.Lens.favoriteSearches.get, predicate.not(List.elem(byPuuidEq)(summoner))),
         ),
         Maybe.map(oldData =>
           pipe(
@@ -87,7 +96,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
-                    lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byNameOrd))),
+                    lens.modify(flow(List.append(summoner), List.sort(SummonerShort.byRiotIdOrd))),
                   )(oldData),
                 ),
                 { revalidate: false },
@@ -107,13 +116,11 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const removeFavoriteSearch = useCallback(
-    (summoner: SummonerShort): Future<NotUsed> =>
+    (summoner: PlatformWithPuuid): Future<NotUsed> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
-        Maybe.filter(
-          flow(UserView.Lens.favoriteSearches.get, List.elem(SummonerShort.byPuuidEq)(summoner)),
-        ),
+        Maybe.filter(flow(UserView.Lens.favoriteSearches.get, List.elem(byPuuidEq)(summoner))),
         Maybe.map(oldData =>
           pipe(
             apiUserSelfFavoritesDelete(summoner),
@@ -122,7 +129,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
-                    lens.modify(List.difference(SummonerShort.byPuuidEq)([summoner])),
+                    lens.modify(List.differenceW(byPuuidEq)([summoner])),
                   )(oldData),
                 ),
                 { revalidate: false },
@@ -151,8 +158,10 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
     (summoner: SummonerShort) =>
       setRecentSearches_(
         flow(
-          List.prepend(summoner),
-          List.uniq(SummonerShort.byPuuidEq),
+          // eslint-disable-next-line deprecation/deprecation
+          List.prepend(PartialSummonerShort.fromSummonerShort(summoner)),
+          // eslint-disable-next-line deprecation/deprecation
+          List.uniq<PartialSummonerShort>(byPuuidEq),
           List.takeLeft(constants.recentSearchesMaxCount),
         ),
       ),
@@ -160,8 +169,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const removeRecentSearch = useCallback(
-    (summoner: SummonerShort) =>
-      setRecentSearches_(List.difference(SummonerShort.byPuuidEq)([summoner])),
+    (puuid: Puuid) => setRecentSearches_(List.differenceW(byPuuidEq)([{ puuid }])),
     [setRecentSearches_],
   )
 
@@ -175,22 +183,20 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   const maybeUser = useMemo(() => pipe(user, AsyncState.toOption, Maybe.flatten), [user])
 
   const recentSearches = useMemo(
-    (): List<SummonerShort> =>
+    // eslint-disable-next-line deprecation/deprecation
+    (): List<PartialSummonerShort> =>
       pipe(
         recentSearches_,
-        List.difference(SummonerShort.byPuuidEq)(
+        List.differenceW(byPuuidEq)(
           pipe(
-            user,
-            AsyncState.toOption,
-            Maybe.flatten,
-            List.fromOption,
+            List.fromOption(maybeUser),
             List.chain(u =>
               pipe(u.favoriteSearches, List.concat(List.fromOption(u.linkedRiotAccount))),
             ),
           ),
         ),
       ),
-    [recentSearches_, user],
+    [maybeUser, recentSearches_],
   )
 
   if (error !== undefined) {

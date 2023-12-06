@@ -119,13 +119,13 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
         ),
       ),
 
-    removeAllFavoriteSearches: (searches: List<PlatformWithPuuid>): Future<NotUsed> =>
+    removeAllFavoriteSearches: (id: UserId, searches: List<PlatformWithPuuid>): Future<NotUsed> =>
       !List.isNonEmpty(searches)
         ? Future.notUsed
         : pipe(
             collection.collection.future(c =>
               c.updateMany(
-                {},
+                { id: UserId.codec.encode(id) },
                 {
                   $pull: {
                     favoriteSearches: {

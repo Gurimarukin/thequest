@@ -5,6 +5,8 @@ import { pipe } from 'fp-ts/function'
 import { useEffect, useMemo } from 'react'
 
 import type { Platform, PlatformLower } from '../../shared/models/api/Platform'
+import { RiotId } from '../../shared/models/riot/RiotId'
+import type { Override } from '../../shared/models/typeFest'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe, Tuple } from '../../shared/utils/fp'
 
@@ -15,11 +17,16 @@ import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { NotFound } from '../domain/NotFound'
 import { Register } from '../domain/Register'
+import {
+  SummonerByNameGame,
+  SummonerByNameProfile,
+  SummonerByPuuidGame,
+  SummonerByPuuidProfile,
+} from '../domain/SummonerBy'
 import { ActiveGame } from '../domain/activeGame/ActiveGame'
 import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
-import { SummonerPuuid } from '../domain/summonerMasteries/SummonerPuuid'
 import { appMatches, appParsers } from './AppRouter'
 
 type ElementWithTitle = Tuple<React.ReactElement, Maybe<string>>
@@ -28,28 +35,38 @@ const titleWithElementParser = zero<ElementWithTitle>()
   .alt(appParsers.index.map(() => t(<Home />)))
   .alt(
     withPlatformLower(appMatches.sPlatformPuuid, ({ platform, puuid }) =>
-      t(<SummonerPuuid platform={platform} puuid={puuid} page="profile" />),
+      t(<SummonerByPuuidProfile platform={platform} puuid={puuid} />),
     ),
   )
   .alt(
     withPlatformLower(appMatches.sPlatformPuuidGame, ({ platform, puuid }) =>
-      t(<SummonerPuuid platform={platform} puuid={puuid} page="game" />),
+      t(<SummonerByPuuidGame platform={platform} puuid={puuid} />),
+    ),
+  )
+  .alt(
+    withPlatformLower(appMatches.platformRiotId, ({ platform, riotId }) =>
+      t(
+        <SummonerMasteries platform={platform} riotId={riotId} />,
+        `${RiotId.stringify(riotId)} (${platform})`,
+      ),
+    ),
+  )
+  .alt(
+    withPlatformLower(appMatches.platformRiotIdGame, ({ platform, riotId }) =>
+      t(
+        <ActiveGame platform={platform} riotId={riotId} />,
+        `${RiotId.stringify(riotId)} (${platform}) | partie)`,
+      ),
     ),
   )
   .alt(
     withPlatformLower(appMatches.platformSummonerName, ({ platform, summonerName }) =>
-      t(
-        <SummonerMasteries platform={platform} summonerName={summonerName} />,
-        `${summonerName} (${platform})`,
-      ),
+      t(<SummonerByNameProfile platform={platform} name={summonerName} />),
     ),
   )
   .alt(
     withPlatformLower(appMatches.platformSummonerNameGame, ({ platform, summonerName }) =>
-      t(
-        <ActiveGame platform={platform} summonerName={summonerName} />,
-        `${summonerName} (${platform}) | partie`,
-      ),
+      t(<SummonerByNameGame platform={platform} name={summonerName} />),
     ),
   )
   .alt(appParsers.aram.map(() => t(<Aram />, 'ARAM')))
@@ -92,9 +109,7 @@ type Platformable = {
   platform: Platform | PlatformLower
 }
 
-type UppercasePlatform<A extends Platformable> = Omit<A, 'platform'> & {
-  platform: Uppercase<A['platform']>
-}
+type UppercasePlatform<A extends Platformable> = Override<A, 'platform', Uppercase<A['platform']>>
 
 // Redirect if upper case
 function withPlatformLower<A extends Platformable>(

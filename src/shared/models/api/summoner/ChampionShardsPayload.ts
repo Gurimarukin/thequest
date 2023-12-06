@@ -1,14 +1,23 @@
 import * as C from 'io-ts/Codec'
 
+import { NonEmptyArray } from '../../../utils/fp'
 import { ShardsCount } from '../ShardsCount'
 import { ChampionKey } from '../champion/ChampionKey'
 
-type ChampionShardsPayload = C.TypeOf<typeof codec>
+type ChampionShard = C.TypeOf<typeof shardCodec>
 
-const codec = C.struct({
+const shardCodec = C.struct({
   championId: ChampionKey.codec,
   shardsCount: ShardsCount.codec,
 })
+
+const ChampionShard = { codec: shardCodec }
+
+export { ChampionShard }
+
+type ChampionShardsPayload = C.TypeOf<typeof codec>
+
+const codec = NonEmptyArray.codec(ChampionShard.codec)
 
 const ChampionShardsPayload = { codec }
 

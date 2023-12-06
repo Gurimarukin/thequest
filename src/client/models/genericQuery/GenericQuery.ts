@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
-import type { MyPartial } from '../../../shared/models/MyPartial'
+import type { RequiredPartial } from '../../../shared/models/typeFest'
 import { Dict, Maybe } from '../../../shared/utils/fp'
 
 import type { PartialGenericQuery } from './PartialGenericQuery'
@@ -15,7 +15,7 @@ const fromPartial = (partial: PartialGenericQuery): GenericQuery => ({
 })
 
 const toPartial = (query: GenericQuery): PartialGenericQuery => {
-  const res: MyPartial<PartialGenericQuery> = {
+  const res: RequiredPartial<PartialGenericQuery> = {
     search: Maybe.toUndefined(query.search),
   }
   return pipe(

@@ -1,6 +1,5 @@
 import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import { MongoClient } from 'mongodb'
 
 import { MsDuration } from '../shared/models/MsDuration'
 import { PubSub } from '../shared/models/rx/PubSub'
@@ -71,7 +70,6 @@ const of = (
     config.riotApi.cacheTtl,
     riotAccountPersistence,
     riotApiService,
-    summonerService,
   )
 
   const challengesService = ChallengesService(
@@ -111,6 +109,7 @@ const of = (
     leagueEntryService,
     masteriesService,
     poroActiveGameService,
+    riotAccountService,
     staticDataService,
     summonerService,
     userService,
@@ -118,22 +117,13 @@ const of = (
 }
 
 const load = (config: Config): Future<Context> =>
-  pipe(
-    Future.tryCatch(() =>
-      new MongoClient(
-        `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`,
-      ).connect(),
-    ),
-    Future.chain(loadBis(config)),
-  )
+  pipe(WithDb.load(config.db), Future.chain(loadBis(config)))
 
 const loadBis =
   (config: Config) =>
-  (client: MongoClient): Future<Context> => {
+  (withDb: WithDb): Future<Context> => {
     const Logger = LoggerGetter(config.logLevel)
     const logger = Logger('Context')
-
-    const withDb = WithDb.of(client, config.db.dbName)
 
     const mongoCollection: MongoCollectionGetter = MongoCollectionGetter.fromWithDb(withDb)
 

@@ -126,6 +126,7 @@ export type Translation = {
     spellKey: (spellKey: SummonerSpellKey) => React.ReactNode
     level: (level: number, highlightClassName?: string) => React.ReactNode
     summonerLevel: React.ReactNode
+    oldSummonerName: React.ReactNode
     summonerIconAlt: (name: string) => string
   }
   form: {

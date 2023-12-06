@@ -120,12 +120,12 @@ const esESTranslation: Translation = {
     masteryScoreAndPoints: 'SCORO — POINT DEL MAITRISO',
     otpIndex: (otpIndex, highlightClassName) => (
       <>
-        INDICO DEL OTP :{' '}
+        INDICO DEL OTP:{' '}
         <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
       </>
     ),
-    mainRoles: 'ROLO PRIMO :',
-    currentRole: 'ROLO IMO :',
+    mainRoles: 'ROLO PRIMO:',
+    currentRole: 'ROLO IMO:',
   },
   aram: {
     category: {
@@ -148,23 +148,22 @@ const esESTranslation: Translation = {
         balanced: 'PERFECTO CAMPEONE',
       },
     },
-    spell: s => `(${spell[s]}) :`,
+    spell: s => `(${spell[s]}):`,
     statIconAlt: name => `Icône stat ${wikiaStatsBalance[name]}`,
   },
   common: {
     challenge: {
       challenge: 'DESAFÍO',
       iconAlt: id => `Icône défi ${challengeShort(id)}`,
-      thresholds: 'UMBRALES :',
+      thresholds: 'UMBRALES:',
       valueTier: (value, tier, o) =>
-        `${value} : ${leagueTier[tier]}${o !== undefined && o.withComma ? ',' : ''}`,
+        `${value}: ${leagueTier[tier]}${o !== undefined && o.withComma ? ',' : ''}`,
     },
     championIconAlt: name => `Icône de ${name}`,
     championKey: key => `<Champion ${key}>`,
     cooldownSeconds: (cooldown, highlightClassName) => (
       <>
-        <span className={highlightClassName}>RECUPERACIÓN :</span> {cooldown.toLocaleString(locale)}
-        s
+        <span className={highlightClassName}>RECUPERACIÓN:</span> {cooldown.toLocaleString(locale)}s
       </>
     ),
     emptyChampionIconAlt: 'Icône de champion vide',
@@ -212,7 +211,7 @@ const esESTranslation: Translation = {
         73: 'Snowdown Showdown (2c2)', // Howling Abyss — 2v2 Snowdown Showdown games
         75: 'Hexakill', // Summoner's Rift — 6v6 Hexakill games
         76: 'Ultra Rapid Fire', // Summoner's Rift — Ultra Rapid Fire games
-        78: 'UNO POR TODOS : MIRORO', // Howling Abyss — One For All: Mirror Mode games
+        78: 'UNO POR TODOS: MIRORO', // Howling Abyss — One For All: Mirror Mode games
         83: 'COOPERATIVA ULTRA RAPIDO FUEGO', // Summoner's Rift — Co-op vs AI Ultra Rapid Fire games
         91: 'Doom Bots Rank 1', // Summoner's Rift — Doom Bots Rank 1 games — Deprecated in patch 7.19 in favor of queueId 950"
         92: 'Doom Bots Rank 2', // Summoner's Rift — Doom Bots Rank 2 games — Deprecated in patch 7.19 in favor of queueId 950"
@@ -253,7 +252,7 @@ const esESTranslation: Translation = {
         960: 'Bots du Chaos', // Summoner's Rift — Doom Bots Standard games
         980: 'Invasion Normal', // Valoran City Park — Star Guardian Invasion: Normal games
         990: 'Invasion Massacre', // Valoran City Park — Star Guardian Invasion: Onslaught games
-        1000: 'PROJET : Chasseurs', // Overcharge — PROJECT: Hunters games
+        1000: 'PROJET: Chasseurs', // Overcharge — PROJECT: Hunters games
         1010: 'ARURF (Faille Enneigée)', // Summoner's Rift — Snow ARURF games
         1020: 'Un Pour Tous', // Summoner's Rift — One for All games
         1030: 'Odyssée Extraction Intro', // Crash Site — Odyssey Extraction: Intro games
@@ -301,14 +300,14 @@ const esESTranslation: Translation = {
       leaguePoints: n => `${n} PL`,
       losses: pluralUnit('DEFETO'),
       wins: pluralUnit('VICTORIA'),
-      serie: 'SERIO :',
+      serie: 'SERIO:',
       tierRank: (tier, rank_) =>
         `${leagueTier[tier]}${rank_ !== undefined ? ` ${rank[rank_]}` : ''}`,
       tierRankAlt: (tier, rank_) =>
         `${leagueTier[tier]}${rank_ !== undefined ? ` ${rank[rank_]}` : ''}`,
       unranked: 'NO CLASIFICATORIA',
       unrankedIconAlt: 'ICONO',
-      previousSplit: 'SPLITO PRECEDO :',
+      previousSplit: 'SPLITO PRECEDO:',
     },
     masteryIconAlt: level => `ICONO NIVELO ${level}`,
     nChampionsFraction: (n, total) => `${plural('CAMPEONE')(n)} / ${total.toLocaleString(locale)}`,
@@ -332,20 +331,21 @@ const esESTranslation: Translation = {
       </>
     ),
     summonerLevel: 'INVOCADOR LEVELITO',
+    oldSummonerName: 'Antiguo nombre de invocador:',
     summonerIconAlt: name => `ICONO DEL ${name}`,
   },
   form: {
     alreadyAnAccount: '¿YA TIENE UNA CUENTA?',
-    confirmPassword: 'CONFIRMAR CONTRASEÑA :',
+    confirmPassword: 'CONFIRMAR CONTRASEÑA:',
     login: 'INICIAR SESIÓN',
     loginWithDiscord: discordLogo => <>CONECTAR CON {discordLogo}</>,
     noAccount: '¿NO TIENE CUENTA?',
     or: 'O',
-    password: 'CONTRASEÑA :',
+    password: 'CONTRASEÑA:',
     passwordsShouldBeIdentical: 'LAS CONTRASEÑAS DEBEN SER IDÉNTICAS',
     register: 'INSCRÍBETE',
     registerWithDiscord: discordLogo => <>REGISTRARSE CON {discordLogo}</>,
-    userName: 'USUARIO :',
+    userName: 'USUARIO:',
   },
   home: {
     isntEndorsed:
@@ -445,7 +445,7 @@ const esESTranslation: Translation = {
     addSummonerToFavorites: 'AÑADIR INVOCADORES COMO FAVORITOS',
     customiseChampionPositions: 'PERSONALIZAR LOS CAMPEONES ASOCIADOS A UNA FUNCIÓN',
     discordHallOfFameRanking:
-      'CLASIFICACIÓN EN EL SALÓN DE LA FAMA DEL SERVIDOR DISCORD DEL CAPITÁN :',
+      'CLASIFICACIÓN EN EL SALÓN DE LA FAMA DEL SERVIDOR DISCORD DEL CAPITÁN:',
     discordServer: 'SERVIDOR DISCORD',
     discordServerIconAlt: name => `Icône du serveur ${name}`,
     join: 'CONTACTO',
@@ -470,13 +470,13 @@ const esESTranslation: Translation = {
       lastUpdate: insertedAt =>
         `ÚLTIMA ACTUALIZACIÓN DE LOS TÍTULOS DE MÁSTER EN ${insertedAt.toLocaleTimeString(locale)}`,
       duration: minutes =>
-        `(DURACIÓN DE LA CACHÉ : ${minutes.toLocaleString(locale, {
+        `(DURACIÓN DE LA CACHÉ: ${minutes.toLocaleString(locale, {
           maximumFractionDigits: 2,
         })} ${pluralUnit('MINUTO')(minutes)})`,
     },
-    masteryScore: 'PUNTUACIÓN DE MAESTRÍA :',
-    masteryPoints: 'PUNTOS DE MAESTRÍA :',
-    otpIndex: 'ÍNDICE DE OTP :',
+    masteryScore: 'PUNTUACIÓN DE MAESTRÍA:',
+    masteryPoints: 'PUNTOS DE MAESTRÍA:',
+    otpIndex: 'ÍNDICE DE OTP:',
     otpIndexExplanation:
       '(NÚMERO DE CAMPEONES QUE ACUMULAN LA MITAD DEL NÚMERO TOTAL DE PUNTOS DE MAESTRÍA)',
     masteriesExplanation: (
@@ -497,7 +497,7 @@ const esESTranslation: Translation = {
     ),
     percentsProgression: (percents, highlightClassName) => (
       <>
-        PROGRESO : <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+        PROGRESO: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
       </>
     ),
   },

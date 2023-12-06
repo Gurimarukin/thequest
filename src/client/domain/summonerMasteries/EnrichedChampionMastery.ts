@@ -9,7 +9,6 @@ import type {
   ChampionFaction,
   ChampionFactionOrNone,
 } from '../../../shared/models/api/champion/ChampionFaction'
-import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List } from '../../../shared/utils/fp'
@@ -17,8 +16,7 @@ import { Maybe } from '../../../shared/utils/fp'
 
 import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
 
-type EnrichedChampionMastery = Omit<ChampionMasteryView, 'championLevel'> & {
-  championLevel: ChampionLevel
+type EnrichedChampionMastery = ChampionMasteryView & {
   name: string
   percents: number
   shardsCount: Maybe<number>

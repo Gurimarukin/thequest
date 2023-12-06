@@ -2,13 +2,13 @@ import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { ChampionMasteries } from '../models/championMastery/ChampionMasteries'
-import type { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
 import type { RiotApiService } from './RiotApiService'
 
@@ -34,7 +34,7 @@ const MasteriesService = (
 ) => ({
   findBySummoner: (
     platform: Platform,
-    summonerId: SummonerId,
+    puuid: Puuid,
     { forceCacheRefresh = false, overrideInsertedAfter }: FindOptions = {},
   ): Future<Maybe<ChampionMasteries>> =>
     pipe(
@@ -48,18 +48,18 @@ const MasteriesService = (
                   Future.map(DayJs.subtract(riotApiCacheTtl.masteries)),
                 ),
             Future.chain(insertedAfter =>
-              championMasteryPersistence.findBySummoner(summonerId, insertedAfter),
+              championMasteryPersistence.findByPuuid(puuid, insertedAfter),
             ),
           ),
       futureMaybe.alt<Omit<ChampionMasteries, 'cacheDuration'>>(() =>
         pipe(
           riotApiService.riotgames
             .platform(platform)
-            .lol.championMasteryV4.championMasteries.bySummoner(summonerId),
+            .lol.championMasteryV4.championMasteries.byPuuid(puuid),
           futureMaybe.bindTo('champions'),
           futureMaybe.bind('insertedAt', () => futureMaybe.fromIO(DayJs.now)),
           futureMaybe.chainFirstTaskEitherK(({ champions, insertedAt }) =>
-            championMasteryPersistence.upsert({ summonerId, champions, insertedAt }),
+            championMasteryPersistence.upsert({ puuid, champions, insertedAt }),
           ),
         ),
       ),

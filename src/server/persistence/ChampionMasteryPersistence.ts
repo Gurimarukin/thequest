@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -11,7 +12,6 @@ import type { ChampionMasteryDbOutput } from '../models/championMastery/Champion
 import { ChampionMasteryDb } from '../models/championMastery/ChampionMasteryDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
-import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 type ChampionMasteryPersistence = ReturnType<typeof ChampionMasteryPersistence>
@@ -27,20 +27,17 @@ const ChampionMasteryPersistence = (
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { summonerId: -1 }, unique: true },
+    { key: { puuid: -1 }, unique: true },
   ])
 
   return {
     ensureIndexes,
 
-    findBySummoner: (
-      summonerId: SummonerId,
-      insertedAfter: DayJs,
-    ): Future<Maybe<ChampionMasteryDb>> =>
+    findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<ChampionMasteryDb>> =>
       pipe(
         collection.collection.future(c =>
           c.findOne({
-            summonerId: SummonerId.codec.encode(summonerId),
+            puuid: Puuid.codec.encode(puuid),
             insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
           }),
         ),
@@ -59,7 +56,7 @@ const ChampionMasteryPersistence = (
       return pipe(
         collection.collection.future(c =>
           c.updateOne(
-            { summonerId: SummonerId.codec.encode(mastery.summonerId) },
+            { puuid: Puuid.codec.encode(mastery.puuid) },
             { $set: encoded },
             { upsert: true },
           ),
@@ -68,24 +65,6 @@ const ChampionMasteryPersistence = (
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       )
     },
-
-    // deleteByPlatformAndPuuid: (searches: NonEmptyArray<PlatformWithPuuid>): Future<number> =>
-    //   pipe(
-    //     collection.deleteMany({
-    //       $or: pipe(
-    //         searches,
-    //         NonEmptyArray.map(PlatformWithPuuid.codec.encode),
-    //         NonEmptyArray.asMutable,
-    //       ),
-    //     }),
-    //     Future.map(r => r.deletedCount),
-    //   ),
-
-    // deleteBeforeDate: (date: DayJs): Future<number> =>
-    //   pipe(
-    //     collection.deleteMany({ insertedAt: { $lt: DayJsFromDate.codec.encode(date) } }),
-    //     Future.map(r => r.deletedCount),
-    //   ),
   }
 }
 

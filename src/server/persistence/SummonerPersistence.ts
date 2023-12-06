@@ -1,31 +1,20 @@
 import { pipe } from 'fp-ts/function'
-import * as C from 'io-ts/Codec'
-import type { CollationOptions } from 'mongodb'
 
 import type { DayJs } from '../../shared/models/DayJs'
 import { Platform } from '../../shared/models/api/Platform'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
 
-import { FpCollection } from '../helpers/FpCollection'
+import { FpCollection, FpCollectionHelpers } from '../helpers/FpCollection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import { SummonerDb, SummonerDbPuuidOnly } from '../models/summoner/SummonerDb'
 import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
-// https://www.mongodb.com/docs/manual/reference/collation
-const platformAndNameIndexCollation: CollationOptions = {
-  locale: 'en',
-
-  // level 1: compare base characters only, ignoring other differences such as diacritics and case
-  // level 2: also compare diacritics (but not case)
-  strength: 2,
-
-  // whitespace and punctuation are not considered as base characters
-  alternate: 'shifted',
-}
+const { caseInsensitiveCollation } = FpCollectionHelpers
 
 type SummonerPersistence = ReturnType<typeof SummonerPersistence>
 
@@ -39,24 +28,26 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
     { key: { id: -1 }, unique: true },
     { key: { puuid: -1 }, unique: true },
-    { key: { platform: -1, name: -1 }, unique: true, collation: platformAndNameIndexCollation },
+    { key: { platform: -1, name: -1 }, unique: true, collation: caseInsensitiveCollation },
   ])
 
   return {
     ensureIndexes,
 
+    /** @deprecated SummonerName will be removed */
+    // eslint-disable-next-line deprecation/deprecation
     findByName: (
       platform: Platform,
-      name: string,
+      name: SummonerName,
       insertedAfter: DayJs,
     ): Future<Maybe<SummonerDb>> =>
       collection.findOne(
         {
           platform: Platform.codec.encode(platform),
-          name: C.string.encode(name),
+          name: SummonerName.codec.encode(name),
           insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
         },
-        { collation: platformAndNameIndexCollation },
+        { collation: caseInsensitiveCollation },
       ),
 
     findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<SummonerDb>> =>
@@ -69,7 +60,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
       pipe(
         collection.updateOne({ id: SummonerId.codec.encode(summoner.id) }, summoner, {
           upsert: true,
-          collation: platformAndNameIndexCollation,
+          collation: caseInsensitiveCollation,
         }),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
       ),

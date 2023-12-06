@@ -329,6 +329,7 @@ const enGBTranslation: Translation = {
       </>
     ),
     summonerLevel: 'Summoner level',
+    oldSummonerName: 'Old summoner name:',
     summonerIconAlt: name => `${name}’ icon`,
   },
   form: {

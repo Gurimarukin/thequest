@@ -29,6 +29,7 @@ export const Application = ({
   leagueEntryService,
   masteriesService,
   poroActiveGameService,
+  riotAccountService,
   staticDataService,
   summonerService,
   userService,
@@ -46,6 +47,7 @@ export const Application = ({
     leagueEntryService,
     masteriesService,
     poroActiveGameService,
+    riotAccountService,
     summonerService,
     staticDataService,
     userService,
@@ -55,6 +57,7 @@ export const Application = ({
     ddragonService,
     discordService,
     masteriesService,
+    riotAccountService,
     summonerService,
     userService,
   )
