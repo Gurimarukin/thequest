@@ -83,7 +83,7 @@ const MadosayentisutoController = (
           summoner: {
             id: summoner.id,
             platform: summoner.platform,
-            name: summoner.name,
+            riotId: summoner.riotId,
             profileIconId: summoner.profileIconId,
           },
           percents: pipe(
