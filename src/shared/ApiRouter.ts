@@ -59,7 +59,7 @@ const staticDataLangAdditionalGet = m(staticDataLang.then(lit('additional')), 'g
 const summonerByPuuidMasteriesGet = m(summonerByPuuid.then(lit('masteries')), 'get')
 const summonerByPuuidChallengesGet = m(summonerByPuuid.then(lit('challenges')), 'get')
 const summonerByPuuidActiveGameLangGet = m(
-  summonerByPuuid.then(lit('active-game').then(langM)),
+  summonerByPuuid.then(lit('activeGame').then(langM)),
   'get',
 )
 
@@ -70,7 +70,7 @@ const summonerByNameActiveGameLangGet = m(summonerByName.then(lit('activeGame'))
 
 const summonerByRiotIdMasteriesGet = m(summonerByRiotId.then(lit('masteries')), 'get')
 const summonerByRiotIdActiveGameLangGet = m(
-  summonerByRiotId.then(lit('active-game').then(langM)),
+  summonerByRiotId.then(lit('activeGame').then(langM)),
   'get',
 )
 
