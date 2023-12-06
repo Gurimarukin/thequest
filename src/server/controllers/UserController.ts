@@ -11,7 +11,7 @@ import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLev
 import type { ChampionShard } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsPayload } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
-import type { Puuid } from '../../shared/models/api/summoner/Puuid'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordCodePayload } from '../../shared/models/api/user/DiscordCodePayload'
 import { LoginPasswordPayload } from '../../shared/models/api/user/LoginPasswordPayload'
@@ -28,7 +28,6 @@ import { validatePassword } from '../../shared/validations/validatePassword'
 import { constants } from '../config/constants'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
@@ -178,7 +177,7 @@ function UserController(
               Maybe.fold(
                 () => addFavoriteSearch,
                 ({ summoner: summonerSelf }) =>
-                  SummonerId.Eq.equals(summonerToFavorite.id, summonerSelf.id)
+                  Puuid.Eq.equals(summonerToFavorite.puuid, summonerSelf.puuid)
                     ? futureEither.left('')
                     : addFavoriteSearch,
               ),
