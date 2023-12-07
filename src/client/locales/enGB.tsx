@@ -331,19 +331,19 @@ const enGBTranslation: Translation = {
     summonerLevel: 'Summoner level',
     oldSummonerName: 'Old summoner name:',
     summonerIconAlt: name => `${name}’ icon`,
-  },
-  form: {
-    alreadyAnAccount: 'Already an account?',
-    confirmPassword: 'Confirm password:',
-    login: 'Login',
-    loginWithDiscord: discordLogo => <>Login with {discordLogo}</>,
-    noAccount: 'No account?',
-    or: 'or',
-    password: 'Password:',
-    passwordsShouldBeIdentical: 'Passwords should be identical',
-    register: 'Register',
-    registerWithDiscord: discordLogo => <>Register with {discordLogo}</>,
-    userName: 'Username:',
+    form: {
+      alreadyAnAccount: 'Already an account?',
+      confirmPassword: 'Confirm password:',
+      login: 'Login',
+      loginWithDiscord: discordLogo => <>Login with {discordLogo}</>,
+      noAccount: 'No account?',
+      or: 'or',
+      password: 'Password:',
+      passwordsShouldBeIdentical: 'Passwords should be identical',
+      register: 'Register',
+      registerWithDiscord: discordLogo => <>Register with {discordLogo}</>,
+      userName: 'Username:',
+    },
   },
   home: {
     isntEndorsed:
@@ -491,6 +491,14 @@ const enGBTranslation: Translation = {
         Progression: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
       </>
     ),
+  },
+  router: {
+    game: 'game',
+    aram: 'ARAM',
+    factions: 'Factions',
+    login: 'Login',
+    register: 'Register',
+    notFound: 'Page not found',
   },
 }
 

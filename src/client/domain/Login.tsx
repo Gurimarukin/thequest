@@ -32,7 +32,7 @@ export const passwordLens = pipe(lens.id<State>(), lens.prop('password'))
 
 export const Login: React.FC = () => {
   const { user, refreshUser } = useUser()
-  const { t } = useTranslation('form')
+  const { t } = useTranslation('common')
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Maybe<string>>(Maybe.none)
@@ -80,10 +80,10 @@ export const Login: React.FC = () => {
                 href={discordApiOAuth2Authorize('login')}
                 className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
               >
-                {t.loginWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
+                {t.form.loginWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
               </a>
 
-              <p>{t.or}</p>
+              <p>{t.form.or}</p>
 
               <form
                 onSubmit={handleSubmit}
@@ -91,7 +91,7 @@ export const Login: React.FC = () => {
               >
                 <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
                   <label className="contents">
-                    <span>{t.userName}</span>
+                    <span>{t.form.userName}</span>
                     <input
                       type="text"
                       value={state.userName}
@@ -100,7 +100,7 @@ export const Login: React.FC = () => {
                     />
                   </label>
                   <label className="contents">
-                    <span>{t.password}</span>
+                    <span>{t.form.password}</span>
                     <input
                       type="password"
                       value={state.password}
@@ -115,7 +115,7 @@ export const Login: React.FC = () => {
                     disabled={isLoading || Either.isLeft(validated)}
                     className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:bg-grey-disabled"
                   >
-                    <span>{t.login}</span>
+                    <span>{t.form.login}</span>
                     {isLoading ? <Loading className="h-4" /> : null}
                   </button>
                   {pipe(
@@ -129,9 +129,9 @@ export const Login: React.FC = () => {
               </form>
 
               <div className="flex w-full max-w-xl flex-col items-center">
-                <span>{t.noAccount}</span>
+                <span>{t.form.noAccount}</span>
                 <Link to={appRoutes.register} className="font-medium underline">
-                  {t.register}
+                  {t.form.register}
                 </Link>
               </div>
             </div>

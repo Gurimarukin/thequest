@@ -12,6 +12,7 @@ import { Maybe, Tuple } from '../../shared/utils/fp'
 
 import { Navigate } from '../components/Navigate'
 import { useHistory } from '../contexts/HistoryContext'
+import { useTranslation } from '../contexts/TranslationContext'
 import { Factions } from '../domain/Factions'
 import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
@@ -27,72 +28,74 @@ import { ActiveGame } from '../domain/activeGame/ActiveGame'
 import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
+import type { Translation } from '../models/Translation'
 import { appMatches, appParsers } from './AppRouter'
 
-type ElementWithTitle = Tuple<React.ReactElement, Maybe<string>>
+type ElementWithTitle = Tuple<React.ReactElement, Maybe<(t: Translation['router']) => string>>
 
 const titleWithElementParser = zero<ElementWithTitle>()
-  .alt(appParsers.index.map(() => t(<Home />)))
+  .alt(appParsers.index.map(() => e(<Home />)))
   .alt(
     withPlatformLower(appMatches.sPlatformPuuid, ({ platform, puuid }) =>
-      t(<SummonerByPuuidProfile platform={platform} puuid={puuid} />),
+      e(<SummonerByPuuidProfile platform={platform} puuid={puuid} />),
     ),
   )
   .alt(
     withPlatformLower(appMatches.sPlatformPuuidGame, ({ platform, puuid }) =>
-      t(<SummonerByPuuidGame platform={platform} puuid={puuid} />),
+      e(<SummonerByPuuidGame platform={platform} puuid={puuid} />),
     ),
   )
   .alt(
     withPlatformLower(appMatches.platformRiotId, ({ platform, riotId }) =>
-      t(
+      e(
         <SummonerMasteries platform={platform} riotId={riotId} />,
-        `${RiotId.stringify(riotId)} (${platform})`,
+        () => `${RiotId.stringify(riotId)} (${platform})`,
       ),
     ),
   )
   .alt(
     withPlatformLower(appMatches.platformRiotIdGame, ({ platform, riotId }) =>
-      t(
+      e(
         <ActiveGame platform={platform} riotId={riotId} />,
-        `${RiotId.stringify(riotId)} (${platform}) | partie)`,
+        t => `${RiotId.stringify(riotId)} (${platform}) | ${t.game})`,
       ),
     ),
   )
   .alt(
     withPlatformLower(appMatches.platformSummonerName, ({ platform, summonerName }) =>
-      t(<SummonerByNameProfile platform={platform} name={summonerName} />),
+      e(<SummonerByNameProfile platform={platform} name={summonerName} />),
     ),
   )
   .alt(
     withPlatformLower(appMatches.platformSummonerNameGame, ({ platform, summonerName }) =>
-      t(<SummonerByNameGame platform={platform} name={summonerName} />),
+      e(<SummonerByNameGame platform={platform} name={summonerName} />),
     ),
   )
-  .alt(appParsers.aram.map(() => t(<Aram />, 'ARAM')))
-  .alt(appParsers.factions.map(() => t(<Factions />, 'Factions')))
-  .alt(appParsers.login.map(() => t(<Login />, 'Connexion')))
-  .alt(appParsers.register.map(() => t(<Register />, 'Inscription')))
-  .alt(appParsers.discordRedirect.map(() => t(<DiscordRedirect />)))
+  .alt(appParsers.aram.map(() => e(<Aram />, t => t.aram)))
+  .alt(appParsers.factions.map(() => e(<Factions />, t => t.factions)))
+  .alt(appParsers.login.map(() => e(<Login />, t => t.login)))
+  .alt(appParsers.register.map(() => e(<Register />, t => t.register)))
+  .alt(appParsers.discordRedirect.map(() => e(<DiscordRedirect />)))
 
 export const AppRouterComponent: React.FC = () => {
+  const { t } = useTranslation('router')
   const { location } = useHistory()
 
   const [node, title] = useMemo(() => {
     const [node_, subTitle] = parse(
       titleWithElementParser,
       Route.parse(location.pathname),
-      t(<NotFound />, 'Page non trouvée'),
+      e(<NotFound />, t_ => t_.notFound),
     )
     const title_ = `La Quête${pipe(
       subTitle,
       Maybe.fold(
         () => '',
-        s => ` | ${s}`,
+        s => ` | ${s(t)}`,
       ),
     )}`
     return [node_, title_]
-  }, [location.pathname])
+  }, [location.pathname, t])
 
   useEffect(() => {
     // eslint-disable-next-line functional/immutable-data
@@ -102,8 +105,10 @@ export const AppRouterComponent: React.FC = () => {
   return node
 }
 
-const t = (element: React.ReactElement, title?: string): ElementWithTitle =>
-  Tuple.of(element, Maybe.fromNullable(title))
+const e = (
+  element: React.ReactElement,
+  title?: (t: Translation['router']) => string,
+): ElementWithTitle => Tuple.of(element, Maybe.fromNullable(title))
 
 type Platformable = {
   platform: Platform | PlatformLower
@@ -121,7 +126,7 @@ function withPlatformLower<A extends Platformable>(
     const isUppercase = upperCase === a.platform
 
     return isUppercase
-      ? t(
+      ? e(
           <Navigate
             to={format(match.formatter, { ...a, platform: a.platform.toLowerCase() })}
             replace={true}

@@ -81,7 +81,7 @@ export const Register: React.FC = () => {
         validated,
         Either.map(payload => {
           pipe(
-            validateOnSubmit(t.form)(payload.password, state.confirmPassword),
+            validateOnSubmit(t.common)(payload.password, state.confirmPassword),
             Either.foldW(flow(Maybe.some, setError), () => {
               setIsLoading(true)
               return pipe(
@@ -204,10 +204,10 @@ export const Register: React.FC = () => {
                 href={discordApiOAuth2Authorize('register')}
                 className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
               >
-                {t.form.registerWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
+                {t.common.form.registerWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
               </a>
 
-              <p>{t.form.or}</p>
+              <p>{t.common.form.or}</p>
 
               <form
                 onSubmit={handleSubmit}
@@ -215,7 +215,7 @@ export const Register: React.FC = () => {
               >
                 <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
                   <label className="contents">
-                    <span>{t.form.userName}</span>
+                    <span>{t.common.form.userName}</span>
                     <input
                       type="text"
                       value={state.userName}
@@ -224,7 +224,7 @@ export const Register: React.FC = () => {
                     />
                   </label>
                   <label className="contents">
-                    <span>{t.form.password}</span>
+                    <span>{t.common.form.password}</span>
                     <input
                       type="password"
                       value={state.password}
@@ -233,7 +233,7 @@ export const Register: React.FC = () => {
                     />
                   </label>
                   <label className="contents">
-                    <span>{t.form.confirmPassword}</span>
+                    <span>{t.common.form.confirmPassword}</span>
                     <input
                       type="password"
                       value={state.confirmPassword}
@@ -248,7 +248,7 @@ export const Register: React.FC = () => {
                     disabled={isLoading || Either.isLeft(validated)}
                     className="flex items-center gap-2 bg-goldenrod px-4 py-1 text-black enabled:hover:bg-goldenrod/75 disabled:bg-grey-disabled"
                   >
-                    <span>{t.form.register}</span>
+                    <span>{t.common.form.register}</span>
                     {isLoading ? <Loading className="h-4" /> : null}
                   </button>
                   {pipe(
@@ -261,9 +261,9 @@ export const Register: React.FC = () => {
                 </div>
               </form>
               <div className="flex w-full max-w-xl flex-col items-center">
-                <span>{t.form.alreadyAnAccount}</span>
+                <span>{t.common.form.alreadyAnAccount}</span>
                 <Link to={appRoutes.login} className="font-medium underline">
-                  {t.form.login}
+                  {t.common.form.login}
                 </Link>
               </div>
             </div>
@@ -300,8 +300,8 @@ const EmptyTd: React.FC<EmptyTdProps> = ({ className }) => (
 const greenCheck = <CheckMarkSharp className="h-6 text-green" />
 
 const validateOnSubmit =
-  (t: Translation['form']) =>
+  (t: Translation['common']) =>
   (password: ClearPassword, confirmPassword: string): Either<string, NotUsed> =>
     ClearPassword.unwrap(password) !== confirmPassword
-      ? Either.left(t.passwordsShouldBeIdentical)
+      ? Either.left(t.form.passwordsShouldBeIdentical)
       : pipe(validatePassword(password), Either.map(toNotUsed))

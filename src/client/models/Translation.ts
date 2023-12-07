@@ -128,19 +128,19 @@ export type Translation = {
     summonerLevel: React.ReactNode
     oldSummonerName: React.ReactNode
     summonerIconAlt: (name: string) => string
-  }
-  form: {
-    alreadyAnAccount: React.ReactNode
-    confirmPassword: React.ReactNode
-    login: React.ReactNode
-    loginWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
-    noAccount: React.ReactNode
-    or: React.ReactNode
-    password: React.ReactNode
-    passwordsShouldBeIdentical: string
-    register: React.ReactNode
-    registerWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
-    userName: React.ReactNode
+    form: {
+      alreadyAnAccount: React.ReactNode
+      confirmPassword: React.ReactNode
+      login: React.ReactNode
+      loginWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
+      noAccount: React.ReactNode
+      or: React.ReactNode
+      password: React.ReactNode
+      passwordsShouldBeIdentical: string
+      register: React.ReactNode
+      registerWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
+      userName: React.ReactNode
+    }
   }
   home: {
     isntEndorsed: React.ReactNode
@@ -217,5 +217,13 @@ export type Translation = {
     otpIndex: React.ReactNode
     otpIndexExplanation: React.ReactNode
     percentsProgression: (percents: number, highlightClassName: string) => React.ReactNode
+  }
+  router: {
+    game: string
+    aram: string
+    factions: string
+    login: string
+    register: string
+    notFound: string
   }
 }

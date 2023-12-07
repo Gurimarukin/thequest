@@ -333,19 +333,19 @@ const esESTranslation: Translation = {
     summonerLevel: 'INVOCADOR LEVELITO',
     oldSummonerName: 'Antiguo nombre de invocador:',
     summonerIconAlt: name => `ICONO DEL ${name}`,
-  },
-  form: {
-    alreadyAnAccount: '¿YA TIENE UNA CUENTA?',
-    confirmPassword: 'CONFIRMAR CONTRASEÑA:',
-    login: 'INICIAR SESIÓN',
-    loginWithDiscord: discordLogo => <>CONECTAR CON {discordLogo}</>,
-    noAccount: '¿NO TIENE CUENTA?',
-    or: 'O',
-    password: 'CONTRASEÑA:',
-    passwordsShouldBeIdentical: 'LAS CONTRASEÑAS DEBEN SER IDÉNTICAS',
-    register: 'INSCRÍBETE',
-    registerWithDiscord: discordLogo => <>REGISTRARSE CON {discordLogo}</>,
-    userName: 'USUARIO:',
+    form: {
+      alreadyAnAccount: '¿YA TIENE UNA CUENTA?',
+      confirmPassword: 'CONFIRMAR CONTRASEÑA:',
+      login: 'INICIAR SESIÓN',
+      loginWithDiscord: discordLogo => <>CONECTAR CON {discordLogo}</>,
+      noAccount: '¿NO TIENE CUENTA?',
+      or: 'O',
+      password: 'CONTRASEÑA:',
+      passwordsShouldBeIdentical: 'LAS CONTRASEÑAS DEBEN SER IDÉNTICAS',
+      register: 'INSCRÍBETE',
+      registerWithDiscord: discordLogo => <>REGISTRARSE CON {discordLogo}</>,
+      userName: 'USUARIO:',
+    },
   },
   home: {
     isntEndorsed:
@@ -502,6 +502,14 @@ const esESTranslation: Translation = {
         PROGRESO: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
       </>
     ),
+  },
+  router: {
+    game: 'PARTIDO',
+    aram: 'ARAMO',
+    factions: 'FACTIONOS',
+    login: 'CONNEXION',
+    register: 'INSCRIPTAR',
+    notFound: 'PROBLEMO',
   },
 }
 

@@ -333,19 +333,19 @@ const frFRTranslation: Translation = {
     summonerLevel: 'Niveau d’invocateur',
     oldSummonerName: 'Ancien nom d’invocateur :',
     summonerIconAlt: name => `Icône de ${name}`,
-  },
-  form: {
-    alreadyAnAccount: 'Déjà un compte ?',
-    confirmPassword: 'Confirmation mot de passe :',
-    login: 'Se connecter',
-    loginWithDiscord: discordLogo => <>Se connecter avec {discordLogo}</>,
-    noAccount: 'Pas de compte ?',
-    or: 'ou',
-    password: 'Mot de passe :',
-    passwordsShouldBeIdentical: 'Les mots de passe doivent être identiques',
-    register: 'S’inscrire',
-    registerWithDiscord: discordLogo => <>S’inscrire avec {discordLogo}</>,
-    userName: 'Utilisateur :',
+    form: {
+      alreadyAnAccount: 'Déjà un compte ?',
+      confirmPassword: 'Confirmation mot de passe :',
+      login: 'Se connecter',
+      loginWithDiscord: discordLogo => <>Se connecter avec {discordLogo}</>,
+      noAccount: 'Pas de compte ?',
+      or: 'ou',
+      password: 'Mot de passe :',
+      passwordsShouldBeIdentical: 'Les mots de passe doivent être identiques',
+      register: 'S’inscrire',
+      registerWithDiscord: discordLogo => <>S’inscrire avec {discordLogo}</>,
+      userName: 'Utilisateur :',
+    },
   },
   home: {
     isntEndorsed:
@@ -507,6 +507,14 @@ const frFRTranslation: Translation = {
         <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
       </>
     ),
+  },
+  router: {
+    game: 'partie',
+    aram: 'ARAM',
+    factions: 'Factions',
+    login: 'Connexion',
+    register: 'Inscription',
+    notFound: 'Page non trouvée',
   },
 }
 
