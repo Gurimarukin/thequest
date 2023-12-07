@@ -41,7 +41,7 @@ const JwtHelper = (secret: string) => ({
             ),
         ),
         Future.chain(Future.fromOption(() => Error('undefined jwt (this should never happen)'))),
-        Future.map(Token.wrap),
+        Future.map(Token),
       ),
 
   verify:

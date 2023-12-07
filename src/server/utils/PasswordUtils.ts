@@ -16,7 +16,7 @@ upash.install('argon2', argon2)
 const hash = (clearPassword: ClearPassword): Future<HashedPassword> =>
   pipe(
     Future.tryCatch(() => upash.hash(clearPassword) as Promise<string>),
-    Future.map(HashedPassword.wrap),
+    Future.map(HashedPassword),
   )
 
 const check = (hashedPassword: HashedPassword, clearPassword: ClearPassword): Future<boolean> =>

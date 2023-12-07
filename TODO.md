@@ -3,7 +3,6 @@
 - removeFavoriteSearch no platform, only puuid
 - remove self from SearchSummoner
 - `titleWithElementParser` translation
-- replace all `wrap`s with `immutableAssign`
 - retry db connection
 
 - full summoner name removal

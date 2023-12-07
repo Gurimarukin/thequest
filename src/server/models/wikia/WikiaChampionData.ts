@@ -160,7 +160,7 @@ const fromRaw =
   (englishName: string) =>
   (champion: RawWikiaChampionData): WikiaChampionData => ({
     ...champion,
-    englishName: ChampionEnglishName.wrap(englishName),
+    englishName: ChampionEnglishName(englishName),
   })
 
 const decoder: Decoder<unknown, WikiaChampionData> = pipe(

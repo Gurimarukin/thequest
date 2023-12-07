@@ -114,7 +114,7 @@ const parseChallenge =
               flow(
                 DomHandler.textContent(championSelector),
                 ValidatedNea.fromEither,
-                Either.map(ChampionEnglishName.wrap),
+                Either.map(ChampionEnglishName),
               ),
             ),
           ),

@@ -114,7 +114,7 @@ const UserService = (
       password !== confirm
         ? Future.failed(Error('Passwords must be the same'))
         : pipe(
-            createUserPassword(UserName.wrap(userName), ClearPassword.wrap(password)),
+            createUserPassword(UserName(userName), ClearPassword(password)),
             Future.filterOrElse(Maybe.isSome, () => Error('Failed to create user')),
             Future.map(toNotUsed),
           ),

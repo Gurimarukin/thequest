@@ -26,9 +26,9 @@ describe('MapFromArray', () => {
   )
 
   const map: E.TypeOf<typeof encoder> = new Map([
-    [ChampionEnglishName.wrap('abc'), ['foo', 1]],
-    [ChampionEnglishName.wrap('def'), ['bar', 2]],
-    [ChampionEnglishName.wrap('abc'), ['baz', 3]],
+    [ChampionEnglishName('abc'), ['foo', 1]],
+    [ChampionEnglishName('def'), ['bar', 2]],
+    [ChampionEnglishName('abc'), ['baz', 3]],
   ])
 
   it('should encode', () => {
@@ -48,8 +48,8 @@ describe('MapFromArray', () => {
     ).toStrictEqual(
       Either.right(
         new Map([
-          [ChampionEnglishName.wrap('abc'), Tuple.of('baz', 3)],
-          [ChampionEnglishName.wrap('def'), Tuple.of('bar', 2)],
+          [ChampionEnglishName('abc'), Tuple.of('baz', 3)],
+          [ChampionEnglishName('def'), Tuple.of('bar', 2)],
         ]),
       ),
     )
