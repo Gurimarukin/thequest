@@ -2,7 +2,6 @@
 - going back to game tab and then refreshing doesnt trigger visual reload
 - removeFavoriteSearch no platform, only puuid
 - remove self from SearchSummoner
-- `points / max` ("/" font-normal)
 - `titleWithElementParser` translation
 - replace all `wrap`s with `immutableAssign`
 - retry db connection

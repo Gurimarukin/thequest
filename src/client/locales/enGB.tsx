@@ -408,10 +408,12 @@ const enGBTranslation: Translation = {
     nTokens: plural('token'),
     points: (points, total, highlightClassName) => (
       <>
-        <span className={highlightClassName}>
-          {points.toLocaleString(locale)}
-          {total !== undefined ? ` / ${total.toLocaleString(locale)}` : null}
-        </span>{' '}
+        <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
+        {total !== undefined ? (
+          <>
+            / <span className={highlightClassName}>{total.toLocaleString(locale)}</span>{' '}
+          </>
+        ) : null}
         points
       </>
     ),
