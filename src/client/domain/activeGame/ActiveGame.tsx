@@ -38,10 +38,9 @@ import { Pre } from '../../components/Pre'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { config } from '../../config/unsafe'
-import { useHistory } from '../../contexts/HistoryContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { usePlatformWithRiotIdFromLocation } from '../../hooks/usePlatformWithRiotIdFromLocation'
+import { useOnSearchSummoner } from '../../hooks/useOnSearchSummoner'
 import { usePrevious } from '../../hooks/usePrevious'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
 import { Assets } from '../../imgs/Assets'
@@ -133,34 +132,9 @@ const Loaded: React.FC<
 > = props => {
   const { summoner, refreshGame } = props
 
-  const { navigate } = useHistory()
-  const { addRecentSearch } = useUser()
   const { t } = useTranslation('activeGame')
-  const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
 
-  useEffect(
-    () =>
-      addRecentSearch({
-        platform: props.platform,
-        puuid: summoner.puuid,
-        riotId: summoner.riotId,
-        name: summoner.name,
-        profileIconId: summoner.profileIconId,
-      }),
-    [addRecentSearch, props.platform, summoner],
-  )
-
-  // Correct Riot ID's case in url
-  useEffect(() => {
-    if (
-      riotIdFromLocation !== undefined &&
-      !RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)
-    ) {
-      navigate(appRoutes.platformRiotIdGame(props.platform, summoner.riotId), {
-        replace: true,
-      })
-    }
-  }, [navigate, props.platform, riotIdFromLocation, summoner.riotId])
+  useOnSearchSummoner(summoner, appRoutes.platformRiotIdGame(props.platform, summoner.riotId))
 
   return pipe(
     props.game,

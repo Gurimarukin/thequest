@@ -20,7 +20,7 @@ import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../../shared/models/api/summoner/SummonerMasteriesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
-import { RiotId } from '../../../shared/models/riot/RiotId'
+import type { RiotId } from '../../../shared/models/riot/RiotId'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -37,7 +37,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useToaster } from '../../contexts/ToasterContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
-import { usePlatformWithRiotIdFromLocation } from '../../hooks/usePlatformWithRiotIdFromLocation'
+import { useOnSearchSummoner } from '../../hooks/useOnSearchSummoner'
 import { usePrevious } from '../../hooks/usePrevious'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
@@ -199,42 +199,15 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   shardsIsLoading,
   setChampionsShardsBulk,
 }) => {
-  const { navigate, masteriesQuery } = useHistory()
-  const { addRecentSearch } = useUser()
+  const { masteriesQuery } = useHistory()
   const { champions } = useStaticData()
 
   const challenges = useChallenges(platform, summoner.puuid)
 
-  useEffect(
-    () =>
-      addRecentSearch({
-        platform,
-        puuid: summoner.puuid,
-        riotId: summoner.riotId,
-        name: summoner.name,
-        profileIconId: summoner.profileIconId,
-      }),
-    [addRecentSearch, platform, summoner],
+  useOnSearchSummoner(
+    { platform, ...summoner },
+    appRoutes.platformRiotId(platform, summoner.riotId, MasteriesQuery.toPartial(masteriesQuery)),
   )
-
-  const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
-
-  // Correct Riot ID's case in url
-  useEffect(() => {
-    if (
-      riotIdFromLocation !== undefined &&
-      !RiotId.Eq.equals(riotIdFromLocation, summoner.riotId)
-    ) {
-      navigate(
-        appRoutes.platformRiotId(
-          platform,
-          summoner.riotId,
-          MasteriesQuery.toPartial(masteriesQuery),
-        ),
-        { replace: true },
-      )
-    }
-  }, [masteriesQuery, navigate, platform, riotIdFromLocation, summoner.riotId])
 
   const { enrichedSummoner, enrichedMasteries } = useMemo(
     () => enrichAll(masteries.champions, championShards, masteriesQuery.search, champions),

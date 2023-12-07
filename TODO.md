@@ -1,8 +1,6 @@
-- riot id
 - active game summoner without poro fix style
 - going back to game tab and then refreshing doesnt trigger visual reload
 - removeFavoriteSearch no platform, only puuid
-- active game url doesn't get replaced by proper summoner name
 - remove self from SearchSummoner
 - `points / max` ("/" font-normal)
 - `titleWithElementParser` translation
