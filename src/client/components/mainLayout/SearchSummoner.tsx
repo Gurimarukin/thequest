@@ -276,7 +276,7 @@ const SummonerSearch: React.FC<SummonerSearchProps> = ({ type, summoner }) => {
       e.stopPropagation()
       setFavoriteIsLoading(true)
       return pipe(
-        removeFavoriteSearch(summoner),
+        removeFavoriteSearch(summoner.puuid),
         task.chainFirstIOK(() => () => setFavoriteIsLoading(false)),
         futureRunUnsafe,
       )

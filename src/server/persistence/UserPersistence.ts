@@ -3,6 +3,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { PullOperator } from 'mongodb'
 
 import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { UserName } from '../../shared/models/api/user/UserName'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { TObservable } from '../../shared/models/rx/TObservable'
@@ -105,12 +106,12 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
     /**
      * @returns `none` if `id` doesn't exist, `some(false)` if `search` was already not in favorites
      */
-    removeFavoriteSearch: (id: UserId, search: PlatformWithPuuid): Future<Maybe<boolean>> =>
+    removeFavoriteSearch: (id: UserId, puuid: Puuid): Future<Maybe<boolean>> =>
       pipe(
         collection.collection.future(c =>
           c.updateOne(
             { id: UserId.codec.encode(id) },
-            { $pull: { favoriteSearches: PlatformWithPuuid.codec.encode(search) } },
+            { $pull: { favoriteSearches: { puuid: Puuid.codec.encode(puuid) } } },
           ),
         ),
         // TODO: logger.trace

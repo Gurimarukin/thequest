@@ -2,7 +2,7 @@ import { apiRoutes } from '../shared/ApiRouter'
 import type { Platform } from '../shared/models/api/Platform'
 import { ChampionShardsPayload } from '../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../shared/models/api/summoner/PlatformWithPuuid'
-import type { Puuid } from '../shared/models/api/summoner/Puuid'
+import { Puuid } from '../shared/models/api/summoner/Puuid'
 import { LoginPasswordPayload } from '../shared/models/api/user/LoginPasswordPayload'
 import type { Future } from '../shared/utils/fp'
 
@@ -19,8 +19,8 @@ export const apiUserLogoutPost: Future<unknown> = http(apiRoutes.user.logout.pos
 export const apiUserSelfFavoritesPut = (platformWithPuuid: PlatformWithPuuid): Future<unknown> =>
   http(apiRoutes.user.self.favorites.put, { json: [PlatformWithPuuid.codec, platformWithPuuid] })
 
-export const apiUserSelfFavoritesDelete = (platformWithPuuid: PlatformWithPuuid): Future<unknown> =>
-  http(apiRoutes.user.self.favorites.delete, { json: [PlatformWithPuuid.codec, platformWithPuuid] })
+export const apiUserSelfFavoritesDelete = (puuid: Puuid): Future<unknown> =>
+  http(apiRoutes.user.self.favorites.delete, { json: [Puuid.codec, puuid] })
 
 export const apiUserSelfSummonerChampionsShardsCountPost = (
   platform: Platform,

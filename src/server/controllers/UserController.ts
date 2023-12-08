@@ -196,10 +196,10 @@ function UserController(
       ),
 
     removeFavoriteSelf: (user: TokenContent): EndedMiddleware =>
-      EndedMiddleware.withBody(PlatformWithPuuid.codec)(({ platform, puuid }) =>
+      EndedMiddleware.withBody(Puuid.codec)(puuid =>
         pipe(
           pipe(
-            userService.removeFavoriteSearch(user.id, { platform, puuid }),
+            userService.removeFavoriteSearch(user.id, puuid),
             Future.map(Either.fromOption(() => 'User not found')),
           ),
           M.fromTaskEither,

@@ -7,7 +7,6 @@ import { createContext, useCallback, useContext, useMemo } from 'react'
 import useSWR from 'swr'
 
 import { apiRoutes } from '../../shared/ApiRouter'
-import type { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { UserView } from '../../shared/models/api/user/UserView'
@@ -43,7 +42,7 @@ type UserContext = {
   user: AsyncState<unknown, Maybe<UserView>>
   maybeUser: Maybe<UserView>
   addFavoriteSearch: (summoner: SummonerShort) => Future<Maybe<NotUsed>>
-  removeFavoriteSearch: (summoner: PlatformWithPuuid) => Future<NotUsed>
+  removeFavoriteSearch: (puuid: Puuid) => Future<NotUsed>
   // eslint-disable-next-line deprecation/deprecation
   recentSearches: List<PartialSummonerShort>
   addRecentSearch: (summoner: SummonerShort) => void
@@ -116,20 +115,20 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const removeFavoriteSearch = useCallback(
-    (summoner: PlatformWithPuuid): Future<NotUsed> =>
+    (puuid: Puuid): Future<NotUsed> =>
       pipe(
         Maybe.fromNullable(data),
         Maybe.flatten,
-        Maybe.filter(flow(UserView.Lens.favoriteSearches.get, List.elem(byPuuidEq)(summoner))),
+        Maybe.filter(flow(UserView.Lens.favoriteSearches.get, List.elem(byPuuidEq)({ puuid }))),
         Maybe.map(oldData =>
           pipe(
-            apiUserSelfFavoritesDelete(summoner),
+            apiUserSelfFavoritesDelete(puuid),
             Future.map(() => {
               mutate(
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
-                    lens.modify(List.differenceW(byPuuidEq)([summoner])),
+                    lens.modify(List.differenceW(byPuuidEq)([{ puuid }])),
                   )(oldData),
                 ),
                 { revalidate: false },

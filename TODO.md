@@ -1,5 +1,3 @@
-- removeFavoriteSearch no platform, only puuid
-
 - full summoner name removal
 
 - use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
