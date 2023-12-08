@@ -41,6 +41,8 @@ import { SummonerService } from './services/SummonerService'
 import { UserService } from './services/UserService'
 import { StaticDataService } from './services/staticDataService/StaticDataService'
 
+const { prettyMs } = StringUtils
+
 const dbRetryDelay = MsDuration.seconds(10)
 
 type Context = ReturnType<typeof of>
@@ -116,15 +118,13 @@ const of = (
   }
 }
 
-const load = (config: Config): Future<Context> =>
-  pipe(WithDb.load(config.db), Future.chain(loadBis(config)))
+const load = (config: Config): Future<Context> => {
+  const Logger = LoggerGetter(config.logLevel)
+  const logger = Logger('Context')
 
-const loadBis =
-  (config: Config) =>
-  (withDb: WithDb): Future<Context> => {
-    const Logger = LoggerGetter(config.logLevel)
-    const logger = Logger('Context')
+  return pipe(WithDb.load(config.db, logger, dbRetryDelay), Future.chain(loadBis))
 
+  function loadBis(withDb: WithDb): Future<Context> {
     const mongoCollection: MongoCollectionGetter = MongoCollectionGetter.fromWithDb(withDb)
 
     const activeGamePersistence = ActiveGamePersistence(Logger, mongoCollection)
@@ -206,29 +206,10 @@ const loadBis =
 
         const migrationService = MigrationService(Logger, mongoCollection, migrationPersistence)
 
-        const waitDatabaseReady: Future<boolean> = pipe(
-          healthCheckService.check(),
-          Future.orElse(() =>
-            pipe(
-              logger.info(
-                `Couldn't connect to mongo, waiting ${StringUtils.prettyMs(
-                  dbRetryDelay,
-                )} before next try`,
-              ),
-              Future.fromIOEither,
-              Future.chain(() => pipe(waitDatabaseReady, Future.delay(dbRetryDelay))),
-            ),
-          ),
-          Future.filterOrElse(
-            success => success,
-            () => Error("HealthCheck wasn't success"),
-          ),
-        )
-
         return pipe(
           logger.info('Ensuring indexes'),
           Future.fromIOEither,
-          Future.chain(() => waitDatabaseReady),
+          Future.chain(() => dbHealthCheck()),
           Future.chain(() => migrationService.applyMigrations),
           Future.chain(() =>
             NonEmptyArray.sequence(Future.ApplicativeSeq)([
@@ -246,9 +227,35 @@ const loadBis =
           Future.chainIOEitherK(() => logger.info('Ensured indexes')),
           Future.map(() => context),
         )
+
+        function dbHealthCheck(): Future<boolean> {
+          const check: Future<boolean> = pipe(
+            pipe(
+              healthCheckService.check(),
+              Future.orElse(() =>
+                pipe(
+                  logger.info(
+                    `Couldn't check health, waiting ${prettyMs(dbRetryDelay)} before next try`,
+                  ),
+                  Future.fromIOEither,
+                  Future.chain(() => pipe(check, Future.delay(dbRetryDelay))),
+                ),
+              ),
+            ),
+          )
+
+          return pipe(
+            check,
+            Future.filterOrElse(
+              success => success,
+              () => Error("HealthCheck wasn't success"),
+            ),
+          )
+        }
       }),
     )
   }
+}
 
 const Context = { load }
 

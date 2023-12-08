@@ -3,11 +3,16 @@ import type { Db } from 'mongodb'
 import { MongoClient } from 'mongodb'
 import type { Readable } from 'stream'
 
+import type { MsDuration } from '../../../shared/models/MsDuration'
+import type { LoggerType } from '../../../shared/models/logger/LoggerType'
 import { TObservable } from '../../../shared/models/rx/TObservable'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Future, Try } from '../../../shared/utils/fp'
 
 import type { DbConfig } from '../../config/Config'
 import { TObservableUtils } from '../../utils/TObservableUtils'
+
+const { prettyMs } = StringUtils
 
 export type WithDb = ReturnType<typeof of>
 
@@ -36,11 +41,24 @@ function of(client: MongoClient, dbName: string) {
   }
 }
 
-function load(config: DbConfig): Future<WithDb> {
-  return pipe(
+function load(config: DbConfig, logger: LoggerType, retryDelay: MsDuration): Future<WithDb> {
+  const futureClient: Future<MongoClient> = pipe(
     Future.tryCatch(() =>
       new MongoClient(`mongodb://${config.user}:${config.password}@${config.host}`).connect(),
     ),
+    Future.orElse(() =>
+      pipe(
+        logger.info(
+          `Mongo client couldn't connect, waiting ${prettyMs(retryDelay)} before next try`,
+        ),
+        Future.fromIOEither,
+        Future.chain(() => pipe(futureClient, Future.delay(retryDelay))),
+      ),
+    ),
+  )
+
+  return pipe(
+    futureClient,
     Future.map(client => of(client, config.dbName)),
   )
 }

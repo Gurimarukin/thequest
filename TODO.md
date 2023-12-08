@@ -1,5 +1,4 @@
 - removeFavoriteSearch no platform, only puuid
-- retry db connection
 
 - full summoner name removal
 
