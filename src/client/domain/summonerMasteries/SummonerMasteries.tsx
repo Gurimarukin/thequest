@@ -205,7 +205,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
   const challenges = useChallenges(platform, summoner.puuid)
 
   useOnSearchSummoner(
-    { platform, ...summoner },
+    useMemo(() => ({ platform, ...summoner }), [platform, summoner]),
     appRoutes.platformRiotId(platform, summoner.riotId, MasteriesQuery.toPartial(masteriesQuery)),
   )
 
