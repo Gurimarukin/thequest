@@ -19,7 +19,7 @@ import { AccountConnected } from './AccountConnected'
 import { AccountDisconnected } from './AccountDisconnected'
 import { HighlightLink } from './HighlightLink'
 import { Languages } from './Languages'
-import { SearchSummoner } from './SearchSummoner'
+import { SearchSummoner } from './searchSummoner/SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
   const { matchLocation } = useHistory()

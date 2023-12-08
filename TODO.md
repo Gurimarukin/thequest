@@ -1,6 +1,5 @@
 - full summoner name removal
 
-- use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
 - react-select
 - are `fromIO`s useful (simply use `myIo()`)?
 
@@ -13,6 +12,7 @@
 - limit favorites
 - modal: trap focus
 - ignore CHERRY league entry
+- eslint unused argument (even if middle)
 - discord OAuth2: proper state (redirect url)
 - clean old cache entries
-- eslint unused argument (even if middle)
+- use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
