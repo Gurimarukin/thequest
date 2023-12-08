@@ -1,6 +1,7 @@
 import { flow, pipe } from 'fp-ts/function'
+import { useCallback } from 'react'
 import type { SWRResponse } from 'swr'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Lang } from '../../../shared/models/api/Lang'
@@ -19,10 +20,14 @@ export function useActiveGame(
   platform: Platform,
   riotId: RiotId,
 ): SWRResponse<SummonerActiveGameView, unknown> {
+  const { mutate } = useSWRConfig()
+
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
 
-  return useSWR(
-    apiRoutes.summoner.byRiotId(platform)(riotId).activeGame(lang).get,
+  const key = apiRoutes.summoner.byRiotId(platform)(riotId).activeGame(lang).get
+
+  const res = useSWR(
+    key,
     ([url, method]) =>
       pipe(
         historyStateRef.current.game,
@@ -43,4 +48,10 @@ export function useActiveGame(
       revalidateOnReconnect: !config.isDev,
     },
   )
+
+  return {
+    ...res,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    mutate: useCallback<typeof res.mutate>((...args) => mutate(key, ...args), [...key, mutate]),
+  }
 }

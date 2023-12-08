@@ -1,5 +1,3 @@
-- active game summoner without poro fix style
-- going back to game tab and then refreshing doesnt trigger visual reload
 - removeFavoriteSearch no platform, only puuid
 - retry db connection
 
