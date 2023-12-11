@@ -10,47 +10,48 @@ import { Either, List, Maybe, NonEmptyArray } from '../../../../shared/utils/fp'
 
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useUser } from '../../../contexts/UserContext'
-import { usePlatformWithRiotIdFromLocation } from '../../../hooks/usePlatformWithRiotIdFromLocation'
+import { usePathMatch } from '../../../hooks/usePathMatch'
 import { SearchOutline } from '../../../imgs/svgs/icons'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
 import { PartialSummonerShort } from '../../../models/summoner/PartialSummonerShort'
 import { appParsers, appRoutes } from '../../../router/AppRouter'
 import { cx } from '../../../utils/cx'
 import { ClickOutside } from '../../ClickOutside'
-import { Select } from '../../Select'
+import { Select, SelectOption } from '../../Select'
 import { SearchSummonerInput } from './SearchSummonerInput'
 import { SummonerSearch } from './SummonerSearch'
 
+const platformOptions: List<SelectOption<Platform>> = pipe(Platform.values, List.map(SelectOption))
+
 export const SearchSummoner: React.FC = () => {
-  const { navigate, matchLocation, masteriesQuery } = useHistory()
+  const { navigate, masteriesQuery } = useHistory()
   const { maybeUser, recentSearches } = useUser()
 
   const [isOpen, setIsOpen] = useState(false)
   const close = useCallback(() => setIsOpen(false), [])
 
-  const platformWithRiotIdFromLocation = usePlatformWithRiotIdFromLocation()
-
   const [platform, setPlatform] = useState<Platform>(
-    platformWithRiotIdFromLocation?.platform ?? Platform.defaultPlatform,
+    usePathMatch(appParsers.anyPlatform)?.platform ?? Platform.defaultPlatform,
   )
 
-  const riotIdFromLocation = platformWithRiotIdFromLocation?.riotId
+  const summonerMatch = usePathMatch(appParsers.anyPlatformSummoner)
   const [summoner, setSummoner] = useState<Either<SummonerName, RiotId>>(
-    riotIdFromLocation !== undefined
-      ? Either.right(riotIdFromLocation)
-      : Either.left(SummonerName('')),
+    summonerMatch?.summoner ?? Either.left(SummonerName('')),
+    // riotIdMatch !== undefined ? Either.right(riotIdMatch) : Either.left(SummonerName('')),
   )
 
   useEffect(() => {
-    if (riotIdFromLocation !== undefined) {
-      setSummoner(Either.right(riotIdFromLocation))
+    if (summonerMatch !== undefined) {
+      setSummoner(summonerMatch.summoner)
     }
-  }, [riotIdFromLocation])
+  }, [summonerMatch])
 
   const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     e.target.select()
     setIsOpen(true)
   }, [])
+
+  const gameMatch = usePathMatch(appParsers.platformRiotIdGame)
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -83,15 +84,9 @@ export const SearchSummoner: React.FC = () => {
         ),
       )
 
-      const parser = appParsers.platformRiotIdGame.map(() => to.game)
-
-      pipe(
-        matchLocation(parser),
-        Maybe.getOrElse(() => to.profile),
-        navigate,
-      )
+      navigate(gameMatch !== undefined ? to.game : to.profile)
     },
-    [masteriesQuery, matchLocation, navigate, platform, summoner],
+    [masteriesQuery, gameMatch, navigate, platform, summoner],
   )
 
   const searches: List<React.ReactElement> = List.compact([
@@ -136,12 +131,7 @@ export const SearchSummoner: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex h-8 font-medium">
-      <Select<Platform>
-        options={Platform.values}
-        value={platform}
-        setValue={setPlatform}
-        className="border-y border-l border-goldenrod bg-black pl-1"
-      />
+      <Select<Platform> options={platformOptions} value={platform} onChange={setPlatform} />
       <div className="flex gap-1 border border-goldenrod pr-1">
         <ClickOutside onClickOutside={close}>
           <SearchSummonerInput

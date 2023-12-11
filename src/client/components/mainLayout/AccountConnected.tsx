@@ -17,6 +17,7 @@ import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
+import { usePathMatch } from '../../hooks/usePathMatch'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { PlatformWithSummoner } from '../../models/summoner/PlatformWithSummoner'
 import { appParsers, appRoutes } from '../../router/AppRouter'
@@ -31,12 +32,13 @@ type AccountConnectedProps = {
 }
 
 export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
-  const { matchLocation, masteriesQuery } = useHistory()
+  const { masteriesQuery } = useHistory()
   const { refreshUser } = useUser()
   const { t } = useTranslation('common')
   const staticData = useStaticData()
 
-  const matchSummoner = matchLocation(appParsers.platformSummonerName)
+  const summonerMatch = usePathMatch(appParsers.platformRiotId)
+  const summonerGameMatch = usePathMatch(appParsers.platformRiotIdGame)
 
   const [menuIsVisible, setMenuIsVisible] = useState(false)
   const toggleMenu = useCallback(() => setMenuIsVisible(v => !v), [])
@@ -67,16 +69,16 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
             () => null,
             ({ platform, puuid, riotId, name, profileIconId }) => (
               <HighlightLink
-                to={(Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
+                to={(summonerGameMatch !== undefined
                   ? appRoutes.sPlatformPuuidGame
                   : appRoutes.sPlatformPuuid)(
                   platform,
                   puuid,
-                  Maybe.isSome(matchSummoner)
+                  summonerMatch !== undefined
                     ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
                     : {},
                 )}
-                parser={anyPlatformSummonerNameExact(platform, riotId, name)}
+                parser={anyPlatformSummonerExact(platform, riotId, name)}
                 tooltip={
                   <div className="flex items-baseline gap-1.5">
                     <div className="flex items-baseline gap-px">
@@ -127,7 +129,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   )
 }
 
-function anyPlatformSummonerNameExact(
+function anyPlatformSummonerExact(
   platform: Platform,
   riotId: RiotId,
   name: SummonerName,

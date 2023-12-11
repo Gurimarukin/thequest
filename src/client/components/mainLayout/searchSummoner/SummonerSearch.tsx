@@ -16,6 +16,7 @@ import { useHistory } from '../../../contexts/HistoryContext'
 import { useStaticData } from '../../../contexts/StaticDataContext'
 import { useTranslation } from '../../../contexts/TranslationContext'
 import { useUser } from '../../../contexts/UserContext'
+import { usePathMatch } from '../../../hooks/usePathMatch'
 import {
   CloseFilled,
   PersonFilled,
@@ -38,24 +39,25 @@ type Props = {
 }
 
 export const SummonerSearch: React.FC<Props> = ({ type, summoner }) => {
-  const { navigate, matchLocation, masteriesQuery } = useHistory()
+  const { navigate, masteriesQuery } = useHistory()
   const { maybeUser, addFavoriteSearch, removeFavoriteSearch, removeRecentSearch } = useUser()
   const { t } = useTranslation('common')
   const staticData = useStaticData()
 
+  const summonerMatch = usePathMatch(appParsers.platformRiotId)
+  const summonerGameMatch = usePathMatch(appParsers.platformRiotIdGame)
+
   // with current masteriesQuery
   const puuidRoute = useCallback(
     (platform: Platform, puuid: Puuid): string =>
-      (Maybe.isSome(matchLocation(appParsers.platformSummonerNameGame))
-        ? appRoutes.sPlatformPuuidGame
-        : appRoutes.sPlatformPuuid)(
+      (summonerGameMatch !== undefined ? appRoutes.sPlatformPuuidGame : appRoutes.sPlatformPuuid)(
         platform,
         puuid,
-        Maybe.isSome(matchLocation(appParsers.platformSummonerName))
+        summonerMatch !== undefined
           ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
           : {},
       ),
-    [masteriesQuery, matchLocation],
+    [masteriesQuery, summonerGameMatch, summonerMatch],
   )
 
   const removeRecent = useCallback(

@@ -1,7 +1,5 @@
 /* eslint-disable functional/no-expression-statements, 
                   functional/no-return-void */
-import type { Parser } from 'fp-ts-routing'
-import { Route, parse } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import * as history from 'history'
 import { lens } from 'monocle-ts'
@@ -25,7 +23,6 @@ type HistoryContext = {
   location: history.Location
   navigate: (to: string, options?: NavigateOptions) => void
   query: qs.ParsedQs
-  matchLocation: <A>(parser: Parser<A>) => Maybe<A>
 
   masteriesQuery: MasteriesQuery
   updateMasteriesQuery: (f: (q: MasteriesQuery) => MasteriesQuery) => void
@@ -62,13 +59,6 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
   )
 
   const query = useMemo(() => qs.parse(location.search.slice(1)), [location.search])
-
-  const matchLocation = useCallback(
-    function <A>(parser: Parser<A>): Maybe<A> {
-      return parse(parser.map(Maybe.some), Route.parse(location.pathname), Maybe.none)
-    },
-    [location.pathname],
-  )
 
   const masteriesQuery = useMemo(
     (): MasteriesQuery =>
@@ -114,7 +104,6 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
     location,
     navigate,
     query,
-    matchLocation,
     masteriesQuery,
     updateMasteriesQuery,
     genericQuery,

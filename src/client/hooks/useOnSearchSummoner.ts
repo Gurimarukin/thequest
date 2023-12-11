@@ -6,7 +6,8 @@ import { RiotId } from '../../shared/models/riot/RiotId'
 
 import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
-import { usePlatformWithRiotIdFromLocation } from './usePlatformWithRiotIdFromLocation'
+import { appParsers } from '../router/AppRouter'
+import { usePathMatch } from './usePathMatch'
 
 // eslint-disable-next-line functional/no-return-void
 export function useOnSearchSummoner(summoner: SummonerShort, correctUrlCase: string): void {
@@ -15,7 +16,7 @@ export function useOnSearchSummoner(summoner: SummonerShort, correctUrlCase: str
 
   useEffect(() => addRecentSearch(summoner), [addRecentSearch, summoner])
 
-  const riotIdFromLocation = usePlatformWithRiotIdFromLocation()?.riotId
+  const riotIdFromLocation = usePathMatch(appParsers.anyPlatformRiotId)?.riotId
 
   // Correct Riot ID's case in url
   useEffect(() => {

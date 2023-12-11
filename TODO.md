@@ -1,6 +1,5 @@
 - full summoner name removal
 
-- react-select
 - are `fromIO`s useful (simply use `myIo()`)?
 
 - challenges page + detect challenges

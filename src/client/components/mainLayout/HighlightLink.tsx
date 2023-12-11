@@ -1,9 +1,7 @@
 import type { Parser } from 'fp-ts-routing'
 import { useRef } from 'react'
 
-import { Maybe } from '../../../shared/utils/fp'
-
-import { useHistory } from '../../contexts/HistoryContext'
+import { usePathMatch } from '../../hooks/usePathMatch'
 import { cx } from '../../utils/cx'
 import type { LinkProps } from '../Link'
 import { Link } from '../Link'
@@ -20,11 +18,9 @@ export function HighlightLink<A>({
   className,
   ...props
 }: Props<A>): React.ReactElement {
-  const { matchLocation } = useHistory()
-
   const ref = useRef<HTMLAnchorElement>(null)
 
-  const matches = Maybe.isSome(matchLocation(parser))
+  const matches = usePathMatch(parser) !== undefined
 
   return (
     <>

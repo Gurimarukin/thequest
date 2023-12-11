@@ -60,6 +60,9 @@ export const appMatches = {
  * Don't forget .then(end).parser (or use p)
  */
 
+const sPlatformPuuid = p(sPlatformPuuidMatch)
+const sPlatformPuuidGame = p(sPlatformPuuidGameMatch)
+
 const platformRiotId = p(platformRiotIdMatch)
 const platformRiotIdGame = p(platformRiotIdGameMatch)
 
@@ -93,11 +96,16 @@ const anyPlatformSummoner: Parser<PlatformWithSummoner> =
       ),
     )
 
+const anyPlatform: Parser<{ platform: Platform }> = sPlatformPuuid
+  .alt(sPlatformPuuidGame)
+  .map(({ platform }) => ({ platform: StringUtils.toUpperCase(platform) }))
+  .alt(anyPlatformSummoner)
+
 export const appParsers = {
   index: end.parser,
 
-  sPlatformPuuid: p(sPlatformPuuidMatch),
-  sPlatformPuuidGame: p(sPlatformPuuidGameMatch),
+  sPlatformPuuid,
+  sPlatformPuuidGame,
 
   platformRiotId,
   platformRiotIdGame,
@@ -111,6 +119,7 @@ export const appParsers = {
   register: p(registerMatch),
   discordRedirect: p(discordRedirectMatch),
 
+  anyPlatform,
   anyPlatformRiotId,
   anyPlatformSummoner,
 }

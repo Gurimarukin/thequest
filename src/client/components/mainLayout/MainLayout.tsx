@@ -3,9 +3,9 @@ import { useRef } from 'react'
 
 import { Maybe } from '../../../shared/utils/fp'
 
-import { useHistory } from '../../contexts/HistoryContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
+import { usePathMatch } from '../../hooks/usePathMatch'
 import { Assets } from '../../imgs/Assets'
 import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
 import { AsyncState } from '../../models/AsyncState'
@@ -22,9 +22,10 @@ import { Languages } from './Languages'
 import { SearchSummoner } from './searchSummoner/SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
-  const { matchLocation } = useHistory()
   const { user } = useUser()
   const { t } = useTranslation('common')
+
+  const summoner = usePathMatch(appParsers.anyPlatformRiotId)
 
   const homeRef = useRef<HTMLAnchorElement>(null)
 
@@ -66,32 +67,26 @@ export const MainLayout: ChildrenFC = ({ children }) => {
           <div className="flex flex-wrap items-center gap-4">
             <SearchSummoner />
 
-            {pipe(
-              matchLocation(appParsers.anyPlatformRiotId),
-              Maybe.fold(
-                () => null,
-                ({ platform, riotId }) => (
-                  <div className="flex flex-wrap items-center gap-4 py-2">
-                    <HighlightLink
-                      to={appRoutes.platformRiotId(platform, riotId, {})}
-                      parser={appParsers.platformRiotId}
-                      tooltip={t.layout.championMasteries}
-                      className="mt-0.5 py-0.5"
-                    >
-                      {t.layout.profile}
-                    </HighlightLink>
-                    <HighlightLink
-                      to={appRoutes.platformRiotIdGame(platform, riotId)}
-                      parser={appParsers.platformRiotIdGame}
-                      tooltip={t.layout.activeGame}
-                      className="mt-0.5 py-0.5"
-                    >
-                      {t.layout.game}
-                    </HighlightLink>
-                  </div>
-                ),
-              ),
-            )}
+            {summoner !== undefined ? (
+              <div className="flex flex-wrap items-center gap-4 py-2">
+                <HighlightLink
+                  to={appRoutes.platformRiotId(summoner.platform, summoner.riotId, {})}
+                  parser={appParsers.platformRiotId}
+                  tooltip={t.layout.championMasteries}
+                  className="mt-0.5 py-0.5"
+                >
+                  {t.layout.profile}
+                </HighlightLink>
+                <HighlightLink
+                  to={appRoutes.platformRiotIdGame(summoner.platform, summoner.riotId)}
+                  parser={appParsers.platformRiotIdGame}
+                  tooltip={t.layout.activeGame}
+                  className="mt-0.5 py-0.5"
+                >
+                  {t.layout.game}
+                </HighlightLink>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-4 self-stretch">
