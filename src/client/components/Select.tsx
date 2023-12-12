@@ -121,6 +121,7 @@ export function Select<A extends string>({
         }),
       }}
       classNames={{
+        container: () => containerClassName,
         control: () => controlClassName,
         singleValue: () => singleValueClassName,
         menu: () => menuClassName,
@@ -134,6 +135,8 @@ export function Select<A extends string>({
     />
   )
 }
+
+const containerClassName = 'z-10'
 
 const controlClassName = 'h-full pl-1.5 pr-1 gap-1 border-y border-l border-goldenrod'
 
