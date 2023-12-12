@@ -89,7 +89,12 @@ const UserService = (
                 hashed: PasswordUtils.hash(password),
               }),
               Future.chain(({ id, hashed }) => {
-                const user = User.of(id, UserLoginPassword.of(userName, hashed, Maybe.none), [])
+                const user = User(
+                  id,
+                  UserLoginPassword.of(userName, hashed, Maybe.none),
+                  [],
+                  'base',
+                )
                 return pipe(
                   userPersistence.create(user),
                   Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
@@ -131,7 +136,7 @@ const UserService = (
               pipe(
                 Future.fromIOEither(UserId.generate),
                 Future.chain(id => {
-                  const user = User.of(id, UserLoginDiscord.of(discord), [])
+                  const user = User(id, UserLoginDiscord.of(discord), [], 'base')
                   return pipe(
                     userPersistence.create(user),
                     Future.map(success => (success ? Maybe.some(user) : Maybe.none)),

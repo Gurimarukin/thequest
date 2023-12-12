@@ -139,6 +139,7 @@ function UserController(
         futureEither.chainTaskEitherK(u =>
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.successful(User.userName(u)),
+            role: Future.successful(u.role),
             favoriteSearches: fetchFavoriteSearches(u.id, u.favoriteSearches),
             linkedRiotAccount: pipe(
               userService.getLinkedRiotAccount({ forceCacheRefresh: false })(u),

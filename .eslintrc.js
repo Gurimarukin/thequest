@@ -140,7 +140,7 @@ module.exports = {
     'no-multi-spaces': 'warn',
     'no-redeclare': 'off',
     'no-restricted-imports': 'off',
-    'no-shadow': ['warn', { builtinGlobals: true, hoist: 'functions' }],
+    'no-shadow': ['warn', { hoist: 'functions' }],
     'no-undef': 'off',
     'no-unneeded-ternary': 'warn',
     'no-use-before-define': 'off',
