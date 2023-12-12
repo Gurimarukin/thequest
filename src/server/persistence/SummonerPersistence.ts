@@ -50,8 +50,13 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
         { collation: caseInsensitiveCollation },
       ),
 
-    findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<SummonerDb>> =>
+    findByPuuid: (
+      platform: Platform,
+      puuid: Puuid,
+      insertedAfter: DayJs,
+    ): Future<Maybe<SummonerDb>> =>
       collection.findOne({
+        platform: Platform.codec.encode(platform),
         puuid: Puuid.codec.encode(puuid),
         insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
       }),

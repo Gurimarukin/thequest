@@ -77,7 +77,7 @@ const of = (
     ): Future<Maybe<Summoner>> =>
       findAndCache(
         platform,
-        insertedAfter => summonerPersistence.findByPuuid(puuid, insertedAfter),
+        insertedAfter => summonerPersistence.findByPuuid(platform, puuid, insertedAfter),
         riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byPuuid(puuid),
         { forceCacheRefresh },
       ),
