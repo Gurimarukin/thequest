@@ -219,6 +219,7 @@ export type Translation = {
     percentsProgression: (percents: number, highlightClassName: string) => React.ReactNode
   }
   router: {
+    theQuest: string
     game: string
     aram: string
     factions: string
