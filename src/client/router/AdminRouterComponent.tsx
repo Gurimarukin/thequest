@@ -14,7 +14,7 @@ import { appRoutes } from './AppRouter'
 import type { ElementWithTitle } from './getRouterComponent'
 import { e, getRouterComponent } from './getRouterComponent'
 
-const AdminRouterComponentBis = getRouterComponent(
+const RouterComponent = getRouterComponent(
   zero<ElementWithTitle>()
     .alt(
       adminParsers.index.map(() => e(<Navigate to={adminRoutes.madosayentisuto} replace={true} />)),
@@ -41,7 +41,7 @@ const AdminRouterComponent: React.FC = () => {
       Maybe.isSome,
     )
   ) {
-    return <AdminRouterComponentBis />
+    return <RouterComponent />
   }
 
   return <Navigate to={appRoutes.index} replace={true} />
