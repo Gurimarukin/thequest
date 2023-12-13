@@ -28,6 +28,7 @@ export const Application = ({
   discordService,
   healthCheckService,
   leagueEntryService,
+  hallOfFameMemberService,
   masteriesService,
   poroActiveGameService,
   riotAccountService,
@@ -39,7 +40,13 @@ export const Application = ({
 
   const withIp = WithIp(Logger, config)
 
-  const adminController = AdminController(config.madosayentisuto, discordService)
+  const adminController = AdminController(
+    config.madosayentisuto,
+    discordService,
+    hallOfFameMemberService,
+    riotAccountService,
+    summonerService,
+  )
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(staticDataService)
   const summonerController = SummonerController(

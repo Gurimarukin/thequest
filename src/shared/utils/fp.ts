@@ -6,6 +6,7 @@ import {
   option,
   ord,
   readonlyArray,
+  readonlyMap,
   readonlyNonEmptyArray,
   readonlyRecord,
   readonlyTuple,
@@ -106,6 +107,10 @@ export const PartialDict = {
   ) => <E, A, B>(
     f: (a: A) => Kind2<F, E, B>,
   ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>,
+}
+
+export function emptyReadonlyMap<K, V>(): ReadonlyMap<K, V> {
+  return readonlyMap.empty
 }
 
 export type Either<E, A> = either.Either<E, A>

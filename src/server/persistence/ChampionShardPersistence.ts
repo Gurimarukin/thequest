@@ -10,15 +10,11 @@ import { FpCollection } from '../helpers/FpCollection'
 import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
+import type { ToDeleteAndToUpsert } from '../models/mongo/ToDeleteAndToUpsert'
 import { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionShardsDbOutput } from '../models/user/ChampionShardsDb'
 import { ChampionShardsDb } from '../models/user/ChampionShardsDb'
 import { UserId } from '../models/user/UserId'
-
-type ToDeleteAndToUpsert<A> = {
-  toDelete: List<A>
-  toUpsert: List<A>
-}
 
 type ChampionShardPersistence = ReturnType<typeof ChampionShardPersistence>
 
