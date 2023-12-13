@@ -213,7 +213,7 @@ export const Register: React.FC = () => {
                 onSubmit={handleSubmit}
                 className="flex flex-col items-center gap-8 border border-goldenrod bg-zinc-900 px-12 py-8"
               >
-                <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-2">
+                <div className="grid grid-cols-[auto_auto] gap-x-3">
                   <label className="contents">
                     <span>{t.common.form.userName}</span>
                     <input
@@ -224,21 +224,21 @@ export const Register: React.FC = () => {
                     />
                   </label>
                   <label className="contents">
-                    <span>{t.common.form.password}</span>
+                    <span className="col-start-1 mt-2">{t.common.form.password}</span>
                     <input
                       type="password"
                       value={state.password}
                       onChange={updatePassword}
-                      className="border border-goldenrod bg-transparent"
+                      className="mt-2 border border-goldenrod bg-transparent"
                     />
                   </label>
                   <label className="contents">
-                    <span>{t.common.form.confirmPassword}</span>
+                    <span className="col-start-1 mt-2">{t.common.form.confirmPassword}</span>
                     <input
                       type="password"
                       value={state.confirmPassword}
                       onChange={updateConfirmPassword}
-                      className="border border-goldenrod bg-transparent"
+                      className="mt-2 border border-goldenrod bg-transparent"
                     />
                   </label>
                 </div>
