@@ -2,6 +2,7 @@
 
 - are `fromIO`s useful (simply use `myIo()`)?
 
+- try fancy league icons?
 - challenges page + detect challenges
 - menu react-popper?
 - challenge progression discord notification
