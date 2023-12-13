@@ -1,4 +1,4 @@
-import { apply, io, ord, predicate, readonlyMap } from 'fp-ts'
+import { apply, io, predicate, readonlyMap } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 
@@ -16,7 +16,16 @@ import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticD
 import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import type { PartialDict } from '../../../shared/utils/fp'
-import { Either, Future, IO, List, Maybe, NonEmptyArray, Tuple } from '../../../shared/utils/fp'
+import {
+  Either,
+  Future,
+  IO,
+  List,
+  Maybe,
+  NonEmptyArray,
+  Tuple,
+  getTrivialOrd,
+} from '../../../shared/utils/fp'
 import { futureMaybe } from '../../../shared/utils/futureMaybe'
 
 import type { Config } from '../../config/Config'
@@ -261,7 +270,7 @@ const enrichChampions = (
 
   return pipe(
     aramChanges,
-    readonlyMap.reduceWithIndex<ChampionEnglishName>(ord.trivial)(
+    readonlyMap.reduceWithIndex<ChampionEnglishName>(getTrivialOrd(ChampionEnglishName.Eq))(
       withoutAramChanges,
       (englishName, acc, spells) =>
         pipe(

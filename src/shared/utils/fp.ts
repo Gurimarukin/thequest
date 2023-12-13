@@ -4,6 +4,7 @@ import {
   io,
   ioEither,
   option,
+  ord,
   readonlyArray,
   readonlyNonEmptyArray,
   readonlyRecord,
@@ -14,6 +15,7 @@ import {
 import type { Applicative2 } from 'fp-ts/Applicative'
 import type { Eq } from 'fp-ts/Eq'
 import type { Kind2, URIS2 } from 'fp-ts/HKT'
+import type { Ord } from 'fp-ts/Ord'
 import type { Predicate } from 'fp-ts/Predicate'
 import type { Refinement } from 'fp-ts/Refinement'
 import type { LazyArg } from 'fp-ts/function'
@@ -52,6 +54,13 @@ export function immutableAssign<
   B extends Dict<string, unknown>,
 >(f: A, b: B): A & B {
   return Object.assign(f.bind({}) as A, b)
+}
+
+/**
+ * Like ord.trivial, but with actual equals.
+ */
+export function getTrivialOrd<A>(eq: Eq<A>): Ord<A> {
+  return { equals: eq.equals, compare: ord.trivial.compare }
 }
 
 export type NotUsed = Newtype<{ readonly NotUsed: unique symbol }, void>
