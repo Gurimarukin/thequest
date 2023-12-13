@@ -47,6 +47,9 @@ const userSelf = user.then(lit('self'))
 const userSelfFavorites = userSelf.then(lit('favorites'))
 const userLogin = user.then(lit('login'))
 const userRegister = user.then(lit('register'))
+
+const admin = api.then(lit('admin'))
+
 const madosayentisuto = api.then(lit('madosayentisuto'))
 
 // final
@@ -86,6 +89,9 @@ const userLoginPasswordPost = m(userLogin.then(lit('password')), 'post')
 const userLogoutPost = m(user.then(lit('logout')), 'post')
 const userRegisterDiscordPost = m(userRegister.then(lit('discord')), 'post')
 const userRegisterPasswordPost = m(userRegister.then(lit('password')), 'post')
+
+const adminMadosayentisutoGet = m(admin.then(lit('madosayentisuto')), 'get')
+
 const madosayentisutoStaticDataGet = m(madosayentisuto.then(lit('staticData')), 'get')
 const madosayentisutoUsersGetProgressionPost = m(
   madosayentisuto.then(lit('users')).then(lit('getProgression')),
@@ -139,6 +145,9 @@ export const apiParsers = {
       discord: { post: p(userRegisterDiscordPost) },
       password: { post: p(userRegisterPasswordPost) },
     },
+  },
+  admin: {
+    madosayentisuto: { get: p(adminMadosayentisutoGet) },
   },
   madosayentisuto: {
     staticData: { get: p(madosayentisutoStaticDataGet) },
@@ -206,6 +215,9 @@ export const apiRoutes = {
       discord: { post: r(userRegisterDiscordPost, {}) },
       password: { post: r(userRegisterPasswordPost, {}) },
     },
+  },
+  admin: {
+    madosayentisuto: { get: r(adminMadosayentisutoGet, {}) },
   },
 }
 

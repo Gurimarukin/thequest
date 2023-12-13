@@ -19,6 +19,10 @@ const decoder = D.struct({
    */
   discriminator: D.string,
   /**
+   * The user's display name, if it is set. For bots, this is the application name
+   */
+  global_name: Maybe.decoder(D.string),
+  /**
    * The user's avatar hash
    *
    * See https://discord.com/developers/docs/reference#image-formatting

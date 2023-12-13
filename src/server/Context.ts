@@ -142,7 +142,7 @@ const load = (config: Config): Future<Context> => {
     const httpClient = HttpClient(Logger)
     const mockService = MockService(Logger)
 
-    const discordService = DiscordService(config.client, httpClient)
+    const discordService = DiscordService(config.discordClient, httpClient)
     const riotApiService = RiotApiService(config, httpClient, mockService)
 
     const ddragonService = DDragonService(config.riotApi.cacheTtl, riotApiService)

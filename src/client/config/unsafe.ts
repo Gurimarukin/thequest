@@ -9,8 +9,8 @@ import { Config } from './Config'
 const inlined: Dict<string, string | undefined> = {
   IS_DEV: process.env['IS_DEV'],
   API_HOST: process.env['API_HOST'],
-  CLIENT_ID: process.env['CLIENT_ID'],
-  REDIRECT_URI: process.env['REDIRECT_URI'],
+  DISCORD_CLIENT_ID: process.env['DISCORD_CLIENT_ID'],
+  DISCORD_CLIENT_REDIRECT_URI: process.env['DISCORD_CLIENT_REDIRECT_URI'],
   PORO_BASE_URL: process.env['PORO_BASE_URL'],
 }
 
