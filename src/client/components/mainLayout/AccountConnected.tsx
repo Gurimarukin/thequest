@@ -4,6 +4,7 @@ import { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useState } from 'react'
 
+import { Permissions } from '../../../shared/Permissions'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { UserView } from '../../../shared/models/api/user/UserView'
 import { GameName } from '../../../shared/models/riot/GameName'
@@ -112,11 +113,13 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
         {menuIsVisible ? (
           <Menu>
             <ul className="flex flex-col gap-0.5">
-              <li className="flex justify-center pb-1">
-                <Link to={adminRoutes.index} className="hover:underline">
-                  ADMIN
-                </Link>
-              </li>
+              {Permissions.canViewAdmin(user.role) ? (
+                <li className="flex justify-center pb-1">
+                  <Link to={adminRoutes.index} className="hover:underline">
+                    ADMIN
+                  </Link>
+                </li>
+              ) : null}
               <li>
                 <button
                   type="button"
