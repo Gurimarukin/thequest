@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { eq, readonlyMap } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { eq, readonlyMap, task } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import type { OptionProps, SingleValue, SingleValueProps } from 'react-select'
@@ -11,6 +11,7 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { Platform } from '../../../shared/models/api/Platform'
 import type { DiscordUserView } from '../../../shared/models/api/hallOfFame/DiscordUserView'
 import { HallOfFameInfos } from '../../../shared/models/api/hallOfFame/HallOfFameInfos'
+import type { HallOfFameMembersPayload } from '../../../shared/models/api/hallOfFame/HallOfFameMembersPayload'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { GameName } from '../../../shared/models/riot/GameName'
@@ -19,14 +20,15 @@ import { TagLine } from '../../../shared/models/riot/TagLine'
 import { MapUtils } from '../../../shared/utils/MapUtils'
 import { Either, Future, List, Maybe, Tuple, getTrivialOrd } from '../../../shared/utils/fp'
 
-import { apiSummonerGet } from '../../api'
+import { apiAdminMadosayentisutoPost, apiSummonerGet } from '../../api'
 import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { Loading } from '../../components/Loading'
 import { Pre } from '../../components/Pre'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useStaticData } from '../../contexts/StaticDataContext'
+import { useToaster } from '../../contexts/ToasterContext'
 import { useSWRHttp } from '../../hooks/useSWRHttp'
-import { CheckMarkSharp, CloseFilled } from '../../imgs/svgs/icons'
+import { CloseFilled } from '../../imgs/svgs/icons'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 
@@ -48,6 +50,8 @@ type LoadedProps = {
 }
 
 const Loaded: React.FC<LoadedProps> = ({ infos }) => {
+  const { showToaster } = useToaster()
+
   const [members, setMembers] = useState<
     ReadonlyMap<PartialDiscordUser, SummonerShort | undefined>
   >(() => toPartial(infos.hallOfFameMembers))
@@ -69,8 +73,28 @@ const Loaded: React.FC<LoadedProps> = ({ infos }) => {
     [],
   )
 
+  const [isLoading, setIsLoading] = useState(false)
+
+  const validated = validate(members)
+
+  const handleSubmit = useCallback(() => {
+    if (Maybe.isSome(validated)) {
+      setIsLoading(true)
+      pipe(
+        apiAdminMadosayentisutoPost(validated.value),
+        task.map(
+          Either.fold(
+            () => showToaster('error', 'error.'),
+            () => showToaster('success', 'success.'),
+          ),
+        ),
+        task.map(() => setIsLoading(false)),
+      )()
+    }
+  }, [showToaster, validated])
+
   return (
-    <div className="flex min-h-full items-center justify-center py-4 text-white">
+    <div className="flex min-h-full flex-col items-center justify-center gap-4 py-4 text-white">
       <table>
         <tbody>
           {pipe(
@@ -95,6 +119,16 @@ const Loaded: React.FC<LoadedProps> = ({ infos }) => {
           />
         </tbody>
       </table>
+
+      <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={Maybe.isNone(validated)}
+        className="flex items-center gap-2"
+      >
+        <span>submit</span>
+        {isLoading ? <Loading className="h-4" /> : null}
+      </Button>
     </div>
   )
 }
@@ -124,6 +158,23 @@ function toPartial(
 
 function isDefined(u: PartialDiscordUser): u is DiscordUserView {
   return ((u as DiscordUserView).username as string | undefined) !== undefined
+}
+
+const traversable = readonlyMap.getTraversable(getTrivialOrd(byIdEq))
+
+function validate(
+  members: ReadonlyMap<PartialDiscordUser, SummonerShort | undefined>,
+): Maybe<HallOfFameMembersPayload> {
+  return pipe(
+    traversable.traverse(Maybe.Applicative)(members, Maybe.fromNullable),
+    Maybe.map(
+      flow(
+        readonlyMap.toReadonlyArray(getTrivialOrd(byIdEq)),
+        List.map(Tuple.mapFst(u => u.id)),
+        MapUtils.fromReadonlyArray(DiscordUserId.Eq),
+      ),
+    ),
+  )
 }
 
 type MemberProps = {
@@ -351,7 +402,7 @@ const SummonerSelectInput: React.FC<SummonerSelectInputProps> = ({ onFoundSummon
         <Loading />
       ) : (
         <Button type="submit" disabled={Either.isLeft(riotId)}>
-          <CheckMarkSharp className="h-4" />
+          ok
         </Button>
       )}
       {error !== undefined ? <div>{error}</div> : null}
@@ -398,7 +449,7 @@ const Button: React.FC<
   <button
     {...props}
     className={cx(
-      'border-2 bg-mastery-7-bis px-1.5 pb-[3px] pt-0.5 text-white active:border-dashed',
+      'border-2 bg-mastery-7-bis px-1.5 pb-[3px] pt-0.5 text-white enabled:active:border-dashed disabled:border-grey-400 disabled:text-grey-400',
       className,
     )}
   />
