@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { eq, readonlyMap, task } from 'fp-ts'
+import { eq, monoid, ord, readonlyMap, string, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
@@ -54,7 +54,7 @@ const Loaded: React.FC<LoadedProps> = ({ infos }) => {
 
   const [members, setMembers] = useState<
     ReadonlyMap<PartialDiscordUser, SummonerShort | undefined>
-  >(() => toPartial(infos.hallOfFameMembers))
+  >(() => toPartial(infos))
 
   const setSummonerAt = (id: DiscordUserId) => (summoner: SummonerShort | undefined) =>
     setMembers(prev =>
@@ -99,7 +99,7 @@ const Loaded: React.FC<LoadedProps> = ({ infos }) => {
         <tbody>
           {pipe(
             members,
-            readonlyMap.toReadonlyArray(getTrivialOrd(byIdEq)),
+            readonlyMap.toReadonlyArray(byGlobalNameOrd),
             List.map(([user, summoner]) => (
               <Member
                 key={DiscordUserId.unwrap(user.id)}
@@ -144,14 +144,46 @@ const Td: React.FC<
 type PartialDiscordUser = DiscordUserView | { id: DiscordUserId }
 
 const byIdEq: eq.Eq<PartialDiscordUser> = eq.struct({ id: DiscordUserId.Eq })
+const byGlobalNameOrd: ord.Ord<PartialDiscordUser> = monoid.concatAll(
+  ord.getMonoid<PartialDiscordUser>(),
+)([
+  pipe(
+    Maybe.getOrd(string.Ord),
+    ord.contramap((u: PartialDiscordUser) =>
+      pipe(
+        u,
+        Maybe.fromPredicate(isDefined),
+        Maybe.map(u_ =>
+          pipe(
+            u_.global_name,
+            Maybe.getOrElse(() => u_.username),
+          ),
+        ),
+      ),
+    ),
+  ),
+  pipe(
+    DiscordUserId.Ord,
+    ord.contramap((u: PartialDiscordUser) => u.id),
+  ),
+])
 
-function toPartial(
-  members: ReadonlyMap<DiscordUserId, SummonerShort>,
-): ReadonlyMap<PartialDiscordUser, SummonerShort | undefined> {
+function toPartial({
+  guildMembers,
+  hallOfFameMembers,
+}: HallOfFameInfos): ReadonlyMap<PartialDiscordUser, SummonerShort | undefined> {
   return pipe(
-    members,
+    hallOfFameMembers,
     readonlyMap.toReadonlyArray(getTrivialOrd(DiscordUserId.Eq)),
-    List.map(Tuple.map(id => ({ id }))),
+    List.map(
+      Tuple.map(id =>
+        pipe(
+          guildMembers,
+          List.findFirst(m => DiscordUserId.Eq.equals(m.id, id)),
+          Maybe.getOrElse(() => ({ id })),
+        ),
+      ),
+    ),
     MapUtils.fromReadonlyArray(byIdEq),
   )
 }
@@ -303,12 +335,10 @@ const DiscordUser: React.FC<DiscordUserProps> = ({ user, className, ...props }) 
       ),
     )}
     <span>
+      @
       {pipe(
         user.global_name,
-        Maybe.foldW(
-          () => <span className="font-lib-mono">{user.username}</span>,
-          n => `@${n}`,
-        ),
+        Maybe.getOrElseW(() => <span className="font-lib-mono">{user.username}</span>),
       )}
     </span>
   </div>
