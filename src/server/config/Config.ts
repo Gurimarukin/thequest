@@ -30,7 +30,7 @@ export type Config = {
   isDev: boolean
   mock: boolean
   logLevel: LogLevelOrOff
-  client: ClientConfig
+  discordClient: DiscordClientConfig
   http: HttpConfig
   db: DbConfig
   riotApi: RiotApiConfig
@@ -39,9 +39,10 @@ export type Config = {
   madosayentisuto: MadosayentisutoConfig
 }
 
-export type ClientConfig = {
+export type DiscordClientConfig = {
   id: DiscordUserId
   secret: ClientSecret
+  token: string
   redirectUri: string
 }
 
@@ -80,6 +81,7 @@ export type RiotApiCacheTtlConfig = {
 }
 
 export type MadosayentisutoConfig = {
+  guildId: string
   whitelistedIps: List<string>
   token: string
 }
@@ -100,10 +102,11 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
         Either.map(Maybe.getOrElse(() => false)),
       ),
       logLevel: r(LogLevelOrOff.codec)('LOG_LEVEL'),
-      client: seqS<ClientConfig>({
-        id: r(DiscordUserId.codec)('CLIENT_ID'),
-        secret: r(ClientSecret.codec)('CLIENT_SECRET'),
-        redirectUri: r(D.string)('REDIRECT_URI'),
+      discordClient: seqS<DiscordClientConfig>({
+        id: r(DiscordUserId.codec)('DISCORD_CLIENT_ID'),
+        secret: r(ClientSecret.codec)('DISCORD_CLIENT_SECRET'),
+        token: r(D.string)('DISCORD_CLIENT_TOKEN'),
+        redirectUri: r(D.string)('DISCORD_CLIENT_REDIRECT_URI'),
       }),
       http: seqS<HttpConfig>({
         port: r(NumberFromString.decoder)('HTTP_PORT'),
@@ -131,6 +134,7 @@ const parse = (dict: PartialDict<string, string>): Try<Config> =>
       }),
       jwtSecret: r(D.string)('JWT_SECRET'),
       madosayentisuto: seqS<MadosayentisutoConfig>({
+        guildId: r(D.string)('MADOSAYENTISUTO_GUILD_ID'),
         whitelistedIps: r(arrayFromStringDecoder(D.string))('MADOSAYENTISUTO_WHITELISTED_IPS'),
         token: r(D.string)('MADOSAYENTISUTO_TOKEN'),
       }),

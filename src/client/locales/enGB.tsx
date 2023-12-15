@@ -493,6 +493,7 @@ const enGBTranslation: Translation = {
     ),
   },
   router: {
+    theQuest: 'The Quest',
     game: 'game',
     aram: 'ARAM',
     factions: 'Factions',

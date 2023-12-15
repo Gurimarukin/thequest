@@ -1,5 +1,6 @@
 import type { io } from 'fp-ts'
 import { apply, chain as fpTsChain, functor, optionT } from 'fp-ts'
+import type { Applicative1 } from 'fp-ts/Applicative'
 import type { Apply1 } from 'fp-ts/Apply'
 import type { Chain1 } from 'fp-ts/Chain'
 import type { Functor1 } from 'fp-ts/Functor'
@@ -29,6 +30,13 @@ const map_: Functor1<URI>['map'] = (fa, f) => pipe(fa, map(f))
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 const Do: Future<Maybe<{}>> = some({})
+
+const ApplicativePar: Applicative1<URI> = {
+  URI,
+  map: map_,
+  ap: apPar_,
+  of: some,
+}
 
 const ApplyPar: Apply1<URI> = {
   URI,
@@ -114,6 +122,7 @@ const none: Future<Maybe<never>> = optionT.zero(Future.Pointed)()
 
 export const futureMaybe = {
   Do,
+  ApplicativePar,
   ApplyPar,
   Functor,
   alt: optionT.alt(Future.Monad) as <A>(

@@ -89,7 +89,12 @@ const UserService = (
                 hashed: PasswordUtils.hash(password),
               }),
               Future.chain(({ id, hashed }) => {
-                const user = User.of(id, UserLoginPassword.of(userName, hashed, Maybe.none), [])
+                const user = User(
+                  id,
+                  UserLoginPassword.of(userName, hashed, Maybe.none),
+                  [],
+                  'base',
+                )
                 return pipe(
                   userPersistence.create(user),
                   Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
@@ -131,7 +136,7 @@ const UserService = (
               pipe(
                 Future.fromIOEither(UserId.generate),
                 Future.chain(id => {
-                  const user = User.of(id, UserLoginDiscord.of(discord), [])
+                  const user = User(id, UserLoginDiscord.of(discord), [], 'base')
                   return pipe(
                     userPersistence.create(user),
                     Future.map(success => (success ? Maybe.some(user) : Maybe.none)),
@@ -159,7 +164,7 @@ const UserService = (
           ),
         ),
         futureMaybe.filter(({ updated }) => updated),
-        futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),
+        futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id, role: user.role })),
       ),
     loginPassword: (userName: UserName, clearPassword: ClearPassword): Future<Maybe<Token>> =>
       pipe(
@@ -169,7 +174,7 @@ const UserService = (
           futureMaybe.fromTaskEither(PasswordUtils.check(user.login.password, clearPassword)),
         ),
         futureMaybe.filter(({ validPassword }) => validPassword),
-        futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id })),
+        futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id, role: user.role })),
       ),
 
     findAllByLoginDiscordId,
@@ -191,7 +196,6 @@ const UserService = (
       return championShardPersistence.bulkDeleteAndUpsert(user, summoner, { toDelete, toUpsert })
     },
 
-    // Either.left if we couldn't find a valid c.name for existing riotgames connection for discord user
     getLinkedRiotAccount:
       ({ forceCacheRefresh }: ForceCacheRefresh) =>
       (user: User<UserLogin>): Future<Maybe<SummonerWithDiscordInfos>> =>

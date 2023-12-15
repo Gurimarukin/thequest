@@ -504,6 +504,7 @@ const esESTranslation: Translation = {
     ),
   },
   router: {
+    theQuest: 'EL QUESTO',
     game: 'PARTIDO',
     aram: 'ARAMO',
     factions: 'FACTIONOS',

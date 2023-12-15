@@ -5,6 +5,7 @@ import type { NotUsed } from '../shared/utils/fp'
 import { IO } from '../shared/utils/fp'
 
 import type { Context } from './Context'
+import { AdminController } from './controllers/AdminController'
 import { HealthCheckController } from './controllers/HealthCheckController'
 import { MadosayentisutoController } from './controllers/MadosayentisutoController'
 import { StaticDataController } from './controllers/StaticDataController'
@@ -27,6 +28,7 @@ export const Application = ({
   discordService,
   healthCheckService,
   leagueEntryService,
+  hallOfFameMemberService,
   masteriesService,
   poroActiveGameService,
   riotAccountService,
@@ -38,6 +40,13 @@ export const Application = ({
 
   const withIp = WithIp(Logger, config)
 
+  const adminController = AdminController(
+    config.madosayentisuto,
+    discordService,
+    hallOfFameMemberService,
+    riotAccountService,
+    summonerService,
+  )
   const healthCheckController = HealthCheckController(healthCheckService)
   const staticDataController = StaticDataController(staticDataService)
   const summonerController = SummonerController(
@@ -77,6 +86,7 @@ export const Application = ({
   const routes = Routes(
     rateLimiter,
     withAuth,
+    adminController,
     healthCheckController,
     madosayentisutoController,
     staticDataController,

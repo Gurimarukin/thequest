@@ -3,6 +3,7 @@ import { apiParsers as api } from '../../shared/ApiRouter'
 import { MsDuration } from '../../shared/models/MsDuration'
 import { type List } from '../../shared/utils/fp'
 
+import type { AdminController } from '../controllers/AdminController'
 import type { HealthCheckController } from '../controllers/HealthCheckController'
 import type { MadosayentisutoController } from '../controllers/MadosayentisutoController'
 import type { StaticDataController } from '../controllers/StaticDataController'
@@ -17,6 +18,7 @@ import type { WithAuth } from './utils/WithAuth'
 export const Routes = (
   rateLimiter: RateLimiter,
   withAuth_: WithAuth,
+  adminController: AdminController,
   healthCheckController: HealthCheckController,
   madosayentisutoController: MadosayentisutoController,
   staticDataController: StaticDataController,
@@ -27,6 +29,7 @@ export const Routes = (
 
   return [
     m(api.healthcheck.get, () => healthCheckController.check),
+
     m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
     m(api.staticData.lang.additional.get, ({ lang }) =>
       staticDataController.additionalStaticData(lang),
@@ -49,6 +52,9 @@ export const Routes = (
       maybeWithAuth(summonerController.activeGameByName(lang, platform, summonerName)),
     ),
 
+    m(api.summoner.byRiotId.get, ({ platform, riotId }) =>
+      summonerController.summonerShortByRiotId(platform, riotId),
+    ),
     m(api.summoner.byRiotId.masteries.get, ({ platform, riotId }) =>
       maybeWithAuth(summonerController.masteriesByRiotId(platform, riotId)),
     ),
@@ -75,6 +81,10 @@ export const Routes = (
     m(api.user.register.password.post, () =>
       rateLimiter(2, MsDuration.minute(1))(userController.registerPassword),
     ),
+
+    m(api.admin.hallOfFame.get, () => withAuth(adminController.listHallOfFame)),
+    m(api.admin.hallOfFame.post, () => withAuth(adminController.updateHallOfFame)),
+
     m(api.madosayentisuto.staticData.get, () => madosayentisutoController.getStaticData),
     m(
       api.madosayentisuto.users.getProgression.post,

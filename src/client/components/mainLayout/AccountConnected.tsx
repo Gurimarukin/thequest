@@ -4,6 +4,7 @@ import { Parser } from 'fp-ts-routing'
 import { pipe } from 'fp-ts/function'
 import { useCallback, useState } from 'react'
 
+import { Permissions } from '../../../shared/Permissions'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { UserView } from '../../../shared/models/api/user/UserView'
 import { GameName } from '../../../shared/models/riot/GameName'
@@ -20,9 +21,11 @@ import { useUser } from '../../contexts/UserContext'
 import { usePathMatch } from '../../hooks/usePathMatch'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { PlatformWithSummoner } from '../../models/summoner/PlatformWithSummoner'
+import { adminRoutes } from '../../router/AdminRouter'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { ClickOutside } from '../ClickOutside'
+import { Link } from '../Link'
 import { Loading } from '../Loading'
 import { HighlightLink } from './HighlightLink'
 import { Menu } from './Menu'
@@ -110,6 +113,13 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
         {menuIsVisible ? (
           <Menu>
             <ul className="flex flex-col gap-0.5">
+              {Permissions.canViewAdmin(user.role) ? (
+                <li className="flex justify-center pb-1">
+                  <Link to={adminRoutes.index} className="hover:underline">
+                    ADMIN
+                  </Link>
+                </li>
+              ) : null}
               <li>
                 <button
                   type="button"

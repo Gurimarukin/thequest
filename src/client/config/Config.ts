@@ -13,9 +13,13 @@ const seqS = ValidatedNea.getSeqS<string>()
 export type Config = {
   isDev: boolean
   apiHost: URL
-  clientId: DiscordUserId
-  redirectUri: string
+  discordClient: DiscordClientConfig
   poroApiBaseUrl: string
+}
+
+type DiscordClientConfig = {
+  id: DiscordUserId
+  redirectUri: string
 }
 
 const parse = (rawConfig: PartialDict<string, string>): Try<Config> =>
@@ -26,8 +30,10 @@ const parse = (rawConfig: PartialDict<string, string>): Try<Config> =>
         Either.map(Maybe.getOrElseW(() => false)),
       ),
       apiHost: r(URLFromString.decoder)('API_HOST'),
-      clientId: r(DiscordUserId.codec)('CLIENT_ID'),
-      redirectUri: r(D.string)('REDIRECT_URI'),
+      discordClient: seqS<DiscordClientConfig>({
+        id: r(DiscordUserId.codec)('DISCORD_CLIENT_ID'),
+        redirectUri: r(D.string)('DISCORD_CLIENT_REDIRECT_URI'),
+      }),
       poroApiBaseUrl: r(D.string)('PORO_BASE_URL'),
     }),
   )

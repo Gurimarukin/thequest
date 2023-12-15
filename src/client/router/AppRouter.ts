@@ -14,6 +14,7 @@ import { Either } from '../../shared/utils/fp'
 import { PartialGenericQuery } from '../models/genericQuery/PartialGenericQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
 import type { PlatformWithSummoner } from '../models/summoner/PlatformWithSummoner'
+import { adminParsers } from './AdminRouter'
 
 const { codec } = RouterUtils
 
@@ -118,6 +119,8 @@ export const appParsers = {
   login: p(loginMatch),
   register: p(registerMatch),
   discordRedirect: p(discordRedirectMatch),
+
+  anyAdmin: adminParsers.any,
 
   anyPlatform,
   anyPlatformRiotId,

@@ -101,7 +101,9 @@ function UserController(
           pipe(
             userService.createUserDiscord(discord),
             Future.map(Either.fromOption(() => 'Discord account already used')),
-            futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
+            futureEither.chainTaskEitherK(user =>
+              userService.signToken({ id: user.id, role: user.role }),
+            ),
             Future.chainFirstIOEitherK(() =>
               logger.info(
                 `Discord user created: ${discord.username}#${discord.discriminator} (${discord.id})`,
@@ -125,7 +127,9 @@ function UserController(
           Future.map(Either.fromOption(() => 'User name already used')),
         ),
       ),
-      futureEither.chainTaskEitherK(user => userService.signToken({ id: user.id })),
+      futureEither.chainTaskEitherK(user =>
+        userService.signToken({ id: user.id, role: user.role }),
+      ),
       M.fromTaskEither,
       M.ichain(Either.fold(M.sendWithStatus(Status.BadRequest), sendToken)),
     ),
@@ -139,6 +143,7 @@ function UserController(
         futureEither.chainTaskEitherK(u =>
           apply.sequenceS(Future.ApplyPar)({
             userName: Future.successful(User.userName(u)),
+            role: Future.successful(u.role),
             favoriteSearches: fetchFavoriteSearches(u.id, u.favoriteSearches),
             linkedRiotAccount: pipe(
               userService.getLinkedRiotAccount({ forceCacheRefresh: false })(u),

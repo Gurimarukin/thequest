@@ -509,6 +509,7 @@ const frFRTranslation: Translation = {
     ),
   },
   router: {
+    theQuest: 'La Quête',
     game: 'partie',
     aram: 'ARAM',
     factions: 'Factions',

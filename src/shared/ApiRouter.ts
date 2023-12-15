@@ -47,6 +47,10 @@ const userSelf = user.then(lit('self'))
 const userSelfFavorites = userSelf.then(lit('favorites'))
 const userLogin = user.then(lit('login'))
 const userRegister = user.then(lit('register'))
+
+const admin = api.then(lit('admin'))
+const adminHallOfFame = admin.then(lit('hallOfFame'))
+
 const madosayentisuto = api.then(lit('madosayentisuto'))
 
 // final
@@ -68,6 +72,7 @@ const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get
 // eslint-disable-next-line deprecation/deprecation
 const summonerByNameActiveGameLangGet = m(summonerByName.then(lit('activeGame')).then(langM), 'get')
 
+const summonerByRiotIdGet = m(summonerByRiotId, 'get')
 const summonerByRiotIdMasteriesGet = m(summonerByRiotId.then(lit('masteries')), 'get')
 const summonerByRiotIdActiveGameLangGet = m(
   summonerByRiotId.then(lit('activeGame').then(langM)),
@@ -86,6 +91,10 @@ const userLoginPasswordPost = m(userLogin.then(lit('password')), 'post')
 const userLogoutPost = m(user.then(lit('logout')), 'post')
 const userRegisterDiscordPost = m(userRegister.then(lit('discord')), 'post')
 const userRegisterPasswordPost = m(userRegister.then(lit('password')), 'post')
+
+const adminHallOfFameGet = m(adminHallOfFame, 'get')
+const adminHallOfFamePost = m(adminHallOfFame, 'post')
+
 const madosayentisutoStaticDataGet = m(madosayentisuto.then(lit('staticData')), 'get')
 const madosayentisutoUsersGetProgressionPost = m(
   madosayentisuto.then(lit('users')).then(lit('getProgression')),
@@ -111,6 +120,7 @@ export const apiParsers = {
       activeGame: { lang: { get: p(summonerByPuuidActiveGameLangGet) } },
     },
     byRiotId: {
+      get: p(summonerByRiotIdGet),
       masteries: { get: p(summonerByRiotIdMasteriesGet) },
       activeGame: { lang: { get: p(summonerByRiotIdActiveGameLangGet) } },
     },
@@ -138,6 +148,12 @@ export const apiParsers = {
     register: {
       discord: { post: p(userRegisterDiscordPost) },
       password: { post: p(userRegisterPasswordPost) },
+    },
+  },
+  admin: {
+    hallOfFame: {
+      get: p(adminHallOfFameGet),
+      post: p(adminHallOfFamePost),
     },
   },
   madosayentisuto: {
@@ -168,6 +184,7 @@ export const apiRoutes = {
     byRiotId: (platform: Platform) => (riotId_: RiotId) => {
       const riotId = RiotId.clean(riotId_)
       return {
+        get: r(summonerByRiotIdGet, { platform, riotId }),
         masteries: { get: r(summonerByRiotIdMasteriesGet, { platform, riotId }) },
         activeGame: (lang: Lang) => ({
           get: r(summonerByRiotIdActiveGameLangGet, { platform, riotId, lang }),
@@ -205,6 +222,12 @@ export const apiRoutes = {
     register: {
       discord: { post: r(userRegisterDiscordPost, {}) },
       password: { post: r(userRegisterPasswordPost, {}) },
+    },
+  },
+  admin: {
+    hallOfFame: {
+      get: r(adminHallOfFameGet, {}),
+      post: r(adminHallOfFamePost, {}),
     },
   },
 }

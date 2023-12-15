@@ -8,7 +8,8 @@ import { lens } from 'monocle-ts'
 
 import { PlatformWithPuuid } from '../../../shared/models/api/summoner/PlatformWithPuuid'
 import { UserName } from '../../../shared/models/api/user/UserName'
-import { List } from '../../../shared/utils/fp'
+import { UserRole } from '../../../shared/models/api/user/UserRole'
+import { List, immutableAssign } from '../../../shared/utils/fp'
 
 import { UserId } from './UserId'
 import { UserLogin } from './UserLogin'
@@ -17,6 +18,7 @@ type User<A extends UserLogin> = {
   id: UserId
   login: A
   favoriteSearches: List<PlatformWithPuuid>
+  role: UserRole
 }
 
 type UserOutput = E.OutputOf<typeof encoder>
@@ -28,6 +30,7 @@ const decoder = <A extends UserLogin>(
     id: UserId.codec,
     login: loginDecoder,
     favoriteSearches: List.codec(PlatformWithPuuid.codec),
+    role: UserRole.codec,
   })
 
 const encoder = E.struct({
@@ -38,11 +41,14 @@ const encoder = E.struct({
 
 const codec: Codec<unknown, UserOutput, User<UserLogin>> = C.make(decoder(UserLogin.codec), encoder)
 
-const of = <A extends UserLogin>(
+function construct<A extends UserLogin>(
   id: UserId,
   login: A,
   favoriteSearches: List<PlatformWithPuuid>,
-): User<A> => ({ id, login, favoriteSearches })
+  role: UserRole,
+): User<A> {
+  return { id, login, favoriteSearches, role }
+}
 
 const userName = (user: User<UserLogin>): string => {
   switch (user.login.type) {
@@ -57,6 +63,6 @@ const Lens = {
   login: pipe(lens.id<User<UserLogin>>(), lens.prop('login')),
 }
 
-const User = { decoder, codec, of, userName, Lens }
+const User = immutableAssign(construct, { decoder, codec, userName, Lens })
 
 export { User, UserOutput }

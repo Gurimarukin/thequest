@@ -22,6 +22,7 @@ import type { ChampionShardsView } from '../../shared/models/api/summoner/Champi
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
+import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { RiotId } from '../../shared/models/riot/RiotId'
 import type { SummonerName } from '../../shared/models/riot/SummonerName'
@@ -91,6 +92,24 @@ const SummonerController = (
   const logger = Logger('SummonerController')
 
   return {
+    summonerShortByRiotId: (platform: Platform, riotId_: RiotId): EndedMiddleware =>
+      pipe(
+        riotAccountService.findByRiotId(riotId_),
+        futureMaybe.chain(({ riotId, puuid }) =>
+          pipe(
+            summonerService.findByPuuid(platform, puuid),
+            futureMaybe.map((s): SummonerShort => ({ ...s, riotId })),
+          ),
+        ),
+        M.fromTaskEither,
+        M.ichain(
+          Maybe.fold(
+            () => M.sendWithStatus(Status.NotFound)('Summoner not found'),
+            M.json(SummonerShort.codec),
+          ),
+        ),
+      ),
+
     masteriesByPuuid:
       (platform: Platform, puuid: Puuid) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
