@@ -1,7 +1,8 @@
 import { apply, readonlyMap } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
-import { MadosayentisutoInfos } from '../../shared/models/api/MadosayentisutoInfos'
+import { MadosayentisutoInfos } from '../../shared/models/api/madosayentisuto/MadosayentisutoInfos'
+import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { Future, List, getTrivialOrd } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
@@ -27,29 +28,32 @@ function AdminController(
   riotAccountService: RiotAccountService,
   summonerService: SummonerService,
 ) {
+  const listHallOfFameMembers: Future<ReadonlyMap<DiscordUserId, SummonerShort>> = pipe(
+    hallOfFameMemberService.listAll,
+    Future.chain(members =>
+      discordUserIdMapTraversable.traverse(Future.ApplicativePar)(members, m =>
+        pipe(
+          summonerService.findByPuuid(m.platform, m.puuid),
+          futureMaybe.apS(
+            'riotId',
+            pipe(
+              riotAccountService.findByPuuid(m.puuid),
+              futureMaybe.map(a => a.riotId),
+            ),
+          ),
+        ),
+      ),
+    ),
+    Future.map(readonlyMap.compact),
+  )
+
   return {
     listMadosayentisuto: (user: TokenContent) =>
       WithPermissions.admin.madosayentisuto.list(user.role)(
         pipe(
           apply.sequenceT(Future.ApplyPar)(
             discordService.v10.guilds(config.guildId).members.get,
-            pipe(
-              hallOfFameMemberService.listAll,
-              Future.chain(members =>
-                discordUserIdMapTraversable.traverse(Future.ApplicativePar)(members, m =>
-                  pipe(
-                    summonerService.findByPuuid(m.platform, m.puuid),
-                    futureMaybe.apS(
-                      'riotId',
-                      pipe(
-                        riotAccountService.findByPuuid(m.puuid),
-                        futureMaybe.map(a => a.riotId),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            listHallOfFameMembers,
           ),
           Future.map(
             ([guidMembers, hallOfFameMembers]): MadosayentisutoInfos => ({
@@ -57,7 +61,7 @@ function AdminController(
                 guidMembers,
                 List.map(m => m.user),
               ),
-              hallOfFameMembers: pipe(hallOfFameMembers, readonlyMap.compact),
+              hallOfFameMembers,
             }),
           ),
           M.fromTaskEither,

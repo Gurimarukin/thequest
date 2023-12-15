@@ -71,6 +71,7 @@ const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get
 // eslint-disable-next-line deprecation/deprecation
 const summonerByNameActiveGameLangGet = m(summonerByName.then(lit('activeGame')).then(langM), 'get')
 
+const summonerByRiotIdGet = m(summonerByRiotId, 'get')
 const summonerByRiotIdMasteriesGet = m(summonerByRiotId.then(lit('masteries')), 'get')
 const summonerByRiotIdActiveGameLangGet = m(
   summonerByRiotId.then(lit('activeGame').then(langM)),
@@ -117,6 +118,7 @@ export const apiParsers = {
       activeGame: { lang: { get: p(summonerByPuuidActiveGameLangGet) } },
     },
     byRiotId: {
+      get: p(summonerByRiotIdGet),
       masteries: { get: p(summonerByRiotIdMasteriesGet) },
       activeGame: { lang: { get: p(summonerByRiotIdActiveGameLangGet) } },
     },
@@ -177,6 +179,7 @@ export const apiRoutes = {
     byRiotId: (platform: Platform) => (riotId_: RiotId) => {
       const riotId = RiotId.clean(riotId_)
       return {
+        get: r(summonerByRiotIdGet, { platform, riotId }),
         masteries: { get: r(summonerByRiotIdMasteriesGet, { platform, riotId }) },
         activeGame: (lang: Lang) => ({
           get: r(summonerByRiotIdActiveGameLangGet, { platform, riotId, lang }),

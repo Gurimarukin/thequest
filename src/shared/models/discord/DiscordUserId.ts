@@ -1,4 +1,5 @@
-import { eq, string } from 'fp-ts'
+import type { eq } from 'fp-ts'
+import { ord, string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { type Newtype, iso } from 'newtype-ts'
@@ -11,8 +12,9 @@ const { unwrap } = iso<DiscordUserId>()
 
 const codec = fromNewtype<DiscordUserId>(C.string)
 
-const Eq: eq.Eq<DiscordUserId> = pipe(string.Eq, eq.contramap(unwrap))
+const Ord: ord.Ord<DiscordUserId> = pipe(string.Ord, ord.contramap(unwrap))
+const Eq: eq.Eq<DiscordUserId> = Ord
 
-const DiscordUserId = { codec, Eq }
+const DiscordUserId = { codec, unwrap, Ord, Eq }
 
 export { DiscordUserId }

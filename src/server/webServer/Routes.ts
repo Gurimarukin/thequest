@@ -52,6 +52,9 @@ export const Routes = (
       maybeWithAuth(summonerController.activeGameByName(lang, platform, summonerName)),
     ),
 
+    m(api.summoner.byRiotId.get, ({ platform, riotId }) =>
+      summonerController.summonerShortByRiotId(platform, riotId),
+    ),
     m(api.summoner.byRiotId.masteries.get, ({ platform, riotId }) =>
       maybeWithAuth(summonerController.masteriesByRiotId(platform, riotId)),
     ),

@@ -3,9 +3,9 @@ import type { AnyBulkWriteOperation } from 'mongodb'
 
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import type { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
-import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
+import { Either, Future, List, NonEmptyArray } from '../../shared/utils/fp'
+import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { FpCollection } from '../helpers/FpCollection'
 import type { HallOfFameMemberOutput } from '../models/HallOfFameMember'
@@ -27,7 +27,16 @@ function HallOfFameMemberPersistence(Logger: LoggerGetter, mongoCollection: Mong
     { key: { userId: -1, puuid: -1 }, unique: true },
   ])
 
-  const listAll: TObservable<HallOfFameMember> = collection.findAll()({})
+  const listAll: Future<List<HallOfFameMember>> = pipe(
+    collection.collection.future(c => c.find({}).toArray()),
+    Future.chainEitherK(as =>
+      pipe(
+        List.decoder(HallOfFameMember.codec).decode(as),
+        Either.mapLeft(decodeError('List<HallOfFameMember>')(as)),
+      ),
+    ),
+    Future.chainFirstIOEitherK(as => logger.trace(`Found all ${as.length} documents`)),
+  )
 
   return {
     ensureIndexes,

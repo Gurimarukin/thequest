@@ -3,8 +3,7 @@ import { pipe } from 'fp-ts/function'
 
 import type { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import { Sink } from '../../shared/models/rx/Sink'
-import { type Future, emptyReadonlyMap } from '../../shared/utils/fp'
+import { Future, List, emptyReadonlyMap } from '../../shared/utils/fp'
 
 import type { HallOfFameMemberPersistence } from '../persistence/HallOfFameMemberPersistence'
 
@@ -14,10 +13,15 @@ type HallOfFameMemberService = ReturnType<typeof HallOfFameMemberService>
 function HallOfFameMemberService(hallOfFameMemberPersistence: HallOfFameMemberPersistence) {
   const listAll: Future<ReadonlyMap<DiscordUserId, PlatformWithPuuid>> = pipe(
     hallOfFameMemberPersistence.listAll,
-    Sink.reduce(emptyReadonlyMap<DiscordUserId, PlatformWithPuuid>(), (acc, m) =>
-      pipe(
-        acc,
-        readonlyMap.upsertAt(DiscordUserId.Eq)(m.userId, { platform: m.platform, puuid: m.puuid }),
+    Future.map(
+      List.reduce(emptyReadonlyMap<DiscordUserId, PlatformWithPuuid>(), (acc, m) =>
+        pipe(
+          acc,
+          readonlyMap.upsertAt(DiscordUserId.Eq)(m.userId, {
+            platform: m.platform,
+            puuid: m.puuid,
+          }),
+        ),
       ),
     ),
   )
