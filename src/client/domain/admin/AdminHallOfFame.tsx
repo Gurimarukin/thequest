@@ -18,7 +18,7 @@ import { GameName } from '../../../shared/models/riot/GameName'
 import { RiotId } from '../../../shared/models/riot/RiotId'
 import { TagLine } from '../../../shared/models/riot/TagLine'
 import { MapUtils } from '../../../shared/utils/MapUtils'
-import { Either, Future, List, Maybe, Tuple, getTrivialOrd } from '../../../shared/utils/fp'
+import { Either, Future, List, Maybe, Tuple, idcOrd } from '../../../shared/utils/fp'
 
 import { apiAdminMadosayentisutoPost, apiSummonerGet } from '../../api'
 import { AsyncRenderer } from '../../components/AsyncRenderer'
@@ -113,7 +113,7 @@ const Loaded: React.FC<LoadedProps> = ({ infos }) => {
           <Pending
             guildMembers={pipe(
               infos.guildMembers,
-              List.differenceW(byIdEq)(pipe(members, readonlyMap.keys(getTrivialOrd(byIdEq)))),
+              List.differenceW(byIdEq)(pipe(members, readonlyMap.keys(idcOrd(byIdEq)))),
             )}
             addPending={addPending}
           />
@@ -174,7 +174,7 @@ function toPartial({
 }: HallOfFameInfos): ReadonlyMap<PartialDiscordUser, SummonerShort | undefined> {
   return pipe(
     hallOfFameMembers,
-    readonlyMap.toReadonlyArray(getTrivialOrd(DiscordUserId.Eq)),
+    readonlyMap.toReadonlyArray(idcOrd(DiscordUserId.Eq)),
     List.map(
       Tuple.map(id =>
         pipe(
@@ -192,7 +192,7 @@ function isDefined(u: PartialDiscordUser): u is DiscordUserView {
   return ((u as DiscordUserView).username as string | undefined) !== undefined
 }
 
-const traversable = readonlyMap.getTraversable(getTrivialOrd(byIdEq))
+const traversable = readonlyMap.getTraversable(idcOrd(byIdEq))
 
 function validate(
   members: ReadonlyMap<PartialDiscordUser, SummonerShort | undefined>,
@@ -201,7 +201,7 @@ function validate(
     traversable.traverse(Maybe.Applicative)(members, Maybe.fromNullable),
     Maybe.map(
       flow(
-        readonlyMap.toReadonlyArray(getTrivialOrd(byIdEq)),
+        readonlyMap.toReadonlyArray(idcOrd(byIdEq)),
         List.map(Tuple.mapFst(u => u.id)),
         MapUtils.fromReadonlyArray(DiscordUserId.Eq),
       ),

@@ -60,7 +60,7 @@ export function immutableAssign<
 /**
  * Like ord.trivial, but with actual equals.
  */
-export function getTrivialOrd<A>(eq: Eq<A>): Ord<A> {
+export function idcOrd<A>(eq: Eq<A>): Ord<A> {
   return { equals: eq.equals, compare: ord.trivial.compare }
 }
 

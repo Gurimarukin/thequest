@@ -6,7 +6,7 @@ import { HallOfFameInfos } from '../../shared/models/api/hallOfFame/HallOfFameIn
 import { HallOfFameMembersPayload } from '../../shared/models/api/hallOfFame/HallOfFameMembersPayload'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import { Future, List, Maybe, getTrivialOrd } from '../../shared/utils/fp'
+import { Future, List, Maybe, idcOrd } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { MadosayentisutoConfig } from '../config/Config'
@@ -18,7 +18,7 @@ import type { SummonerService } from '../services/SummonerService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import { WithPermissions } from '../webServer/utils/WithPermissions'
 
-const discordUserIdMapTraversable = readonlyMap.getTraversable(getTrivialOrd(DiscordUserId.Eq))
+const discordUserIdMapTraversable = readonlyMap.getTraversable(idcOrd(DiscordUserId.Eq))
 
 type AdminController = ReturnType<typeof AdminController>
 

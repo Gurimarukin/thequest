@@ -24,7 +24,7 @@ import {
   Maybe,
   NonEmptyArray,
   Tuple,
-  getTrivialOrd,
+  idcOrd,
 } from '../../../shared/utils/fp'
 import { futureMaybe } from '../../../shared/utils/futureMaybe'
 
@@ -270,7 +270,7 @@ const enrichChampions = (
 
   return pipe(
     aramChanges,
-    readonlyMap.reduceWithIndex<ChampionEnglishName>(getTrivialOrd(ChampionEnglishName.Eq))(
+    readonlyMap.reduceWithIndex<ChampionEnglishName>(idcOrd(ChampionEnglishName.Eq))(
       withoutAramChanges,
       (englishName, acc, spells) =>
         pipe(

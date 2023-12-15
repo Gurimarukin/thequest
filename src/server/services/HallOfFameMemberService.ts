@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/function'
 
 import type { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import { Future, List, emptyReadonlyMap, getTrivialOrd } from '../../shared/utils/fp'
+import { Future, List, emptyReadonlyMap, idcOrd } from '../../shared/utils/fp'
 
 import type { HallOfFameMember } from '../models/HallOfFameMember'
 import type { HallOfFameMemberPersistence } from '../persistence/HallOfFameMemberPersistence'
@@ -36,7 +36,7 @@ function HallOfFameMemberService(hallOfFameMemberPersistence: HallOfFameMemberPe
         Future.chain(a => {
           const list = pipe(
             members,
-            readonlyMap.toReadonlyArray(getTrivialOrd(DiscordUserId.Eq)),
+            readonlyMap.toReadonlyArray(idcOrd(DiscordUserId.Eq)),
             List.map(
               ([userId, { puuid, platform }]): HallOfFameMember => ({ userId, puuid, platform }),
             ),
