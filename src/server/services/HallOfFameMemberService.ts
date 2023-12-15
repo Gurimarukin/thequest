@@ -3,8 +3,9 @@ import { pipe } from 'fp-ts/function'
 
 import type { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import { Future, List, emptyReadonlyMap } from '../../shared/utils/fp'
+import { Future, List, emptyReadonlyMap, getTrivialOrd } from '../../shared/utils/fp'
 
+import type { HallOfFameMember } from '../models/HallOfFameMember'
 import type { HallOfFameMemberPersistence } from '../persistence/HallOfFameMemberPersistence'
 
 type HallOfFameMemberService = ReturnType<typeof HallOfFameMemberService>
@@ -26,7 +27,30 @@ function HallOfFameMemberService(hallOfFameMemberPersistence: HallOfFameMemberPe
     ),
   )
 
-  return { listAll }
+  return {
+    listAll,
+
+    storeAll: (members: ReadonlyMap<DiscordUserId, PlatformWithPuuid>): Future<boolean> =>
+      pipe(
+        hallOfFameMemberPersistence.deleteAll,
+        Future.chain(a => {
+          const list = pipe(
+            members,
+            readonlyMap.toReadonlyArray(getTrivialOrd(DiscordUserId.Eq)),
+            List.map(
+              ([userId, { puuid, platform }]): HallOfFameMember => ({ userId, puuid, platform }),
+            ),
+          )
+
+          return pipe(
+            List.isNonEmpty(list)
+              ? hallOfFameMemberPersistence.insertMany(list)
+              : Future.successful(true),
+            Future.map(b => a && b),
+          )
+        }),
+      ),
+  }
 }
 
 export { HallOfFameMemberService }

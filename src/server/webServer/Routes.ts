@@ -83,6 +83,7 @@ export const Routes = (
     ),
 
     m(api.admin.madosayentisuto.get, () => withAuth(adminController.listMadosayentisuto)),
+    m(api.admin.madosayentisuto.post, () => withAuth(adminController.updateMadosayentisuto)),
 
     m(api.madosayentisuto.staticData.get, () => madosayentisutoController.getStaticData),
     m(

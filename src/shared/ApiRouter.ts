@@ -49,6 +49,7 @@ const userLogin = user.then(lit('login'))
 const userRegister = user.then(lit('register'))
 
 const admin = api.then(lit('admin'))
+const adminMadosayentisuto = admin.then(lit('madosayentisuto'))
 
 const madosayentisuto = api.then(lit('madosayentisuto'))
 
@@ -91,7 +92,8 @@ const userLogoutPost = m(user.then(lit('logout')), 'post')
 const userRegisterDiscordPost = m(userRegister.then(lit('discord')), 'post')
 const userRegisterPasswordPost = m(userRegister.then(lit('password')), 'post')
 
-const adminMadosayentisutoGet = m(admin.then(lit('madosayentisuto')), 'get')
+const adminMadosayentisutoGet = m(adminMadosayentisuto, 'get')
+const adminMadosayentisutoPost = m(adminMadosayentisuto, 'post')
 
 const madosayentisutoStaticDataGet = m(madosayentisuto.then(lit('staticData')), 'get')
 const madosayentisutoUsersGetProgressionPost = m(
@@ -149,7 +151,10 @@ export const apiParsers = {
     },
   },
   admin: {
-    madosayentisuto: { get: p(adminMadosayentisutoGet) },
+    madosayentisuto: {
+      get: p(adminMadosayentisutoGet),
+      post: p(adminMadosayentisutoPost),
+    },
   },
   madosayentisuto: {
     staticData: { get: p(madosayentisutoStaticDataGet) },
@@ -220,7 +225,10 @@ export const apiRoutes = {
     },
   },
   admin: {
-    madosayentisuto: { get: r(adminMadosayentisutoGet, {}) },
+    madosayentisuto: {
+      get: r(adminMadosayentisutoGet, {}),
+      post: r(adminMadosayentisutoPost, {}),
+    },
   },
 }
 

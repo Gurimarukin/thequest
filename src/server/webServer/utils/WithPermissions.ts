@@ -17,6 +17,7 @@ export const WithPermissions = {
   admin: {
     madosayentisuto: {
       list: allow(Permissions.canViewAdmin),
+      update: allow(Permissions.canUpdateAdmin),
     },
   },
 }

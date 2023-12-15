@@ -1,7 +1,8 @@
 import type { UserRole } from './models/api/user/UserRole'
 
-function canViewAdmin(role: UserRole): boolean {
-  return role === 'admin'
-}
+const isAdmin = (role: UserRole): boolean => role === 'admin'
 
-export const Permissions = { canViewAdmin }
+export const Permissions = {
+  canViewAdmin: isAdmin,
+  canUpdateAdmin: isAdmin,
+}
