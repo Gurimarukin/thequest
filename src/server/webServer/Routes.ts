@@ -82,8 +82,8 @@ export const Routes = (
       rateLimiter(2, MsDuration.minute(1))(userController.registerPassword),
     ),
 
-    m(api.admin.madosayentisuto.get, () => withAuth(adminController.listMadosayentisuto)),
-    m(api.admin.madosayentisuto.post, () => withAuth(adminController.updateMadosayentisuto)),
+    m(api.admin.hallOfFame.get, () => withAuth(adminController.listHallOfFame)),
+    m(api.admin.hallOfFame.post, () => withAuth(adminController.updateHallOfFame)),
 
     m(api.madosayentisuto.staticData.get, () => madosayentisutoController.getStaticData),
     m(

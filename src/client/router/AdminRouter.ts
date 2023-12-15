@@ -6,7 +6,7 @@ import { end, format, lit } from 'fp-ts-routing'
  */
 
 const admin = lit('admin')
-const adminMadosayentisuto = admin.then(lit('madosayentisuto'))
+const adminHallOfFame = admin.then(lit('hall-of-fame'))
 
 /**
  * parsers
@@ -16,7 +16,7 @@ const adminMadosayentisuto = admin.then(lit('madosayentisuto'))
 
 export const adminParsers = {
   index: p(admin),
-  madosayentisuto: p(adminMadosayentisuto),
+  hallOfFame: p(adminHallOfFame),
 
   any: admin.parser,
 }
@@ -27,7 +27,7 @@ export const adminParsers = {
 
 export const adminRoutes = {
   index: format(admin.formatter, {}),
-  madosayentisuto: format(adminMadosayentisuto.formatter, {}),
+  hallOfFame: format(adminHallOfFame.formatter, {}),
 }
 
 function p<A>(match: Match<A>): Parser<A> {

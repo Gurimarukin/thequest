@@ -15,7 +15,7 @@ const allow =
 
 export const WithPermissions = {
   admin: {
-    madosayentisuto: {
+    hallOfFame: {
       list: allow(Permissions.canViewAdmin),
       update: allow(Permissions.canUpdateAdmin),
     },

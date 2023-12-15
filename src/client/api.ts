@@ -2,7 +2,7 @@ import { pipe } from 'fp-ts/function'
 
 import { apiRoutes } from '../shared/ApiRouter'
 import type { Platform } from '../shared/models/api/Platform'
-import { HallOfFameMembersPayload } from '../shared/models/api/madosayentisuto/HallOfFameMembersPayload'
+import { HallOfFameMembersPayload } from '../shared/models/api/hallOfFame/HallOfFameMembersPayload'
 import { ChampionShardsPayload } from '../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../shared/models/api/summoner/PlatformWithPuuid'
 import { Puuid } from '../shared/models/api/summoner/Puuid'
@@ -56,7 +56,7 @@ export function apiUserSelfSummonerChampionsShardsCountPost(
 }
 
 export function apiAdminMadosayentisutoPost(payload: HallOfFameMembersPayload): Future<unknown> {
-  return http(apiRoutes.admin.madosayentisuto.post, {
+  return http(apiRoutes.admin.hallOfFame.post, {
     json: [HallOfFameMembersPayload.codec, payload],
   })
 }

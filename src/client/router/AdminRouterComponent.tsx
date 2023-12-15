@@ -3,7 +3,7 @@ import { zero } from 'fp-ts-routing'
 import { Loading } from '../components/Loading'
 import { Navigate } from '../components/Navigate'
 import { useUser } from '../contexts/UserContext'
-import { AdminMadosayentisuto } from '../domain/admin/AdminMadosayentisuto'
+import { AdminHallOfFame } from '../domain/admin/AdminHallOfFame'
 import { AsyncState } from '../models/AsyncState'
 import { adminParsers, adminRoutes } from './AdminRouter'
 import type { ElementWithTitle } from './getRouterComponent'
@@ -11,14 +11,8 @@ import { e, getRouterComponent } from './getRouterComponent'
 
 const RouterComponent = getRouterComponent(
   zero<ElementWithTitle>()
-    .alt(
-      adminParsers.index.map(() => e(<Navigate to={adminRoutes.madosayentisuto} replace={true} />)),
-    )
-    .alt(
-      adminParsers.madosayentisuto.map(() =>
-        e(<AdminMadosayentisuto />, () => 'Admin - Madosayentisuto'),
-      ),
-    ),
+    .alt(adminParsers.index.map(() => e(<Navigate to={adminRoutes.hallOfFame} replace={true} />)))
+    .alt(adminParsers.hallOfFame.map(() => e(<AdminHallOfFame />, () => 'Admin - Hall of Fame'))),
 )
 
 const AdminRouterComponent: React.FC = () => {

@@ -2,8 +2,8 @@ import { apply, readonlyMap } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import { Status } from 'hyper-ts'
 
-import { HallOfFameMembersPayload } from '../../shared/models/api/madosayentisuto/HallOfFameMembersPayload'
-import { MadosayentisutoInfos } from '../../shared/models/api/madosayentisuto/MadosayentisutoInfos'
+import { HallOfFameInfos } from '../../shared/models/api/hallOfFame/HallOfFameInfos'
+import { HallOfFameMembersPayload } from '../../shared/models/api/hallOfFame/HallOfFameMembersPayload'
 import type { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { Future, List, Maybe, getTrivialOrd } from '../../shared/utils/fp'
@@ -50,15 +50,15 @@ function AdminController(
   )
 
   return {
-    listMadosayentisuto: (user: TokenContent): EndedMiddleware =>
-      WithPermissions.admin.madosayentisuto.list(user.role)(
+    listHallOfFame: (user: TokenContent): EndedMiddleware =>
+      WithPermissions.admin.hallOfFame.list(user.role)(
         pipe(
           apply.sequenceT(Future.ApplyPar)(
             discordService.v10.guilds(config.guildId).members.get,
             listHallOfFameMembers,
           ),
           Future.map(
-            ([guidMembers, hallOfFameMembers]): MadosayentisutoInfos => ({
+            ([guidMembers, hallOfFameMembers]): HallOfFameInfos => ({
               guildMembers: pipe(
                 guidMembers,
                 List.map(m => m.user),
@@ -67,12 +67,12 @@ function AdminController(
             }),
           ),
           M.fromTaskEither,
-          M.ichain(M.json(MadosayentisutoInfos.codec)),
+          M.ichain(M.json(HallOfFameInfos.codec)),
         ),
       ),
 
-    updateMadosayentisuto: (user: TokenContent): EndedMiddleware =>
-      WithPermissions.admin.madosayentisuto.update(user.role)(
+    updateHallOfFame: (user: TokenContent): EndedMiddleware =>
+      WithPermissions.admin.hallOfFame.update(user.role)(
         EndedMiddleware.withBody(HallOfFameMembersPayload.codec)(members =>
           pipe(
             discordUserIdMapTraversable.traverse(futureMaybe.ApplicativePar)(

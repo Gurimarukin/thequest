@@ -6,7 +6,7 @@ import { DiscordUserId } from '../../discord/DiscordUserId'
 import { SummonerShort } from '../summoner/SummonerShort'
 import { DiscordUserView } from './DiscordUserView'
 
-type MadosayentisutoInfos = C.TypeOf<typeof codec>
+type HallOfFameInfos = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   guildMembers: List.codec(DiscordUserView.codec),
@@ -16,6 +16,6 @@ const codec = C.struct({
   ),
 })
 
-const MadosayentisutoInfos = { codec }
+const HallOfFameInfos = { codec }
 
-export { MadosayentisutoInfos }
+export { HallOfFameInfos }

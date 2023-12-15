@@ -9,8 +9,8 @@ import Select from 'react-select'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import { Platform } from '../../../shared/models/api/Platform'
-import type { DiscordUserView } from '../../../shared/models/api/madosayentisuto/DiscordUserView'
-import { MadosayentisutoInfos } from '../../../shared/models/api/madosayentisuto/MadosayentisutoInfos'
+import type { DiscordUserView } from '../../../shared/models/api/hallOfFame/DiscordUserView'
+import { HallOfFameInfos } from '../../../shared/models/api/hallOfFame/HallOfFameInfos'
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { GameName } from '../../../shared/models/riot/GameName'
@@ -30,12 +30,12 @@ import { CheckMarkSharp, CloseFilled } from '../../imgs/svgs/icons'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 
-export const AdminMadosayentisuto: React.FC = () => (
+export const AdminHallOfFame: React.FC = () => (
   <MainLayout>
     <AsyncRenderer
-      {...useSWRHttp(apiRoutes.admin.madosayentisuto.get, { timeout: 60000 }, [
-        MadosayentisutoInfos.codec,
-        'MadosayentisutoInfos',
+      {...useSWRHttp(apiRoutes.admin.hallOfFame.get, { timeout: 60000 }, [
+        HallOfFameInfos.codec,
+        'HallOfFameInfos',
       ])}
     >
       {infos => <Loaded infos={infos} />}
@@ -44,7 +44,7 @@ export const AdminMadosayentisuto: React.FC = () => (
 )
 
 type LoadedProps = {
-  infos: MadosayentisutoInfos
+  infos: HallOfFameInfos
 }
 
 const Loaded: React.FC<LoadedProps> = ({ infos }) => {
