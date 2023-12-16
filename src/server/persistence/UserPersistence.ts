@@ -6,7 +6,6 @@ import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWith
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { UserName } from '../../shared/models/api/user/UserName'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import { TObservable } from '../../shared/models/rx/TObservable'
 import type { NotUsed } from '../../shared/utils/fp'
 import { Future, List, Maybe, NonEmptyArray, Tuple, toNotUsed } from '../../shared/utils/fp'
 
@@ -46,15 +45,6 @@ function UserPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionG
       const encoded = DiscordUserId.codec.encode(id)
       return collection.findOne({
         $or: [{ [Keys.loginDiscordId]: encoded }, { [Keys.loginPasswordDiscordId]: encoded }],
-      })
-    },
-
-    findAllByLoginDiscordId: (users: List<DiscordUserId>): TObservable<User<UserLogin>> => {
-      if (!List.isNonEmpty(users)) return TObservable.empty()
-
-      const inUsers = { $in: NonEmptyArray.encoder(DiscordUserId.codec).encode(users) }
-      return collection.findAll()({
-        $or: [{ [Keys.loginDiscordId]: inUsers }, { [Keys.loginPasswordDiscordId]: inUsers }],
       })
     },
 

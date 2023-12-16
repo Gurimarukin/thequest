@@ -462,12 +462,12 @@ const SummonerComponent: React.FC<SummonerComponentProp> = ({
   const { assets } = useStaticData()
   return (
     <div className={cx('flex items-center gap-2', className)}>
-      <img src={assets.summonerIcon(profileIconId)} className="h-8 w-8" />
-      <div>
+      <img src={assets.summonerIcon(profileIconId)} className="h-8 w-8 shrink-0" />
+      <div className="grow">
         <span className="text-goldenrod">{GameName.unwrap(gameName)}</span>
         <span className="text-grey-500">#{TagLine.unwrap(tagLine)}</span>
       </div>
-      <span className="text-white">{platform}</span>
+      <span className="shrink-0 text-white">{platform}</span>
     </div>
   )
 }

@@ -20,7 +20,7 @@ const MigrationPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollec
   )
 
   const alreadyApplied: Future<List<DayJs>> = pipe(
-    collection.findAll([MigrationCreatedAt.decoder, 'MigrationCreatedAt'])(
+    collection.findAllObs([MigrationCreatedAt.decoder, 'MigrationCreatedAt'])(
       {},
       { projection: { createdAt: 1 } },
     ),

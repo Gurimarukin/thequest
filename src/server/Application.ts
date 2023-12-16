@@ -75,8 +75,10 @@ export const Application = ({
     config.madosayentisuto,
     withIp,
     ddragonService,
+    hallOfFameMemberService,
     masteriesService,
-    userService,
+    riotAccountService,
+    summonerService,
     staticDataController,
   )
 

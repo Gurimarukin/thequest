@@ -7,7 +7,7 @@
 - menu react-popper?
 - challenge progression discord notification
 - account menu
-- forget about Discord Riot Connection, create BO and link by hand
+- forget about Discord Riot Connection, remove getLinkedRiotAccount
 
 - limit favorites
 - modal: trap focus

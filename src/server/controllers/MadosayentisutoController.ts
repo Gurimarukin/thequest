@@ -8,19 +8,19 @@ import type { Lang } from '../../shared/models/api/Lang'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
-import { Sink } from '../../shared/models/rx/Sink'
-import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
-import type { Future } from '../../shared/utils/fp'
-import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { Future, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { MadosayentisutoConfig } from '../config/Config'
+import type { HallOfFameMember } from '../models/HallOfFameMember'
 import { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
 import type { DDragonService } from '../services/DDragonService'
+import type { HallOfFameMemberService } from '../services/HallOfFameMemberService'
 import type { MasteriesService } from '../services/MasteriesService'
-import type { SummonerWithDiscordInfos, UserService } from '../services/UserService'
+import type { RiotAccountService } from '../services/RiotAccountService'
+import type { SummonerService } from '../services/SummonerService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import type { WithIp } from '../webServer/utils/WithIp'
 import type { StaticDataController } from './StaticDataController'
@@ -38,8 +38,10 @@ const MadosayentisutoController = (
   config: MadosayentisutoConfig,
   withIp: WithIp,
   ddragonService: DDragonService,
+  hallOfFameMemberService: HallOfFameMemberService,
   masteriesService: MasteriesService,
-  userService: UserService,
+  riotAccountService: RiotAccountService,
+  summonerService: SummonerService,
   staticDataController: StaticDataController,
 ) => {
   const getStaticData: EndedMiddleware = withIpAndToken(staticDataController.staticData(lang))
@@ -47,13 +49,9 @@ const MadosayentisutoController = (
   const getUsersProgression: EndedMiddleware = withIpAndToken(
     EndedMiddleware.withBody(NonEmptyArray.decoder(DiscordUserId.codec))(
       flow(
-        userService.findAllByLoginDiscordId,
-        TObservable.chainTaskEitherK(userService.getLinkedRiotAccount({ forceCacheRefresh: true })),
-        TObservable.chainTaskEitherK(
-          flow(futureMaybe.fromOption, futureMaybe.chain(toProgression)),
-        ),
-        TObservable.compact,
-        Sink.readonlyArray,
+        hallOfFameMemberService.listForUsers,
+        Future.chain(List.traverse(Future.ApplicativePar)(toProgression)),
+        Future.map(List.compact),
         M.fromTaskEither,
         M.ichain(M.json(List.encoder(TheQuestProgression.encoder))),
       ),
@@ -66,24 +64,27 @@ const MadosayentisutoController = (
   }
 
   function toProgression({
-    summoner,
-    discord,
-  }: SummonerWithDiscordInfos): Future<Maybe<TheQuestProgression>> {
+    userId,
+    platform,
+    puuid,
+  }: HallOfFameMember): Future<Maybe<TheQuestProgression>> {
     return pipe(
       // TODO: maybe log failed requests below
-      apply.sequenceS(futureMaybe.ApplyPar)({
-        masteries: masteriesService.findBySummoner(summoner.platform, summoner.puuid, {
+      apply.sequenceT(futureMaybe.ApplyPar)(
+        riotAccountService.findByPuuid(puuid),
+        summonerService.findByPuuid(platform, puuid),
+        masteriesService.findBySummoner(platform, puuid, {
           forceCacheRefresh: true,
         }),
-        staticData: futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),
-      }),
-      futureMaybe.map(({ masteries: { champions }, staticData }): TheQuestProgression => {
+        futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),
+      ),
+      futureMaybe.map(([{ riotId }, summoner, { champions }, staticData]): TheQuestProgression => {
         return {
-          userId: discord.id,
+          userId,
           summoner: {
             id: summoner.id,
             platform: summoner.platform,
-            riotId: summoner.riotId,
+            riotId,
             profileIconId: summoner.profileIconId,
           },
           percents: pipe(

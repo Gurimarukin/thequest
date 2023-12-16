@@ -30,6 +30,8 @@ function HallOfFameMemberService(hallOfFameMemberPersistence: HallOfFameMemberPe
   return {
     listAll,
 
+    listForUsers: hallOfFameMemberPersistence.listForUsers,
+
     storeAll: (members: ReadonlyMap<DiscordUserId, PlatformWithPuuid>): Future<boolean> =>
       pipe(
         hallOfFameMemberPersistence.deleteAll,

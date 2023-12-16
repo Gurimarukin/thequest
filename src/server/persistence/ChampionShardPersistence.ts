@@ -33,7 +33,7 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
     ensureIndexes,
 
     listForSummoner: (user: UserId, summoner: SummonerId): TObservable<ChampionShardsDb> =>
-      collection.findAll()({
+      collection.findAllObs()({
         user: UserId.codec.encode(user),
         summoner: SummonerId.codec.encode(summoner),
       }),

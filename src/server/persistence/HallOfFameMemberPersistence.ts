@@ -1,8 +1,8 @@
 import { pipe } from 'fp-ts/function'
 
-import type { NonEmptyArray, NotUsed } from '../../shared/utils/fp'
-import { Either, Future, List } from '../../shared/utils/fp'
-import { decodeError } from '../../shared/utils/ioTsUtils'
+import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
+import type { List, NotUsed } from '../../shared/utils/fp'
+import { Future, NonEmptyArray } from '../../shared/utils/fp'
 
 import { FpCollection } from '../helpers/FpCollection'
 import { HallOfFameMember } from '../models/HallOfFameMember'
@@ -22,16 +22,7 @@ function HallOfFameMemberPersistence(Logger: LoggerGetter, mongoCollection: Mong
     { key: { userId: -1, puuid: -1 }, unique: true },
   ])
 
-  const listAll: Future<List<HallOfFameMember>> = pipe(
-    collection.collection.future(c => c.find({}).toArray()),
-    Future.chainEitherK(as =>
-      pipe(
-        List.decoder(HallOfFameMember.codec).decode(as),
-        Either.mapLeft(decodeError('List<HallOfFameMember>')(as)),
-      ),
-    ),
-    Future.chainFirstIOEitherK(as => logger.trace(`Found all ${as.length} documents`)),
-  )
+  const listAll: Future<List<HallOfFameMember>> = collection.findAllArr()({})
 
   const deleteAll: Future<boolean> = pipe(
     collection.deleteMany({}),
@@ -42,6 +33,11 @@ function HallOfFameMemberPersistence(Logger: LoggerGetter, mongoCollection: Mong
     ensureIndexes,
 
     listAll,
+
+    listForUsers: (ids: NonEmptyArray<DiscordUserId>): Future<List<HallOfFameMember>> =>
+      collection.findAllArr()({
+        userId: { $in: NonEmptyArray.encoder(DiscordUserId.codec).encode(ids) },
+      }),
 
     deleteAll,
 

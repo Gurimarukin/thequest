@@ -66,13 +66,8 @@ const UserService = (
 ) => {
   const logger = Logger('UserService')
 
-  const {
-    findAllByLoginDiscordId,
-    findById,
-    addFavoriteSearch,
-    removeFavoriteSearch,
-    removeAllFavoriteSearches,
-  } = userPersistence
+  const { findById, addFavoriteSearch, removeFavoriteSearch, removeAllFavoriteSearches } =
+    userPersistence
 
   const createUserPassword = (
     userName: UserName,
@@ -177,7 +172,6 @@ const UserService = (
         futureMaybe.chainTaskEitherK(({ user }) => signToken({ id: user.id, role: user.role })),
       ),
 
-    findAllByLoginDiscordId,
     findById,
     addFavoriteSearch,
     removeFavoriteSearch,
