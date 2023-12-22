@@ -1,7 +1,10 @@
 import type { Match, Parser } from 'fp-ts-routing'
 import { end, format, lit } from 'fp-ts-routing'
+import { pipe } from 'fp-ts/function'
+import * as C from 'io-ts/Codec'
 
 import type { Method } from './models/Method'
+import { GameId } from './models/api/GameId'
 import { Lang } from './models/api/Lang'
 import { Platform } from './models/api/Platform'
 import { Puuid } from './models/api/summoner/Puuid'
@@ -11,6 +14,7 @@ import { SummonerName } from './models/riot/SummonerName'
 import { TagLine } from './models/riot/TagLine'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
+import { NumberFromString } from './utils/ioTsUtils'
 
 const { codec } = RouterUtils
 
@@ -29,6 +33,7 @@ const riotIdM = codec('gameName', GameName.codec)
     ({ gameName, tagLine }) => ({ riotId: RiotId(gameName, tagLine) }),
     ({ riotId }) => riotId,
   )
+const gameIdM = codec('gameId', pipe(NumberFromString.codec, C.compose(GameId.codec)))
 
 const api = lit('api')
 const staticDataLang = api.then(lit('staticData')).then(langM)
@@ -96,6 +101,11 @@ const adminHallOfFameGet = m(adminHallOfFame, 'get')
 const adminHallOfFamePost = m(adminHallOfFame, 'post')
 
 const madosayentisutoStaticDataGet = m(madosayentisuto.then(lit('staticData')), 'get')
+const madosayentisutoMatchGet = m(
+  madosayentisuto.then(lit('match').then(platformM).then(gameIdM)),
+  'get',
+)
+
 const madosayentisutoUsersGetProgressionPost = m(
   madosayentisuto.then(lit('users')).then(lit('getProgression')),
   'post',
@@ -158,6 +168,7 @@ export const apiParsers = {
   },
   madosayentisuto: {
     staticData: { get: p(madosayentisutoStaticDataGet) },
+    match: { get: p(madosayentisutoMatchGet) },
     users: {
       getProgression: { post: p(madosayentisutoUsersGetProgressionPost) },
     },

@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
+import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
@@ -25,6 +26,7 @@ import { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
+import { RiotMatch } from '../models/riot/match/RiotMatch'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { MockService } from './MockService'
 
@@ -32,24 +34,61 @@ const { ddragon, ddragonCdn } = DDragonUtils
 
 const xRiotToken = 'X-Riot-Token'
 
-const regionalUrl = (path: string): string => `https://europe.api.riotgames.com${path}`
-
-const plateformEndpoint: Dict<Platform, string> = {
-  BR: 'br1.api.riotgames.com',
-  EUN: 'eun1.api.riotgames.com',
-  EUW: 'euw1.api.riotgames.com',
-  JP: 'jp1.api.riotgames.com',
-  KR: 'kr.api.riotgames.com',
-  LA1: 'la1.api.riotgames.com',
-  LA2: 'la2.api.riotgames.com',
-  NA: 'na1.api.riotgames.com',
-  OC: 'oc1.api.riotgames.com',
-  TR: 'tr1.api.riotgames.com',
-  RU: 'ru.api.riotgames.com',
+function regionalUrl(region: Region, path: string): string {
+  return `https://${region.toLowerCase()}.api.riotgames.com${path}`
 }
 
-const platformUrl = (platform: Platform, path: string): string =>
-  `https://${plateformEndpoint[platform]}${path}`
+type Region = (typeof regionValues)[number]
+
+const regionValues = ['AMERICAS', 'ASIA', 'EUROPE', 'SEA'] as const
+
+/**
+ * The AMERICAS routing value serves NA, BR, LAN and LAS.
+ * The ASIA routing value serves KR and JP.
+ * The EUROPE routing value serves EUNE, EUW, TR and RU.
+ * The SEA routing value serves OCE, PH2, SG2, TH2, TW2 and VN2.
+ */
+const platformRegion: Dict<Platform, Region> = {
+  BR: 'AMERICAS',
+  EUN: 'EUROPE',
+  EUW: 'EUROPE',
+  JP: 'ASIA',
+  KR: 'ASIA',
+  LA1: 'AMERICAS',
+  LA2: 'AMERICAS',
+  NA: 'AMERICAS',
+  OC: 'SEA',
+  TR: 'EUROPE',
+  RU: 'EUROPE',
+  PH2: 'SEA',
+  SG2: 'SEA',
+  TH2: 'SEA',
+  TW2: 'SEA',
+  VN2: 'SEA',
+}
+
+function platformUrl(platform: Platform, path: string): string {
+  return `https://${platformCode[platform].toLowerCase()}.api.riotgames.com${path}`
+}
+
+const platformCode: Dict<Platform, string> = {
+  BR: 'BR1',
+  EUN: 'EUN1',
+  EUW: 'EUW1',
+  JP: 'JP1',
+  KR: 'KR',
+  LA1: 'LA1',
+  LA2: 'LA2',
+  NA: 'NA1',
+  OC: 'OC1',
+  TR: 'TR1',
+  RU: 'RU',
+  PH2: 'PH2',
+  SG2: 'SG2',
+  TH2: 'TH2',
+  TW2: 'TW2',
+  VN2: 'VN2',
+}
 
 type RiotApiService = ReturnType<typeof RiotApiService>
 
@@ -234,6 +273,25 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
       }),
 
       regional: {
+        lol: {
+          matchV5: {
+            matches: (platform: Platform, gameId: GameId): Future<Maybe<RiotMatch>> =>
+              pipe(
+                httpClient.http(
+                  [
+                    regionalUrl(
+                      platformRegion[platform],
+                      `/lol/match/v5/matches/${platformCode[platform]}_${gameId}`,
+                    ),
+                    'get',
+                  ],
+                  { headers: { [xRiotToken]: lolKey } },
+                  [RiotMatch.decoder, 'RiotMatch'],
+                ),
+                statusesToOption(404),
+              ),
+          },
+        },
         riot: {
           accountV1: {
             accounts: {
@@ -243,7 +301,10 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                   pipe(
                     httpClient.http(
                       [
-                        regionalUrl(`/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`),
+                        regionalUrl(
+                          'EUROPE',
+                          `/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`,
+                        ),
                         'get',
                       ],
                       { headers: { [xRiotToken]: lolKey } },
@@ -255,7 +316,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
               byPuuid: (puuid: Puuid): Future<Maybe<RiotRiotAccount>> =>
                 pipe(
                   httpClient.http(
-                    [regionalUrl(`/riot/account/v1/accounts/by-puuid/${puuid}`), 'get'],
+                    [regionalUrl('EUROPE', `/riot/account/v1/accounts/by-puuid/${puuid}`), 'get'],
                     { headers: { [xRiotToken]: lolKey } },
                     [RiotRiotAccount.decoder, 'RiotRiotAccount'],
                   ),

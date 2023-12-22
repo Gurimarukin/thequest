@@ -23,6 +23,7 @@ const GameMode = createEnum(
   'ODYSSEY', // Odyssey: Extraction games
   'NEXUSBLITZ', // Nexus Blitz games
   'ULTBOOK', // Ultimate Spellbook games
+  'CHERRY', // Arena
 )
 
 export { GameMode }

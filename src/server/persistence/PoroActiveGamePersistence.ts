@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { GameId } from '../../shared/models/api/GameId'
 import { Lang } from '../../shared/models/api/Lang'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import type { NotUsed } from '../../shared/utils/fp'
@@ -12,7 +13,6 @@ import { FpCollection } from '../helpers/FpCollection'
 import { PoroActiveGameDb } from '../models/activeGame/PoroActiveGameDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
-import { GameId } from '../models/riot/GameId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 const ellipse = StringUtils.ellipse(3300)

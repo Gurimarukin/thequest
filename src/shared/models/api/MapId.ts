@@ -31,6 +31,7 @@ const e = createEnum(
   20, // Crash Site — Odyssey: Extraction map
   21, // Nexus Blitz — Nexus Blitz map
   22, // Convergence — Teamfight Tactics map
+  30, // Rings of Wrath — Arena map
 )
 
 const isSummonersRift = (map: MapId): map is SummonersRiftMap =>

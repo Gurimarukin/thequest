@@ -51,6 +51,7 @@ const e = createEnum(
   450, // Howling Abyss — 5v5 ARAM games
   460, // Twisted Treeline — 3v3 Blind Pick games — Deprecated in patch 9.23"
   470, // Twisted Treeline — 3v3 Ranked Flex games — Deprecated in patch 9.23"
+  490, // Summoner's Rift — Normal (Quickplay)
   600, // Summoner's Rift — Blood Hunt Assassin games
   610, // Cosmic Ruins — Dark Star: Singularity games
   700, // Summoner's Rift — Summoner's Rift Clash games
@@ -84,6 +85,8 @@ const e = createEnum(
   1200, // Nexus Blitz — Nexus Blitz games — Deprecated in patch 9.2"
   1300, // Nexus Blitz — Nexus Blitz games
   1400, // Summoner's Rift — Ultimate Spellbook games
+  1700, // Rings of Wrath — Arena
+  1710, // Rings of Wrath — Arena
   1900, // Summoner's Rift — Pick URF games
   2000, // Summoner's Rift — Tutorial 1
   2010, // Summoner's Rift — Tutorial 2

@@ -9,7 +9,24 @@ import { createEnum } from '../../utils/createEnum'
 
 type Platform = typeof e.T
 
-const e = createEnum('BR', 'EUN', 'EUW', 'JP', 'KR', 'LA1', 'LA2', 'NA', 'OC', 'TR', 'RU')
+const e = createEnum(
+  'BR',
+  'EUN',
+  'EUW',
+  'JP',
+  'KR',
+  'LA1',
+  'LA2',
+  'NA',
+  'OC',
+  'TR',
+  'RU',
+  'PH2',
+  'SG2',
+  'TH2',
+  'TW2',
+  'VN2',
+)
 
 type PlatformLower = Lowercase<Platform>
 type PlatformOrLower = Platform | PlatformLower

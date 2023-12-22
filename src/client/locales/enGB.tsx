@@ -232,6 +232,7 @@ const enGBTranslation: Translation = {
         450: 'ARAM', // Howling Abyss — 5v5 ARAM games
         460: '3v3 Blind Pick', // Twisted Treeline — 3v3 Blind Pick games — Deprecated in patch 9.23"
         470: '3v3 Ranked Flex', // Twisted Treeline — 3v3 Ranked Flex games — Deprecated in patch 9.23"
+        490: 'Quickplay', // Summoner's Rift — Normal (Quickplay)
         600: 'Blood Hunt Assassin', // Summoner's Rift — Blood Hunt Assassin games
         610: 'Dark Star: Singularity', // Cosmic Ruins — Dark Star: Singularity games
         700: 'Clash', // Summoner's Rift — Summoner's Rift Clash games
@@ -265,6 +266,8 @@ const enGBTranslation: Translation = {
         1200: 'Nexus Blitz', // Nexus Blitz — Nexus Blitz games — Deprecated in patch 9.2"
         1300: 'Nexus Blitz', // Nexus Blitz — Nexus Blitz games
         1400: 'Ultimate Spellbook', // Summoner's Rift — Ultimate Spellbook games
+        1700: 'Arena', // Rings of Wrath — Arena
+        1710: 'Arena', // Rings of Wrath — Arena
         1900: 'Pick URF', // Summoner's Rift — Pick URF games
         2000: 'Tutorial 1', // Summoner's Rift — Tutorial 1
         2010: 'Tutorial 2', // Summoner's Rift — Tutorial 2

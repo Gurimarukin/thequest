@@ -1,6 +1,7 @@
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
+import { GameId } from '../../../shared/models/api/GameId'
 import { Lang } from '../../../shared/models/api/Lang'
 import { PoroNiceness } from '../../../shared/models/api/activeGame/PoroNiceness'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
@@ -12,7 +13,6 @@ import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { GameId } from '../riot/GameId'
 
 const poroLeagueCodec = C.struct({
   currentSplit: Maybe.codec(

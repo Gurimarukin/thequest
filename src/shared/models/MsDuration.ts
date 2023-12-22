@@ -1,5 +1,6 @@
 // import type { StringValue } from 'ms'
 // import vercelMs from 'ms'
+import { number, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
@@ -49,6 +50,8 @@ const add =
   (a: MsDuration): MsDuration =>
     ms(unwrap(a) + unwrap(b))
 
+const Ord: ord.Ord<MsDuration> = pipe(number.Ord, ord.contramap(unwrap))
+
 const MsDuration = {
   codec,
   // fromStringDecoder,
@@ -66,6 +69,7 @@ const MsDuration = {
   day: days,
   fromDate,
   add,
+  Ord,
 }
 
 export { MsDuration }
