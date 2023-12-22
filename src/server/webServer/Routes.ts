@@ -86,6 +86,9 @@ export const Routes = (
     m(api.admin.hallOfFame.post, () => withAuth(adminController.updateHallOfFame)),
 
     m(api.madosayentisuto.staticData.get, () => madosayentisutoController.getStaticData),
+    m(api.madosayentisuto.match.get, ({ platform, gameId }) =>
+      madosayentisutoController.getMatch(platform, gameId),
+    ),
     m(
       api.madosayentisuto.users.getProgression.post,
       () => madosayentisutoController.getUsersProgression,

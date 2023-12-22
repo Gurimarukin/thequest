@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { GameId } from '../../shared/models/api/GameId'
 import { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, List } from '../../shared/utils/fp'
@@ -9,7 +10,6 @@ import { FpCollection } from '../helpers/FpCollection'
 import { ActiveGameDb } from '../models/activeGame/ActiveGameDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
-import { GameId } from '../models/riot/GameId'
 import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 

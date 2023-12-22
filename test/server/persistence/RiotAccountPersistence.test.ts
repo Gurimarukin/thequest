@@ -92,7 +92,7 @@ describe('RiotAccountPersistence', () => {
     const myRiotId = RiotId.fromStringDecoder.decode(rawiotId)
 
     if (!Either.isRight(myRiotId)) {
-      fail(`myRiotId should be right ${D.draw(myRiotId.left)}`)
+      fail(`myRiotId should be right\n${D.draw(myRiotId.left)}`)
     }
 
     return expectFaker(p => p.findByRiotId(myRiotId.right, day0))

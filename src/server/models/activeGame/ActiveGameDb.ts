@@ -1,6 +1,7 @@
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
+import { GameId } from '../../../shared/models/api/GameId'
 import { MapId } from '../../../shared/models/api/MapId'
 import type { BannedChampionOutput } from '../../../shared/models/api/activeGame/BannedChampion'
 import { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
@@ -16,7 +17,6 @@ import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { GameId } from '../riot/GameId'
 import { SummonerId } from '../summoner/SummonerId'
 
 type Participant = C.TypeOf<typeof participantCodec>

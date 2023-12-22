@@ -21,6 +21,7 @@ import { ChampionShardPersistence } from './persistence/ChampionShardPersistence
 import { HallOfFameMemberPersistence } from './persistence/HallOfFameMemberPersistence'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { LeagueEntryPersistence } from './persistence/LeagueEntryPersistence'
+import { MatchPersistence } from './persistence/MatchPersistence'
 import { MigrationPersistence } from './persistence/MigrationPersistence'
 import { PoroActiveGamePersistence } from './persistence/PoroActiveGamePersistence'
 import { RiotAccountPersistence } from './persistence/RiotAccountPersistence'
@@ -34,6 +35,7 @@ import { HallOfFameMemberService } from './services/HallOfFameMemberService'
 import { HealthCheckService } from './services/HealthCheckService'
 import { LeagueEntryService } from './services/LeagueEntryService'
 import { MasteriesService } from './services/MasteriesService'
+import { MatchService } from './services/MatchService'
 import { MigrationService } from './services/MigrationService'
 import { MockService } from './services/MockService'
 import { PoroActiveGameService } from './services/PoroActiveGameService'
@@ -54,6 +56,7 @@ const of = (
   config: Config,
   Logger: LoggerGetter,
   challengesPersistence: ChallengesPersistence,
+  matchPersistence: MatchPersistence,
   championMasteryPersistence: ChampionMasteryPersistence,
   championShardPersistence: ChampionShardPersistence,
   hallOfFameMemberPersistence: HallOfFameMemberPersistence,
@@ -89,6 +92,7 @@ const of = (
     leagueEntryPersistence,
     riotApiService,
   )
+  const matchService = MatchService(matchPersistence, riotApiService)
   const masteriesService = MasteriesService(
     config.riotApi.cacheTtl,
     championMasteryPersistence,
@@ -114,6 +118,7 @@ const of = (
     healthCheckService,
     leagueEntryService,
     hallOfFameMemberService,
+    matchService,
     masteriesService,
     poroActiveGameService,
     riotAccountService,
@@ -139,6 +144,7 @@ const load = (config: Config): Future<Context> => {
     const hallOfFameMemberPersistence = HallOfFameMemberPersistence(Logger, mongoCollection)
     const healthCheckPersistence = HealthCheckPersistence(withDb)
     const leagueEntryPersistence = LeagueEntryPersistence(Logger, mongoCollection)
+    const matchPersistence = MatchPersistence(Logger, mongoCollection)
     const migrationPersistence = MigrationPersistence(Logger, mongoCollection)
     const poroActiveGamePersistence = PoroActiveGamePersistence(Logger, mongoCollection)
     const riotAccountPersistence = RiotAccountPersistence(Logger, mongoCollection)
@@ -194,6 +200,7 @@ const load = (config: Config): Future<Context> => {
           config,
           Logger,
           challengesPersistence,
+          matchPersistence,
           championMasteryPersistence,
           championShardPersistence,
           hallOfFameMemberPersistence,
@@ -226,6 +233,7 @@ const load = (config: Config): Future<Context> => {
               championShardPersistence.ensureIndexes,
               hallOfFameMemberPersistence.ensureIndexes,
               leagueEntryPersistence.ensureIndexes,
+              matchPersistence.ensureIndexes,
               poroActiveGamePersistence.ensureIndexes,
               riotAccountPersistence.ensureIndexes,
               summonerPersistence.ensureIndexes,

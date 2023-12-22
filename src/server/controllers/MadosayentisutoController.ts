@@ -4,7 +4,9 @@ import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
 import { Business } from '../../shared/Business'
+import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
+import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
@@ -16,9 +18,11 @@ import { futureMaybe } from '../../shared/utils/futureMaybe'
 import type { MadosayentisutoConfig } from '../config/Config'
 import type { HallOfFameMember } from '../models/HallOfFameMember'
 import { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
+import { MatchDb } from '../models/match/MatchDb'
 import type { DDragonService } from '../services/DDragonService'
 import type { HallOfFameMemberService } from '../services/HallOfFameMemberService'
 import type { MasteriesService } from '../services/MasteriesService'
+import type { MatchService } from '../services/MatchService'
 import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
@@ -40,6 +44,7 @@ const MadosayentisutoController = (
   ddragonService: DDragonService,
   hallOfFameMemberService: HallOfFameMemberService,
   masteriesService: MasteriesService,
+  matchService: MatchService,
   riotAccountService: RiotAccountService,
   summonerService: SummonerService,
   staticDataController: StaticDataController,
@@ -60,6 +65,16 @@ const MadosayentisutoController = (
 
   return {
     getStaticData,
+
+    getMatch: (platform: Platform, gameId: GameId): EndedMiddleware =>
+      withToken(
+        pipe(
+          matchService.findById(platform, gameId),
+          M.fromTaskEither,
+          M.ichain(Maybe.fold(() => M.sendWithStatus(Status.NotFound)(''), M.json(MatchDb.codec))),
+        ),
+      ),
+
     getUsersProgression,
   }
 
@@ -129,16 +144,20 @@ const MadosayentisutoController = (
     return withIp('madosayentisuto route')(ip =>
       !List.elem(string.Eq)(ip, config.whitelistedIps)
         ? M.sendWithStatus(Status.NotFound)('')
-        : pipe(
-            M.decodeHeader('authorization', [D.string, 'string']),
-            M.matchE(
-              () => M.sendWithStatus(Status.BadRequest)(''),
-              authorization =>
-                string.Eq.equals(authorization, config.token)
-                  ? m
-                  : M.sendWithStatus(Status.Unauthorized)(''),
-            ),
-          ),
+        : withToken(m),
+    )
+  }
+
+  function withToken(m: EndedMiddleware): EndedMiddleware {
+    return pipe(
+      M.decodeHeader('authorization', [D.string, 'string']),
+      M.matchE(
+        () => M.sendWithStatus(Status.BadRequest)(''),
+        authorization =>
+          string.Eq.equals(authorization, config.token)
+            ? m
+            : M.sendWithStatus(Status.Unauthorized)(''),
+      ),
     )
   }
 }
