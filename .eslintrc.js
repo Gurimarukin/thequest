@@ -51,6 +51,7 @@ module.exports = {
           'ChampionKey',
           'DDragonVersion',
           'DiscordUserId',
+          'GameId',
           'GameName',
           'MsDuration',
           'Puuid',
