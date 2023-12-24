@@ -92,6 +92,22 @@ const SummonerController = (
   const logger = Logger('SummonerController')
 
   return {
+    summonerShortByPuuid: (platform: Platform, puuid: Puuid): EndedMiddleware =>
+      pipe(
+        apply.sequenceT(futureMaybe.ApplyPar)(
+          summonerService.findByPuuid(platform, puuid),
+          riotAccountService.findByPuuid(puuid),
+        ),
+        futureMaybe.map(([summoner, { riotId }]): SummonerShort => ({ ...summoner, riotId })),
+        M.fromTaskEither,
+        M.ichain(
+          Maybe.fold(
+            () => M.sendWithStatus(Status.NotFound)('Summoner not found'),
+            M.json(SummonerShort.codec),
+          ),
+        ),
+      ),
+
     summonerShortByRiotId: (platform: Platform, riotId_: RiotId): EndedMiddleware =>
       pipe(
         riotAccountService.findByRiotId(riotId_),

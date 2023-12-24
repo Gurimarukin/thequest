@@ -65,6 +65,7 @@ const healthcheckGet = m(api.then(lit('healthcheck')), 'get')
 const staticDataLangGet = m(staticDataLang, 'get')
 const staticDataLangAdditionalGet = m(staticDataLang.then(lit('additional')), 'get')
 
+const summonerByPuuidGet = m(summonerByPuuid, 'get')
 const summonerByPuuidMasteriesGet = m(summonerByPuuid.then(lit('masteries')), 'get')
 const summonerByPuuidChallengesGet = m(summonerByPuuid.then(lit('challenges')), 'get')
 const summonerByPuuidActiveGameLangGet = m(
@@ -125,6 +126,7 @@ export const apiParsers = {
   },
   summoner: {
     byPuuid: {
+      get: p(summonerByPuuidGet),
       masteries: { get: p(summonerByPuuidMasteriesGet) },
       challenges: { get: p(summonerByPuuidChallengesGet) },
       activeGame: { lang: { get: p(summonerByPuuidActiveGameLangGet) } },

@@ -35,6 +35,9 @@ export const Routes = (
       staticDataController.additionalStaticData(lang),
     ),
 
+    m(api.summoner.byPuuid.get, ({ platform, puuid }) =>
+      summonerController.summonerShortByPuuid(platform, puuid),
+    ),
     m(api.summoner.byPuuid.masteries.get, ({ platform, puuid }) =>
       maybeWithAuth(summonerController.masteriesByPuuid(platform, puuid)),
     ),
