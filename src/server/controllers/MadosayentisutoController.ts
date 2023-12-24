@@ -14,6 +14,7 @@ import { DictUtils } from '../../shared/utils/DictUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
 import { Future, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
+import { DayJsFromISOString } from '../../shared/utils/ioTsUtils'
 
 import type { MadosayentisutoConfig } from '../config/Config'
 import type { HallOfFameMember } from '../models/HallOfFameMember'
@@ -71,7 +72,12 @@ const MadosayentisutoController = (
         pipe(
           matchService.findById(platform, gameId),
           M.fromTaskEither,
-          M.ichain(Maybe.fold(() => M.sendWithStatus(Status.NotFound)(''), M.json(MatchDb.codec))),
+          M.ichain(
+            Maybe.fold(
+              () => M.sendWithStatus(Status.NotFound)(''),
+              M.json(MatchDb.codec(DayJsFromISOString.codec)),
+            ),
+          ),
         ),
       ),
 

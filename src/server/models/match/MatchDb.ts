@@ -1,5 +1,7 @@
+import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
+import type { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import { GameId } from '../../../shared/models/api/GameId'
 import { MapId } from '../../../shared/models/api/MapId'
@@ -17,7 +19,6 @@ import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { type Dict, List, Maybe } from '../../../shared/utils/fp'
 
-import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { GameMode } from '../riot/GameMode'
 import { GameType } from '../riot/GameType'
 import { SummonerId } from '../summoner/SummonerId'
@@ -186,26 +187,29 @@ const teamProperties: Dict<`${TeamId}`, typeof teamCodec> = {
   200: teamCodec,
 }
 
-type MatchDb = C.TypeOf<typeof codec>
-type MatchDbOutput = C.OutputOf<typeof codec>
+type MatchDb = C.TypeOf<ReturnType<typeof codec>>
+type MatchDbOutput = C.OutputOf<ReturnType<typeof codec>>
 
-const codec = C.struct({
-  platform: Platform.codec,
-  id: GameId.codec,
-  dataVersion: C.string, // '2'
-  gameCreation: DayJsFromDate.codec,
-  gameDuration: MsDuration.codec,
-  gameEndTimestamp: DayJsFromDate.codec,
-  gameMode: GameMode.codec,
-  gameName: C.string,
-  gameStartTimestamp: DayJsFromDate.codec,
-  gameType: GameType.codec,
-  gameVersion: C.string,
-  mapId: MapId.codec,
-  queueId: GameQueue.codec,
-  teams: C.partial(teamProperties),
-  win: TeamId.codec,
-})
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function codec<O>(dayjsCodec: Codec<unknown, O, DayJs>) {
+  return C.struct({
+    platform: Platform.codec,
+    id: GameId.codec,
+    dataVersion: C.string, // '2'
+    gameCreation: dayjsCodec,
+    gameDuration: MsDuration.codec,
+    gameEndTimestamp: dayjsCodec,
+    gameMode: GameMode.codec,
+    gameName: C.string,
+    gameStartTimestamp: dayjsCodec,
+    gameType: GameType.codec,
+    gameVersion: C.string,
+    mapId: MapId.codec,
+    queueId: GameQueue.codec,
+    teams: C.partial(teamProperties),
+    win: TeamId.codec,
+  })
+}
 
 const MatchDb = { codec }
 
