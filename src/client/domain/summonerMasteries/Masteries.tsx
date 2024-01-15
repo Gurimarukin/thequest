@@ -345,12 +345,11 @@ const rulerColor = (level: number): string => {
 
 const getRenderChildrenCompact =
   (ref: React.RefObject<HTMLUListElement>) =>
-  (children: List<React.ReactElement>): React.ReactElement =>
-    (
-      <ul
-        ref={ref}
-        className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1 text-2xs"
-      >
-        {children}
-      </ul>
-    )
+  (children: List<React.ReactElement>): React.ReactElement => (
+    <ul
+      ref={ref}
+      className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1 text-2xs"
+    >
+      {children}
+    </ul>
+  )

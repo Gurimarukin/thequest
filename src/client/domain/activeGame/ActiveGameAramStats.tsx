@@ -24,19 +24,15 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
             </li>
           )
         },
-        (t, spell) => html =>
-          (
-            <li
-              key={spell}
-              className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}
-            >
-              <span
-                dangerouslySetInnerHTML={{ __html: html.spell }}
-                className="wikia compact h-5 w-5"
-              />
-              <span>{t.common.labels.spell[spell]}</span>
-            </li>
-          ),
+        (t, spell) => html => (
+          <li key={spell} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
+            <span
+              dangerouslySetInnerHTML={{ __html: html.spell }}
+              className="wikia compact h-5 w-5"
+            />
+            <span>{t.common.labels.spell[spell]}</span>
+          </li>
+        ),
         5,
       ),
     [props.draggable, reverse],

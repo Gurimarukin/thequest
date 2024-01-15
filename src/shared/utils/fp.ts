@@ -105,10 +105,9 @@ const partialDictTraverse = readonlyRecord.traverse as <F extends URIS2>(
 
 export const PartialDict = {
   every: readonlyRecord.every as {
-    <A, B extends A>(refinement: Refinement<A, B>): Refinement<
-      PartialDict<string, A>,
-      PartialDict<string, B>
-    >
+    <A, B extends A>(
+      refinement: Refinement<A, B>,
+    ): Refinement<PartialDict<string, A>, PartialDict<string, B>>
     <A>(predicate: Predicate<A>): Predicate<PartialDict<string, A>>
   },
   fromEntries: Object.fromEntries as <K extends string, A>(

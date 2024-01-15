@@ -19,8 +19,8 @@ const customHandlers = (object: unknown): unknown =>
   object instanceof RequestError
     ? MyHttpError.fromRequestError(object)
     : object instanceof HTTPError
-    ? MyHttpError.fromHTTPError(object)
-    : object
+      ? MyHttpError.fromHTTPError(object)
+      : object
 
 // eslint-disable-next-line functional/no-classes
 class MyHttpError extends Error {

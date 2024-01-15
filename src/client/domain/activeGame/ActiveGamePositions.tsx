@@ -39,8 +39,8 @@ export const ActiveGamePositions: React.FC<Props> = ({
             height: shouldWrap
               ? undefined
               : isLast
-              ? participantHeightWithoutSpacer
-              : participantHeightDesktop,
+                ? participantHeightWithoutSpacer
+                : participantHeightDesktop,
             gridRowStart: rowMultiple * i + 1,
           }}
         />

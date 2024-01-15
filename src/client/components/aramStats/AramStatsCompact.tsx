@@ -12,12 +12,11 @@ export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
       </li>
     )
   },
-  (t, spell) => html =>
-    (
-      <li key={spell} className="flex items-center gap-1">
-        <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia compact" />
-        <span>{t.common.labels.spell[spell]}</span>
-      </li>
-    ),
+  (t, spell) => html => (
+    <li key={spell} className="flex items-center gap-1">
+      <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia compact" />
+      <span>{t.common.labels.spell[spell]}</span>
+    </li>
+  ),
   4,
 )

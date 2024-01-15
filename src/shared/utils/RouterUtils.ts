@@ -19,6 +19,6 @@ const codec_ = <K extends string, A>(k: K, codec: Codec<string, string, A>): Mat
     new Formatter((r, o) => new Route(r.parts.concat(codec.encode(o[k])), r.query)),
   )
 
-const singleton = <K extends string, A>(k: K, a: A): Dict<K, A> => ({ [k]: a } as Dict<K, A>)
+const singleton = <K extends string, A>(k: K, a: A): Dict<K, A> => ({ [k]: a }) as Dict<K, A>
 
 export const RouterUtils = { codec: codec_ }
