@@ -109,30 +109,32 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
   return (
     <ToasterContext.Provider value={value}>
       {children}
-      {createPortal(
-        <div className="absolute right-0 top-0 flex w-[384px] max-w-[100vw] flex-col">
-          {transitions(({ opacity, height, ttl }, toaster) => (
-            <animated.div style={{ opacity, height }}>
-              <div ref={onMount(toaster)} className="pt-1">
-                <div className={cx('p-[3px] text-[beige] shadow-even', container[toaster.type])}>
-                  <div
-                    className={cx(
-                      'grid grid-cols-[1fr_auto] border-[3px] py-2 pl-2 pr-1',
-                      border[toaster.type],
-                    )}
-                  >
-                    <div className="text-sm">{toaster.content}</div>
-                    <button type="button" onClick={onClick(ttl, toaster)}>
-                      <CloseFilled className="w-5" />
-                    </button>
+      <>
+        {createPortal(
+          <div className="absolute right-0 top-0 flex w-[384px] max-w-[100vw] flex-col">
+            {transitions(({ opacity, height, ttl }, toaster) => (
+              <animated.div style={{ opacity, height }}>
+                <div ref={onMount(toaster)} className="pt-1">
+                  <div className={cx('p-[3px] text-[beige] shadow-even', container[toaster.type])}>
+                    <div
+                      className={cx(
+                        'grid grid-cols-[1fr_auto] border-[3px] py-2 pl-2 pr-1',
+                        border[toaster.type],
+                      )}
+                    >
+                      <div className="text-sm">{toaster.content}</div>
+                      <button type="button" onClick={onClick(ttl, toaster)}>
+                        <CloseFilled className="w-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </animated.div>
-          ))}
-        </div>,
-        toasterLayer,
-      )}
+              </animated.div>
+            ))}
+          </div>,
+          toasterLayer,
+        )}
+      </>
     </ToasterContext.Provider>
   )
 }
