@@ -60,8 +60,12 @@ export function immutableAssign<
 /**
  * Like ord.trivial, but with actual equals.
  */
-export function idcOrd<A>(eq: Eq<A>): Ord<A> {
-  return { equals: eq.equals, compare: ord.trivial.compare }
+export function idcOrd<A>({ equals }: Eq<A>): Ord<A> {
+  return {
+    equals,
+    compare: (first: A, second: A) =>
+      equals(first, second) ? 0 : ord.trivial.compare(first, second),
+  }
 }
 
 export type NotUsed = Newtype<{ readonly NotUsed: unique symbol }, void>
@@ -85,6 +89,20 @@ export const Dict = {
 
 export type PartialDict<K extends string, A> = Partial<Dict<K, A>>
 
+const partialDictMap = readonlyRecord.map as <A, B>(
+  f: (a: A | undefined) => B | undefined,
+) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>
+
+const partialDictMapWithIndex = readonlyRecord.mapWithIndex as <K extends string, A, B>(
+  f: (k: K, a: A | undefined) => B | undefined,
+) => (fa: PartialDict<K, A | undefined>) => PartialDict<K, B>
+
+const partialDictTraverse = readonlyRecord.traverse as <F extends URIS2>(
+  F: Applicative2<F>,
+) => <E, A, B>(
+  f: (a: A | undefined) => Kind2<F, E, B | undefined>,
+) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>
+
 export const PartialDict = {
   every: readonlyRecord.every as {
     <A, B extends A>(refinement: Refinement<A, B>): Refinement<
@@ -96,17 +114,23 @@ export const PartialDict = {
   fromEntries: Object.fromEntries as <K extends string, A>(
     fa: List<Tuple<K, A>>,
   ) => PartialDict<K, A>,
-  map: readonlyRecord.map as <A, B>(
-    f: (a: A) => B,
-  ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
-  mapWithIndex: readonlyRecord.mapWithIndex as <K extends string, A, B>(
-    f: (k: K, a: A) => B,
-  ) => (fa: PartialDict<K, A>) => PartialDict<K, B>,
-  traverse: readonlyRecord.traverse as <F extends URIS2>(
-    F: Applicative2<F>,
-  ) => <E, A, B>(
-    f: (a: A) => Kind2<F, E, B>,
-  ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>,
+
+  map: <A, B>(
+    f: (a: A) => B | undefined,
+  ): (<K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>) =>
+    partialDictMap(a => (a !== undefined ? f(a) : undefined)),
+
+  mapWithIndex: <K extends string, A, B>(
+    f: (k: K, a: A) => B | undefined,
+  ): ((fa: PartialDict<K, A>) => PartialDict<K, B>) =>
+    partialDictMapWithIndex((k, a) => (a !== undefined ? f(k, a) : undefined)),
+
+  traverse:
+    <F extends URIS2>(F: Applicative2<F>) =>
+    <E, A, B>(
+      f: (a: A) => Kind2<F, E, B | undefined>,
+    ): (<K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>) =>
+      partialDictTraverse(F)(a => (a !== undefined ? f(a) : F.of<E, B | undefined>(undefined))),
 }
 
 export function emptyReadonlyMap<K, V>(): ReadonlyMap<K, V> {

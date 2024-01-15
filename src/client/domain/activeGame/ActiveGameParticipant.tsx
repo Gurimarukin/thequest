@@ -282,7 +282,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 league={flex}
                 reverse={reverse}
                 tooltipShouldHide={tooltipShouldHide}
-                text-cyan-200={true}
                 draggable={false}
               />
             </Cell>
