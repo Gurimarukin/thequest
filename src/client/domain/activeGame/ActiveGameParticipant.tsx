@@ -337,9 +337,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             () => (
               <>
                 <span className="invisible">h</span>
-                <div className="size-16 bg-black text-2xs">
-                  {t.common.championKey(championId)}
-                </div>
+                <div className="size-16 bg-black text-2xs">{t.common.championKey(championId)}</div>
                 <span className="invisible">h</span>
               </>
             ),
