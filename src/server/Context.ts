@@ -51,7 +51,6 @@ const dbRetryDelay = MsDuration.seconds(10)
 
 type Context = ReturnType<typeof of>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (
   config: Config,
   Logger: LoggerGetter,
@@ -71,6 +70,7 @@ const of = (
   riotApiService: RiotApiService,
   staticDataService: StaticDataService,
   summonerService: SummonerService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const jwtHelper = JwtHelper(config.jwtSecret)
 

@@ -54,7 +54,6 @@ type ForceCacheRefresh = {
 
 type UserService = ReturnType<typeof UserService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const UserService = (
   Logger: LoggerGetter,
   championShardPersistence: ChampionShardPersistence,
@@ -63,6 +62,7 @@ const UserService = (
   discordService: DiscordService,
   riotAccountService: RiotAccountService,
   summonerService: SummonerService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const logger = Logger('UserService')
 

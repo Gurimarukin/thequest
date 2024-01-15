@@ -38,7 +38,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               <img
                 src={Assets.yuumi}
                 alt={t.layout.yuumiIconAlt}
-                className="h-12 w-12 rounded-sm bg-black text-2xs text-transparent"
+                className="size-12 rounded-sm bg-black text-2xs text-transparent"
               />
             </Link>
             <Tooltip hoverRef={homeRef}>{t.layout.home}</Tooltip>
@@ -59,7 +59,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 tooltip={t.layout.globetrotterChallenges}
                 className="py-2"
               >
-                <MaskedImage src={Assets.runeterra} className="h-5 w-5" />
+                <MaskedImage src={Assets.runeterra} className="size-5" />
               </HighlightLink>
             </div>
           </div>

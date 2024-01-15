@@ -38,7 +38,6 @@ const lang: Lang = 'fr_FR'
 
 type MadosayentisutoController = ReturnType<typeof MadosayentisutoController>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MadosayentisutoController = (
   config: MadosayentisutoConfig,
   withIp: WithIp,
@@ -49,6 +48,7 @@ const MadosayentisutoController = (
   riotAccountService: RiotAccountService,
   summonerService: SummonerService,
   staticDataController: StaticDataController,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const getStaticData: EndedMiddleware = withIpAndToken(staticDataController.staticData(lang))
 

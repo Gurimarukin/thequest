@@ -76,7 +76,6 @@ const queueTypes = {
 
 type SummonerController = ReturnType<typeof SummonerController>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const SummonerController = (
   Logger: LoggerGetter,
   activeGameService: ActiveGameService,
@@ -88,6 +87,7 @@ const SummonerController = (
   summonerService: SummonerService,
   staticDataService: StaticDataService,
   userService: UserService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const logger = Logger('SummonerController')
 

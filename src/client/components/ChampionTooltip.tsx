@@ -63,7 +63,7 @@ export const ChampionTooltip: React.FC<Props> = ({
         {/* "hitbox" */}
         {percentsElement}
         <div className="absolute left-0">
-          <span className="absolute -right-2 -top-4 h-[200%] w-[200%] rotate-12 bg-goldenrod-bis shadow-inner shadow-black" />
+          <span className="absolute -right-2 -top-4 size-[200%] rotate-12 bg-goldenrod-bis shadow-inner shadow-black" />
           {percentsElement}
         </div>
         <h3
@@ -103,7 +103,7 @@ export const ChampionTooltip: React.FC<Props> = ({
                   <li key={position} className="flex items-center gap-0.5">
                     <ChampionPositionImg
                       position={position}
-                      className="h-6 w-6 shrink-0 p-0.5 text-wheat-bis"
+                      className="size-6 shrink-0 p-0.5 text-wheat-bis"
                     />
                     <span>{t.common.labels.position[position]}</span>
                   </li>
@@ -115,7 +115,7 @@ export const ChampionTooltip: React.FC<Props> = ({
                 factions,
                 NonEmptyArray.map(faction => (
                   <li key={faction} className="flex items-center gap-1.5">
-                    <ChampionFactionImg faction={faction} className="h-5 w-5 text-wheat-bis" />
+                    <ChampionFactionImg faction={faction} className="size-5 text-wheat-bis" />
                     <span>{t.common.labels.faction[faction]}</span>
                   </li>
                 )),

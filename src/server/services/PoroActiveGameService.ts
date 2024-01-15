@@ -81,11 +81,11 @@ const PoroActiveGameService = (
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (
   config: PoroApiConfig,
   poroActiveGamePersistence: PoroActiveGamePersistence,
   httpClient: HttpClient,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return {
     find: (

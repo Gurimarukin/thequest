@@ -10,7 +10,7 @@ export const loadDotEnv: IO<PartialDict<string, string>> = pipe(
     result.parsed !== undefined
       ? IO.successful(process.env)
       : result.error !== undefined
-      ? IO.failed(result.error)
-      : IO.failed(Error('result.error was undefined')),
+        ? IO.failed(result.error)
+        : IO.failed(Error('result.error was undefined')),
   ),
 )

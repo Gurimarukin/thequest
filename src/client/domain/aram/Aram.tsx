@@ -102,7 +102,7 @@ export const Aram: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
+      <div className="flex size-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
           randomChampion={randomChampion}
@@ -166,7 +166,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
         ref={championHoverRef}
         championKey={champion.key}
         championName={champion.name}
-        className="h-12 w-12 rounded-xl shadow-even shadow-black"
+        className="size-12 rounded-xl shadow-even shadow-black"
       />
       <Tooltip hoverRef={championHoverRef} placement="top">
         {champion.name}
@@ -184,17 +184,16 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
 
 const getRenderChildrenCompact =
   (ref1: React.RefObject<HTMLUListElement>, ref2: React.RefObject<HTMLUListElement>) =>
-  (children1: List<React.ReactElement>, children2: List<React.ReactElement>): React.ReactElement =>
-    (
-      <>
-        <ul ref={ref1} className="row-span-2 flex flex-col justify-center p-0.5">
-          {children1}
-        </ul>
-        <ul
-          ref={ref2}
-          className={cx('flex flex-col', ['px-1.5 py-0.5', List.isNonEmpty(children2)])}
-        >
-          {children2}
-        </ul>
-      </>
-    )
+  (
+    children1: List<React.ReactElement>,
+    children2: List<React.ReactElement>,
+  ): React.ReactElement => (
+    <>
+      <ul ref={ref1} className="row-span-2 flex flex-col justify-center p-0.5">
+        {children1}
+      </ul>
+      <ul ref={ref2} className={cx('flex flex-col', ['px-1.5 py-0.5', List.isNonEmpty(children2)])}>
+        {children2}
+      </ul>
+    </>
+  )

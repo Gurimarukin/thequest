@@ -151,40 +151,44 @@ export const Tooltip: React.FC<Props> = ({
   // Set hover / click listeners to display or hide the tooltip.
   useEffect(setupHoverClickListeners, [setupHoverClickListeners])
 
-  return createPortal(
-    <div
-      ref={tooltipRef}
-      className={cx(
-        'group z-40 whitespace-nowrap border border-tooltip bg-zinc-900 px-2 py-1 text-sm text-wheat shadow-even shadow-black transition-opacity duration-300',
-        shouldDisplay ? 'visible opacity-100' : 'invisible opacity-0',
-        className,
-      )}
-      style={styles['popper']}
-      {...attributes['popper']}
-    >
-      {children}
-      <div
-        ref={arrowRef}
-        className="h-1.5 w-2.5 group-data-popper-top:-bottom-1.5 group-data-popper-bottom:-top-1.5 group-data-popper-left:-right-2 group-data-popper-right:-left-2"
-        style={styles['arrow']}
-      >
-        <CaretUpSharpCropped
+  return (
+    <>
+      {createPortal(
+        <div
+          ref={tooltipRef}
           className={cx(
-            'text-tooltip group-data-popper-top:rotate-180',
-            ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
-            [
-              'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
-              placement.startsWith('right'),
-            ],
-            [
-              'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
-              placement.startsWith('left'),
-            ],
+            'group z-40 whitespace-nowrap border border-tooltip bg-zinc-900 px-2 py-1 text-sm text-wheat shadow-even shadow-black transition-opacity duration-300',
+            shouldDisplay ? 'visible opacity-100' : 'invisible opacity-0',
+            className,
           )}
-        />
-      </div>
-    </div>,
-    tooltipLayer,
+          style={styles['popper']}
+          {...attributes['popper']}
+        >
+          {children}
+          <div
+            ref={arrowRef}
+            className="h-1.5 w-2.5 group-data-popper-top:-bottom-1.5 group-data-popper-bottom:-top-1.5 group-data-popper-left:-right-2 group-data-popper-right:-left-2"
+            style={styles['arrow']}
+          >
+            <CaretUpSharpCropped
+              className={cx(
+                'text-tooltip group-data-popper-top:rotate-180',
+                ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
+                [
+                  'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
+                  placement.startsWith('right'),
+                ],
+                [
+                  'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
+                  placement.startsWith('left'),
+                ],
+              )}
+            />
+          </div>
+        </div>,
+        tooltipLayer,
+      )}
+    </>
   )
 }
 

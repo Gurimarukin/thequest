@@ -4,6 +4,7 @@ import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { DayJs } from '../../../src/shared/models/DayJs'
+import { MsDuration } from '../../../src/shared/models/MsDuration'
 import { Puuid } from '../../../src/shared/models/api/summoner/Puuid'
 import { GameName } from '../../../src/shared/models/riot/GameName'
 import { RiotId } from '../../../src/shared/models/riot/RiotId'
@@ -21,11 +22,17 @@ import { RiotAccountPersistence } from '../../../src/server/persistence/RiotAcco
 import { Logger } from '../../Logger'
 import { expectT } from '../../expectT'
 
+const dbRetryDelay = MsDuration.seconds(10)
+
 describe('RiotAccountPersistence', () => {
   const withDb = pipe(
     Config.load,
     Future.fromIOEither,
-    Future.chain(config => WithDb.load(config.db)),
+    Future.chain(config => {
+      const logger = Logger('RiotAccountPersistence.test')
+
+      return WithDb.load(config.db, logger, dbRetryDelay)
+    }),
     futureRunUnsafe,
   )
   const riotAccountPersistence = pipe(

@@ -10,17 +10,16 @@ type Props = Override<
 
 const getButton =
   (baseClassName: string): React.FC<Props> =>
-  ({ type, className, children, ...props }) =>
-    (
-      <button
-        {...props}
-        // eslint-disable-next-line react/button-has-type
-        type={type}
-        className={cx('disabled:opacity-25', baseClassName, className)}
-      >
-        {children}
-      </button>
-    )
+  ({ type, className, children, ...props }) => (
+    <button
+      {...props}
+      // eslint-disable-next-line react/button-has-type
+      type={type}
+      className={cx('disabled:opacity-25', baseClassName, className)}
+    >
+      {children}
+    </button>
+  )
 
 export const ButtonPrimary = getButton('bg-goldenrod py-1 px-4 text-black hover:bg-goldenrod/75')
 

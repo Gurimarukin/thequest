@@ -1,7 +1,8 @@
 import { flow, pipe } from 'fp-ts/function'
 import { useCallback } from 'react'
-import type { SWRResponse } from 'swr'
+import type { KeyedMutator, SWRResponse } from 'swr'
 import useSWR, { useSWRConfig } from 'swr'
+import type { OverrideProperties } from 'type-fest'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Lang } from '../../../shared/models/api/Lang'
@@ -15,11 +16,15 @@ import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 
+type Mutator = (
+  ...args: Parameters<KeyedMutator<SummonerActiveGameView>>
+) => Promise<SummonerActiveGameView | undefined>
+
 export function useActiveGame(
   lang: Lang,
   platform: Platform,
   riotId: RiotId,
-): SWRResponse<SummonerActiveGameView, unknown> {
+): OverrideProperties<SWRResponse<SummonerActiveGameView, unknown>, { mutate: Mutator }> {
   const { mutate } = useSWRConfig()
 
   const { historyStateRef, modifyHistoryStateRef } = useHistory()
@@ -51,7 +56,10 @@ export function useActiveGame(
 
   return {
     ...res,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    mutate: useCallback<typeof res.mutate>((...args) => mutate(key, ...args), [...key, mutate]),
+    mutate: useCallback(
+      (data, opts) => mutate(key, data as SummonerActiveGameView, opts),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [...key, mutate],
+    ),
   }
 }

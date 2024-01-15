@@ -76,7 +76,7 @@ export const Summoner: React.FC<Props> = ({
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={t.common.summonerIconAlt(RiotId.stringify(riotId))}
-          className="h-24 w-24 rounded border border-goldenrod-bis"
+          className="size-24 rounded border border-goldenrod-bis"
         />
         <div className="grid grid-rows-[1fr_auto]">
           <div className="flex flex-wrap items-baseline gap-2">
@@ -176,13 +176,12 @@ const getMasteryImgWithCount =
     t: Translation['common'],
     masteriesCount: Dict<`${ChampionLevel}`, number>,
   ): React.FC<MasteryImgWithCountProps> =>
-  ({ level, imgClassName, className }) =>
-    (
-      <div className={cx('flex flex-col items-center', className)}>
-        <span className="text-sm font-semibold">{t.number(masteriesCount[level])}</span>
-        <MasteryImg level={level} className={cx('w-full', imgClassName)} />
-      </div>
-    )
+  ({ level, imgClassName, className }) => (
+    <div className={cx('flex flex-col items-center', className)}>
+      <span className="text-sm font-semibold">{t.number(masteriesCount[level])}</span>
+      <MasteryImg level={level} className={cx('w-full', imgClassName)} />
+    </div>
+  )
 
 const prettyMs = (ms: MsDuration): number => {
   const date = DayJs.of(MsDuration.unwrap(ms))

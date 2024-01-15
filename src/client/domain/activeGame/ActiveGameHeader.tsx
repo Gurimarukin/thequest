@@ -111,12 +111,12 @@ const Ban: React.FC<BanProps> = ({ bannedChampion }) => {
         Tuple.of(
           <li
             ref={ref}
-            className="relative flex h-10 w-10 items-center justify-center overflow-hidden bg-black"
+            className="relative flex size-10 items-center justify-center overflow-hidden bg-black"
           >
             <img
               src={Assets.champion}
               alt={t.common.emptyChampionIconAlt}
-              className="h-6 w-6 opacity-50"
+              className="size-6 opacity-50"
             />
           </li>,
           t.activeGame.empty,
@@ -135,7 +135,7 @@ const Ban: React.FC<BanProps> = ({ bannedChampion }) => {
             championKey={championId}
             championName={bannedChampionName}
             as="li"
-            className="relative h-10 w-10"
+            className="relative size-10"
           >
             <span className="absolute top-[calc(100%_-_2px)] w-20 origin-left -rotate-45 border-t-4 border-red-ban shadow-even shadow-black" />
           </CroppedChampionSquare>,

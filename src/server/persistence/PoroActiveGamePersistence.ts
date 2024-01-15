@@ -19,10 +19,10 @@ const ellipse = StringUtils.ellipse(3300)
 
 type PoroActiveGamePersistence = ReturnType<typeof PoroActiveGamePersistence>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const PoroActiveGamePersistence = (
   Logger: LoggerGetter,
   mongoCollection: MongoCollectionGetter,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const codecWithName = Tuple.of(PoroActiveGameDb.codec, 'PoroActiveGameDb')
   const [codec, codecName] = codecWithName

@@ -2,6 +2,7 @@
 import { pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../../src/shared/models/DayJs'
+import { MsDuration } from '../../../src/shared/models/MsDuration'
 import type { Platform } from '../../../src/shared/models/api/Platform'
 import { Puuid } from '../../../src/shared/models/api/summoner/Puuid'
 import { SummonerName } from '../../../src/shared/models/riot/SummonerName'
@@ -19,11 +20,17 @@ import { SummonerPersistence } from '../../../src/server/persistence/SummonerPer
 import { Logger } from '../../Logger'
 import { expectT } from '../../expectT'
 
+const dbRetryDelay = MsDuration.seconds(10)
+
 describe('SummonerPersistence', () => {
   const withDb = pipe(
     Config.load,
     Future.fromIOEither,
-    Future.chain(config => WithDb.load(config.db)),
+    Future.chain(config => {
+      const logger = Logger('RiotAccountPersistence.test')
+
+      return WithDb.load(config.db, logger, dbRetryDelay)
+    }),
     futureRunUnsafe,
   )
   const summonerPersistence = pipe(
@@ -56,7 +63,7 @@ describe('SummonerPersistence', () => {
 
   afterAll(() => withDb.then(a => a.client.close()))
 
-  it('should find by exact puuid', () => expectFaker(p => p.findByPuuid(puuid, day0)))
+  it('should find by exact puuid', () => expectFaker(p => p.findByPuuid(platform, puuid, day0)))
 
   it('should find by exact name', () =>
     // eslint-disable-next-line deprecation/deprecation

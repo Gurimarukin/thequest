@@ -27,16 +27,15 @@ const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
       </li>
     )
   },
-  (t, spell) => html =>
-    (
-      <li key={spell} className="col-span-3 flex flex-col gap-1 last:mb-1">
-        <div className="flex items-center gap-1">
-          <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia" />
-          <span>{t.aram.spell(spell)}</span>
-        </div>
-        <span dangerouslySetInnerHTML={{ __html: html.description }} className="wikia" />
-      </li>
-    ),
+  (t, spell) => html => (
+    <li key={spell} className="col-span-3 flex flex-col gap-1 last:mb-1">
+      <div className="flex items-center gap-1">
+        <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia" />
+        <span>{t.aram.spell(spell)}</span>
+      </div>
+      <span dangerouslySetInnerHTML={{ __html: html.description }} className="wikia" />
+    </li>
+  ),
   Infinity,
 )
 

@@ -138,7 +138,7 @@ export const Factions: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
+      <div className="flex size-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
           randomChampion={randomChampion}

@@ -1,3 +1,5 @@
+- dont reload game on focus
+
 - full summoner name removal
 
 - are `fromIO`s useful (simply use `myIo()`)?
