@@ -21,11 +21,11 @@ type FindOptions = {
 
 type LeagueEntryService = ReturnType<typeof LeagueEntryService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const LeagueEntryService = (
   riotApiCacheTtl: RiotApiCacheTtlConfig,
   leagueEntryPersistence: LeagueEntryPersistence,
   riotApiService: RiotApiService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => ({
   findBySummoner: (
     platform: Platform,

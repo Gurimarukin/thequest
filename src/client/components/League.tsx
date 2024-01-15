@@ -168,7 +168,7 @@ export const League: React.FC<Props> = ({
                       tier={s.tier}
                       rank={s.rank}
                       draggable={draggable}
-                      className="mx-0.5 h-5 w-5"
+                      className="mx-0.5 size-5"
                     />
                     )
                   </span>

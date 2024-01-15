@@ -76,7 +76,7 @@ export const Summoner: React.FC<Props> = ({
         <img
           src={staticData.assets.summonerIcon(profileIconId)}
           alt={t.common.summonerIconAlt(RiotId.stringify(riotId))}
-          className="h-24 w-24 rounded border border-goldenrod-bis"
+          className="size-24 rounded border border-goldenrod-bis"
         />
         <div className="grid grid-rows-[1fr_auto]">
           <div className="flex flex-wrap items-baseline gap-2">

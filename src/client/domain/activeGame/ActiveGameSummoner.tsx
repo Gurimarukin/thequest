@@ -176,7 +176,7 @@ export const ActiveGameSummoner: React.FC<Props> = ({
                         className={cx('w-4', ['text-cyan-200', isCurrent])}
                       />
                       {isCurrent ? (
-                        <span className="absolute -bottom-1 h-0.5 w-0.5 rounded-1/2 bg-cyan-200" />
+                        <span className="absolute -bottom-1 size-0.5 rounded-1/2 bg-cyan-200" />
                       ) : null}
                     </li>
                   )

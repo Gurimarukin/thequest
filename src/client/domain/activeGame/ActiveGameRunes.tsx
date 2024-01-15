@@ -82,7 +82,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
         {pipe(
           keyStone,
           Maybe.fold(
-            () => <div className="h-full w-full bg-black" />,
+            () => <div className="size-full bg-black" />,
             r => (
               <Rune
                 icon={r.iconPath}

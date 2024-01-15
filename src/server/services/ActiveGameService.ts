@@ -43,11 +43,11 @@ const ActiveGameService = (
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (
   riotApiCacheTtl: RiotApiCacheTtlConfig,
   activeGamePersistence: ActiveGamePersistence,
   riotApiService: RiotApiService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return {
     findBySummoner: (platform: Platform, summonerId: SummonerId): Future<Maybe<ActiveGame>> =>

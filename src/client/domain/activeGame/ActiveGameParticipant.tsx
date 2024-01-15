@@ -337,7 +337,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             () => (
               <>
                 <span className="invisible">h</span>
-                <div className="h-16 w-16 bg-black text-2xs">
+                <div className="size-16 bg-black text-2xs">
                   {t.common.championKey(championId)}
                 </div>
                 <span className="invisible">h</span>
@@ -389,33 +389,33 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         gridColStart={7}
         className={cx('flex flex-col items-center justify-center gap-2', padding)}
       >
-        <li className="h-7 w-7">
+        <li className="size-7">
           {pipe(
             spell1,
             Maybe.fold(
-              () => <Empty className="h-full w-full">{t.common.spellKey(spell1Id)}</Empty>,
+              () => <Empty className="size-full">{t.common.spellKey(spell1Id)}</Empty>,
               s => (
                 <SummonerSpell
                   spell={s}
                   tooltipShouldHide={tooltipShouldHide}
                   draggable={false}
-                  className="h-full w-full"
+                  className="size-full"
                 />
               ),
             ),
           )}
         </li>
-        <li className="h-7 w-7">
+        <li className="size-7">
           {pipe(
             spell2,
             Maybe.fold(
-              () => <Empty className="h-full w-full">{t.common.spellKey(spell2Id)}</Empty>,
+              () => <Empty className="size-full">{t.common.spellKey(spell2Id)}</Empty>,
               s => (
                 <SummonerSpell
                   spell={s}
                   tooltipShouldHide={tooltipShouldHide}
                   draggable={false}
-                  className="h-full w-full"
+                  className="size-full"
                 />
               ),
             ),

@@ -19,11 +19,11 @@ import { Migration20231212 } from './migrations/Migration20231212'
 
 export type MigrationService = ReturnType<typeof MigrationService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const MigrationService = (
   Logger: LoggerGetter,
   mongoCollection: MongoCollectionGetter,
   migrationPersistence: MigrationPersistence,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const logger = Logger('MigrationService')
 

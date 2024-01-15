@@ -63,7 +63,7 @@ const Span: React.FC<SpanProps> = ({ position, className, style }) => {
   return (
     <div className={className} style={style}>
       <span ref={ref}>
-        <ChampionPositionImg position={position} className="h-5 w-5 text-grey-500" />
+        <ChampionPositionImg position={position} className="size-5 text-grey-500" />
       </span>
       <Tooltip hoverRef={ref}>{t.labels.position[position]}</Tooltip>
     </div>

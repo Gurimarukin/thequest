@@ -26,11 +26,11 @@ type FindOptions = {
 
 type MasteriesService = ReturnType<typeof MasteriesService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const MasteriesService = (
   riotApiCacheTtl: RiotApiCacheTtlConfig,
   championMasteryPersistence: ChampionMasteryPersistence,
   riotApiService: RiotApiService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => ({
   findBySummoner: (
     platform: Platform,

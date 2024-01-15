@@ -107,7 +107,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
   return (
     <>
-      <div ref={hoverRef_} className="grid h-16 w-16">
+      <div ref={hoverRef_} className="grid size-16">
         {/* level border */}
         <div
           className={cx(
@@ -153,7 +153,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
         {/* chest bottom left */}
         {chestGranted ? (
-          <div className="flex h-3.5 w-3.5 flex-col-reverse self-end justify-self-start rounded-tr bg-black area-1">
+          <div className="flex size-3.5 flex-col-reverse self-end justify-self-start rounded-tr bg-black area-1">
             <Chest className="w-3 text-goldenrod opacity-90" />
           </div>
         ) : null}
@@ -411,7 +411,7 @@ const Shards: React.FC<ShardsProps> = ({
         <span className="text-[15px] leading-[9px]">{shardsCount}</span>
       </div>
       <span className="relative z-10 mr-[-3px] rounded-tl bg-black pl-px pt-px">
-        <SparklesSharp className="h-2.5 w-2.5 rotate-180" />
+        <SparklesSharp className="size-2.5 rotate-180" />
       </span>
     </div>
   )

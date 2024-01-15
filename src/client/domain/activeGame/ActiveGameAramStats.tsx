@@ -19,7 +19,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
           const renderStatValue_ = renderStatValue(name, '')
           return value => (
             <li key={name} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-              <span className="h-2.5 w-2.5">{icon}</span>
+              <span className="size-2.5">{icon}</span>
               {renderStatValue_(value)}
             </li>
           )
@@ -28,7 +28,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
           <li key={spell} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
             <span
               dangerouslySetInnerHTML={{ __html: html.spell }}
-              className="wikia compact h-5 w-5"
+              className="wikia compact size-5"
             />
             <span>{t.common.labels.spell[spell]}</span>
           </li>

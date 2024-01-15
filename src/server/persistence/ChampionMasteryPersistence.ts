@@ -16,10 +16,10 @@ import { DayJsFromDate } from '../utils/ioTsUtils'
 
 type ChampionMasteryPersistence = ReturnType<typeof ChampionMasteryPersistence>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const ChampionMasteryPersistence = (
   Logger: LoggerGetter,
   mongoCollection: MongoCollectionGetter,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const logger = Logger('ChampionMasteryPersistence')
   const collection = FpCollection(logger)([ChampionMasteryDb.codec, 'ChampionMasteryDb'])(

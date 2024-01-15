@@ -17,11 +17,11 @@ import type { RiotApiService } from './RiotApiService'
 
 type ChallengesService = ReturnType<typeof ChallengesService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const ChallengesService = (
   riotApiCacheTtl: RiotApiCacheTtlConfig,
   challengesPersistence: ChallengesPersistence,
   riotApiService: RiotApiService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return {
     findBySummoner: (platform: Platform, puuid: Puuid): Future<Maybe<Challenges>> =>

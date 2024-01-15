@@ -221,7 +221,7 @@ const Member: React.FC<MemberProps> = ({ user, summoner, setSummoner, remove }) 
     <Td>
       <div className="flex h-full items-center">
         <button type="button" onClick={remove}>
-          <CloseFilled className="h-6 w-6 text-red" />
+          <CloseFilled className="size-6 text-red" />
         </button>
       </div>
     </Td>
@@ -329,7 +329,7 @@ const DiscordUser: React.FC<DiscordUserProps> = ({ user, className, ...props }) 
         avatar => (
           <img
             src={`https://cdn.discordapp.com/avatars/${user.id}/${avatar}.png?size=64`}
-            className="h-8 w-8"
+            className="size-8"
           />
         ),
       ),
@@ -462,7 +462,7 @@ const SummonerComponent: React.FC<SummonerComponentProp> = ({
   const { assets } = useStaticData()
   return (
     <div className={cx('flex items-center gap-2', className)}>
-      <img src={assets.summonerIcon(profileIconId)} className="h-8 w-8 shrink-0" />
+      <img src={assets.summonerIcon(profileIconId)} className="size-8 shrink-0" />
       <div className="grow">
         <span className="text-goldenrod">{GameName.unwrap(gameName)}</span>
         <span className="text-grey-500">#{TagLine.unwrap(tagLine)}</span>

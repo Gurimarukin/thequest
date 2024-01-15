@@ -102,7 +102,7 @@ export const Aram: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="flex h-full w-full flex-col overflow-y-auto px-2 pb-24 pt-3">
+      <div className="flex size-full flex-col overflow-y-auto px-2 pb-24 pt-3">
         <SearchChampion
           searchCount={searchCount}
           randomChampion={randomChampion}
@@ -166,7 +166,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
         ref={championHoverRef}
         championKey={champion.key}
         championName={champion.name}
-        className="text-blabla h-12 w-12 rounded-xl shadow-even shadow-black"
+        className="size-12 rounded-xl shadow-even shadow-black"
       />
       <Tooltip hoverRef={championHoverRef} placement="top">
         {champion.name}

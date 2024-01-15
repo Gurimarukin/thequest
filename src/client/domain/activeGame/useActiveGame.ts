@@ -2,7 +2,7 @@ import { flow, pipe } from 'fp-ts/function'
 import { useCallback } from 'react'
 import type { KeyedMutator, SWRResponse } from 'swr'
 import useSWR, { useSWRConfig } from 'swr'
-import { OverrideProperties } from 'type-fest'
+import type { OverrideProperties } from 'type-fest'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
 import type { Lang } from '../../../shared/models/api/Lang'
@@ -58,6 +58,7 @@ export function useActiveGame(
     ...res,
     mutate: useCallback(
       (data, opts) => mutate(key, data as SummonerActiveGameView, opts),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [...key, mutate],
     ),
   }

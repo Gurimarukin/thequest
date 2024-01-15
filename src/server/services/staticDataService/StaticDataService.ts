@@ -49,13 +49,13 @@ import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const StaticDataService = (
   config: Config,
   Logger: LoggerGetter,
   httpClient: HttpClient,
   ddragonService: DDragonService,
   mockService: MockService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const logger = Logger('StaticDataService')
 

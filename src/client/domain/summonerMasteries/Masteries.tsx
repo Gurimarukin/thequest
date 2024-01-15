@@ -225,12 +225,12 @@ const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
   <div
     className={
       isGlowing
-        ? 'absolute left-[-7px] top-[-7px] grid h-[78px] w-[78px] items-center justify-items-center overflow-hidden rounded-1/2'
+        ? 'absolute left-[-7px] top-[-7px] grid size-[78px] items-center justify-items-center overflow-hidden rounded-1/2'
         : 'hidden'
     }
   >
-    <div className="col-start-1 row-start-1 h-full w-full animate-my-spin-reverse rounded-1/2 border-2 border-dashed border-white" />
-    <div className="col-start-1 row-start-1 h-[calc(100%_-_4px)] w-[calc(100%_-_4px)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
+    <div className="col-start-1 row-start-1 size-full animate-my-spin-reverse rounded-1/2 border-2 border-dashed border-white" />
+    <div className="col-start-1 row-start-1 size-[calc(100%_-_4px)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
   </div>
 )
 

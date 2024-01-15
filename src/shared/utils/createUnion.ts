@@ -75,10 +75,10 @@ export function createUnion<D extends UnionDescription>(
  * custom
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UnionKeys<U> =
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   U extends UnionResult<infer _> ? Exclude<keyof U, 'T' | 'is' | 'match'> : never
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UnionTypes<U, K extends UnionKeys<U> = UnionKeys<U>> =
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   U extends UnionResult<infer _> ? ReturnType<U[K]> : never

@@ -68,6 +68,7 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-namespace': 'warn',
+    '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/no-restricted-imports': 'off',
     '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
     '@typescript-eslint/no-unnecessary-condition': 'warn',
@@ -108,7 +109,7 @@ module.exports = {
     'functional/no-expression-statements': [
       'warn',
       {
-        ignorePattern: [
+        ignoreCodePattern: [
           '^afterEach\\(',
           '^beforeEach\\(',
           '^console\\.',

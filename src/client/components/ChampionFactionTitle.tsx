@@ -36,7 +36,7 @@ export const ChampionFactionTitle: React.FC<ChampionFactionTitleProps> = ({
     <div className={cx('col-span-full flex', className)}>
       <div className="flex items-baseline gap-4">
         <div className="flex items-center gap-2">
-          {faction !== 'none' ? <ChampionFactionImg faction={faction} className="h-7 w-7" /> : null}
+          {faction !== 'none' ? <ChampionFactionImg faction={faction} className="size-7" /> : null}
           <span className="font-semibold">{t.labels.factionOrNone[faction]}</span>
           <span ref={ref} className="text-sm">
             {t.fraction(count, total, { withParenthesis: true })}

@@ -49,11 +49,11 @@ const SummonerService = (
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const of = (
   riotApiCacheTtl: RiotApiCacheTtlConfig,
   summonerPersistence: SummonerPersistence,
   riotApiService: RiotApiService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return {
     findByName: (
