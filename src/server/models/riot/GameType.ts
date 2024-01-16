@@ -13,12 +13,7 @@ const e = createEnum(
 )
 
 const decoder = pipe(
-  D.id<unknown>(),
-  D.map(res => {
-    console.log('gameType =', res)
-    return res
-  }),
-  D.compose(D.literal(...e.values, 'CUSTOM', 'TUTORIAL', 'MATCHED')),
+  D.literal(...e.values, 'CUSTOM', 'TUTORIAL', 'MATCHED'),
   D.map((m): GameType => {
     if (m === 'CUSTOM') return 'CUSTOM_GAME'
     if (m === 'TUTORIAL') return 'TUTORIAL_GAME'
