@@ -389,40 +389,49 @@ const SummonerController = (
     maybeUser: Maybe<TokenContent>,
     gameInsertedAt: DayJs,
   ): (participant: ActiveGameParticipant) => Future<ActiveGameParticipantView> {
-    return participant =>
+    return p =>
       pipe(
-        apply.sequenceS(Future.ApplyPar)({
-          riotAccount: pipe(
-            riotAccountService.findByPuuid(participant.puuid),
-            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(participant.puuid))),
-          ),
-          leagues: findLeagues(platform, participant.summonerId, {
-            overrideInsertedAfter: gameInsertedAt,
-          }),
-          masteriesAndShardsCount: findMasteriesAndShardsCount(
-            platform,
-            maybeUser,
-            gameInsertedAt,
-            participant,
-          ),
-        }),
-        Future.map(
-          ({ riotAccount, leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
-            pipe(
-              participant,
-              ActiveGameParticipant.toView({
-                riotId: riotAccount.riotId,
-                leagues,
-                masteries,
-                shardsCount,
+        // We should be able to directly call `riotAccountService.findByPuuid(participant.puuid)`, but `puuid` is fucked up
+        summonerService.findByName(platform, p.summonerName),
+        futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerName))),
+        Future.chain(summoner => {
+          const participant: ActiveGameParticipant = { ...p, puuid: summoner.puuid }
+
+          return pipe(
+            apply.sequenceS(Future.ApplyPar)({
+              riotAccount: pipe(
+                riotAccountService.findByPuuid(summoner.puuid),
+                futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerName))),
+              ),
+              leagues: findLeagues(platform, p.summonerId, {
+                overrideInsertedAfter: gameInsertedAt,
               }),
+              masteriesAndShardsCount: findMasteriesAndShardsCount(
+                platform,
+                maybeUser,
+                gameInsertedAt,
+                participant,
+              ),
+            }),
+            Future.map(
+              ({ riotAccount, leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
+                pipe(
+                  participant,
+                  ActiveGameParticipant.toView({
+                    riotId: riotAccount.riotId,
+                    leagues,
+                    masteries,
+                    shardsCount,
+                  }),
+                ),
             ),
-        ),
+          )
+        }),
       )
   }
 
-  function couldntFindAccountError(puuid: Puuid): Error {
-    return Error(`Couldn't find Riot account for summoner: ${puuid}`)
+  function couldntFindAccountError(summonerName: SummonerName): Error {
+    return Error(`Couldn't find Riot account for summoner: ${summonerName}`)
   }
 
   type EnrichedActiveGameParticipant = ActiveGameParticipant & {
@@ -440,9 +449,20 @@ const SummonerController = (
         List.flatten,
         List.traverse(Future.ApplicativePar)(p =>
           pipe(
-            riotAccountService.findByPuuid(p.puuid),
-            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.puuid))),
-            Future.map((a): EnrichedActiveGameParticipant => ({ ...p, riotId: a.riotId })),
+            // We should be able to directly call `riotAccountService.findByPuuid(p.puuid)`, but `puuid` is fucked up
+            summonerService.findByName(platform, p.summonerName),
+            futureMaybe.bindTo('summoner'),
+            futureMaybe.bind('account', ({ summoner }) =>
+              riotAccountService.findByPuuid(summoner.puuid),
+            ),
+            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerName))),
+            Future.map(
+              ({ summoner, account }): EnrichedActiveGameParticipant => ({
+                ...p,
+                puuid: summoner.puuid,
+                riotId: account.riotId,
+              }),
+            ),
           ),
         ),
         Future.chain(participants =>
