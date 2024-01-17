@@ -15,6 +15,7 @@ import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { RiotSummoner } from '../models/riot/RiotSummoner'
 import type { Summoner } from '../models/summoner/Summoner'
 import type { SummonerDb } from '../models/summoner/SummonerDb'
+import type { SummonerId } from '../models/summoner/SummonerId'
 import type { SummonerPersistence } from '../persistence/SummonerPersistence'
 import { getOnError } from '../utils/getOnError'
 import type { RiotApiService } from './RiotApiService'
@@ -56,6 +57,19 @@ const of = (
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   return {
+    findById: (
+      platform: Platform,
+      id: SummonerId,
+      { forceCacheRefresh }: ForceCacheRefresh = { forceCacheRefresh: false },
+    ): Future<Maybe<Summoner>> =>
+      findAndCache(
+        platform,
+        insertedAfter => summonerPersistence.findById(platform, id, insertedAfter),
+        // eslint-disable-next-line deprecation/deprecation
+        riotApiService.riotgames.platform(platform).lol.summonerV4.summoners.byId(id),
+        { forceCacheRefresh },
+      ),
+
     findByName: (
       platform: Platform,
       name: SummonerName,

@@ -392,8 +392,8 @@ const SummonerController = (
     return p =>
       pipe(
         // We should be able to directly call `riotAccountService.findByPuuid(participant.puuid)`, but `puuid` is fucked up
-        summonerService.findByName(platform, p.summonerName),
-        futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerName))),
+        summonerService.findById(platform, p.summonerId),
+        futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerId))),
         Future.chain(summoner => {
           const participant: ActiveGameParticipant = { ...p, puuid: summoner.puuid }
 
@@ -401,7 +401,7 @@ const SummonerController = (
             apply.sequenceS(Future.ApplyPar)({
               riotAccount: pipe(
                 riotAccountService.findByPuuid(summoner.puuid),
-                futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerName))),
+                futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerId))),
               ),
               leagues: findLeagues(platform, p.summonerId, {
                 overrideInsertedAfter: gameInsertedAt,
@@ -430,8 +430,8 @@ const SummonerController = (
       )
   }
 
-  function couldntFindAccountError(summonerName: SummonerName): Error {
-    return Error(`Couldn't find Riot account for summoner: ${summonerName}`)
+  function couldntFindAccountError(id: SummonerId): Error {
+    return Error(`Couldn't find Riot account for summoner: ${id}`)
   }
 
   type EnrichedActiveGameParticipant = ActiveGameParticipant & {
@@ -450,12 +450,12 @@ const SummonerController = (
         List.traverse(Future.ApplicativePar)(p =>
           pipe(
             // We should be able to directly call `riotAccountService.findByPuuid(p.puuid)`, but `puuid` is fucked up
-            summonerService.findByName(platform, p.summonerName),
+            summonerService.findById(platform, p.summonerId),
             futureMaybe.bindTo('summoner'),
             futureMaybe.bind('account', ({ summoner }) =>
               riotAccountService.findByPuuid(summoner.puuid),
             ),
-            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerName))),
+            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(p.summonerId))),
             Future.map(
               ({ summoner, account }): EnrichedActiveGameParticipant => ({
                 ...p,
