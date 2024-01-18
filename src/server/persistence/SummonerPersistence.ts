@@ -34,17 +34,6 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
   return {
     ensureIndexes,
 
-    findById: (
-      platform: Platform,
-      id: SummonerId,
-      insertedAfter: DayJs,
-    ): Future<Maybe<SummonerDb>> =>
-      collection.findOne({
-        platform: Platform.codec.encode(platform),
-        id: SummonerId.codec.encode(id),
-        insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
-      }),
-
     /** @deprecated SummonerName will be removed */
     // eslint-disable-next-line deprecation/deprecation
     findByName: (
