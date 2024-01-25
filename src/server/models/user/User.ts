@@ -5,10 +5,12 @@ import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 import { lens } from 'monocle-ts'
+import type { IsEqual } from 'type-fest'
 
 import { PlatformWithPuuid } from '../../../shared/models/api/summoner/PlatformWithPuuid'
 import { UserName } from '../../../shared/models/api/user/UserName'
 import { UserRole } from '../../../shared/models/api/user/UserRole'
+import type { Expect } from '../../../shared/models/typeUtils'
 import { List, immutableAssign } from '../../../shared/utils/fp'
 
 import { UserId } from './UserId'
@@ -37,7 +39,11 @@ const encoder = E.struct({
   id: UserId.codec,
   login: UserLogin.codec,
   favoriteSearches: List.encoder(PlatformWithPuuid.codec),
+  role: UserRole.encoder,
 })
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type TestEncoder = Expect<IsEqual<E.TypeOf<typeof encoder>, User<UserLogin>>>
 
 const codec: Codec<unknown, UserOutput, User<UserLogin>> = C.make(decoder(UserLogin.codec), encoder)
 

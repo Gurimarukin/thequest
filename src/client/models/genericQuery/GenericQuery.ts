@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
-import type { RequiredPartial } from '../../../shared/models/typeFest'
+import type { RequiredPartial } from '../../../shared/models/typeUtils'
 import { Dict, Maybe } from '../../../shared/utils/fp'
 
 import type { PartialGenericQuery } from './PartialGenericQuery'

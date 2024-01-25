@@ -1,13 +1,18 @@
 import { pipe } from 'fp-ts/function'
 import { Subject } from 'rxjs'
+import type { OverrideProperties } from 'type-fest'
 
 import { IO, toNotUsed } from '../../utils/fp'
-import type { Override } from '../typeFest'
 import type { TObservable } from './TObservable'
 import type { TSubject } from './TSubject'
 
-// eslint-disable-next-line functional/no-return-void
-type StrongSubject<A> = Override<Subject<A>, 'next', (value: A) => void>
+type StrongSubject<A> = OverrideProperties<
+  Subject<A>,
+  {
+    // eslint-disable-next-line functional/no-return-void
+    next: (value: A) => void
+  }
+>
 
 export type PubSub<A> = {
   subject: TSubject<A>

@@ -1,16 +1,16 @@
 import type { IndexDirection, IndexDescription as MongoIndexDescription } from 'mongodb'
-
-import type { Override } from '../../../shared/models/typeFest'
+import type { OverrideProperties } from 'type-fest'
 
 export type WithoutProjection<T> = T & {
   fields?: undefined
   projection?: undefined
 }
 
-export type IndexDescription<A> = Override<
+export type IndexDescription<A> = OverrideProperties<
   MongoIndexDescription,
-  'key',
   {
-    [B in keyof A]?: IndexDirection
+    key: {
+      [B in keyof A]?: IndexDirection
+    }
   }
 >

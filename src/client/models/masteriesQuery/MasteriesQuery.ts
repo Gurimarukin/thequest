@@ -5,7 +5,7 @@ import { lens } from 'monocle-ts'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
-import type { RequiredPartial } from '../../../shared/models/typeFest'
+import type { RequiredPartial } from '../../../shared/models/typeUtils'
 import { Dict, List, Maybe } from '../../../shared/utils/fp'
 
 import { MasteriesQueryOrder } from './MasteriesQueryOrder'

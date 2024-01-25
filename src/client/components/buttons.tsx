@@ -1,11 +1,12 @@
-import type { Override } from '../../shared/models/typeFest'
+import type { OverrideProperties } from 'type-fest'
 
 import { cx } from '../utils/cx'
 
-type Props = Override<
+type Props = OverrideProperties<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'type',
-  Exclude<React.ButtonHTMLAttributes<HTMLButtonElement>['type'], undefined>
+  {
+    type: Exclude<React.ButtonHTMLAttributes<HTMLButtonElement>['type'], undefined>
+  }
 >
 
 const getButton =

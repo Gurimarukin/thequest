@@ -132,6 +132,7 @@ const UserService = (
                 Future.fromIOEither(UserId.generate),
                 Future.chain(id => {
                   const user = User(id, UserLoginDiscord.of(discord), [], 'base')
+
                   return pipe(
                     userPersistence.create(user),
                     Future.map(success => (success ? Maybe.some(user) : Maybe.none)),

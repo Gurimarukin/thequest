@@ -1,10 +1,10 @@
 import type { Match, Parser } from 'fp-ts-routing'
 import { format, zero } from 'fp-ts-routing'
 import { lazy } from 'react'
+import type { Merge } from 'type-fest'
 
 import type { Platform, PlatformLower } from '../../shared/models/api/Platform'
 import { RiotId } from '../../shared/models/riot/RiotId'
-import type { Override } from '../../shared/models/typeFest'
 import { StringUtils } from '../../shared/utils/StringUtils'
 
 import { LoadingSuspense } from '../components/LoadingSuspense'
@@ -88,7 +88,12 @@ type Platformable = {
   platform: Platform | PlatformLower
 }
 
-type UppercasePlatform<A extends Platformable> = Override<A, 'platform', Uppercase<A['platform']>>
+type UppercasePlatform<A extends Platformable> = Merge<
+  A,
+  {
+    platform: Uppercase<A['platform']>
+  }
+>
 
 // Redirect if upper case
 function withPlatformLower<A extends Platformable>(

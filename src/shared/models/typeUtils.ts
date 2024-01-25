@@ -2,10 +2,10 @@ import type { Dict } from '../utils/fp'
 
 export type EnforceNonEmptyDict<A extends Dict<string, unknown>> = keyof A extends never ? never : A
 
-export type Override<A, K extends keyof A, B> = Omit<A, K> & {
-  [J in K]: B
-}
-
 export type RequiredPartial<A> = {
   [K in keyof Required<A>]: A[K] | undefined
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type Expect<T extends true> =
+  (<U>() => U extends U ? 1 : 2) extends <U>() => U extends true ? 1 : 2 ? true : false
