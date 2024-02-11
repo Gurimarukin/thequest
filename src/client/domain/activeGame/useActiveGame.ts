@@ -11,7 +11,6 @@ import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/Su
 import type { RiotId } from '../../../shared/models/riot/RiotId'
 import { Future, Maybe } from '../../../shared/utils/fp'
 
-import { config } from '../../config/unsafe'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
@@ -48,9 +47,9 @@ export function useActiveGame(
         futureRunUnsafe,
       ),
     {
-      revalidateIfStale: !config.isDev,
-      revalidateOnFocus: !config.isDev,
-      revalidateOnReconnect: !config.isDev,
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     },
   )
 
