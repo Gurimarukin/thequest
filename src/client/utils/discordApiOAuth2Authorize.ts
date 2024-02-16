@@ -14,5 +14,4 @@ export const discordApiOAuth2Authorize = (state: DiscordRedirectState): string =
     response_type: 'code',
     scope: pipe(['identify', 'connections'], List.mkString(' ')),
     state,
-    prompt: 'none',
   })}`
