@@ -1,9 +1,11 @@
+import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import useSWR from 'swr'
 
 import type { RouteWithMethod } from '../../../shared/ApiRouter'
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { MsDuration } from '../../../shared/models/MsDuration'
 import { DiscordCodePayload } from '../../../shared/models/api/user/DiscordCodePayload'
 import { OAuth2Code } from '../../../shared/models/discord/OAuth2Code'
 import type { Dict } from '../../../shared/utils/fp'
@@ -20,6 +22,8 @@ import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
 import { NotFound } from '../NotFound'
 import { DiscordRedirectState } from './DiscordRedirectState'
+
+const apiCallDelay = MsDuration.ms(100)
 
 const apiRoute: Dict<DiscordRedirectState, RouteWithMethod> = {
   login: apiRoutes.user.login.discord.post,
@@ -56,8 +60,13 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
     [...apiRoute[state], code],
     ([url, method, code_]) =>
       pipe(
-        http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
-        Future.chain(() => refreshUser),
+        apply.sequenceT(Future.ApplicativePar)(
+          pipe(
+            http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
+            Future.chain(() => refreshUser),
+          ),
+          pipe(Future.notUsed, Future.delay(apiCallDelay)),
+        ),
         futureRunUnsafe,
       ),
     {
@@ -70,6 +79,7 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
 
   return (
     <>
+      <pre>{JSON.stringify({ data, error }, null, 2)}</pre>
       <AsyncRenderer data={data} error={error}>
         {() => <Navigate to={appRoutes.index} replace={true} />}
       </AsyncRenderer>
