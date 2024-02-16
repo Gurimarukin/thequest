@@ -131,7 +131,7 @@ const decoder = pipe(
             NonEmptyArray.concatAll(semigroup.max(MsDuration.Ord)),
           ),
         ),
-        Maybe.getOrElse(() => MsDuration.ms(0)),
+        Maybe.getOrElse(() => MsDuration.milliseconds(0)),
       )
 
       return {
@@ -140,7 +140,7 @@ const decoder = pipe(
         gameDuration: pipe(
           gameEndTimestamp,
           Maybe.fold(
-            () => MsDuration.ms(gameDuration),
+            () => MsDuration.milliseconds(gameDuration),
             () => MsDuration.seconds(gameDuration),
           ),
         ),

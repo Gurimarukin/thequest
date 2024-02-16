@@ -57,13 +57,21 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
       )({
         summoner,
         leagues: emptyLeagues,
-        masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
+        masteries: {
+          champions: [],
+          insertedAt: DayJs.of(0),
+          cacheDuration: MsDuration.milliseconds(0),
+        },
         championShards: Maybe.none,
       }),
     ).toStrictEqual({
       summoner,
       leagues: emptyLeagues,
-      masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
+      masteries: {
+        champions: [],
+        insertedAt: DayJs.of(0),
+        cacheDuration: MsDuration.milliseconds(0),
+      },
       championShards: Maybe.none,
     })
 
@@ -74,13 +82,21 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
       )({
         summoner,
         leagues: emptyLeagues,
-        masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
+        masteries: {
+          champions: [],
+          insertedAt: DayJs.of(0),
+          cacheDuration: MsDuration.milliseconds(0),
+        },
         championShards: Maybe.some([shardsOne]),
       }),
     ).toStrictEqual({
       summoner,
       leagues: emptyLeagues,
-      masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
+      masteries: {
+        champions: [],
+        insertedAt: DayJs.of(0),
+        cacheDuration: MsDuration.milliseconds(0),
+      },
       championShards: Maybe.some([shardsOne, shardsTwo]),
     })
 
@@ -91,13 +107,21 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
       )({
         summoner,
         leagues: emptyLeagues,
-        masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
+        masteries: {
+          champions: [],
+          insertedAt: DayJs.of(0),
+          cacheDuration: MsDuration.milliseconds(0),
+        },
         championShards: Maybe.some([shardsOne, shardsTwo]),
       }),
     ).toStrictEqual({
       summoner,
       leagues: emptyLeagues,
-      masteries: { champions: [], insertedAt: DayJs.of(0), cacheDuration: MsDuration.ms(0) },
+      masteries: {
+        champions: [],
+        insertedAt: DayJs.of(0),
+        cacheDuration: MsDuration.milliseconds(0),
+      },
       championShards: Maybe.some([shardsOneBis, shardsTwo]),
     })
   })

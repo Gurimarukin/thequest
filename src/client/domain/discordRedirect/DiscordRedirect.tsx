@@ -23,7 +23,7 @@ import { http } from '../../utils/http'
 import { NotFound } from '../NotFound'
 import { DiscordRedirectState } from './DiscordRedirectState'
 
-const apiCallDelay = MsDuration.ms(100)
+const apiCallDelay = MsDuration.milliseconds(100)
 
 const apiRoute: Dict<DiscordRedirectState, RouteWithMethod> = {
   login: apiRoutes.user.login.discord.post,

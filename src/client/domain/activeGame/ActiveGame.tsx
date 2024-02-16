@@ -61,7 +61,7 @@ const { swap } = ListUtils
 const { clamp } = NumberUtils
 const { pad10 } = StringUtils
 
-const refreshDelay = MsDuration.ms(100)
+const refreshDelay = MsDuration.milliseconds(100)
 const reloadInterval = MsDuration.seconds(10)
 const timerInterval = MsDuration.second(1)
 

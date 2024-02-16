@@ -12,7 +12,7 @@ import { iso } from 'newtype-ts'
 type MsDuration = Newtype<{ readonly MsDuration: unique symbol }, number>
 
 const { wrap, unwrap } = iso<MsDuration>()
-const ms = wrap
+const milliseconds = wrap
 
 const codec: Codec<unknown, number, MsDuration> = C.make(
   pipe(C.number, D.map(wrap)),
@@ -36,19 +36,19 @@ const codec: Codec<unknown, number, MsDuration> = C.make(
 //     option.map(wrap),
 //   )
 
-const infinity: MsDuration = ms(Infinity)
+const infinity: MsDuration = milliseconds(Infinity)
 
-const seconds = (n: number): MsDuration => ms(1000 * n)
+const seconds = (n: number): MsDuration => milliseconds(1000 * n)
 const minutes = (n: number): MsDuration => seconds(60 * n)
 const hours = (n: number): MsDuration => minutes(60 * n)
 const days = (n: number): MsDuration => hours(24 * n)
 
-const fromDate = (date: Date): MsDuration => ms(date.getTime())
+const fromDate = (date: Date): MsDuration => milliseconds(date.getTime())
 
 const add =
   (b: MsDuration) =>
   (a: MsDuration): MsDuration =>
-    ms(unwrap(a) + unwrap(b))
+    milliseconds(unwrap(a) + unwrap(b))
 
 const Ord: ord.Ord<MsDuration> = pipe(number.Ord, ord.contramap(unwrap))
 
@@ -57,7 +57,8 @@ const MsDuration = {
   // fromStringDecoder,
   // fromString,
   infinity,
-  ms,
+  millisecond: milliseconds,
+  milliseconds,
   unwrap,
   seconds,
   second: seconds,
