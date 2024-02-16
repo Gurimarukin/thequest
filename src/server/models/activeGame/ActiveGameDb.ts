@@ -30,11 +30,13 @@ const participantCodec = C.struct({
   championId: ChampionKey.codec,
   spell1Id: SummonerSpellKey.codec,
   spell2Id: SummonerSpellKey.codec,
-  perks: C.struct({
-    perkIds: List.codec(RuneId.codec),
-    perkStyle: RuneStyleId.codec,
-    perkSubStyle: RuneStyleId.codec,
-  }),
+  perks: Maybe.codec(
+    C.struct({
+      perkIds: List.codec(RuneId.codec),
+      perkStyle: RuneStyleId.codec,
+      perkSubStyle: RuneStyleId.codec,
+    }),
+  ),
 })
 
 type ActiveGameDb = C.TypeOf<typeof codec>

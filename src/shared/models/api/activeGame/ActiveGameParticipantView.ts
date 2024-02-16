@@ -26,7 +26,7 @@ const codec = C.struct({
   shardsCount: Maybe.codec(C.number),
   spell1Id: SummonerSpellKey.codec,
   spell2Id: SummonerSpellKey.codec,
-  perks: PerksView.codec,
+  perks: Maybe.codec(PerksView.codec),
 
   // poro
   premadeId: Maybe.codec(C.number),

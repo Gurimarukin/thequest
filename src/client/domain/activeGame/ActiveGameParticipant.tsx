@@ -104,7 +104,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
     shardsCount,
     spell1Id,
     spell2Id,
-    perks,
+    perks: maybePerks,
     premadeId,
     summonerLevel,
     championRankedStats,
@@ -420,19 +420,31 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           )}
         </li>
       </Cell>
-      <Cell
-        gridColStart={8}
-        className={cx('col-span-2 flex items-center py-1', reverse ? 'pl-4' : 'pr-4', padding)}
-      >
-        <ActiveGameRunes
-          runeStyleById={runeStyleById}
-          runeById={runeById}
-          perks={perks}
-          reverse={reverse}
-          tooltipShouldHide={tooltipShouldHide}
-          draggable={false}
-        />
-      </Cell>
+      {pipe(
+        maybePerks,
+        Maybe.fold(
+          () => null,
+          perks => (
+            <Cell
+              gridColStart={8}
+              className={cx(
+                'col-span-2 flex items-center py-1',
+                reverse ? 'pl-4' : 'pr-4',
+                padding,
+              )}
+            >
+              <ActiveGameRunes
+                runeStyleById={runeStyleById}
+                runeById={runeById}
+                perks={perks}
+                reverse={reverse}
+                tooltipShouldHide={tooltipShouldHide}
+                draggable={false}
+              />
+            </Cell>
+          ),
+        ),
+      )}
 
       {/* spacer */}
       {!isLast ? (

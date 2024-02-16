@@ -7,7 +7,7 @@ import { RuneStyleId } from '../../../../shared/models/api/perk/RuneStyleId'
 import { Puuid } from '../../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { SummonerName } from '../../../../shared/models/riot/SummonerName'
-import { List } from '../../../../shared/utils/fp'
+import { List, Maybe } from '../../../../shared/utils/fp'
 
 import { SummonerId } from '../../summoner/SummonerId'
 
@@ -27,7 +27,7 @@ type RawCurrentGameParticipant = D.TypeOf<typeof rawDecoder>
 const rawDecoder = D.struct({
   puuid: Puuid.codec,
   championId: ChampionKey.codec, // The ID of the champion played by this participant
-  perks: rawPerksDecoder, // Perks/Runes Reforged Information
+  perks: Maybe.decoder(rawPerksDecoder), // Perks/Runes Reforged Information
   profileIconId: D.number, // The ID of the profile icon used by this participant
   bot: D.boolean, // Flag indicating whether or not this participant is a bot
   teamId: TeamId.decoder, // The team ID of this participant, indicating the participant's team

@@ -21,11 +21,11 @@ type ActiveGameParticipant = {
   championId: ChampionKey
   spell1Id: SummonerSpellKey
   spell2Id: SummonerSpellKey
-  perks: {
+  perks: Maybe<{
     perkIds: List<RuneId>
     perkStyle: RuneStyleId
     perkSubStyle: RuneStyleId
-  }
+  }>
 }
 
 type ToView = {
