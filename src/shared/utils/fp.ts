@@ -104,6 +104,8 @@ const partialDictTraverse = readonlyRecord.traverse as <F extends URIS2>(
 ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>
 
 export const PartialDict = {
+  empty: <K extends string = string, A = never>(): PartialDict<K, A> => readonlyRecord.empty,
+
   every: readonlyRecord.every as {
     <A, B extends A>(
       refinement: Refinement<A, B>,
