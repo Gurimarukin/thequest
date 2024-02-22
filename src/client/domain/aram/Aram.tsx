@@ -12,6 +12,7 @@ import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
+import { ChampionPositionsAndFactions } from '../../components/ChampionTooltip'
 import { CroppedChampionSquare } from '../../components/CroppedChampionSquare'
 import { SearchChampion } from '../../components/SearchChampion'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
@@ -168,8 +169,9 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
         championName={champion.name}
         className="size-12 rounded-xl shadow-even shadow-black"
       />
-      <Tooltip hoverRef={championHoverRef} placement="top">
-        {champion.name}
+      <Tooltip hoverRef={championHoverRef} placement="top" className="flex flex-col gap-1">
+        <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>
+        <ChampionPositionsAndFactions positions={champion.positions} factions={champion.factions} />
       </Tooltip>
 
       <AramStatsCompact aram={champion.aram} splitAt={5}>

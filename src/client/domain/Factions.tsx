@@ -14,6 +14,7 @@ import { StringUtils } from '../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../shared/utils/fp'
 
 import { ChampionFactionTitle } from '../components/ChampionFactionTitle'
+import { ChampionPositionsAndFactions } from '../components/ChampionTooltip'
 import { CroppedChampionSquare } from '../components/CroppedChampionSquare'
 import { SearchChampion } from '../components/SearchChampion'
 import { MainLayout } from '../components/mainLayout/MainLayout'
@@ -194,8 +195,9 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
           champion.isHidden,
         ])}
       />
-      <Tooltip hoverRef={hoverRef} placement="top">
-        {champion.name}
+      <Tooltip hoverRef={hoverRef} placement="top" className="flex flex-col gap-1">
+        <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>
+        <ChampionPositionsAndFactions positions={champion.positions} factions={[]} />
       </Tooltip>
     </>
   )

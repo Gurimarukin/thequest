@@ -95,35 +95,51 @@ export const ChampionTooltip: React.FC<Props> = ({
         <div className="flex items-center gap-2">
           <span>{chestGranted ? t.masteries.chestGranted : t.masteries.chestAvailable}</span>
         </div>
-        <ul className="flex w-full max-w-[164px] flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
-          {List.isNonEmpty(positions)
-            ? pipe(
-                positions,
-                NonEmptyArray.map(position => (
-                  <li key={position} className="flex items-center gap-0.5">
-                    <ChampionPositionImg
-                      position={position}
-                      className="size-6 shrink-0 p-0.5 text-wheat-bis"
-                    />
-                    <span>{t.common.labels.position[position]}</span>
-                  </li>
-                )),
-              )
-            : null}
-          {List.isNonEmpty(factions)
-            ? pipe(
-                factions,
-                NonEmptyArray.map(faction => (
-                  <li key={faction} className="flex items-center gap-1.5">
-                    <ChampionFactionImg faction={faction} className="size-5 text-wheat-bis" />
-                    <span>{t.common.labels.faction[faction]}</span>
-                  </li>
-                )),
-              )
-            : null}
-        </ul>
+        <ChampionPositionsAndFactions positions={positions} factions={factions} />
       </div>
     </div>
+  )
+}
+
+type ChampionPositionsAndFactionsProps = {
+  positions: List<ChampionPosition>
+  factions: List<ChampionFaction>
+}
+
+export const ChampionPositionsAndFactions: React.FC<ChampionPositionsAndFactionsProps> = ({
+  positions,
+  factions,
+}) => {
+  const { t } = useTranslation('common')
+
+  return (
+    <ul className="flex w-full max-w-[164px] flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
+      {List.isNonEmpty(positions)
+        ? pipe(
+            positions,
+            NonEmptyArray.map(position => (
+              <li key={position} className="flex items-center gap-0.5">
+                <ChampionPositionImg
+                  position={position}
+                  className="size-6 shrink-0 p-0.5 text-wheat-bis"
+                />
+                <span>{t.labels.position[position]}</span>
+              </li>
+            )),
+          )
+        : null}
+      {List.isNonEmpty(factions)
+        ? pipe(
+            factions,
+            NonEmptyArray.map(faction => (
+              <li key={faction} className="flex items-center gap-1.5">
+                <ChampionFactionImg faction={faction} className="size-5 text-wheat-bis" />
+                <span>{t.labels.faction[faction]}</span>
+              </li>
+            )),
+          )
+        : null}
+    </ul>
   )
 }
 
