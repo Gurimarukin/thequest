@@ -653,7 +653,7 @@ const sortTeamParticipants =
             remain,
             List.partition(([, c]) =>
               pipe(
-                c.positions,
+                c.external_positions,
                 Maybe.exists(
                   List.some(p =>
                     ChampionPosition.Eq.equals(WikiaChampionPosition.position[p], position),
@@ -699,7 +699,7 @@ const sortTeamParticipants =
 
 const hasOnePosition: Predicate<ParticipantWithChampion> = ([, c]) =>
   pipe(
-    c.positions,
+    c.external_positions,
     Maybe.exists(p => p.length === 1),
   )
 

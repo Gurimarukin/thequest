@@ -226,7 +226,7 @@ const enrichChampions = (
         Either.bindTo('wikiaChampion'),
         Either.bind('positions', ({ wikiaChampion }) =>
           pipe(
-            wikiaChampion.positions,
+            wikiaChampion.external_positions,
             ValidatedNea.fromOption(() => 'empty positons'),
           ),
         ),
