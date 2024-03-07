@@ -329,7 +329,7 @@ const SummonerController = (
     maybeUser: Maybe<TokenContent>,
   ): Future<Maybe<ActiveGameView>> {
     return pipe(
-      activeGameService.findBySummoner(summoner.platform, summoner.id),
+      activeGameService.findBySummoner(summoner.platform, summoner.puuid),
       futureMaybe.chainTaskEitherK(game =>
         pipe(
           poroActiveGameService.find(lang, game.gameId, summoner.platform, summoner.riotId),

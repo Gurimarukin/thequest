@@ -5,6 +5,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import type { OverrideProperties } from 'type-fest'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { MsDuration } from '../../../shared/models/MsDuration'
 import type { Lang } from '../../../shared/models/api/Lang'
 import type { Platform } from '../../../shared/models/api/Platform'
 import { SummonerActiveGameView } from '../../../shared/models/api/activeGame/SummonerActiveGameView'
@@ -14,6 +15,8 @@ import { Future, Maybe } from '../../../shared/utils/fp'
 import { HistoryState, useHistory } from '../../contexts/HistoryContext'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import { http } from '../../utils/http'
+
+const timeout = MsDuration.minute(1)
 
 type Mutator = (
   ...args: Parameters<KeyedMutator<SummonerActiveGameView>>
@@ -36,7 +39,11 @@ export function useActiveGame(
       pipe(
         historyStateRef.current.game,
         Maybe.fold(
-          () => http([url, method], {}, [SummonerActiveGameView.codec, 'SummonerActiveGameView']),
+          () =>
+            http([url, method], { timeout }, [
+              SummonerActiveGameView.codec,
+              'SummonerActiveGameView',
+            ]),
           flow(
             Future.successful,
             Future.chainFirstIOK(

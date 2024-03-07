@@ -4,16 +4,22 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 import ky, { HTTPError } from 'ky'
 import type { HttpMethod, Options } from 'ky/distribution/types/options'
+import type { Except, OverrideProperties } from 'type-fest'
 
+import { MsDuration } from '../../shared/models/MsDuration'
 import type { NonEmptyArray, Tuple } from '../../shared/utils/fp'
 import { Either, Future, List, Maybe, Try } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { config } from '../config/unsafe'
 
-export type HttpOptions<O, B> = Omit<Options, 'method' | 'json'> & {
-  json?: Tuple<Encoder<O, B>, B>
-}
+export type HttpOptions<O, B> = OverrideProperties<
+  Except<Options, 'method'>,
+  {
+    json?: Tuple<Encoder<O, B>, B>
+    timeout?: MsDuration
+  }
+>
 
 function http<O, B>(
   urlWithMethod: Tuple<string, HttpMethod>,
@@ -26,7 +32,7 @@ function http<A, O, B>(
 ): Future<A>
 function http<A, O, B>(
   [url, method]: Tuple<string, HttpMethod>,
-  { credentials, ...options }: HttpOptions<O, B> = {},
+  { credentials, timeout, ...options }: HttpOptions<O, B> = {},
   decoderWithName?: Tuple<Decoder<unknown, A>, string>,
 ): Future<A> {
   const json = ((): O | undefined => {
@@ -42,6 +48,7 @@ function http<A, O, B>(
         method,
         json,
         credentials: credentials === undefined ? 'include' : credentials,
+        ...(timeout === undefined ? {} : { timeout: MsDuration.unwrap(timeout) }),
       }).json(),
     ),
     Future.chainEitherK(u => {
