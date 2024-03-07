@@ -8,6 +8,7 @@ import type { OptionProps, SingleValue, SingleValueProps } from 'react-select'
 import Select from 'react-select'
 
 import { apiRoutes } from '../../../shared/ApiRouter'
+import { MsDuration } from '../../../shared/models/MsDuration'
 import { Platform } from '../../../shared/models/api/Platform'
 import type { DiscordUserView } from '../../../shared/models/api/hallOfFame/DiscordUserView'
 import { HallOfFameInfos } from '../../../shared/models/api/hallOfFame/HallOfFameInfos'
@@ -32,10 +33,12 @@ import { CloseFilled } from '../../imgs/svgs/icons'
 import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 
+const getHallOfFameTimeout = MsDuration.minute(1)
+
 export const AdminHallOfFame: React.FC = () => (
   <MainLayout>
     <AsyncRenderer
-      {...useSWRHttp(apiRoutes.admin.hallOfFame.get, { timeout: 60000 }, [
+      {...useSWRHttp(apiRoutes.admin.hallOfFame.get, { timeout: getHallOfFameTimeout }, [
         HallOfFameInfos.codec,
         'HallOfFameInfos',
       ])}
