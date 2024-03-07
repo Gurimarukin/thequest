@@ -205,18 +205,18 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
             },
           },
 
-          spectatorV4: {
+          spectatorV5: {
             activeGames: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<RiotCurrentGameInfo>> =>
+              bySummoner: (puuid: Puuid): Future<Maybe<RiotCurrentGameInfo>> =>
                 pipe(
-                  config.mock ? mockService.activeGames.bySummoner(summonerId) : futureMaybe.none,
+                  config.mock ? mockService.activeGames.bySummoner(puuid) : futureMaybe.none,
                   futureMaybe.alt(() =>
                     pipe(
                       httpClient.http(
                         [
                           platformUrl(
                             platform,
-                            `/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
+                            `/lol/spectator/v5/active-games/by-summoner/${puuid}`,
                           ),
                           'get',
                         ],

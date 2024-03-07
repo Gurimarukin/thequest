@@ -3,6 +3,7 @@ import { pipe } from 'fp-ts/function'
 import type { DayJs } from '../../shared/models/DayJs'
 import { GameId } from '../../shared/models/api/GameId'
 import { TeamId } from '../../shared/models/api/activeGame/TeamId'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, List } from '../../shared/utils/fp'
 
@@ -10,7 +11,6 @@ import { FpCollection } from '../helpers/FpCollection'
 import { ActiveGameDb } from '../models/activeGame/ActiveGameDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
-import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 type ActiveGamePersistence = ReturnType<typeof ActiveGamePersistence>
@@ -23,9 +23,9 @@ const ActiveGamePersistence = (Logger: LoggerGetter, mongoCollection: MongoColle
   )
 
   const Keys = {
-    participantsSummonerId: pipe(
+    participantsPuuid: pipe(
       TeamId.values,
-      List.map(teamId => collection.path('participants', `${teamId}`, 'summonerId')),
+      List.map(teamId => collection.path('participants', `${teamId}`, 'puuid')),
     ),
   }
 
@@ -36,14 +36,12 @@ const ActiveGamePersistence = (Logger: LoggerGetter, mongoCollection: MongoColle
   return {
     ensureIndexes,
 
-    findBySummonerId: (
-      summonerId: SummonerId,
-      insertedAfter: DayJs,
-    ): Future<Maybe<ActiveGameDb>> => {
-      const id = SummonerId.codec.encode(summonerId)
+    findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<ActiveGameDb>> => {
+      const encoded = Puuid.codec.encode(puuid)
+
       return collection.findOne({
         $and: [
-          { $or: Keys.participantsSummonerId.map(key => ({ [key]: id })) },
+          { $or: Keys.participantsPuuid.map(key => ({ [key]: encoded })) },
           { insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) } },
         ],
       })

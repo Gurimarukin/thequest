@@ -4,9 +4,9 @@ import type { Decoder } from 'io-ts/Decoder'
 
 import { AdditionalStaticData } from '../../shared/models/api/staticData/AdditionalStaticData'
 import { StaticData } from '../../shared/models/api/staticData/StaticData'
+import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe, Tuple } from '../../shared/utils/fp'
-import { List } from '../../shared/utils/fp'
-import { Either, Future } from '../../shared/utils/fp'
+import { Either, Future, List } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
@@ -14,7 +14,6 @@ import type { MyFile } from '../models/FileOrDir'
 import { Dir } from '../models/FileOrDir'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
-import type { SummonerId } from '../models/summoner/SummonerId'
 import { WikiaChampionData } from '../models/wikia/WikiaChampionData'
 import { FsUtils } from '../utils/FsUtils'
 import { unknownToError } from '../utils/unknownToError'
@@ -46,10 +45,10 @@ const MockService = (Logger: LoggerGetter) => {
     'AdditionalStaticData',
   ])(() => mock.additionalStaticData)()
 
-  const activeGamesBySummoner: (summonerId: SummonerId) => Future<Maybe<RiotCurrentGameInfo>> =
-    maybeFile([RiotCurrentGameInfo.decoder, 'RiotCurrentGameInfo'])((summonerId: SummonerId) =>
-      pipe(mock.activeGames.bySummoner, Dir.joinFile(`${summonerId}.json`)),
-    )
+  const activeGamesBySummoner: (puuid: Puuid) => Future<Maybe<RiotCurrentGameInfo>> = maybeFile([
+    RiotCurrentGameInfo.decoder,
+    'RiotCurrentGameInfo',
+  ])((puuid: Puuid) => pipe(mock.activeGames.bySummoner, Dir.joinFile(`${puuid}.json`)))
 
   const wikiaChampions = maybeFile<List<WikiaChampionData>>([
     List.decoder(WikiaChampionData.decoder),
