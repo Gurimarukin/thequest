@@ -13,7 +13,7 @@ import { decodeError } from '../../shared/utils/ioTsUtils'
 import type { MyFile } from '../models/FileOrDir'
 import { Dir } from '../models/FileOrDir'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
+import { RiotCurrentLolGameInfo } from '../models/riot/currentGame/RiotCurrentLolGameInfo'
 import { WikiaChampionData } from '../models/wikia/WikiaChampionData'
 import { FsUtils } from '../utils/FsUtils'
 import { unknownToError } from '../utils/unknownToError'
@@ -45,8 +45,8 @@ const MockService = (Logger: LoggerGetter) => {
     'AdditionalStaticData',
   ])(() => mock.additionalStaticData)()
 
-  const activeGamesBySummoner: (puuid: Puuid) => Future<Maybe<RiotCurrentGameInfo>> = maybeFile([
-    RiotCurrentGameInfo.decoder,
+  const activeGamesBySummoner: (puuid: Puuid) => Future<Maybe<RiotCurrentLolGameInfo>> = maybeFile([
+    RiotCurrentLolGameInfo.decoder,
     'RiotCurrentGameInfo',
   ])((puuid: Puuid) => pipe(mock.activeGames.bySummoner, Dir.joinFile(`${puuid}.json`)))
 

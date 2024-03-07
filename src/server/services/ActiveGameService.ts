@@ -78,6 +78,7 @@ const of = (
   ): Future<Maybe<ActiveGame>> {
     return pipe(
       riotApiService.riotgames.platform(platform).lol.spectatorV5.activeGames.bySummoner(puuid),
+      futureMaybe.chainOptionK(g => (g.gameMode === 'TFT' ? Maybe.none : Maybe.some(g))),
       futureMaybe.bindTo('game'),
       futureMaybe.bind('now', () => futureMaybe.fromIO(DayJs.now)),
       futureMaybe.map(
