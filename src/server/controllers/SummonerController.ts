@@ -52,6 +52,7 @@ import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import { LeagueEntry } from '../models/league/LeagueEntry'
 import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
+import type { RiotAccount } from '../models/riot/RiotAccount'
 import type { Summoner, SummonerWithRiotId } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
@@ -394,7 +395,9 @@ const SummonerController = (
         apply.sequenceS(Future.ApplyPar)({
           riotAccount: pipe(
             riotAccountService.findByPuuid(participant.puuid),
-            futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(participant.puuid))),
+            futureMaybe.getOrElse(() =>
+              Future.failed<RiotAccount>(couldntFindAccountError(participant.puuid)),
+            ),
           ),
           leagues: findLeagues(platform, participant.summonerId, {
             overrideInsertedAfter: gameInsertedAt,
