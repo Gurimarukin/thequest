@@ -22,7 +22,7 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
     const summoner: SummonerView = {
       puuid: Puuid(''),
       riotId: RiotId(GameName(''), TagLine('')),
-      name: SummonerName(''),
+      name: Maybe.some(SummonerName('')),
       profileIconId: 0,
       summonerLevel: 0,
     }
