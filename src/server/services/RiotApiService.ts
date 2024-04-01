@@ -6,7 +6,6 @@ import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { GameName } from '../../shared/models/riot/GameName'
-import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import type { TagLine } from '../../shared/models/riot/TagLine'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
 import type { Dict, Future, Maybe } from '../../shared/utils/fp'
@@ -238,18 +237,6 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                 pipe(
                   httpClient.http(
                     [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [RiotSummoner.decoder, 'RiotSummoner'],
-                  ),
-                  statusesToOption(404),
-                ),
-
-              /** @deprecated SummonerName will be removed */
-              // eslint-disable-next-line deprecation/deprecation
-              byName: (name: SummonerName): Future<Maybe<RiotSummoner>> =>
-                pipe(
-                  httpClient.http(
-                    [platformUrl(platform, `/lol/summoner/v4/summoners/by-name/${name}`), 'get'],
                     { headers: { [xRiotToken]: lolKey } },
                     [RiotSummoner.decoder, 'RiotSummoner'],
                   ),
