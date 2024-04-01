@@ -7,7 +7,6 @@ import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { GameName } from '../../../shared/models/riot/GameName'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { List, Maybe } from '../../../shared/utils/fp'
@@ -28,7 +27,6 @@ const allLevels = new Set<ChampionLevel>(ChampionLevel.values)
 type Props = {
   platform: Platform
   riotId: RiotId
-  summonerName: SummonerName
   profileIconId: number
   masteries: Maybe<ActiveGameMasteriesView>
   premadeId: Maybe<number>
@@ -43,7 +41,6 @@ type Props = {
 export const ActiveGameSummoner: React.FC<Props> = ({
   platform,
   riotId,
-  summonerName,
   profileIconId,
   masteries,
   premadeId,
@@ -57,7 +54,6 @@ export const ActiveGameSummoner: React.FC<Props> = ({
   const { t } = useTranslation()
   const { assets } = useStaticData()
 
-  const riotIdRef = useRef<HTMLAnchorElement>(null)
   const summonerLevelRef = useRef<HTMLSpanElement>(null)
   const percentsRef = useRef<HTMLSpanElement>(null)
   const totalMasteriesRef = useRef<HTMLSpanElement>(null)
@@ -85,7 +81,6 @@ export const ActiveGameSummoner: React.FC<Props> = ({
         )}
         <div className={cx('flex grow', reverse ? 'justify-start' : 'justify-end')}>
           <a
-            ref={riotIdRef}
             href={appRoutes.platformRiotId(platform, riotId, {
               view: 'histogram',
               level: allLevels,
@@ -99,12 +94,6 @@ export const ActiveGameSummoner: React.FC<Props> = ({
             </span>
             <span className="leading-5 text-grey-500">#{TagLine.unwrap(riotId.tagLine)}</span>
           </a>
-          <Tooltip hoverRef={riotIdRef} placement="top" className="flex items-baseline gap-2">
-            <span>{t.common.oldSummonerName}</span>
-            <span className="whitespace-pre font-medium text-goldenrod">
-              {SummonerName.unwrap(summonerName)}
-            </span>
-          </Tooltip>
         </div>
       </div>
       <div className={cx('flex items-center gap-2', ['flex-row-reverse', !reverse])}>

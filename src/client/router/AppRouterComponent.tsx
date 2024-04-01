@@ -13,12 +13,7 @@ import { Factions } from '../domain/Factions'
 import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { Register } from '../domain/Register'
-import {
-  SummonerByNameGame,
-  SummonerByNameProfile,
-  SummonerByPuuidGame,
-  SummonerByPuuidProfile,
-} from '../domain/SummonerBy'
+import { SummonerByPuuidGame, SummonerByPuuidProfile } from '../domain/SummonerBy'
 import { ActiveGame } from '../domain/activeGame/ActiveGame'
 import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
@@ -56,16 +51,6 @@ export const AppRouterComponent: React.FC = getRouterComponent(
           <ActiveGame platform={platform} riotId={riotId} />,
           t => `${RiotId.stringify(riotId)} (${platform}) | ${t.game})`,
         ),
-      ),
-    )
-    .alt(
-      withPlatformLower(appMatches.platformSummonerName, ({ platform, summonerName }) =>
-        e(<SummonerByNameProfile platform={platform} name={summonerName} />),
-      ),
-    )
-    .alt(
-      withPlatformLower(appMatches.platformSummonerNameGame, ({ platform, summonerName }) =>
-        e(<SummonerByNameGame platform={platform} name={summonerName} />),
       ),
     )
     .alt(appParsers.aram.map(() => e(<Aram />, t => t.aram)))

@@ -6,7 +6,6 @@ import type { Platform } from '../../shared/models/api/Platform'
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
-import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { Maybe } from '../../shared/utils/fp'
 
 import { AsyncRenderer } from '../components/AsyncRenderer'
@@ -43,41 +42,6 @@ export const SummonerByPuuidGame: React.FC<ByPuuidProps> = ({ platform, puuid })
     <MainLayout>
       <AsyncRenderer
         {...useSWRHttp(apiRoutes.summoner.byPuuid(platform)(puuid).activeGame(lang).get, {}, [
-          SummonerActiveGameView.codec,
-          'SummonerActiveGameView',
-        ])}
-      >
-        {game => <SummonerByGameLoaded platform={platform} game={game} />}
-      </AsyncRenderer>
-    </MainLayout>
-  )
-}
-
-type ByNameProps = {
-  platform: Platform
-  name: SummonerName
-}
-
-export const SummonerByNameProfile: React.FC<ByNameProps> = ({ platform, name }) => (
-  <MainLayout>
-    <AsyncRenderer
-      {...useSWRHttp(apiRoutes.summoner.byName(platform)(name).masteries.get, {}, [
-        SummonerMasteriesView.codec,
-        'SummonerMasteriesView',
-      ])}
-    >
-      {masteries => <SummonerByProfileLoaded platform={platform} masteries={masteries} />}
-    </AsyncRenderer>
-  </MainLayout>
-)
-
-export const SummonerByNameGame: React.FC<ByNameProps> = ({ platform, name }) => {
-  const { lang } = useTranslation()
-
-  return (
-    <MainLayout>
-      <AsyncRenderer
-        {...useSWRHttp(apiRoutes.summoner.byName(platform)(name).activeGame(lang).get, {}, [
           SummonerActiveGameView.codec,
           'SummonerActiveGameView',
         ])}

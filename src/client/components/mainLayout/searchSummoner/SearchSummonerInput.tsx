@@ -1,9 +1,8 @@
-import { pipe } from 'fp-ts/function'
+import { identity, pipe } from 'fp-ts/function'
 import { forwardRef, useCallback } from 'react'
 
 import { GameName } from '../../../../shared/models/riot/GameName'
 import { RiotId } from '../../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../../shared/models/riot/TagLine'
 import { Either } from '../../../../shared/utils/fp'
 
@@ -11,8 +10,8 @@ import { useTranslation } from '../../../contexts/TranslationContext'
 import { cx } from '../../../utils/cx'
 
 type Props = {
-  summoner: Either<SummonerName, RiotId>
-  setSummoner: React.Dispatch<React.SetStateAction<Either<SummonerName, RiotId>>>
+  summoner: Either<string, RiotId>
+  setSummoner: React.Dispatch<React.SetStateAction<Either<string, RiotId>>>
   handleFocus: React.FocusEventHandler<HTMLInputElement>
 }
 
@@ -25,13 +24,13 @@ export const SearchSummonerInput = forwardRef<HTMLDivElement, Props>(
         setSummoner(
           pipe(
             RiotId.fromStringDecoder.decode(e.target.value),
-            Either.mapLeft(() => SummonerName(e.target.value)),
+            Either.mapLeft(() => e.target.value),
           ),
         ),
       [setSummoner],
     )
 
-    const summonerRaw = pipe(summoner, Either.fold(SummonerName.unwrap, RiotId.stringify))
+    const summonerRaw = pipe(summoner, Either.fold(identity, RiotId.stringify))
 
     return (
       <div ref={ref} className="grid min-w-[200px] items-center area-1">
@@ -39,7 +38,7 @@ export const SearchSummonerInput = forwardRef<HTMLDivElement, Props>(
           {pipe(
             summoner,
             Either.fold(
-              name => <span>{SummonerName.unwrap(name)}</span>,
+              name => <span>{name}</span>,
               ({ gameName, tagLine }) => (
                 <>
                   <span className="text-goldenrod">{GameName.unwrap(gameName)}</span>

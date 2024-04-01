@@ -119,7 +119,9 @@ export const SummonerSearch: React.FC<Props> = ({ type, summoner }) => {
           alt={t.summonerIconAlt(
             pipe(
               summoner.riotId,
-              Maybe.fold(() => SummonerName.unwrap(summoner.name), RiotId.stringify),
+              Maybe.map(RiotId.stringify),
+              Maybe.alt(() => pipe(summoner.name, Maybe.map(SummonerName.unwrap))),
+              Maybe.getOrElse(() => `<Summoner ${summoner.puuid}>`),
             ),
           )}
           className="w-12"
@@ -127,19 +129,24 @@ export const SummonerSearch: React.FC<Props> = ({ type, summoner }) => {
         <div className="ml-2 flex grow items-baseline gap-0.5">
           {pipe(
             summoner.riotId,
-            Maybe.fold(
-              () => <span className={linkClassName}>{SummonerName.unwrap(summoner.name)}</span>,
-              riotId => (
-                <>
-                  <span className={cx(linkClassName, 'text-goldenrod')}>
-                    {GameName.unwrap(riotId.gameName)}
-                  </span>
-                  <span className="font-normal text-grey-500">
-                    #{TagLine.unwrap(riotId.tagLine)}
-                  </span>
-                </>
+            Maybe.map(riotId => (
+              <>
+                <span className={cx(linkClassName, 'text-goldenrod')}>
+                  {GameName.unwrap(riotId.gameName)}
+                </span>
+                <span className="font-normal text-grey-500">#{TagLine.unwrap(riotId.tagLine)}</span>
+              </>
+            )),
+            Maybe.alt(() =>
+              pipe(
+                summoner.name,
+                Maybe.map(name => (
+                  // eslint-disable-next-line react/jsx-key
+                  <span className={linkClassName}>{SummonerName.unwrap(name)}</span>
+                )),
               ),
             ),
+            Maybe.toNullable,
           )}
         </div>
         <span className={cx(linkClassName, 'ml-4 font-normal')}>{summoner.platform}</span>

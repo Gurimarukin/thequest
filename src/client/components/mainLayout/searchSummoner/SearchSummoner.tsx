@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Platform } from '../../../../shared/models/api/Platform'
 import { Puuid } from '../../../../shared/models/api/summoner/Puuid'
 import type { RiotId } from '../../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../../shared/models/riot/SummonerName'
 import { Either, List, Maybe, NonEmptyArray } from '../../../../shared/utils/fp'
 
 import { useHistory } from '../../../contexts/HistoryContext'
@@ -34,15 +33,14 @@ export const SearchSummoner: React.FC = () => {
     usePathMatch(appParsers.anyPlatform)?.platform ?? Platform.defaultPlatform,
   )
 
-  const summonerMatch = usePathMatch(appParsers.anyPlatformSummoner)
-  const [summoner, setSummoner] = useState<Either<SummonerName, RiotId>>(
-    summonerMatch?.summoner ?? Either.left(SummonerName('')),
-    // riotIdMatch !== undefined ? Either.right(riotIdMatch) : Either.left(SummonerName('')),
+  const summonerMatch = usePathMatch(appParsers.anyPlatformRiotId)
+  const [summoner, setSummoner] = useState<Either<string, RiotId>>(
+    summonerMatch !== undefined ? Either.right(summonerMatch.riotId) : Either.left(''),
   )
 
   useEffect(() => {
     if (summonerMatch !== undefined) {
-      setSummoner(summonerMatch.summoner)
+      setSummoner(Either.right(summonerMatch.riotId))
     }
   }, [summonerMatch])
 
@@ -57,34 +55,17 @@ export const SearchSummoner: React.FC = () => {
     (e: React.FormEvent) => {
       e.preventDefault()
 
-      type To = {
-        profile: string
-        game: string
+      if (Either.isRight(summoner)) {
+        navigate(
+          gameMatch !== undefined
+            ? appRoutes.platformRiotIdGame(platform, summoner.right)
+            : appRoutes.platformRiotId(
+                platform,
+                summoner.right,
+                MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
+              ),
+        )
       }
-
-      const to = pipe(
-        summoner,
-        Either.fold(
-          (name): To => ({
-            profile: appRoutes.platformSummonerName(
-              platform,
-              name,
-              MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
-            ),
-            game: appRoutes.platformSummonerNameGame(platform, name),
-          }),
-          (riotId): To => ({
-            profile: appRoutes.platformRiotId(
-              platform,
-              riotId,
-              MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none }),
-            ),
-            game: appRoutes.platformRiotIdGame(platform, riotId),
-          }),
-        ),
-      )
-
-      navigate(gameMatch !== undefined ? to.game : to.profile)
     },
     [masteriesQuery, gameMatch, navigate, platform, summoner],
   )

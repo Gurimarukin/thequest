@@ -96,7 +96,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   mapId,
   participant: {
     riotId,
-    summonerName,
     profileIconId,
     leagues,
     championId,
@@ -241,7 +240,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           {...{
             platform,
             riotId,
-            summonerName,
             profileIconId,
             masteries,
             premadeId,
