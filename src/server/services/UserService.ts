@@ -42,7 +42,7 @@ export type SummonerWithDiscordInfos = {
     platform: Platform
     puuid: Puuid
     riotId: RiotId
-    name: SummonerName
+    name: Maybe<SummonerName>
     profileIconId: number
   }
   discord: UserDiscordInfos

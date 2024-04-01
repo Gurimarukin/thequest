@@ -25,7 +25,6 @@ import { SummonerMasteriesView } from '../../shared/models/api/summoner/Summoner
 import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { RiotId } from '../../shared/models/riot/RiotId'
-import type { SummonerName } from '../../shared/models/riot/SummonerName'
 import { Sink } from '../../shared/models/rx/Sink'
 import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
@@ -139,20 +138,6 @@ const SummonerController = (
           findMasteries(platform, maybeUser),
         ),
 
-    masteriesByName:
-      (platform: Platform, name: SummonerName) =>
-      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(
-          summonerService.findByName(platform, name),
-          futureMaybe.bind('riotId', summoner =>
-            pipe(
-              riotAccountService.findByPuuid(summoner.puuid),
-              futureMaybe.map(a => a.riotId),
-            ),
-          ),
-          findMasteries(platform, maybeUser),
-        ),
-
     masteriesByRiotId:
       (platform: Platform, riotId_: RiotId) =>
       (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
@@ -186,20 +171,6 @@ const SummonerController = (
             riotAccountService.findByPuuid(puuid),
           ),
           futureMaybe.map(([summoner, { riotId }]) => ({ ...summoner, riotId })),
-          findActiveGame(lang, maybeUser),
-        ),
-
-    activeGameByName:
-      (lang: Lang, platform: Platform, name: SummonerName) =>
-      (maybeUser: Maybe<TokenContent>): EndedMiddleware =>
-        pipe(
-          summonerService.findByName(platform, name),
-          futureMaybe.bind('riotId', summoner =>
-            pipe(
-              riotAccountService.findByPuuid(summoner.puuid),
-              futureMaybe.map(a => a.riotId),
-            ),
-          ),
           findActiveGame(lang, maybeUser),
         ),
 

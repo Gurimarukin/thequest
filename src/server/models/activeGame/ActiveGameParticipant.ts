@@ -7,7 +7,6 @@ import type { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import type { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { RiotId } from '../../../shared/models/riot/RiotId'
-import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
@@ -16,7 +15,6 @@ import type { SummonerId } from '../summoner/SummonerId'
 type ActiveGameParticipant = {
   puuid: Puuid
   summonerId: SummonerId
-  summonerName: SummonerName
   profileIconId: number
   championId: ChampionKey
   spell1Id: SummonerSpellKey
@@ -39,7 +37,6 @@ const toView =
   ({ riotId, leagues, masteries, shardsCount }: ToView) =>
   (participant: ActiveGameParticipant): ActiveGameParticipantView => ({
     riotId,
-    summonerName: participant.summonerName,
     profileIconId: participant.profileIconId,
     leagues,
     championId: participant.championId,

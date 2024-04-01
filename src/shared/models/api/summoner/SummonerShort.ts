@@ -3,6 +3,7 @@ import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
 import { StringUtils } from '../../../utils/StringUtils'
+import { Maybe } from '../../../utils/fp'
 import { RiotId } from '../../riot/RiotId'
 import { SummonerName } from '../../riot/SummonerName'
 import { Platform } from '../Platform'
@@ -14,7 +15,7 @@ const codecProperties = {
   platform: Platform.codec,
   puuid: Puuid.codec,
   riotId: RiotId.fromStringCodec,
-  name: SummonerName.codec,
+  name: Maybe.codec(SummonerName.codec),
   profileIconId: C.number,
 }
 
