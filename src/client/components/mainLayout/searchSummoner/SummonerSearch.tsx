@@ -34,7 +34,6 @@ import { Loading } from '../../Loading'
 
 type Props = {
   type: 'self' | 'favorite' | 'recent'
-   
   summoner: PartialSummonerShort
 }
 
