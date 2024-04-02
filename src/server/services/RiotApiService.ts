@@ -139,24 +139,6 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
         lol: {
           championMasteryV4: {
             championMasteries: {
-              /** @deprecated Endpoint will be removed on 2023-12-15 */
-              // eslint-disable-next-line deprecation/deprecation
-              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotChampionMastery>>> =>
-                pipe(
-                  httpClient.http(
-                    [
-                      platformUrl(
-                        platform,
-                        `/lol/champion-mastery/v4/champion-masteries/by-summoner/${summonerId}`,
-                      ),
-                      'get',
-                    ],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [List.decoder(RiotChampionMastery.decoder), 'List<RiotChampionMastery>'],
-                  ),
-                  statusesToOption(404),
-                ),
-
               byPuuid: (puuid: Puuid): Future<Maybe<List<RiotChampionMastery>>> =>
                 pipe(
                   httpClient.http(

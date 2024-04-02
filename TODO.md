@@ -1,9 +1,6 @@
-- dont reload game on focus
-
-- full summoner name removal
+- single discord oauth (login/register)
 
 - are `fromIO`s useful (simply use `myIo()`)?
-
 - try fancy league icons?
 - challenges page + detect challenges
 - menu react-popper?

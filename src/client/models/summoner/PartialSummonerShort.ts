@@ -11,10 +11,8 @@ const codec = C.struct({
   riotId: Maybe.codec(RiotId.fromStringCodec),
 })
 
-// eslint-disable-next-line deprecation/deprecation
 function fromSummonerShort(summoner: SummonerShort): PartialSummonerShort {
   return { ...summoner, riotId: Maybe.some(summoner.riotId) }
 }
 
-/** @deprecated SummonerName will be removed */
 export const PartialSummonerShort = { codec, fromSummonerShort }
