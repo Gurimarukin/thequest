@@ -6,12 +6,12 @@ import { useCallback, useState } from 'react'
 
 import { Permissions } from '../../../shared/Permissions'
 import type { Platform } from '../../../shared/models/api/Platform'
+import { PlatformWithRiotId } from '../../../shared/models/api/summoner/PlatformWithRiotId'
 import type { UserView } from '../../../shared/models/api/user/UserView'
 import { GameName } from '../../../shared/models/riot/GameName'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import type { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
-import { Either, Future, Maybe } from '../../../shared/utils/fp'
+import { Future, Maybe } from '../../../shared/utils/fp'
 
 import { apiUserLogoutPost } from '../../api'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -20,7 +20,6 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { usePathMatch } from '../../hooks/usePathMatch'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import { PlatformWithSummoner } from '../../models/summoner/PlatformWithSummoner'
 import { adminRoutes } from '../../router/AdminRouter'
 import { appParsers, appRoutes } from '../../router/AppRouter'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
@@ -70,7 +69,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
           user.linkedRiotAccount,
           Maybe.fold(
             () => null,
-            ({ platform, puuid, riotId, name, profileIconId }) => (
+            ({ platform, puuid, riotId, profileIconId }) => (
               <HighlightLink
                 to={(summonerGameMatch !== undefined
                   ? appRoutes.sPlatformPuuidGame
@@ -81,7 +80,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                     ? MasteriesQuery.toPartial({ ...masteriesQuery, search: Maybe.none })
                     : {},
                 )}
-                parser={anyPlatformSummonerExact(platform, riotId, name)}
+                parser={anyPlatformSummonerExact(platform, riotId)}
                 tooltip={
                   <div className="flex items-baseline gap-1.5">
                     <div className="flex items-baseline gap-px">
@@ -139,19 +138,11 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
   )
 }
 
-function anyPlatformSummonerExact(
-  platform: Platform,
-  riotId: RiotId,
-  name: SummonerName,
-): Parser<PlatformWithSummoner> {
+function anyPlatformSummonerExact(platform: Platform, riotId: RiotId): Parser<PlatformWithRiotId> {
   return new Parser(r =>
     pipe(
-      appParsers.anyPlatformSummoner.run(r),
-      Maybe.filter(
-        ([a]) =>
-          PlatformWithSummoner.Eq.equals(a, { platform, summoner: Either.right(riotId) }) ||
-          PlatformWithSummoner.Eq.equals(a, { platform, summoner: Either.left(name) }),
-      ),
+      appParsers.anyPlatformRiotId.run(r),
+      Maybe.filter(([a]) => PlatformWithRiotId.Eq.equals(a, { platform, riotId })),
     ),
   )
 }

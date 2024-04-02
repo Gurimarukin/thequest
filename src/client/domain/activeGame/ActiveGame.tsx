@@ -26,7 +26,6 @@ import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticD
 import type { SummonerShort } from '../../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -419,7 +418,7 @@ const Participants: React.FC<ParticipantsProps> = ({
         const participant = participants[j]!
         return (
           <ActiveGameParticipant
-            key={SummonerName.unwrap(participant.summonerName)}
+            key={RiotId.stringify(participant.riotId)}
             summonerSpellByKey={summonerSpellByKey}
             runeStyleById={runeStyleById}
             runeById={runeById}

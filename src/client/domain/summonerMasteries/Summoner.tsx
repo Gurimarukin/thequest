@@ -11,7 +11,7 @@ import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import { type Dict } from '../../../shared/utils/fp'
+import { type Dict, Maybe } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
@@ -45,7 +45,7 @@ export type EnrichedSummonerView = SummonerView & {
 export const Summoner: React.FC<Props> = ({
   summoner: {
     riotId,
-    name,
+    name: maybeName,
     profileIconId,
     summonerLevel,
     questPercents,
@@ -87,12 +87,20 @@ export const Summoner: React.FC<Props> = ({
               <span className="text-lg text-grey-500">#{TagLine.unwrap(riotId.tagLine)}</span>
             </div>
             <Tooltip hoverRef={nameRef} className="flex flex-col items-center">
-              <div className="flex items-baseline gap-2">
-                <span>{t.common.oldSummonerName}</span>
-                <span className="whitespace-pre text-lg font-bold text-goldenrod">
-                  {SummonerName.unwrap(name)}
-                </span>
-              </div>
+              {pipe(
+                maybeName,
+                Maybe.fold(
+                  () => null,
+                  name => (
+                    <div className="flex items-baseline gap-2">
+                      <span>{t.common.oldSummonerName}</span>
+                      <span className="whitespace-pre text-lg font-bold text-goldenrod">
+                        {SummonerName.unwrap(name)}
+                      </span>
+                    </div>
+                  ),
+                ),
+              )}
               <span className="text-grey-500">
                 {t.summoner.masteriesCache.lastUpdate(DayJs.unwrap(masteries.insertedAt).toDate())}
               </span>

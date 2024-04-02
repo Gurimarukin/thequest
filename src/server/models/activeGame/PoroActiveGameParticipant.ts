@@ -41,7 +41,6 @@ const toView =
   ({ participant, masteries, shardsCount }: ToView) =>
   (poroParticipant: PoroActiveGameParticipant): ActiveGameParticipantView => ({
     riotId: poroParticipant.riotId,
-    summonerName: participant.summonerName,
     profileIconId: participant.profileIconId,
     leagues: Maybe.some(PoroLeagues.toView(poroParticipant.leagues)),
     championId: participant.championId,

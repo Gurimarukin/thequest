@@ -6,14 +6,11 @@ import { Platform } from '../../shared/models/api/Platform'
 import type { PlatformWithRiotId } from '../../shared/models/api/summoner/PlatformWithRiotId'
 import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { RiotId } from '../../shared/models/riot/RiotId'
-import { SummonerName } from '../../shared/models/riot/SummonerName'
 import { RouterUtils } from '../../shared/utils/RouterUtils'
 import { StringUtils } from '../../shared/utils/StringUtils'
-import { Either } from '../../shared/utils/fp'
 
 import { PartialGenericQuery } from '../models/genericQuery/PartialGenericQuery'
 import { PartialMasteriesQuery } from '../models/masteriesQuery/PartialMasteriesQuery'
-import type { PlatformWithSummoner } from '../models/summoner/PlatformWithSummoner'
 import { adminParsers } from './AdminRouter'
 
 const { codec } = RouterUtils
@@ -32,11 +29,6 @@ const sPlatformPuuidGameMatch = sPlatformPuuidMatch.then(lit('game'))
 const platformRiotIdMatch = platformM.then(codec('riotId', riotIdCodec))
 const platformRiotIdGameMatch = platformRiotIdMatch.then(lit('game'))
 
-/** @deprecated SummonerName will be removed */
-const platformSummonerNameMatch = platformM.then(codec('summonerName', SummonerName.codec))
-// eslint-disable-next-line deprecation/deprecation
-const platformSummonerNameGameMatch = platformSummonerNameMatch.then(lit('game'))
-
 const aramMatch = lit('aram')
 const factionsMatch = lit('factions')
 const loginMatch = lit('login')
@@ -49,10 +41,6 @@ export const appMatches = {
 
   platformRiotId: platformRiotIdMatch.then(end),
   platformRiotIdGame: platformRiotIdGameMatch.then(end),
-
-  // eslint-disable-next-line deprecation/deprecation
-  platformSummonerName: platformSummonerNameMatch.then(end),
-  platformSummonerNameGame: platformSummonerNameGameMatch.then(end),
 }
 
 /**
@@ -67,10 +55,6 @@ const sPlatformPuuidGame = p(sPlatformPuuidGameMatch)
 const platformRiotId = p(platformRiotIdMatch)
 const platformRiotIdGame = p(platformRiotIdGameMatch)
 
-// eslint-disable-next-line deprecation/deprecation
-const platformSummonerName = p(platformSummonerNameMatch)
-const platformSummonerNameGame = p(platformSummonerNameGameMatch)
-
 const anyPlatformRiotId: Parser<PlatformWithRiotId> = platformRiotId
   .alt(platformRiotIdGame)
   .map(({ platform, riotId }) => ({
@@ -78,29 +62,10 @@ const anyPlatformRiotId: Parser<PlatformWithRiotId> = platformRiotId
     riotId,
   }))
 
-const anyPlatformSummoner: Parser<PlatformWithSummoner> =
-  // Right<RiotId>
-  anyPlatformRiotId
-    .map(
-      ({ platform, riotId }): PlatformWithSummoner => ({
-        platform,
-        summoner: Either.right(riotId),
-      }),
-    )
-    // Left<SummonerName>
-    .alt(
-      platformSummonerName.alt(platformSummonerNameGame).map(
-        ({ platform, summonerName }): PlatformWithSummoner => ({
-          platform: StringUtils.toUpperCase(platform),
-          summoner: Either.left(summonerName),
-        }),
-      ),
-    )
-
 const anyPlatform: Parser<{ platform: Platform }> = sPlatformPuuid
   .alt(sPlatformPuuidGame)
   .map(({ platform }) => ({ platform: StringUtils.toUpperCase(platform) }))
-  .alt(anyPlatformSummoner)
+  .alt(anyPlatformRiotId)
 
 export const appParsers = {
   index: end.parser,
@@ -110,9 +75,6 @@ export const appParsers = {
 
   platformRiotId,
   platformRiotIdGame,
-
-  platformSummonerName,
-  platformSummonerNameGame,
 
   aram: p(aramMatch),
   factions: p(factionsMatch),
@@ -124,7 +86,6 @@ export const appParsers = {
 
   anyPlatform,
   anyPlatformRiotId,
-  anyPlatformSummoner,
 }
 
 /**
@@ -151,20 +112,6 @@ export const appRoutes = {
     ),
   platformRiotIdGame: (platform: Platform, riotId: RiotId) =>
     format(platformRiotIdGameMatch.formatter, { platform, riotId }),
-
-  platformSummonerName: (
-    platform: Platform,
-    summonerName: SummonerName,
-    query: PartialMasteriesQuery,
-  ) =>
-    withQuery(
-      // eslint-disable-next-line deprecation/deprecation
-      format(platformSummonerNameMatch.formatter, { platform, summonerName }),
-      PartialMasteriesQuery,
-      query,
-    ),
-  platformSummonerNameGame: (platform: Platform, summonerName: SummonerName) =>
-    format(platformSummonerNameGameMatch.formatter, { platform, summonerName }),
 
   aram: (query: PartialGenericQuery) =>
     withQuery(format(aramMatch.formatter, {}), PartialGenericQuery, query),

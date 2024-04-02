@@ -4,6 +4,7 @@ import * as E from 'io-ts/Encoder'
 import { Platform } from '../../../shared/models/api/Platform'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
+import { Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { SummonerId } from './SummonerId'
@@ -14,7 +15,10 @@ const codec = C.struct({
   id: SummonerId.codec,
   puuid: Puuid.codec,
   platform: Platform.codec,
-  name: SummonerName.codec,
+  /**
+   * Exists as Maybe for retrocompatibility
+   */
+  name: Maybe.codec(SummonerName.codec),
   profileIconId: C.number,
   summonerLevel: C.number,
   insertedAt: DayJsFromDate.codec,

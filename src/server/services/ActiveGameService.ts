@@ -13,6 +13,7 @@ import type { ActiveGame } from '../models/activeGame/ActiveGame'
 import type { ActiveGameDb } from '../models/activeGame/ActiveGameDb'
 import type { CronJobEvent } from '../models/event/CronJobEvent'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
+import type { RiotCurrentLolGameInfo } from '../models/riot/currentGame/RiotCurrentLolGameInfo'
 import type { ActiveGamePersistence } from '../persistence/ActiveGamePersistence'
 import { getOnError } from '../utils/getOnError'
 import type { RiotApiService } from './RiotApiService'
@@ -81,19 +82,25 @@ const of = (
       futureMaybe.chainOptionK(g => (g.gameMode === 'TFT' ? Maybe.none : Maybe.some(g))),
       futureMaybe.bindTo('game'),
       futureMaybe.bind('now', () => futureMaybe.fromIO(DayJs.now)),
-      futureMaybe.map(
-        ({ game, now }): ActiveGameDb => ({
-          ...game,
-          insertedAt: pipe(
-            maybeInsertedAt,
-            Maybe.getOrElse(() => now),
-          ),
-          updatedAt: now,
-        }),
-      ),
+      futureMaybe.map(({ game, now }) => toActiveGameDb(game, now, maybeInsertedAt)),
       futureMaybe.chainFirstTaskEitherK(activeGamePersistence.upsert),
     )
   }
 }
 
 export { ActiveGameService }
+
+function toActiveGameDb(
+  game: RiotCurrentLolGameInfo,
+  now: DayJs,
+  maybeInsertedAt: Maybe<DayJs>,
+): ActiveGameDb {
+  return {
+    ...game,
+    insertedAt: pipe(
+      maybeInsertedAt,
+      Maybe.getOrElse(() => now),
+    ),
+    updatedAt: now,
+  }
+}

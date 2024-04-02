@@ -17,6 +17,8 @@ type RiotId = {
   tagLine: TagLine
 }
 
+const empty: RiotId = { gameName: GameName(''), tagLine: TagLine('') }
+
 function construct(gameName: GameName, tagLine: TagLine): RiotId {
   return { gameName, tagLine }
 }
@@ -73,6 +75,7 @@ const Eq: eq.Eq<RiotId> = eq.struct({
 })
 
 const RiotId = immutableAssign(construct, {
+  empty,
   getFromStringCodec,
   fromStringDecoder: getFromStringDecoder('#'),
   fromStringCodec: getFromStringCodec('#'),

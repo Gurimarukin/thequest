@@ -12,20 +12,18 @@ import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { SummonerId } from '../summoner/SummonerId'
 
-type Participant = C.TypeOf<typeof participantCodec>
-type ParticipantOutput = C.OutputOf<typeof participantCodec>
+export type ActiveGameParticipantDb = C.TypeOf<typeof participantCodec>
+type ActiveGameParticipantPbOutput = C.OutputOf<typeof participantCodec>
 
 const participantCodec = C.struct({
   puuid: Puuid.codec,
   summonerId: SummonerId.codec,
-  summonerName: SummonerName.codec,
   profileIconId: C.number,
   championId: ChampionKey.codec,
   spell1Id: SummonerSpellKey.codec,
@@ -51,7 +49,11 @@ const bannedChampionsProperties: Dict<
 
 const participantsProperties: Dict<
   `${TeamId}`,
-  Codec<unknown, NonEmptyArray<ParticipantOutput>, NonEmptyArray<Participant>>
+  Codec<
+    unknown,
+    NonEmptyArray<ActiveGameParticipantPbOutput>,
+    NonEmptyArray<ActiveGameParticipantDb>
+  >
 > = {
   100: NonEmptyArray.codec(participantCodec),
   200: NonEmptyArray.codec(participantCodec),

@@ -1,7 +1,6 @@
 import * as D from 'io-ts/Decoder'
 
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
-import { SummonerName } from '../../../shared/models/riot/SummonerName'
 
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
 import { SummonerId } from '../summoner/SummonerId'
@@ -13,7 +12,6 @@ const decoder = D.struct({
   id: SummonerId.codec,
   accountId: AccountId.codec,
   puuid: Puuid.codec,
-  name: SummonerName.codec,
   profileIconId: D.number,
   revisionDate: DayJsFromNumber.decoder,
   summonerLevel: D.number,

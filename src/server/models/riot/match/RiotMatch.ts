@@ -14,7 +14,7 @@ import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
-import type { MatchDb } from '../../match/MatchDb'
+import type { MatchDb, MatchParticipantDb, MatchTeamDb } from '../../match/MatchDb'
 import { GameMode } from '../GameMode'
 import { GameType } from '../GameType'
 import { RiotMatchParticipant } from './RiotMatchParticipant'
@@ -173,7 +173,23 @@ const decoder = pipe(
 
 const toMatchDb =
   (platform: Platform) =>
-  ({ gameId, ...m }: RiotMatch): MatchDb => ({ ...m, platform, id: gameId })
+  ({ gameId, ...match }: RiotMatch): MatchDb => ({
+    ...match,
+    platform,
+    id: gameId,
+    teams: pipe(
+      match.teams,
+      PartialDict.map(
+        (team): MatchTeamDb => ({
+          ...team,
+          participants: pipe(
+            team.participants,
+            List.map((p): MatchParticipantDb => ({ ...p, summonerName: Maybe.none })),
+          ),
+        }),
+      ),
+    ),
+  })
 
 const RiotMatch = { decoder, toMatchDb }
 

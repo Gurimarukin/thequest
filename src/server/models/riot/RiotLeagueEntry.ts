@@ -11,8 +11,6 @@ import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { LeagueId } from './LeagueId'
 
 const commonDecoder = D.struct({
-  // summonerId: SummonerId.codec,
-  // summonerName: D.string,
   leaguePoints: D.number,
   wins: D.number,
   losses: D.number,

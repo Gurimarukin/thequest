@@ -12,7 +12,6 @@ import { Puuid } from '../../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { GameName } from '../../../../shared/models/riot/GameName'
 import { RiotId } from '../../../../shared/models/riot/RiotId'
-import { SummonerName } from '../../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../../shared/models/riot/TagLine'
 import type { Dict } from '../../../../shared/utils/fp'
 import { List, Maybe } from '../../../../shared/utils/fp'
@@ -166,7 +165,6 @@ const rawDecoder_ = D.struct({
   summoner2Id: SummonerSpellKey.codec,
   summonerId: SummonerId.codec,
   summonerLevel: D.number,
-  summonerName: SummonerName.codec,
   teamEarlySurrendered: D.boolean,
   teamId: TeamId.codec,
   /**

@@ -10,7 +10,6 @@ import { Platform } from './models/api/Platform'
 import { Puuid } from './models/api/summoner/Puuid'
 import { GameName } from './models/riot/GameName'
 import { RiotId } from './models/riot/RiotId'
-import { SummonerName } from './models/riot/SummonerName'
 import { TagLine } from './models/riot/TagLine'
 import { RouterUtils } from './utils/RouterUtils'
 import type { Dict, Tuple } from './utils/fp'
@@ -40,11 +39,6 @@ const staticDataLang = api.then(lit('staticData')).then(langM)
 
 const summoner = api.then(lit('summoner'))
 const summonerByPuuid = summoner.then(lit('byPuuid')).then(platformM).then(puuidM)
-/** @deprecated SummonerName will be removed */
-const summonerByName = summoner
-  .then(lit('byName'))
-  .then(platformM)
-  .then(codec('summonerName', SummonerName.codec))
 const summonerByRiotId = summoner.then(lit('byRiotId')).then(platformM).then(riotIdM)
 
 const user = api.then(lit('user'))
@@ -72,11 +66,6 @@ const summonerByPuuidActiveGameLangGet = m(
   summonerByPuuid.then(lit('activeGame').then(langM)),
   'get',
 )
-
-// eslint-disable-next-line deprecation/deprecation
-const summonerByNameMasteriesGet = m(summonerByName.then(lit('masteries')), 'get')
-// eslint-disable-next-line deprecation/deprecation
-const summonerByNameActiveGameLangGet = m(summonerByName.then(lit('activeGame')).then(langM), 'get')
 
 const summonerByRiotIdGet = m(summonerByRiotId, 'get')
 const summonerByRiotIdMasteriesGet = m(summonerByRiotId.then(lit('masteries')), 'get')
@@ -135,10 +124,6 @@ export const apiParsers = {
       get: p(summonerByRiotIdGet),
       masteries: { get: p(summonerByRiotIdMasteriesGet) },
       activeGame: { lang: { get: p(summonerByRiotIdActiveGameLangGet) } },
-    },
-    byName: {
-      masteries: { get: p(summonerByNameMasteriesGet) },
-      activeGame: { lang: { get: p(summonerByNameActiveGameLangGet) } },
     },
   },
   user: {
@@ -201,15 +186,6 @@ export const apiRoutes = {
         masteries: { get: r(summonerByRiotIdMasteriesGet, { platform, riotId }) },
         activeGame: (lang: Lang) => ({
           get: r(summonerByRiotIdActiveGameLangGet, { platform, riotId, lang }),
-        }),
-      }
-    },
-    byName: (platform: Platform) => (summonerName_: SummonerName) => {
-      const summonerName = SummonerName.clean(summonerName_)
-      return {
-        masteries: { get: r(summonerByNameMasteriesGet, { platform, summonerName }) },
-        activeGame: (lang: Lang) => ({
-          get: r(summonerByNameActiveGameLangGet, { platform, summonerName, lang }),
         }),
       }
     },
