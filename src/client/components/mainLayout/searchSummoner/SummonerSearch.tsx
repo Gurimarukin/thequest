@@ -34,7 +34,7 @@ import { Loading } from '../../Loading'
 
 type Props = {
   type: 'self' | 'favorite' | 'recent'
-  // eslint-disable-next-line deprecation/deprecation
+   
   summoner: PartialSummonerShort
 }
 
