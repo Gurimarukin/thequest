@@ -1,23 +1,21 @@
 import * as D from 'io-ts/Decoder'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 
 import { DayJsFromNumber } from '../../utils/ioTsUtils'
-import { SummonerId } from '../summoner/SummonerId'
 
 type RiotChampionMastery = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
+  // puuid: Puuid.codec,
   championId: ChampionKey.codec,
-  championLevel: ChampionLevel.codec,
+  championLevel: D.number,
   championPoints: D.number,
   lastPlayTime: DayJsFromNumber.decoder,
   championPointsSinceLastLevel: D.number,
   championPointsUntilNextLevel: D.number,
-  chestGranted: D.boolean,
   tokensEarned: D.number,
-  summonerId: SummonerId.codec,
+  markRequiredForNextLevel: D.number,
 })
 
 const RiotChampionMastery = { decoder }

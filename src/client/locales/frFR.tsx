@@ -357,18 +357,15 @@ const frFRTranslation: Translation = {
   },
   masteries: {
     addShard: 'Ajouter un fragment',
-    chestAvailable: 'coffre disponible',
-    chestGranted: 'coffre obtenu',
     filters: {
       all: 'tous',
-      fiveAndSix: '5 et 6',
-      fourAndLess: '4 et moins',
-      level: level => `Niveau ${level}`,
+      level: level => `Niveau ${level}${level === 10 ? '+' : ''}`,
       order: {
         desc: 'Tri décroissant',
         asc: 'Tri croissant',
       },
-      sixAndLess: '6 et moins',
+      nineAndLess: '9 et moins',
+      tenAndMore: '10+',
       sort: {
         name: 'Trier par nom',
         percents: ({ withShards }) =>
@@ -414,7 +411,8 @@ const frFRTranslation: Translation = {
       yesForAll: 'Oui pour tout',
     },
     nShards: plural('fragment'),
-    nTokens: plural('jeton'),
+    nMarksOfMastery: (earned, total) =>
+      `${plural('jeton')(earned)} / ${total.toLocaleString(locale)}`,
     points: (points, total, highlightClassName) => (
       <>
         <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
@@ -431,10 +429,6 @@ const frFRTranslation: Translation = {
     pointsUntilNextLevel: (points, level) =>
       `${plural('point')(points)} jusqu’au niveau ${level.toLocaleString(locale)}`,
     removeShard: 'Enlever un fragment',
-    tokenIconAlt: (level, o) =>
-      `Jeton de maîtrise ${level.toLocaleString(locale)}${
-        o !== undefined && o.notObtained ? ' (non obtenu)' : ''
-      }`,
     updateShardsSucces: 'Fragments modifiés',
     updateShardsError: 'Erreur lors de la modification des fragments',
   },

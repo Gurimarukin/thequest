@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ChampionFaction } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { ChampionShard } from '../../../shared/models/api/summoner/ChampionShardsPayload'
 import type { List } from '../../../shared/utils/fp'
@@ -27,17 +27,17 @@ import { cx } from '../../utils/cx'
 export type ShardsToRemoveNotification = {
   championId: ChampionKey
   name: string
-  championLevel: ChampionLevel
+  championLevel: number
   championPoints: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
   percents: number
-  chestGranted: boolean
   tokensEarned: number
+  markRequiredForNextLevel: number
   shardsCount: number
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
-  leveledUpFrom: ChampionLevel
+  leveledUpFrom: number // champion level
   shardsToRemove: number
 }
 
@@ -67,6 +67,9 @@ type Props = {
   hide: () => void
 }
 
+/**
+ * @deprecated shards
+ */
 export const ShardsToRemoveModal: React.FC<Props> = ({
   notifications,
   shardsIsLoading,
@@ -165,9 +168,13 @@ export const ShardsToRemoveModal: React.FC<Props> = ({
                   centerShards={true}
                 />
                 <span ref={masteriesRef} className="flex items-center">
-                  <MasteryImg level={n.leveledUpFrom} className="h-6" />
+                  {/* TODO: display actual level; AnyMasteryImg? (With overlay if 10+?) */}
+                  <MasteryImg level={ChampionLevel.fromNumber(n.leveledUpFrom)} className="h-6" />
+
                   <ChevronForwardFilled className="h-4" />
-                  <MasteryImg level={n.championLevel} className="h-6" />
+
+                  {/* TODO: display actual level */}
+                  <MasteryImg level={ChampionLevel.fromNumber(n.championLevel)} className="h-6" />
                 </span>
                 <Tooltip hoverRef={masteriesRef} placement="top">
                   {t.modal.masteryChange(n.leveledUpFrom, n.championLevel)}

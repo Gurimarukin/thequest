@@ -8,7 +8,7 @@ import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
+import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
@@ -126,9 +126,12 @@ const MadosayentisutoController = (
             monoid.concatAll(number.MonoidSum),
           ),
           champions: {
-            mastery7: filteredByLevel(7),
-            mastery6: filteredByLevel(6),
-            mastery5: filteredByLevel(5),
+            mastery10plus: pipe(
+              champions,
+              List.filterMap(m => (10 <= m.championLevel ? Maybe.some(m.championId) : Maybe.none)),
+            ),
+            mastery9: filteredByLevel(9),
+            mastery8: filteredByLevel(8),
           },
         }
 
@@ -136,9 +139,7 @@ const MadosayentisutoController = (
           return pipe(
             champions,
             List.filterMap(m =>
-              ChampionLevel.Eq.equals(m.championLevel, level)
-                ? Maybe.some(m.championId)
-                : Maybe.none,
+              m.championLevel === level ? Maybe.some(m.championId) : Maybe.none,
             ),
           )
         }

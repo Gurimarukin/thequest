@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
-import { number, ord, readonlySet } from 'fp-ts'
+import { ord, readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import { flow, pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
@@ -207,27 +207,21 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
               ['hidden', !levelsMenuIsVisible],
             )}
           >
-            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6]}>
-              {t.masteries.filters.sixAndLess}
+            <SelectLevelsButton levels={ChampionLevel.values}>
+              {t.masteries.filters.all}
             </SelectLevelsButton>
-            <SelectLevelsButton levels={[5, 6]}>
-              {t.masteries.filters.fiveAndSix}
-            </SelectLevelsButton>
-            <SelectLevelsButton levels={[0, 1, 2, 3, 4]}>
-              {t.masteries.filters.fourAndLess}
+            <SelectLevelsButton levels={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}>
+              {t.masteries.filters.nineAndLess}
             </SelectLevelsButton>
             {pipe(
               ChampionLevel.values,
               List.reverse,
               List.map(level => (
                 <SelectLevelsButton key={level} levels={[level]}>
-                  {t.common.number(level)}
+                  {level === 10 ? t.masteries.filters.tenAndMore : t.common.number(level)}
                 </SelectLevelsButton>
               )),
             )}
-            <SelectLevelsButton levels={ChampionLevel.values}>
-              {t.masteries.filters.all}
-            </SelectLevelsButton>
           </ul>
         </div>
 
@@ -327,7 +321,7 @@ const getSelectLevelsButton =
           <span className="flex gap-1">
             {pipe(
               levelsSet,
-              readonlySet.toReadonlyArray<ChampionLevel>(ord.reverse(number.Ord)),
+              readonlySet.toReadonlyArray<ChampionLevel>(ord.reverse(ChampionLevel.Ord)),
               List.map(level => (
                 <MasteryImg
                   key={level}

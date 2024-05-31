@@ -1,7 +1,6 @@
 import * as C from 'io-ts/Codec'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { List } from '../../../shared/utils/fp'
 
@@ -15,13 +14,13 @@ const codec = C.struct({
   champions: List.codec(
     C.struct({
       championId: ChampionKey.codec,
-      championLevel: ChampionLevel.codec,
+      championLevel: C.number,
       championPoints: C.number,
       lastPlayTime: DayJsFromDate.codec,
       championPointsSinceLastLevel: C.number,
       championPointsUntilNextLevel: C.number,
-      chestGranted: C.boolean,
       tokensEarned: C.number,
+      markRequiredForNextLevel: C.number,
     }),
   ),
   insertedAt: DayJsFromDate.codec,

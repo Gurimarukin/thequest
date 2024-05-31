@@ -16,7 +16,6 @@ import type { ActiveGameView } from '../../shared/models/api/activeGame/ActiveGa
 import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import { ChallengesView } from '../../shared/models/api/challenges/ChallengesView'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { ChampionShardsView } from '../../shared/models/api/summoner/ChampionShardsView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
@@ -255,7 +254,7 @@ const SummonerController = (
             ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
           )(champion),
           Maybe.map(m => m.championLevel),
-          Maybe.getOrElse((): ChampionLevel => 0),
+          Maybe.getOrElse(() => 0),
           shouldNotifyChampionLeveledUp(count)(updatedWhenChampionLevel),
           Try.map(
             (maybeShardsToRemove): ChampionShardsView => ({
@@ -521,8 +520,8 @@ const SummonerController = (
                   championPoints: m.championPoints,
                   championPointsSinceLastLevel: m.championPointsSinceLastLevel,
                   championPointsUntilNextLevel: m.championPointsUntilNextLevel,
-                  chestGranted: m.chestGranted,
                   tokensEarned: m.tokensEarned,
+                  markRequiredForNextLevel: m.markRequiredForNextLevel,
                 }),
               ),
             ),
@@ -547,18 +546,24 @@ const SummonerController = (
 export { SummonerController }
 
 /**
+ * @deprecated shards
+ *
  * @returns shards to remove, if some
  */
 export const shouldNotifyChampionLeveledUp =
   (shardsCount: number) =>
-  (oldLevel: ChampionLevel) =>
-  (newLevel: ChampionLevel): Try<Maybe<number>> => {
+  (oldLevel: number) =>
+  (newLevel: number): Try<Maybe<number>> => {
     if (newLevel < oldLevel) {
       return Try.failure(
-        Error(`shouldNotifyChampionLeveledUp: oldLevel should be equal to or lower than newLevel`),
+        Error(
+          `shouldNotifyChampionLeveledUp: oldLevel (${oldLevel}) should be equal to or lower than newLevel ${newLevel}`,
+        ),
       )
     }
+
     const diff = Math.min(shardsCount, newLevel - Math.max(oldLevel, 5))
+
     return Try.success(diff <= 0 ? Maybe.none : Maybe.some(diff))
   }
 

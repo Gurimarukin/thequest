@@ -4,7 +4,7 @@ const plugin = require('tailwindcss/plugin')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   mode: 'jit',
-  content: ['./src/client/**/*.{html,js,ts,jsx,tsx}'],
+  content: ['./src/client/**/*.{html,js,ts,jsx,tsx}', './uibook/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
     fontFamily: {
       baloo: 'baloo2',

@@ -11,6 +11,7 @@ type Props = {
 
 export const MasteryImg: React.FC<Props> = ({ level, className }) => {
   const { t } = useTranslation('common')
+
   return (
     <img
       src={Assets.masteries[level]}

@@ -59,8 +59,8 @@ type StyleProps = Parameters<AnimatedComponent<'li'>>[0]['style'] // Merge<CSSPr
 
 type SquarePropsRest = Pick<
   ChampionMasterySquareProps,
-  | 'chestGranted'
   | 'tokensEarned'
+  | 'markRequiredForNextLevel'
   | 'championLevel'
   | 'championPoints'
   | 'championPointsSinceLastLevel'
@@ -155,6 +155,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             () => ({
               chestGranted: false,
               tokensEarned: 0,
+              markRequiredForNextLevel: 0,
               championLevel: 0,
               championPoints: 0,
               championPointsSinceLastLevel: 0,
@@ -341,6 +342,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
             ),
             props => {
               const hidePoints = props.championLevel < 5
+
               return (
                 <>
                   <span className="invisible">h</span>

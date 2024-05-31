@@ -1,6 +1,5 @@
-/* eslint-disable functional/no-return-void */
-
-/* eslint-disable functional/no-expression-statements */
+/* eslint-disable functional/no-expression-statements,
+                  functional/no-return-void */
 import { monoid, number, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import debounce from 'lodash.debounce'
@@ -298,10 +297,7 @@ type EnrichedAll = {
   enrichedMasteries: List<EnrichedChampionMastery>
 }
 
-type PartialMasteriesGrouped = PartialDict<
-  `${ChampionLevel}`,
-  NonEmptyArray<EnrichedChampionMastery>
->
+type PartialMasteriesGrouped = PartialDict<`${number}`, NonEmptyArray<EnrichedChampionMastery>>
 
 const enrichAll = (
   masteries: List<ChampionMasteryView>,
@@ -345,8 +341,8 @@ const enrichAll = (
             championPoints: 0,
             championPointsSinceLastLevel: 0,
             championPointsUntilNextLevel: 0,
-            chestGranted: false,
             tokensEarned: 0,
+            markRequiredForNextLevel: 0,
             name,
             percents: 0,
             shardsCount,
@@ -385,7 +381,9 @@ const enrichAll = (
   const grouped: PartialMasteriesGrouped = pipe(
     enrichedMasteries_,
     NonEmptyArray.fromReadonlyArray,
-    Maybe.map(List.groupBy(c => ChampionLevel.stringify(c.championLevel))),
+    Maybe.map(
+      List.groupBy(c => pipe(ChampionLevel.fromNumber(c.championLevel), ChampionLevel.stringify)),
+    ),
     Maybe.getOrElse(() => ({})),
   )
 
@@ -405,9 +403,11 @@ const enrichAll = (
       otpIndex: Business.otpRatio(enrichedMasteries_, totalMasteryPoints),
       masteriesCount: pipe(
         ChampionLevel.values,
-        List.reduce(Dict.empty<`${ChampionLevel}`, number>(), (acc, key) => {
-          const value: number = grouped[key]?.length ?? 0
-          return { ...acc, [key]: value }
+        List.reduce(Dict.empty<`${number}`, number>(), (acc, championLevel) => {
+          const lvl = ChampionLevel.stringify(championLevel)
+          const value: number = grouped[lvl]?.length ?? 0
+
+          return { ...acc, [lvl]: value }
         }),
       ),
     },
@@ -440,8 +440,8 @@ const getNotifications = (
                   championPointsSinceLastLevel: c.championPointsSinceLastLevel,
                   championPointsUntilNextLevel: c.championPointsUntilNextLevel,
                   percents: c.percents,
-                  chestGranted: c.chestGranted,
                   tokensEarned: c.tokensEarned,
+                  markRequiredForNextLevel: c.markRequiredForNextLevel,
                   shardsCount: count,
                   positions: c.positions,
                   factions: c.factions,

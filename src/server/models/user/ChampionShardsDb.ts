@@ -1,7 +1,6 @@
 import * as C from 'io-ts/Codec'
 
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 
 import { SummonerId } from '../summoner/SummonerId'
 import { UserId } from './UserId'
@@ -15,7 +14,7 @@ const codec = C.struct({
   summoner: SummonerId.codec,
   champion: ChampionKey.codec,
   count: C.number,
-  updatedWhenChampionLevel: ChampionLevel.codec,
+  updatedWhenChampionLevel: C.number,
 })
 
 const ChampionShardsDb = { codec }

@@ -12,6 +12,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "uibook"],
   "exclude": ["node_modules"]
 }

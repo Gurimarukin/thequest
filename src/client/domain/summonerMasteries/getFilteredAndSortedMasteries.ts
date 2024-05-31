@@ -106,7 +106,10 @@ export const getFilteredAndSortedMasteries = (
       NonEmptyArray.fromReadonlyArray,
       Maybe.map(
         flow(
-          NonEmptyArray.map(c => c.championPoints + c.championPointsUntilNextLevel),
+          NonEmptyArray.map(c =>
+            // `championPointsUntilNextLevel` can be negative
+            Math.max(c.championPoints + c.championPointsUntilNextLevel, c.championPoints),
+          ),
           NonEmptyArray.max(number.Ord),
         ),
       ),
@@ -259,8 +262,10 @@ const getSortBy = (
 const levelFilterPredicate =
   (levels: ReadonlySet<ChampionLevel>): Predicate<EnrichedChampionMastery> =>
   c =>
+    // always keep if all levels are selected
     readonlySet.size(levels) === ChampionLevel.values.length ||
-    readonlySet.elem(ChampionLevel.Eq)(c.championLevel, levels)
+    // convert to 10 if 10+
+    readonlySet.elem(ChampionLevel.Eq)(ChampionLevel.fromNumber(c.championLevel), levels)
 
 const factionFilterPredicate =
   (factions: ReadonlySet<ChampionFactionOrNone>): Predicate<EnrichedChampionMastery> =>
@@ -285,6 +290,9 @@ const positionFilterPredicate =
 // At level 7, shards doesn't matter
 // At level 6, more than 1 shard doesn't matter
 // At level 5 and less, more than 2 shards doesn't matter
+/**
+ * @deprecated shards
+ */
 const ordByShardsWithLevel: Ord<EnrichedChampionMastery> = pipe(
   EnrichedChampionMastery.Ord.byShards,
   ord.contramap((c: EnrichedChampionMastery) =>

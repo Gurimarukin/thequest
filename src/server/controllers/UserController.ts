@@ -7,7 +7,6 @@ import { MsDuration } from '../../shared/models/MsDuration'
 import { ValidatedNea } from '../../shared/models/ValidatedNea'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionShard } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { ChampionShardsPayload } from '../../shared/models/api/summoner/ChampionShardsPayload'
 import { PlatformWithPuuid } from '../../shared/models/api/summoner/PlatformWithPuuid'
@@ -396,7 +395,7 @@ function UserController(
                 ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
               )(championId),
               Maybe.map(m => m.championLevel),
-              Maybe.getOrElse<ChampionLevel>(() => 0),
+              Maybe.getOrElse(() => 0),
             ),
           })),
         ),

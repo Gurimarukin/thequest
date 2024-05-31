@@ -357,18 +357,15 @@ const esESTranslation: Translation = {
   },
   masteries: {
     addShard: 'ADAR EL FRAGMENTO',
-    chestAvailable: 'COFFRO DISPONIBLA',
-    chestGranted: 'COFFRO OKIDOKI',
     filters: {
       all: 'AYYYY',
-      fiveAndSix: '5 E 6',
-      fourAndLess: '4 E MINOS',
-      level: level => `NIVATO ${level}`,
+      level: level => `NIVATO ${level}${level === 10 ? '+' : ''}`,
       order: {
         desc: 'EL GRANDE TO MINO',
         asc: 'EL MINO TO GRANDE',
       },
-      sixAndLess: '6 E MINO',
+      nineAndLess: '9 E MINO',
+      tenAndMore: '10+',
       sort: {
         name: 'TRIAR PER NOME',
         percents: ({ withShards }) => `TRIAR PER % > ${withShards ? 'FRAGMENTO > ' : ''}POINTITO`,
@@ -413,7 +410,8 @@ const esESTranslation: Translation = {
       yesForAll: 'SI JAJAJAJA',
     },
     nShards: plural('FRAGMENTO'),
-    nTokens: plural('TOKO'),
+    nMarksOfMastery: (earned, total) =>
+      `${plural('TOKO')(earned)} / ${total.toLocaleString(locale)}`,
     points: (points, total, highlightClassName) => (
       <>
         <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
@@ -430,10 +428,6 @@ const esESTranslation: Translation = {
     pointsUntilNextLevel: (points, level) =>
       `${plural('POINTITO')(points)} PARA EL NIVOLO ${level.toLocaleString(locale)}`,
     removeShard: 'DISCALIFIAR EL FRAGMENTO',
-    tokenIconAlt: (level, o) =>
-      `EL JETONO ${level.toLocaleString(locale)}${
-        o !== undefined && o.notObtained ? ' (NO OBTENU)' : ''
-      }`,
     updateShardsSucces: 'FRAGMENTO MODIFIAR',
     updateShardsError: 'PROBLEMO EN EL MODIFICATION DEL FRAGMENTO',
   },

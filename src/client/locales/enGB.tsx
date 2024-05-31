@@ -355,18 +355,15 @@ const enGBTranslation: Translation = {
   },
   masteries: {
     addShard: 'Add shard',
-    chestAvailable: 'chest available',
-    chestGranted: 'chest granted',
     filters: {
       all: 'all',
-      fiveAndSix: '5 and 6',
-      fourAndLess: '4 and less',
-      level: level => `Level ${level}`,
+      level: level => `Level ${level}${level === 10 ? '+' : ''}`,
       order: {
         desc: 'Sort descending',
         asc: 'Sort ascending',
       },
-      sixAndLess: '6 and less',
+      nineAndLess: '9 and less',
+      tenAndMore: '10+',
       sort: {
         name: 'Sort by name',
         percents: ({ withShards }) => `Sort by percents > ${withShards ? 'shards > ' : ''}points`,
@@ -408,7 +405,8 @@ const enGBTranslation: Translation = {
       yesForAll: 'Yes for all',
     },
     nShards: plural('shard'),
-    nTokens: plural('token'),
+    nMarksOfMastery: (earned, total) =>
+      `${plural('token')(earned)} / ${total.toLocaleString(locale)}`,
     points: (points, total, highlightClassName) => (
       <>
         <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
@@ -425,10 +423,6 @@ const enGBTranslation: Translation = {
     pointsUntilNextLevel: (points, level) =>
       `${plural('point')(points)} until level ${level.toLocaleString(locale)}`,
     removeShard: 'Remove shard',
-    tokenIconAlt: (level, o) =>
-      `Mastery ${level.toLocaleString(locale)} token${
-        o !== undefined && o.notObtained ? ' (non obtenu)' : ''
-      }`,
     updateShardsSucces: 'Shards updated',
     updateShardsError: 'Error while update shards',
   },

@@ -148,15 +148,12 @@ export type Translation = {
   }
   masteries: {
     addShard: React.ReactNode
-    chestAvailable: React.ReactNode
-    chestGranted: React.ReactNode
     filters: {
       all: React.ReactNode
-      fiveAndSix: React.ReactNode
-      fourAndLess: React.ReactNode
       level: (level: ChampionLevel) => React.ReactNode
       order: Dict<MasteriesQueryOrder, React.ReactNode>
-      sixAndLess: React.ReactNode
+      nineAndLess: React.ReactNode
+      tenAndMore: React.ReactNode
       sort: {
         [K in MasteriesQuerySort]: K extends 'percents'
           ? (options: { withShards: boolean }) => React.ReactNode
@@ -168,7 +165,7 @@ export type Translation = {
     }
     modal: {
       confirm: React.ReactNode
-      masteryChange: (from: ChampionLevel, to: ChampionLevel) => React.ReactNode
+      masteryChange: (from: number, to: number) => React.ReactNode
       nChangesDetected: (n: number) => React.ReactNode
       no: React.ReactNode
       noForAll: React.ReactNode
@@ -177,12 +174,11 @@ export type Translation = {
       yesForAll: React.ReactNode
     }
     nShards: (n: number) => React.ReactNode
-    nTokens: (n: number) => React.ReactNode
+    nMarksOfMastery: (earned: number, total: number) => React.ReactNode
     points: (points: number, total?: number, highlightClassName?: string) => React.ReactNode
     pointsSinceLastLevel: (points: number, level: number) => string
     pointsUntilNextLevel: (points: number, level: number) => string
     removeShard: React.ReactNode
-    tokenIconAlt: (level: number, options?: { notObtained: boolean }) => string
     updateShardsSucces: React.ReactNode
     updateShardsError: React.ReactNode
   }

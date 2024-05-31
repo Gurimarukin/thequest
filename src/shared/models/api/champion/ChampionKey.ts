@@ -6,6 +6,7 @@ import * as D from 'io-ts/Decoder'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
 
+import { immutableAssign } from '../../../utils/fp'
 import { NumberFromString, fromNewtype } from '../../../utils/ioTsUtils'
 
 // Champion's number id
@@ -23,6 +24,6 @@ const fromStringCodec: Codec<unknown, string, ChampionKey> = C.make(
 
 const Eq: eq.Eq<ChampionKey> = pipe(number.Eq, eq.contramap(unwrap))
 
-const ChampionKey = { unwrap, codec, fromStringCodec, Eq }
+const ChampionKey = immutableAssign(wrap, { unwrap, codec, fromStringCodec, Eq })
 
 export { ChampionKey }

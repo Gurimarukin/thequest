@@ -16,7 +16,6 @@ import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
 import type { SetChampionShards } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
-import { bgGradientMastery } from '../../components/ChampionTooltip'
 import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -26,6 +25,7 @@ import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { CountWithTotal } from '../../models/CountWithTotal'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
+import { masteryBgGradient, masteryRulerColor } from '../../utils/colors'
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
@@ -259,19 +259,11 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
 
   const pointsUntilAndSince = pipe(
     [
-      2 < championLevel
-        ? Maybe.some(
-            t.masteries.pointsSinceLastLevel(
-              championPointsSinceLastLevel,
-              Math.min(championLevel, 5),
-            ),
-          )
+      2 <= championLevel
+        ? Maybe.some(t.masteries.pointsSinceLastLevel(championPointsSinceLastLevel, championLevel))
         : Maybe.none,
-      0 < championLevel && championLevel < 5
-        ? Maybe.some(
-            t.masteries.pointsUntilNextLevel(championPointsUntilNextLevel, championLevel + 1),
-          )
-        : Maybe.none,
+      // TODO: handle negative
+      Maybe.some(t.masteries.pointsUntilNextLevel(championPointsUntilNextLevel, championLevel + 1)),
     ],
     List.compact,
     NonEmptyArray.fromReadonlyArray,
@@ -298,13 +290,13 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                   )}
                   <div
                     ref={hoverRef2}
-                    className={cx('absolute top-0 h-full', bgGradientMastery(championLevel))}
+                    className={cx('absolute top-0 h-full', masteryBgGradient(championLevel))}
                     style={{ width: p(championPoints) }}
                   />
                   {championLevel < 2 ? null : (
                     <div
                       ref={hoverRef3}
-                      className={`absolute top-0 h-full border-r ${rulerColor(championLevel)}`}
+                      className={`absolute top-0 h-full border-r ${masteryRulerColor(championLevel)}`}
                       style={{ width: p(championPoints - championPointsSinceLastLevel) }}
                     />
                   )}
@@ -335,12 +327,6 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
       )}
     </>
   )
-}
-
-const rulerColor = (level: number): string => {
-  if (5 <= level && level <= 7) return 'border-grey-500'
-  if (level === 4) return 'border-grey-400'
-  return 'border-grey-500'
 }
 
 const getRenderChildrenCompact =
