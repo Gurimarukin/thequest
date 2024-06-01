@@ -366,7 +366,7 @@ const enGBTranslation: Translation = {
       tenAndMore: '10+',
       sort: {
         name: 'Sort by name',
-        percents: ({ withShards }) => `Sort by percents > ${withShards ? 'shards > ' : ''}points`,
+        percents: 'Sort by percents > points',
         points: 'Sort by points',
       },
       sortShort: {

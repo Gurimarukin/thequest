@@ -155,9 +155,7 @@ export type Translation = {
       nineAndLess: React.ReactNode
       tenAndMore: React.ReactNode
       sort: {
-        [K in MasteriesQuerySort]: K extends 'percents'
-          ? (options: { withShards: boolean }) => React.ReactNode
-          : React.ReactNode
+        [K in MasteriesQuerySort]: React.ReactNode
       }
       sortShort: Dict<MasteriesQuerySort, React.ReactNode>
       view: Dict<MasteriesQueryView, React.ReactNode>

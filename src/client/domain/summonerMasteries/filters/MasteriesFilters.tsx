@@ -10,8 +10,8 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { ChampionFactionOrNone } from '../../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevel } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
-import type { NonEmptyArray } from '../../../../shared/utils/fp'
-import { List, Maybe } from '../../../../shared/utils/fp'
+import type { Maybe, NonEmptyArray } from '../../../../shared/utils/fp'
+import { List } from '../../../../shared/utils/fp'
 
 import { ChampionFactionImg } from '../../../components/ChampionFactionImg'
 import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
@@ -22,7 +22,6 @@ import { SearchChampion } from '../../../components/SearchChampion'
 import { Tooltip } from '../../../components/tooltip/Tooltip'
 import { useHistory } from '../../../contexts/HistoryContext'
 import { useTranslation } from '../../../contexts/TranslationContext'
-import { useUser } from '../../../contexts/UserContext'
 import { Assets } from '../../../imgs/Assets'
 import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
 import {
@@ -48,7 +47,6 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
   const { t } = useTranslation()
 
   const { masteriesQuery, updateMasteriesQuery } = useHistory()
-  const { maybeUser } = useUser()
 
   const [levelsMenuIsVisible, setLevelsMenuIsVisible] = useState(false)
   const handleMasteriesMouseEnter = useCallback(() => {
@@ -133,9 +131,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
           <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
             {labelValue(
               'percents',
-              <TextLabel
-                tooltip={t.masteries.filters.sort.percents({ withShards: Maybe.isSome(maybeUser) })}
-              >
+              <TextLabel tooltip={t.masteries.filters.sort.percents}>
                 {t.masteries.filters.sortShort.percents}
               </TextLabel>,
             )}

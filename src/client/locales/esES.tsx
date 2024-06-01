@@ -368,7 +368,7 @@ const esESTranslation: Translation = {
       tenAndMore: '10+',
       sort: {
         name: 'TRIAR PER NOME',
-        percents: ({ withShards }) => `TRIAR PER % > ${withShards ? 'FRAGMENTO > ' : ''}POINTITO`,
+        percents: 'TRIAR PER % > POINTITO',
         points: 'TRIAR PER POINTITO',
       },
       sortShort: {

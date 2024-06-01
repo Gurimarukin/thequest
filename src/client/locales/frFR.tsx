@@ -368,8 +368,7 @@ const frFRTranslation: Translation = {
       tenAndMore: '10+',
       sort: {
         name: 'Trier par nom',
-        percents: ({ withShards }) =>
-          `Trier par pourcents > ${withShards ? 'fragments > ' : ''}points`,
+        percents: 'Trier par pourcents > points',
         points: 'Trier par points',
       },
       sortShort: {
