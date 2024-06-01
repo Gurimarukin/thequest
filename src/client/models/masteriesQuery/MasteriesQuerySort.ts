@@ -2,10 +2,10 @@ import { createEnum } from '../../../shared/utils/createEnum'
 
 type MasteriesQuerySort = typeof e.T
 
-const e = createEnum('percents', 'points', 'name')
+const e = createEnum('level', 'percents', 'points', 'name')
 
-const default_: MasteriesQuerySort = 'percents'
+const default_: MasteriesQuerySort = 'level'
 
-const MasteriesQuerySort = { codec: e.codec, default: default_ }
+const MasteriesQuerySort = { codec: e.codec, values: e.values, default: default_ }
 
 export { MasteriesQuerySort }

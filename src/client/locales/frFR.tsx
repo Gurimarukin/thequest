@@ -367,14 +367,16 @@ const frFRTranslation: Translation = {
       nineAndLess: '9 et moins',
       tenAndMore: '10+',
       sort: {
-        name: 'Trier par nom',
+        level: 'Trier par niveau > jetons > points',
         percents: 'Trier par pourcents > points',
         points: 'Trier par points',
+        name: 'Trier par nom',
       },
       sortShort: {
-        name: 'abc',
+        level: 'niv',
         percents: '%',
         points: 'pts',
+        name: 'abc',
       },
       view: {
         aram: 'Vue ARAM',

@@ -11,8 +11,7 @@ import type {
 } from '../../../shared/models/api/champion/ChampionFaction'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { List } from '../../../shared/utils/fp'
-import { Maybe } from '../../../shared/utils/fp'
+import type { List, Maybe } from '../../../shared/utils/fp'
 
 import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
 
@@ -29,6 +28,16 @@ type EnrichedChampionMastery = ChampionMasteryView & {
   isHidden: boolean
 }
 
+const byLevel: Ord<EnrichedChampionMastery> = pipe(
+  number.Ord,
+  ord.contramap((c: EnrichedChampionMastery) => c.championLevel),
+)
+
+const byTokens: Ord<EnrichedChampionMastery> = pipe(
+  number.Ord,
+  ord.contramap((c: EnrichedChampionMastery) => c.tokensEarned),
+)
+
 const byPercents: Ord<EnrichedChampionMastery> = pipe(
   number.Ord,
   ord.contramap((c: EnrichedChampionMastery) => c.percents),
@@ -39,23 +48,13 @@ const byPoints: Ord<EnrichedChampionMastery> = pipe(
   ord.contramap((c: EnrichedChampionMastery) => c.championPoints),
 )
 
-const byShards: Ord<EnrichedChampionMastery> = pipe(
-  number.Ord,
-  ord.contramap((c: EnrichedChampionMastery) =>
-    pipe(
-      c.shardsCount,
-      Maybe.getOrElse(() => 0),
-    ),
-  ),
-)
-
 const byName: Ord<EnrichedChampionMastery> = pipe(
   string.Ord,
   ord.contramap((c: EnrichedChampionMastery) => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
 const EnrichedChampionMastery = {
-  Ord: { byPercents, byPoints, byShards, byName },
+  Ord: { byLevel, byTokens, byPercents, byPoints, byName },
   Lens: {
     shardsCount: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('shardsCount'), lens.some),
     glow: pipe(lens.id<EnrichedChampionMastery>(), lens.prop('glow')),

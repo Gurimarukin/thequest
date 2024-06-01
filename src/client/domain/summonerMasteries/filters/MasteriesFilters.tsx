@@ -10,8 +10,8 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { ChampionFactionOrNone } from '../../../../shared/models/api/champion/ChampionFaction'
 import { ChampionLevel } from '../../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../../shared/models/api/champion/ChampionPosition'
-import type { Maybe, NonEmptyArray } from '../../../../shared/utils/fp'
-import { List } from '../../../../shared/utils/fp'
+import type { Dict, Maybe } from '../../../../shared/utils/fp'
+import { List, NonEmptyArray } from '../../../../shared/utils/fp'
 
 import { ChampionFactionImg } from '../../../components/ChampionFactionImg'
 import { ChampionPositionImg } from '../../../components/ChampionPositionImg'
@@ -24,6 +24,7 @@ import { useHistory } from '../../../contexts/HistoryContext'
 import { useTranslation } from '../../../contexts/TranslationContext'
 import { Assets } from '../../../imgs/Assets'
 import { HowlingAbyssSimple } from '../../../imgs/svgs/HowlingAbyss'
+import type { SVGIcon } from '../../../imgs/svgs/SVGIcon'
 import {
   AppsSharp,
   CaretDownOutline,
@@ -32,8 +33,8 @@ import {
   StatsChartSharp,
 } from '../../../imgs/svgs/icons'
 import { MasteriesQuery } from '../../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
-import type { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
+import { MasteriesQueryOrder } from '../../../models/masteriesQuery/MasteriesQueryOrder'
+import { MasteriesQuerySort } from '../../../models/masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from '../../../models/masteriesQuery/MasteriesQueryView'
 import { cx } from '../../../utils/cx'
 import { Checkboxes } from './Checkboxes'
@@ -129,23 +130,16 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
 
         <div className="flex flex-wrap items-center gap-3">
           <Radios<MasteriesQuerySort> name="sort" value={masteriesQuery.sort} setValue={setSort}>
-            {labelValue(
-              'percents',
-              <TextLabel tooltip={t.masteries.filters.sort.percents}>
-                {t.masteries.filters.sortShort.percents}
-              </TextLabel>,
-            )}
-            {labelValue(
-              'points',
-              <TextLabel tooltip={t.masteries.filters.sort.points}>
-                {t.masteries.filters.sortShort.points}
-              </TextLabel>,
-            )}
-            {labelValue(
-              'name',
-              <TextLabel tooltip={t.masteries.filters.sort.name}>
-                {t.masteries.filters.sortShort.name}
-              </TextLabel>,
+            {pipe(
+              MasteriesQuerySort.values,
+              NonEmptyArray.map((value: MasteriesQuerySort) =>
+                labelValue(
+                  value,
+                  <TextLabel tooltip={t.masteries.filters.sort[value]}>
+                    {t.masteries.filters.sortShort[value]}
+                  </TextLabel>,
+                ),
+              ),
             )}
           </Radios>
 
@@ -154,17 +148,18 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             value={masteriesQuery.order}
             setValue={setOrder}
           >
-            {labelValue(
-              'desc',
-              <IconLabel tooltip={t.masteries.filters.order.desc} className="w-6">
-                <CaretDownOutline className="w-5" />
-              </IconLabel>,
-            )}
-            {labelValue(
-              'asc',
-              <IconLabel tooltip={t.masteries.filters.order.asc} className="w-6">
-                <CaretUpOutline className="w-5" />
-              </IconLabel>,
+            {pipe(
+              MasteriesQueryOrder.values,
+              NonEmptyArray.map((value: MasteriesQueryOrder) => {
+                const OrderIcon = orderIcon[value]
+
+                return labelValue(
+                  value,
+                  <IconLabel tooltip={t.masteries.filters.order[value]} className="w-6">
+                    <OrderIcon className="w-5" />
+                  </IconLabel>,
+                )
+              }),
             )}
           </Radios>
         </div>
@@ -357,6 +352,7 @@ const TextLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
 
 const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
   const hoverRef = useRef<HTMLSpanElement>(null)
+
   return (
     <>
       <span
@@ -373,4 +369,9 @@ const IconLabel: React.FC<SpanProps> = ({ tooltip, className, children }) => {
       </Tooltip>
     </>
   )
+}
+
+const orderIcon: Dict<MasteriesQueryOrder, SVGIcon> = {
+  asc: CaretUpOutline,
+  desc: CaretDownOutline,
 }

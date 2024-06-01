@@ -367,14 +367,16 @@ const esESTranslation: Translation = {
       nineAndLess: '9 E MINO',
       tenAndMore: '10+',
       sort: {
+        level: 'TRIAR PER NIVATO > TOKOS > POINTITOS',
+        percents: 'TRIAR PER % > POINTITOS',
+        points: 'TRIAR PER POINTITOS',
         name: 'TRIAR PER NOME',
-        percents: 'TRIAR PER % > POINTITO',
-        points: 'TRIAR PER POINTITO',
       },
       sortShort: {
-        name: 'JAJA',
+        level: 'PTS',
         percents: '%',
         points: 'TITO',
+        name: 'JAJA',
       },
       view: {
         aram: 'ARAMO',

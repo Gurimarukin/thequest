@@ -365,14 +365,16 @@ const enGBTranslation: Translation = {
       nineAndLess: '9 and less',
       tenAndMore: '10+',
       sort: {
-        name: 'Sort by name',
+        level: 'Sort par level > tokens > points',
         percents: 'Sort by percents > points',
         points: 'Sort by points',
+        name: 'Sort by name',
       },
       sortShort: {
-        name: 'abc',
+        level: 'lvl',
         percents: '%',
         points: 'pts',
+        name: 'abc',
       },
       view: {
         aram: 'ARAM view',
