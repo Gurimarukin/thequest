@@ -415,10 +415,13 @@ const enGBTranslation: Translation = {
         points
       </>
     ),
-    pointsSinceLastLevel: (points, level) => `${plural('point')(points)} since level ${nls(level)}`,
+    pointsSinceLastLevel: (points, level) =>
+      points < 0
+        ? `${plural('point')(Math.abs(points))} until level ${nls(level)}`
+        : `${plural('point')(points)} since level ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
-      points <= 0
-        ? `level ${nls(level)} exceeded by ${plural('point')(-points)}`
+      points < 0
+        ? `level ${nls(level)} exceeded by ${plural('point')(Math.abs(points))}`
         : `${plural('point')(points)} until level ${nls(level)}`,
     removeShard: 'Remove shard',
     updateShardsSucces: 'Shards updated',

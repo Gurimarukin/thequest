@@ -265,7 +265,6 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
       2 <= championLevel
         ? Maybe.some(t.masteries.pointsSinceLastLevel(championPointsSinceLastLevel, championLevel))
         : Maybe.none,
-      // TODO: handle negative
       Maybe.some(t.masteries.pointsUntilNextLevel(championPointsUntilNextLevel, championLevel + 1)),
     ],
     List.compact,
@@ -296,7 +295,10 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                     <div
                       ref={hoverRef1}
                       className="absolute top-0 h-full bg-histogram-grey/50"
-                      style={{ width: p(championPointsUntilNextLevel), left: p(championPoints) }}
+                      style={{
+                        width: p(championPointsUntilNextLevel),
+                        left: p(championPoints),
+                      }}
                     />
                   ) : null}
                   {2 <= championLevel ? (
@@ -304,9 +306,13 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                       ref={hoverRef3}
                       className={cx(
                         'absolute top-0 h-full border-l',
+                        championPointsUntilNextLevel <= 0 ? 'border-x' : 'border-l',
                         masteryRulerColor(championLevel),
                       )}
-                      style={{ left: p(championPoints - championPointsSinceLastLevel) }}
+                      style={{
+                        width: p(championPointsSinceLastLevel + championPointsUntilNextLevel),
+                        left: p(championPoints - championPointsSinceLastLevel),
+                      }}
                     />
                   ) : null}
                 </div>

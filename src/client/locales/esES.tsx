@@ -420,10 +420,12 @@ const esESTranslation: Translation = {
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
-      `${plural('POINTITO')(points)} DEL NIVELO ${nls(level)}`,
+      points < 0
+        ? `${plural('POINTITO')(Math.abs(points))} PARA EL NIVOLO ${nls(level)}`
+        : `${plural('POINTITO')(points)} DEL NIVELO ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
-      points <= 0
-        ? `NIVEL ${nls(level)} SUPERADO EN ${plural('PUNTO')(-points)}`
+      points < 0
+        ? `NIVEL ${nls(level)} SUPERADO EN ${plural('PUNTO')(Math.abs(points))}`
         : `${plural('POINTITO')(points)} PARA EL NIVOLO ${nls(level)}`,
     removeShard: 'DISCALIFIAR EL FRAGMENTO',
     updateShardsSucces: 'FRAGMENTO MODIFIAR',

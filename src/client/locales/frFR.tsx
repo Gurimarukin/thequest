@@ -421,10 +421,12 @@ const frFRTranslation: Translation = {
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
-      `${plural('point')(points)} depuis le niveau ${nls(level)}`,
+      points < 0
+        ? `${plural('point')(Math.abs(points))} jusqu’au niveau ${nls(level)}`
+        : `${plural('point')(points)} depuis le niveau ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
-      points <= 0
-        ? `niveau ${nls(level)} dépassé de ${plural('point')(-points)}`
+      points < 0
+        ? `niveau ${nls(level)} dépassé de ${plural('point')(Math.abs(points))}`
         : `${plural('point')(points)} jusqu’au niveau ${nls(level)}`,
     removeShard: 'Enlever un fragment',
     updateShardsSucces: 'Fragments modifiés',
