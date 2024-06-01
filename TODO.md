@@ -1,4 +1,6 @@
 - single discord oauth (login/register)
+- render newtypes
+- visual hint if `markRequiredForNextLevel < tokensEarned`
 
 - are `fromIO`s useful (simply use `myIo()`)?
 - try fancy league icons?

@@ -105,11 +105,11 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   const hoverRef = overrideHoverRef ?? hoverRef_
 
   const tokens = pipe(
-    repeatElements(tokensEarned, i => (
+    repeatElements(Math.min(tokensEarned, markRequiredForNextLevel), i => (
       <SparkSolid key={i} className={`-mt-px h-2.5 ${masteryTextColor(championLevel)}`} />
     )),
     List.concat(
-      repeatElements(markRequiredForNextLevel - tokensEarned, i => (
+      repeatElements(Math.max(markRequiredForNextLevel - tokensEarned, 0), i => (
         <span
           key={tokensEarned + i}
           className="m-0.5 mt-px size-1.5 rounded-1/2 border border-grey-500"
