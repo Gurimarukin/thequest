@@ -428,7 +428,9 @@ const esESTranslation: Translation = {
     pointsSinceLastLevel: (points, level) =>
       `${plural('POINTITO')(points)} DEL NIVELO ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('POINTITO')(points)} PARA EL NIVOLO ${level.toLocaleString(locale)}`,
+      points <= 0
+        ? `NIVEL ${nls(level)} SUPERADO EN ${plural('PUNTO')(-points)}`
+        : `${plural('POINTITO')(points)} PARA EL NIVOLO ${level.toLocaleString(locale)}`,
     removeShard: 'DISCALIFIAR EL FRAGMENTO',
     updateShardsSucces: 'FRAGMENTO MODIFIAR',
     updateShardsError: 'PROBLEMO EN EL MODIFICATION DEL FRAGMENTO',
@@ -511,6 +513,13 @@ const esESTranslation: Translation = {
 }
 
 export default esESTranslation
+
+/**
+ * n.toLocaleString(locale)
+ */
+function nls(n: number): string {
+  return n.toLocaleString(locale)
+}
 
 function plural(unit: string) {
   return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`

@@ -423,7 +423,9 @@ const enGBTranslation: Translation = {
     pointsSinceLastLevel: (points, level) =>
       `${plural('point')(points)} since level ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('point')(points)} until level ${level.toLocaleString(locale)}`,
+      points <= 0
+        ? `level ${nls(level)} exceeded by ${plural('point')(-points)}`
+        : `${plural('point')(points)} until level ${level.toLocaleString(locale)}`,
     removeShard: 'Remove shard',
     updateShardsSucces: 'Shards updated',
     updateShardsError: 'Error while update shards',
@@ -501,6 +503,13 @@ const enGBTranslation: Translation = {
 }
 
 export default enGBTranslation
+
+/**
+ * n.toLocaleString(locale)
+ */
+function nls(n: number): string {
+  return n.toLocaleString(locale)
+}
 
 function plural(unit: string) {
   return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`

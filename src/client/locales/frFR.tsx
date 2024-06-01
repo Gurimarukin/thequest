@@ -428,7 +428,9 @@ const frFRTranslation: Translation = {
     pointsSinceLastLevel: (points, level) =>
       `${plural('point')(points)} depuis le niveau ${level.toLocaleString(locale)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('point')(points)} jusqu’au niveau ${level.toLocaleString(locale)}`,
+      points <= 0
+        ? `niveau ${nls(level)} dépassé de ${plural('point')(-points)}`
+        : `${plural('point')(points)} jusqu’au niveau ${level.toLocaleString(locale)}`,
     removeShard: 'Enlever un fragment',
     updateShardsSucces: 'Fragments modifiés',
     updateShardsError: 'Erreur lors de la modification des fragments',
@@ -512,6 +514,13 @@ const frFRTranslation: Translation = {
 }
 
 export default frFRTranslation
+
+/**
+ * n.toLocaleString(locale)
+ */
+function nls(n: number): string {
+  return n.toLocaleString(locale)
+}
 
 function plural(unit: string) {
   return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`
