@@ -125,13 +125,15 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
             ['shadow-even shadow-black', !noShadow],
           )}
         >
-          <LevelSVG
-            championLevel={championLevel}
-            {...(isHistogram
-              ? // always full for histogram
-                { championPointsUntilNextLevel: 0, championPointsSinceLastLevel: 1 }
-              : { championPointsUntilNextLevel, championPointsSinceLastLevel })}
-          />
+          {0 < championLevel ? (
+            <LevelSVG
+              championLevel={championLevel}
+              {...(isHistogram
+                ? // always full for histogram
+                  { championPointsUntilNextLevel: 0, championPointsSinceLastLevel: 1 }
+                : { championPointsUntilNextLevel, championPointsSinceLastLevel })}
+            />
+          ) : null}
         </div>
 
         {/* champion image */}
