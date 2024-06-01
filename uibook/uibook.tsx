@@ -37,7 +37,19 @@ const UIBook: React.FC = () => {
             ChampionLevel.values,
             List.reverse,
             List.mapWithIndex(championMastery),
-            List.prepend(championMastery(11, 9999)),
+            List.prepend({
+              ...championMastery(11, 99),
+              championPointsSinceLastLevel: -100,
+              championPointsUntilNextLevel: 200,
+            }),
+            List.prepend({
+              ...championMastery(12, 999),
+              championPointsSinceLastLevel: 0,
+            }),
+            List.prepend({
+              ...championMastery(13, 9999),
+              championPointsUntilNextLevel: 0,
+            }),
           )}
           setChampionShards={{
             isLoading: false,
