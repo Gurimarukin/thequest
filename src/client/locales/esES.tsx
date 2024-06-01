@@ -113,15 +113,14 @@ const esESTranslation: Translation = {
     theQuestProgression: 'QUESTO PROGRESSIO',
     totals: (totalMasteryLevel, translatedTotalMasteryPoints, highlightClassName) => (
       <>
-        (<span className={highlightClassName}>{totalMasteryLevel.toLocaleString(locale)}</span> —{' '}
+        (<span className={highlightClassName}>{nls(totalMasteryLevel)}</span> —{' '}
         <span className={highlightClassName}>{translatedTotalMasteryPoints}</span>)
       </>
     ),
     masteryScoreAndPoints: 'SCORO — POINT DEL MAITRISO',
     otpIndex: (otpIndex, highlightClassName) => (
       <>
-        INDICO DEL OTP:{' '}
-        <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
+        INDICO DEL OTP: <span className={highlightClassName}>{nls(otpIndex)}</span>
       </>
     ),
     mainRoles: 'ROLO PRIMO:',
@@ -163,7 +162,7 @@ const esESTranslation: Translation = {
     championKey: key => `<Champion ${key}>`,
     cooldownSeconds: (cooldown, highlightClassName) => (
       <>
-        <span className={highlightClassName}>RECUPERACIÓN:</span> {cooldown.toLocaleString(locale)}s
+        <span className={highlightClassName}>RECUPERACIÓN:</span> {nls(cooldown)}s
       </>
     ),
     emptyChampionIconAlt: 'Icône de champion vide',
@@ -174,7 +173,7 @@ const esESTranslation: Translation = {
       removeFavoriteError: 'PROBLEMO',
     },
     fraction: (numerator, denominator, o) => {
-      const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
+      const res = `${nls(numerator)} / ${nls(denominator)}`
       return o !== undefined && o.withParenthesis ? `(${res})` : res
     },
     labels: {
@@ -313,16 +312,13 @@ const esESTranslation: Translation = {
       previousSplit: 'SPLITO PRECEDO:',
     },
     masteryIconAlt: level => `ICONO NIVELO ${level}`,
-    nChampionsFraction: (n, total) => `${plural('CAMPEONE')(n)} / ${total.toLocaleString(locale)}`,
+    nChampionsFraction: (n, total) => `${plural('CAMPEONE')(n)} / ${nls(total)}`,
     nResults: plural('RESULTO'),
     notFound: 'PROBLEMO.',
-    number: (n, o) =>
-      o !== undefined && o.withParenthesis
-        ? `(${n.toLocaleString(locale)})`
-        : n.toLocaleString(locale),
-    numberK: n => `${n.toLocaleString(locale)}k`,
-    numberM: n => `${n.toLocaleString(locale)}M`,
-    percents: n => `${n.toLocaleString(locale)} %`,
+    number: (n, o) => (o !== undefined && o.withParenthesis ? `(${nls(n)})` : nls(n)),
+    numberK: n => `${nls(n)}k`,
+    numberM: n => `${nls(n)}M`,
+    percents: n => `${nls(n)} %`,
     randomChampion: 'CAMPEONE ALEATORIO',
     runeIconAlt: name => `ICONO ${name}`,
     searchChamion: 'RECHERCHAR EL CHAMPIONO',
@@ -330,7 +326,7 @@ const esESTranslation: Translation = {
     spellKey: key => `<SORTO ${key}>`,
     level: (level, highlightClassName) => (
       <>
-        NIVEL <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+        NIVEL <span className={highlightClassName}>{nls(level)}</span>
       </>
     ),
     summonerLevel: 'INVOCADOR LEVELITO',
@@ -393,8 +389,7 @@ const esESTranslation: Translation = {
     },
     modal: {
       confirm: 'ACEPTAR',
-      masteryChange: (from, to) =>
-        `CHANGAR DEL MAITRISO ${from.toLocaleString(locale)} à ${to.toLocaleString(locale)}`,
+      masteryChange: (from, to) => `CHANGAR DEL MAITRISO ${nls(from)} à ${nls(to)}`,
       nChangesDetected: n => {
         const s = n < 2 ? '' : 's'
         return (
@@ -412,25 +407,24 @@ const esESTranslation: Translation = {
       yesForAll: 'SI JAJAJAJA',
     },
     nShards: plural('FRAGMENTO'),
-    nMarksOfMastery: (earned, total) =>
-      `${plural('TOKO')(earned)} / ${total.toLocaleString(locale)}`,
+    nMarksOfMastery: (earned, total) => `${plural('TOKO')(earned)} / ${nls(total)}`,
     points: (points, total, highlightClassName) => (
       <>
-        <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
+        <span className={highlightClassName}>{nls(points)}</span>{' '}
         {total !== undefined ? (
           <>
-            / <span className={highlightClassName}>{total.toLocaleString(locale)}</span>{' '}
+            / <span className={highlightClassName}>{nls(total)}</span>{' '}
           </>
         ) : null}
         PUNTOS
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
-      `${plural('POINTITO')(points)} DEL NIVELO ${level.toLocaleString(locale)}`,
+      `${plural('POINTITO')(points)} DEL NIVELO ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
       points <= 0
         ? `NIVEL ${nls(level)} SUPERADO EN ${plural('PUNTO')(-points)}`
-        : `${plural('POINTITO')(points)} PARA EL NIVOLO ${level.toLocaleString(locale)}`,
+        : `${plural('POINTITO')(points)} PARA EL NIVOLO ${nls(level)}`,
     removeShard: 'DISCALIFIAR EL FRAGMENTO',
     updateShardsSucces: 'FRAGMENTO MODIFIAR',
     updateShardsError: 'PROBLEMO EN EL MODIFICATION DEL FRAGMENTO',
@@ -441,9 +435,7 @@ const esESTranslation: Translation = {
   },
   register: {
     accessRecentSearches: recentSearches =>
-      `VER LAS ${recentSearches.toLocaleString(
-        locale,
-      )} BÚSQUEDAS MÁS RECIENTES (ALMACENAMIENTO LOCAL DEL NAVEGADOR)`,
+      `VER LAS ${nls(recentSearches)} BÚSQUEDAS MÁS RECIENTES (ALMACENAMIENTO LOCAL DEL NAVEGADOR)`,
     accessSummonerDetails: 'BUSCAR TODOS LOS DATOS DE UN INVOCADOR',
     addSummonerToFavorites: 'AÑADIR INVOCADORES COMO FAVORITOS',
     customiseChampionPositions: 'PERSONALIZAR LOS CAMPEONES ASOCIADOS A UNA FUNCIÓN',
@@ -497,7 +489,7 @@ const esESTranslation: Translation = {
     ),
     percentsProgression: (percents, highlightClassName) => (
       <>
-        PROGRESO: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+        PROGRESO: <span className={highlightClassName}>{nls(percents)} %</span>
       </>
     ),
   },
@@ -522,7 +514,7 @@ function nls(n: number): string {
 }
 
 function plural(unit: string) {
-  return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`
+  return (n: number): string => `${nls(n)} ${pluralUnit(unit)(n)}`
 }
 
 function pluralUnit(unit: string) {
