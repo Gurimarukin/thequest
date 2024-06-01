@@ -32,9 +32,9 @@ function championPercents({
       // `championPointsUntilNextLevel` can be negative
       Math.min(championPoints + championPointsUntilNextLevel, championPoints) / 75600,
       1,
-    ) * 75
+    ) * 50
 
-  const tokensPercents = Math.min((Math.max(championLevel - 4, 0) + tokensEarned) / 7, 1) * 25
+  const tokensPercents = Math.min((Math.max(championLevel - 4, 0) + tokensEarned) / 7, 1) * 50
 
   return pointsPercents + tokensPercents
 }
