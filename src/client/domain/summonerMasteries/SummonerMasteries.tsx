@@ -45,8 +45,6 @@ import { cx } from '../../utils/cx'
 import { futureRunUnsafe } from '../../utils/futureRunUnsafe'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { Masteries } from './Masteries'
-import type { ShardsToRemoveNotification } from './ShardsToRemoveModal'
-import { ShardsToRemoveModal } from './ShardsToRemoveModal'
 import type { EnrichedSummonerView } from './Summoner'
 import { Summoner } from './Summoner'
 import { useChallenges } from './useChallenges'
@@ -135,7 +133,6 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, riotId }) => {
                 ListUtils.updateOrAppend(ChampionShardsView.Eq.byChampion)({
                   champion: championId,
                   count: shardsCount,
-                  shardsToRemoveFromNotification: Maybe.none,
                 }),
               ),
             ),
@@ -219,19 +216,6 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
     setUiIsBlocked(false)
   }, [])
 
-  const [isNotificationsHidden, setIsNotificationsHidden] = useState(false)
-
-  const hideNotifications = useCallback(() => setIsNotificationsHidden(true), [])
-
-  const notifications = useMemo(
-    () => getNotifications(championShards, enrichedMasteries),
-    [championShards, enrichedMasteries],
-  )
-
-  useEffect(() => {
-    setIsNotificationsHidden(false)
-  }, [])
-
   const setChampionShards = useMemo(
     (): SetChampionShards => ({
       isLoading: shardsIsLoading,
@@ -241,12 +225,6 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
         }),
     }),
     [setChampionsShardsBulk, shardsIsLoading],
-  )
-
-  const nonOptimisticSetChampionsShardsBulk = useCallback(
-    (updates: NonEmptyArray<ChampionShard>): void =>
-      setChampionsShardsBulk(updates, { optimisticMutation: false }),
-    [setChampionsShardsBulk],
   )
 
   return (
@@ -273,21 +251,6 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
           setChampionShards={setChampionShards}
         />
       </div>
-      {pipe(
-        notifications,
-        Maybe.filter(() => !uiIsBlocked && !isNotificationsHidden),
-        Maybe.fold(
-          () => null,
-          n => (
-            <ShardsToRemoveModal
-              notifications={n}
-              shardsIsLoading={shardsIsLoading}
-              setChampionsShardsBulk={nonOptimisticSetChampionsShardsBulk}
-              hide={hideNotifications}
-            />
-          ),
-        ),
-      )}
     </>
   )
 }
@@ -414,45 +377,3 @@ const enrichAll = (
     enrichedMasteries: enrichedMasteries_,
   }
 }
-
-const getNotifications = (
-  championShards: Maybe<List<ChampionShardsView>>,
-  enrichedMasteries: EnrichedAll['enrichedMasteries'],
-): Maybe<NonEmptyArray<ShardsToRemoveNotification>> =>
-  pipe(
-    championShards,
-    Maybe.map(
-      List.filterMap(({ champion, count, shardsToRemoveFromNotification }) =>
-        pipe(
-          shardsToRemoveFromNotification,
-          Maybe.chain(n =>
-            pipe(
-              pipe(
-                enrichedMasteries,
-                ListUtils.findFirstBy(ChampionKey.Eq)(c => c.championId),
-              )(champion),
-              Maybe.map(
-                (c): ShardsToRemoveNotification => ({
-                  championId: champion,
-                  name: c.name,
-                  championLevel: c.championLevel,
-                  championPoints: c.championPoints,
-                  championPointsSinceLastLevel: c.championPointsSinceLastLevel,
-                  championPointsUntilNextLevel: c.championPointsUntilNextLevel,
-                  percents: c.percents,
-                  tokensEarned: c.tokensEarned,
-                  markRequiredForNextLevel: c.markRequiredForNextLevel,
-                  shardsCount: count,
-                  positions: c.positions,
-                  factions: c.factions,
-                  leveledUpFrom: n.leveledUpFrom,
-                  shardsToRemove: n.shardsToRemove,
-                }),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-    Maybe.chain(NonEmptyArray.fromReadonlyArray),
-  )

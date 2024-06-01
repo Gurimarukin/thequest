@@ -14,7 +14,6 @@ const codec = C.struct({
   summoner: SummonerId.codec,
   champion: ChampionKey.codec,
   count: C.number,
-  updatedWhenChampionLevel: C.number,
 })
 
 const ChampionShardsDb = { codec }

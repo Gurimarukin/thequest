@@ -25,7 +25,6 @@ import { SummonerShort } from '../../shared/models/api/summoner/SummonerShort'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { RiotId } from '../../shared/models/riot/RiotId'
 import { Sink } from '../../shared/models/rx/Sink'
-import { TObservable } from '../../shared/models/rx/TObservable'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
@@ -46,7 +45,6 @@ import { ActiveGame } from '../models/activeGame/ActiveGame'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
 import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
 import { PoroActiveGameParticipant } from '../models/activeGame/PoroActiveGameParticipant'
-import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import { LeagueEntry } from '../models/league/LeagueEntry'
 import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -203,12 +201,10 @@ const SummonerController = (
           Future.map(Either.fromOption(() => 'Masteries not found')),
         ),
       ),
-      futureEither.bind('championShards', ({ summoner, masteries }) =>
+      futureEither.bind('championShards', ({ summoner }) =>
         pipe(
           futureMaybe.fromOption(maybeUser),
-          futureMaybe.chainTaskEitherK(user =>
-            findChampionShards(user, summoner, masteries.champions),
-          ),
+          futureMaybe.chainTaskEitherK(user => findChampionShards(user, summoner)),
           Future.map(Either.right),
         ),
       ),
@@ -243,36 +239,8 @@ const SummonerController = (
   function findChampionShards(
     user: TokenContent,
     summoner: Summoner,
-    masteries: List<ChampionMastery>,
   ): Future<List<ChampionShardsView>> {
-    return pipe(
-      userService.listChampionShardsForSummoner(user.id, summoner.id),
-      TObservable.chainEitherK(({ champion, count, updatedWhenChampionLevel }) =>
-        pipe(
-          pipe(
-            masteries,
-            ListUtils.findFirstBy(ChampionKey.Eq)(m => m.championId),
-          )(champion),
-          Maybe.map(m => m.championLevel),
-          Maybe.getOrElse(() => 0),
-          shouldNotifyChampionLeveledUp(count)(updatedWhenChampionLevel),
-          Try.map(
-            (maybeShardsToRemove): ChampionShardsView => ({
-              champion,
-              count,
-              shardsToRemoveFromNotification: pipe(
-                maybeShardsToRemove,
-                Maybe.map(shardsToRemove => ({
-                  leveledUpFrom: updatedWhenChampionLevel,
-                  shardsToRemove,
-                })),
-              ),
-            }),
-          ),
-        ),
-      ),
-      Sink.readonlyArray,
-    )
+    return pipe(userService.listChampionShardsForSummoner(user.id, summoner.id), Sink.readonlyArray)
   }
 
   function findActiveGame(
