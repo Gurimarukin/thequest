@@ -482,18 +482,15 @@ const esESTranslation: Translation = {
       '(NÚMERO DE CAMPEONES QUE ACUMULAN LA MITAD DEL NÚMERO TOTAL DE PUNTOS DE MAESTRÍA)',
     masteriesExplanation: (
       <>
-        <li>DEL DOMINIO 0 AL DOMINIO 5, LOS PORCENTAJES CORRESPONDEN A LOS PUNTOS DE DOMINIO.</li>
-        <li>MAESTRÍA 5 = 50 %</li>
-        <li>CADA FRAGMENTO = 3 %</li>
+        <li>Nivel de maestría 10 o superior = 100%.</li>
         <li>
-          CADA FICHA DE MAESTRÍA 6 = 7% (MAESTRÍA 5 + 1 FICHA = 57%; MAESTRÍA 5 + 2 FICHAS = 64 %)
+          Se necesitan 75.600 puntos para alcanzar el nivel 10 (cuenta para la mitad del cálculo del
+          porcentaje)
         </li>
-        <li>MAESTRÍA 6 = 67 %</li>
         <li>
-          CADA FICHA DE MAESTRÍA 7 = 10% (MAESTRÍA 6 + 1 FICHA = 77%; MAESTRÍA 6 + 2 FICHAS = 87%;
-          MAESTRÍA 6 + 3 FICHAS = 97%)
+          Se necesitan 7 Marcas de Maestría para alcanzar el nivel 10 (cuenta para la otra mitad del
+          cálculo)
         </li>
-        <li>MAESTRÍA 7 = 100 %</li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (

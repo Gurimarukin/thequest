@@ -482,21 +482,15 @@ const frFRTranslation: Translation = {
       '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
     masteriesExplanation: (
       <>
+        <li>Niveau de maîtrise 10 ou plus = 100%</li>
         <li>
-          De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de maîtrise.
+          Il faut 75 600 points pour atteindre le niveau 10 (compte pour la moitié du calcul de
+          pourcents)
         </li>
-        <li>Maîtrise 5 = 50 %</li>
-        <li>Chaque fragment = 3 %</li>
         <li>
-          Chaque jeton pour la maîtrise 6 = 7 % (maîtrise 5 + 1 jeton = 57 % ; maîtrise 5 + 2 jetons
-          = 64 %)
+          Il faut 7 Marques de Maîtrise pour atteindre le niveau 10 (compte pour l’autre moitié du
+          calcul)
         </li>
-        <li>Maîtrise 6 = 67 %</li>
-        <li>
-          Chaque jeton pour la maîtrise 7 = 10 % (maîtrise 6 + 1 jeton = 77 % ; maîtrise 6 + 2
-          jetons = 87 % ; maîtrise 6 + 3 jetons = 97 %)
-        </li>
-        <li>Maîtrise 7 = 100 %</li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (

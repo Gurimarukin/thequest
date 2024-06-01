@@ -473,16 +473,14 @@ const enGBTranslation: Translation = {
     otpIndexExplanation: '(number of champions cumulating half the total number of mastery points)',
     masteriesExplanation: (
       <>
-        <li>From mastery 0 to mastery 5, percents correspond with mastery points.</li>
-        <li>Mastery 5 = 50%</li>
-        <li>Each shard = 3%</li>
-        <li>Each mastery 6 token = 7% (mastery 5 + 1 token = 57%; mastery 5 + 2 tokens = 64%)</li>
-        <li>Mastery 6 = 67%</li>
+        <li>Mastery level 10 or more = 100%</li>
         <li>
-          Each mastery 7 token = 10% (mastery 6 + 1 token = 77%; mastery 6 + 2 tokens = 87%; mastery
-          6 + 3 tokens = 97%)
+          It takes 75,600 points to reach level 10 (counts for half the percentage calculation)
         </li>
-        <li>Mastery 7 = 100%</li>
+        <li>
+          It takes 7 Marks of Mastery to reach level 10 (counts for the other half of the
+          calculation)
+        </li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (
