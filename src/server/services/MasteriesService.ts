@@ -79,6 +79,11 @@ export { MasteriesService }
 const pointsRequiredForLevel6 = 31600
 const pointsRequiredForLevel7 = 42600
 
+/**
+ * Temporary workaround (lol) for old masteries system where you could have mastery level without enought mastery points.
+ *
+ * Also see client/components/ChampionMasterySquare#levelPercents
+ */
 function fixPointsSinceLastLevel(c: ChampionMastery): ChampionMastery {
   if (c.championLevel === 6) {
     if (pointsRequiredForLevel6 <= c.championPoints) return c

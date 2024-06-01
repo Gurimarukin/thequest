@@ -263,7 +263,12 @@ function levelPercents({
   championPointsSinceLastLevel,
   championPointsUntilNextLevel,
 }: ChampionLevelPercents): number {
+  // championPointsSinceLastLevel can be negative because of new system
+  // see server/services/MasteriesService#fixPointsSinceLastLevel
+  if (championPointsSinceLastLevel < 0) return 0
+
   const levelRange = championPointsSinceLastLevel + championPointsUntilNextLevel
+
   if (levelRange === 0) return 0
 
   return Math.min(round((100 * championPointsSinceLastLevel) / levelRange), 100)
