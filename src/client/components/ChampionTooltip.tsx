@@ -31,7 +31,7 @@ export const ChampionTooltip: React.FC<Props> = ({
   name,
   tokensEarned,
   markRequiredForNextLevel,
-  shardsCount: filteredShardsCount,
+  shardsCount,
   positions,
   factions,
 }) => {
@@ -53,7 +53,7 @@ export const ChampionTooltip: React.FC<Props> = ({
           )
         : Maybe.none,
       pipe(
-        filteredShardsCount,
+        shardsCount,
         Maybe.map(shards => <span key="shards">{t.masteries.nShards(shards)}</span>),
       ),
     ],

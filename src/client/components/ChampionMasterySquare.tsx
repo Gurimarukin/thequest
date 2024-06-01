@@ -96,6 +96,11 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
     [championId, setChampionShards],
   )
 
+  const filteredShardsCount = pipe(
+    shardsCount,
+    Maybe.filter(n => 0 < n),
+  )
+
   const hoverRef_ = useRef<HTMLDivElement>(null)
   const hoverRef = overrideHoverRef ?? hoverRef_
 
@@ -177,8 +182,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 
         {/* shards bottom right */}
         {pipe(
-          shardsCount,
-          Maybe.filter(n => 0 < n),
+          filteredShardsCount,
           Maybe.fold(
             () => null,
             shards => (
@@ -208,7 +212,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           championPointsUntilNextLevel={championPointsUntilNextLevel}
           name={name}
           percents={percents}
-          shardsCount={shardsCount}
+          shardsCount={filteredShardsCount}
           positions={positions}
           factions={factions}
         />
