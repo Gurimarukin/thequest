@@ -89,6 +89,8 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   noShadow = false,
   draggable,
 }) => {
+  const { t } = useTranslation('common')
+
   const setShardsCount = useMemo(
     () => (setChampionShards !== null ? setChampionShards.run(championId) : null),
     [championId, setChampionShards],
@@ -154,7 +156,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
               masteryTextColor(championLevel),
             )}
           >
-            <span>{championLevel}</span>
+            <span>{t.number(championLevel)}</span>
           </div>
 
           {/* tokens next to champion level */}
