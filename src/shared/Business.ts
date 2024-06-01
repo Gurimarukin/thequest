@@ -12,8 +12,13 @@ type SimpleChampion = {
   tokensEarned: number
 }
 
-// You need 75,600 pts and 7 Marks of Mastery to be level 10.
-// Each progression counts for half of the percents.
+/**
+ * Mastery level 10 or more = 100%.
+ *
+ * It takes 75,600 points to reach level 10 (counts for half the percentage calculation).
+ *
+ * It takes 7 Marks of Mastery to reach level 10 (counts for the other half of the calculation).
+ */
 function championPercents({
   championLevel,
   championPoints,
