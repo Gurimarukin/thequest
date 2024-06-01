@@ -8,6 +8,7 @@ import type { ChallengesView } from '../../../shared/models/api/challenges/Chall
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ListUtils } from '../../../shared/utils/ListUtils'
+import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -31,6 +32,8 @@ import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
 import type { FactionsCount } from './getFilteredAndSortedMasteries'
 import { getFilteredAndSortedMasteries } from './getFilteredAndSortedMasteries'
+
+const { round } = NumberUtils
 
 type Props = {
   challenges: SWRResponse<ChallengesView, unknown>
@@ -278,28 +281,34 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
           Maybe.fold(
             () => null,
             maxPoints => {
-              const p = (n: number): string => `${Math.round((100 * n) / maxPoints)}%`
+              function p(n: number): `${number}%` {
+                return `${round((100 * n) / maxPoints, 2)}%`
+              }
+
               return (
                 <div className="relative h-7">
-                  {championPointsUntilNextLevel === 0 ? null : (
-                    <div
-                      ref={hoverRef1}
-                      className="h-full bg-histogram-grey opacity-50"
-                      style={{ width: p(championPoints + championPointsUntilNextLevel) }}
-                    />
-                  )}
                   <div
                     ref={hoverRef2}
-                    className={cx('absolute top-0 h-full', masteryBgGradient(championLevel))}
+                    className={cx('absolute left-0 top-0 h-full', masteryBgGradient(championLevel))}
                     style={{ width: p(championPoints) }}
                   />
-                  {championLevel < 2 ? null : (
+                  {0 < championPointsUntilNextLevel ? (
+                    <div
+                      ref={hoverRef1}
+                      className="absolute top-0 h-full bg-histogram-grey/50"
+                      style={{ width: p(championPointsUntilNextLevel), left: p(championPoints) }}
+                    />
+                  ) : null}
+                  {2 <= championLevel ? (
                     <div
                       ref={hoverRef3}
-                      className={`absolute top-0 h-full border-r ${masteryRulerColor(championLevel)}`}
-                      style={{ width: p(championPoints - championPointsSinceLastLevel) }}
+                      className={cx(
+                        'absolute top-0 h-full border-l',
+                        masteryRulerColor(championLevel),
+                      )}
+                      style={{ left: p(championPoints - championPointsSinceLastLevel) }}
                     />
-                  )}
+                  ) : null}
                 </div>
               )
             },
