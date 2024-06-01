@@ -178,6 +178,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* shards bottom right */}
         {pipe(
           shardsCount,
+          Maybe.filter(n => 0 < n),
           Maybe.fold(
             () => null,
             shards => (
