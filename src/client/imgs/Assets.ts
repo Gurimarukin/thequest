@@ -28,6 +28,9 @@ const masteries: Dict<`${ChampionLevel}`, string> = {
   5: new URL('./masteries/mastery-5.png', import.meta.url).toString(),
   6: new URL('./masteries/mastery-6.png', import.meta.url).toString(),
   7: new URL('./masteries/mastery-7.png', import.meta.url).toString(),
+  8: new URL('./masteries/mastery-8.png', import.meta.url).toString(),
+  9: new URL('./masteries/mastery-9.png', import.meta.url).toString(),
+  10: new URL('./masteries/mastery-10.png', import.meta.url).toString(),
 }
 
 const stats: Dict<WikiaStatsBalanceKey, string> = {
@@ -42,11 +45,6 @@ const stats: Dict<WikiaStatsBalanceKey, string> = {
   tenacity: new URL('./stats/tenacity.webp', import.meta.url).toString(),
 }
 
-const tokens = {
-  5: new URL('./tokens/token-5.png', import.meta.url).toString(),
-  6: new URL('./tokens/token-6.png', import.meta.url).toString(),
-}
-
 export const Assets = {
   champion: new URL('./champion.webp', import.meta.url).toString(),
   factions,
@@ -55,6 +53,5 @@ export const Assets = {
   poro: new URL('./poro.png', import.meta.url).toString(),
   runeterra: new URL('./runeterra.png', import.meta.url).toString(),
   stats,
-  tokens,
   yuumi: new URL('./yuumi.png', import.meta.url).toString(),
 }

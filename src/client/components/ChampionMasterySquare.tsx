@@ -5,16 +5,13 @@ import { useCallback, useMemo, useRef } from 'react'
 
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
-import type { NonEmptyArray } from '../../shared/utils/fp'
-import { List, Maybe } from '../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
-import { Assets } from '../imgs/Assets'
-import { Chest } from '../imgs/svgs/Chest'
-import { AddOutline, RemoveOutline, SparklesSharp } from '../imgs/svgs/icons'
+import { AddOutline, RemoveOutline, SparkSolid, SparklesSharp } from '../imgs/svgs/icons'
+import { masteryBgColor, masteryTextColor } from '../utils/colors'
 import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
 import { CroppedChampionSquare } from './CroppedChampionSquare'
@@ -25,9 +22,9 @@ const { round } = NumberUtils
 
 export type ChampionMasterySquareProps = {
   championId: ChampionKey
-  chestGranted: boolean
   tokensEarned: number
-  championLevel: ChampionLevel
+  markRequiredForNextLevel: number
+  championLevel: number
   championPoints: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
@@ -74,8 +71,8 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   championPoints,
   championPointsSinceLastLevel,
   championPointsUntilNextLevel,
-  chestGranted,
   tokensEarned,
+  markRequiredForNextLevel,
   name,
   percents,
   shardsCount,
@@ -92,18 +89,30 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   noShadow = false,
   draggable,
 }) => {
+  const { t } = useTranslation('common')
+
   const setShardsCount = useMemo(
     () => (setChampionShards !== null ? setChampionShards.run(championId) : null),
     [championId, setChampionShards],
   )
 
-  const filteredShardsCount = pipe(
-    shardsCount,
-    Maybe.filter(count => (championLevel === 7 ? 0 < count : true)), // hide for level 7 and 0 shards
-  )
-
   const hoverRef_ = useRef<HTMLDivElement>(null)
   const hoverRef = overrideHoverRef ?? hoverRef_
+
+  const tokens = pipe(
+    repeatElements(tokensEarned, i => (
+      <SparkSolid key={i} className={`-mt-px h-2.5 ${masteryTextColor(championLevel)}`} />
+    )),
+    List.concat(
+      repeatElements(markRequiredForNextLevel - tokensEarned, i => (
+        <span
+          key={tokensEarned + i}
+          className="m-0.5 mt-px size-1.5 rounded-1/2 border border-grey-500"
+        />
+      )),
+    ),
+    NonEmptyArray.fromReadonlyArray,
+  )
 
   return (
     <>
@@ -116,11 +125,15 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
             ['shadow-even shadow-black', !noShadow],
           )}
         >
-          <LevelSVG
-            championLevel={championLevel}
-            championPointsUntilNextLevel={isHistogram ? 0 : championPointsUntilNextLevel} // always full for histogram
-            championPointsSinceLastLevel={championPointsSinceLastLevel}
-          />
+          {0 < championLevel ? (
+            <LevelSVG
+              championLevel={championLevel}
+              {...(isHistogram
+                ? // always full for histogram
+                  { championPointsUntilNextLevel: 0, championPointsSinceLastLevel: 1 }
+                : { championPointsUntilNextLevel, championPointsSinceLastLevel })}
+            />
+          ) : null}
         </div>
 
         {/* champion image */}
@@ -139,28 +152,33 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           {/* champion level */}
           <div
             className={cx(
-              'flex overflow-hidden rounded-br-lg bg-black pb-[3px] pr-[5px] text-sm font-bold leading-2.5',
+              'flex overflow-hidden bg-black pb-[3px] pr-[5px] text-sm font-bold leading-2.5',
+              Maybe.isNone(tokens) ? 'rounded-br-lg' : 'rounded-br',
               ['pl-0.5 pt-0.5', centerLevel],
-              championLevelNumberColor(championLevel),
+              masteryTextColor(championLevel),
             )}
           >
-            <span>{championLevel}</span>
+            <span>{t.number(championLevel)}</span>
           </div>
 
           {/* tokens next to champion level */}
-          <Tokens championLevel={championLevel} tokensEarned={tokensEarned} />
+          {pipe(
+            tokens,
+            Maybe.fold(
+              () => null,
+              elements => (
+                <div className="-ml-0.5 flex gap-0.5 rounded-br bg-black pb-0.5 pr-0.5">
+                  {elements}
+                </div>
+              ),
+            ),
+          )}
         </div>
-
-        {/* chest bottom left */}
-        {chestGranted ? (
-          <div className="flex size-3.5 flex-col-reverse self-end justify-self-start rounded-tr bg-black area-1">
-            <Chest className="w-3 text-goldenrod opacity-90" />
-          </div>
-        ) : null}
 
         {/* shards bottom right */}
         {pipe(
-          filteredShardsCount,
+          shardsCount,
+          Maybe.filter(n => 0 < n),
           Maybe.fold(
             () => null,
             shards => (
@@ -183,14 +201,14 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         className="!p-0"
       >
         <ChampionTooltip
-          chestGranted={chestGranted}
           tokensEarned={tokensEarned}
+          markRequiredForNextLevel={markRequiredForNextLevel}
           championLevel={championLevel}
           championPoints={championPoints}
           championPointsUntilNextLevel={championPointsUntilNextLevel}
           name={name}
           percents={percents}
-          filteredShardsCount={filteredShardsCount}
+          shardsCount={shardsCount}
           positions={positions}
           factions={factions}
         />
@@ -200,7 +218,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
 }
 
 type LevelSVGProps = {
-  championLevel: ChampionLevel
+  championLevel: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
 }
@@ -215,7 +233,7 @@ const LevelSVG: React.FC<LevelSVGProps> = ({
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
-    className={cx('h-full w-full', championLevelBgColor(championLevel))}
+    className={cx('h-full w-full', masteryBgColor(championLevel))}
   >
     <circle
       cx="16"
@@ -242,81 +260,23 @@ type ChampionLevelPercents = {
   championPointsUntilNextLevel: number
 }
 
-const levelPercents = ({
+function levelPercents({
   championPointsSinceLastLevel,
   championPointsUntilNextLevel,
-}: ChampionLevelPercents): number => {
+}: ChampionLevelPercents): number {
+  // championPointsSinceLastLevel can be negative because of new system
+  // see server/services/MasteriesService#fixPointsSinceLastLevel
+  if (championPointsSinceLastLevel < 0) return 0
+
   const levelRange = championPointsSinceLastLevel + championPointsUntilNextLevel
+
   if (levelRange === 0) return 0
-  return round((100 * championPointsSinceLastLevel) / levelRange)
-}
 
-const championLevelBgColor = (championLevel: ChampionLevel): string | undefined => {
-  if (championLevel === 7) return 'text-mastery-7'
-  if (championLevel === 6) return 'text-mastery-6'
-  if (championLevel === 5) return 'text-mastery-5'
-  if (championLevel === 4) return 'text-mastery-4'
-  if (championLevel === 0) return undefined
-  return 'text-mastery-3'
-}
-
-const championLevelNumberColor = (championLevel: ChampionLevel): string => {
-  if (championLevel === 7) return 'text-mastery-7-text'
-  if (championLevel === 6) return 'text-mastery-6-text'
-  if (championLevel === 5) return 'text-mastery-5-text'
-  if (championLevel === 4) return 'text-mastery-4-text'
-  return 'text-mastery-3-text'
-}
-
-type TokensProps = {
-  championLevel: number
-  tokensEarned: number
-}
-
-const Tokens: React.FC<TokensProps> = ({ championLevel, tokensEarned }) => {
-  const { t } = useTranslation('masteries')
-
-  const render = useCallback(
-    (totalTockens: number, src: string): React.ReactElement => (
-      <span
-        className={cx(
-          '-ml-1 flex h-2.5 rounded-br bg-black',
-          ['gap-0.5 pb-0.5 pl-1 pr-0.5 pt-px', championLevel === 5],
-          ['gap-[3px] pb-px pl-[5px] pr-[3px]', championLevel === 6],
-        )}
-      >
-        {pipe(
-          repeatElements(tokensEarned, i => (
-            <img
-              key={i}
-              src={src}
-              alt={t.tokenIconAlt(championLevel + 1)}
-              className="h-full bg-cover"
-            />
-          )),
-          List.concat(
-            repeatElements(totalTockens - tokensEarned, i => (
-              <img
-                key={totalTockens - i}
-                src={src}
-                alt={t.tokenIconAlt(championLevel + 1, { notObtained: true })}
-                className="h-full bg-cover grayscale"
-              />
-            )),
-          ),
-        )}
-      </span>
-    ),
-    [championLevel, t, tokensEarned],
-  )
-
-  if (championLevel === 5) return render(2, Assets.tokens[5])
-  if (championLevel === 6) return render(3, Assets.tokens[6])
-  return null
+  return Math.min(round((100 * championPointsSinceLastLevel) / levelRange), 100)
 }
 
 function repeatElements<A>(n: number, getA: (i: number) => A): List<A> {
-  return pipe([...Array(Math.max(n, 0))], List.mapWithIndex(getA))
+  return pipe(Array.from({ length: Math.max(n, 0) }), List.mapWithIndex(getA))
 }
 
 type ShardsProps = {

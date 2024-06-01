@@ -6,7 +6,7 @@ import { ChampionFactionOrNone } from '../../../shared/models/api/champion/Champ
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { RequiredPartial } from '../../../shared/models/typeUtils'
-import { Dict, List, Maybe } from '../../../shared/utils/fp'
+import { Dict, Maybe } from '../../../shared/utils/fp'
 
 import { MasteriesQueryOrder } from './MasteriesQueryOrder'
 import { MasteriesQuerySort } from './MasteriesQuerySort'
@@ -23,12 +23,7 @@ type MasteriesQuery = {
   search: Maybe<string>
 }
 
-const levelDefault: ReadonlySet<ChampionLevel> = new Set(
-  pipe(
-    ChampionLevel.values,
-    List.filter(l => l !== 7),
-  ),
-)
+const levelDefault: ReadonlySet<ChampionLevel> = new Set(ChampionLevel.values)
 const levelEq = readonlySet.getEq(ChampionLevel.Eq)
 
 const positionDefault: ReadonlySet<ChampionPosition> = new Set(ChampionPosition.values)

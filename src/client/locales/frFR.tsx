@@ -113,14 +113,14 @@ const frFRTranslation: Translation = {
     theQuestProgression: 'Progression de La Quête',
     totals: (totalMasteryLevel, translatedTotalMasteryPoints, highlightClassName) => (
       <>
-        (<span className={highlightClassName}>{totalMasteryLevel.toLocaleString(locale)}</span> —{' '}
+        (<span className={highlightClassName}>{nls(totalMasteryLevel)}</span> —{' '}
         <span className={highlightClassName}>{translatedTotalMasteryPoints}</span>)
       </>
     ),
     masteryScoreAndPoints: 'Score — Points de maîtrise',
     otpIndex: (otpIndex, highlightClassName) => (
       <>
-        Indice d’OTP : <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
+        Indice d’OTP : <span className={highlightClassName}>{nls(otpIndex)}</span>
       </>
     ),
     mainRoles: 'Rôles principaux :',
@@ -162,8 +162,7 @@ const frFRTranslation: Translation = {
     championKey: key => `<Champion ${key}>`,
     cooldownSeconds: (cooldown, highlightClassName) => (
       <>
-        <span className={highlightClassName}>récupération :</span> {cooldown.toLocaleString(locale)}
-        s
+        <span className={highlightClassName}>récupération :</span> {nls(cooldown)}s
       </>
     ),
     emptyChampionIconAlt: 'Icône de champion vide',
@@ -174,7 +173,8 @@ const frFRTranslation: Translation = {
       removeFavoriteError: 'Erreur lors de la suppression du favori',
     },
     fraction: (numerator, denominator, o) => {
-      const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
+      const res = `${nls(numerator)} / ${nls(denominator)}`
+
       return o !== undefined && o.withParenthesis ? `(${res})` : res
     },
     labels: {
@@ -313,16 +313,13 @@ const frFRTranslation: Translation = {
       previousSplit: 'Split précédent :',
     },
     masteryIconAlt: level => `Icône niveau ${level}`,
-    nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,
+    nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${nls(total)}`,
     nResults: plural('résultat'),
     notFound: 'introuvable.',
-    number: (n, o) =>
-      o !== undefined && o.withParenthesis
-        ? `(${n.toLocaleString(locale)})`
-        : n.toLocaleString(locale),
-    numberK: n => `${n.toLocaleString(locale)}k`,
-    numberM: n => `${n.toLocaleString(locale)}M`,
-    percents: n => `${n.toLocaleString(locale)} %`,
+    number: (n, o) => (o !== undefined && o.withParenthesis ? `(${nls(n)})` : nls(n)),
+    numberK: n => `${nls(n)}k`,
+    numberM: n => `${nls(n)}M`,
+    percents: n => `${nls(n)} %`,
     randomChampion: 'Champion aléatoire',
     runeIconAlt: name => `Icône rune ${name}`,
     searchChamion: 'Rechercher champion',
@@ -330,7 +327,7 @@ const frFRTranslation: Translation = {
     spellKey: key => `<Sort ${key}>`,
     level: (level, highlightClassName) => (
       <>
-        niveau <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+        niveau <span className={highlightClassName}>{nls(level)}</span>
       </>
     ),
     summonerLevel: 'Niveau d’invocateur',
@@ -357,28 +354,26 @@ const frFRTranslation: Translation = {
   },
   masteries: {
     addShard: 'Ajouter un fragment',
-    chestAvailable: 'coffre disponible',
-    chestGranted: 'coffre obtenu',
     filters: {
       all: 'tous',
-      fiveAndSix: '5 et 6',
-      fourAndLess: '4 et moins',
-      level: level => `Niveau ${level}`,
+      level: level => `Niveau ${level}${level === 10 ? '+' : ''}`,
       order: {
         desc: 'Tri décroissant',
         asc: 'Tri croissant',
       },
-      sixAndLess: '6 et moins',
+      nineAndLess: '9 et moins',
+      tenAndMore: '10+',
       sort: {
-        name: 'Trier par nom',
-        percents: ({ withShards }) =>
-          `Trier par pourcents > ${withShards ? 'fragments > ' : ''}points`,
+        level: 'Trier par niveau > jetons > points',
+        percents: 'Trier par pourcents > points',
         points: 'Trier par points',
+        name: 'Trier par nom',
       },
       sortShort: {
-        name: 'abc',
+        level: 'niv',
         percents: '%',
         points: 'pts',
+        name: 'abc',
       },
       view: {
         aram: 'Vue ARAM',
@@ -395,8 +390,7 @@ const frFRTranslation: Translation = {
     },
     modal: {
       confirm: 'Confirmer',
-      masteryChange: (from, to) =>
-        `Changement de maîtrise ${from.toLocaleString(locale)} à ${to.toLocaleString(locale)}`,
+      masteryChange: (from, to) => `Changement de maîtrise ${nls(from)} à ${nls(to)}`,
       nChangesDetected: n => {
         const s = n < 2 ? '' : 's'
         return (
@@ -414,27 +408,27 @@ const frFRTranslation: Translation = {
       yesForAll: 'Oui pour tout',
     },
     nShards: plural('fragment'),
-    nTokens: plural('jeton'),
+    nMarksOfMastery: (earned, total) => `${plural('jeton')(earned)} / ${nls(total)}`,
     points: (points, total, highlightClassName) => (
       <>
-        <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
+        <span className={highlightClassName}>{nls(points)}</span>{' '}
         {total !== undefined ? (
           <>
-            / <span className={highlightClassName}>{total.toLocaleString(locale)}</span>{' '}
+            / <span className={highlightClassName}>{nls(total)}</span>{' '}
           </>
         ) : null}
         points
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
-      `${plural('point')(points)} depuis le niveau ${level.toLocaleString(locale)}`,
+      points < 0
+        ? `${plural('point')(Math.abs(points))} jusqu’au niveau ${nls(level)}`
+        : `${plural('point')(points)} depuis le niveau ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('point')(points)} jusqu’au niveau ${level.toLocaleString(locale)}`,
+      points < 0
+        ? `niveau ${nls(level)} dépassé de ${plural('point')(Math.abs(points))}`
+        : `${plural('point')(points)} jusqu’au niveau ${nls(level)}`,
     removeShard: 'Enlever un fragment',
-    tokenIconAlt: (level, o) =>
-      `Jeton de maîtrise ${level.toLocaleString(locale)}${
-        o !== undefined && o.notObtained ? ' (non obtenu)' : ''
-      }`,
     updateShardsSucces: 'Fragments modifiés',
     updateShardsError: 'Erreur lors de la modification des fragments',
   },
@@ -444,9 +438,7 @@ const frFRTranslation: Translation = {
   },
   register: {
     accessRecentSearches: recentSearches =>
-      `Voir les ${recentSearches.toLocaleString(
-        locale,
-      )} recherches les plus récentes (stockage local du navigateur)`,
+      `Voir les ${nls(recentSearches)} recherches les plus récentes (stockage local du navigateur)`,
     accessSummonerDetails: 'Accéder à tous les détails d’un invocateur via la recherche',
     addSummonerToFavorites: 'Ajouter des invocateur en favori',
     customiseChampionPositions: 'Personnaliser les champions associés à un rôle',
@@ -455,7 +447,7 @@ const frFRTranslation: Translation = {
     discordServer: 'Serveur Discord',
     discordServerIconAlt: name => `Icône du serveur ${name}`,
     join: 'Rejoindre',
-    keepTrackOfShards: 'Garder le compte des fragments de champions (à la main, désolé)',
+    keepTrackOfShards: 'Garder le compte des fragments de champions',
     quickSummonerAccess: 'Accès rapide au profil d’invocateur lié',
     registrationExplanation: (
       <>
@@ -487,27 +479,20 @@ const frFRTranslation: Translation = {
       '(nombre de champions cumulant la moitié du nombre total de points de maîtrise)',
     masteriesExplanation: (
       <>
+        <li>Niveau de maîtrise 10 ou plus = 100%</li>
         <li>
-          De la maîtrise 0 à la maîtrise 5, les pourcents correspondent aux points de maîtrise.
+          Il faut 75 600 points pour atteindre le niveau 10 (compte pour la moitié du calcul de
+          pourcents)
         </li>
-        <li>Maîtrise 5 = 50 %</li>
-        <li>Chaque fragment = 3 %</li>
         <li>
-          Chaque jeton pour la maîtrise 6 = 7 % (maîtrise 5 + 1 jeton = 57 % ; maîtrise 5 + 2 jetons
-          = 64 %)
+          Il faut 7 Marques de Maîtrise pour atteindre le niveau 10 (compte pour l’autre moitié du
+          calcul)
         </li>
-        <li>Maîtrise 6 = 67 %</li>
-        <li>
-          Chaque jeton pour la maîtrise 7 = 10 % (maîtrise 6 + 1 jeton = 77 % ; maîtrise 6 + 2
-          jetons = 87 % ; maîtrise 6 + 3 jetons = 97 %)
-        </li>
-        <li>Maîtrise 7 = 100 %</li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (
       <>
-        Progression :{' '}
-        <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+        Progression : <span className={highlightClassName}>{nls(percents)} %</span>
       </>
     ),
   },
@@ -524,8 +509,15 @@ const frFRTranslation: Translation = {
 
 export default frFRTranslation
 
+/**
+ * n.toLocaleString(locale)
+ */
+function nls(n: number): string {
+  return n.toLocaleString(locale)
+}
+
 function plural(unit: string) {
-  return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`
+  return (n: number): string => `${nls(n)} ${pluralUnit(unit)(n)}`
 }
 
 function pluralUnit(unit: string) {

@@ -4,11 +4,12 @@ import { DayJs } from '../../shared/models/DayJs'
 import type { Platform } from '../../shared/models/api/Platform'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe } from '../../shared/utils/fp'
-import { Future } from '../../shared/utils/fp'
+import { Future, List } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import type { ChampionMasteries } from '../models/championMastery/ChampionMasteries'
+import type { ChampionMastery } from '../models/championMastery/ChampionMastery'
 import type { ChampionMasteryPersistence } from '../persistence/ChampionMasteryPersistence'
 import type { RiotApiService } from './RiotApiService'
 
@@ -66,7 +67,41 @@ const MasteriesService = (
       futureMaybe.map(
         (s): ChampionMasteries => ({ ...s, cacheDuration: riotApiCacheTtl.masteries }),
       ),
+      futureMaybe.map(masteries => ({
+        ...masteries,
+        champions: pipe(masteries.champions, List.map(fixPointsSinceLastLevel)),
+      })),
     ),
 })
 
 export { MasteriesService }
+
+const pointsRequiredForLevel6 = 31600
+const pointsRequiredForLevel7 = 42600
+
+/**
+ * Temporary workaround (lol) for old masteries system where you could have mastery level without enought mastery points.
+ *
+ * Also see client/components/ChampionMasterySquare#levelPercents
+ */
+function fixPointsSinceLastLevel(c: ChampionMastery): ChampionMastery {
+  if (c.championLevel === 6) {
+    if (pointsRequiredForLevel6 <= c.championPoints) return c
+
+    return {
+      ...c,
+      championPointsSinceLastLevel: c.championPoints - pointsRequiredForLevel6,
+    }
+  }
+
+  if (c.championLevel === 7) {
+    if (pointsRequiredForLevel7 <= c.championPoints) return c
+
+    return {
+      ...c,
+      championPointsSinceLastLevel: c.championPoints - pointsRequiredForLevel7,
+    }
+  }
+
+  return c
+}

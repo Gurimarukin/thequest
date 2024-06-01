@@ -88,7 +88,6 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
                 summoner,
                 champion: c.championId,
                 count: c.shardsCount,
-                updatedWhenChampionLevel: c.championLevel,
               })
               return {
                 updateOne: {

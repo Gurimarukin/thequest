@@ -3,7 +3,7 @@ import { optional } from 'monocle-ts'
 
 import { DayJs } from '../../../../../src/shared/models/DayJs'
 import { MsDuration } from '../../../../../src/shared/models/MsDuration'
-import type { ChampionKey } from '../../../../../src/shared/models/api/champion/ChampionKey'
+import { ChampionKey } from '../../../../../src/shared/models/api/champion/ChampionKey'
 import { ChampionShardsView } from '../../../../../src/shared/models/api/summoner/ChampionShardsView'
 import { Puuid } from '../../../../../src/shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../../../../src/shared/models/api/summoner/SummonerMasteriesView'
@@ -28,21 +28,18 @@ describe('SummonerMasteriesView.Lens.championShards.counts', () => {
     }
 
     const shardsOne: ChampionShardsView = {
-      champion: 1 as unknown as ChampionKey,
+      champion: ChampionKey(1),
       count: 1,
-      shardsToRemoveFromNotification: Maybe.none,
     }
 
     const shardsOneBis: ChampionShardsView = {
-      champion: 1 as unknown as ChampionKey,
+      champion: ChampionKey(1),
       count: 2,
-      shardsToRemoveFromNotification: Maybe.none,
     }
 
     const shardsTwo: ChampionShardsView = {
-      champion: 2 as unknown as ChampionKey,
+      champion: ChampionKey(2),
       count: 1,
-      shardsToRemoveFromNotification: Maybe.none,
     }
 
     const emptyLeagues: SummonerMasteriesView['leagues'] = {

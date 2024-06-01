@@ -1,24 +1,24 @@
 import { pipe } from 'fp-ts/function'
 
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
-import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
+import { masteryBgGradient } from '../utils/colors'
 import { cx } from '../utils/cx'
 import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
 
 type Props = {
-  chestGranted: boolean
   tokensEarned: number
-  championLevel: ChampionLevel
+  markRequiredForNextLevel: number
+  championLevel: number
   championPoints: number
   championPointsUntilNextLevel: number
   name: string
   percents: number
-  filteredShardsCount: Maybe<number>
+  shardsCount: Maybe<number>
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
 }
@@ -29,9 +29,9 @@ export const ChampionTooltip: React.FC<Props> = ({
   championPoints,
   championPointsUntilNextLevel,
   name,
-  chestGranted,
   tokensEarned,
-  filteredShardsCount,
+  markRequiredForNextLevel,
+  shardsCount: filteredShardsCount,
   positions,
   factions,
 }) => {
@@ -45,8 +45,12 @@ export const ChampionTooltip: React.FC<Props> = ({
 
   const tokenShards = pipe(
     [
-      championLevel === 5 || championLevel === 6
-        ? Maybe.some(<span key="tokens">{t.masteries.nTokens(tokensEarned)}</span>)
+      0 < markRequiredForNextLevel
+        ? Maybe.some(
+            <span key="tokens">
+              {t.masteries.nMarksOfMastery(tokensEarned, markRequiredForNextLevel)}
+            </span>,
+          )
         : Maybe.none,
       pipe(
         filteredShardsCount,
@@ -69,7 +73,7 @@ export const ChampionTooltip: React.FC<Props> = ({
         <h3
           className={cx(
             'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black text-shadow',
-            bgGradientMastery(championLevel),
+            masteryBgGradient(championLevel),
           )}
         >
           {name}
@@ -78,9 +82,7 @@ export const ChampionTooltip: React.FC<Props> = ({
       <p className="border-b border-tooltip px-2 py-1 text-center">
         {t.masteries.points(
           championPoints,
-          0 < championLevel && championLevel < 5
-            ? championPoints + championPointsUntilNextLevel
-            : undefined,
+          championPoints + championPointsUntilNextLevel,
           'font-semibold',
         )}
       </p>
@@ -92,9 +94,6 @@ export const ChampionTooltip: React.FC<Props> = ({
             nea => <div className="flex items-center gap-2">{nea}</div>,
           ),
         )}
-        <div className="flex items-center gap-2">
-          <span>{chestGranted ? t.masteries.chestGranted : t.masteries.chestAvailable}</span>
-        </div>
         <ChampionPositionsAndFactions positions={positions} factions={factions} />
       </div>
     </div>
@@ -141,13 +140,4 @@ export const ChampionPositionsAndFactions: React.FC<ChampionPositionsAndFactions
         : null}
     </ul>
   )
-}
-
-export const bgGradientMastery = (level: ChampionLevel): string | undefined => {
-  if (level === 7) return 'bg-gradient-to-r from-mastery-7 to-mastery-7-bis'
-  if (level === 6) return 'bg-gradient-to-r from-mastery-6 to-mastery-6-bis'
-  if (level === 5) return 'bg-gradient-to-r from-mastery-5 to-mastery-5-bis'
-  if (level === 4) return 'bg-gradient-to-r from-mastery-4 to-mastery-4-bis'
-  if (level === 0) return undefined
-  return 'bg-gradient-to-r from-mastery-3 to-mastery-3-bis'
 }

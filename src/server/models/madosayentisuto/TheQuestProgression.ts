@@ -21,9 +21,9 @@ const encoder = E.struct({
   percents: E.id<number>(),
   totalMasteryLevel: E.id<number>(),
   champions: E.struct({
-    mastery7: List.encoder(ChampionKey.codec),
-    mastery6: List.encoder(ChampionKey.codec),
-    mastery5: List.encoder(ChampionKey.codec),
+    mastery10plus: List.encoder(ChampionKey.codec),
+    mastery9: List.encoder(ChampionKey.codec),
+    mastery8: List.encoder(ChampionKey.codec),
   }),
 })
 

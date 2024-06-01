@@ -113,15 +113,14 @@ const esESTranslation: Translation = {
     theQuestProgression: 'QUESTO PROGRESSIO',
     totals: (totalMasteryLevel, translatedTotalMasteryPoints, highlightClassName) => (
       <>
-        (<span className={highlightClassName}>{totalMasteryLevel.toLocaleString(locale)}</span> —{' '}
+        (<span className={highlightClassName}>{nls(totalMasteryLevel)}</span> —{' '}
         <span className={highlightClassName}>{translatedTotalMasteryPoints}</span>)
       </>
     ),
     masteryScoreAndPoints: 'SCORO — POINT DEL MAITRISO',
     otpIndex: (otpIndex, highlightClassName) => (
       <>
-        INDICO DEL OTP:{' '}
-        <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
+        INDICO DEL OTP: <span className={highlightClassName}>{nls(otpIndex)}</span>
       </>
     ),
     mainRoles: 'ROLO PRIMO:',
@@ -163,7 +162,7 @@ const esESTranslation: Translation = {
     championKey: key => `<Champion ${key}>`,
     cooldownSeconds: (cooldown, highlightClassName) => (
       <>
-        <span className={highlightClassName}>RECUPERACIÓN:</span> {cooldown.toLocaleString(locale)}s
+        <span className={highlightClassName}>RECUPERACIÓN:</span> {nls(cooldown)}s
       </>
     ),
     emptyChampionIconAlt: 'Icône de champion vide',
@@ -174,7 +173,7 @@ const esESTranslation: Translation = {
       removeFavoriteError: 'PROBLEMO',
     },
     fraction: (numerator, denominator, o) => {
-      const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
+      const res = `${nls(numerator)} / ${nls(denominator)}`
       return o !== undefined && o.withParenthesis ? `(${res})` : res
     },
     labels: {
@@ -313,16 +312,13 @@ const esESTranslation: Translation = {
       previousSplit: 'SPLITO PRECEDO:',
     },
     masteryIconAlt: level => `ICONO NIVELO ${level}`,
-    nChampionsFraction: (n, total) => `${plural('CAMPEONE')(n)} / ${total.toLocaleString(locale)}`,
+    nChampionsFraction: (n, total) => `${plural('CAMPEONE')(n)} / ${nls(total)}`,
     nResults: plural('RESULTO'),
     notFound: 'PROBLEMO.',
-    number: (n, o) =>
-      o !== undefined && o.withParenthesis
-        ? `(${n.toLocaleString(locale)})`
-        : n.toLocaleString(locale),
-    numberK: n => `${n.toLocaleString(locale)}k`,
-    numberM: n => `${n.toLocaleString(locale)}M`,
-    percents: n => `${n.toLocaleString(locale)} %`,
+    number: (n, o) => (o !== undefined && o.withParenthesis ? `(${nls(n)})` : nls(n)),
+    numberK: n => `${nls(n)}k`,
+    numberM: n => `${nls(n)}M`,
+    percents: n => `${nls(n)} %`,
     randomChampion: 'CAMPEONE ALEATORIO',
     runeIconAlt: name => `ICONO ${name}`,
     searchChamion: 'RECHERCHAR EL CHAMPIONO',
@@ -330,7 +326,7 @@ const esESTranslation: Translation = {
     spellKey: key => `<SORTO ${key}>`,
     level: (level, highlightClassName) => (
       <>
-        NIVEL <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+        NIVEL <span className={highlightClassName}>{nls(level)}</span>
       </>
     ),
     summonerLevel: 'INVOCADOR LEVELITO',
@@ -357,27 +353,26 @@ const esESTranslation: Translation = {
   },
   masteries: {
     addShard: 'ADAR EL FRAGMENTO',
-    chestAvailable: 'COFFRO DISPONIBLA',
-    chestGranted: 'COFFRO OKIDOKI',
     filters: {
       all: 'AYYYY',
-      fiveAndSix: '5 E 6',
-      fourAndLess: '4 E MINOS',
-      level: level => `NIVATO ${level}`,
+      level: level => `NIVATO ${level}${level === 10 ? '+' : ''}`,
       order: {
         desc: 'EL GRANDE TO MINO',
         asc: 'EL MINO TO GRANDE',
       },
-      sixAndLess: '6 E MINO',
+      nineAndLess: '9 E MINO',
+      tenAndMore: '10+',
       sort: {
+        level: 'TRIAR PER NIVATO > TOKOS > POINTITOS',
+        percents: 'TRIAR PER % > POINTITOS',
+        points: 'TRIAR PER POINTITOS',
         name: 'TRIAR PER NOME',
-        percents: ({ withShards }) => `TRIAR PER % > ${withShards ? 'FRAGMENTO > ' : ''}POINTITO`,
-        points: 'TRIAR PER POINTITO',
       },
       sortShort: {
-        name: 'JAJA',
+        level: 'PTS',
         percents: '%',
         points: 'TITO',
+        name: 'JAJA',
       },
       view: {
         aram: 'ARAMO',
@@ -394,8 +389,7 @@ const esESTranslation: Translation = {
     },
     modal: {
       confirm: 'ACEPTAR',
-      masteryChange: (from, to) =>
-        `CHANGAR DEL MAITRISO ${from.toLocaleString(locale)} à ${to.toLocaleString(locale)}`,
+      masteryChange: (from, to) => `CHANGAR DEL MAITRISO ${nls(from)} à ${nls(to)}`,
       nChangesDetected: n => {
         const s = n < 2 ? '' : 's'
         return (
@@ -413,27 +407,27 @@ const esESTranslation: Translation = {
       yesForAll: 'SI JAJAJAJA',
     },
     nShards: plural('FRAGMENTO'),
-    nTokens: plural('TOKO'),
+    nMarksOfMastery: (earned, total) => `${plural('TOKO')(earned)} / ${nls(total)}`,
     points: (points, total, highlightClassName) => (
       <>
-        <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
+        <span className={highlightClassName}>{nls(points)}</span>{' '}
         {total !== undefined ? (
           <>
-            / <span className={highlightClassName}>{total.toLocaleString(locale)}</span>{' '}
+            / <span className={highlightClassName}>{nls(total)}</span>{' '}
           </>
         ) : null}
         PUNTOS
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
-      `${plural('POINTITO')(points)} DEL NIVELO ${level.toLocaleString(locale)}`,
+      points < 0
+        ? `${plural('POINTITO')(Math.abs(points))} PARA EL NIVOLO ${nls(level)}`
+        : `${plural('POINTITO')(points)} DEL NIVELO ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('POINTITO')(points)} PARA EL NIVOLO ${level.toLocaleString(locale)}`,
+      points < 0
+        ? `NIVEL ${nls(level)} SUPERADO EN ${plural('PUNTO')(Math.abs(points))}`
+        : `${plural('POINTITO')(points)} PARA EL NIVOLO ${nls(level)}`,
     removeShard: 'DISCALIFIAR EL FRAGMENTO',
-    tokenIconAlt: (level, o) =>
-      `EL JETONO ${level.toLocaleString(locale)}${
-        o !== undefined && o.notObtained ? ' (NO OBTENU)' : ''
-      }`,
     updateShardsSucces: 'FRAGMENTO MODIFIAR',
     updateShardsError: 'PROBLEMO EN EL MODIFICATION DEL FRAGMENTO',
   },
@@ -443,9 +437,7 @@ const esESTranslation: Translation = {
   },
   register: {
     accessRecentSearches: recentSearches =>
-      `VER LAS ${recentSearches.toLocaleString(
-        locale,
-      )} BÚSQUEDAS MÁS RECIENTES (ALMACENAMIENTO LOCAL DEL NAVEGADOR)`,
+      `VER LAS ${nls(recentSearches)} BÚSQUEDAS MÁS RECIENTES (ALMACENAMIENTO LOCAL DEL NAVEGADOR)`,
     accessSummonerDetails: 'BUSCAR TODOS LOS DATOS DE UN INVOCADOR',
     addSummonerToFavorites: 'AÑADIR INVOCADORES COMO FAVORITOS',
     customiseChampionPositions: 'PERSONALIZAR LOS CAMPEONES ASOCIADOS A UNA FUNCIÓN',
@@ -486,23 +478,20 @@ const esESTranslation: Translation = {
       '(NÚMERO DE CAMPEONES QUE ACUMULAN LA MITAD DEL NÚMERO TOTAL DE PUNTOS DE MAESTRÍA)',
     masteriesExplanation: (
       <>
-        <li>DEL DOMINIO 0 AL DOMINIO 5, LOS PORCENTAJES CORRESPONDEN A LOS PUNTOS DE DOMINIO.</li>
-        <li>MAESTRÍA 5 = 50 %</li>
-        <li>CADA FRAGMENTO = 3 %</li>
+        <li>Nivel de maestría 10 o superior = 100%.</li>
         <li>
-          CADA FICHA DE MAESTRÍA 6 = 7% (MAESTRÍA 5 + 1 FICHA = 57%; MAESTRÍA 5 + 2 FICHAS = 64 %)
+          Se necesitan 75.600 puntos para alcanzar el nivel 10 (cuenta para la mitad del cálculo del
+          porcentaje)
         </li>
-        <li>MAESTRÍA 6 = 67 %</li>
         <li>
-          CADA FICHA DE MAESTRÍA 7 = 10% (MAESTRÍA 6 + 1 FICHA = 77%; MAESTRÍA 6 + 2 FICHAS = 87%;
-          MAESTRÍA 6 + 3 FICHAS = 97%)
+          Se necesitan 7 Marcas de Maestría para alcanzar el nivel 10 (cuenta para la otra mitad del
+          cálculo)
         </li>
-        <li>MAESTRÍA 7 = 100 %</li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (
       <>
-        PROGRESO: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+        PROGRESO: <span className={highlightClassName}>{nls(percents)} %</span>
       </>
     ),
   },
@@ -519,8 +508,15 @@ const esESTranslation: Translation = {
 
 export default esESTranslation
 
+/**
+ * n.toLocaleString(locale)
+ */
+function nls(n: number): string {
+  return n.toLocaleString(locale)
+}
+
 function plural(unit: string) {
-  return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`
+  return (n: number): string => `${nls(n)} ${pluralUnit(unit)(n)}`
 }
 
 function pluralUnit(unit: string) {

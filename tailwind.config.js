@@ -4,7 +4,7 @@ const plugin = require('tailwindcss/plugin')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   mode: 'jit',
-  content: ['./src/client/**/*.{html,js,ts,jsx,tsx}'],
+  content: ['./src/client/**/*.{html,js,ts,jsx,tsx}', './uibook/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
     fontFamily: {
       baloo: 'baloo2',
@@ -41,21 +41,6 @@ module.exports = {
       tooltip: '#725a34',
       'aram-stats': colors.zinc[800],
       'histogram-grey': colors.gray[600],
-      'mastery-3': '#71717a',
-      'mastery-3-bis': '#52525b', // #52604f
-      'mastery-3-text': colors.neutral[300],
-      'mastery-4': '#9e7a39',
-      'mastery-4-bis': '#725a34',
-      'mastery-4-text': colors.yellow[600],
-      'mastery-5': '#771616', // firebrick
-      'mastery-5-bis': '#672121',
-      'mastery-5-text': colors.red[700],
-      'mastery-6': '#73407e',
-      'mastery-6-bis': '#582263',
-      'mastery-6-text': colors.purple[400],
-      'mastery-7': '#204b85',
-      'mastery-7-bis': '#043c88',
-      'mastery-7-text': colors.blue[500],
 
       'discord-blurple': '#5865f2',
       'discord-darkgreen': '#248045',

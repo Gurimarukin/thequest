@@ -113,14 +113,14 @@ const enGBTranslation: Translation = {
     theQuestProgression: 'The Quest progression',
     totals: (totalMasteryLevel, translatedTotalMasteryPoints, highlightClassName) => (
       <>
-        (<span className={highlightClassName}>{totalMasteryLevel.toLocaleString(locale)}</span> —{' '}
+        (<span className={highlightClassName}>{nls(totalMasteryLevel)}</span> —{' '}
         <span className={highlightClassName}>{translatedTotalMasteryPoints}</span>)
       </>
     ),
     masteryScoreAndPoints: 'Mastery score — points',
     otpIndex: (otpIndex, highlightClassName) => (
       <>
-        OTP index: <span className={highlightClassName}>{otpIndex.toLocaleString(locale)}</span>
+        OTP index: <span className={highlightClassName}>{nls(otpIndex)}</span>
       </>
     ),
     mainRoles: 'Main roles:',
@@ -161,7 +161,7 @@ const enGBTranslation: Translation = {
     championKey: key => `<Champion ${key}>`,
     cooldownSeconds: (cooldown, highlightClassName) => (
       <>
-        <span className={highlightClassName}>cooldown:</span> {cooldown.toLocaleString(locale)}s
+        <span className={highlightClassName}>cooldown:</span> {nls(cooldown)}s
       </>
     ),
     emptyChampionIconAlt: 'Empty champion icon',
@@ -172,7 +172,7 @@ const enGBTranslation: Translation = {
       removeFavoriteError: 'Error while removing favorite',
     },
     fraction: (numerator, denominator, o) => {
-      const res = `${numerator.toLocaleString(locale)} / ${denominator.toLocaleString(locale)}`
+      const res = `${nls(numerator)} / ${nls(denominator)}`
       return o !== undefined && o.withParenthesis ? `(${res})` : res
     },
     labels: {
@@ -311,16 +311,13 @@ const enGBTranslation: Translation = {
       previousSplit: 'Previous split:',
     },
     masteryIconAlt: level => `Level ${level} icon`,
-    nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${total.toLocaleString(locale)}`,
+    nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${nls(total)}`,
     nResults: plural('result'),
     notFound: 'not found.',
-    number: (n, o) =>
-      o !== undefined && o.withParenthesis
-        ? `(${n.toLocaleString(locale)})`
-        : n.toLocaleString(locale),
-    numberK: n => `${n.toLocaleString(locale)}k`,
-    numberM: n => `${n.toLocaleString(locale)}M`,
-    percents: n => `${n.toLocaleString(locale)}%`,
+    number: (n, o) => (o !== undefined && o.withParenthesis ? `(${nls(n)})` : nls(n)),
+    numberK: n => `${nls(n)}k`,
+    numberM: n => `${nls(n)}M`,
+    percents: n => `${nls(n)}%`,
     randomChampion: 'Random champion',
     runeIconAlt: name => `${name} run icon`,
     searchChamion: 'Search champion',
@@ -328,7 +325,7 @@ const enGBTranslation: Translation = {
     spellKey: key => `<Spell ${key}>`,
     level: (level, highlightClassName) => (
       <>
-        level <span className={highlightClassName}>{level.toLocaleString(locale)}</span>
+        level <span className={highlightClassName}>{nls(level)}</span>
       </>
     ),
     summonerLevel: 'Summoner level',
@@ -355,27 +352,26 @@ const enGBTranslation: Translation = {
   },
   masteries: {
     addShard: 'Add shard',
-    chestAvailable: 'chest available',
-    chestGranted: 'chest granted',
     filters: {
       all: 'all',
-      fiveAndSix: '5 and 6',
-      fourAndLess: '4 and less',
-      level: level => `Level ${level}`,
+      level: level => `Level ${level}${level === 10 ? '+' : ''}`,
       order: {
         desc: 'Sort descending',
         asc: 'Sort ascending',
       },
-      sixAndLess: '6 and less',
+      nineAndLess: '9 and less',
+      tenAndMore: '10+',
       sort: {
-        name: 'Sort by name',
-        percents: ({ withShards }) => `Sort by percents > ${withShards ? 'shards > ' : ''}points`,
+        level: 'Sort par level > tokens > points',
+        percents: 'Sort by percents > points',
         points: 'Sort by points',
+        name: 'Sort by name',
       },
       sortShort: {
-        name: 'abc',
+        level: 'lvl',
         percents: '%',
         points: 'pts',
+        name: 'abc',
       },
       view: {
         aram: 'ARAM view',
@@ -392,8 +388,7 @@ const enGBTranslation: Translation = {
     },
     modal: {
       confirm: 'Confirm',
-      masteryChange: (from, to) =>
-        `Update from mastery ${from.toLocaleString(locale)} to ${to.toLocaleString(locale)}`,
+      masteryChange: (from, to) => `Update from mastery ${nls(from)} to ${nls(to)}`,
       nChangesDetected: n => (
         <>
           Level {pluralUnit('change')(n)} detected since last shards update.
@@ -408,27 +403,27 @@ const enGBTranslation: Translation = {
       yesForAll: 'Yes for all',
     },
     nShards: plural('shard'),
-    nTokens: plural('token'),
+    nMarksOfMastery: (earned, total) => `${plural('token')(earned)} / ${nls(total)}`,
     points: (points, total, highlightClassName) => (
       <>
-        <span className={highlightClassName}>{points.toLocaleString(locale)}</span>{' '}
+        <span className={highlightClassName}>{nls(points)}</span>{' '}
         {total !== undefined ? (
           <>
-            / <span className={highlightClassName}>{total.toLocaleString(locale)}</span>{' '}
+            / <span className={highlightClassName}>{nls(total)}</span>{' '}
           </>
         ) : null}
         points
       </>
     ),
     pointsSinceLastLevel: (points, level) =>
-      `${plural('point')(points)} since level ${level.toLocaleString(locale)}`,
+      points < 0
+        ? `${plural('point')(Math.abs(points))} until level ${nls(level)}`
+        : `${plural('point')(points)} since level ${nls(level)}`,
     pointsUntilNextLevel: (points, level) =>
-      `${plural('point')(points)} until level ${level.toLocaleString(locale)}`,
+      points < 0
+        ? `level ${nls(level)} exceeded by ${plural('point')(Math.abs(points))}`
+        : `${plural('point')(points)} until level ${nls(level)}`,
     removeShard: 'Remove shard',
-    tokenIconAlt: (level, o) =>
-      `Mastery ${level.toLocaleString(locale)} token${
-        o !== undefined && o.notObtained ? ' (non obtenu)' : ''
-      }`,
     updateShardsSucces: 'Shards updated',
     updateShardsError: 'Error while update shards',
   },
@@ -438,9 +433,7 @@ const enGBTranslation: Translation = {
   },
   register: {
     accessRecentSearches: recentSearches =>
-      `View ${recentSearches.toLocaleString(
-        locale,
-      )} most recent searches (browser’s local storage)`,
+      `View ${nls(recentSearches)} most recent searches (browser’s local storage)`,
     accessSummonerDetails: 'Search for summoner’s details',
     addSummonerToFavorites: 'Adding favorite summoners',
     customiseChampionPositions: 'Customize the champions associated with a positon',
@@ -448,7 +441,7 @@ const enGBTranslation: Translation = {
     discordServer: 'Discord server',
     discordServerIconAlt: name => `${name} server’s icon`,
     join: 'Join',
-    keepTrackOfShards: 'Keeping track of champion shards (by hand, sorry)',
+    keepTrackOfShards: 'Keeping track of champion shards',
     quickSummonerAccess: 'Quick access to linked summoner profile',
     registrationExplanation: (
       <>
@@ -477,21 +470,19 @@ const enGBTranslation: Translation = {
     otpIndexExplanation: '(number of champions cumulating half the total number of mastery points)',
     masteriesExplanation: (
       <>
-        <li>From mastery 0 to mastery 5, percents correspond with mastery points.</li>
-        <li>Mastery 5 = 50%</li>
-        <li>Each shard = 3%</li>
-        <li>Each mastery 6 token = 7% (mastery 5 + 1 token = 57%; mastery 5 + 2 tokens = 64%)</li>
-        <li>Mastery 6 = 67%</li>
+        <li>Mastery level 10 or more = 100%</li>
         <li>
-          Each mastery 7 token = 10% (mastery 6 + 1 token = 77%; mastery 6 + 2 tokens = 87%; mastery
-          6 + 3 tokens = 97%)
+          It takes 75,600 points to reach level 10 (counts for half the percentage calculation)
         </li>
-        <li>Mastery 7 = 100%</li>
+        <li>
+          It takes 7 Marks of Mastery to reach level 10 (counts for the other half of the
+          calculation)
+        </li>
       </>
     ),
     percentsProgression: (percents, highlightClassName) => (
       <>
-        Progression: <span className={highlightClassName}>{percents.toLocaleString(locale)} %</span>
+        Progression: <span className={highlightClassName}>{nls(percents)} %</span>
       </>
     ),
   },
@@ -508,8 +499,15 @@ const enGBTranslation: Translation = {
 
 export default enGBTranslation
 
+/**
+ * n.toLocaleString(locale)
+ */
+function nls(n: number): string {
+  return n.toLocaleString(locale)
+}
+
 function plural(unit: string) {
-  return (n: number): string => `${n.toLocaleString(locale)} ${pluralUnit(unit)(n)}`
+  return (n: number): string => `${nls(n)} ${pluralUnit(unit)(n)}`
 }
 
 function pluralUnit(unit: string) {

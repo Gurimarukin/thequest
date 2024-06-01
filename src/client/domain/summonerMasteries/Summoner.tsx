@@ -3,7 +3,7 @@ import { useMemo, useRef } from 'react'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
-import type { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
+import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
 import { GameName } from '../../../shared/models/riot/GameName'
@@ -39,7 +39,7 @@ export type EnrichedSummonerView = SummonerView & {
   totalMasteryLevel: number
   totalMasteryPoints: number
   otpIndex: number
-  masteriesCount: Dict<`${ChampionLevel}`, number>
+  masteriesCount: Dict<`${number}`, number>
 }
 
 export const Summoner: React.FC<Props> = ({
@@ -124,24 +124,24 @@ export const Summoner: React.FC<Props> = ({
 
       <div className="flex flex-col items-center gap-3">
         <div ref={masteriesRef} className="flex items-end gap-2">
-          <MasteryImgWithCount level={7} imgClassName="!w-[72px] -mt-1.5" />
-          <MasteryImgWithCount level={6} imgClassName="!w-[72px] mt-[-7px] -mb-1" />
-          <MasteryImgWithCount level={5} imgClassName="!w-[72px] mt-[-11px] -mb-1.5" />
+          {/* TODO: 10+ */}
+          <MasteryImgWithCount level={10} imgClassName="!w-20" />
+          <MasteryImgWithCount level={9} imgClassName="!w-20" className="-mb-1.5" />
+          <MasteryImgWithCount level={8} imgClassName="!w-20 -mt-0.5" className="-mb-1.5" />
         </div>
         <Tooltip
           hoverRef={masteriesRef}
-          className="flex max-w-xs flex-col items-center gap-2 px-5 pb-4 pt-3"
+          className="flex flex-col items-center gap-2 px-5 pb-4 pt-3"
         >
-          <div className="grid grid-cols-[repeat(4,54px)_34px] items-end gap-1">
+          <div className="grid grid-cols-[repeat(7,54px)_34px] items-end gap-1">
+            <MasteryImgWithCount level={7} />
+            <MasteryImgWithCount level={6} imgClassName="-mt-1" />
+            <MasteryImgWithCount level={5} imgClassName="-mt-1.5" />
             <MasteryImgWithCount level={4} imgClassName="-mt-1.5" />
-            <MasteryImgWithCount level={3} imgClassName="mt-[-9px] mb-[-3px]" />
-            <MasteryImgWithCount level={2} imgClassName="-mt-2.5 mb-[-5px]" />
-            <MasteryImgWithCount level={1} imgClassName="-mt-2.5 -mb-2" />
-            <MasteryImgWithCount
-              level={0}
-              imgClassName="-mt-2.5 -mb-2"
-              className="relative -left-2.5 w-[54px]"
-            />
+            <MasteryImgWithCount level={3} imgClassName="-mt-1.5" />
+            <MasteryImgWithCount level={2} imgClassName="-mt-2.5" />
+            <MasteryImgWithCount level={1} imgClassName="-mt-2.5" />
+            <MasteryImgWithCount level={0} imgClassName="-mt-2.5" className="-mx-2.5" />
           </div>
           <div className="grid grid-cols-[auto_auto] gap-x-2">
             <span className="justify-self-end">{t.summoner.masteryScore}</span>
@@ -182,16 +182,20 @@ type MasteryImgWithCountProps = {
 const getMasteryImgWithCount =
   (
     t: Translation['common'],
-    masteriesCount: Dict<`${ChampionLevel}`, number>,
+    masteriesCount: Dict<`${number}`, number>,
   ): React.FC<MasteryImgWithCountProps> =>
-  ({ level, imgClassName, className }) => (
-    <div className={cx('flex flex-col items-center', className)}>
-      <span className="text-sm font-semibold">{t.number(masteriesCount[level])}</span>
-      <MasteryImg level={level} className={cx('w-full', imgClassName)} />
-    </div>
-  )
+  ({ level, imgClassName, className }) => {
+    const count = masteriesCount[ChampionLevel.stringify(level)]
 
-const prettyMs = (ms: MsDuration): number => {
+    return (
+      <div className={cx('flex flex-col items-center', className)}>
+        <span className="text-sm font-semibold">{t.number(count !== undefined ? count : -1)}</span>
+        <MasteryImg level={level} className={cx('w-full', imgClassName)} />
+      </div>
+    )
+  }
+
+function prettyMs(ms: MsDuration): number {
   const date = DayJs.of(MsDuration.unwrap(ms))
   const zero = DayJs.of(0)
 

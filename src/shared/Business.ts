@@ -2,30 +2,41 @@ import { number, ord } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
 import type { Lang } from './models/api/Lang'
-import type { ChampionLevel } from './models/api/champion/ChampionLevel'
 import type { Dict } from './utils/fp'
 import { List, NonEmptyArray } from './utils/fp'
 
 type SimpleChampion = {
-  championLevel: ChampionLevel
+  championLevel: number
   championPoints: number
+  championPointsUntilNextLevel: number
   tokensEarned: number
 }
 
-// Mastery 5: 50%
-// Mastery 6 tokens: 7% each
-// Mastery 7 tokens: 10% each
-// Shards (not based on user's favorites): 3% each
-const championPercents = (c: SimpleChampion): number => {
-  if (c.championLevel === 7) return 100
+/**
+ * Mastery level 10 or more = 100%.
+ *
+ * It takes 75,600 points to reach level 10 (counts for half the percentage calculation).
+ *
+ * It takes 7 Marks of Mastery to reach level 10 (counts for the other half of the calculation).
+ */
+function championPercents({
+  championLevel,
+  championPoints,
+  championPointsUntilNextLevel,
+  tokensEarned,
+}: SimpleChampion): number {
+  if (10 < championLevel) return 100
 
-  // 6-0: 67%, 6-1: 77%, 6-2: 87%, 6-3: 97%
-  if (c.championLevel === 6) return 67 + c.tokensEarned * 10
+  const pointsPercents =
+    Math.min(
+      // `championPointsUntilNextLevel` can be negative
+      Math.min(championPoints + championPointsUntilNextLevel, championPoints) / 75600,
+      1,
+    ) * 75
 
-  // 5-0: 50%, 5-1: 57%, 5-2: 64%
-  if (c.championLevel === 5) return 50 + c.tokensEarned * 7
+  const tokensPercents = Math.min((Math.max(championLevel - 4, 0) + tokensEarned) / 7, 1) * 25
 
-  return (c.championPoints / 21600) * 50
+  return pointsPercents + tokensPercents
 }
 
 type ChampionPoints = {
@@ -38,15 +49,16 @@ const byPointsOrd = pipe(
   ord.reverse,
 )
 
-const otpRatio = (masteries: List<ChampionPoints>, totalMasteryPoints: number): number =>
-  otpRatioRec(totalMasteryPoints / 2, pipe(masteries, List.sort(byPointsOrd)), 0, 0)
+function otpRatio(masteries: List<ChampionPoints>, totalMasteryPoints: number): number {
+  return otpRatioRec(totalMasteryPoints / 2, pipe(masteries, List.sort(byPointsOrd)), 0, 0)
+}
 
-const otpRatioRec = (
+function otpRatioRec(
   threshold: number,
   masteries: List<ChampionPoints>,
   pointsAcc: number,
   countAcc: number,
-): number => {
+): number {
   if (!List.isNonEmpty(masteries)) return countAcc
 
   const [head, tail] = NonEmptyArray.unprepend(masteries)

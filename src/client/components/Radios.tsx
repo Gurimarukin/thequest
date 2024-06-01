@@ -27,6 +27,7 @@ export function Radios<A extends Value>({
     <div className="flex flex-wrap">
       {children.map(({ value: val, label }) => {
         const isChecked = val === value
+
         return (
           <label key={val} className="group">
             <input
