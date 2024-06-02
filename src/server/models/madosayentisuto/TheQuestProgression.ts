@@ -4,7 +4,7 @@ import { Platform } from '../../../shared/models/api/Platform'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { DiscordUserId } from '../../../shared/models/discord/DiscordUserId'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import { List } from '../../../shared/utils/fp'
+import { NonEmptyArray } from '../../../shared/utils/fp'
 
 import { SummonerId } from '../summoner/SummonerId'
 
@@ -20,11 +20,7 @@ const encoder = E.struct({
   }),
   percents: E.id<number>(),
   totalMasteryLevel: E.id<number>(),
-  champions: E.struct({
-    mastery10plus: List.encoder(ChampionKey.codec),
-    mastery9: List.encoder(ChampionKey.codec),
-    mastery8: List.encoder(ChampionKey.codec),
-  }),
+  champions: E.record(NonEmptyArray.encoder(ChampionKey.codec)), // champion level as keys
 })
 
 const TheQuestProgression = { encoder }

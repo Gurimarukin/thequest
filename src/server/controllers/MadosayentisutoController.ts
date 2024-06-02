@@ -8,11 +8,10 @@ import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
-import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
-import { Future, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { Dict, Future, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { DayJsFromISOString } from '../../shared/utils/ioTsUtils'
 
@@ -99,8 +98,8 @@ const MadosayentisutoController = (
         }),
         futureMaybe.fromTaskEither(ddragonService.latestChampions(lang)),
       ),
-      futureMaybe.map(([{ riotId }, summoner, { champions }, staticData]): TheQuestProgression => {
-        return {
+      futureMaybe.map(
+        ([{ riotId }, summoner, { champions }, staticData]): TheQuestProgression => ({
           userId,
           summoner: {
             id: summoner.id,
@@ -125,25 +124,14 @@ const MadosayentisutoController = (
             List.map(m => m.championLevel),
             monoid.concatAll(number.MonoidSum),
           ),
-          champions: {
-            mastery10plus: pipe(
-              champions,
-              List.filterMap(m => (10 <= m.championLevel ? Maybe.some(m.championId) : Maybe.none)),
-            ),
-            mastery9: filteredByLevel(9),
-            mastery8: filteredByLevel(8),
-          },
-        }
-
-        function filteredByLevel(level: ChampionLevel): List<ChampionKey> {
-          return pipe(
+          champions: pipe(
             champions,
-            List.filterMap(m =>
-              m.championLevel === level ? Maybe.some(m.championId) : Maybe.none,
-            ),
-          )
-        }
-      }),
+            List.filter(m => 5 <= m.championLevel),
+            List.groupByStr(m => `${m.championLevel}`),
+            Dict.map(NonEmptyArray.map(m => m.championId)),
+          ),
+        }),
+      ),
     )
   }
 
