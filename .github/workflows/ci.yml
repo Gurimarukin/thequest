@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      # - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
       - run: yarn tsc
 
@@ -45,7 +45,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      # - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
       - run: yarn formatCheck
 
@@ -58,7 +58,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      # - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
       - run: yarn lint
 
@@ -71,7 +71,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      # - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
       - run: yarn dc
 
@@ -84,7 +84,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      # - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
       - run: yarn testUnit
 
@@ -97,33 +97,8 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      # - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
       - run: |
           cp .env.local.example .env
           yarn build
-
-  #
-  # ---
-  #
-
-  # build:
-  #   runs-on: ubuntu-latest
-
-  #   strategy:
-  #     matrix:
-  #       node-version: [18.x]
-  #       # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     # - name: install
-  #     #   run: yarn install --frozen-lockfile
-  #     - name: test
-  #       run: yarn run test
-  #     - name: build
-  #       run: cp .env.example .env && yarn run build
