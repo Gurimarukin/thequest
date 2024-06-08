@@ -1,5 +1,4 @@
 /* eslint-disable functional/no-expression-statements */
-import { fail } from 'assert'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
@@ -11,16 +10,14 @@ import { RiotId } from '../../../src/shared/models/riot/RiotId'
 import { TagLine } from '../../../src/shared/models/riot/TagLine'
 import { Either, Future, Maybe } from '../../../src/shared/utils/fp'
 
-import { futureRunUnsafe } from '../../../src/client/utils/futureRunUnsafe'
-
 import { Config } from '../../../src/server/config/Config'
 import { MongoCollectionGetter } from '../../../src/server/models/mongo/MongoCollection'
 import { WithDb } from '../../../src/server/models/mongo/WithDb'
 import type { RiotAccountDb } from '../../../src/server/models/riot/RiotAccountDb'
 import { RiotAccountPersistence } from '../../../src/server/persistence/RiotAccountPersistence'
 
-import { Logger } from '../../Logger'
 import { expectT } from '../../expectT'
+import { Logger } from '../Logger'
 
 const dbRetryDelay = MsDuration.seconds(10)
 
@@ -33,7 +30,7 @@ describe('RiotAccountPersistence', () => {
 
       return WithDb.load(config.db, logger, dbRetryDelay)
     }),
-    futureRunUnsafe,
+    Future.runUnsafe,
   )
   const riotAccountPersistence = pipe(
     Future.tryCatch(() => withDb),
@@ -56,7 +53,7 @@ describe('RiotAccountPersistence', () => {
     pipe(
       riotAccountPersistence,
       Future.chain(p => p.upsert(faker)),
-      futureRunUnsafe,
+      Future.runUnsafe,
     ),
   )
 
@@ -79,7 +76,7 @@ describe('RiotAccountPersistence', () => {
       Future.map(actual => {
         expectT(actual).toStrictEqual(Maybe.none)
       }),
-      futureRunUnsafe,
+      Future.runUnsafe,
     ))
 
   function expectFaker(
@@ -91,7 +88,7 @@ describe('RiotAccountPersistence', () => {
       Future.map(actual => {
         expectT(actual).toStrictEqual(Maybe.some(faker))
       }),
-      futureRunUnsafe,
+      Future.runUnsafe,
     )
   }
 
@@ -99,7 +96,8 @@ describe('RiotAccountPersistence', () => {
     const myRiotId = RiotId.fromStringDecoder.decode(rawiotId)
 
     if (!Either.isRight(myRiotId)) {
-      fail(`myRiotId should be right\n${D.draw(myRiotId.left)}`)
+      // eslint-disable-next-line functional/no-throw-statements
+      throw Error(`assert.fail: myRiotId should be right\n${D.draw(myRiotId.left)}`)
     }
 
     return expectFaker(p => p.findByRiotId(myRiotId.right, day0))

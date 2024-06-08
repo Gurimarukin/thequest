@@ -1,6 +1,6 @@
-import { IO, NotUsed } from '../src/shared/utils/fp'
+import { IO, NotUsed } from '../../src/shared/utils/fp'
 
-import type { LoggerGetter } from '../src/server/models/logger/LoggerGetter'
+import type { LoggerGetter } from '../../src/server/models/logger/LoggerGetter'
 
 const log = (): IO<NotUsed> => IO.successful(NotUsed)
 

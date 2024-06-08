@@ -203,7 +203,7 @@ module.exports = {
       name: 'not-to-client',
       severity: 'error',
       from: {
-        pathNot: '^src/client',
+        pathNot: ['^src/client', '^test/client'],
       },
       to: {
         path: '^src/client',
@@ -213,7 +213,7 @@ module.exports = {
       name: 'not-to-server',
       severity: 'error',
       from: {
-        pathNot: '^src/server',
+        pathNot: ['^src/server', '^test/server'],
       },
       to: {
         path: '^src/server',
@@ -223,7 +223,7 @@ module.exports = {
       name: 'only-from-whitelisted',
       severity: 'error',
       from: {
-        pathNot: '^src/(client|server|shared)',
+        pathNot: ['^src/(client|server|shared)', '^test'],
       },
       to: {
         path: '^src',
