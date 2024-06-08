@@ -37,7 +37,6 @@
     "test": "jest",
     "testUnit": "yarn test --testPathPattern=.*\\.spec\\.ts",
     "testCoverage": "yarn test --ci --coverage",
-    "style": "yarn prettier && yarn lint",
     "dc": "depcruise src test",
     "dcGraph": "depcruise -v -T dot src -x '(node_modules|fs|util|fp\\.ts)' | dot -T svg | depcruise-wrap-stream-in-html > dependencygraph.html"
   },
