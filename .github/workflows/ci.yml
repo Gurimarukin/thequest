@@ -100,5 +100,5 @@ jobs:
       - run: yarn install --frozen-lockfile
 
       - run: |
-          cp .env.local.example .env
+          cp .env.example .env
           yarn build
