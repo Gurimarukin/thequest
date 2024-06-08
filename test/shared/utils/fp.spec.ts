@@ -4,8 +4,6 @@ import { pipe } from 'fp-ts/function'
 import type { TeamId } from '../../../src/shared/models/api/activeGame/TeamId'
 import { Future, List, PartialDict } from '../../../src/shared/utils/fp'
 
-import { futureRunUnsafe } from '../../../src/client/utils/futureRunUnsafe'
-
 import { expectT } from '../../expectT'
 
 describe('List.differenceW', () => {
@@ -49,7 +47,7 @@ describe('PartialDict.traverse', () => {
     return pipe(
       partialDict,
       PartialDict.traverse(Future.ApplicativePar)(Future.successful),
-      futureRunUnsafe,
+      Future.runUnsafe,
     )
   })
 })

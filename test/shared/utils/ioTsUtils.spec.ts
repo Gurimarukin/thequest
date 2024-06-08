@@ -2,33 +2,32 @@ import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 
+import { DiscordUserId } from '../../../src/shared/models/discord/DiscordUserId'
 import { Either, Tuple } from '../../../src/shared/utils/fp'
 import { MapFromArray } from '../../../src/shared/utils/ioTsUtils'
-
-import { ChampionEnglishName } from '../../../src/server/models/wikia/ChampionEnglishName'
 
 import { expectT } from '../../expectT'
 
 describe('MapFromArray', () => {
-  const codec = MapFromArray.codec(ChampionEnglishName.Ord)(
-    ChampionEnglishName.codec,
+  const codec = MapFromArray.codec(DiscordUserId.Ord)(
+    DiscordUserId.codec,
     C.tuple(C.string, C.number),
   )
 
-  const decoder = MapFromArray.decoder(ChampionEnglishName.Eq)(
-    ChampionEnglishName.codec,
+  const decoder = MapFromArray.decoder(DiscordUserId.Eq)(
+    DiscordUserId.codec,
     D.tuple(D.string, D.number),
   )
 
-  const encoder = MapFromArray.encoder(ChampionEnglishName.Ord)(
-    ChampionEnglishName.codec,
+  const encoder = MapFromArray.encoder(DiscordUserId.Ord)(
+    DiscordUserId.codec,
     E.tuple(E.id<string>(), E.id<number>()),
   )
 
   const map: E.TypeOf<typeof encoder> = new Map([
-    [ChampionEnglishName('abc'), ['foo', 1]],
-    [ChampionEnglishName('def'), ['bar', 2]],
-    [ChampionEnglishName('abc'), ['baz', 3]],
+    [DiscordUserId('abc'), ['foo', 1]],
+    [DiscordUserId('def'), ['bar', 2]],
+    [DiscordUserId('abc'), ['baz', 3]],
   ])
 
   it('should encode', () => {
@@ -48,8 +47,8 @@ describe('MapFromArray', () => {
     ).toStrictEqual(
       Either.right(
         new Map([
-          [ChampionEnglishName('abc'), Tuple.of('baz', 3)],
-          [ChampionEnglishName('def'), Tuple.of('bar', 2)],
+          [DiscordUserId('abc'), Tuple.of('baz', 3)],
+          [DiscordUserId('def'), Tuple.of('bar', 2)],
         ]),
       ),
     )
