@@ -16,3 +16,5 @@ const main: Future<NotUsed> = pipe(
 
 // eslint-disable-next-line functional/no-expression-statements
 Future.runUnsafe(main)
+
+console.log('toto')
