@@ -71,14 +71,38 @@ const StaticDataService = (
       version => data => DDragonVersion.Eq.equals(data.value.version, version),
     )
 
-  const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = fetchCachedStoredAt(
-    [''],
-    () => () => getFetchWikiaChampionsData(logger, httpClient),
-  )('')()
+  const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = pipe(
+    fetchCachedStoredAt([''], () => () => getFetchWikiaChampionsData(logger, httpClient))('')(),
+    Future.orElse(e =>
+      pipe(
+        logger.warn('fetchWikiaChampionsData error:', e),
+        Future.fromIO,
+        Future.map(() => List.empty<WikiaChampionData>()),
+      ),
+    ),
+  )
 
-  const fetchWikiaChallenges: Future<List<WikiaChallenge>> = getFetchWikiaChallenges(httpClient)
+  const fetchWikiaChallenges: Future<List<WikiaChallenge>> = pipe(
+    getFetchWikiaChallenges(httpClient),
+    Future.orElse(e =>
+      pipe(
+        logger.warn('fetchWikiaChallenges error:', e),
+        Future.fromIO,
+        Future.map(() => List.empty<WikiaChallenge>()),
+      ),
+    ),
+  )
 
-  const fetchWikiaAramChanges: Future<WikiaAramChanges> = getFetchWikiaAramChanges(httpClient)
+  const fetchWikiaAramChanges: Future<WikiaAramChanges> = pipe(
+    getFetchWikiaAramChanges(httpClient),
+    Future.orElse(e =>
+      pipe(
+        logger.warn('fetchWikiaAramChanges error:', e),
+        Future.fromIO,
+        Future.map((): WikiaAramChanges => new Map()),
+      ),
+    ),
+  )
 
   return {
     wikiaChampions: pipe(
