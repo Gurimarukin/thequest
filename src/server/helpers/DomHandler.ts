@@ -61,19 +61,32 @@ function querySelectorEnsureOne<E extends Element>(selector: string, type?: Cons
   }
 }
 
-const querySelectorAll =
-  <E extends Element>(selector: string, type: Constructor<E>) =>
-  (parent: ParentNode): ValidatedNea<string, List<E>> => {
-    const elts = parent.querySelectorAll(selector)
+function querySelectorAll(
+  selector: string,
+): (parent: ParentNode) => ValidatedNea<string, List<Element>>
+function querySelectorAll<E extends Element>(
+  selector: string,
+  type: Constructor<E>,
+): (parent: ParentNode) => ValidatedNea<string, List<E>>
+function querySelectorAll<E extends Element>(
+  selector: string,
+  type?: Constructor<E>,
+): (parent: ParentNode) => ValidatedNea<string, List<Element>> {
+  return (parent: ParentNode): ValidatedNea<string, List<E>> => {
+    const elts: List<Element> = Array.from(parent.querySelectorAll(selector))
+
+    if (type === undefined) return ValidatedNea.valid(elts as List<E>)
 
     const isE = (e: Element): e is E => e instanceof type
+
     return pipe(
-      [...elts],
+      elts,
       List.traverseWithIndex(ValidatedNea.getValidation<string>())((i, e) =>
         isE(e) ? ValidatedNea.valid(e) : elementNotMatching(selector, type)(i, e),
       ),
     )
   }
+}
 
 function querySelectorAllNonEmpty(
   selector: string,

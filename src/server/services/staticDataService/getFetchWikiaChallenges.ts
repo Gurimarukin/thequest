@@ -2,9 +2,8 @@ import { apply } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 
 import { ValidatedNea } from '../../../shared/models/ValidatedNea'
-import { ListUtils } from '../../../shared/utils/ListUtils'
 import type { Tuple3 } from '../../../shared/utils/fp'
-import { Either, Future, List, Maybe, NonEmptyArray, Try } from '../../../shared/utils/fp'
+import { Either, Future, List, NonEmptyArray, Try } from '../../../shared/utils/fp'
 import { decodeErrorString } from '../../../shared/utils/ioTsUtils'
 
 import { constants } from '../../config/constants'
@@ -20,52 +19,56 @@ const challengesUrl = `${constants.lolWikiaDomain}/wiki/Challenges_(League_of_Le
 export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<List<WikiaChallenge>> =>
   pipe(httpClient.text([challengesUrl, 'get']), Future.chainEitherK(wikiaChallengesFromHtml))
 
+const dataHash = 'data-hash'
+const factionChallenges = 'Faction_Challenges'
+
 // export for testing purpose
 export const wikiaChallengesFromHtml = (html: string): Try<List<WikiaChallenge>> =>
   pipe(
     html,
     DomHandler.of({ url: challengesUrl }),
-    Try.chain(domHandler =>
+    Try.bindTo('domHandler'),
+    Try.bind('tabsUl', ({ domHandler }) =>
       pipe(
         domHandler.window.document.body,
-        DomHandler.querySelectorEnsureOne('#Faction-specific_challenges'),
+        DomHandler.querySelectorEnsureOne(`[${dataHash}="${factionChallenges}"]`),
         Either.mapLeft(withUrlError),
-        Try.chainOptionK(() => withUrlError('factionChallengesH3 null'))(factionChallengesSpan =>
-          Maybe.fromNullable(factionChallengesSpan.parentNode),
+        Try.chainNullableK(withUrlError('tabs <ul> is null'))(
+          factionChallengesLi => factionChallengesLi.parentNode,
         ),
-        Try.bindTo('factionChallengesH3'),
-        Try.bind('challengesContainer', ({ factionChallengesH3 }) =>
-          Try.fromNullable(withUrlError('challengesContainer null'))(
-            factionChallengesH3.parentNode,
-          ),
+      ),
+    ),
+    Try.bind('tabIndex', ({ tabsUl }) =>
+      pipe(
+        Array.from(tabsUl.children),
+        List.findIndex(e => e.getAttribute(dataHash) === factionChallenges),
+        Try.fromOption(() =>
+          withUrlError(`can't find <li> with ${dataHash} "${factionChallenges}"`),
         ),
-        Try.chainOptionK(() => withUrlError('factionChallengesContent null'))(
-          ({ factionChallengesH3, challengesContainer }) =>
-            pipe(
-              [...challengesContainer.children],
-              ListUtils.findFirstWithPrevious(prev =>
-                pipe(
-                  prev,
-                  Maybe.exists(e => e === factionChallengesH3),
-                ),
-              ),
-            ),
-        ),
+      ),
+    ),
+    Try.chain(({ domHandler, tabsUl, tabIndex }) =>
+      pipe(
+        tabsUl.parentNode,
+        Try.fromNullable(withUrlError('tabs <ul> parent is null')),
+        Try.chainNullableK(withUrlError('tabs <ul> parent parent is null'))(p => p.parentNode),
         Try.chain(
           flow(
-            DomHandler.querySelectorEnsureOne(':scope > .wds-tab__content:not(.wds-is-current)'),
+            DomHandler.querySelectorEnsureOne(
+              `:scope > .wds-tab__content:nth-of-type(${tabIndex + 2})`,
+            ),
             Either.mapLeft(withUrlError),
           ),
         ),
         Try.chain(content =>
           pipe(
-            [...content.children],
+            Array.from(content.children),
             List.filter(e => !(e.nodeName === 'P' && e.classList.contains('mw-empty-elt'))),
             List.chunksOf(3),
             List.traverseWithIndex(ValidatedNea.getValidation<string>())(
               parseChallenge(domHandler),
             ),
-            Either.mapLeft(flow(List.mkString('\n', '\n', ''), withUrlError)),
+            Either.mapLeft(withUrlErrors),
           ),
         ),
       ),
@@ -95,7 +98,7 @@ const parseChallenge =
           domHandler.querySelectorEnsureOneTextContent('dt'),
           ValidatedNea.fromEither,
         ),
-        postion: pipe(
+        position: pipe(
           p,
           domHandler.querySelectorEnsureOneTextContent('i > span > span > a'),
           ValidatedNea.fromEither,
@@ -134,3 +137,8 @@ const isTuple3 = (tuple: List<Element>): tuple is Tuple3<Element, Element, Eleme
   tuple.length === 3
 
 const withUrlError = (e: string): Error => Error(`[${challengesUrl}] ${e}`)
+
+const withUrlErrors: (e: NonEmptyArray<string>) => Error = flow(
+  List.mkString('\n', '\n', ''),
+  withUrlError,
+)

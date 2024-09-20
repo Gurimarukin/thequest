@@ -4,7 +4,7 @@ import type { ChampionEnglishName } from './ChampionEnglishName'
 import type { WikiaChampionFaction } from './WikiaChampionFaction'
 
 export type WikiaChallenge = {
-  postion: WikiaChampionFaction
+  position: WikiaChampionFaction
   title: string
   champions: NonEmptyArray<ChampionEnglishName>
 }

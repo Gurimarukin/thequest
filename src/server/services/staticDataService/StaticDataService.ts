@@ -251,7 +251,7 @@ const enrichChampions = (
                 challenges,
                 List.filterMap(challenge =>
                   List.elem(ChampionEnglishName.Eq)(wikiaChampion.englishName, challenge.champions)
-                    ? Maybe.some(WikiaChampionFaction.faction[challenge.postion])
+                    ? Maybe.some(WikiaChampionFaction.faction[challenge.position])
                     : Maybe.none,
                 ),
               ),
