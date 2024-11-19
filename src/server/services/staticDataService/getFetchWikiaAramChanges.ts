@@ -22,7 +22,7 @@ const apiPhpUrl = `${constants.lolWikiaDomain}/api.php`
 
 export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAramChanges> => {
   return pipe(
-    httpClient.http(
+    httpClient.json(
       [apiPhpUrl, 'get'],
       {
         searchParams: {
@@ -103,7 +103,7 @@ export const getFetchWikiaAramChanges = (httpClient: HttpClient): Future<WikiaAr
     value: string,
   ): Future<string> {
     return pipe(
-      httpClient.http(
+      httpClient.json(
         [apiPhpUrl, 'get'],
         {
           searchParams: {
