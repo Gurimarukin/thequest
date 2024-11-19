@@ -8,7 +8,7 @@ import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalanc
 import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { StrictStruct } from '../../../shared/utils/ioTsUtils'
 
-import { ChampionEnglishName } from './ChampionEnglishName'
+import { ChampionEnglishName } from '../wiki/ChampionEnglishName'
 import { WikiaChampionPosition } from './WikiaChampionPosition'
 
 type RawWikiaChampionData = D.TypeOf<typeof rawDecoder>

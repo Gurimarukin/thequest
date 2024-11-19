@@ -2,7 +2,7 @@ import { pipe } from 'fp-ts/function'
 
 import { Either, Maybe } from '../../../../src/shared/utils/fp'
 
-import { splitMapArray } from '../../../../src/server/services/staticDataService/getFetchWikiaAramChanges'
+import { splitMapArray } from '../../../../src/server/services/staticDataService/getFetchWikiAramChanges'
 
 import { expectT } from '../../../expectT'
 

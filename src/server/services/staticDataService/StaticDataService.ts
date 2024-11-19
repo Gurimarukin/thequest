@@ -34,8 +34,8 @@ import type { HttpClient } from '../../helpers/HttpClient'
 import { StoredAt } from '../../models/StoredAt'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
-import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
-import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
+import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
+import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
 import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
@@ -43,7 +43,7 @@ import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
 import { CacheUtils } from '../../utils/CacheUtils'
 import type { DDragonService } from '../DDragonService'
 import type { MockService } from '../MockService'
-import { getFetchWikiaAramChanges } from './getFetchWikiaAramChanges'
+import { getFetchWikiAramChanges } from './getFetchWikiAramChanges'
 import { getFetchWikiaChallenges } from './getFetchWikiaChallenges'
 import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
 
@@ -93,13 +93,13 @@ const StaticDataService = (
     ),
   )
 
-  const fetchWikiaAramChanges: Future<WikiaAramChanges> = pipe(
-    getFetchWikiaAramChanges(httpClient),
+  const fetchWikiaAramChanges: Future<WikiAramChanges> = pipe(
+    getFetchWikiAramChanges(httpClient),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiaAramChanges error:', e),
         Future.fromIO,
-        Future.map((): WikiaAramChanges => new Map()),
+        Future.map((): WikiAramChanges => new Map()),
       ),
     ),
   )

@@ -9,7 +9,7 @@ import { decodeErrorString } from '../../../shared/utils/ioTsUtils'
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
-import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
+import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
 import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
 import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 

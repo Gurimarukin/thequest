@@ -25,14 +25,14 @@ import { decodeError, decodeErrorString } from '../../../shared/utils/ioTsUtils'
 
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
-import { ChampionEnglishName } from '../../models/wikia/ChampionEnglishName'
-import type { WikiaAramChanges } from '../../models/wikia/WikiaAramChanges'
+import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
+import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
 
 const lolWikiDomain = 'https://wiki.leagueoflegends.com'
 
 const apiPhpUrl = `${lolWikiDomain}/api.php`
 
-export function getFetchWikiaAramChanges(httpClient: HttpClient): Future<WikiaAramChanges> {
+export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiAramChanges> {
   const fetchMapChanges: Future<string> = pipe(
     httpClient.json(
       [apiPhpUrl, 'get'],
@@ -162,7 +162,7 @@ function makeTemplate(
   )
 }
 
-function parseWikiHtml(html: string): IO<WikiaAramChanges> {
+function parseWikiHtml(html: string): IO<WikiAramChanges> {
   return pipe(
     DomHandler.of()(html),
     Either.map(domHandler => domHandler.window.document.body),
@@ -222,7 +222,7 @@ function preProcessHtml(body: HTMLElement): IO<void> {
 
 const validation = ValidatedNea.getValidation<string>()
 
-function parseGroupHtml(elements: ReadonlyArray<Element>): ValidatedNea<string, WikiaAramChanges> {
+function parseGroupHtml(elements: ReadonlyArray<Element>): ValidatedNea<string, WikiAramChanges> {
   return pipe(
     elements,
     splitMapArray(e => (e.tagName === 'H2' ? Maybe.some(e) : Maybe.none)),

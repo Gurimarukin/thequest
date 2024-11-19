@@ -8,7 +8,7 @@ import { iso } from 'newtype-ts'
 import { immutableAssign } from '../../../shared/utils/fp'
 import { fromNewtype } from '../../../shared/utils/ioTsUtils'
 
-// Champion's english name. Acts as an id for the wikia.
+// Champion's english name. Acts as an id for the wiki.
 
 type ChampionEnglishName = Newtype<{ readonly ChampionEnglishName: unique symbol }, string>
 
