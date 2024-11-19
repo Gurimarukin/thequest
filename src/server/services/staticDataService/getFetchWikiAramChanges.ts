@@ -23,14 +23,13 @@ import {
 } from '../../../shared/utils/fp'
 import { decodeError, decodeErrorString } from '../../../shared/utils/ioTsUtils'
 
+import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
 import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
 
-const lolWikiDomain = 'https://wiki.leagueoflegends.com'
-
-const apiPhpUrl = `${lolWikiDomain}/api.php`
+const apiPhpUrl = `${constants.lolWikiDomain}/api.php`
 
 export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiAramChanges> {
   const fetchMapChanges: Future<string> = pipe(
@@ -203,12 +202,12 @@ function preProcessHtml(body: HTMLElement): IO<void> {
         Maybe.getOrElse(() => e.src),
       )
 
-      e.setAttribute('src', new URL(newUrl, lolWikiDomain).toString())
+      e.setAttribute('src', new URL(newUrl, constants.lolWikiDomain).toString())
       e.removeAttribute('srcset')
     })
 
     body.querySelectorAll('a').forEach(e => {
-      e.setAttribute('href', new URL(e.href, lolWikiDomain).toString())
+      e.setAttribute('href', new URL(e.href, constants.lolWikiDomain).toString())
       e.setAttribute('target', '_blank')
       e.setAttribute('rel', 'noreferrer')
     })
