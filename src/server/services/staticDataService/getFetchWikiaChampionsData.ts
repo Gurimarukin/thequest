@@ -13,7 +13,7 @@ import type { HttpClient } from '../../helpers/HttpClient'
 import { RawWikiaChampionsData } from '../../models/wikia/RawWikiaChampionsData'
 import { RawWikiaChampionData, WikiaChampionData } from '../../models/wikia/WikiaChampionData'
 
-const championDataUrl = `${constants.lolWikiaDomain}/wiki/Module:ChampionData/data`
+const championDataUrl = `${constants.lolWikiDomain}/en-us/Module:ChampionData/data`
 
 const mwCodeClassName = '.mw-code'
 
