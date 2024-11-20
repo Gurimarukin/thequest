@@ -36,15 +36,15 @@ import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
 import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
-import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
+import type { WikiChallenge } from '../../models/wiki/WikiChallenge'
+import { WikiChampionFaction } from '../../models/wikia/WikiChampionFaction'
 import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
-import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
 import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
 import { CacheUtils } from '../../utils/CacheUtils'
 import type { DDragonService } from '../DDragonService'
 import type { MockService } from '../MockService'
 import { getFetchWikiAramChanges } from './getFetchWikiAramChanges'
-import { getFetchWikiaChallenges } from './getFetchWikiaChallenges'
+import { getFetchWikiChallenges } from './getFetchWikiChallenges'
 import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
@@ -82,13 +82,13 @@ const StaticDataService = (
     ),
   )
 
-  const fetchWikiaChallenges: Future<List<WikiaChallenge>> = pipe(
-    getFetchWikiaChallenges(httpClient),
+  const fetchWikiaChallenges: Future<List<WikiChallenge>> = pipe(
+    getFetchWikiChallenges(httpClient),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiaChallenges error:', e),
         Future.fromIO,
-        Future.map(() => List.empty<WikiaChallenge>()),
+        Future.map(() => List.empty<WikiChallenge>()),
       ),
     ),
   )
@@ -231,7 +231,7 @@ export { StaticDataService }
 const enrichChampions = (
   ddragonChampions: List<DDragonChampion>,
   wikiaChampions: List<WikiaChampionData>,
-  challenges: List<WikiaChallenge>,
+  challenges: List<WikiChallenge>,
   aramChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
   const wikiaChampionByKey = pipe(
@@ -275,7 +275,7 @@ const enrichChampions = (
                 challenges,
                 List.filterMap(challenge =>
                   List.elem(ChampionEnglishName.Eq)(wikiaChampion.englishName, challenge.champions)
-                    ? Maybe.some(WikiaChampionFaction.faction[challenge.position])
+                    ? Maybe.some(WikiChampionFaction.faction[challenge.faction])
                     : Maybe.none,
                 ),
               ),

@@ -10,67 +10,38 @@ import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
-import type { WikiaChallenge } from '../../models/wikia/WikiaChallenge'
-import { WikiaChampionFaction } from '../../models/wikia/WikiaChampionFaction'
+import type { WikiChallenge } from '../../models/wiki/WikiChallenge'
+import { WikiChampionFaction } from '../../models/wikia/WikiChampionFaction'
 
 // pageid: 1522274
-const challengesUrl = `${constants.lolWikiaDomain}/wiki/Challenges_(League_of_Legends)`
+const challengesUrl = `${constants.lolWikiDomain}/en-us/Challenges`
 
-export const getFetchWikiaChallenges = (httpClient: HttpClient): Future<List<WikiaChallenge>> =>
-  pipe(httpClient.text([challengesUrl, 'get']), Future.chainEitherK(wikiaChallengesFromHtml))
+export const getFetchWikiChallenges = (httpClient: HttpClient): Future<List<WikiChallenge>> =>
+  pipe(httpClient.text([challengesUrl, 'get']), Future.chainEitherK(wikiChallengesFromHtml))
 
-const dataHash = 'data-hash'
-const factionChallenges = 'Faction_Challenges'
+const dataTitle = 'data-title'
+const factionChallengez = 'Faction Challenges'
 
 // export for testing purpose
-export const wikiaChallengesFromHtml = (html: string): Try<List<WikiaChallenge>> =>
+export const wikiChallengesFromHtml = (html: string): Try<List<WikiChallenge>> =>
   pipe(
     html,
     DomHandler.of({ url: challengesUrl }),
     Try.bindTo('domHandler'),
-    Try.bind('tabsUl', ({ domHandler }) =>
+    Try.bind('content', ({ domHandler }) =>
       pipe(
         domHandler.window.document.body,
-        DomHandler.querySelectorEnsureOne(`[${dataHash}="${factionChallenges}"]`),
+        DomHandler.querySelectorEnsureOne(`[${dataTitle}="${factionChallengez}"]`),
         Either.mapLeft(withUrlError),
-        Try.chainNullableK(withUrlError('tabs <ul> is null'))(
-          factionChallengesLi => factionChallengesLi.parentNode,
-        ),
       ),
     ),
-    Try.bind('tabIndex', ({ tabsUl }) =>
+    Try.chain(({ domHandler, content }) =>
       pipe(
-        Array.from(tabsUl.children),
-        List.findIndex(e => e.getAttribute(dataHash) === factionChallenges),
-        Try.fromOption(() =>
-          withUrlError(`can't find <li> with ${dataHash} "${factionChallenges}"`),
-        ),
-      ),
-    ),
-    Try.chain(({ domHandler, tabsUl, tabIndex }) =>
-      pipe(
-        tabsUl.parentNode,
-        Try.fromNullable(withUrlError('tabs <ul> parent is null')),
-        Try.chainNullableK(withUrlError('tabs <ul> parent parent is null'))(p => p.parentNode),
-        Try.chain(
-          flow(
-            DomHandler.querySelectorEnsureOne(
-              `:scope > .wds-tab__content:nth-of-type(${tabIndex + 2})`,
-            ),
-            Either.mapLeft(withUrlError),
-          ),
-        ),
-        Try.chain(content =>
-          pipe(
-            Array.from(content.children),
-            List.filter(e => !(e.nodeName === 'P' && e.classList.contains('mw-empty-elt'))),
-            List.chunksOf(3),
-            List.traverseWithIndex(ValidatedNea.getValidation<string>())(
-              parseChallenge(domHandler),
-            ),
-            Either.mapLeft(withUrlErrors),
-          ),
-        ),
+        Array.from(content.children),
+        List.filter(e => !(e.nodeName === 'P' && e.classList.contains('mw-empty-elt'))),
+        List.chunksOf(3),
+        List.traverseWithIndex(ValidatedNea.getValidation<string>())(parseChallenge(domHandler)),
+        Either.mapLeft(withUrlErrors),
       ),
     ),
   )
@@ -79,7 +50,7 @@ const championSelector = 'ul > li > span > span:last-of-type > a'
 
 const parseChallenge =
   (domHandler: DomHandler) =>
-  (i: number, tuple: List<Element>): ValidatedNea<string, WikiaChallenge> => {
+  (i: number, tuple: List<Element>): ValidatedNea<string, WikiChallenge> => {
     if (!isTuple3(tuple)) {
       return pipe(
         tuple,
@@ -91,23 +62,24 @@ const parseChallenge =
     }
 
     const [dl, p, div] = tuple
+
     return pipe(
       apply.sequenceS(ValidatedNea.getValidation<string>())({
+        faction: pipe(
+          p,
+          domHandler.querySelectorEnsureOneTextContent('i > span > span:last-child > a'),
+          ValidatedNea.fromEither,
+          ValidatedNea.chainEitherK(u =>
+            pipe(
+              WikiChampionFaction.decoder.decode(u),
+              Either.mapLeft(decodeErrorString('WikiaChampionFaction')(u)),
+            ),
+          ),
+        ),
         title: pipe(
           dl,
           domHandler.querySelectorEnsureOneTextContent('dt'),
           ValidatedNea.fromEither,
-        ),
-        position: pipe(
-          p,
-          domHandler.querySelectorEnsureOneTextContent('i > span > span > a'),
-          ValidatedNea.fromEither,
-          ValidatedNea.chainEitherK(u =>
-            pipe(
-              WikiaChampionFaction.decoder.decode(u),
-              Either.mapLeft(decodeErrorString('WikiaChampionFaction')(u)),
-            ),
-          ),
         ),
         champions: pipe(
           div,
