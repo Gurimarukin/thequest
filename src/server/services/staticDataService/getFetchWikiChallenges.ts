@@ -11,7 +11,7 @@ import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
 import type { WikiChallenge } from '../../models/wiki/WikiChallenge'
-import { WikiChampionFaction } from '../../models/wikia/WikiChampionFaction'
+import { WikiChampionFaction } from '../../models/wiki/WikiChampionFaction'
 
 // pageid: 1522274
 const challengesUrl = `${constants.lolWikiDomain}/en-us/Challenges`
@@ -72,7 +72,7 @@ const parseChallenge =
           ValidatedNea.chainEitherK(u =>
             pipe(
               WikiChampionFaction.decoder.decode(u),
-              Either.mapLeft(decodeErrorString('WikiaChampionFaction')(u)),
+              Either.mapLeft(decodeErrorString('WikiChampionFaction')(u)),
             ),
           ),
         ),

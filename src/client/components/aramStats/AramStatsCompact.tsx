@@ -14,7 +14,7 @@ export const AramStatsCompact: React.FC<AramStatsProps> = getAramStats(
   },
   (t, spell) => html => (
     <li key={spell} className="flex items-center gap-1">
-      <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia compact" />
+      <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wiki compact" />
       <span>{t.common.labels.spell[spell]}</span>
     </li>
   ),

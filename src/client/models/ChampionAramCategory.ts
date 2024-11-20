@@ -1,8 +1,8 @@
 import { monoid, number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
+import { WikiStatsBalance } from '../../shared/models/WikiStatsBalance'
 import type { AramData } from '../../shared/models/api/AramData'
-import { WikiaStatsBalance } from '../../shared/models/wikia/WikiaStatsBalance'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { createEnum } from '../../shared/utils/createEnum'
 import { List, Maybe } from '../../shared/utils/fp'
@@ -29,7 +29,7 @@ const fromAramData = (aram: AramData): ChampionAramCategory =>
     ),
   )
 
-const normalizeStats = (stats: WikiaStatsBalance): number =>
+const normalizeStats = (stats: WikiStatsBalance): number =>
   pipe(
     stats,
     DictUtils.partial.entries,
@@ -37,8 +37,8 @@ const normalizeStats = (stats: WikiaStatsBalance): number =>
       if (val === undefined || val === 0) return 0
 
       return (
-        ((WikiaStatsBalance.isModifierStat(key) ? val - 1 : val) < 0 ? -1 : 1) *
-        (WikiaStatsBalance.isMalusStat(key) ? -1 : 1)
+        ((WikiStatsBalance.isModifierStat(key) ? val - 1 : val) < 0 ? -1 : 1) *
+        (WikiStatsBalance.isMalusStat(key) ? -1 : 1)
       )
     }),
     monoid.concatAll(number.MonoidSum),

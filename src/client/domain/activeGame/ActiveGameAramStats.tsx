@@ -28,7 +28,7 @@ export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
           <li key={spell} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
             <span
               dangerouslySetInnerHTML={{ __html: html.spell }}
-              className="wikia compact size-5"
+              className="wiki compact size-5"
             />
             <span>{t.common.labels.spell[spell]}</span>
           </li>

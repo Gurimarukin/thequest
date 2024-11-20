@@ -3,7 +3,7 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
 import { Dict, List, Maybe } from '../../utils/fp'
-import { WikiaStatsBalance } from '../wikia/WikiaStatsBalance'
+import { WikiStatsBalance } from '../WikiStatsBalance'
 import { SpellName } from './SpellName'
 
 type ChampionSpellHtml = C.TypeOf<typeof championSpellHtmlCodec>
@@ -28,7 +28,7 @@ const spellsProperties: Dict<
 type AramData = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  stats: Maybe.codec(WikiaStatsBalance.codec),
+  stats: Maybe.codec(WikiStatsBalance.codec),
   spells: Maybe.codec(C.partial(spellsProperties)),
 })
 

@@ -1,3 +1,4 @@
+import type { WikiStatsBalanceKey } from '../../shared/models/WikiStatsBalance'
 import type { ChallengeId } from '../../shared/models/api/ChallengeId'
 import type { SpellName } from '../../shared/models/api/SpellName'
 import type { GameQueue } from '../../shared/models/api/activeGame/GameQueue'
@@ -12,7 +13,6 @@ import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
 import type { SummonerLeaguesView } from '../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
-import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
 
 import type { ChampionAramCategory } from './ChampionAramCategory'
@@ -45,7 +45,7 @@ export type Translation = {
       description: Dict<ChampionAramCategory, React.ReactNode>
     }
     spell: (spell: SpellName) => React.ReactNode
-    statIconAlt: (name: WikiaStatsBalanceKey) => string
+    statIconAlt: (name: WikiStatsBalanceKey) => string
   }
   common: {
     challenge: {
@@ -82,7 +82,7 @@ export type Translation = {
       leagueTier: Dict<LeagueTier, React.ReactNode>
       position: Dict<ChampionPosition, React.ReactNode>
       spell: Dict<SpellName, React.ReactNode>
-      wikiaStatsBalance: Dict<WikiaStatsBalanceKey, React.ReactNode>
+      wikiStatsBalance: Dict<WikiStatsBalanceKey, React.ReactNode>
     }
     layout: {
       account: React.ReactNode

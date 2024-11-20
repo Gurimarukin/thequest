@@ -24,7 +24,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
-import './Aram.css'
+import './aram.css'
 
 const { cleanChampionName } = StringUtils
 

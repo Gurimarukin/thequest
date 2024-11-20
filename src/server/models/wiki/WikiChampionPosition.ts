@@ -2,11 +2,11 @@ import type { ChampionPosition } from '../../../shared/models/api/champion/Champ
 import { createEnum } from '../../../shared/utils/createEnum'
 import type { Dict } from '../../../shared/utils/fp'
 
-type WikiaChampionPosition = typeof e.T
+type WikiChampionPosition = typeof e.T
 
 const e = createEnum('Top', 'Jungle', 'Middle', 'Bottom', 'Support')
 
-const position: Dict<WikiaChampionPosition, ChampionPosition> = {
+const position: Dict<WikiChampionPosition, ChampionPosition> = {
   Top: 'top',
   Jungle: 'jun',
   Middle: 'mid',
@@ -14,6 +14,6 @@ const position: Dict<WikiaChampionPosition, ChampionPosition> = {
   Support: 'sup',
 }
 
-const WikiaChampionPosition = { ...e, position }
+const WikiChampionPosition = { ...e, position }
 
-export { WikiaChampionPosition }
+export { WikiChampionPosition }

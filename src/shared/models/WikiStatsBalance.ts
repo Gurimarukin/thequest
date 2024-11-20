@@ -5,11 +5,11 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 
-import { DictUtils } from '../../utils/DictUtils'
-import { List } from '../../utils/fp'
-import { StrictPartial } from '../../utils/ioTsUtils'
+import { DictUtils } from '../utils/DictUtils'
+import { List } from '../utils/fp'
+import { StrictPartial } from '../utils/ioTsUtils'
 
-type WikiaStatsBalance = C.TypeOf<typeof rawCodec>
+type WikiStatsBalance = C.TypeOf<typeof rawCodec>
 
 const properties = {
   dmg_dealt: C.number,
@@ -25,13 +25,13 @@ const properties = {
 
 const rawCodec = StrictPartial.codec(properties)
 
-const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiaStatsBalance> = C.make(
+const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiStatsBalance> = C.make(
   pipe(
     rawCodec,
     D.map(
       flow(
         DictUtils.partial.entries,
-        List.reduce({} as WikiaStatsBalance, (acc, [key, val]) => {
+        List.reduce({} as WikiStatsBalance, (acc, [key, val]) => {
           if (val === undefined) return acc
           if (isModifierStat(key)) {
             if (val === 1) return acc
@@ -46,13 +46,13 @@ const codec: Codec<unknown, C.OutputOf<typeof rawCodec>, WikiaStatsBalance> = C.
   rawCodec,
 )
 
-const Eq: eq.Eq<WikiaStatsBalanceKey> = string.Eq
+const Eq: eq.Eq<WikiStatsBalanceKey> = string.Eq
 
-type WikiaStatsBalanceKey = keyof WikiaStatsBalance
+type WikiStatsBalanceKey = keyof WikiStatsBalance
 
 const keys = DictUtils.keys(properties)
 
-const modifierStats: List<WikiaStatsBalanceKey> = [
+const modifierStats: List<WikiStatsBalanceKey> = [
   'dmg_dealt',
   'dmg_taken',
   'healing',
@@ -63,20 +63,20 @@ const modifierStats: List<WikiaStatsBalanceKey> = [
   'tenacity',
 ]
 
-const percentsStats: List<WikiaStatsBalanceKey> = pipe(
+const percentsStats: List<WikiStatsBalanceKey> = pipe(
   modifierStats,
   List.difference(Eq)(['tenacity']),
 )
 
-const malusStats: List<WikiaStatsBalanceKey> = ['dmg_taken']
+const malusStats: List<WikiStatsBalanceKey> = ['dmg_taken']
 
-const isModifierStat = (stat: WikiaStatsBalanceKey): boolean => List.elem(Eq)(stat, modifierStats)
+const isModifierStat = (stat: WikiStatsBalanceKey): boolean => List.elem(Eq)(stat, modifierStats)
 
-const isPercentsStat = (stat: WikiaStatsBalanceKey): boolean => List.elem(Eq)(stat, percentsStats)
+const isPercentsStat = (stat: WikiStatsBalanceKey): boolean => List.elem(Eq)(stat, percentsStats)
 
-const isMalusStat = (stat: WikiaStatsBalanceKey): boolean => List.elem(Eq)(stat, malusStats)
+const isMalusStat = (stat: WikiStatsBalanceKey): boolean => List.elem(Eq)(stat, malusStats)
 
-const WikiaStatsBalance = {
+const WikiStatsBalance = {
   keys,
   codec,
   isModifierStat,
@@ -85,4 +85,4 @@ const WikiaStatsBalance = {
   Eq,
 }
 
-export { WikiaStatsBalance, WikiaStatsBalanceKey }
+export { WikiStatsBalance, WikiStatsBalanceKey }

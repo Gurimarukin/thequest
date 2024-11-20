@@ -1,7 +1,7 @@
 import type { NonEmptyArray } from '../../../shared/utils/fp'
 
-import type { WikiChampionFaction } from '../wikia/WikiChampionFaction'
 import type { ChampionEnglishName } from './ChampionEnglishName'
+import type { WikiChampionFaction } from './WikiChampionFaction'
 
 export type WikiChallenge = {
   faction: WikiChampionFaction

@@ -10,26 +10,26 @@ import { decodeError, decodeErrorString } from '../../../shared/utils/ioTsUtils'
 import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
-import { RawWikiaChampionsData } from '../../models/wikia/RawWikiaChampionsData'
-import { RawWikiaChampionData, WikiaChampionData } from '../../models/wikia/WikiaChampionData'
+import { RawWikiChampionsData } from '../../models/wiki/RawWikiChampionsData'
+import { RawWikiChampionData, WikiChampionData } from '../../models/wiki/WikiChampionData'
 
 const championDataUrl = `${constants.lolWikiDomain}/en-us/Module:ChampionData/data`
 
 const mwCodeClassName = '.mw-code'
 
-export const getFetchWikiaChampionsData = (
+export const getFetchWikiChampionsData = (
   logger: LoggerType,
   httpClient: HttpClient,
-): Future<List<WikiaChampionData>> =>
+): Future<List<WikiChampionData>> =>
   pipe(
     httpClient.text([championDataUrl, 'get']),
-    Future.chainIOEitherK(wikiaChampionsDataFromHtml(logger)),
+    Future.chainIOEitherK(wikiChampionsDataFromHtml(logger)),
   )
 
 // export for testing purpose
-export const wikiaChampionsDataFromHtml =
+export const wikiChampionsDataFromHtml =
   (logger: LoggerType) =>
-  (html: string): IO<List<WikiaChampionData>> =>
+  (html: string): IO<List<WikiChampionData>> =>
     pipe(
       DomHandler.of()(html),
       Try.chain(domHandler =>
@@ -45,8 +45,8 @@ export const wikiaChampionsDataFromHtml =
       Try.chain(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
       Try.chain(u =>
         pipe(
-          RawWikiaChampionsData.decoder.decode(u),
-          Either.mapLeft(decodeError('RawWikiaChampionsData')(u)),
+          RawWikiChampionsData.decoder.decode(u),
+          Either.mapLeft(decodeError('RawWikiChampionsData')(u)),
         ),
       ),
       Try.map(
@@ -54,12 +54,12 @@ export const wikiaChampionsDataFromHtml =
           DictUtils.entries,
           List.partitionMap(([englishName, rawChampion]) =>
             pipe(
-              RawWikiaChampionData.decoder.decode(rawChampion),
+              RawWikiChampionData.decoder.decode(rawChampion),
               Either.bimap(
-                decodeErrorString(`RawWikiaChampionData (${JSON.stringify(englishName)})`)(
+                decodeErrorString(`RawWikiChampionData (${JSON.stringify(englishName)})`)(
                   rawChampion,
                 ),
-                WikiaChampionData.fromRaw(englishName),
+                WikiChampionData.fromRaw(englishName),
               ),
             ),
           ),

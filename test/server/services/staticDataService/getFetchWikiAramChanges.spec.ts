@@ -6,7 +6,7 @@ import { splitMapArray } from '../../../../src/server/services/staticDataService
 
 import { expectT } from '../../../expectT'
 
-describe('getFetchWikiaAramChanges', () => {
+describe('getFetchWikiAramChanges', () => {
   describe('splitMapArray', () => {
     it('should split map empty array', () => {
       const actual = pipe(

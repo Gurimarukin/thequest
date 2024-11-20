@@ -37,15 +37,15 @@ import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
 import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
 import type { WikiChallenge } from '../../models/wiki/WikiChallenge'
-import { WikiChampionFaction } from '../../models/wikia/WikiChampionFaction'
-import type { WikiaChampionData } from '../../models/wikia/WikiaChampionData'
-import { WikiaChampionPosition } from '../../models/wikia/WikiaChampionPosition'
+import type { WikiChampionData } from '../../models/wiki/WikiChampionData'
+import { WikiChampionFaction } from '../../models/wiki/WikiChampionFaction'
+import { WikiChampionPosition } from '../../models/wiki/WikiChampionPosition'
 import { CacheUtils } from '../../utils/CacheUtils'
 import type { DDragonService } from '../DDragonService'
 import type { MockService } from '../MockService'
 import { getFetchWikiAramChanges } from './getFetchWikiAramChanges'
 import { getFetchWikiChallenges } from './getFetchWikiChallenges'
-import { getFetchWikiaChampionsData } from './getFetchWikiaChampionsData'
+import { getFetchWikiChampionsData } from './getFetchWikiChampionsData'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
@@ -71,33 +71,33 @@ const StaticDataService = (
       version => data => DDragonVersion.Eq.equals(data.value.version, version),
     )
 
-  const fetchWikiaChampionsData: Future<List<WikiaChampionData>> = pipe(
-    fetchCachedStoredAt([''], () => () => getFetchWikiaChampionsData(logger, httpClient))('')(),
+  const fetchWikiChampionsData: Future<List<WikiChampionData>> = pipe(
+    fetchCachedStoredAt([''], () => () => getFetchWikiChampionsData(logger, httpClient))('')(),
     Future.orElse(e =>
       pipe(
-        logger.warn('fetchWikiaChampionsData error:', e),
+        logger.warn('fetchWikiChampionsData error:', e),
         Future.fromIO,
-        Future.map(() => List.empty<WikiaChampionData>()),
+        Future.map(() => List.empty<WikiChampionData>()),
       ),
     ),
   )
 
-  const fetchWikiaChallenges: Future<List<WikiChallenge>> = pipe(
+  const fetchWikiChallenges: Future<List<WikiChallenge>> = pipe(
     getFetchWikiChallenges(httpClient),
     Future.orElse(e =>
       pipe(
-        logger.warn('fetchWikiaChallenges error:', e),
+        logger.warn('fetchWikiChallenges error:', e),
         Future.fromIO,
         Future.map(() => List.empty<WikiChallenge>()),
       ),
     ),
   )
 
-  const fetchWikiaAramChanges: Future<WikiAramChanges> = pipe(
+  const fetchWikiAramChanges: Future<WikiAramChanges> = pipe(
     getFetchWikiAramChanges(httpClient),
     Future.orElse(e =>
       pipe(
-        logger.warn('fetchWikiaAramChanges error:', e),
+        logger.warn('fetchWikiAramChanges error:', e),
         Future.fromIO,
         Future.map((): WikiAramChanges => new Map()),
       ),
@@ -105,9 +105,9 @@ const StaticDataService = (
   )
 
   return {
-    wikiaChampions: pipe(
-      config.mock ? mockService.wikia.champions : futureMaybe.none,
-      futureMaybe.getOrElse(() => fetchWikiaChampionsData),
+    wikiChampions: pipe(
+      config.mock ? mockService.wiki.champions : futureMaybe.none,
+      futureMaybe.getOrElse(() => fetchWikiChampionsData),
     ),
 
     getLatest: (lang: Lang): Future<StaticData> =>
@@ -181,12 +181,12 @@ const StaticDataService = (
     return ddragonChampions =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
-          wikiaChampions: fetchWikiaChampionsData,
-          challenges: fetchWikiaChallenges,
-          aramChanges: fetchWikiaAramChanges,
+          wikiChampions: fetchWikiChampionsData,
+          challenges: fetchWikiChallenges,
+          aramChanges: fetchWikiAramChanges,
         }),
-        Future.map(({ wikiaChampions, challenges, aramChanges }) =>
-          enrichChampions(ddragonChampions, wikiaChampions, challenges, aramChanges),
+        Future.map(({ wikiChampions, challenges, aramChanges }) =>
+          enrichChampions(ddragonChampions, wikiChampions, challenges, aramChanges),
         ),
         Future.chainFirstIOEitherK(
           flow(
@@ -230,12 +230,12 @@ export { StaticDataService }
 
 const enrichChampions = (
   ddragonChampions: List<DDragonChampion>,
-  wikiaChampions: List<WikiaChampionData>,
+  wikiChampions: List<WikiChampionData>,
   challenges: List<WikiChallenge>,
   aramChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
-  const wikiaChampionByKey = pipe(
-    wikiaChampions,
+  const wikiChampionByKey = pipe(
+    wikiChampions,
     ListUtils.findFirstBy(ChampionKey.Eq)(c => c.id),
   )
 
@@ -245,47 +245,47 @@ const enrichChampions = (
     ddragonChampions,
     List.map(ddragonChampion =>
       pipe(
-        wikiaChampionByKey(ddragonChampion.key),
-        ValidatedNea.fromOption(() => 'wikiaChampion not found'),
-        Either.bindTo('wikiaChampion'),
-        Either.bind('positions', ({ wikiaChampion }) =>
+        wikiChampionByKey(ddragonChampion.key),
+        ValidatedNea.fromOption(() => 'wikiChampion not found'),
+        Either.bindTo('wikiChampion'),
+        Either.bind('positions', ({ wikiChampion }) =>
           pipe(
-            wikiaChampion.external_positions,
+            wikiChampion.external_positions,
             ValidatedNea.fromOption(() => 'empty positons'),
           ),
         ),
         Either.bimap(
           messages =>
             ChampionError.of(
-              'Wikia champion',
+              'Wiki champion',
               `${ddragonChampion.id} (${ddragonChampion.key})`,
               messages,
               Maybe.some(ddragonChampion),
             ),
-          ({ wikiaChampion, positions }) => {
+          ({ wikiChampion, positions }) => {
             const data: StaticDataChampion = {
               id: ddragonChampion.id,
               key: ddragonChampion.key,
               name: ddragonChampion.name,
               positions: pipe(
                 positions,
-                NonEmptyArray.map(p => WikiaChampionPosition.position[p]),
+                NonEmptyArray.map(p => WikiChampionPosition.position[p]),
               ),
               factions: pipe(
                 challenges,
                 List.filterMap(challenge =>
-                  List.elem(ChampionEnglishName.Eq)(wikiaChampion.englishName, challenge.champions)
+                  List.elem(ChampionEnglishName.Eq)(wikiChampion.englishName, challenge.champions)
                     ? Maybe.some(WikiChampionFaction.faction[challenge.faction])
                     : Maybe.none,
                 ),
               ),
               aram: {
-                stats: wikiaChampion.stats.aram,
+                stats: wikiChampion.stats.aram,
                 spells: Maybe.none,
               },
             }
 
-            return Tuple.of(wikiaChampion.englishName, data)
+            return Tuple.of(wikiChampion.englishName, data)
           },
         ),
       ),
@@ -309,7 +309,7 @@ const enrichChampions = (
                 List.append(
                   Either.left(
                     ChampionError.of(
-                      'Wikia spells',
+                      'Wiki spells',
                       ChampionEnglishName.unwrap(englishName),
                       ['not found'],
                       Maybe.none,

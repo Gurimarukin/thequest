@@ -20,7 +20,7 @@ const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
       <li key={name} className="contents">
         <div className="flex items-center gap-2 pr-2">
           <span>{icon}</span>
-          <span className="grow">{t.common.labels.wikiaStatsBalance[name]}</span>
+          <span className="grow">{t.common.labels.wikiStatsBalance[name]}</span>
         </div>
         {renderStatValue_(value)}
         <span />
@@ -30,10 +30,10 @@ const AramStatsFull: React.FC<AramStatsProps> = getAramStats(
   (t, spell) => html => (
     <li key={spell} className="col-span-3 flex flex-col gap-1 last:mb-1">
       <div className="flex items-center gap-1">
-        <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wikia" />
+        <span dangerouslySetInnerHTML={{ __html: html.spell }} className="wiki" />
         <span>{t.aram.spell(spell)}</span>
       </div>
-      <span dangerouslySetInnerHTML={{ __html: html.description }} className="wikia" />
+      <span dangerouslySetInnerHTML={{ __html: html.description }} className="wiki" />
     </li>
   ),
   Infinity,
