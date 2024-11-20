@@ -3,15 +3,15 @@ import { pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 
+import { WikiStatsBalance } from '../../../shared/models/WikiStatsBalance'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
-import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { StrictStruct } from '../../../shared/utils/ioTsUtils'
 
 import { ChampionEnglishName } from './ChampionEnglishName'
-import { WikiaChampionPosition } from './WikiaChampionPosition'
+import { WikiChampionPosition } from './WikiChampionPosition'
 
-type RawWikiaChampionData = D.TypeOf<typeof rawDecoder>
+type RawWikiChampionData = D.TypeOf<typeof rawDecoder>
 
 // const Resource = createEnum(
 //   'Blood Well',
@@ -51,12 +51,12 @@ type RawWikiaChampionData = D.TypeOf<typeof rawDecoder>
 //   'Warden',
 // )
 
-const positionsDecoder: Decoder<unknown, Maybe<NonEmptyArray<WikiaChampionPosition>>> = D.union(
+const positionsDecoder: Decoder<unknown, Maybe<NonEmptyArray<WikiChampionPosition>>> = D.union(
   pipe(
     StrictStruct.decoder({}),
     D.map(() => Maybe.none),
   ),
-  pipe(NonEmptyArray.decoder(WikiaChampionPosition.decoder), D.map(Maybe.some)),
+  pipe(NonEmptyArray.decoder(WikiChampionPosition.decoder), D.map(Maybe.some)),
 )
 
 // const altTypeDecoder: Decoder<unknown, Maybe<ChampionType>> = D.union(
@@ -68,7 +68,7 @@ const positionsDecoder: Decoder<unknown, Maybe<NonEmptyArray<WikiaChampionPositi
 // )
 
 const maybeBalanceDecoder = pipe(
-  Maybe.decoder(WikiaStatsBalance.codec),
+  Maybe.decoder(WikiStatsBalance.codec),
   D.map(Maybe.filter(predicate.not(Dict.isEmpty))),
 )
 
@@ -150,24 +150,24 @@ const rawProperties = {
 
 const rawDecoder = D.struct(rawProperties)
 
-const RawWikiaChampionData = { decoder: rawDecoder }
+const RawWikiChampionData = { decoder: rawDecoder }
 
-type WikiaChampionData = RawWikiaChampionData & {
+type WikiChampionData = RawWikiChampionData & {
   englishName: ChampionEnglishName
 }
 
 const fromRaw =
   (englishName: string) =>
-  (champion: RawWikiaChampionData): WikiaChampionData => ({
+  (champion: RawWikiChampionData): WikiChampionData => ({
     ...champion,
     englishName: ChampionEnglishName(englishName),
   })
 
-const decoder: Decoder<unknown, WikiaChampionData> = pipe(
+const decoder: Decoder<unknown, WikiChampionData> = pipe(
   D.struct(rawProperties),
   D.intersect(D.struct({ englishName: ChampionEnglishName.codec })),
 )
 
-const WikiaChampionData = { fromRaw, decoder }
+const WikiChampionData = { fromRaw, decoder }
 
-export { RawWikiaChampionData, WikiaChampionData }
+export { RawWikiChampionData, WikiChampionData }

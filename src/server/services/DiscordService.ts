@@ -24,7 +24,7 @@ function DiscordService(config: DiscordClientConfig, httpClient: HttpClient) {
       token: {
         post: {
           authorizationCode: (code: OAuth2Code): Future<OAuth2AccessTokenResult> =>
-            httpClient.http(
+            httpClient.json(
               [`${api}/oauth2/token`, 'post'],
               {
                 form: OAuth2AuthorizationCodePayload.encoder.encode({
@@ -39,7 +39,7 @@ function DiscordService(config: DiscordClientConfig, httpClient: HttpClient) {
             ),
 
           refreshToken: (refreshToken: RefreshToken): Future<OAuth2AccessTokenResult> =>
-            httpClient.http(
+            httpClient.json(
               [`${api}/oauth2/token`, 'post'],
               {
                 form: OAuth2RefreshTokenPayload.encoder.encode({
@@ -57,7 +57,7 @@ function DiscordService(config: DiscordClientConfig, httpClient: HttpClient) {
     users: {
       me: {
         get: (token: AccessToken): Future<DiscordUser> =>
-          httpClient.http(
+          httpClient.json(
             [`${api}/users/@me`, 'get'],
             { headers: { authorization: authorizationHeader(token) } },
             [DiscordUser.decoder, 'DiscordUser'],
@@ -65,7 +65,7 @@ function DiscordService(config: DiscordClientConfig, httpClient: HttpClient) {
 
         connections: {
           get: (token: AccessToken): Future<List<DiscordConnection>> =>
-            httpClient.http(
+            httpClient.json(
               [`${api}/users/@me/connections`, 'get'],
               { headers: { authorization: authorizationHeader(token) } },
               [List.decoder(DiscordConnection.decoder), 'List<DiscordConnection>'],
@@ -76,7 +76,7 @@ function DiscordService(config: DiscordClientConfig, httpClient: HttpClient) {
     v10: {
       guilds: (guildId: string) => ({
         members: {
-          get: httpClient.http(
+          get: httpClient.json(
             [`${api}/v10/guilds/${guildId}/members`, 'get'],
             {
               searchParams: { limit: 1000 },

@@ -3,7 +3,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import { Table } from 'lua-in-js'
 
-type RawWikiaChampionsData = D.TypeOf<typeof decoder>
+type RawWikiChampionsData = D.TypeOf<typeof decoder>
 
 const tableDecoder: Decoder<unknown, unknown[] | Record<string, unknown>> = pipe(
   D.id<unknown>(),
@@ -13,6 +13,6 @@ const tableDecoder: Decoder<unknown, unknown[] | Record<string, unknown>> = pipe
 
 const decoder = pipe(tableDecoder, D.compose(D.UnknownRecord))
 
-const RawWikiaChampionsData = { decoder }
+const RawWikiChampionsData = { decoder }
 
-export { RawWikiaChampionsData }
+export { RawWikiChampionsData }

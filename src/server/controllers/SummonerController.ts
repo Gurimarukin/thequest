@@ -52,8 +52,8 @@ import type { RiotAccount } from '../models/riot/RiotAccount'
 import type { Summoner, SummonerWithRiotId } from '../models/summoner/Summoner'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
-import type { WikiaChampionData } from '../models/wikia/WikiaChampionData'
-import { WikiaChampionPosition } from '../models/wikia/WikiaChampionPosition'
+import type { WikiChampionData } from '../models/wiki/WikiChampionData'
+import { WikiChampionPosition } from '../models/wiki/WikiChampionPosition'
 import type { ActiveGameService } from '../services/ActiveGameService'
 import type { ChallengesService } from '../services/ChallengesService'
 import type { LeagueEntryService } from '../services/LeagueEntryService'
@@ -303,7 +303,7 @@ const SummonerController = (
   ): Future<ActiveGameView> {
     return pipe(
       apply.sequenceS(Future.ApplyPar)({
-        champions: staticDataService.wikiaChampions,
+        champions: staticDataService.wikiChampions,
         participants: pipe(
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
@@ -539,7 +539,7 @@ export const shouldNotifyChampionLeveledUp =
  * Try to sort participants by positions
  */
 const sortParticipants =
-  (champions: List<WikiaChampionData>) =>
+  (champions: List<WikiChampionData>) =>
   (mapId: MapId) =>
   (
     participants: NonEmptyArray<ActiveGameParticipantView>,
@@ -549,11 +549,11 @@ const sortParticipants =
     return sortTeamParticipants(champions)(participants)
   }
 
-type ParticipantWithChampion = Tuple<ActiveGameParticipantView, WikiaChampionData>
+type ParticipantWithChampion = Tuple<ActiveGameParticipantView, WikiChampionData>
 type Positions = PartialDict<ChampionPosition, ActiveGameParticipantView>
 
 const sortTeamParticipants =
-  (champions: List<WikiaChampionData>) =>
+  (champions: List<WikiChampionData>) =>
   (
     participants: NonEmptyArray<ActiveGameParticipantView>,
   ): NonEmptyArray<ActiveGameParticipantView> => {
@@ -562,7 +562,7 @@ const sortTeamParticipants =
       ListUtils.findFirstBy(ChampionKey.Eq)(c => c.id),
     )
 
-    // we won't be able to do much without associated wikia positions
+    // we won't be able to do much without associated wiki positions
     const { left: championNotFound, right: championFound } = pipe(
       participants,
       List.partitionMap(p =>
@@ -603,7 +603,7 @@ const sortTeamParticipants =
                 c.external_positions,
                 Maybe.exists(
                   List.some(p =>
-                    ChampionPosition.Eq.equals(WikiaChampionPosition.position[p], position),
+                    ChampionPosition.Eq.equals(WikiChampionPosition.position[p], position),
                   ),
                 ),
               ),

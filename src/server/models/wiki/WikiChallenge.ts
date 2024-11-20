@@ -1,10 +1,10 @@
 import type { NonEmptyArray } from '../../../shared/utils/fp'
 
 import type { ChampionEnglishName } from './ChampionEnglishName'
-import type { WikiaChampionFaction } from './WikiaChampionFaction'
+import type { WikiChampionFaction } from './WikiChampionFaction'
 
-export type WikiaChallenge = {
-  position: WikiaChampionFaction
+export type WikiChallenge = {
+  faction: WikiChampionFaction
   title: string
   champions: NonEmptyArray<ChampionEnglishName>
 }

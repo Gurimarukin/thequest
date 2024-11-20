@@ -14,7 +14,7 @@ import type { MyFile } from '../models/FileOrDir'
 import { Dir } from '../models/FileOrDir'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { RiotCurrentLolGameInfo } from '../models/riot/currentGame/RiotCurrentLolGameInfo'
-import { WikiaChampionData } from '../models/wikia/WikiaChampionData'
+import { WikiChampionData } from '../models/wiki/WikiChampionData'
 import { FsUtils } from '../utils/FsUtils'
 import { unknownToError } from '../utils/unknownToError'
 
@@ -25,8 +25,8 @@ const mock = {
   activeGames: {
     bySummoner: pipe(mockDir, Dir.joinDir('activeGames', 'bySummoner')),
   },
-  wikia: {
-    champions: pipe(mockDir, Dir.joinFile('wikia', 'champions.json')),
+  wiki: {
+    champions: pipe(mockDir, Dir.joinFile('wiki', 'champions.json')),
   },
 }
 
@@ -50,10 +50,10 @@ const MockService = (Logger: LoggerGetter) => {
     'RiotCurrentGameInfo',
   ])((puuid: Puuid) => pipe(mock.activeGames.bySummoner, Dir.joinFile(`${puuid}.json`)))
 
-  const wikiaChampions = maybeFile<List<WikiaChampionData>>([
-    List.decoder(WikiaChampionData.decoder),
-    'List<WikiaChampionData>',
-  ])(() => mock.wikia.champions)()
+  const wikiChampions = maybeFile<List<WikiChampionData>>([
+    List.decoder(WikiChampionData.decoder),
+    'List<WikiChampionData>',
+  ])(() => mock.wiki.champions)()
 
   return {
     staticData,
@@ -61,8 +61,8 @@ const MockService = (Logger: LoggerGetter) => {
     activeGames: {
       bySummoner: activeGamesBySummoner,
     },
-    wikia: {
-      champions: wikiaChampions,
+    wiki: {
+      champions: wikiChampions,
     },
   }
 

@@ -4,7 +4,7 @@ import type { PartialDict } from '../../../shared/utils/fp'
 
 import type { ChampionEnglishName } from './ChampionEnglishName'
 
-export type WikiaAramChanges = ReadonlyMap<
+export type WikiAramChanges = ReadonlyMap<
   ChampionEnglishName,
   PartialDict<SpellName, ChampionSpellHtml>
 >

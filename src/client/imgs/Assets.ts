@@ -1,6 +1,6 @@
+import type { WikiStatsBalanceKey } from '../../shared/models/WikiStatsBalance'
 import type { ChampionFaction } from '../../shared/models/api/champion/ChampionFaction'
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
-import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import type { Dict } from '../../shared/utils/fp'
 
 const factions: Dict<ChampionFaction, string> = {
@@ -33,7 +33,7 @@ const masteries: Dict<`${ChampionLevel}`, string> = {
   10: new URL('./masteries/mastery-10.png', import.meta.url).toString(),
 }
 
-const stats: Dict<WikiaStatsBalanceKey, string> = {
+const stats: Dict<WikiStatsBalanceKey, string> = {
   dmg_dealt: new URL('./stats/attack_damage.webp', import.meta.url).toString(),
   dmg_taken: new URL('./stats/armor_penetration.webp', import.meta.url).toString(),
   healing: new URL('./stats/heal_power.webp', import.meta.url).toString(),

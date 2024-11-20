@@ -1,37 +1,37 @@
-.wikia * {
+.wiki * {
   display: inline;
   white-space: normal;
 }
 
-.wikia .border {
+.wiki .border {
   border: none;
 }
 
-.wikia a {
+.wiki a {
   pointer-events: none;
   cursor: default;
 }
 
-.wikia ul {
+.wiki ul {
   display: block;
   list-style-type: disc;
 }
 
-.wikia li {
+.wiki li {
   display: list-item;
 }
 
-.wikia ul {
+.wiki ul {
   padding-left: 0.75rem;
 }
 
-.wikia .inline-image {
+.wiki .inline-image {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   flex-wrap: wrap;
 }
 
-.wikia.compact .inline-image > span:not(.border) {
+.wiki.compact .inline-image > span:not(.border) {
   display: none;
 }

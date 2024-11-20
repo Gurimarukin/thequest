@@ -95,7 +95,7 @@ type RiotApiService = ReturnType<typeof RiotApiService>
 const RiotApiService = (config: Config, httpClient: HttpClient, mockService: MockService) => {
   const lolKey = config.riotApi.key
 
-  const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.http(
+  const leagueoflegendsDDragonApiVersions: Future<NonEmptyArray<DDragonVersion>> = httpClient.json(
     [ddragon('/api/versions.json'), 'get'],
     {},
     [NonEmptyArray.decoder(DDragonVersion.codec), 'NonEmptyArray<DDragonVersion>'],
@@ -110,19 +110,19 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
         cdn: (version: DDragonVersion) => ({
           data: (lang: Lang) => {
-            const champion: Future<DDragonChampions> = httpClient.http(
+            const champion: Future<DDragonChampions> = httpClient.json(
               [ddragonCdn(version, `/data/${lang}/champion.json`), 'get'],
               {},
               [DDragonChampions.decoder, 'DDragonChampions'],
             )
 
-            const summoner: Future<DDragonSummoners> = httpClient.http(
+            const summoner: Future<DDragonSummoners> = httpClient.json(
               [ddragonCdn(version, `/data/${lang}/summoner.json`), 'get'],
               {},
               [DDragonSummoners.decoder, 'DDragonSummoners'],
             )
 
-            const runesReforged: Future<List<DDragonRuneStyle>> = httpClient.http(
+            const runesReforged: Future<List<DDragonRuneStyle>> = httpClient.json(
               [ddragonCdn(version, `/data/${lang}/runesReforged.json`), 'get'],
               {},
               [List.decoder(DDragonRuneStyle.decoder), 'List<DDragonRuneStyle>'],
@@ -141,7 +141,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
             championMasteries: {
               byPuuid: (puuid: Puuid): Future<Maybe<List<RiotChampionMastery>>> =>
                 pipe(
-                  httpClient.http(
+                  httpClient.json(
                     [
                       platformUrl(
                         platform,
@@ -160,7 +160,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
           challengesV1: {
             playerData: (puuid: Puuid): Future<Maybe<RiotChallenges>> =>
               pipe(
-                httpClient.http(
+                httpClient.json(
                   [platformUrl(platform, `/lol/challenges/v1/player-data/${puuid}`), 'get'],
                   { headers: { [xRiotToken]: lolKey } },
                   [RiotChallenges.decoder, 'RiotChallenges'],
@@ -173,7 +173,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
             entries: {
               bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotLeagueEntry>>> =>
                 pipe(
-                  httpClient.http(
+                  httpClient.json(
                     [
                       platformUrl(platform, `/lol/league/v4/entries/by-summoner/${summonerId}`),
                       'get',
@@ -193,7 +193,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                   config.mock ? mockService.activeGames.bySummoner(puuid) : futureMaybe.none,
                   futureMaybe.alt(() =>
                     pipe(
-                      httpClient.http(
+                      httpClient.json(
                         [
                           platformUrl(
                             platform,
@@ -217,7 +217,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
               // eslint-disable-next-line deprecation/deprecation
               byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
                 pipe(
-                  httpClient.http(
+                  httpClient.json(
                     [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
                     { headers: { [xRiotToken]: lolKey } },
                     [RiotSummoner.decoder, 'RiotSummoner'],
@@ -227,7 +227,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
               byPuuid: (puuid: Puuid): Future<Maybe<RiotSummoner>> =>
                 pipe(
-                  httpClient.http(
+                  httpClient.json(
                     [platformUrl(platform, `/lol/summoner/v4/summoners/by-puuid/${puuid}`), 'get'],
                     {
                       headers: { [xRiotToken]: lolKey },
@@ -246,7 +246,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
           matchV5: {
             matches: (platform: Platform, gameId: GameId): Future<Maybe<RiotMatch>> =>
               pipe(
-                httpClient.http(
+                httpClient.json(
                   [
                     regionalUrl(
                       platformRegion[platform],
@@ -268,7 +268,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
                 (gameName: GameName) =>
                 (tagLine: TagLine): Future<Maybe<RiotRiotAccount>> =>
                   pipe(
-                    httpClient.http(
+                    httpClient.json(
                       [
                         regionalUrl(
                           'EUROPE',
@@ -284,7 +284,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
               byPuuid: (puuid: Puuid): Future<Maybe<RiotRiotAccount>> =>
                 pipe(
-                  httpClient.http(
+                  httpClient.json(
                     [regionalUrl('EUROPE', `/riot/account/v1/accounts/by-puuid/${puuid}`), 'get'],
                     { headers: { [xRiotToken]: lolKey } },
                     [RiotRiotAccount.decoder, 'RiotRiotAccount'],
@@ -302,7 +302,7 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
         plugins: {
           rcpBeLolGameData: {
             global: (lang: Lang) => {
-              const perks: Future<List<CDragonRune>> = httpClient.http(
+              const perks: Future<List<CDragonRune>> = httpClient.json(
                 [
                   `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/${lang.toLowerCase()}/v1/perks.json`,
                   'get',

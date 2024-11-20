@@ -23,16 +23,16 @@ type HttpClient = ReturnType<typeof HttpClient>
 const HttpClient = (Logger: LoggerGetter) => {
   const logger = Logger('HttpClient')
 
-  function http<O, B>(
+  function json<O, B>(
     urlWithMethod: Tuple<string, Method>,
     options?: HttpOptions<O, B>,
   ): Future<unknown>
-  function http<A, O, B>(
+  function json<A, O, B>(
     urlWithMethod: Tuple<string, Method>,
     options: HttpOptions<O, B>,
     decoderWithName: Tuple<Decoder<unknown, A>, string>,
   ): Future<A>
-  function http<A, O, B>(
+  function json<A, O, B>(
     urlWithMethod: Tuple<string, Method>,
     options?: HttpOptions<O, B>,
     decoderWithName?: Tuple<Decoder<unknown, A>, string>,
@@ -52,7 +52,7 @@ const HttpClient = (Logger: LoggerGetter) => {
     [url, method]: Tuple<string, Method>,
     options: HttpOptions<O, B> = {},
   ): Future<string> => {
-    const json = ((): O | undefined => {
+    const json_ = ((): O | undefined => {
       if (options.json === undefined) return undefined
       const [encoder, b] = options.json
       return encoder.encode(b)
@@ -63,7 +63,7 @@ const HttpClient = (Logger: LoggerGetter) => {
         got[method](url, {
           ...options,
           method,
-          json: json === undefined ? undefined : (json as Dict<string, unknown>),
+          json: json_ === undefined ? undefined : (json_ as Dict<string, unknown>),
         }),
       ),
       task.chainFirstIOK(
@@ -79,7 +79,7 @@ const HttpClient = (Logger: LoggerGetter) => {
     )
   }
 
-  return { http, text }
+  return { json, text }
 }
 
 export const statusesToOption = (

@@ -2,7 +2,7 @@ import type { ChampionFaction } from '../../../shared/models/api/champion/Champi
 import { createEnum } from '../../../shared/utils/createEnum'
 import type { Dict } from '../../../shared/utils/fp'
 
-type WikiaChampionFaction = typeof e.T
+type WikiChampionFaction = typeof e.T
 
 const e = createEnum(
   'Bandle City',
@@ -20,7 +20,7 @@ const e = createEnum(
   'Zaun',
 )
 
-const faction: Dict<WikiaChampionFaction, ChampionFaction> = {
+const faction: Dict<WikiChampionFaction, ChampionFaction> = {
   'Bandle City': 'bandle',
   Bilgewater: 'bilgewater',
   Demacia: 'demacia',
@@ -36,6 +36,6 @@ const faction: Dict<WikiaChampionFaction, ChampionFaction> = {
   Zaun: 'zaun',
 }
 
-const WikiaChampionFaction = { ...e, faction }
+const WikiChampionFaction = { ...e, faction }
 
-export { WikiaChampionFaction }
+export { WikiChampionFaction }

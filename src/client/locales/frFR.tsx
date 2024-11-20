@@ -1,3 +1,4 @@
+import type { WikiStatsBalanceKey } from '../../shared/models/WikiStatsBalance'
 import type { SpellName } from '../../shared/models/api/SpellName'
 import type {
   ChampionFaction,
@@ -6,7 +7,6 @@ import type {
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import type { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../shared/models/api/league/LeagueTier'
-import type { WikiaStatsBalanceKey } from '../../shared/models/wikia/WikiaStatsBalance'
 import { type Dict } from '../../shared/utils/fp'
 
 import { EmojiUpsideDown } from '../imgs/svgs/emojis'
@@ -89,7 +89,7 @@ const spell: Dict<SpellName, string> = {
   R: 'R',
 }
 
-const wikiaStatsBalance: Dict<WikiaStatsBalanceKey, string> = {
+const wikiStatsBalance: Dict<WikiStatsBalanceKey, string> = {
   dmg_dealt: 'Dégâts infligés',
   dmg_taken: 'Dégâts subis',
   healing: 'Efficacité des soins',
@@ -148,7 +148,7 @@ const frFRTranslation: Translation = {
       },
     },
     spell: s => `(${spell[s]}) :`,
-    statIconAlt: name => `Icône stat ${wikiaStatsBalance[name]}`,
+    statIconAlt: name => `Icône stat ${wikiStatsBalance[name]}`,
   },
   common: {
     challenge: {
@@ -278,7 +278,7 @@ const frFRTranslation: Translation = {
       leagueTier,
       position,
       spell,
-      wikiaStatsBalance,
+      wikiStatsBalance,
     },
     layout: {
       account: 'Compte',

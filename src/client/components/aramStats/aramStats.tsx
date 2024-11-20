@@ -3,10 +3,10 @@ import type { Separated } from 'fp-ts/Separated'
 import { flow, identity, pipe } from 'fp-ts/function'
 import { useMemo } from 'react'
 
+import type { WikiStatsBalanceKey } from '../../../shared/models/WikiStatsBalance'
+import { WikiStatsBalance } from '../../../shared/models/WikiStatsBalance'
 import type { AramData, ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { SpellName } from '../../../shared/models/api/SpellName'
-import type { WikiaStatsBalanceKey } from '../../../shared/models/wikia/WikiaStatsBalance'
-import { WikiaStatsBalance } from '../../../shared/models/wikia/WikiaStatsBalance'
 import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
@@ -35,7 +35,7 @@ export type AramStatsProps = {
 
 type RenderStat = (
   t: Translation,
-  name: WikiaStatsBalanceKey,
+  name: WikiStatsBalanceKey,
   draggable?: boolean,
 ) => (value: number) => React.ReactElement
 type RenderSpell = (
@@ -91,7 +91,7 @@ const getSeparateChildren =
           aram.stats,
           Maybe.chain(stats =>
             pipe(
-              WikiaStatsBalance.keys,
+              WikiStatsBalance.keys,
               List.filterMap(key =>
                 pipe(
                   Dict.lookup(key, stats),
@@ -144,7 +144,7 @@ const getSeparateChildren =
 
 export const renderStatIcon = (
   t: Translation['aram'],
-  name: WikiaStatsBalanceKey,
+  name: WikiStatsBalanceKey,
   draggable?: boolean,
   className?: string,
 ): React.ReactElement => (
@@ -157,13 +157,13 @@ export const renderStatIcon = (
 )
 
 export const renderStatValue = (
-  name: WikiaStatsBalanceKey,
+  name: WikiStatsBalanceKey,
   className?: string,
 ): ((value: number) => React.ReactElement) => {
-  const isMalusStat = WikiaStatsBalance.isMalusStat(name)
-  const maybeUnit = WikiaStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
+  const isMalusStat = WikiStatsBalance.isMalusStat(name)
+  const maybeUnit = WikiStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
   return value => {
-    const n = WikiaStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
+    const n = WikiStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
     return (
       <span
         className={cx(
