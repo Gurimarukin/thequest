@@ -1,5 +1,7 @@
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
+import * as D from 'io-ts/Decoder'
+import * as E from 'io-ts/Encoder'
 
 import type { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
@@ -35,7 +37,7 @@ const participantCodec = C.struct({
   baronKills: C.number,
   bountyLevel: C.number,
   champExperience: C.number,
-  challenges: Maybe.codec(C.record(C.number)),
+  challenges: Maybe.codec(C.record(C.make(D.id<unknown>(), E.id<unknown>()))),
   champLevel: C.number,
   /**
    * Prior to patch 11.4, on Feb 18th, 2021, this field returned invalid championIds.

@@ -46,7 +46,7 @@ const rawDecoder_ = D.struct({
   baronKills: D.number,
   bountyLevel: D.number,
   champExperience: D.number,
-  challenges: Maybe.decoder(D.record(D.number)),
+  challenges: Maybe.decoder(D.record(D.id<unknown>())),
   champLevel: D.number,
   /**
    * Prior to patch 11.4, on Feb 18th, 2021, this field returned invalid championIds.
