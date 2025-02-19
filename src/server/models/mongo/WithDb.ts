@@ -71,7 +71,7 @@ function load(config: DbConfig, logger: LoggerType, retryDelay: MsDuration): Fut
 
   return pipe(
     futureClient,
-    Future.map(client => of(client, config.dbName)),
+    Future.map(client_ => of(client_, config.dbName)),
   )
 }
 

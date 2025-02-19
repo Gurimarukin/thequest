@@ -52,6 +52,8 @@ export const CroppedChampionSquare: <A extends HTMLTag = 'div'>(
 type HTMLTag = keyof React.ReactHTML
 
 type ExtractElement<A extends HTMLTag> =
+  // TODO
+  // eslint-disable-next-line deprecation/deprecation
   React.ReactHTML[A] extends React.DetailedHTMLFactory<React.HTMLAttributes<unknown>, infer E>
     ? E
     : never
