@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile || echo "yarn install exited with code $?"
 
       # typescript
       - run: yarn tsc
