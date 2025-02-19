@@ -36,7 +36,7 @@
     "lint": "eslint --cache --max-warnings 0 src test",
     "lintFix": "yarn lint --fix",
     "test": "jest",
-    "testUnit": "yarn test --testPathPattern=.*\\.spec\\.ts",
+    "testUnit": "yarn test --testPathPattern=\".*\\.spec\\.ts\"",
     "testCoverage": "yarn test --ci --coverage",
     "dc": "depcruise src test",
     "dcGraph": "depcruise -v -T dot src -x '(node_modules|fs|util|fp\\.ts)' | dot -T svg | depcruise-wrap-stream-in-html > dependencygraph.html"
