@@ -95,8 +95,8 @@ const wikiStatsBalance: Dict<WikiStatsBalanceKey, string> = {
   healing: 'SUAVEMENTE',
   shielding: 'SHIELDO',
   ability_haste: 'RAPIDO SPELLO',
-  energy_regen: 'RECUPARATION ENERGIA',
-  attack_speed: 'RAPIDO DATTAQO',
+  energyregen_mod: 'RECUPARATION ENERGIA',
+  total_as: 'RAPIDO DATTAQO',
   movement_speed: 'RAPIDO DE VELOCIDAD',
   tenacity: 'TENACITO',
 }

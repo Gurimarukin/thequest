@@ -17,8 +17,8 @@ const properties = {
   healing: C.number,
   shielding: C.number,
   ability_haste: C.number, // 20, -10
-  energy_regen: C.number,
-  attack_speed: C.number,
+  energyregen_mod: C.number,
+  total_as: C.number,
   movement_speed: C.number,
   tenacity: C.number,
 }
@@ -57,8 +57,8 @@ const modifierStats: List<WikiStatsBalanceKey> = [
   'dmg_taken',
   'healing',
   'shielding',
-  'energy_regen',
-  'attack_speed',
+  'energyregen_mod',
+  'total_as',
   'movement_speed',
   'tenacity',
 ]

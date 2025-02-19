@@ -95,8 +95,8 @@ const wikiStatsBalance: Dict<WikiStatsBalanceKey, string> = {
   healing: 'Healing',
   shielding: 'Shielding',
   ability_haste: 'Ability haste',
-  energy_regen: 'Energy regeneration',
-  attack_speed: 'Attack speed',
+  energyregen_mod: 'Energy regeneration',
+  total_as: 'Attack speed',
   movement_speed: 'Movement speed',
   tenacity: 'Tenacity',
 }

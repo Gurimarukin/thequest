@@ -33,14 +33,15 @@ const masteries: Dict<`${ChampionLevel}`, string> = {
   10: new URL('./masteries/mastery-10.png', import.meta.url).toString(),
 }
 
+// https://wiki.leagueoflegends.com/en-us/Category:Champion_stat_assets
 const stats: Dict<WikiStatsBalanceKey, string> = {
-  dmg_dealt: new URL('./stats/attack_damage.webp', import.meta.url).toString(),
+  dmg_dealt: new URL('./stats/damage_amp.png', import.meta.url).toString(),
   dmg_taken: new URL('./stats/armor_penetration.webp', import.meta.url).toString(),
   healing: new URL('./stats/heal_power.webp', import.meta.url).toString(),
   shielding: new URL('./stats/shield_power.webp', import.meta.url).toString(),
   ability_haste: new URL('./stats/ability_haste.webp', import.meta.url).toString(),
-  energy_regen: new URL('./stats/energy_regen.webp', import.meta.url).toString(),
-  attack_speed: new URL('./stats/attack_speed.webp', import.meta.url).toString(),
+  energyregen_mod: new URL('./stats/energy_regen.webp', import.meta.url).toString(),
+  total_as: new URL('./stats/attack_speed.webp', import.meta.url).toString(),
   movement_speed: new URL('./stats/movement_speed.webp', import.meta.url).toString(),
   tenacity: new URL('./stats/tenacity.webp', import.meta.url).toString(),
 }
