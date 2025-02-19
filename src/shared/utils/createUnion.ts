@@ -3,7 +3,6 @@
                   @typescript-eslint/strict-boolean-expressions,
                   functional/immutable-data,
                   functional/no-expression-statements */
-
 /**
  * copypasta from: https://github.com/AlexGalays/spacelift/blob/be302c4807b23114de27dda6a90b315c3af56631/src/union.ts
  */
