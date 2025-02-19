@@ -237,14 +237,21 @@ const strictStructDecoder = <A>(properties: { [K in keyof A]: Decoder<unknown, A
         D.fromStruct(properties),
         D.parse(res => {
           const diff = pipe(DictUtils.keys(pjo), List.difference(string.Eq)(DictUtils.keys(res)))
-          return List.isNonEmpty(diff)
-            ? D.failure(pjo, pipe(diff, List.mkString('KeysNotParsed: ', ', ', '')))
-            : D.success(res)
+
+          if (List.isNonEmpty(diff)) {
+            return D.failure(pjo, notParsed('StrictStruct', diff))
+          }
+
+          return D.success(res)
         }),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ).decode(pjo as any),
     ),
   )
+
+function notParsed(name: string, diff: NonEmptyArray<string>): string {
+  return pipe(diff, List.map(JSON.stringify), List.mkString(`${name}<{ notParsed: `, ' | ', ' }>'))
+}
 
 export const StrictStruct = { decoder: strictStructDecoder }
 
@@ -263,9 +270,12 @@ const strictPartialDecoder = <A>(properties: { [K in keyof A]: Decoder<unknown, 
         D.fromPartial(properties),
         D.parse(res => {
           const diff = pipe(DictUtils.keys(pjo), List.difference(string.Eq)(DictUtils.keys(res)))
-          return List.isNonEmpty(diff)
-            ? D.failure(pjo, pipe(diff, List.mkString('KeysNotParsed: ', ', ', '')))
-            : D.success(res)
+
+          if (List.isNonEmpty(diff)) {
+            return D.failure(pjo, notParsed('StrictPartial', diff))
+          }
+
+          return D.success(res)
         }),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ).decode(pjo as any),
