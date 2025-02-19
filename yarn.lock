@@ -7771,22 +7771,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lua-in-js@npm:2.2.5":
-  version: 2.2.5
-  resolution: "lua-in-js@npm:2.2.5"
+"lua-in-js@npm:2.2.0":
+  version: 2.2.0
+  resolution: "lua-in-js@npm:2.2.0"
   dependencies:
-    luaparse: "npm:^0.3.1"
-    printj: "npm:^1.3.1"
-  checksum: 10c0/21145761644718abaa2228597291b27dec436cf769e4d1b7555e8319c855818731d9552b0932c07b78871c8839af59ee7179a9394cfa4df85ee16971bf87deda
+    luaparse: "npm:^0.2.1"
+    printj: "npm:^1.2.2"
+  checksum: 10c0/956436470df62a59b64df847ae1daaebac677bcc2f27f725ef666708ee6673ee8fb9aa37c898560467bdec617176f4445ff2c08ebb172a03a4e05ef920e716d8
   languageName: node
   linkType: hard
 
-"luaparse@npm:^0.3.1":
-  version: 0.3.1
-  resolution: "luaparse@npm:0.3.1"
+"luaparse@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "luaparse@npm:0.2.1"
   bin:
-    luaparse: bin/luaparse
-  checksum: 10c0/c96c6152c7b5d73c98d4f51e28d700697a865edd8f5c28b16f0c4c34b91f7d0493212f181394384c02291300d453bc0d3ddc2cc52abc73c3be213520bec84c53
+    luaparse: ./bin/luaparse
+  checksum: 10c0/847a6bde8c4555bb8f5572a45f23dc8830c62f7f4ec1d0032ac572c86c62d9380d4bdef5567edae932e9804c38134e90b0a552acb111a80ab2f67cca3c7f370d
   languageName: node
   linkType: hard
 
@@ -9110,7 +9110,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"printj@npm:^1.3.1":
+"printj@npm:^1.2.2":
   version: 1.3.1
   resolution: "printj@npm:1.3.1"
   bin:
@@ -10612,7 +10612,7 @@ __metadata:
     jsonwebtoken: "npm:9.0.2"
     ky: "npm:0.33.3"
     lodash.debounce: "npm:4.0.8"
-    lua-in-js: "npm:2.2.5"
+    lua-in-js: "npm:2.2.0"
     mongodb: "npm:6.13.0"
     monocle-ts: "npm:2.3.13"
     newtype-ts: "npm:0.3.5"
