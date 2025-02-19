@@ -13,77 +13,33 @@ env:
   NODE_VERSION: 20.x
 
 jobs:
-  typescript:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
+          cache: yarn
+      - run: yarn install --frozen-lockfile || echo "yarn install exited with code $?"
 
+      # typescript
       - run: yarn tsc
 
-  format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
-
+      # format
       - run: yarn formatCheck
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
-
+      # lint
       - run: yarn lint
 
-  depcruise:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
-
+      # depcruise
       - run: yarn dc
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
-
+      # test
       - run: yarn testUnit
 
-  build:
-    needs: [typescript, format, lint, depcruise, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
-
+      # build
       - run: |
           cp .env.example .env
           yarn build

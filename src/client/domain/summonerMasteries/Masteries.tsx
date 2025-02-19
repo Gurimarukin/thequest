@@ -228,7 +228,7 @@ const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
   <div
     className={
       isGlowing
-        ? 'absolute left-[-7px] top-[-7px] grid size-[78px] items-center justify-items-center overflow-hidden rounded-1/2'
+        ? 'absolute left-[-7px] top-[-7px] grid size-[78px] place-items-center overflow-hidden rounded-1/2'
         : 'hidden'
     }
   >

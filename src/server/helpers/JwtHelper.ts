@@ -69,7 +69,7 @@ export { JwtHelper }
 
 const msDurationOptions = <K extends string>(
   obj: Dict<K, MsDuration | undefined>,
-): PartialDict<K, string> =>
+): PartialDict<K, `${number}`> =>
   pipe(
     obj,
     DictUtils.entries,

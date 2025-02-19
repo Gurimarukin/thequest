@@ -178,7 +178,7 @@ const getUrl = <I = StatusOpen>(): MyMiddleware<I, I, string> =>
 const getBodyString = <I = StatusOpen>(): MyMiddleware<I, I, string> =>
   pipe(getBodyChunks<I>(), map(flow(List.map(String), List.mkString(''))))
 
-const getCookies = <I = StatusOpen>(): MyMiddleware<I, I, Dict<string, string>> =>
+const getCookies = <I = StatusOpen>(): MyMiddleware<I, I, Dict<string, string | undefined>> =>
   pipe(
     decodeHeader<I, Maybe<string>>('cookie', [Maybe.decoder(D.string), 'Maybe<string>']),
     ichain(

@@ -29,7 +29,9 @@ const WithAuth = (userService: UserService) => {
         pipe(
           futureMaybe.fromNullable(request.headers.cookie),
           futureMaybe.chainEitherK(cookie => Try.tryCatch(() => parseCookie(cookie))),
-          futureMaybe.chainOptionK(Dict.lookup(constants.accountCookieName)),
+          futureMaybe.chainOptionK(
+            flow(Dict.lookup(constants.accountCookieName), Maybe.chain(Maybe.fromNullable)),
+          ),
           Future.chain(
             Maybe.fold(
               () => Future.successful(Either.left(SimpleHttpResponse.of(Status.Unauthorized, ''))),
@@ -65,7 +67,7 @@ const WithAuth = (userService: UserService) => {
   ): EndedMiddleware {
     return pipe(
       M.getCookies(),
-      M.map(Dict.lookup(constants.accountCookieName)),
+      M.map(flow(Dict.lookup(constants.accountCookieName), Maybe.chain(Maybe.fromNullable))),
       M.ichain(
         Maybe.fold(
           () => f(Maybe.none),

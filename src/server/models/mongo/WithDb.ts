@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/function'
 import type { Db } from 'mongodb'
-import { MongoClient } from 'mongodb'
+import { MongoClient, ServerApiVersion } from 'mongodb'
 import type { Readable } from 'stream'
 
 import type { MsDuration } from '../../../shared/models/MsDuration'
@@ -42,24 +42,36 @@ function of(client: MongoClient, dbName: string) {
 }
 
 function load(config: DbConfig, logger: LoggerType, retryDelay: MsDuration): Future<WithDb> {
+  const client = new MongoClient(`mongodb://${config.host}`, {
+    auth: {
+      username: config.user,
+      password: config.password,
+    },
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  })
+
   const futureClient: Future<MongoClient> = pipe(
-    Future.tryCatch(() =>
-      new MongoClient(`mongodb://${config.user}:${config.password}@${config.host}`).connect(),
-    ),
-    Future.orElse(() =>
-      pipe(
+    Future.tryCatch(() => client.connect()),
+    Future.orElse(e => {
+      console.log('e =', e)
+
+      return pipe(
         logger.info(
           `Mongo client couldn't connect, waiting ${prettyMs(retryDelay)} before next try`,
         ),
         Future.fromIOEither,
         Future.chain(() => pipe(futureClient, Future.delay(retryDelay))),
-      ),
-    ),
+      )
+    }),
   )
 
   return pipe(
     futureClient,
-    Future.map(client => of(client, config.dbName)),
+    Future.map(client_ => of(client_, config.dbName)),
   )
 }
 

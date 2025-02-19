@@ -153,7 +153,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         />
 
         {/* top left */}
-        <div className="flex items-start self-start justify-self-start area-1">
+        <div className="flex items-start place-self-start area-1">
           {/* champion level */}
           <div
             className={cx(
@@ -314,7 +314,7 @@ const Shards: React.FC<ShardsProps> = ({
   const canAddShard = shardsCount < 9
 
   return (
-    <div className="group relative flex h-2.5 flex-row-reverse items-end self-end justify-self-end area-1">
+    <div className="group relative flex h-2.5 flex-row-reverse items-end place-self-end area-1">
       {setShardsCount !== null ? (
         <div
           className={cx(
