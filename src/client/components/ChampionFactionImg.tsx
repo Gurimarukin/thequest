@@ -4,7 +4,7 @@ import { Assets } from '../imgs/Assets'
 import { MaskedImage } from './MaskedImage'
 
 type Props = {
-  faction: ChampionFaction | 'runeterra'
+  faction: ChampionFaction
   /**
    * Should define a fixed width and height
    */
@@ -12,8 +12,5 @@ type Props = {
 }
 
 export const ChampionFactionImg: React.FC<Props> = ({ faction, className }) => (
-  <MaskedImage
-    src={faction === 'runeterra' ? Assets.runeterra : Assets.factions[faction]}
-    className={className}
-  />
+  <MaskedImage src={Assets.factions[faction]} className={className} />
 )
