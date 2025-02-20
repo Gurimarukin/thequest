@@ -6,8 +6,8 @@ import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 
 import type { Method } from '../../shared/models/Method'
-import type { Dict, NonEmptyArray, Tuple } from '../../shared/utils/fp'
-import { Either, Future, IO, List, Maybe, Try } from '../../shared/utils/fp'
+import type { NonEmptyArray } from '../../shared/utils/fp'
+import { Dict, Either, Future, List, Maybe, Try, Tuple } from '../../shared/utils/fp'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
@@ -72,7 +72,9 @@ const HttpClient = (Logger: LoggerGetter) => {
             e => (e instanceof HTTPError ? Maybe.some(e.response.statusCode) : Maybe.none),
             res => Maybe.some(res.statusCode),
           ),
-          Maybe.fold(() => IO.notUsed, flow(formatRequest(method, url), logger.debug)),
+          Maybe.getOrElseW(() => '???' as const),
+          formatRequest(method, url, options.searchParams),
+          logger.debug,
         ),
       ),
       Future.map(res => res.body as string),
@@ -97,6 +99,37 @@ export const statusesToOption = (
 export { HttpClient }
 
 const formatRequest =
-  (method: Method, url: string) =>
-  (statusCode: number): string =>
-    `${method.toUpperCase()} ${url} - ${statusCode}`
+  (method: Method, url: string, searchParams: HttpOptions<unknown, unknown>['searchParams']) =>
+  (statusCode: number | '???'): string => {
+    const search = searchParamsToString(searchParams)
+
+    return `${method.toUpperCase()} ${url}${search !== undefined ? `?${search}` : ''} - ${statusCode}`
+  }
+
+function searchParamsToString(
+  searchParams: HttpOptions<unknown, unknown>['searchParams'],
+): string | undefined {
+  if (searchParams === undefined) {
+    return undefined
+  }
+
+  if (typeof searchParams === 'string') {
+    return searchParams
+  }
+
+  if (isSearchParams(searchParams)) {
+    return searchParams.toString()
+  }
+
+  return new URLSearchParams(
+    pipe(
+      Dict.toReadonlyArray(searchParams),
+      List.map(([key, val]) => Tuple.of(key, `${val}`)),
+      List.asMutable,
+    ),
+  ).toString()
+}
+
+function isSearchParams(a: unknown): a is URLSearchParams {
+  return a instanceof URLSearchParams
+}
