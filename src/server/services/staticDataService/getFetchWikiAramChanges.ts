@@ -31,6 +31,8 @@ import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
 
 const apiPhpUrl = `${constants.lolWikiDomain}/api.php`
 
+const championsSep = '\n\n'
+
 export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiAramChanges> {
   const fetchMapChanges: Future<string> = pipe(
     httpClient.json(
@@ -60,14 +62,34 @@ export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiAram
     fetchMapChanges,
     Future.chainEitherK(parseRawChanges),
     Future.map(flow(groupChangesByChampionsAndSpells, makeTemplate)),
-    Future.chain(fetchParseWikiText),
+    Future.chain(fetchParseWikiTextChunked),
     Future.chainIOEitherK(parseWikiHtml),
   )
 
-  function fetchParseWikiText(text: string): Future<string> {
+  function fetchParseWikiTextChunked(text: string): Future<string> {
+    const champions = text.split(championsSep)
+
+    return pipe(
+      champions,
+      // splitting in half should be enough, increase if needed
+      List.chunksOf(Math.round(champions.length / 2)),
+      Future.traverseArrayWithIndex(fetchParseWikiText),
+      Future.map(List.mkString('\n')),
+    )
+  }
+
+  function fetchParseWikiText(index: number, champions: List<string>): Future<string> {
+    const text = champions.join(championsSep)
+
+    const maxLength = 5484
+
+    if (text.length > maxLength) {
+      return Future.failed(Error(`wikitext length should be less than ${maxLength}`))
+    }
+
     return pipe(
       httpClient.json(
-        [apiPhpUrl, 'get'], // TODO: POST?
+        [apiPhpUrl, 'get'],
         {
           searchParams: {
             action: 'parse',
