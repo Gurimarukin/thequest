@@ -32,7 +32,6 @@ import type { WikiMapChanges } from '../../models/wiki/WikiMapChanges'
 const apiPhpUrl = `${constants.lolWikiDomain}/api.php`
 
 const fetchParseWikiTextMaxLength = 5484
-const championsSep = '\n\n'
 
 /**
  * @param parseWikiTextChunksCount int >= 1, splitting in half should be enough, increase if needed
@@ -71,16 +70,19 @@ export const fetFetchMapChanges =
     return pipe(
       fetchMapChanges,
       Future.chainEitherK(parseRawChanges),
-      Future.map(flow(groupChangesByChampionsAndSpells, makeTemplate)),
+      Future.map(groupChangesByChampionsAndSpells),
       Future.chain(fetchParseWikiTextChunked),
       Future.chainIOEitherK(parseWikiHtml),
     )
 
-    function fetchParseWikiTextChunked(text: string): Future<string> {
-      const champions = text.split(championsSep)
+    function fetchParseWikiTextChunked(
+      grouped: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, string>>,
+    ): Future<string> {
+      const champions = pipe(grouped, readonlyMap.toReadonlyArray(ChampionEnglishName.Ord))
       const chunks = pipe(
         champions,
         List.chunksOf(Math.ceil(champions.length / parseWikiTextChunksCount)),
+        List.map(makeTemplate),
       )
 
       return pipe(
@@ -92,10 +94,8 @@ export const fetFetchMapChanges =
 
     function fetchParseWikiText(
       totalChunks: number,
-    ): (chunkIndex: number, championsChunk: List<string>) => Future<string> {
-      return (chunkIndex, championsChunk) => {
-        const text = championsChunk.join(championsSep)
-
+    ): (chunkIndex: number, championsChunk: string) => Future<string> {
+      return (chunkIndex, text) => {
         if (text.length > fetchParseWikiTextMaxLength) {
           return Future.failed(
             Error(
@@ -171,11 +171,10 @@ function parseRawChanges(
 }
 
 function makeTemplate(
-  grouped: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, string>>,
+  champions: NonEmptyArray<Tuple<ChampionEnglishName, PartialDict<SpellName, string>>>,
 ): string {
   return pipe(
-    grouped,
-    readonlyMap.toReadonlyArray(ChampionEnglishName.Ord),
+    champions,
     List.map(([englishName, spells]) =>
       StringUtils.stripMargins(
         `== ${englishName} ==
