@@ -91,6 +91,7 @@ export type Translation = {
       game: React.ReactNode
       home: React.ReactNode
       aramSpecificBalanceChanges: React.ReactNode
+      urfSpecificBalanceChanges: React.ReactNode
       globetrotterChallenges: React.ReactNode
       login: React.ReactNode
       logout: React.ReactNode
@@ -214,6 +215,7 @@ export type Translation = {
     theQuest: string
     game: string
     aram: string
+    urf: string
     factions: string
     login: string
     register: string

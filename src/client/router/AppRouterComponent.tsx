@@ -7,6 +7,7 @@ import type { Platform, PlatformLower } from '../../shared/models/api/Platform'
 import { RiotId } from '../../shared/models/riot/RiotId'
 import { StringUtils } from '../../shared/utils/StringUtils'
 
+import { Urf } from '../Urf'
 import { LoadingSuspense } from '../components/LoadingSuspense'
 import { Navigate } from '../components/Navigate'
 import { Factions } from '../domain/Factions'
@@ -54,6 +55,7 @@ export const AppRouterComponent: React.FC = getRouterComponent(
       ),
     )
     .alt(appParsers.aram.map(() => e(<Aram />, t => t.aram)))
+    .alt(appParsers.urf.map(() => e(<Urf />, t => t.urf)))
     .alt(appParsers.factions.map(() => e(<Factions />, t => t.factions)))
     .alt(appParsers.login.map(() => e(<Login />, t => t.login)))
     .alt(appParsers.register.map(() => e(<Register />, t => t.register)))

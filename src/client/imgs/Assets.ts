@@ -53,6 +53,7 @@ export const Assets = {
   masteries,
   poro: new URL('./poro.png', import.meta.url).toString(),
   runeterra: new URL('./runeterra.png', import.meta.url).toString(),
+  spatula: new URL('./spatula.png', import.meta.url).toString(),
   stats,
   yuumi: new URL('./yuumi.png', import.meta.url).toString(),
 }
