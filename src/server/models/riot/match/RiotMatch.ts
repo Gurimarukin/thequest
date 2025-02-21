@@ -6,6 +6,7 @@ import type { Except, Merge, OverrideProperties } from 'type-fest'
 import { DayJs } from '../../../../shared/models/DayJs'
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
+import { GameMode } from '../../../../shared/models/api/GameMode'
 import { MapId } from '../../../../shared/models/api/MapId'
 import type { Platform } from '../../../../shared/models/api/Platform'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
@@ -15,7 +16,6 @@ import { List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/util
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
 import type { MatchDb, MatchParticipantDb, MatchTeamDb } from '../../match/MatchDb'
-import { GameMode } from '../GameMode'
 import { GameType } from '../GameType'
 import { RiotMatchParticipant } from './RiotMatchParticipant'
 

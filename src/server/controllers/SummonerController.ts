@@ -399,6 +399,7 @@ const SummonerController = (
         Future.map<ActiveGameView['participants'], ActiveGameView>(participants => ({
           gameStartTime: game.gameStartTime,
           mapId: game.mapId,
+          gameMode: game.gameMode,
           gameQueueConfigId: game.gameQueueConfigId,
           isDraft: game.isDraft,
           bannedChampions: game.bannedChampions,
