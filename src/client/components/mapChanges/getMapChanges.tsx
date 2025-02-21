@@ -24,7 +24,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
-import './aram.css'
+import './mapChanges.css'
 
 const { cleanChampionName } = StringUtils
 
@@ -35,7 +35,7 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
 
 type CategoryOrHidden = ChampionAramCategory | 'hidden'
 
-export const Aram: React.FC = () => {
+export const getMapChanges = (): React.FC => () => {
   const { genericQuery, updateGenericQuery } = useHistory()
   const { t } = useTranslation('common')
   const { champions } = useStaticData()
