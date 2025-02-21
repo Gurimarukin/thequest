@@ -20,6 +20,7 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
+import { OpenInNew } from '../../imgs/svgs/icons'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
@@ -38,7 +39,7 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
 type CategoryOrHidden = MapChangesChampionCategory | 'hidden'
 
 export const getMapChanges =
-  (getData: (c: StaticDataChampion) => MapChangesData): React.FC =>
+  (wikiLink: string, getData: (c: StaticDataChampion) => MapChangesData): React.FC =>
   () => {
     const { genericQuery, updateGenericQuery } = useHistory()
     const { t } = useTranslation('common')
@@ -141,6 +142,19 @@ export const getMapChanges =
           <div className="mt-6 self-center">
             {t.nChampionsFraction(searchCount, champions.length)}
           </div>
+
+          <span className="mt-24 flex items-center gap-2 self-center text-sm">
+            <OpenInNew className="invisible size-3.5" /> {/* for hitbox */}
+            <a
+              href={wikiLink}
+              target="_blank"
+              rel="noreferrer"
+              className="peer border-b border-b-transparent transition-all duration-100 hover:border-b-goldenrod"
+            >
+              {wikiLink}
+            </a>
+            <OpenInNew className="invisible size-3.5 opacity-0 transition-all duration-100 peer-hover:visible peer-hover:opacity-100" />
+          </span>
         </div>
       </MainLayout>
     )

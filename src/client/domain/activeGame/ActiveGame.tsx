@@ -255,6 +255,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
           <a href={poroLink(lang, platform, summoner.riotId)} target="_blank" rel="noreferrer">
             <img src={Assets.poro} alt={t.activeGame.poroIconAlt} className="h-5" />
           </a>
+
           {isPoroOK ? (
             <CheckMarkSharp className="w-3 text-green" />
           ) : (
