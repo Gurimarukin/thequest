@@ -2,6 +2,7 @@ import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
 
 import { GameId } from '../../../shared/models/api/GameId'
+import { GameMode } from '../../../shared/models/api/GameMode'
 import { MapId } from '../../../shared/models/api/MapId'
 import type { BannedChampionOutput } from '../../../shared/models/api/activeGame/BannedChampion'
 import { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
@@ -62,6 +63,7 @@ const participantsProperties: Dict<
 const codec = C.struct({
   gameId: GameId.codec,
   mapId: MapId.codec,
+  gameMode: GameMode.codec,
   gameStartTime: Maybe.codec(DayJsFromDate.codec),
   gameQueueConfigId: GameQueue.codec,
   isDraft: C.boolean,

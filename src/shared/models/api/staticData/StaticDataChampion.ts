@@ -6,7 +6,7 @@ import { lens } from 'monocle-ts'
 
 import { StringUtils } from '../../../utils/StringUtils'
 import { List, Maybe } from '../../../utils/fp'
-import { AramData } from '../AramData'
+import { MapChangesData } from '../MapChangesData'
 import type { ChampionFactionOrNone } from '../champion/ChampionFaction'
 import { ChampionFaction } from '../champion/ChampionFaction'
 import { ChampionId } from '../champion/ChampionId'
@@ -21,7 +21,8 @@ const codec = C.struct({
   name: C.string,
   positions: List.codec(ChampionPosition.codec),
   factions: List.codec(ChampionFaction.codec),
-  aram: AramData.codec,
+  aram: MapChangesData.codec,
+  urf: MapChangesData.codec,
 })
 
 const getFaction: (factions: List<ChampionFaction>) => ChampionFactionOrNone = flow(
@@ -36,6 +37,7 @@ const byName: Ord<StaticDataChampion> = pipe(
 
 const Lens = {
   aramSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('aram'), lens.prop('spells')),
+  urfSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('urf'), lens.prop('spells')),
 }
 
 const StaticDataChampion = { codec, getFaction, Ord: { byName }, Lens }

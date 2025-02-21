@@ -1,4 +1,4 @@
-import { createEnum } from '../../../shared/utils/createEnum'
+import { createEnum } from '../../utils/createEnum'
 
 type GameMode = typeof GameMode.T
 

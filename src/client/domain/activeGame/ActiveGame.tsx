@@ -10,6 +10,7 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
+import type { GameMode } from '../../../shared/models/api/GameMode'
 import type { Lang } from '../../../shared/models/api/Lang'
 import { MapId } from '../../../shared/models/api/MapId'
 import { Platform } from '../../../shared/models/api/Platform'
@@ -190,6 +191,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   game: {
     gameStartTime,
     mapId,
+    gameMode,
     gameQueueConfigId,
     isDraft,
     bannedChampions,
@@ -253,6 +255,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
           <a href={poroLink(lang, platform, summoner.riotId)} target="_blank" rel="noreferrer">
             <img src={Assets.poro} alt={t.activeGame.poroIconAlt} className="h-5" />
           </a>
+
           {isPoroOK ? (
             <CheckMarkSharp className="w-3 text-green" />
           ) : (
@@ -309,7 +312,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                 <Participants
                   platform={platform}
                   summoner={summoner}
-                  mapId={mapId}
+                  gameMode={gameMode}
                   shouldWrap={shouldWrap}
                   teamId={teamId}
                   reverse={reverse}
@@ -342,7 +345,7 @@ const poroLink = (lang: Lang, platform: Platform, { gameName, tagLine }: RiotId)
 type ParticipantsProps = {
   platform: Platform
   summoner: SummonerShort
-  mapId: MapId
+  gameMode: GameMode
   shouldWrap: boolean
   teamId: TeamId
   reverse: boolean
@@ -355,7 +358,7 @@ type ParticipantsProps = {
 const Participants: React.FC<ParticipantsProps> = ({
   platform,
   summoner,
-  mapId,
+  gameMode,
   shouldWrap,
   teamId,
   reverse,
@@ -423,7 +426,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             runeStyleById={runeStyleById}
             runeById={runeById}
             platform={platform}
-            mapId={mapId}
+            gameMode={gameMode}
             participant={participant}
             shouldWrap={shouldWrap}
             highlight={RiotId.Eq.equals(participant.riotId, summoner.riotId)}
@@ -525,6 +528,7 @@ const Timer: React.FC<TimerProps> = ({ startTime }) => {
       <GameInfo ref={timerRef}>
         <span className="font-lib-mono">{prettyMs(gameDuration)}</span>
       </GameInfo>
+
       <Tooltip hoverRef={timerRef}>{t.gameStartedAt(date)}</Tooltip>
     </>
   )

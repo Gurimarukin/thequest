@@ -15,7 +15,7 @@ import type { SummonerLeaguesView } from '../../shared/models/api/summoner/Summo
 import type { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import type { Dict } from '../../shared/utils/fp'
 
-import type { ChampionAramCategory } from './ChampionAramCategory'
+import type { MapChangesChampionCategory } from './MapChangesChampionCategory'
 import type { MasteriesQueryOrder } from './masteriesQuery/MasteriesQueryOrder'
 import type { MasteriesQuerySort } from './masteriesQuery/MasteriesQuerySort'
 import type { MasteriesQueryView } from './masteriesQuery/MasteriesQueryView'
@@ -39,10 +39,10 @@ export type Translation = {
     mainRoles: React.ReactNode
     currentRole: React.ReactNode
   }
-  aram: {
+  mapChanges: {
     category: {
-      label: Dict<ChampionAramCategory, React.ReactNode>
-      description: Dict<ChampionAramCategory, React.ReactNode>
+      label: Dict<MapChangesChampionCategory, React.ReactNode>
+      description: Dict<MapChangesChampionCategory, React.ReactNode>
     }
     spell: (spell: SpellName) => React.ReactNode
     statIconAlt: (name: WikiStatsBalanceKey) => string
@@ -91,6 +91,7 @@ export type Translation = {
       game: React.ReactNode
       home: React.ReactNode
       aramSpecificBalanceChanges: React.ReactNode
+      urfSpecificBalanceChanges: React.ReactNode
       globetrotterChallenges: React.ReactNode
       login: React.ReactNode
       logout: React.ReactNode
@@ -214,6 +215,7 @@ export type Translation = {
     theQuest: string
     game: string
     aram: string
+    urf: string
     factions: string
     login: string
     register: string

@@ -3,8 +3,8 @@ import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
-import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
+import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import type {
   ChampionFaction,
   ChampionFactionOrNone,
@@ -13,7 +13,7 @@ import type { ChampionPosition } from '../../../shared/models/api/champion/Champ
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List, Maybe } from '../../../shared/utils/fp'
 
-import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
+import type { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 
 type EnrichedChampionMastery = ChampionMasteryView & {
   name: string
@@ -22,10 +22,15 @@ type EnrichedChampionMastery = ChampionMasteryView & {
   glow: boolean
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
-  aram: AramData
-  category: ChampionAramCategory
+  aram: MapChanges
+  urf: MapChanges
   faction: ChampionFactionOrNone
   isHidden: boolean
+}
+
+type MapChanges = {
+  category: MapChangesChampionCategory
+  data: MapChangesData
 }
 
 const byLevel: Ord<EnrichedChampionMastery> = pipe(

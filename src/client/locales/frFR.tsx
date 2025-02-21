@@ -126,7 +126,7 @@ const frFRTranslation: Translation = {
     mainRoles: 'Rôles principaux :',
     currentRole: 'Rôle actuel :',
   },
-  aram: {
+  mapChanges: {
     category: {
       label: {
         buffed: 'Champions buffés',
@@ -287,6 +287,7 @@ const frFRTranslation: Translation = {
       game: 'Partie',
       home: 'Accueil',
       aramSpecificBalanceChanges: 'Équilibrages spécifiques ARAM',
+      urfSpecificBalanceChanges: 'Équilibrages spécifiques URF',
       globetrotterChallenges: 'Défis “Globe-trotteur”',
       login: 'Connexion',
       logout: 'Déconnexion',
@@ -380,12 +381,14 @@ const frFRTranslation: Translation = {
         compact: 'Vue compacte',
         factions: 'Vue factions',
         histogram: 'Vue histogramme',
+        urf: 'Vue URF',
       },
       viewShort: {
         aram: 'ARAM',
         compact: 'Compact',
         factions: 'Factions',
         histogram: 'Histogramme',
+        urf: 'URF',
       },
     },
     modal: {
@@ -500,6 +503,7 @@ const frFRTranslation: Translation = {
     theQuest: 'La Quête',
     game: 'partie',
     aram: 'ARAM',
+    urf: 'URF',
     factions: 'Factions',
     login: 'Connexion',
     register: 'Inscription',

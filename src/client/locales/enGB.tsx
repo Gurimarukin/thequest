@@ -126,7 +126,7 @@ const enGBTranslation: Translation = {
     mainRoles: 'Main roles:',
     currentRole: 'Current role:',
   },
-  aram: {
+  mapChanges: {
     category: {
       label: {
         buffed: 'Buffed champions',
@@ -285,6 +285,7 @@ const enGBTranslation: Translation = {
       game: 'Game',
       home: 'Home',
       aramSpecificBalanceChanges: 'ARAM specific balance changes',
+      urfSpecificBalanceChanges: 'URF specific balance changes',
       globetrotterChallenges: '“Globetrotter” challenges ',
       login: 'Login',
       logout: 'Logout',
@@ -378,12 +379,14 @@ const enGBTranslation: Translation = {
         compact: 'Compact view',
         factions: 'Factions view',
         histogram: 'Histogram view',
+        urf: 'URF view',
       },
       viewShort: {
         aram: 'ARAM',
         compact: 'Compact',
         factions: 'Factions',
         histogram: 'Histogram',
+        urf: 'URF',
       },
     },
     modal: {
@@ -490,6 +493,7 @@ const enGBTranslation: Translation = {
     theQuest: 'The Quest',
     game: 'game',
     aram: 'ARAM',
+    urf: 'URF',
     factions: 'Factions',
     login: 'Login',
     register: 'Register',

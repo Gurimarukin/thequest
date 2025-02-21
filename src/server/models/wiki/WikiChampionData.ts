@@ -118,7 +118,7 @@ const rawProperties = {
     aram: maybeBalanceDecoder,
     // nb: maybeBalanceDecoder,
     // ofa: maybeBalanceDecoder,
-    // urf: maybeBalanceDecoder,
+    urf: maybeBalanceDecoder,
     // usb: maybeBalanceDecoder,
     // ar: maybeBalanceDecoder,
   }),

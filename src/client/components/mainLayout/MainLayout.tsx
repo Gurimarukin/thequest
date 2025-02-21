@@ -54,6 +54,15 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               </HighlightLink>
 
               <HighlightLink
+                to={appRoutes.urf({})}
+                parser={appParsers.urf}
+                tooltip={t.layout.urfSpecificBalanceChanges}
+                className="py-2"
+              >
+                <MaskedImage src={Assets.spatula} className="size-5" />
+              </HighlightLink>
+
+              <HighlightLink
                 to={appRoutes.factions({})}
                 parser={appParsers.factions}
                 tooltip={t.layout.globetrotterChallenges}

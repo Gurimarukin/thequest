@@ -38,7 +38,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { useOnSearchSummoner } from '../../hooks/useOnSearchSummoner'
 import { usePrevious } from '../../hooks/usePrevious'
-import { ChampionAramCategory } from '../../models/ChampionAramCategory'
+import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
@@ -270,7 +270,7 @@ const enrichAll = (
 ): EnrichedAll => {
   const enrichedMasteries_ = pipe(
     staticDataChampions,
-    List.map(({ key, name, positions, factions, aram }): EnrichedChampionMastery => {
+    List.map(({ key, name, positions, factions, aram, urf }): EnrichedChampionMastery => {
       const shardsCount = pipe(
         championShards,
         Maybe.map(
@@ -288,7 +288,8 @@ const enrichAll = (
         maybeSearch,
         Maybe.exists(search => cleanChampionName(name).includes(cleanChampionName(search))),
       )
-      const category = ChampionAramCategory.fromAramData(aram)
+      const aramCategory = MapChangesChampionCategory.fromData(aram)
+      const urfCategory = MapChangesChampionCategory.fromData(urf)
       const faction = StaticDataChampion.getFaction(factions)
       const isHidden = false
 
@@ -312,8 +313,14 @@ const enrichAll = (
             glow,
             positions,
             factions,
-            aram,
-            category,
+            aram: {
+              category: aramCategory,
+              data: aram,
+            },
+            urf: {
+              category: urfCategory,
+              data: urf,
+            },
             faction,
             isHidden,
           }),
@@ -325,8 +332,14 @@ const enrichAll = (
             glow,
             positions,
             factions,
-            aram,
-            category,
+            aram: {
+              category: aramCategory,
+              data: aram,
+            },
+            urf: {
+              category: urfCategory,
+              data: urf,
+            },
             faction,
             isHidden,
           }),

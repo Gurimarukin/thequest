@@ -92,8 +92,14 @@ function championMastery(i: number, championLevel: number): EnrichedChampionMast
     glow: false,
     positions: [],
     factions: [],
-    aram: { stats: Maybe.none, spells: Maybe.none },
-    category: 'balanced',
+    aram: {
+      category: 'balanced',
+      data: { stats: Maybe.none, spells: Maybe.none },
+    },
+    urf: {
+      category: 'buffed',
+      data: { stats: Maybe.some({ dmg_dealt: 1.1 }), spells: Maybe.none },
+    },
     faction: 'bandle',
     isHidden: false,
   }

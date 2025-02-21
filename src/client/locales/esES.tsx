@@ -126,7 +126,7 @@ const esESTranslation: Translation = {
     mainRoles: 'ROLO PRIMO:',
     currentRole: 'ROLO IMO:',
   },
-  aram: {
+  mapChanges: {
     category: {
       label: {
         buffed: 'CAMPEONE MAXO',
@@ -287,6 +287,7 @@ const esESTranslation: Translation = {
       game: 'JUEGO',
       home: 'CASA',
       aramSpecificBalanceChanges: 'ÉQUILIBRO ESPECIAL aram',
+      urfSpecificBalanceChanges: 'ÉQUILIBRO ESPECIAL urf',
       globetrotterChallenges: 'QUESTO “GLOBO-TROTORO”',
       login: 'CONNEXION',
       logout: 'SALIR',
@@ -380,12 +381,14 @@ const esESTranslation: Translation = {
         compact: 'COMPACTO',
         factions: 'FACTIONOS',
         histogram: 'HISTOGRAMMO',
+        urf: 'URFO',
       },
       viewShort: {
         aram: 'ARAMO',
         compact: 'COMPACTO',
         factions: 'FACTIONOS',
         histogram: 'HISTOGRAMO',
+        urf: 'URFO',
       },
     },
     modal: {
@@ -500,6 +503,7 @@ const esESTranslation: Translation = {
     theQuest: 'EL QUESTO',
     game: 'PARTIDO',
     aram: 'ARAMO',
+    urf: 'URFO',
     factions: 'FACTIONOS',
     login: 'CONNEXION',
     register: 'INSCRIPTAR',

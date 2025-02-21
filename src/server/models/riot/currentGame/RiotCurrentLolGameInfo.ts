@@ -3,6 +3,7 @@ import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
+import { GameMode } from '../../../../shared/models/api/GameMode'
 import { MapId } from '../../../../shared/models/api/MapId'
 import type { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
@@ -12,7 +13,6 @@ import type { NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
 import { Either, List, Maybe } from '../../../../shared/utils/fp'
 
 import { DayJsFromNumber } from '../../../utils/ioTsUtils'
-import { GameMode } from '../GameMode'
 import { GameType } from '../GameType'
 import { RiotCurrentGameParticipant } from './RiotCurrentGameParticipant'
 

@@ -9,13 +9,14 @@ import { StringUtils } from '../../shared/utils/StringUtils'
 
 import { LoadingSuspense } from '../components/LoadingSuspense'
 import { Navigate } from '../components/Navigate'
+import { Aram } from '../domain/Aram'
 import { Factions } from '../domain/Factions'
 import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { Register } from '../domain/Register'
 import { SummonerByPuuidGame, SummonerByPuuidProfile } from '../domain/SummonerBy'
+import { Urf } from '../domain/Urf'
 import { ActiveGame } from '../domain/activeGame/ActiveGame'
-import { Aram } from '../domain/aram/Aram'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
 import { SummonerMasteries } from '../domain/summonerMasteries/SummonerMasteries'
 import { appMatches, appParsers } from './AppRouter'
@@ -54,6 +55,7 @@ export const AppRouterComponent: React.FC = getRouterComponent(
       ),
     )
     .alt(appParsers.aram.map(() => e(<Aram />, t => t.aram)))
+    .alt(appParsers.urf.map(() => e(<Urf />, t => t.urf)))
     .alt(appParsers.factions.map(() => e(<Factions />, t => t.factions)))
     .alt(appParsers.login.map(() => e(<Login />, t => t.login)))
     .alt(appParsers.register.map(() => e(<Register />, t => t.register)))

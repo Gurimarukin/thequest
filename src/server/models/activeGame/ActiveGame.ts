@@ -1,5 +1,6 @@
 import type { DayJs } from '../../../shared/models/DayJs'
 import type { GameId } from '../../../shared/models/api/GameId'
+import type { GameMode } from '../../../shared/models/api/GameMode'
 import type { MapId } from '../../../shared/models/api/MapId'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { ActiveGameView } from '../../../shared/models/api/activeGame/ActiveGameView'
@@ -14,6 +15,7 @@ type ActiveGame = {
   gameId: GameId
   gameStartTime: Maybe<DayJs>
   mapId: MapId
+  gameMode: GameMode
   gameQueueConfigId: GameQueue
   isDraft: boolean
   bannedChampions: PartialDict<`${TeamId}`, NonEmptyArray<BannedChampion>>

@@ -13,7 +13,7 @@ import {
 } from 'react'
 
 import { Business } from '../../../shared/Business'
-import { MapId } from '../../../shared/models/api/MapId'
+import type { GameMode } from '../../../shared/models/api/GameMode'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
@@ -27,17 +27,17 @@ import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'
 
-import { AramTooltip } from '../../components/AramTooltip'
 import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
+import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { cx } from '../../utils/cx'
-import { ActiveGameAramStats } from './ActiveGameAramStats'
+import { ActiveGameMapChangesStats } from './ActiveGameMapChangesStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
 import { ActiveGameSummoner } from './ActiveGameSummoner'
 import { ActiveGameTag } from './ActiveGameTag'
@@ -73,7 +73,7 @@ type ParticipantProps = {
   runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
   runeById: (id: RuneId) => Maybe<StaticDataRune>
   platform: Platform
-  mapId: MapId
+  gameMode: GameMode
   participant: ActiveGameParticipantView
   shouldWrap: boolean
   highlight: boolean
@@ -93,7 +93,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   runeStyleById,
   runeById,
   platform,
-  mapId,
+  gameMode,
   participant: {
     riotId,
     profileIconId,
@@ -125,14 +125,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
 
   const championRef = useRef<HTMLDivElement>(null)
   const championWinRateRef = useRef<HTMLDivElement>(null)
-  const aramRef = useRef<HTMLDivElement>(null)
+  const mapChangesRef = useRef<HTMLDivElement>(null)
 
   const spell1 = summonerSpellByKey(spell1Id)
   const spell2 = summonerSpellByKey(spell2Id)
 
   const champion = championByKey(championId)
 
-  const isHowlingAbyss = MapId.isHowlingAbyss(mapId)
   const tooltipShouldHide = isDragging
 
   const squareProps = pipe(
@@ -367,16 +366,27 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </Cell>
       {pipe(
         champion,
-        Maybe.filter(() => isHowlingAbyss),
+        Maybe.chain(c => {
+          switch (gameMode) {
+            case 'ARAM':
+              return Maybe.some(c.aram)
+
+            case 'URF':
+              return Maybe.some(c.urf)
+
+            default:
+              return Maybe.none
+          }
+        }),
         Maybe.fold(
           () => null,
-          c => (
+          data => (
             <Cell gridColStart={6} className={cx('flex flex-col justify-center', padding)}>
-              <div ref={aramRef} className="py-1 text-2xs">
-                <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
+              <div ref={mapChangesRef} className="py-1 text-2xs">
+                <ActiveGameMapChangesStats reverse={reverse} data={data} draggable={false} />
               </div>
-              <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
-                <AramTooltip aram={c.aram} />
+              <Tooltip hoverRef={mapChangesRef} shouldHide={tooltipShouldHide}>
+                <MapChangesTooltip data={data} />
               </Tooltip>
             </Cell>
           ),

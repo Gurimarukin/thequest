@@ -2,11 +2,11 @@ import { pipe } from 'fp-ts/function'
 
 import { Either, Maybe } from '../../../../src/shared/utils/fp'
 
-import { splitMapArray } from '../../../../src/server/services/staticDataService/getFetchWikiAramChanges'
+import { splitMapArray } from '../../../../src/server/services/staticDataService/getFetchMapChanges'
 
 import { expectT } from '../../../expectT'
 
-describe('getFetchWikiAramChanges', () => {
+describe('getFetchMapChanges', () => {
   describe('splitMapArray', () => {
     it('should split map empty array', () => {
       const actual = pipe(

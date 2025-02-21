@@ -13,8 +13,8 @@ import { StaticDataChampion } from '../../../shared/models/api/staticData/Static
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
-import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import type { CountWithTotal } from '../../models/CountWithTotal'
+import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import type { Translation } from '../../models/Translation'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
@@ -23,7 +23,7 @@ import { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryVi
 import { ChampionFactionUtils } from '../../utils/ChampionFactionUtils'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
-type CategoryOrHidden = ChampionAramCategory | 'hidden'
+type CategoryOrHidden = MapChangesChampionCategory | 'hidden'
 type FactionOrNoneOrHidden = ChampionFactionOrNone | 'hidden'
 
 export type FilteredAndSortedMasteries = {
@@ -41,6 +41,7 @@ export type FactionsCount = PartialDict<ChampionFactionOrNone, CountWithTotal>
 const hideInsteadOfGlowViews: ReadonlySet<MasteriesQueryView> = new Set<MasteriesQueryView>([
   'histogram',
   'aram',
+  'urf',
   'factions',
 ])
 
@@ -132,23 +133,30 @@ const getSort = (
       return List.sortBy
 
     case 'aram':
-      return sortAram(isHidden)
+      return sortMapChanges(isHidden, c => c.aram.category)
+
+    case 'urf':
+      return sortMapChanges(isHidden, c => c.urf.category)
 
     case 'factions':
       return sortFactions(t, challenges, isHidden)
   }
 }
 
-const sortAram =
-  (isHidden: (c: EnrichedChampionMastery) => boolean) =>
+const sortMapChanges =
+  (
+    isHidden: (c: EnrichedChampionMastery) => boolean,
+    getCategory: (c: EnrichedChampionMastery) => MapChangesChampionCategory,
+  ) =>
   (ords: List<Ord<EnrichedChampionMastery>>) =>
   (as: List<EnrichedChampionMastery>): List<EnrichedChampionMastery> => {
     const grouped = pipe(
       as,
-      List.groupBy((c): CategoryOrHidden => (isHidden(c) ? 'hidden' : c.category)),
+      List.groupBy((c): CategoryOrHidden => (isHidden(c) ? 'hidden' : getCategory(c))),
     )
+
     return pipe(
-      ChampionAramCategory.values,
+      MapChangesChampionCategory.values,
       List.reduce(List.empty<EnrichedChampionMastery>(), (acc, category) =>
         pipe(acc, List.concat(pipe(grouped[category] ?? [], List.sortBy(ords)))),
       ),

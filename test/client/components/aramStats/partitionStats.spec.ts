@@ -2,7 +2,7 @@ import { separated } from 'fp-ts'
 
 import { Either } from '../../../../src/shared/utils/fp'
 
-import { partitionStats } from '../../../../src/client/components/aramStats/partitionStats'
+import { partitionStats } from '../../../../src/client/components/mapChanges/stats/partitionStats'
 
 import { expectT } from '../../../expectT'
 

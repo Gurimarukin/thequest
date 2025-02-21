@@ -67,7 +67,7 @@ export function Select<A extends string>({
       isSearchable={false}
       components={{
         IndicatorSeparator: null,
-        DropdownIndicator: ChevronForwardFilled,
+        DropdownIndicator: ChevronForwardFilled as React.FC<{ className?: string }>,
       }}
       className={className}
       styles={{
