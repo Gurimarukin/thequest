@@ -2,9 +2,9 @@ import { predicate, separated } from 'fp-ts'
 import type { Separated } from 'fp-ts/Separated'
 import { identity, pipe } from 'fp-ts/function'
 
-import { Either, List, NonEmptyArray } from '../../../shared/utils/fp'
+import { Either, List, NonEmptyArray } from '../../../../shared/utils/fp'
 
-export const partitionStats = <A>(as: List<Either<A, A>>): Separated<List<A>, List<A>> => {
+export function partitionStats<A>(as: List<Either<A, A>>): Separated<List<A>, List<A>> {
   if (List.isEmpty(as)) return separated.separated([], [])
 
   if (as.length === 1) {

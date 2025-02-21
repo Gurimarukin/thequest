@@ -1,7 +1,5 @@
-import { MainLayout } from './components/mainLayout/MainLayout'
+import { StaticDataChampion } from '../shared/models/api/staticData/StaticDataChampion'
 
-export const Urf: React.FC = () => (
-  <MainLayout>
-    <div>URF</div>
-  </MainLayout>
-)
+import { getMapChanges } from './components/mapChanges/getMapChanges'
+
+export const Urf: React.FC = getMapChanges(StaticDataChampion.Lens.urf)

@@ -12,18 +12,18 @@ import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { AramTooltip } from '../../components/AramTooltip'
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
 import type { SetChampionShards } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
-import { AramStatsCompact } from '../../components/aramStats/AramStatsCompact'
+import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
+import { MapChangesStatsCompact } from '../../components/mapChanges/stats/MapChangesStatsCompact'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import { CountWithTotal } from '../../models/CountWithTotal'
+import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { masteryBgGradient, masteryRulerColor } from '../../utils/colors'
@@ -152,7 +152,9 @@ const Champion: React.FC<ChampionProps> = ({
       !isHidden &&
       !pipe(
         maybePrev,
-        Maybe.exists(prev => ChampionAramCategory.Eq.equals(prev.category, champion.category)),
+        Maybe.exists(prev =>
+          MapChangesChampionCategory.Eq.equals(prev.category, champion.category),
+        ),
       ) ? (
         <ChampionCategoryTitle
           category={champion.category}
@@ -196,14 +198,14 @@ const Champion: React.FC<ChampionProps> = ({
           />
 
           <div className={isAram ? 'contents' : 'hidden'}>
-            <AramStatsCompact aram={champion.aram} splitAt={Infinity}>
+            <MapChangesStatsCompact data={champion.aram} splitAt={Infinity}>
               {renderChildrenCompact}
-            </AramStatsCompact>
+            </MapChangesStatsCompact>
           </div>
           {isAram ? (
             <>
               <Tooltip hoverRef={[aramHoverRef1, aramHoverRef2]} placementRef={containerRef}>
-                <AramTooltip aram={champion.aram} />
+                <MapChangesTooltip data={champion.aram} />
               </Tooltip>
 
               <span ref={aramHoverRef2} className="rounded-bl-xl" />

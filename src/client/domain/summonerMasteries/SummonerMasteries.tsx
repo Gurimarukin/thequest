@@ -38,7 +38,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { useUser } from '../../contexts/UserContext'
 import { useOnSearchSummoner } from '../../hooks/useOnSearchSummoner'
 import { usePrevious } from '../../hooks/usePrevious'
-import { ChampionAramCategory } from '../../models/ChampionAramCategory'
+import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../../router/AppRouter'
 import { cx } from '../../utils/cx'
@@ -288,7 +288,7 @@ const enrichAll = (
         maybeSearch,
         Maybe.exists(search => cleanChampionName(name).includes(cleanChampionName(search))),
       )
-      const category = ChampionAramCategory.fromAramData(aram)
+      const category = MapChangesChampionCategory.fromData(aram)
       const faction = StaticDataChampion.getFaction(factions)
       const isHidden = false
 

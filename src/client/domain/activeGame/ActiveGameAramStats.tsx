@@ -2,20 +2,26 @@ import { useMemo } from 'react'
 
 import { List } from '../../../shared/utils/fp'
 
-import type { AramStatsProps } from '../../components/aramStats/aramStats'
-import { getAramStats, renderStatIcon, renderStatValue } from '../../components/aramStats/aramStats'
+import type { MapChangesStatsProps } from '../../components/mapChanges/stats/mapChangesStats'
+import {
+  getMapChangesStats,
+  renderStatIcon,
+  renderStatValue,
+} from '../../components/mapChanges/stats/mapChangesStats'
 import { cx } from '../../utils/cx'
 
-type Props = Pick<AramStatsProps, 'aram' | 'draggable'> & {
+// TODO: ARAM and URF
+
+type Props = Pick<MapChangesStatsProps, 'data' | 'draggable'> & {
   reverse: boolean
 }
 
 export const ActiveGameAramStats: React.FC<Props> = ({ reverse, ...props }) => {
   const AramStats = useMemo(
     () =>
-      getAramStats(
+      getMapChangesStats(
         (t, name) => {
-          const icon = renderStatIcon(t.aram, name, props.draggable, 'h-full w-full')
+          const icon = renderStatIcon(t.mapChanges, name, props.draggable, 'h-full w-full')
           const renderStatValue_ = renderStatValue(name, '')
           return value => (
             <li key={name} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>

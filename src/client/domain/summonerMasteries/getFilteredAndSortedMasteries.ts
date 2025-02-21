@@ -13,8 +13,8 @@ import { StaticDataChampion } from '../../../shared/models/api/staticData/Static
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
-import { ChampionAramCategory } from '../../models/ChampionAramCategory'
 import type { CountWithTotal } from '../../models/CountWithTotal'
+import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import type { Translation } from '../../models/Translation'
 import type { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryOrder } from '../../models/masteriesQuery/MasteriesQueryOrder'
@@ -23,7 +23,7 @@ import { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryVi
 import { ChampionFactionUtils } from '../../utils/ChampionFactionUtils'
 import { EnrichedChampionMastery } from './EnrichedChampionMastery'
 
-type CategoryOrHidden = ChampionAramCategory | 'hidden'
+type CategoryOrHidden = MapChangesChampionCategory | 'hidden'
 type FactionOrNoneOrHidden = ChampionFactionOrNone | 'hidden'
 
 export type FilteredAndSortedMasteries = {
@@ -148,7 +148,7 @@ const sortAram =
       List.groupBy((c): CategoryOrHidden => (isHidden(c) ? 'hidden' : c.category)),
     )
     return pipe(
-      ChampionAramCategory.values,
+      MapChangesChampionCategory.values,
       List.reduce(List.empty<EnrichedChampionMastery>(), (acc, category) =>
         pipe(acc, List.concat(pipe(grouped[category] ?? [], List.sortBy(ords)))),
       ),

@@ -126,7 +126,7 @@ const enGBTranslation: Translation = {
     mainRoles: 'Main roles:',
     currentRole: 'Current role:',
   },
-  aram: {
+  mapChanges: {
     category: {
       label: {
         buffed: 'Buffed champions',

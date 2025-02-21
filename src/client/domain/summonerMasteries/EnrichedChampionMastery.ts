@@ -13,7 +13,7 @@ import type { ChampionPosition } from '../../../shared/models/api/champion/Champ
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import type { List, Maybe } from '../../../shared/utils/fp'
 
-import type { ChampionAramCategory } from '../../models/ChampionAramCategory'
+import type { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 
 type EnrichedChampionMastery = ChampionMasteryView & {
   name: string
@@ -23,7 +23,7 @@ type EnrichedChampionMastery = ChampionMasteryView & {
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
   aram: MapChangesData
-  category: ChampionAramCategory
+  category: MapChangesChampionCategory
   faction: ChampionFactionOrNone
   isHidden: boolean
 }

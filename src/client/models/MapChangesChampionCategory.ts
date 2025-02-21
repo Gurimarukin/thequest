@@ -7,21 +7,21 @@ import { DictUtils } from '../../shared/utils/DictUtils'
 import { createEnum } from '../../shared/utils/createEnum'
 import { List, Maybe } from '../../shared/utils/fp'
 
-type ChampionAramCategory = typeof e.T
+type MapChangesChampionCategory = typeof e.T
 
 const e = createEnum('buffed', 'nerfed', 'other', 'balanced')
 
-const fromAramData = (aram: MapChangesData): ChampionAramCategory =>
+const fromData = (data: MapChangesData): MapChangesChampionCategory =>
   pipe(
-    aram.stats,
-    Maybe.map((stats): ChampionAramCategory => {
+    data.stats,
+    Maybe.map((stats): MapChangesChampionCategory => {
       const normalized = normalizeStats(stats)
       return normalized < 0 ? 'nerfed' : 0 < normalized ? 'buffed' : 'other'
     }),
     Maybe.getOrElse(() =>
       pipe(
-        aram.spells,
-        Maybe.fold<unknown, ChampionAramCategory>(
+        data.spells,
+        Maybe.fold<unknown, MapChangesChampionCategory>(
           () => 'balanced',
           () => 'other',
         ),
@@ -44,6 +44,6 @@ const normalizeStats = (stats: WikiStatsBalance): number =>
     monoid.concatAll(number.MonoidSum),
   )
 
-const ChampionAramCategory = { values: e.values, fromAramData, Eq: e.Eq }
+const MapChangesChampionCategory = { values: e.values, fromData, Eq: e.Eq }
 
-export { ChampionAramCategory }
+export { MapChangesChampionCategory }

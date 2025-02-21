@@ -126,7 +126,7 @@ const esESTranslation: Translation = {
     mainRoles: 'ROLO PRIMO:',
     currentRole: 'ROLO IMO:',
   },
-  aram: {
+  mapChanges: {
     category: {
       label: {
         buffed: 'CAMPEONE MAXO',

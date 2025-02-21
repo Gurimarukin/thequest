@@ -2,12 +2,12 @@ import { useRef } from 'react'
 
 import { useTranslation } from '../contexts/TranslationContext'
 import { InformationCircleOutline } from '../imgs/svgs/icons'
-import type { ChampionAramCategory } from '../models/ChampionAramCategory'
+import type { MapChangesChampionCategory } from '../models/MapChangesChampionCategory'
 import { cx } from '../utils/cx'
 import { Tooltip } from './tooltip/Tooltip'
 
 type ChampionCategoryTitleProps = {
-  category: ChampionAramCategory
+  category: MapChangesChampionCategory
   className?: string
 }
 
@@ -15,7 +15,7 @@ export const ChampionCategoryTitle: React.FC<ChampionCategoryTitleProps> = ({
   category,
   className,
 }) => {
-  const { t } = useTranslation('aram')
+  const { t } = useTranslation('mapChanges')
 
   const hoverRef = useRef<HTMLHeadingElement>(null)
   const placementRef = useRef<HTMLSpanElement>(null)

@@ -27,11 +27,11 @@ import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe } from '../../../shared/utils/fp'
 
-import { AramTooltip } from '../../components/AramTooltip'
 import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
+import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
@@ -373,10 +373,10 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           c => (
             <Cell gridColStart={6} className={cx('flex flex-col justify-center', padding)}>
               <div ref={aramRef} className="py-1 text-2xs">
-                <ActiveGameAramStats reverse={reverse} aram={c.aram} draggable={false} />
+                <ActiveGameAramStats reverse={reverse} data={c.aram} draggable={false} />
               </div>
               <Tooltip hoverRef={aramRef} shouldHide={tooltipShouldHide}>
-                <AramTooltip aram={c.aram} />
+                <MapChangesTooltip data={c.aram} />
               </Tooltip>
             </Cell>
           ),
