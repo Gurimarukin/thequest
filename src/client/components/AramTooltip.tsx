@@ -1,11 +1,11 @@
-import type { AramData } from '../../shared/models/api/AramData'
+import type { MapChangesData } from '../../shared/models/api/MapChangesData'
 import type { List } from '../../shared/utils/fp'
 
 import type { AramStatsProps } from './aramStats/aramStats'
 import { getAramStats, renderStatIcon, renderStatValue } from './aramStats/aramStats'
 
 type Props = {
-  aram: AramData
+  aram: MapChangesData
 }
 
 export const AramTooltip: React.FC<Props> = ({ aram }) => (

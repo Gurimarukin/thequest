@@ -2,7 +2,7 @@ import { monoid, number } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
 import { WikiStatsBalance } from '../../shared/models/WikiStatsBalance'
-import type { AramData } from '../../shared/models/api/AramData'
+import type { MapChangesData } from '../../shared/models/api/MapChangesData'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { createEnum } from '../../shared/utils/createEnum'
 import { List, Maybe } from '../../shared/utils/fp'
@@ -11,7 +11,7 @@ type ChampionAramCategory = typeof e.T
 
 const e = createEnum('buffed', 'nerfed', 'other', 'balanced')
 
-const fromAramData = (aram: AramData): ChampionAramCategory =>
+const fromAramData = (aram: MapChangesData): ChampionAramCategory =>
   pipe(
     aram.stats,
     Maybe.map((stats): ChampionAramCategory => {

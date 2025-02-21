@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 
 import type { WikiStatsBalanceKey } from '../../../shared/models/WikiStatsBalance'
 import { WikiStatsBalance } from '../../../shared/models/WikiStatsBalance'
-import type { AramData, ChampionSpellHtml } from '../../../shared/models/api/AramData'
+import type { ChampionSpellHtml, MapChangesData } from '../../../shared/models/api/MapChangesData'
 import { SpellName } from '../../../shared/models/api/SpellName'
 import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
@@ -16,7 +16,7 @@ import { cx } from '../../utils/cx'
 import { partitionStats } from './partitionStats'
 
 export type AramStatsProps = {
-  aram: AramData
+  aram: MapChangesData
   splitAt?: number
   /**
    * @default false
@@ -80,7 +80,7 @@ const getSeparateChildren =
   (renderStat: RenderStat, renderSpell: RenderSpell) =>
   (
     t: Translation,
-    aram: AramData,
+    aram: MapChangesData,
     splitAt: number,
     simpleStatsSpellsSplit: boolean,
     draggable: boolean | undefined,

@@ -1,12 +1,14 @@
 import { apply, io, predicate, readonlyMap } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
+import type { Lens } from 'monocle-ts/Lens'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { ValidatedNea } from '../../../shared/models/ValidatedNea'
-import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { Lang } from '../../../shared/models/api/Lang'
+import type { ChampionSpellHtml } from '../../../shared/models/api/MapChangesData'
+import { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import type { SpellName } from '../../../shared/models/api/SpellName'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
@@ -35,17 +37,18 @@ import { StoredAt } from '../../models/StoredAt'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
-import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
 import type { WikiChallenge } from '../../models/wiki/WikiChallenge'
 import type { WikiChampionData } from '../../models/wiki/WikiChampionData'
 import { WikiChampionFaction } from '../../models/wiki/WikiChampionFaction'
 import { WikiChampionPosition } from '../../models/wiki/WikiChampionPosition'
+import type { WikiMapChanges } from '../../models/wiki/WikiMapChanges'
 import { CacheUtils } from '../../utils/CacheUtils'
 import type { DDragonService } from '../DDragonService'
 import type { MockService } from '../MockService'
 import { getFetchWikiAramChanges } from './getFetchWikiAramChanges'
 import { getFetchWikiChallenges } from './getFetchWikiChallenges'
 import { getFetchWikiChampionsData } from './getFetchWikiChampionsData'
+import { getFetchWikiUrfChanges } from './getFetchWikiUrfChanges'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
@@ -93,13 +96,24 @@ const StaticDataService = (
     ),
   )
 
-  const fetchWikiAramChanges: Future<WikiAramChanges> = pipe(
+  const fetchWikiAramChanges: Future<WikiMapChanges> = pipe(
     getFetchWikiAramChanges(httpClient),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiAramChanges error:', e),
         Future.fromIO,
-        Future.map((): WikiAramChanges => new Map()),
+        Future.map((): WikiMapChanges => new Map()),
+      ),
+    ),
+  )
+
+  const fetchWikiUrfChanges: Future<WikiMapChanges> = pipe(
+    getFetchWikiUrfChanges(httpClient),
+    Future.orElse(e =>
+      pipe(
+        logger.warn('fetchWikiUrfChanges error:', e),
+        Future.fromIO,
+        Future.map((): WikiMapChanges => new Map()),
       ),
     ),
   )
@@ -184,9 +198,10 @@ const StaticDataService = (
           wikiChampions: fetchWikiChampionsData,
           challenges: fetchWikiChallenges,
           aramChanges: fetchWikiAramChanges,
+          urfChanges: fetchWikiUrfChanges,
         }),
-        Future.map(({ wikiChampions, challenges, aramChanges }) =>
-          enrichChampions(ddragonChampions, wikiChampions, challenges, aramChanges),
+        Future.map(({ wikiChampions, challenges, aramChanges, urfChanges }) =>
+          enrichChampions(ddragonChampions, wikiChampions, challenges, aramChanges, urfChanges),
         ),
         Future.chainFirstIOEitherK(
           flow(
@@ -209,10 +224,8 @@ const StaticDataService = (
                         name: c.name,
                         positions: [],
                         factions: [],
-                        aram: {
-                          stats: Maybe.none,
-                          spells: Maybe.none,
-                        },
+                        aram: MapChangesData.empty,
+                        urf: MapChangesData.empty,
                       }),
                     ),
                   ),
@@ -233,13 +246,14 @@ const enrichChampions = (
   wikiChampions: List<WikiChampionData>,
   challenges: List<WikiChallenge>,
   aramChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
+  urfChanges: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
 ): List<Either<ChampionError, StaticDataChampion>> => {
   const wikiChampionByKey = pipe(
     wikiChampions,
     ListUtils.findFirstBy(ChampionKey.Eq)(c => c.id),
   )
 
-  const withoutAramChanges: List<
+  const withoutMapChanges: List<
     Either<ChampionError, Tuple<ChampionEnglishName, StaticDataChampion>>
   > = pipe(
     ddragonChampions,
@@ -283,6 +297,10 @@ const enrichChampions = (
                 stats: wikiChampion.stats.aram,
                 spells: Maybe.none,
               },
+              urf: {
+                stats: wikiChampion.stats.urf,
+                spells: Maybe.none,
+              },
             }
 
             return Tuple.of(wikiChampion.englishName, data)
@@ -293,47 +311,58 @@ const enrichChampions = (
   )
 
   return pipe(
-    aramChanges,
-    readonlyMap.reduceWithIndex<ChampionEnglishName>(idcOrd(ChampionEnglishName.Eq))(
-      withoutAramChanges,
-      (englishName, acc, spells) =>
-        pipe(
-          acc,
-          ListUtils.findFirstWithIndex(
-            Either.exists(([name]) => ChampionEnglishName.Eq.equals(name, englishName)),
-          ),
-          Maybe.fold(
-            () =>
-              pipe(
-                acc,
-                List.append(
-                  Either.left(
-                    ChampionError.of(
-                      'Wiki spells',
-                      ChampionEnglishName.unwrap(englishName),
-                      ['not found'],
-                      Maybe.none,
-                    ),
-                  ),
-                ),
-              ),
-            ([i, data]) =>
-              List.unsafeUpdateAt(
-                i,
-                pipe(
-                  data,
-                  Either.map(
-                    Tuple.mapSnd(StaticDataChampion.Lens.aramSpells.set(Maybe.some(spells))),
-                  ),
-                ),
-                acc,
-              ),
-          ),
-        ),
-    ),
+    withoutMapChanges,
+    addMapChanges('ARAM', StaticDataChampion.Lens.aramSpells, aramChanges),
+    addMapChanges('URF', StaticDataChampion.Lens.urfSpells, urfChanges),
     List.map(Either.map(Tuple.snd)),
   )
 }
+
+const addMapChanges =
+  (
+    mapName: string,
+    lens: Lens<StaticDataChampion, MapChangesData['spells']>,
+
+    changes: ReadonlyMap<ChampionEnglishName, PartialDict<SpellName, ChampionSpellHtml>>,
+  ) =>
+  (
+    champions: List<Either<ChampionError, Tuple<ChampionEnglishName, StaticDataChampion>>>,
+  ): List<Either<ChampionError, Tuple<ChampionEnglishName, StaticDataChampion>>> =>
+    pipe(
+      changes,
+      readonlyMap.reduceWithIndex<ChampionEnglishName>(idcOrd(ChampionEnglishName.Eq))(
+        champions,
+        (englishName, acc, spells) =>
+          pipe(
+            acc,
+            ListUtils.findFirstWithIndex(
+              Either.exists(([name]) => ChampionEnglishName.Eq.equals(name, englishName)),
+            ),
+            Maybe.fold(
+              () =>
+                pipe(
+                  acc,
+                  List.append(
+                    Either.left(
+                      ChampionError.of(
+                        `${mapName} wiki spells`,
+                        ChampionEnglishName.unwrap(englishName),
+                        ['not found'],
+                        Maybe.none,
+                      ),
+                    ),
+                  ),
+                ),
+              ([i, data]) =>
+                List.unsafeUpdateAt(
+                  i,
+                  pipe(data, Either.map(Tuple.mapSnd(lens.set(Maybe.some(spells))))),
+                  acc,
+                ),
+            ),
+          ),
+      ),
+    )
 
 type ChampionError = {
   type: string
@@ -398,6 +427,7 @@ const fetchCachedStoredAt = <K extends string, A, Args extends List<unknown>>(
           ),
         ),
   )
+
   return key =>
     (...args) =>
       pipe(

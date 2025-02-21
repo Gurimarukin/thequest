@@ -5,7 +5,7 @@ import * as D from 'io-ts/Decoder'
 import xml2js from 'xml2js'
 
 import { ValidatedNea } from '../../../shared/models/ValidatedNea'
-import type { ChampionSpellHtml } from '../../../shared/models/api/AramData'
+import type { ChampionSpellHtml } from '../../../shared/models/api/MapChangesData'
 import { SpellName } from '../../../shared/models/api/SpellName'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
@@ -27,13 +27,13 @@ import { constants } from '../../config/constants'
 import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
-import type { WikiAramChanges } from '../../models/wiki/WikiAramChanges'
+import type { WikiMapChanges } from '../../models/wiki/WikiMapChanges'
 
 const apiPhpUrl = `${constants.lolWikiDomain}/api.php`
 
 const championsSep = '\n\n'
 
-export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiAramChanges> {
+export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiMapChanges> {
   const fetchMapChanges: Future<string> = pipe(
     httpClient.json(
       [apiPhpUrl, 'get'],
@@ -183,7 +183,7 @@ function makeTemplate(
   )
 }
 
-function parseWikiHtml(html: string): IO<WikiAramChanges> {
+function parseWikiHtml(html: string): IO<WikiMapChanges> {
   return pipe(
     DomHandler.of()(html),
     Either.map(domHandler => domHandler.window.document.body),
@@ -243,7 +243,7 @@ function preProcessHtml(body: HTMLElement): IO<void> {
 
 const validation = ValidatedNea.getValidation<string>()
 
-function parseGroupHtml(elements: ReadonlyArray<Element>): ValidatedNea<string, WikiAramChanges> {
+function parseGroupHtml(elements: ReadonlyArray<Element>): ValidatedNea<string, WikiMapChanges> {
   return pipe(
     elements,
     splitMapArray(e => (e.tagName === 'H2' ? Maybe.some(e) : Maybe.none)),

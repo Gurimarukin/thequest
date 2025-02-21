@@ -3,8 +3,8 @@ import type { Ord } from 'fp-ts/Ord'
 import { pipe } from 'fp-ts/function'
 import { lens } from 'monocle-ts'
 
-import type { AramData } from '../../../shared/models/api/AramData'
 import type { ChampionMasteryView } from '../../../shared/models/api/ChampionMasteryView'
+import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import type {
   ChampionFaction,
   ChampionFactionOrNone,
@@ -22,7 +22,7 @@ type EnrichedChampionMastery = ChampionMasteryView & {
   glow: boolean
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
-  aram: AramData
+  aram: MapChangesData
   category: ChampionAramCategory
   faction: ChampionFactionOrNone
   isHidden: boolean

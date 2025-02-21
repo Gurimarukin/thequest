@@ -25,13 +25,18 @@ const spellsProperties: Dict<
   ),
 )
 
-type AramData = C.TypeOf<typeof codec>
+type MapChangesData = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   stats: Maybe.codec(WikiStatsBalance.codec),
   spells: Maybe.codec(C.partial(spellsProperties)),
 })
 
-const AramData = { codec }
+const empty: MapChangesData = {
+  stats: Maybe.none,
+  spells: Maybe.none,
+}
 
-export { AramData, ChampionSpellHtml }
+const MapChangesData = { codec, empty }
+
+export { ChampionSpellHtml, MapChangesData }
