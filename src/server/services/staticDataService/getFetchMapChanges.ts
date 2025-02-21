@@ -59,8 +59,13 @@ export const fetFetchMapChanges =
           parseXML(mapChangesPageParseTreeXMLDecoder, 'MapChangesPageParseTreeXML'),
         ),
       ),
-      Future.chain(a => pipe(a.root.ignore[0], parseXML(includeOnlyXMLDecoder, 'IncludeOnlyXML'))),
-      Future.map(a => a.includeonly),
+      Future.chain(a =>
+        pipe(
+          a.root.ignore[0],
+          parseXML(includeOnlyXMLDecoder, 'IncludeOnlyXML', { strict: false }),
+        ),
+      ),
+      Future.map(a => a.INCLUDEONLY),
     )
 
     return pipe(
@@ -359,7 +364,7 @@ const mapChangesPageParseTreeXMLDecoder = D.struct({
 })
 
 const includeOnlyXMLDecoder = D.struct({
-  includeonly: D.string,
+  INCLUDEONLY: D.string,
 })
 
 const tupleChampionEnglishNameSpellNameStringDecoder = D.tuple(
