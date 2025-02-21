@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "La quêêête",
   "type": "module",
-  "packageManager": "yarn@4.6.0",
+  "packageManager": "yarn@1.22.22",
   "targets": {
     "server": {
       "source": "src/server/index.ts",
       "engines": {
-        "node": ">= 18"
+        "node": ">= 20"
       }
     },
     "client": {
