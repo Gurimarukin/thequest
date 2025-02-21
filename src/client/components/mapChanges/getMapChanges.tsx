@@ -2,7 +2,6 @@
                   functional/no-return-void */
 import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import type { Lens } from 'monocle-ts/Lens'
 import { Fragment, useMemo, useRef } from 'react'
 
 import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
@@ -39,7 +38,7 @@ type EnrichedStaticDataChampion = StaticDataChampion & {
 type CategoryOrHidden = MapChangesChampionCategory | 'hidden'
 
 export const getMapChanges =
-  (lens: Lens<StaticDataChampion, MapChangesData>): React.FC =>
+  (getData: (c: StaticDataChampion) => MapChangesData): React.FC =>
   () => {
     const { genericQuery, updateGenericQuery } = useHistory()
     const { t } = useTranslation('common')
@@ -55,7 +54,7 @@ export const getMapChanges =
               genericQuery.search,
               Maybe.every(search => cleanChampionName(c.name).includes(cleanChampionName(search))),
             ),
-            category: MapChangesChampionCategory.fromData(lens.get(c)),
+            category: MapChangesChampionCategory.fromData(getData(c)),
           }),
         ),
         List.sort(StaticDataChampion.Ord.byName),
@@ -133,7 +132,7 @@ export const getMapChanges =
                     <ChampionCategoryTitle category={c.category} className="pt-4" />
                   ) : null}
 
-                  <Champion lens={lens} champion={c} />
+                  <Champion getData={getData} champion={c} />
                 </Fragment>
               )),
             )}
@@ -148,11 +147,11 @@ export const getMapChanges =
   }
 
 type ChampionProps = {
-  lens: Lens<StaticDataChampion, MapChangesData>
+  getData: (c: StaticDataChampion) => MapChangesData
   champion: EnrichedStaticDataChampion
 }
 
-const Champion: React.FC<ChampionProps> = ({ lens, champion }) => {
+const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const championHoverRef = useRef<HTMLDivElement>(null)
@@ -169,7 +168,7 @@ const Champion: React.FC<ChampionProps> = ({ lens, champion }) => {
       ref={containerRef}
       className={cx(
         'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-aram-stats text-2xs',
-        MapChangesChampionCategory.fromData(lens.get(champion)) !== 'balanced'
+        MapChangesChampionCategory.fromData(getData(champion)) !== 'balanced'
           ? 'col-span-7'
           : 'col-span-4',
         ['hidden', champion.isHidden],
@@ -186,11 +185,11 @@ const Champion: React.FC<ChampionProps> = ({ lens, champion }) => {
         <ChampionPositionsAndFactions positions={champion.positions} factions={champion.factions} />
       </Tooltip>
 
-      <MapChangesStatsCompact data={lens.get(champion)} splitAt={5}>
+      <MapChangesStatsCompact data={getData(champion)} splitAt={5}>
         {renderChildrenCompact}
       </MapChangesStatsCompact>
       <Tooltip hoverRef={[mapChangesHoverRef1, mapChangesHoverRef2]} placementRef={containerRef}>
-        <MapChangesTooltip data={lens.get(champion)} />
+        <MapChangesTooltip data={getData(champion)} />
       </Tooltip>
     </div>
   )

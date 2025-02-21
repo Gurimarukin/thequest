@@ -35,14 +35,9 @@ const byName: Ord<StaticDataChampion> = pipe(
   ord.contramap((c: StaticDataChampion) => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
-const aramLens = pipe(lens.id<StaticDataChampion>(), lens.prop('aram'))
-const urfLens = pipe(lens.id<StaticDataChampion>(), lens.prop('urf'))
-
 const Lens = {
-  aram: aramLens,
-  aramSpells: pipe(aramLens, lens.prop('spells')),
-  urf: urfLens,
-  urfSpells: pipe(urfLens, lens.prop('spells')),
+  aramSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('aram'), lens.prop('spells')),
+  urfSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('urf'), lens.prop('spells')),
 }
 
 const StaticDataChampion = { codec, getFaction, Ord: { byName }, Lens }
