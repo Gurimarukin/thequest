@@ -155,7 +155,7 @@ const enGBTranslation: Translation = {
       iconAlt: id => `${challengeShort(id)} challenge icon`,
       thresholds: 'Thresholds:',
       valueTier: (value, tier, o) =>
-        `${value}: ${leagueTier[tier]}${o !== undefined && o.withComma ? ',' : ''}`,
+        `${value}: ${leagueTier[tier]}${o?.withComma === true ? ',' : ''}`,
     },
     championIconAlt: name => `${name}’s icon`,
     championKey: key => `<Champion ${key}>`,
@@ -173,7 +173,7 @@ const enGBTranslation: Translation = {
     },
     fraction: (numerator, denominator, o) => {
       const res = `${nls(numerator)} / ${nls(denominator)}`
-      return o !== undefined && o.withParenthesis ? `(${res})` : res
+      return o?.withParenthesis === true ? `(${res})` : res
     },
     labels: {
       challengeShort,
@@ -314,7 +314,7 @@ const enGBTranslation: Translation = {
     nChampionsFraction: (n, total) => `${plural('champion')(n)} / ${nls(total)}`,
     nResults: plural('result'),
     notFound: 'not found.',
-    number: (n, o) => (o !== undefined && o.withParenthesis ? `(${nls(n)})` : nls(n)),
+    number: (n, o) => (o?.withParenthesis === true ? `(${nls(n)})` : nls(n)),
     numberK: n => `${nls(n)}k`,
     numberM: n => `${nls(n)}M`,
     percents: n => `${nls(n)}%`,

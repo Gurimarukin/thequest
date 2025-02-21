@@ -79,7 +79,7 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, riotId }) => {
       Maybe.isNone(maybeUser) &&
       Maybe.isSome(Maybe.flatten(previousUser))
     ) {
-      mutate({ ...data, championShards: Maybe.none }, { revalidate: false })
+      void mutate({ ...data, championShards: Maybe.none }, { revalidate: false })
     }
   }, [data, maybeUser, mutate, previousUser])
 
@@ -99,12 +99,12 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, riotId }) => {
           return pipe(
             apiUserSelfSummonerChampionsShardsCountPost(platform_, puuid, updates),
             Future.map(() => {
-              if (!optimisticMutation) mutate(newData, { revalidate: false })
+              if (!optimisticMutation) void mutate(newData, { revalidate: false })
               showToaster('success', t.masteries.updateShardsSucces)
               return NotUsed
             }),
             Future.orElse(e => {
-              if (optimisticMutation) mutate(oldData, { revalidate: false })
+              if (optimisticMutation) void mutate(oldData, { revalidate: false })
               console.error(e)
               showToaster('error', t.masteries.updateShardsError)
               return Future.notUsed
@@ -140,9 +140,9 @@ export const SummonerMasteries: React.FC<Props> = ({ platform, riotId }) => {
         ),
       )(data)
 
-      if (optimisticMutation) mutate(newData, { revalidate: false })
+      if (optimisticMutation) void mutate(newData, { revalidate: false })
 
-      debouncedSetChampionsShardsBulk(
+      void debouncedSetChampionsShardsBulk(
         platform,
         data.summoner.puuid,
         updates,

@@ -83,7 +83,7 @@ const Loaded: React.FC<LoadedProps> = ({ infos }) => {
   const handleSubmit = useCallback(() => {
     if (Maybe.isSome(validated)) {
       setIsLoading(true)
-      pipe(
+      void pipe(
         apiAdminMadosayentisutoPost(validated.value),
         task.map(
           Either.fold(
@@ -266,7 +266,7 @@ const Pending: React.FC<PendingProps> = ({ guildMembers, addPending }) => {
     <Tr>
       <Td />
       <Td>
-        <Select<DiscordUserView, false>
+        <Select<DiscordUserView>
           options={guildMembers}
           getOptionValue={getOptionValueUser}
           getOptionLabel={getOptionLabelUser}
@@ -399,7 +399,7 @@ const SummonerSelectInput: React.FC<SummonerSelectInputProps> = ({ onFoundSummon
 
       if (Either.isRight(riotId)) {
         setIsLoading(true)
-        pipe(
+        void pipe(
           apiSummonerGet(platform, riotId.right),
           Future.map(Maybe.fold(() => setError('not found'), onFoundSummoner)),
           Future.orElseW(() => {
@@ -416,7 +416,7 @@ const SummonerSelectInput: React.FC<SummonerSelectInputProps> = ({ onFoundSummon
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      <Select<{ value: Platform }, false>
+      <Select<{ value: Platform }>
         options={platformOptions}
         value={{ value: platform }}
         getOptionLabel={getOptionLabelPlatform}

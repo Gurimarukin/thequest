@@ -5,10 +5,10 @@ import { Future } from '../../shared/utils/fp'
 
 import { HashedPassword } from '../models/user/HashedPassword'
 
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const argon2 = require('@phc/argon2')
 const upash = require('upash')
-/* eslint-enable @typescript-eslint/no-var-requires */
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 // eslint-disable-next-line functional/no-expression-statements
 upash.install('argon2', argon2)

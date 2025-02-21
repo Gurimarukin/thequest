@@ -8,4 +8,5 @@ export type RequiredPartial<A> = {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type Expect<T extends true> =
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   (<U>() => U extends U ? 1 : 2) extends <U>() => U extends true ? 1 : 2 ? true : false

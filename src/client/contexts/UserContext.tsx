@@ -90,7 +90,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
             apiUserSelfFavoritesPut(summoner),
             statusesToOption(404),
             futureMaybe.map(() => {
-              mutate(
+              void mutate(
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,
@@ -123,7 +123,7 @@ export const UserContextProvider: ChildrenFC = ({ children }) => {
           pipe(
             apiUserSelfFavoritesDelete(puuid),
             Future.map(() => {
-              mutate(
+              void mutate(
                 Maybe.some(
                   pipe(
                     UserView.Lens.favoriteSearches,

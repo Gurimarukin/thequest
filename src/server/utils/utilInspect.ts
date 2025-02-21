@@ -10,7 +10,7 @@ import util from 'util'
 import { List, NonEmptyArray } from '../../shared/utils/fp'
 
 export const utilInspect = (object: unknown, options?: InspectOptions): string =>
-  util.inspect(customHandlers(object), options as InspectOptions)
+  util.inspect(customHandlers(object), options)
 
 export const utilFormat = (format?: unknown, ...param: unknown[]): string =>
   util.format(customHandlers(format), ...param.map(customHandlers))
@@ -22,7 +22,7 @@ const customHandlers = (object: unknown): unknown =>
       ? MyHttpError.fromHTTPError(object)
       : object
 
-// eslint-disable-next-line functional/no-classes
+// eslint-disable-next-line functional/no-classes, functional/no-class-inheritance
 class MyHttpError extends Error {
   responseBody: string | undefined
 
@@ -34,6 +34,8 @@ class MyHttpError extends Error {
     responseBody?: Buffer | string,
   ) {
     super(`MyHttpError: ${method.toUpperCase()} ${url} - ${statusCode ?? '???'}`)
+
+    this.name = 'MyHttpError'
 
     if (stack !== undefined) {
       this.stack = pipe(

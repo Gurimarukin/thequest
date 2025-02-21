@@ -53,8 +53,15 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
   useEffect(() => h.listen(l => setLocation(l.location)), [h])
 
   const navigate = useCallback(
-    (to: string, { replace = false }: NavigateOptions = {}) =>
-      (replace ? h.replace : h.push)({ pathname: to, search: '', hash: '' }),
+    (pathname: string, { replace = false }: NavigateOptions = {}) => {
+      const to = { pathname, search: '', hash: '' }
+
+      if (replace) {
+        return h.replace(to)
+      }
+
+      return h.push(to)
+    },
     [h],
   )
 
@@ -73,9 +80,15 @@ export const HistoryContextProvider: ChildrenFC = ({ children }) => {
   const updateMasteriesQuery = useCallback(
     (f: (q: MasteriesQuery) => MasteriesQuery) => {
       const newQuery = f(masteriesQuery)
-      return (masteriesQuery.view !== newQuery.view ? h.push : h.replace)({
+      const to = {
         search: pipe(newQuery, MasteriesQuery.toPartial, PartialMasteriesQuery.qsStringify),
-      })
+      }
+
+      if (masteriesQuery.view !== newQuery.view) {
+        return h.push(to)
+      }
+
+      return h.replace(to)
     },
     [h, masteriesQuery],
   )

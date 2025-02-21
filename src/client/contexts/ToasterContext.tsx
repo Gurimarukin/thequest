@@ -69,6 +69,7 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
       setToasters(List.filter(t => !ToasterId.Eq.equals(t.id, toaster.id)))
     },
     config: (toaster, index, phase) => key =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       phase === 'enter' && key === 'ttl'
         ? {
             duration: MsDuration.unwrap(

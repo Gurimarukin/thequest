@@ -12,7 +12,7 @@ import { flow, identity, pipe } from 'fp-ts/function'
 import type { IO, Try } from './fp'
 import { Future, Maybe } from './fp'
 
-const URI = 'TaskEitherOption' as const
+const URI = 'TaskEitherOption'
 type URI = typeof URI
 
 declare module 'fp-ts/HKT' {
@@ -28,7 +28,7 @@ const apPar_: Apply1<URI>['ap'] = (fab, fa) => pipe(fab, ap(fa))
 const chain_: Chain1<URI>['chain'] = (ma, f) => pipe(ma, chain(f))
 const map_: Functor1<URI>['map'] = (fa, f) => pipe(fa, map(f))
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 const Do: Future<Maybe<{}>> = some({})
 
 const ApplicativePar: Applicative1<URI> = {

@@ -23,7 +23,7 @@ import { unknownToError } from '../../utils/unknownToError'
 
 type MyMiddleware<I, O, A> = (c: Connection<I>) => Future<Tuple<A, Connection<O>>>
 
-const URI = 'MyMiddleware' as const
+const URI = 'MyMiddleware'
 type URI = typeof URI
 
 declare module 'fp-ts/HKT' {

@@ -189,7 +189,7 @@ const getMasteryImgWithCount =
 
     return (
       <div className={cx('flex flex-col items-center', className)}>
-        <span className="text-sm font-semibold">{t.number(count !== undefined ? count : -1)}</span>
+        <span className="text-sm font-semibold">{t.number(count ?? -1)}</span>
         <MasteryImg level={level} className={cx('w-full', imgClassName)} />
       </div>
     )

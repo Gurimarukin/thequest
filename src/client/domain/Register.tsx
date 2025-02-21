@@ -80,7 +80,7 @@ export const Register: React.FC = () => {
       pipe(
         validated,
         Either.map(payload => {
-          pipe(
+          void pipe(
             validateOnSubmit(t.common)(payload.password, state.confirmPassword),
             Either.foldW(flow(Maybe.some, setError), () => {
               setIsLoading(true)

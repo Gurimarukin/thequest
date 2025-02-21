@@ -81,7 +81,8 @@ const multipleGroupBy =
         /* eslint-enable functional/no-loop-statements */
         if (has.call(out, k)) {
           /* eslint-disable functional/no-expression-statements */
-          ;(out[k] as nonEmptyArray.NonEmptyArray<A>).push(a)
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          out[k]!.push(a)
         } else {
           // eslint-disable-next-line functional/immutable-data
           out[k] = [a]
@@ -189,4 +190,5 @@ export const ListUtils = {
   swap,
 }
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 const has = Object.prototype.hasOwnProperty

@@ -50,11 +50,8 @@ const UserLogin = {
   discordInfos: (login: UserLogin): Maybe<UserDiscordInfos> => {
     switch (login.type) {
       case 'Discord':
-        const {
-          type: {},
-          ...discord
-        } = login
-        return Maybe.some(discord)
+        return Maybe.some(withoutType(login))
+
       case 'Password':
         return login.discord
     }
@@ -66,10 +63,15 @@ const UserLogin = {
       switch (login.type) {
         case 'Discord':
           return UserLoginDiscord.of(discord) as A
+
         case 'Password':
           return UserLoginPassword.of(login.userName, login.password, Maybe.some(discord)) as A
       }
     },
+}
+
+function withoutType({ type: {}, ...discord }: UserLoginDiscord): UserDiscordInfos {
+  return discord
 }
 
 export { UserLogin, UserLoginDiscord, UserLoginPassword }

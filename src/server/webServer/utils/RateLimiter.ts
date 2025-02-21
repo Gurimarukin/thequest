@@ -49,7 +49,8 @@ const RateLimiter = (Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDuration)
             Maybe.fold(
               () => Tuple.of([RequestsHistory.of(key, [now])], middleware),
               i => {
-                const { history } = requests[i] as RequestsHistory
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const { history } = requests[i]!
                 const cleaned = pipe(
                   history,
                   List.filter(h => ord.lt(DayJs.Ord)(windowStart, h)),

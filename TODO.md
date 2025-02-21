@@ -1,3 +1,4 @@
+- sodium
 - store full match
 - single discord oauth (login/register)
 - render newtypes

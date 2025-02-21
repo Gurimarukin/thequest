@@ -47,7 +47,7 @@ function http<A, O, B>(
         ...options,
         method,
         json,
-        credentials: credentials === undefined ? 'include' : credentials,
+        credentials: credentials ?? 'include',
         ...(timeout === undefined ? {} : { timeout: MsDuration.unwrap(timeout) }),
       }).json(),
     ),

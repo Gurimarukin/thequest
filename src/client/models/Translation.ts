@@ -154,9 +154,7 @@ export type Translation = {
       order: Dict<MasteriesQueryOrder, React.ReactNode>
       nineAndLess: React.ReactNode
       tenAndMore: React.ReactNode
-      sort: {
-        [K in MasteriesQuerySort]: React.ReactNode
-      }
+      sort: Dict<MasteriesQuerySort, React.ReactNode>
       sortShort: Dict<MasteriesQuerySort, React.ReactNode>
       view: Dict<MasteriesQueryView, React.ReactNode>
       viewShort: Dict<MasteriesQueryView, React.ReactNode>

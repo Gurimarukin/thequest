@@ -32,7 +32,8 @@ import { iso } from 'newtype-ts'
 
 import { MsDuration } from '../models/MsDuration'
 
-export function todo(...[]: List<unknown>): never {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function todo(...args: List<unknown>): never {
   // eslint-disable-next-line functional/no-throw-statements
   throw Error('Missing implementation')
 }
@@ -325,7 +326,8 @@ export const IO = {
     (f: Future<NotUsed>): io.IO<NotUsed> =>
     () => {
       // eslint-disable-next-line functional/no-expression-statements
-      pipe(f, Future.run(onError))
+      void pipe(f, Future.run(onError))
+
       return NotUsed
     },
   run: ioRun,

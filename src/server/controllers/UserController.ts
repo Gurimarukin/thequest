@@ -272,7 +272,7 @@ function UserController(
           ),
           Future.map(
             Maybe.foldW(
-              () => Either.left<PlatformWithPuuid, never>({ platform, puuid }),
+              () => Either.left<PlatformWithPuuid>({ platform, puuid }),
               ([summoner, { riotId }]) =>
                 Either.right<never, SummonerShort>({ ...summoner, riotId }),
             ),

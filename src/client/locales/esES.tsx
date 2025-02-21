@@ -156,7 +156,7 @@ const esESTranslation: Translation = {
       iconAlt: id => `Icône défi ${challengeShort(id)}`,
       thresholds: 'UMBRALES:',
       valueTier: (value, tier, o) =>
-        `${value}: ${leagueTier[tier]}${o !== undefined && o.withComma ? ',' : ''}`,
+        `${value}: ${leagueTier[tier]}${o?.withComma === true ? ',' : ''}`,
     },
     championIconAlt: name => `Icône de ${name}`,
     championKey: key => `<Champion ${key}>`,
@@ -174,7 +174,8 @@ const esESTranslation: Translation = {
     },
     fraction: (numerator, denominator, o) => {
       const res = `${nls(numerator)} / ${nls(denominator)}`
-      return o !== undefined && o.withParenthesis ? `(${res})` : res
+
+      return o?.withParenthesis === true ? `(${res})` : res
     },
     labels: {
       challengeShort,
@@ -315,7 +316,7 @@ const esESTranslation: Translation = {
     nChampionsFraction: (n, total) => `${plural('CAMPEONE')(n)} / ${nls(total)}`,
     nResults: plural('RESULTO'),
     notFound: 'PROBLEMO.',
-    number: (n, o) => (o !== undefined && o.withParenthesis ? `(${nls(n)})` : nls(n)),
+    number: (n, o) => (o?.withParenthesis === true ? `(${nls(n)})` : nls(n)),
     numberK: n => `${nls(n)}k`,
     numberM: n => `${nls(n)}M`,
     percents: n => `${nls(n)} %`,
