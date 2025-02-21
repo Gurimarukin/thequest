@@ -72,7 +72,6 @@ function otpRatioRec(
 
 const poroLang: Dict<Lang, string> = {
   en_GB: 'en',
-  es_ES: 'es',
   fr_FR: 'fr',
 }
 

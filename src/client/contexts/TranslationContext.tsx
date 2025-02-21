@@ -15,7 +15,6 @@ import type { Translation } from '../models/Translation'
 
 const translations: Dict<Lang, Task<Translation>> = {
   en_GB: tDefault(() => import('../locales/enGB')),
-  es_ES: tDefault(() => import('../locales/esES')),
   fr_FR: tDefault(() => import('../locales/frFR')),
 }
 
