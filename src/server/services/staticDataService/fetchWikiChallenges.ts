@@ -16,7 +16,7 @@ import { WikiChampionFaction } from '../../models/wiki/WikiChampionFaction'
 // pageid: 1522274
 const challengesUrl = `${constants.lolWikiDomain}/en-us/Challenges`
 
-export const getFetchWikiChallenges = (httpClient: HttpClient): Future<List<WikiChallenge>> =>
+export const fetchWikiChallenges = (httpClient: HttpClient): Future<List<WikiChallenge>> =>
   pipe(httpClient.text([challengesUrl, 'get']), Future.chainEitherK(wikiChallengesFromHtml))
 
 const dataTitle = 'data-title'

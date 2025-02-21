@@ -45,10 +45,10 @@ import type { WikiMapChanges } from '../../models/wiki/WikiMapChanges'
 import { CacheUtils } from '../../utils/CacheUtils'
 import type { DDragonService } from '../DDragonService'
 import type { MockService } from '../MockService'
-import { getFetchWikiAramChanges } from './getFetchWikiAramChanges'
-import { getFetchWikiChallenges } from './getFetchWikiChallenges'
-import { getFetchWikiChampionsData } from './getFetchWikiChampionsData'
-import { getFetchWikiUrfChanges } from './getFetchWikiUrfChanges'
+import { fetchWikiAramChanges } from './fetchWikiAramChanges'
+import { fetchWikiChallenges } from './fetchWikiChallenges'
+import { fetchWikiChampionsData } from './fetchWikiChampionsData'
+import { fetchWikiUrfChanges } from './fetchWikiUrfChanges'
 
 type StaticDataService = ReturnType<typeof StaticDataService>
 
@@ -62,7 +62,7 @@ const StaticDataService = (
 ) => {
   const logger = Logger('StaticDataService')
 
-  const fetchStaticData: (lang: Lang) => (version: DDragonVersion) => Future<StaticData> =
+  const fetchCachedStaticData: (lang: Lang) => (version: DDragonVersion) => Future<StaticData> =
     fetchCachedStoredAt(
       Lang.values,
       lang => (version: DDragonVersion) =>
@@ -74,8 +74,8 @@ const StaticDataService = (
       version => data => DDragonVersion.Eq.equals(data.value.version, version),
     )
 
-  const fetchWikiChampionsData: Future<List<WikiChampionData>> = pipe(
-    fetchCachedStoredAt([''], () => () => getFetchWikiChampionsData(logger, httpClient))('')(),
+  const fetchCachedWikiChampionsData: Future<List<WikiChampionData>> = pipe(
+    fetchCachedStoredAt([''], () => () => fetchWikiChampionsData(logger, httpClient))('')(),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiChampionsData error:', e),
@@ -85,8 +85,8 @@ const StaticDataService = (
     ),
   )
 
-  const fetchWikiChallenges: Future<List<WikiChallenge>> = pipe(
-    getFetchWikiChallenges(httpClient),
+  const fetchWikiChallengesSafe: Future<List<WikiChallenge>> = pipe(
+    fetchWikiChallenges(httpClient),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiChallenges error:', e),
@@ -96,8 +96,8 @@ const StaticDataService = (
     ),
   )
 
-  const fetchWikiAramChanges: Future<WikiMapChanges> = pipe(
-    getFetchWikiAramChanges(httpClient),
+  const fetchWikiAramChangesSafe: Future<WikiMapChanges> = pipe(
+    fetchWikiAramChanges(httpClient),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiAramChanges error:', e),
@@ -107,8 +107,8 @@ const StaticDataService = (
     ),
   )
 
-  const fetchWikiUrfChanges: Future<WikiMapChanges> = pipe(
-    getFetchWikiUrfChanges(httpClient),
+  const fetchWikiUrfChangesSafe: Future<WikiMapChanges> = pipe(
+    fetchWikiUrfChanges(httpClient),
     Future.orElse(e =>
       pipe(
         logger.warn('fetchWikiUrfChanges error:', e),
@@ -121,14 +121,14 @@ const StaticDataService = (
   return {
     wikiChampions: pipe(
       config.mock ? mockService.wiki.champions : futureMaybe.none,
-      futureMaybe.getOrElse(() => fetchWikiChampionsData),
+      futureMaybe.getOrElse(() => fetchCachedWikiChampionsData),
     ),
 
     getLatest: (lang: Lang): Future<StaticData> =>
       pipe(
         config.mock ? mockService.staticData : futureMaybe.none,
         futureMaybe.getOrElse(() =>
-          pipe(ddragonService.latestVersion, Future.chain(fetchStaticData(lang))),
+          pipe(ddragonService.latestVersion, Future.chain(fetchCachedStaticData(lang))),
         ),
       ),
 
@@ -195,10 +195,10 @@ const StaticDataService = (
     return ddragonChampions =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
-          wikiChampions: fetchWikiChampionsData,
-          challenges: fetchWikiChallenges,
-          aramChanges: fetchWikiAramChanges,
-          urfChanges: fetchWikiUrfChanges,
+          wikiChampions: fetchCachedWikiChampionsData,
+          challenges: fetchWikiChallengesSafe,
+          aramChanges: fetchWikiAramChangesSafe,
+          urfChanges: fetchWikiUrfChangesSafe,
         }),
         Future.map(({ wikiChampions, challenges, aramChanges, urfChanges }) =>
           enrichChampions(ddragonChampions, wikiChampions, challenges, aramChanges, urfChanges),

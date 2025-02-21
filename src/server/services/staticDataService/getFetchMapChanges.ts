@@ -31,79 +31,92 @@ import type { WikiMapChanges } from '../../models/wiki/WikiMapChanges'
 
 const apiPhpUrl = `${constants.lolWikiDomain}/api.php`
 
+const fetchParseWikiTextMaxLength = 5484
 const championsSep = '\n\n'
 
-export function getFetchWikiAramChanges(httpClient: HttpClient): Future<WikiMapChanges> {
-  const fetchMapChanges: Future<string> = pipe(
-    httpClient.json(
-      [apiPhpUrl, 'get'],
-      {
-        searchParams: {
-          action: 'parse',
-          format: 'json',
-          prop: 'parsetree',
-          // page: 'Template:Map changes/data/aram',
-          pageid: 1399551,
-        },
-      },
-      [parseParseTreeDecoder, 'ParseParseTree'],
-    ),
-    Future.chain(a =>
-      pipe(
-        a.parse.parsetree['*'],
-        parseXML(aramChangesPageParseTreeXMLDecoder, 'AramChangesPageParseTreeXML'),
-      ),
-    ),
-    Future.chain(a => pipe(a.root.ignore[0], parseXML(includeOnlyXMLDecoder, 'IncludeOnlyXML'))),
-    Future.map(a => a.includeonly),
-  )
-
-  return pipe(
-    fetchMapChanges,
-    Future.chainEitherK(parseRawChanges),
-    Future.map(flow(groupChangesByChampionsAndSpells, makeTemplate)),
-    Future.chain(fetchParseWikiTextChunked),
-    Future.chainIOEitherK(parseWikiHtml),
-  )
-
-  function fetchParseWikiTextChunked(text: string): Future<string> {
-    const champions = text.split(championsSep)
-
-    return pipe(
-      champions,
-      // splitting in half should be enough, increase if needed
-      List.chunksOf(Math.round(champions.length / 2)),
-      Future.traverseArrayWithIndex(fetchParseWikiText),
-      Future.map(List.mkString('\n')),
-    )
-  }
-
-  function fetchParseWikiText(index: number, champions: List<string>): Future<string> {
-    const text = champions.join(championsSep)
-
-    const maxLength = 5484
-
-    if (text.length > maxLength) {
-      return Future.failed(Error(`wikitext length should be less than ${maxLength}`))
-    }
-
-    return pipe(
+/**
+ * @param parseWikiTextChunksCount int >= 1, splitting in half should be enough, increase if needed
+ */
+export const fetFetchMapChanges =
+  (pageid: number, parseWikiTextChunksCount: number) =>
+  (httpClient: HttpClient): Future<WikiMapChanges> => {
+    const fetchMapChanges: Future<string> = pipe(
       httpClient.json(
         [apiPhpUrl, 'get'],
         {
           searchParams: {
             action: 'parse',
             format: 'json',
-            contentmodel: 'wikitext',
-            text,
+            prop: 'parsetree',
+            pageid,
           },
         },
-        [parseTextDecoder, 'ParseText'],
+        [parseParseTreeDecoder, 'ParseParseTree'],
       ),
-      Future.map(res => res.parse.text['*']),
+      Future.chain(a =>
+        pipe(
+          a.parse.parsetree['*'],
+          parseXML(mapChangesPageParseTreeXMLDecoder, 'MapChangesPageParseTreeXML'),
+        ),
+      ),
+      Future.chain(a => pipe(a.root.ignore[0], parseXML(includeOnlyXMLDecoder, 'IncludeOnlyXML'))),
+      Future.map(a => a.includeonly),
     )
+
+    return pipe(
+      fetchMapChanges,
+      Future.chainEitherK(parseRawChanges),
+      Future.map(flow(groupChangesByChampionsAndSpells, makeTemplate)),
+      Future.chain(fetchParseWikiTextChunked),
+      Future.chainIOEitherK(parseWikiHtml),
+    )
+
+    function fetchParseWikiTextChunked(text: string): Future<string> {
+      const champions = text.split(championsSep)
+      const chunks = pipe(
+        champions,
+        List.chunksOf(Math.ceil(champions.length / parseWikiTextChunksCount)),
+      )
+
+      return pipe(
+        chunks,
+        Future.traverseArrayWithIndex(fetchParseWikiText(chunks.length)),
+        Future.map(List.mkString('\n')),
+      )
+    }
+
+    function fetchParseWikiText(
+      totalChunks: number,
+    ): (chunkIndex: number, championsChunk: List<string>) => Future<string> {
+      return (chunkIndex, championsChunk) => {
+        const text = championsChunk.join(championsSep)
+
+        if (text.length > fetchParseWikiTextMaxLength) {
+          return Future.failed(
+            Error(
+              `Chunk ${chunkIndex} / ${totalChunks}: wikitext length should be less than ${fetchParseWikiTextMaxLength}`,
+            ),
+          )
+        }
+
+        return pipe(
+          httpClient.json(
+            [apiPhpUrl, 'get'],
+            {
+              searchParams: {
+                action: 'parse',
+                format: 'json',
+                contentmodel: 'wikitext',
+                text,
+              },
+            },
+            [parseTextDecoder, 'ParseText'],
+          ),
+          Future.map(res => res.parse.text['*']),
+        )
+      }
+    }
   }
-}
 
 function groupChangesByChampionsAndSpells(
   tuples: List<Tuple3<ChampionEnglishName, SpellName, string>>,
@@ -339,7 +352,7 @@ const parseParseTreeDecoder = D.struct({
   }),
 })
 
-const aramChangesPageParseTreeXMLDecoder = D.struct({
+const mapChangesPageParseTreeXMLDecoder = D.struct({
   root: D.struct({
     ignore: D.tuple(D.string),
   }),

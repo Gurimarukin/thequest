@@ -17,7 +17,7 @@ const championDataUrl = `${constants.lolWikiDomain}/en-us/Module:ChampionData/da
 
 const mwCodeClassName = '.mw-code'
 
-export const getFetchWikiChampionsData = (
+export const fetchWikiChampionsData = (
   logger: LoggerType,
   httpClient: HttpClient,
 ): Future<List<WikiChampionData>> =>
