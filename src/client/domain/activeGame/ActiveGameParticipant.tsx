@@ -37,7 +37,7 @@ import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { cx } from '../../utils/cx'
-import { ActiveGameAramStats } from './ActiveGameAramStats'
+import { ActiveGameMapChangesStats } from './ActiveGameMapChangesStats'
 import { ActiveGameRunes } from './ActiveGameRunes'
 import { ActiveGameSummoner } from './ActiveGameSummoner'
 import { ActiveGameTag } from './ActiveGameTag'
@@ -383,7 +383,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           data => (
             <Cell gridColStart={6} className={cx('flex flex-col justify-center', padding)}>
               <div ref={mapChangesRef} className="py-1 text-2xs">
-                <ActiveGameAramStats reverse={reverse} data={data} draggable={false} />
+                <ActiveGameMapChangesStats reverse={reverse} data={data} draggable={false} />
               </div>
               <Tooltip hoverRef={mapChangesRef} shouldHide={tooltipShouldHide}>
                 <MapChangesTooltip data={data} />
