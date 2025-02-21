@@ -33,7 +33,7 @@
     "compile": "tsc -p tsconfig.json",
     "~compile": "yarn compile -w --preserveWatchOutput",
     "~uibook": "parcel uibook/uibook.html --dist-dir dist/uibook -p 5678",
-    "_prettier": "prettier src test *.json *.md *.cjs *.mjs",
+    "_prettier": "prettier --cache --cache-strategy metadata .github src test .*.cjs *.cjs *.mjs *.json .*.yml *.yml *.md",
     "formatCheck": "yarn _prettier --check",
     "format": "yarn _prettier --write",
     "lint": "eslint --cache --max-warnings 0 src test",
