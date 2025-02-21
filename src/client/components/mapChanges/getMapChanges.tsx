@@ -2,10 +2,10 @@
                   functional/no-return-void */
 import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import { Lens } from 'monocle-ts/Lens'
+import type { Lens } from 'monocle-ts/Lens'
 import { Fragment, useMemo, useRef } from 'react'
 
-import { MapChangesData } from '../../../shared/models/api/MapChangesData'
+import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
