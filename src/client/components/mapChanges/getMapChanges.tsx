@@ -25,8 +25,9 @@ import { MapChangesChampionCategory } from '../../models/MapChangesChampionCateg
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
 import { MapChangesTooltip } from './MapChangesTooltip'
-import './mapChanges.css'
 import { MapChangesStatsCompact } from './stats/MapChangesStatsCompact'
+
+import './mapChanges.css'
 
 const { cleanChampionName } = StringUtils
 
