@@ -379,12 +379,14 @@ const enGBTranslation: Translation = {
         compact: 'Compact view',
         factions: 'Factions view',
         histogram: 'Histogram view',
+        urf: 'URF view',
       },
       viewShort: {
         aram: 'ARAM',
         compact: 'Compact',
         factions: 'Factions',
         histogram: 'Histogram',
+        urf: 'URF',
       },
     },
     modal: {

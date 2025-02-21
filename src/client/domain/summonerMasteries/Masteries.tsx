@@ -4,6 +4,7 @@ import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 import type { SWRResponse } from 'swr'
 
+import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -110,6 +111,7 @@ const viewContainerClassName: Dict<MasteriesQueryView, string> = {
   compact: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
   histogram: 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2',
   aram: 'grid grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
+  urf: 'grid grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1',
   factions: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
 }
 
@@ -137,13 +139,23 @@ const Champion: React.FC<ChampionProps> = ({
   const { masteriesQuery } = useHistory()
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const mapChangesHoverRef1 = useRef<HTMLUListElement>(null)
+  const mapChangesHoverRef2 = useRef<HTMLSpanElement>(null)
 
-  const aramHoverRef1 = useRef<HTMLUListElement>(null)
-  const renderChildrenCompact = useMemo(() => getRenderChildrenCompact(aramHoverRef1), [])
-  const aramHoverRef2 = useRef<HTMLSpanElement>(null)
+  const renderMapChanges = useMemo(
+    () =>
+      getRenderMapChanges(
+        containerRef,
+        mapChangesHoverRef1,
+        mapChangesHoverRef2,
+        getRenderChildrenCompact(mapChangesHoverRef1),
+      ),
+    [],
+  )
 
   const isHistogram = masteriesQuery.view === 'histogram'
   const isAram = masteriesQuery.view === 'aram'
+  const isUrf = masteriesQuery.view === 'urf'
   const isFactions = masteriesQuery.view === 'factions'
 
   return (
@@ -153,11 +165,25 @@ const Champion: React.FC<ChampionProps> = ({
       !pipe(
         maybePrev,
         Maybe.exists(prev =>
-          MapChangesChampionCategory.Eq.equals(prev.category, champion.category),
+          MapChangesChampionCategory.Eq.equals(prev.aram.category, champion.aram.category),
         ),
       ) ? (
         <ChampionCategoryTitle
-          category={champion.category}
+          category={champion.aram.category}
+          className={cx(['pt-4', Maybe.isSome(maybePrev)])}
+        />
+      ) : null}
+
+      {isUrf &&
+      !isHidden &&
+      !pipe(
+        maybePrev,
+        Maybe.exists(prev =>
+          MapChangesChampionCategory.Eq.equals(prev.urf.category, champion.urf.category),
+        ),
+      ) ? (
+        <ChampionCategoryTitle
+          category={champion.urf.category}
           className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
@@ -181,7 +207,8 @@ const Champion: React.FC<ChampionProps> = ({
         className={cx(
           'relative',
           ['hidden', isHidden],
-          [champion.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
+          [champion.aram.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
+          [champion.urf.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isUrf],
         )}
       >
         {/* glow */}
@@ -197,22 +224,11 @@ const Champion: React.FC<ChampionProps> = ({
             centerLevel={false}
           />
 
-          <div className={isAram ? 'contents' : 'hidden'}>
-            <MapChangesStatsCompact data={champion.aram} splitAt={Infinity}>
-              {renderChildrenCompact}
-            </MapChangesStatsCompact>
-          </div>
-          {isAram ? (
-            <>
-              <Tooltip hoverRef={[aramHoverRef1, aramHoverRef2]} placementRef={containerRef}>
-                <MapChangesTooltip data={champion.aram} />
-              </Tooltip>
-
-              <span ref={aramHoverRef2} className="rounded-bl-xl" />
-            </>
-          ) : null}
+          {isAram ? renderMapChanges(champion.aram.data) : null}
+          {isUrf ? renderMapChanges(champion.urf.data) : null}
         </div>
       </div>
+
       <ChampionMasteryHistogram
         maybeMaxPoints={maybeMaxPoints}
         champion={champion}
@@ -238,6 +254,27 @@ const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
     <div className="col-start-1 row-start-1 size-[calc(100%_-_4px)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
   </div>
 )
+
+const getRenderMapChanges =
+  (
+    containerRef: React.RefObject<HTMLDivElement>,
+    mapChangesHoverRef1: React.RefObject<HTMLUListElement>,
+    mapChangesHoverRef2: React.RefObject<HTMLSpanElement>,
+    renderChildrenCompact: (children: List<React.ReactElement>) => React.ReactElement,
+  ) =>
+  (data: MapChangesData): React.ReactElement => (
+    <>
+      <MapChangesStatsCompact data={data} splitAt={Infinity}>
+        {renderChildrenCompact}
+      </MapChangesStatsCompact>
+
+      <Tooltip hoverRef={[mapChangesHoverRef1, mapChangesHoverRef2]} placementRef={containerRef}>
+        <MapChangesTooltip data={data} />
+      </Tooltip>
+
+      <span ref={mapChangesHoverRef2} className="rounded-bl-xl" />
+    </>
+  )
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>

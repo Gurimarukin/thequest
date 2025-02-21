@@ -22,10 +22,15 @@ type EnrichedChampionMastery = ChampionMasteryView & {
   glow: boolean
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
-  aram: MapChangesData
-  category: MapChangesChampionCategory
+  aram: MapChanges
+  urf: MapChanges
   faction: ChampionFactionOrNone
   isHidden: boolean
+}
+
+type MapChanges = {
+  category: MapChangesChampionCategory
+  data: MapChangesData
 }
 
 const byLevel: Ord<EnrichedChampionMastery> = pipe(

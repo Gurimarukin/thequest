@@ -381,12 +381,14 @@ const frFRTranslation: Translation = {
         compact: 'Vue compacte',
         factions: 'Vue factions',
         histogram: 'Vue histogramme',
+        urf: 'Vue URF',
       },
       viewShort: {
         aram: 'ARAM',
         compact: 'Compact',
         factions: 'Factions',
         histogram: 'Histogramme',
+        urf: 'URF',
       },
     },
     modal: {

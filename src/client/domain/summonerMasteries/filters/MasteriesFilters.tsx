@@ -120,6 +120,13 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             </IconLabel>,
           )}
           {labelValue(
+            'urf',
+            <IconLabel tooltip={t.masteries.filters.view.urf} className="px-1.5">
+              <MaskedImage src={Assets.spatula} className="size-[18px]" />
+              <span>{t.masteries.filters.viewShort.urf}</span>
+            </IconLabel>,
+          )}
+          {labelValue(
             'factions',
             <IconLabel tooltip={t.masteries.filters.view.factions} className="px-1.5">
               <MaskedImage src={Assets.runeterra} className="size-[18px]" />

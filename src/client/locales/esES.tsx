@@ -381,12 +381,14 @@ const esESTranslation: Translation = {
         compact: 'COMPACTO',
         factions: 'FACTIONOS',
         histogram: 'HISTOGRAMMO',
+        urf: 'URFO',
       },
       viewShort: {
         aram: 'ARAMO',
         compact: 'COMPACTO',
         factions: 'FACTIONOS',
         histogram: 'HISTOGRAMO',
+        urf: 'URFO',
       },
     },
     modal: {

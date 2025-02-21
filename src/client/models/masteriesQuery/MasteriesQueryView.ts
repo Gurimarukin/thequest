@@ -2,7 +2,7 @@ import { createEnum } from '../../../shared/utils/createEnum'
 
 type MasteriesQueryView = typeof e.T
 
-const e = createEnum('compact', 'histogram', 'aram', 'factions')
+const e = createEnum('compact', 'histogram', 'aram', 'urf', 'factions')
 
 const default_: MasteriesQueryView = 'compact'
 
