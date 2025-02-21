@@ -37,9 +37,7 @@ function regionalUrl(region: Region, path: string): string {
   return `https://${region.toLowerCase()}.api.riotgames.com${path}`
 }
 
-type Region = (typeof regionValues)[number]
-
-const regionValues = ['AMERICAS', 'ASIA', 'EUROPE', 'SEA'] as const
+type Region = 'AMERICAS' | 'ASIA' | 'EUROPE' | 'SEA'
 
 /**
  * The AMERICAS routing value serves NA, BR, LAN and LAS.
@@ -214,7 +212,6 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
           summonerV4: {
             summoners: {
               /** @deprecated ⚠️ Consistently looking up summoner ids that don't exist will result in a blacklist. */
-              // eslint-disable-next-line deprecation/deprecation
               byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.json(

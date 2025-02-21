@@ -21,6 +21,7 @@ const reduce =
             },
             error: e => {
               subscription.unsubscribe()
+              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
               reject(e)
             },
             /* eslint-enable functional/no-expression-statements */
@@ -51,6 +52,7 @@ const readonlyArray = <A>(obs: TObservable<A>): Future<List<A>> =>
           error: e => {
             /* eslint-disable functional/no-expression-statements */
             subscription.unsubscribe()
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             reject(e)
             /* eslint-enable functional/no-expression-statements */
           },
@@ -68,6 +70,7 @@ const toNotUsed = <A>(obs: TObservable<NonIO<A>>): Future<NotUsed> =>
           /* eslint-disable functional/no-expression-statements */
           error: e => {
             subscription.unsubscribe()
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             reject(e)
           },
           /* eslint-enable functional/no-expression-statements */

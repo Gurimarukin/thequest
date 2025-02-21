@@ -53,7 +53,7 @@ type HTMLTag = keyof React.ReactHTML
 
 type ExtractElement<A extends HTMLTag> =
   // TODO
-  // eslint-disable-next-line deprecation/deprecation
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   React.ReactHTML[A] extends React.DetailedHTMLFactory<React.HTMLAttributes<unknown>, infer E>
     ? E
     : never

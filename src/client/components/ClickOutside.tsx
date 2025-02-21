@@ -28,7 +28,8 @@ export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {
   }, [handleClick])
 
   return Children.map(children, (elt, idx) =>
-    cloneElement(elt as React.ReactElement, {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    cloneElement(elt!, {
       ref: (refs as List<React.RefObject<Node>>)[idx],
     }),
   ) as unknown as React.ReactElement

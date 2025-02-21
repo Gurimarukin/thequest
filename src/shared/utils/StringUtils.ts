@@ -18,8 +18,8 @@ const matcher =
   (str: string): Maybe<A> =>
     pipe(str.match(regex), Maybe.fromNullable, Maybe.map(f))
 
-const matcher1 = (regex: RegExp): ((str: string) => Maybe<string>) =>
-  matcher(regex, ([, a]) => a as string)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const matcher1 = (regex: RegExp): ((str: string) => Maybe<string>) => matcher(regex, ([, a]) => a!)
 
 const matcher2 = (regex: RegExp): ((str: string) => Maybe<Tuple<string, string>>) =>
   matcher(regex, ([, a, b]) => [a, b] as Tuple<string, string>)

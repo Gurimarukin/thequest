@@ -84,7 +84,7 @@ export const ActiveGame: React.FC<Props> = ({ platform, riotId }) => {
       Maybe.isSome(Maybe.flatten(previousUser)) &&
       Maybe.isSome(data.game)
     ) {
-      mutate(
+      void mutate(
         pipe(
           SummonerActiveGameView.Lens.game.participants,
           optional.modify(
@@ -99,12 +99,12 @@ export const ActiveGame: React.FC<Props> = ({ platform, riotId }) => {
   }, [data, maybeUser, mutate, previousUser])
 
   const refreshGame = useCallback(() => {
-    mutate(undefined, { revalidate: false })
+    void mutate(undefined, { revalidate: false })
     setTimeout(() => mutate(undefined, { revalidate: true }), MsDuration.unwrap(refreshDelay))
   }, [mutate])
 
   const reloadGame = useCallback(() => {
-    mutate()
+    void mutate()
   }, [mutate])
 
   return (
@@ -388,7 +388,7 @@ const Participants: React.FC<ParticipantsProps> = ({
     )
 
     if (active) {
-      api.start(
+      void api.start(
         fn(
           participantHeight,
           teamId,
@@ -402,7 +402,7 @@ const Participants: React.FC<ParticipantsProps> = ({
       ) // Feed springs new style data, they'll animate the view without causing a single render
     } else {
       const newOrder = swap(order.current, currentIndex, currentRow)
-      api.start(
+      void api.start(
         fn(participantHeight, teamId, newOrder, active, activeIndex, currentIndex, currentRow, y),
       )
 

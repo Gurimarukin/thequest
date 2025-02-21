@@ -18,7 +18,7 @@ import { WikiChampionData } from '../models/wiki/WikiChampionData'
 import { FsUtils } from '../utils/FsUtils'
 import { unknownToError } from '../utils/unknownToError'
 
-const mockDir = pipe(Dir.of(__dirname), Dir.joinDir('..', '..', '..', 'mock'))
+const mockDir = pipe(Dir.of(import.meta.dirname), Dir.joinDir('..', '..', '..', 'mock'))
 const mock = {
   staticData: pipe(mockDir, Dir.joinFile('staticData.json')),
   additionalStaticData: pipe(mockDir, Dir.joinFile('additionalStaticData.json')),

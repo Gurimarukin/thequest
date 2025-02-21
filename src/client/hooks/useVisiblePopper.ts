@@ -19,7 +19,7 @@ export function useVisiblePopper(
   const { update } = result
 
   useEffect(() => {
-    if (isVisible) update?.()
+    if (isVisible) void update?.()
   }, [isVisible, update])
 
   return result

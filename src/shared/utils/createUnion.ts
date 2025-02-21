@@ -15,6 +15,7 @@ export type UnionResult<T extends UnionDescription> = {
   T: Union<T>
   is: <NAME extends keyof T>(
     name: NAME,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   ) => <U extends Union<T>>(other: U) => other is ReturnType<T[NAME]> & { type: NAME }
   match: <B>(m: Match<T, B>) => (u: Union<T>) => B
 } & { [K in keyof T]: Factory<T[K], K> & { T: ReturnType<Factory<T[K], K>> } }
@@ -41,7 +42,7 @@ type Union<T extends UnionDescription> = {
 export function createUnion<D extends UnionDescription>(
   description: EnforceNonEmptyDict<D>,
 ): UnionResult<D> {
-  const factories = Object.keys(description).reduce((acc, key) => {
+  const factories = Object.keys(description).reduce<any>((acc, key) => {
     const factory = description[key] as (...args: List<any>) => any
     const factoryWithType = (...args: List<any>) => ({
       type: key,
@@ -49,7 +50,7 @@ export function createUnion<D extends UnionDescription>(
     })
     acc[key] = factoryWithType
     return acc
-  }, {} as any)
+  }, {})
 
   const isCache: any = {}
   function is(type: string): any {
@@ -67,7 +68,7 @@ export function createUnion<D extends UnionDescription>(
     ...factories,
     is,
     match,
-  } as any
+  }
 }
 
 /**
