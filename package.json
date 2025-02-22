@@ -24,7 +24,7 @@
     "_nodemon": "nodemon -e ts,tsx,js,cjs,mjs,json,env --ignore dist/ --ignore tsbuild/ --ignore src/client/ --ignore uibook/",
     "clean": "rm -fr .parcel-cache dist",
     "prebuild": "yarn clean && yarn checkEnv",
-    "build": "tsc -p tsconfig.build.json && parcel build",
+    "build": "yarn compile && yarn _swc && parcel build",
     "checkEnv": "yarn _swc && yarn _node tsbuild/src/server/checkEnv.js && yarn _node tsbuild/src/client/checkEnv.js",
     "createUser": "yarn _swc && yarn _node tsbuild/src/server/createUser.js",
     "swcServer": "yarn _swc && yarn _node tsbuild/src/server/index.js",
