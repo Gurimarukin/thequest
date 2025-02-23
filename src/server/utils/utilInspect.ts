@@ -2,8 +2,7 @@
                   functional/no-this-expressions */
 import { string } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-import type { Method } from 'got'
-import { HTTPError, RequestError } from 'got'
+import { HTTPError as KyHTTPError } from 'ky'
 import type { InspectOptions } from 'util'
 import util from 'util'
 
@@ -16,11 +15,7 @@ export const utilFormat = (format?: unknown, ...param: unknown[]): string =>
   util.format(customHandlers(format), ...param.map(customHandlers))
 
 const customHandlers = (object: unknown): unknown =>
-  object instanceof RequestError
-    ? MyHttpError.fromRequestError(object)
-    : object instanceof HTTPError
-      ? MyHttpError.fromHTTPError(object)
-      : object
+  object instanceof KyHTTPError ? MyHttpError.fromHTTPError(object) : object
 
 // eslint-disable-next-line functional/no-classes, functional/no-class-inheritance
 class MyHttpError extends Error {
@@ -28,12 +23,12 @@ class MyHttpError extends Error {
 
   private constructor(
     stack: string | undefined,
-    method: Method,
+    method: string,
     url: string,
-    statusCode: number | undefined,
+    status: number | undefined,
     responseBody?: Buffer | string,
   ) {
-    super(`MyHttpError: ${method.toUpperCase()} ${url} - ${statusCode ?? '???'}`)
+    super(`MyHttpError: ${method.toUpperCase()} ${url} - ${status ?? '???'}`)
 
     this.name = 'MyHttpError'
 
@@ -50,23 +45,7 @@ class MyHttpError extends Error {
     this.responseBody = responseBody?.toString('utf-8')
   }
 
-  static fromHTTPError(e: HTTPError): MyHttpError {
-    return new MyHttpError(
-      e.stack,
-      e.request.options.method,
-      e.request.requestUrl,
-      e.response.statusCode,
-    )
-  }
-
-  static fromRequestError(e: RequestError): MyHttpError | RequestError {
-    if (e.request === undefined) return e
-    return new MyHttpError(
-      e.stack,
-      e.request.options.method,
-      e.request.requestUrl,
-      e.response?.statusCode,
-      e.response?.rawBody,
-    )
+  static fromHTTPError(e: KyHTTPError): MyHttpError {
+    return new MyHttpError(e.stack, e.request.method, e.request.url, e.response.status)
   }
 }

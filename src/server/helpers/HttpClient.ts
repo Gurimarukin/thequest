@@ -1,9 +1,10 @@
 import { json as fpTsJson, number, task } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import type { OptionsOfJSONResponseBody } from 'got'
-import got, { HTTPError } from 'got'
 import type { Decoder } from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
+import type { Options as KyOptions, SearchParamsOption } from 'ky'
+import ky, { HTTPError as KyHTTPError } from 'ky'
+import type { Except, Merge } from 'type-fest'
 
 import type { Method } from '../../shared/models/Method'
 import type { NonEmptyArray } from '../../shared/utils/fp'
@@ -13,9 +14,12 @@ import { decodeError } from '../../shared/utils/ioTsUtils'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { unknownToError } from '../utils/unknownToError'
 
-export type HttpOptions<O, B> = Omit<OptionsOfJSONResponseBody, 'url' | 'method' | 'json'> & {
-  json?: Tuple<Encoder<O, B>, B>
-}
+type BaseOptions = Except<KyOptions, 'method' | 'body' | 'json'>
+type BodyOptions = Merge<BaseOptions, { body: BodyInit }>
+type FormOptions = Merge<BaseOptions, { form: Dict<string, string> }>
+type JsonOptions<O, B> = Merge<BaseOptions, { json: Tuple<Encoder<O, B>, B> }>
+
+export type HttpOptions<O, B> = BaseOptions | BodyOptions | JsonOptions<O, B> | FormOptions
 
 type HttpClient = ReturnType<typeof HttpClient>
 
@@ -41,43 +45,72 @@ const HttpClient = (Logger: LoggerGetter) => {
       text(urlWithMethod, options),
       Future.chainEitherK(flow(fpTsJson.parse, Either.mapLeft(unknownToError))),
       Future.chainEitherK(u => {
-        if (decoderWithName === undefined) return Either.right(u as A)
+        if (decoderWithName === undefined) {
+          return Either.right(u as A)
+        }
+
         const [decoder, decoderName] = decoderWithName
+
         return pipe(decoder.decode(u), Either.mapLeft(decodeError(decoderName)(u)))
       }),
     )
   }
 
-  const text = <O, B>(
+  function text<O, B>(
     [url, method]: Tuple<string, Method>,
     options: HttpOptions<O, B> = {},
-  ): Future<string> => {
+  ): Future<string> {
+    const body = ((): BodyInit | undefined => {
+      if ('body' in options) {
+        return options.body
+      }
+
+      if (!('form' in options)) {
+        return undefined
+      }
+
+      const formData = new FormData()
+
+      // eslint-disable-next-line functional/no-loop-statements
+      for (const [key, val] of Dict.toReadonlyArray(options.form)) {
+        // eslint-disable-next-line functional/no-expression-statements
+        formData.append(key, val)
+      }
+
+      return formData
+    })()
+
     const json_ = ((): O | undefined => {
-      if (options.json === undefined) return undefined
+      if (!('json' in options)) {
+        return undefined
+      }
+
       const [encoder, b] = options.json
+
       return encoder.encode(b)
     })()
 
     return pipe(
       Future.tryCatch(() =>
-        got[method](url, {
+        ky[method](url, {
           ...options,
           method,
+          body: body ?? undefined,
           json: json_ === undefined ? undefined : (json_ as Dict<string, unknown>),
         }),
       ),
       task.chainFirstIOK(
         flow(
           Try.fold(
-            e => (e instanceof HTTPError ? Maybe.some(e.response.statusCode) : Maybe.none),
-            res => Maybe.some(res.statusCode),
+            e => (e instanceof KyHTTPError ? Maybe.some(e.response.status) : Maybe.none),
+            res => Maybe.some(res.status),
           ),
           Maybe.getOrElseW(() => '???' as const),
           formatRequest(method, url, options.searchParams),
           logger.debug,
         ),
       ),
-      Future.map(res => res.body as string),
+      Future.chain(res => Future.tryCatch(() => res.text())),
     )
   }
 
@@ -90,7 +123,7 @@ export const statusesToOption = (
   flow(
     Future.map(Maybe.some),
     Future.orElseEitherK(e =>
-      e instanceof HTTPError && pipe(statuses, List.elem(number.Eq)(e.response.statusCode))
+      e instanceof KyHTTPError && pipe(statuses, List.elem(number.Eq)(e.response.status))
         ? Try.success(Maybe.none)
         : Try.failure(e),
     ),
@@ -106,9 +139,7 @@ const formatRequest =
     return `${method.toUpperCase()} ${url}${search !== undefined ? `?${search}` : ''} - ${statusCode}`
   }
 
-function searchParamsToString(
-  searchParams: HttpOptions<unknown, unknown>['searchParams'],
-): string | undefined {
+function searchParamsToString(searchParams: SearchParamsOption): string | undefined {
   if (searchParams === undefined) {
     return undefined
   }
@@ -121,10 +152,14 @@ function searchParamsToString(
     return searchParams.toString()
   }
 
+  const as: List<List<string | number | boolean>> = Array.isArray(searchParams)
+    ? searchParams
+    : Dict.toReadonlyArray(searchParams)
+
   return new URLSearchParams(
     pipe(
-      Dict.toReadonlyArray(searchParams),
-      List.map(([key, val]) => Tuple.of(key, `${val}`)),
+      as,
+      List.map(([key, val]) => Tuple.of(`${key}`, `${val}`)),
       List.asMutable,
     ),
   ).toString()
