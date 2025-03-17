@@ -31,7 +31,7 @@ const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: 
   /**
    * Get latest version from cache if still valid, else, fetch from API and update cache
    */
-  const getLatestVersionWithCache: Future<DDragonVersion> = pipe(
+  const latestVersionCached: Future<DDragonVersion> = pipe(
     apply.sequenceS(io.Apply)({
       maybeVersion: latestVersion.get,
       now: DayJs.now,
@@ -56,42 +56,45 @@ const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: 
     ),
   )
 
-  const champions: (lang: Lang) => (version: DDragonVersion) => Future<DDragonChampions> =
+  function champions(version: DDragonVersion, lang: Lang): Future<DDragonChampions> {
+    return riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).champion
+  }
+
+  const championsCached: (lang: Lang) => (version: DDragonVersion) => Future<DDragonChampions> =
+    fetchCached(lang => version => champions(version, lang))
+
+  const runesCached: (lang: Lang) => (version: DDragonVersion) => Future<List<CDragonRune>> =
     fetchCached(
-      lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).champion,
+      lang => () =>
+        riotApiService.communitydragon.latest.plugins.rcpBeLolGameData.global(lang).v1.perks,
     )
 
-  const runes: (lang: Lang) => (version: DDragonVersion) => Future<List<CDragonRune>> = fetchCached(
-    lang => () =>
-      riotApiService.communitydragon.latest.plugins.rcpBeLolGameData.global(lang).v1.perks,
-  )
-
-  const summoners: (lang: Lang) => (version: DDragonVersion) => Future<DDragonSummoners> =
+  const summonersCached: (lang: Lang) => (version: DDragonVersion) => Future<DDragonSummoners> =
     fetchCached(
       lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).summoner,
     )
 
-  const runeStyles: (lang: Lang) => (version: DDragonVersion) => Future<List<DDragonRuneStyle>> =
-    fetchCached(
-      lang => version =>
-        riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).runesReforged,
-    )
+  const runeStylesCached: (
+    lang: Lang,
+  ) => (version: DDragonVersion) => Future<List<DDragonRuneStyle>> = fetchCached(
+    lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).runesReforged,
+  )
 
   return {
-    latestVersion: getLatestVersionWithCache,
+    latestVersionCached,
     latestChampions: (lang: Lang): Future<WithVersion<DDragonChampions>> =>
       pipe(
-        getLatestVersionWithCache,
+        latestVersionCached,
         Future.bindTo('version'),
-        Future.bind('value', ({ version }) => champions(lang)(version)),
+        Future.bind('value', ({ version }) => championsCached(lang)(version)),
       ),
     champions,
-    summoners,
-    runeStyles,
+    summonersCached,
+    runeStylesCached,
 
     cdragon: {
-      latestRunes: (lang: Lang): Future<List<CDragonRune>> =>
-        pipe(getLatestVersionWithCache, Future.chain(runes(lang))),
+      latestRunesCached: (lang: Lang): Future<List<CDragonRune>> =>
+        pipe(latestVersionCached, Future.chain(runesCached(lang))),
     },
   }
 }

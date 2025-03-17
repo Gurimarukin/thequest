@@ -67,7 +67,7 @@ const StaticDataService = (
       Lang.values,
       lang => (version: DDragonVersion) =>
         pipe(
-          ddragonService.champions(lang)(version),
+          ddragonService.champions(version, lang),
           Future.map(d => DictUtils.values(d.data)),
           Future.chain(staticDataFetch(version)),
         ),
@@ -128,7 +128,7 @@ const StaticDataService = (
       pipe(
         config.mock ? mockService.staticData : futureMaybe.none,
         futureMaybe.getOrElse(() =>
-          pipe(ddragonService.latestVersion, Future.chain(fetchCachedStaticData(lang))),
+          pipe(ddragonService.latestVersionCached, Future.chain(fetchCachedStaticData(lang))),
         ),
       ),
 
@@ -139,16 +139,17 @@ const StaticDataService = (
       ),
   }
 
+  // No need to cache it, as all `ddragonService` functions used are already cached
   function getLatestAdditional(lang: Lang): Future<AdditionalStaticData> {
     return pipe(
-      ddragonService.latestVersion,
+      ddragonService.latestVersionCached,
       Future.chain(version =>
         pipe(
           apply.sequenceS(Future.ApplicativePar)({
             version: Future.successful(version),
-            summoners: ddragonService.summoners(lang)(version),
-            runeStyles: ddragonService.runeStyles(lang)(version),
-            runes: ddragonService.cdragon.latestRunes(lang),
+            summoners: ddragonService.summonersCached(lang)(version),
+            runeStyles: ddragonService.runeStylesCached(lang)(version),
+            runes: ddragonService.cdragon.latestRunesCached(lang),
           }),
         ),
       ),
