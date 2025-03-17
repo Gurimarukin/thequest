@@ -232,6 +232,7 @@ const enGBTranslation: Translation = {
         450: 'ARAM', // Howling Abyss — 5v5 ARAM games
         460: '3v3 Blind Pick', // Twisted Treeline — 3v3 Blind Pick games — Deprecated in patch 9.23"
         470: '3v3 Ranked Flex', // Twisted Treeline — 3v3 Ranked Flex games — Deprecated in patch 9.23"
+        480: 'Swiftplay', // Swiftplay
         490: 'Quickplay', // Summoner's Rift — Normal (Quickplay)
         600: 'Blood Hunt Assassin', // Summoner's Rift — Blood Hunt Assassin games
         610: 'Dark Star: Singularity', // Cosmic Ruins — Dark Star: Singularity games
@@ -243,6 +244,9 @@ const enGBTranslation: Translation = {
         830: 'Coop vs AI Intro', // Summoner's Rift — Co-op vs. AI Intro Bot games
         840: 'Coop vs AI Begginer', // Summoner's Rift — Co-op vs. AI Beginner Bot games
         850: 'Coop vs AI Intermediate', // Summoner's Rift — Co-op vs. AI Intermediate Bot games
+        870: 'Coop vs AI Intro', // Summoner's Rift — Co-op vs. AI Intro Bot games
+        880: 'Coop vs AI Begginer', // Summoner's Rift — Co-op vs. AI Beginner Bot games
+        890: 'Coop vs AI Intermediate', // Summoner's Rift — Co-op vs. AI Intermediate Bot games
         900: 'ARURF', // Summoner's Rift — ARURF games
         910: 'Ascension', // Crystal Scar — Ascension games
         920: 'Legend of the Poro King', // Howling Abyss — Legend of the Poro King games
@@ -264,10 +268,15 @@ const enGBTranslation: Translation = {
         1110: 'TFT Tutorial', // Convergence — Teamfight Tactics Tutorial games
         1111: 'TFT test', // Convergence — Teamfight Tactics test games
         1200: 'Nexus Blitz', // Nexus Blitz — Nexus Blitz games — Deprecated in patch 9.2"
+        1210: "TFT Choncc's Treasure", // Convergence — Teamfight Tactics Choncc's Treasure Mode
         1300: 'Nexus Blitz', // Nexus Blitz — Nexus Blitz games
         1400: 'Ultimate Spellbook', // Summoner's Rift — Ultimate Spellbook games
         1700: 'Arena', // Rings of Wrath — Arena
         1710: 'Arena', // Rings of Wrath — Arena
+        1810: 'Swarm', // Swarm — Swarm Mode Games
+        1820: 'Swarm', // Swarm Mode Games — Swarm
+        1830: 'Swarm', // Swarm Mode Games — Swarm
+        1840: 'Swarm', // Swarm Mode Games — Swarm
         1900: 'Pick URF', // Summoner's Rift — Pick URF games
         2000: 'Tutorial 1', // Summoner's Rift — Tutorial 1
         2010: 'Tutorial 2', // Summoner's Rift — Tutorial 2

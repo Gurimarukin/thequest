@@ -60,7 +60,7 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
     [...apiRoute[state], code],
     ([url, method, code_]) =>
       pipe(
-        apply.sequenceT(Future.ApplicativePar)(
+        apply.sequenceT(Future.ApplyPar)(
           pipe(
             http([url, method], { json: [DiscordCodePayload.codec, { code: code_ }] }),
             Future.chain(() => refreshUser),
@@ -79,7 +79,7 @@ const DiscordRedirectValidated: React.FC<DiscordRedirectValidatedProps> = ({ cod
 
   return (
     <>
-      <pre>{JSON.stringify({ data, error }, null, 2)}</pre>
+      <pre>{JSON.stringify({ data, error })}</pre>
       <AsyncRenderer data={data} error={error}>
         {() => <Navigate to={appRoutes.index} replace={true} />}
       </AsyncRenderer>

@@ -8,6 +8,7 @@ import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
+import { StaticData } from '../../shared/models/api/staticData/StaticData'
 import { DiscordUserId } from '../../shared/models/discord/DiscordUserId'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { NumberUtils } from '../../shared/utils/NumberUtils'
@@ -25,9 +26,9 @@ import type { MasteriesService } from '../services/MasteriesService'
 import type { MatchService } from '../services/MatchService'
 import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
+import type { StaticDataService } from '../services/staticDataService/StaticDataService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import type { WithIp } from '../webServer/utils/WithIp'
-import type { StaticDataController } from './StaticDataController'
 
 const lang: Lang = 'fr_FR'
 
@@ -46,10 +47,17 @@ const MadosayentisutoController = (
   matchService: MatchService,
   riotAccountService: RiotAccountService,
   summonerService: SummonerService,
-  staticDataController: StaticDataController,
+  staticDataService: StaticDataService,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
-  const getStaticData: EndedMiddleware = withIpAndToken(staticDataController.staticData(lang))
+  const getStaticData: EndedMiddleware = withIpAndToken(
+    pipe(
+      staticDataService.getLatest(lang),
+      Future.map((data): StaticData => ({ ...data, docErrors: Maybe.none })),
+      M.fromTaskEither,
+      M.ichain(M.json(StaticData.codec)),
+    ),
+  )
 
   const getUsersProgression: EndedMiddleware = withIpAndToken(
     EndedMiddleware.withBody(NonEmptyArray.decoder(DiscordUserId.codec))(

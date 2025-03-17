@@ -14,6 +14,7 @@ import { Maybe } from '../../shared/utils/fp'
 import { AsyncRenderer } from '../components/AsyncRenderer'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import type { ChildrenFC } from '../models/ChildrenFC'
+import { useToaster } from './ToasterContext'
 import { useTranslation } from './TranslationContext'
 
 const { ddragonCdn } = DDragonUtils
@@ -34,12 +35,28 @@ const StaticDataContext = createContext<StaticDataContext | undefined>(undefined
 
 export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
   const { lang } = useTranslation()
+  const { showToaster } = useToaster()
+
   return (
     <AsyncRenderer
       {...useSWRHttp(apiRoutes.staticData(lang).get, {}, [StaticData.codec, 'StaticData'], {
         revalidateIfStale: false,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
+        onSuccess: ({ docErrors }) =>
+          pipe(
+            docErrors,
+            Maybe.map(errors =>
+              showToaster(
+                'error',
+                <ul className="list-disc pl-4">
+                  {errors.map(e => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>,
+              ),
+            ),
+          ),
       })}
     >
       {data => <StaticDataLoaded data={data}>{children}</StaticDataLoaded>}

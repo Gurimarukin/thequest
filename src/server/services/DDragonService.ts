@@ -1,12 +1,15 @@
-import { apply, io } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { apply, io, number, string } from 'fp-ts'
+import type { Eq } from 'fp-ts/Eq'
+import { flow, pipe } from 'fp-ts/function'
 
 import { DayJs } from '../../shared/models/DayJs'
 import { Store } from '../../shared/models/Store'
 import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
+import { GameMode } from '../../shared/models/api/GameMode'
 import { Lang } from '../../shared/models/api/Lang'
-import type { List } from '../../shared/utils/fp'
-import { Future, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { MapId } from '../../shared/models/api/MapId'
+import { GameQueue } from '../../shared/models/api/activeGame/GameQueue'
+import { Future, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import type { RiotApiCacheTtlConfig } from '../config/Config'
 import { StoredAt } from '../models/StoredAt'
@@ -17,6 +20,11 @@ import type { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import { CacheUtils } from '../utils/CacheUtils'
 import type { RiotApiService } from './RiotApiService'
 
+const missingFromDoc = {
+  queues: [480] satisfies List<GameQueue>,
+  gameModes: ['CHERRY', 'SWIFTPLAY'] satisfies List<GameMode>,
+}
+
 type WithVersion<A> = {
   value: A
   version: DDragonVersion
@@ -24,8 +32,11 @@ type WithVersion<A> = {
 
 type DDragonService = ReturnType<typeof DDragonService>
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: RiotApiService) => {
+const DDragonService = (
+  riotApiCacheTtl: RiotApiCacheTtlConfig,
+  riotApiService: RiotApiService,
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+) => {
   const latestVersion = Store<Maybe<StoredAt<DDragonVersion>>>(Maybe.none)
 
   /**
@@ -80,6 +91,50 @@ const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: 
     lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).runesReforged,
   )
 
+  const checkQueuesMapsAndModes: Future<Maybe<NonEmptyArray<string>>> = pipe(
+    apply.sequenceT(Future.ApplyPar)(
+      pipe(
+        riotApiService.riotgames.developerDocsLol.queues,
+        Future.map(queues =>
+          detectDiffs(number.Eq, 'queues')(
+            GameQueue.values,
+            pipe(
+              queues,
+              List.map(q => q.queueId),
+            ),
+            missingFromDoc.queues,
+          ),
+        ),
+      ),
+      pipe(
+        riotApiService.riotgames.developerDocsLol.maps,
+        Future.map(maps =>
+          detectDiffs(number.Eq, 'maps')(
+            MapId.values,
+            pipe(
+              maps,
+              List.map(m => m.mapId),
+            ),
+          ),
+        ),
+      ),
+      pipe(
+        riotApiService.riotgames.developerDocsLol.gameModes,
+        Future.map(maps =>
+          detectDiffs(string.Eq, 'gameModes')(
+            GameMode.values,
+            pipe(
+              maps,
+              List.map(m => m.gameMode),
+            ),
+            missingFromDoc.gameModes,
+          ),
+        ),
+      ),
+    ),
+    Future.map(flow(List.flatten, NonEmptyArray.fromReadonlyArray)),
+  )
+
   return {
     latestVersionCached,
     latestChampions: (lang: Lang): Future<WithVersion<DDragonChampions>> =>
@@ -96,6 +151,8 @@ const DDragonService = (riotApiCacheTtl: RiotApiCacheTtlConfig, riotApiService: 
       latestRunesCached: (lang: Lang): Future<List<CDragonRune>> =>
         pipe(latestVersionCached, Future.chain(runesCached(lang))),
     },
+
+    checkQueuesMapsAndModes,
   }
 }
 
@@ -117,9 +174,30 @@ const fetchCached = <A>(
       ),
     () => version_ => io.of(data => DDragonVersion.Eq.equals(data.version, version_)),
   )
+
   return lang => version =>
     pipe(
       res(lang)(version),
       Future.map(a => a.value),
     )
 }
+
+const detectDiffs =
+  <A>(eq: Eq<A>, label: string) =>
+  (fromModel: List<A>, fromDoc: List<A>, additionalDoc: List<A> = []): List<string> => {
+    const doc = pipe(fromDoc, List.concat(additionalDoc))
+
+    const alreadyFromDoc = List.intersection(eq)(fromDoc, additionalDoc)
+    const additional = List.difference(eq)(fromModel, doc)
+    const missing = List.difference(eq)(doc, fromModel)
+
+    return List.compact([
+      List.isNonEmpty(alreadyFromDoc)
+        ? Maybe.some(`Already from doc ${label}: ${alreadyFromDoc.join(', ')}`)
+        : Maybe.none,
+      List.isNonEmpty(additional)
+        ? Maybe.some(`Additional ${label}: ${additional.join(', ')}`)
+        : Maybe.none,
+      List.isNonEmpty(missing) ? Maybe.some(`Missing ${label}: ${missing.join(', ')}`) : Maybe.none,
+    ])
+  }

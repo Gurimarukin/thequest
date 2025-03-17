@@ -81,7 +81,7 @@ export const Application = ({
     matchService,
     riotAccountService,
     summonerService,
-    staticDataController,
+    staticDataService,
   )
 
   const rateLimiter = RateLimiter(Logger, withIp, rateLimiterLifeTime)

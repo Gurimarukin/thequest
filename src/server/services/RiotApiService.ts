@@ -25,6 +25,9 @@ import { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
+import { GameModeDoc } from '../models/riot/doc/GameModeDoc'
+import { MapDoc } from '../models/riot/doc/MapDoc'
+import { QueueDoc } from '../models/riot/doc/QueueDoc'
 import { RiotMatch } from '../models/riot/match/RiotMatch'
 import type { SummonerId } from '../models/summoner/SummonerId'
 import type { MockService } from './MockService'
@@ -87,6 +90,10 @@ const platformCode: Dict<Platform, string> = {
   VN2: 'VN2',
 }
 
+function developerUrl(path: string): string {
+  return `https://static.developer.riotgames.com${path}`
+}
+
 type RiotApiService = ReturnType<typeof RiotApiService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -97,6 +104,24 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
     [ddragon('/api/versions.json'), 'get'],
     {},
     [NonEmptyArray.decoder(DDragonVersion.codec), 'NonEmptyArray<DDragonVersion>'],
+  )
+
+  const riotgamesDeveloperDocsLolQueues: Future<List<QueueDoc>> = httpClient.json(
+    [developerUrl('/docs/lol/queues.json'), 'get'],
+    {},
+    [List.decoder(QueueDoc.decoder), 'List<QueueDoc>'],
+  )
+
+  const riotgamesDeveloperDocsLolMaps: Future<List<MapDoc>> = httpClient.json(
+    [developerUrl('/docs/lol/maps.json'), 'get'],
+    {},
+    [List.decoder(MapDoc.decoder), 'List<MapDoc>'],
+  )
+
+  const riotgamesDeveloperDocsLolGameModes: Future<List<GameModeDoc>> = httpClient.json(
+    [developerUrl('/docs/lol/gameModes.json'), 'get'],
+    {},
+    [List.decoder(GameModeDoc.decoder), 'List<GameModeDoc>'],
   )
 
   return {
@@ -291,6 +316,12 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
             },
           },
         },
+      },
+
+      developerDocsLol: {
+        queues: riotgamesDeveloperDocsLolQueues,
+        maps: riotgamesDeveloperDocsLolMaps,
+        gameModes: riotgamesDeveloperDocsLolGameModes,
       },
     },
 

@@ -24,6 +24,7 @@ const GameMode = createEnum(
   'NEXUSBLITZ', // Nexus Blitz games
   'ULTBOOK', // Ultimate Spellbook games
   'CHERRY', // Arena
+  'SWIFTPLAY', // Swiftplay
 )
 
 export { GameMode }

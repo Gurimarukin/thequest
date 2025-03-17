@@ -51,6 +51,7 @@ const e = createEnum(
   450, // Howling Abyss — 5v5 ARAM games
   460, // Twisted Treeline — 3v3 Blind Pick games — Deprecated in patch 9.23"
   470, // Twisted Treeline — 3v3 Ranked Flex games — Deprecated in patch 9.23"
+  480, // Swiftplay
   490, // Summoner's Rift — Normal (Quickplay)
   600, // Summoner's Rift — Blood Hunt Assassin games
   610, // Cosmic Ruins — Dark Star: Singularity games
@@ -59,9 +60,12 @@ const e = createEnum(
   800, // Twisted Treeline — Co-op vs. AI Intermediate Bot games — Deprecated in patch 9.23"
   810, // Twisted Treeline — Co-op vs. AI Intro Bot games — Deprecated in patch 9.23"
   820, // Twisted Treeline — Co-op vs. AI Beginner Bot games
-  830, // Summoner's Rift — Co-op vs. AI Intro Bot games
-  840, // Summoner's Rift — Co-op vs. AI Beginner Bot games
-  850, // Summoner's Rift — Co-op vs. AI Intermediate Bot games
+  830, // Summoner's Rift — Co-op vs. AI Intro Bot games — Deprecated in March 2024 in favor of queueId 870
+  840, // Summoner's Rift — Co-op vs. AI Beginner Bot games — Deprecated in March 2024 in favor of queueId 880
+  850, // Summoner's Rift — Co-op vs. AI Intermediate Bot games — Deprecated in March 2024 in favor of queueId 890
+  870, // Summoner's Rift — Co-op vs. AI Intro Bot games
+  880, // Summoner's Rift — Co-op vs. AI Beginner Bot games
+  890, // Summoner's Rift — Co-op vs. AI Intermediate Bot games
   900, // Summoner's Rift — ARURF games
   910, // Crystal Scar — Ascension games
   920, // Howling Abyss — Legend of the Poro King games
@@ -83,10 +87,15 @@ const e = createEnum(
   1110, // Convergence — Teamfight Tactics Tutorial games
   1111, // Convergence — Teamfight Tactics test games
   1200, // Nexus Blitz — Nexus Blitz games — Deprecated in patch 9.2"
+  1210, // Convergence — Teamfight Tactics Choncc's Treasure Mode
   1300, // Nexus Blitz — Nexus Blitz games
   1400, // Summoner's Rift — Ultimate Spellbook games
   1700, // Rings of Wrath — Arena
   1710, // Rings of Wrath — Arena
+  1810, // Swarm — Swarm Mode Games
+  1820, // Swarm Mode Games — Swarm
+  1830, // Swarm Mode Games — Swarm
+  1840, // Swarm Mode Games — Swarm
   1900, // Summoner's Rift — Pick URF games
   2000, // Summoner's Rift — Tutorial 1
   2010, // Summoner's Rift — Tutorial 2
