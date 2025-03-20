@@ -25,7 +25,7 @@ function championPercents({
   championPointsUntilNextLevel,
   tokensEarned,
 }: SimpleChampion): number {
-  if (10 < championLevel) return 100
+  if (10 <= championLevel) return 100
 
   const pointsPercents =
     Math.min(
