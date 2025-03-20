@@ -21,6 +21,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { InformationCircleOutline } from '../../imgs/svgs/icons'
 import type { Translation } from '../../models/Translation'
 import { TranslationUtils } from '../../utils/TranslationUtils'
+import { masteryTextColor } from '../../utils/colors'
 import { cx } from '../../utils/cx'
 
 const { round } = NumberUtils
@@ -188,7 +189,9 @@ const getMasteryImgWithCount =
 
     return (
       <div className={cx('flex flex-col items-center', className)}>
-        <span className="text-sm font-semibold">{t.number(count ?? -1)}</span>
+        <span className={cx('text-sm font-semibold', masteryTextColor(level))}>
+          {t.number(count ?? -1)}
+        </span>
         <MasteryImg level={level} className={cx('w-[3.375rem]', imgClassName)} />
       </div>
     )

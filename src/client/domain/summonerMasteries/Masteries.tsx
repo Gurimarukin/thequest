@@ -27,7 +27,7 @@ import { CountWithTotal } from '../../models/CountWithTotal'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { masteryHistogramGradient, masteryRulerColor } from '../../utils/colors'
+import { masteryHistogramGradient, masteryRulerColor, masteryTextColor } from '../../utils/colors'
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
@@ -365,7 +365,10 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
           ),
         )}
         <div className="flex items-center">
-          <span ref={placementRef} className="pl-1.5 pt-1 font-semibold">
+          <span
+            ref={placementRef}
+            className={cx('pl-1.5 pt-1 font-semibold', masteryTextColor(championLevel))}
+          >
             {t.common.number(championPoints)}
           </span>
         </div>
