@@ -3,7 +3,8 @@
 - store full match
 - single discord oauth (login/register)
 - render newtypes
-- visual hint if `markRequiredForNextLevel < tokensEarned`
+- visual hint if `tokensEarned > markRequiredForNextLevel`
+- bug: hide tooltip on route change
 
 - are `fromIO`s useful (simply use `myIo()`)?
 - try fancy league icons?
