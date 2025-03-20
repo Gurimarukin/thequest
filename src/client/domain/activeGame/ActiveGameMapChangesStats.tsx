@@ -19,7 +19,7 @@ export const ActiveGameMapChangesStats: React.FC<Props> = ({ reverse, ...props }
     () =>
       getMapChangesStats(
         (t, name) => {
-          const icon = renderStatIcon(t.mapChanges, name, props.draggable, 'h-full w-full')
+          const icon = renderStatIcon(t.mapChanges, name, props.draggable, 'size-full')
           const renderStatValue_ = renderStatValue(name, '')
 
           return value => (
