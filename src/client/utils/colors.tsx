@@ -3,6 +3,8 @@ import type { Except } from 'type-fest'
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import { type Dict } from '../../shared/utils/fp'
 
+import { cx } from './cx'
+
 type LevelClassNames = Dict<`${ChampionLevel}`, string>
 type LevelExcept0ClassNames = Except<LevelClassNames, '0'>
 
@@ -28,20 +30,20 @@ export const masterySquareBorderGradientDefs = (
         <stop offset="55%" stopColor="#fffad8" />
         <stop offset="80%" stopColor="#c8fdfc" />
       </linearGradient>
-      {simpleGradientDef(9, '#d2651b', '#8e3d25')}
-      {simpleGradientDef(8, '#8d12c9', '#560292')}
-      {simpleGradientDef(7, '#0369a1', '#324bd0')}
-      {simpleGradientDef(6, '#329055', '#266846')}
-      {simpleGradientDef(5, '#94a3b8', '#475569')}
-      {simpleGradientDef(4, '#71717a', '#52525b')}
-      {simpleGradientDef(3, '#71717a', '#52525b')}
-      {simpleGradientDef(2, '#71717a', '#52525b')}
-      {simpleGradientDef(1, '#71717a', '#52525b')}
+      {gradient(9, '#d2651b', '#8e3d25')}
+      {gradient(8, '#8d12c9', '#560292')}
+      {gradient(7, '#0369a1', '#324bd0')}
+      {gradient(6, '#329055', '#266846')}
+      {gradient(5, '#94a3b8', '#475569')}
+      {gradient(4, '#71717a', '#52525b')}
+      {gradient(3, '#71717a', '#52525b')}
+      {gradient(2, '#71717a', '#52525b')}
+      {gradient(1, '#71717a', '#52525b')}
     </defs>
   </svg>
 )
 
-function simpleGradientDef(level: ChampionLevel, from: string, to: string): React.ReactElement {
+function gradient(level: ChampionLevel, from: string, to: string): React.ReactElement {
   return (
     <linearGradient id={masterySquareBorderGradientId(level)} x1="1" y1="0" x2="0" y2="0">
       <stop offset="0%" stopColor={from} />
@@ -53,16 +55,16 @@ function simpleGradientDef(level: ChampionLevel, from: string, to: string): Reac
 // Update in sync with `masterySquareBorderGradientDefs` above.
 // Define some `text-...` for `<ChampionTooltip />` better contrast (default: black)
 const masteryHistogramGradientClassName = {
-  10: 'bg-gradient-to-br from-[#f3eafb] from-30% via-[#fffad8] to-[#c8fdfc] to-80% text-black',
-  9: 'bg-gradient-to-r from-[#d2651b] to-[#8e3d25] text-shadow',
-  8: 'bg-gradient-to-r from-[#8d12c9] to-[#560292] text-shadow',
-  7: 'bg-gradient-to-r from-[#0369a1] to-[#324bd0] text-shadow',
-  6: 'bg-gradient-to-r from-[#329055] to-[#266846] text-shadow',
-  5: 'bg-gradient-to-r from-[#94a3b8] to-[#475569] text-shadow',
-  4: 'bg-gradient-to-r from-[#71717a] to-[#52525b] text-shadow',
-  3: 'bg-gradient-to-r from-[#71717a] to-[#52525b] text-shadow',
-  2: 'bg-gradient-to-r from-[#71717a] to-[#52525b] text-shadow',
-  1: 'bg-gradient-to-r from-[#71717a] to-[#52525b] text-shadow',
+  10: 'from-[#f3eafb] via-[#fffad8] to-[#c8fdfc] text-black',
+  9: 'from-[#d2651b] to-[#8e3d25] text-shadow',
+  8: 'from-[#8d12c9] to-[#560292] text-shadow',
+  7: 'from-[#0369a1] to-[#324bd0] text-shadow',
+  6: 'from-[#329055] to-[#266846] text-shadow',
+  5: 'from-[#94a3b8] to-[#475569] text-shadow',
+  4: 'from-[#71717a] to-[#52525b] text-shadow',
+  3: 'from-[#71717a] to-[#52525b] text-shadow',
+  2: 'from-[#71717a] to-[#52525b] text-shadow',
+  1: 'from-[#71717a] to-[#52525b] text-shadow',
 } satisfies LevelExcept0ClassNames
 
 // Need iife for Tailwind extension to work ✨
@@ -106,7 +108,8 @@ export function masteryHistogramGradient(championLevel: number): string | undefi
 
   if (level === 0) return undefined
 
-  return masteryHistogramGradientClassName[level]
+  const commonClassName = 'bg-gradient-to-br from-30% to-80%'
+  return cx(commonClassName, masteryHistogramGradientClassName[level])
 }
 
 export function masteryTextColor(championLevel: number): string {
