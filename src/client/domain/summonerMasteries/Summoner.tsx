@@ -122,26 +122,25 @@ export const Summoner: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-3">
-        <div ref={masteriesRef} className="flex items-end gap-2">
-          {/* TODO: 10+ */}
+      <div className="flex flex-col items-center gap-2">
+        <div ref={masteriesRef} className="flex items-end gap-3 pb-1">
           <MasteryImgWithCount level={10} imgClassName="!w-20" />
-          <MasteryImgWithCount level={9} imgClassName="!w-20" className="-mb-1.5" />
-          <MasteryImgWithCount level={8} imgClassName="!w-20 -mt-0.5" className="-mb-1.5" />
+          <MasteryImgWithCount level={9} imgClassName="!w-20 -mt-0.5" className="-mb-1" />
+          <MasteryImgWithCount level={8} imgClassName="!w-20 -mt-0.5" className="-mb-1" />
         </div>
         <Tooltip
           hoverRef={masteriesRef}
           className="flex flex-col items-center gap-2 px-5 pb-4 pt-3"
         >
-          <div className="grid grid-cols-[repeat(7,54px)_34px] items-end gap-1">
+          <div className="flex items-end justify-center gap-3">
             <MasteryImgWithCount level={7} />
-            <MasteryImgWithCount level={6} imgClassName="-mt-1" />
-            <MasteryImgWithCount level={5} imgClassName="-mt-1.5" />
-            <MasteryImgWithCount level={4} imgClassName="-mt-1.5" />
-            <MasteryImgWithCount level={3} imgClassName="-mt-1.5" />
-            <MasteryImgWithCount level={2} imgClassName="-mt-2.5" />
-            <MasteryImgWithCount level={1} imgClassName="-mt-2.5" />
-            <MasteryImgWithCount level={0} imgClassName="-mt-2.5" className="-mx-2.5" />
+            <MasteryImgWithCount level={6} />
+            <MasteryImgWithCount level={5} imgClassName="-mt-1" className="-mx-0.5" />
+            <MasteryImgWithCount level={4} imgClassName="-mt-1" className="-mx-1" />
+            <MasteryImgWithCount level={3} imgClassName="-mt-1.5" className="-mx-1.5" />
+            <MasteryImgWithCount level={2} imgClassName="-mt-1.5" className="-mx-2" />
+            <MasteryImgWithCount level={1} imgClassName="-mt-2" className="-mx-2.5" />
+            <MasteryImgWithCount level={0} imgClassName="-mt-2" className="-mx-4" />
           </div>
           <div className="grid grid-cols-[auto_auto] gap-x-2">
             <span className="justify-self-end">{t.summoner.masteryScore}</span>
@@ -190,7 +189,7 @@ const getMasteryImgWithCount =
     return (
       <div className={cx('flex flex-col items-center', className)}>
         <span className="text-sm font-semibold">{t.number(count ?? -1)}</span>
-        <MasteryImg level={level} className={cx('w-full', imgClassName)} />
+        <MasteryImg level={level} className={cx('w-[3.375rem]', imgClassName)} />
       </div>
     )
   }

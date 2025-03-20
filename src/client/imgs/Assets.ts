@@ -3,6 +3,7 @@ import type { ChampionFaction } from '../../shared/models/api/champion/ChampionF
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
 import type { Dict } from '../../shared/utils/fp'
 
+// https://wiki.leagueoflegends.com/en-us/Category:Lore_icons
 const factions: Dict<ChampionFaction, string> = {
   bandle: new URL('./factions/bandle.webp', import.meta.url).toString(),
   bilgewater: new URL('./factions/bilgewater.webp', import.meta.url).toString(),
@@ -19,6 +20,16 @@ const factions: Dict<ChampionFaction, string> = {
   zaun: new URL('./factions/zaun.webp', import.meta.url).toString(),
 }
 
+// https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/mastery-{n}.png
+//
+// Pre-process:
+// 1. Put all masteries together (each in its own layer)
+// 2. Create mastery 0 by removing wings of mastery 1
+// 3. Crop to content
+// 4. Commit those "large" versions
+// 5. Reduce widths for actual use (2 times the in-app width):
+//   - masteries 10-8: width 240
+//   - masteries 7-0: width 116
 const masteries: Dict<`${ChampionLevel}`, string> = {
   0: new URL('./masteries/mastery-0.png', import.meta.url).toString(),
   1: new URL('./masteries/mastery-1.png', import.meta.url).toString(),

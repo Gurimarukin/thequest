@@ -196,7 +196,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
             isMenuVisible={levelsMenuIsVisible}
             onMouseEnter={handleMasteriesMouseEnter}
             tooltipPlacement="top"
-            iconClassName="px-[5px] pt-1 pb-0.5"
+            iconClassName="px-0.5 pt-1.5 pb-1"
             className="relative z-30"
           />
           <ul
@@ -316,7 +316,7 @@ const getSelectLevelsButton =
           )}
         >
           <span>{children}</span>
-          <span className="flex gap-1">
+          <span className="flex gap-0.5">
             {pipe(
               levelsSet,
               readonlySet.toReadonlyArray<ChampionLevel>(ord.reverse(ChampionLevel.Ord)),
