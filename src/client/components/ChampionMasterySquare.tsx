@@ -11,7 +11,7 @@ import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
 import { AddOutline, RemoveOutline, SparkSolid, SparklesSharp } from '../imgs/svgs/icons'
-import { masteryBgColor, masterySquareBorderGradient, masteryTextColor } from '../utils/colors'
+import { masteryBgColor, masterySquareBorderGradientId, masteryTextColor } from '../utils/colors'
 import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
 import { CroppedChampionSquare } from './CroppedChampionSquare'
@@ -138,12 +138,12 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
                     // always full for histogram
                     championPointsUntilNextLevel: 0,
                     championPointsSinceLastLevel: 1,
-                    gradient: undefined,
+                    stroke: 'currentColor',
                   }
                 : {
                     championPointsUntilNextLevel,
                     championPointsSinceLastLevel,
-                    gradient: masterySquareBorderGradient(championLevel),
+                    stroke: `url(#${masterySquareBorderGradientId(championLevel)})`,
                   })}
             />
           ) : null}
@@ -233,7 +233,7 @@ type LevelSVGProps = {
   championLevel: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
-  gradient: React.ReactElement | undefined
+  stroke: string
 }
 
 const totalLength = 100.5
@@ -242,19 +242,18 @@ const LevelSVG: React.FC<LevelSVGProps> = ({
   championLevel,
   championPointsSinceLastLevel,
   championPointsUntilNextLevel,
-  gradient,
+  stroke,
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
     className={cx('size-full', masteryBgColor(championLevel))}
   >
-    {gradient}
     <circle
       cx="16"
       cy="16"
       r="16"
-      stroke={gradient !== undefined ? 'url(#linear)' : 'currentColor'}
+      stroke={stroke}
       strokeWidth="16"
       strokeDasharray={totalLength}
       strokeDashoffset={

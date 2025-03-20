@@ -1,7 +1,7 @@
 import type { Except } from 'type-fest'
 
 import type { ChampionLevel } from '../../shared/models/api/champion/ChampionLevel'
-import type { Dict, PartialDict } from '../../shared/utils/fp'
+import { type Dict } from '../../shared/utils/fp'
 
 type LevelClassNames = Dict<`${ChampionLevel}`, string>
 type LevelExcept0ClassNames = Except<LevelClassNames, '0'>
@@ -19,18 +19,38 @@ const masteryBgColorClassName = {
   1: 'text-[#71717a]',
 } satisfies LevelExcept0ClassNames
 
-const masterySquareBorderGradients: PartialDict<`${ChampionLevel}`, React.ReactElement> = {
-  10: (
+// Update in sync with `masteryHistogramGradientClassName` below.
+export const masterySquareBorderGradientDefs = (
+  <svg xmlns="http://www.w3.org/2000/svg" className="size-0">
     <defs>
-      <linearGradient id="linear" x1="1" y1="0" x2="0" y2="0">
+      <linearGradient id={masterySquareBorderGradientId(10)} x1="1" y1="0" x2="0" y2="0">
         <stop offset="30%" stopColor="#f3eafb" />
         <stop offset="55%" stopColor="#fffad8" />
         <stop offset="80%" stopColor="#c8fdfc" />
       </linearGradient>
+      {simpleGradientDef(9, '#d2651b', '#8e3d25')}
+      {simpleGradientDef(8, '#8d12c9', '#560292')}
+      {simpleGradientDef(7, '#0369a1', '#324bd0')}
+      {simpleGradientDef(6, '#329055', '#266846')}
+      {simpleGradientDef(5, '#94a3b8', '#475569')}
+      {simpleGradientDef(4, '#71717a', '#52525b')}
+      {simpleGradientDef(3, '#71717a', '#52525b')}
+      {simpleGradientDef(2, '#71717a', '#52525b')}
+      {simpleGradientDef(1, '#71717a', '#52525b')}
     </defs>
-  ),
+  </svg>
+)
+
+function simpleGradientDef(level: ChampionLevel, from: string, to: string): React.ReactElement {
+  return (
+    <linearGradient id={masterySquareBorderGradientId(level)} x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0%" stopColor={from} />
+      <stop offset="100%" stopColor={to} />
+    </linearGradient>
+  )
 }
 
+// Update in sync with `masterySquareBorderGradientDefs` above.
 // Define some `text-...` for `<ChampionTooltip />` better contrast (default: black)
 const masteryHistogramGradientClassName = {
   10: 'bg-gradient-to-br from-[#f3eafb] from-30% via-[#fffad8] to-[#c8fdfc] to-80% text-black',
@@ -77,8 +97,8 @@ export function masteryBgColor(championLevel: number): string | undefined {
   return masteryBgColorClassName[level]
 }
 
-export function masterySquareBorderGradient(championLevel: number): React.ReactElement | undefined {
-  return masterySquareBorderGradients[clampChampionLevel(championLevel)]
+export function masterySquareBorderGradientId(championLevel: number): string {
+  return `linear-${clampChampionLevel(championLevel)}`
 }
 
 export function masteryHistogramGradient(championLevel: number): string | undefined {

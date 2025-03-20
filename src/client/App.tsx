@@ -4,6 +4,7 @@ import { ToasterContextProvider } from './contexts/ToasterContext'
 import { TranslationContextProvider } from './contexts/TranslationContext'
 import { UserContextProvider } from './contexts/UserContext'
 import { AppRouterComponent } from './router/AppRouterComponent'
+import { masterySquareBorderGradientDefs } from './utils/colors'
 
 export const App: React.FC = () => (
   <TranslationContextProvider>
@@ -11,6 +12,8 @@ export const App: React.FC = () => (
       <HistoryContextProvider>
         <UserContextProvider>
           <StaticDataContextProvider>
+            {masterySquareBorderGradientDefs}
+
             <AppRouterComponent />
           </StaticDataContextProvider>
         </UserContextProvider>
