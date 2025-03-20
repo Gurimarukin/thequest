@@ -70,10 +70,10 @@ export const ActiveGameRunes: React.FC<Props> = ({
         />
         <RunePath
           runes={shards}
-          reverse={!reverse}
+          reverse={reverse}
           tooltipShouldHide={tooltipShouldHide}
           draggable={draggable}
-          className="justify-end gap-1.5"
+          className="gap-1.5"
           liClassName="!w-3 h-3 overflow-hidden"
           runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
         />
@@ -118,6 +118,7 @@ const getFindRunes =
           ),
       ),
     )
+
     return pipe(
       runeIds,
       List.filterMap(
@@ -148,7 +149,7 @@ const RunePath: React.FC<RunePathProps> = ({
   liClassName,
   runeClassName,
 }) => (
-  <ul className={cx('flex', ['flex-row-reverse', reverse], className)}>
+  <ul className={cx('flex justify-end', ['flex-row-reverse', !reverse], className)}>
     {runes.map((r, i) => (
       <li
         // eslint-disable-next-line react/no-array-index-key
