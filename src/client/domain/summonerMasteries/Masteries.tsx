@@ -27,7 +27,7 @@ import { CountWithTotal } from '../../models/CountWithTotal'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
 import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
-import { masteryBgGradient, masteryRulerColor } from '../../utils/colors'
+import { masteryHistogramGradient, masteryRulerColor } from '../../utils/colors'
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
 import { MasteriesFilters } from './filters/MasteriesFilters'
@@ -329,7 +329,10 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
                 <div className="relative h-7">
                   <div
                     ref={hoverRef2}
-                    className={cx('absolute left-0 top-0 h-full', masteryBgGradient(championLevel))}
+                    className={cx(
+                      'absolute left-0 top-0 h-full',
+                      masteryHistogramGradient(championLevel),
+                    )}
                     style={{ width: p(championPoints) }}
                   />
                   {0 < championPointsUntilNextLevel ? (

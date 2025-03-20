@@ -5,7 +5,7 @@ import type { ChampionPosition } from '../../shared/models/api/champion/Champion
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
-import { masteryBgGradient } from '../utils/colors'
+import { masteryHistogramGradient } from '../utils/colors'
 import { cx } from '../utils/cx'
 import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
@@ -72,8 +72,8 @@ export const ChampionTooltip: React.FC<Props> = ({
         </div>
         <h3
           className={cx(
-            'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black text-shadow',
-            masteryBgGradient(championLevel),
+            'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black',
+            masteryHistogramGradient(championLevel),
           )}
         >
           {name}

@@ -11,7 +11,7 @@ import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 import { useTranslation } from '../contexts/TranslationContext'
 import { AddOutline, RemoveOutline, SparkSolid, SparklesSharp } from '../imgs/svgs/icons'
-import { masteryBgColor, masteryTextColor } from '../utils/colors'
+import { masteryBgColor, masterySquareBorderGradient, masteryTextColor } from '../utils/colors'
 import { cx } from '../utils/cx'
 import { ChampionTooltip } from './ChampionTooltip'
 import { CroppedChampionSquare } from './CroppedChampionSquare'
@@ -125,7 +125,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         {/* level border */}
         <div
           className={cx(
-            'h-full w-full overflow-hidden rounded-bl-xl bg-black area-1',
+            'size-full overflow-hidden rounded-bl-xl bg-black area-1',
             isHistogram ? 'rounded-br-xl' : 'rounded-tr-xl',
             ['shadow-even shadow-black', !noShadow],
           )}
@@ -134,9 +134,17 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
             <LevelSVG
               championLevel={championLevel}
               {...(isHistogram
-                ? // always full for histogram
-                  { championPointsUntilNextLevel: 0, championPointsSinceLastLevel: 1 }
-                : { championPointsUntilNextLevel, championPointsSinceLastLevel })}
+                ? {
+                    // always full for histogram
+                    championPointsUntilNextLevel: 0,
+                    championPointsSinceLastLevel: 1,
+                    gradient: undefined,
+                  }
+                : {
+                    championPointsUntilNextLevel,
+                    championPointsSinceLastLevel,
+                    gradient: masterySquareBorderGradient(championLevel),
+                  })}
             />
           ) : null}
         </div>
@@ -225,6 +233,7 @@ type LevelSVGProps = {
   championLevel: number
   championPointsSinceLastLevel: number
   championPointsUntilNextLevel: number
+  gradient: React.ReactElement | undefined
 }
 
 const totalLength = 100.5
@@ -233,17 +242,19 @@ const LevelSVG: React.FC<LevelSVGProps> = ({
   championLevel,
   championPointsSinceLastLevel,
   championPointsUntilNextLevel,
+  gradient,
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
-    className={cx('h-full w-full', masteryBgColor(championLevel))}
+    className={cx('size-full', masteryBgColor(championLevel))}
   >
+    {gradient}
     <circle
       cx="16"
       cy="16"
       r="16"
-      stroke="currentColor"
+      stroke={gradient !== undefined ? 'url(#linear)' : 'currentColor'}
       strokeWidth="16"
       strokeDasharray={totalLength}
       strokeDashoffset={
