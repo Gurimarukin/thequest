@@ -4,11 +4,11 @@ import * as C from 'io-ts/Codec'
 import { LeagueMiniSeriesProgress } from '../../../shared/models/api/league/LeagueMiniSeriesProgress'
 import { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
+import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 import { LeagueId } from '../riot/LeagueId'
-import { SummonerId } from '../summoner/SummonerId'
 
 const commonCodec = C.struct({
   leaguePoints: C.number,
@@ -42,7 +42,7 @@ const leagueEntryCodec = pipe(
 type LeagueEntryDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  summonerId: SummonerId.codec,
+  puuid: Puuid.codec,
   entries: List.codec(leagueEntryCodec),
   insertedAt: DayJsFromDate.codec,
 })

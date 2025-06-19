@@ -29,7 +29,6 @@ import { GameModeDoc } from '../models/riot/doc/GameModeDoc'
 import { MapDoc } from '../models/riot/doc/MapDoc'
 import { QueueDoc } from '../models/riot/doc/QueueDoc'
 import { RiotMatch } from '../models/riot/match/RiotMatch'
-import type { SummonerId } from '../models/summoner/SummonerId'
 import type { MockService } from './MockService'
 
 const { ddragon, ddragonCdn } = DDragonUtils
@@ -194,13 +193,10 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
           leagueV4: {
             entries: {
-              bySummoner: (summonerId: SummonerId): Future<Maybe<List<RiotLeagueEntry>>> =>
+              byPuuid: (puuid: Puuid): Future<Maybe<List<RiotLeagueEntry>>> =>
                 pipe(
                   httpClient.json(
-                    [
-                      platformUrl(platform, `/lol/league/v4/entries/by-summoner/${summonerId}`),
-                      'get',
-                    ],
+                    [platformUrl(platform, `/lol/league/v4/entries/by-puuid/${puuid}`), 'get'],
                     { headers: { [xRiotToken]: lolKey } },
                     [List.decoder(RiotLeagueEntry.decoder), 'List<RiotLeagueEntry>'],
                   ),
@@ -236,17 +232,6 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
           summonerV4: {
             summoners: {
-              /** @deprecated ⚠️ Consistently looking up summoner ids that don't exist will result in a blacklist. */
-              byId: (summonerId: SummonerId): Future<Maybe<RiotSummoner>> =>
-                pipe(
-                  httpClient.json(
-                    [platformUrl(platform, `/lol/summoner/v4/summoners/${summonerId}`), 'get'],
-                    { headers: { [xRiotToken]: lolKey } },
-                    [RiotSummoner.decoder, 'RiotSummoner'],
-                  ),
-                  statusesToOption(404),
-                ),
-
               byPuuid: (puuid: Puuid): Future<Maybe<RiotSummoner>> =>
                 pipe(
                   httpClient.json(

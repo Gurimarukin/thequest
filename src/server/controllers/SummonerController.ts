@@ -50,7 +50,6 @@ import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { RiotAccount } from '../models/riot/RiotAccount'
 import type { Summoner, SummonerWithRiotId } from '../models/summoner/Summoner'
-import type { SummonerId } from '../models/summoner/SummonerId'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { WikiChampionData } from '../models/wiki/WikiChampionData'
 import { WikiChampionPosition } from '../models/wiki/WikiChampionPosition'
@@ -191,7 +190,7 @@ const SummonerController = (
       futureEither.bindTo('summoner'),
       futureEither.bind('leagues', ({ summoner }) =>
         pipe(
-          findLeagues(platform, summoner.id),
+          findLeagues(platform, summoner.puuid),
           Future.map(Either.fromOption(() => 'Leagues not found')),
         ),
       ),
@@ -215,11 +214,11 @@ const SummonerController = (
 
   function findLeagues(
     platform: Platform,
-    summonerId: SummonerId,
+    puuid: Puuid,
     options?: { overrideInsertedAfter: DayJs },
   ): Future<Maybe<SummonerLeaguesView>> {
     return pipe(
-      leagueEntryService.findBySummoner(platform, summonerId, options),
+      leagueEntryService.findBySummoner(platform, puuid, options),
       futureMaybe.map(
         (entries): Leagues => ({
           soloDuo: pipe(
@@ -337,7 +336,7 @@ const SummonerController = (
               Future.failed<RiotAccount>(couldntFindAccountError(participant.puuid)),
             ),
           ),
-          leagues: findLeagues(platform, participant.summonerId, {
+          leagues: findLeagues(platform, participant.puuid, {
             overrideInsertedAfter: gameInsertedAt,
           }),
           masteriesAndShardsCount: findMasteriesAndShardsCount(

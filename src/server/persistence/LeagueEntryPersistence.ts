@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import type { DayJs } from '../../shared/models/DayJs'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future } from '../../shared/utils/fp'
 
@@ -8,7 +9,6 @@ import { FpCollection } from '../helpers/FpCollection'
 import { LeagueEntryDb } from '../models/league/LeagueEntryDb'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
-import { SummonerId } from '../models/summoner/SummonerId'
 import { DayJsFromDate } from '../utils/ioTsUtils'
 
 type LeagueEntryPersistence = ReturnType<typeof LeagueEntryPersistence>
@@ -21,24 +21,21 @@ const LeagueEntryPersistence = (Logger: LoggerGetter, mongoCollection: MongoColl
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { summonerId: -1 }, unique: true },
+    { key: { puuid: -1 }, unique: true },
   ])
 
   return {
     ensureIndexes,
 
-    findBySummonerId: (
-      summonerId: SummonerId,
-      insertedAfter: DayJs,
-    ): Future<Maybe<LeagueEntryDb>> =>
+    findByPuuid: (puuid: Puuid, insertedAfter: DayJs): Future<Maybe<LeagueEntryDb>> =>
       collection.findOne({
-        summonerId: SummonerId.codec.encode(summonerId),
+        puuid: Puuid.codec.encode(puuid),
         insertedAt: { $gte: DayJsFromDate.codec.encode(insertedAfter) },
       }),
 
     upsert: (entries: LeagueEntryDb): Future<boolean> =>
       pipe(
-        collection.updateOne({ summonerId: SummonerId.codec.encode(entries.summonerId) }, entries, {
+        collection.updateOne({ puuid: Puuid.codec.encode(entries.puuid) }, entries, {
           upsert: true,
         }),
         Future.map(r => r.modifiedCount + r.upsertedCount <= 1),
