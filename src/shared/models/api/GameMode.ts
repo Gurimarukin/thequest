@@ -25,6 +25,7 @@ const GameMode = createEnum(
   'ULTBOOK', // Ultimate Spellbook games
   'CHERRY', // Arena
   'SWIFTPLAY', // Swiftplay
+  'BRAWL',
 )
 
 export { GameMode }

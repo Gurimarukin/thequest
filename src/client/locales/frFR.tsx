@@ -283,6 +283,7 @@ const frFRTranslation: Translation = {
         2000: 'Tutoriel 1', // Summoner's Rift — Tutorial 1
         2010: 'Tutoriel 2', // Summoner's Rift — Tutorial 2
         2020: 'Tutoriel 3', // Summoner's Rift — Tutorial 3
+        2300: 'Brawl', // The Bandlewood — Brawl map
       },
       leagueTier,
       position,
