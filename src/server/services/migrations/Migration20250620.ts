@@ -8,7 +8,7 @@ import type { MongoCollectionGetter } from '../../models/mongo/MongoCollection'
 import { MigrationUtils } from './MigrationUtils'
 
 export const Migration20250620 = (mongoCollection: MongoCollectionGetter): Migration => ({
-  createdAt: DayJs.of('2025-06-200T09:14:43Z'),
+  createdAt: DayJs.of('2025-06-20T09:14:43Z'),
   migrate: pipe(
     MigrationUtils.dropCollection(mongoCollection, 'leagueEntry'),
     Future.map(toNotUsed),
