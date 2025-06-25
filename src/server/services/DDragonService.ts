@@ -21,8 +21,9 @@ import { CacheUtils } from '../utils/CacheUtils'
 import type { RiotApiService } from './RiotApiService'
 
 const missingFromDoc = {
-  queues: [480] satisfies List<GameQueue>,
-  gameModes: ['CHERRY', 'SWIFTPLAY'] satisfies List<GameMode>,
+  queues: [480, 2300] satisfies List<GameQueue>,
+  gameModes: ['CHERRY', 'SWIFTPLAY', 'BRAWL'] satisfies List<GameMode>,
+  maps: [35] satisfies List<MapId>,
 }
 
 type WithVersion<A> = {
@@ -115,6 +116,7 @@ const DDragonService = (
               maps,
               List.map(m => m.mapId),
             ),
+            missingFromDoc.maps,
           ),
         ),
       ),
