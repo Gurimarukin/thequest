@@ -23,7 +23,6 @@ import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { type Dict, List, Maybe } from '../../../shared/utils/fp'
 
 import { GameType } from '../riot/GameType'
-import { SummonerId } from '../summoner/SummonerId'
 
 const objectiveCodec = C.struct({
   first: C.boolean,
@@ -137,7 +136,7 @@ const participantCodec = C.struct({
   summoner1Id: SummonerSpellKey.codec,
   summoner2Casts: C.number,
   summoner2Id: SummonerSpellKey.codec,
-  summonerId: SummonerId.codec,
+  // summonerId: SummonerId.codec,
   summonerLevel: C.number,
   /**
    * Exists as Maybe for retrocompatibility

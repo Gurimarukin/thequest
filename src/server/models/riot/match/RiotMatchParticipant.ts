@@ -16,8 +16,6 @@ import { TagLine } from '../../../../shared/models/riot/TagLine'
 import type { Dict } from '../../../../shared/utils/fp'
 import { List, Maybe } from '../../../../shared/utils/fp'
 
-import { SummonerId } from '../../summoner/SummonerId'
-
 type Position = (typeof positionValues)[number]
 
 const laneValues = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM'] as const
@@ -163,7 +161,7 @@ const rawDecoder_ = D.struct({
   summoner1Id: SummonerSpellKey.codec,
   summoner2Casts: D.number,
   summoner2Id: SummonerSpellKey.codec,
-  summonerId: SummonerId.codec,
+  // summonerId: SummonerId.codec,
   summonerLevel: D.number,
   teamEarlySurrendered: D.boolean,
   teamId: TeamId.codec,

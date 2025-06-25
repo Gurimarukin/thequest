@@ -79,7 +79,6 @@ export default tseslint.config(
             'GameName',
             'MsDuration',
             'Puuid',
-            'SummonerId',
             'SummonerName',
             'SummonerSpellId',
             'SummonerSpellKey',
