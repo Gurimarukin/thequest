@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import type { AnyBulkWriteOperation } from 'mongodb'
 
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
+import { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { TObservable } from '../../shared/models/rx/TObservable'
 import type { Maybe, NotUsed } from '../../shared/utils/fp'
 import { Future, List, NonEmptyArray } from '../../shared/utils/fp'
@@ -11,7 +12,6 @@ import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { MongoCollectionGetter } from '../models/mongo/MongoCollection'
 import type { ToDeleteAndToUpsert } from '../models/mongo/ToDeleteAndToUpsert'
-import { SummonerId } from '../models/summoner/SummonerId'
 import type { ChampionShardsDbOutput } from '../models/user/ChampionShardsDb'
 import { ChampionShardsDb } from '../models/user/ChampionShardsDb'
 import { UserId } from '../models/user/UserId'
@@ -32,26 +32,26 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
   return {
     ensureIndexes,
 
-    listForSummoner: (user: UserId, summoner: SummonerId): TObservable<ChampionShardsDb> =>
+    listForSummoner: (user: UserId, summoner: Puuid): TObservable<ChampionShardsDb> =>
       collection.findAllObs()({
         user: UserId.codec.encode(user),
-        summoner: SummonerId.codec.encode(summoner),
+        summoner: Puuid.codec.encode(summoner),
       }),
 
     findForChampion: (
       user: UserId,
-      summoner: SummonerId,
+      summoner: Puuid,
       champion: ChampionKey,
     ): Future<Maybe<ChampionShardsDb>> =>
       collection.findOne({
         user: UserId.codec.encode(user),
-        summoner: SummonerId.codec.encode(summoner),
+        summoner: Puuid.codec.encode(summoner),
         champion: ChampionKey.codec.encode(champion),
       }),
 
     bulkDeleteAndUpsert: (
       user: UserId,
-      summoner: SummonerId,
+      summoner: Puuid,
       { toDelete, toUpsert }: ToDeleteAndToUpsert<ChampionShardsLevel>,
     ): Future<boolean> => {
       const operations: List<AnyBulkWriteOperation<ChampionShardsDbOutput>> = pipe(
@@ -62,7 +62,7 @@ const ChampionShardPersistence = (Logger: LoggerGetter, mongoCollection: MongoCo
                 deleteMany: {
                   filter: {
                     user: UserId.codec.encode(user),
-                    summoner: SummonerId.codec.encode(summoner),
+                    summoner: Puuid.codec.encode(summoner),
                     champion: {
                       $in: pipe(
                         toDelete,

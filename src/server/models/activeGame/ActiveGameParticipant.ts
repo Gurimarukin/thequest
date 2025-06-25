@@ -10,11 +10,8 @@ import type { RiotId } from '../../../shared/models/riot/RiotId'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
-import type { SummonerId } from '../summoner/SummonerId'
-
 type ActiveGameParticipant = {
   puuid: Puuid
-  summonerId: SummonerId
   profileIconId: number
   championId: ChampionKey
   spell1Id: SummonerSpellKey

@@ -19,6 +19,7 @@ import { Migration20231212 } from './migrations/Migration20231212'
 import { Migration20240401 } from './migrations/Migration20240401'
 import { Migration20250619 } from './migrations/Migration20250619'
 import { Migration20250620 } from './migrations/Migration20250620'
+import { Migration20250624 } from './migrations/Migration20250624'
 
 export type MigrationService = ReturnType<typeof MigrationService>
 
@@ -41,6 +42,7 @@ export const MigrationService = (
     Migration20240401(mongoCollection),
     Migration20250619(mongoCollection),
     Migration20250620(mongoCollection),
+    Migration20250624(mongoCollection),
   ]
 
   const applyMigrations: Future<NotUsed> = pipe(

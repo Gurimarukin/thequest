@@ -17,14 +17,12 @@ import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { SummonerId } from '../summoner/SummonerId'
 
 export type ActiveGameParticipantDb = C.TypeOf<typeof participantCodec>
 type ActiveGameParticipantPbOutput = C.OutputOf<typeof participantCodec>
 
 const participantCodec = C.struct({
   puuid: Puuid.codec,
-  summonerId: SummonerId.codec,
   profileIconId: C.number,
   championId: ChampionKey.codec,
   spell1Id: SummonerSpellKey.codec,

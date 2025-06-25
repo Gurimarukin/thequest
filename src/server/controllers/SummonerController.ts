@@ -239,7 +239,10 @@ const SummonerController = (
     user: TokenContent,
     summoner: Summoner,
   ): Future<List<ChampionShardsView>> {
-    return pipe(userService.listChampionShardsForSummoner(user.id, summoner.id), Sink.readonlyArray)
+    return pipe(
+      userService.listChampionShardsForSummoner(user.id, summoner.puuid),
+      Sink.readonlyArray,
+    )
   }
 
   function findActiveGame(
@@ -501,7 +504,7 @@ const SummonerController = (
         futureMaybe.chain(user =>
           userService.findChampionShardsForChampion(
             user.id,
-            participant.summonerId,
+            participant.puuid,
             participant.championId,
           ),
         ),

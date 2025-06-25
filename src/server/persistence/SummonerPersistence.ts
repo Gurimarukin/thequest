@@ -22,7 +22,6 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
   )
 
   const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
-    { key: { id: -1 }, unique: true },
     { key: { puuid: -1 }, unique: true },
   ])
 
@@ -45,7 +44,7 @@ const SummonerPersistence = (Logger: LoggerGetter, mongoCollection: MongoCollect
       const encoded = SummonerDb.codec.encode(summoner)
 
       return pipe(
-        collection.collection.future(c => c.updateOne({ id: encoded.id }, { $set: encoded })),
+        collection.collection.future(c => c.updateOne({ puuid: encoded.puuid }, { $set: encoded })),
         Future.map(r => r.matchedCount + r.modifiedCount <= 1),
       )
     },

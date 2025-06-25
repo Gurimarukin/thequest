@@ -8,8 +8,6 @@ import { Puuid } from '../../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { List, Maybe } from '../../../../shared/utils/fp'
 
-import { SummonerId } from '../../summoner/SummonerId'
-
 const rawGameCustomizationObjectDecoder = D.struct({
   category: D.string, // Category identifier for Game Customization
   content: D.string, // Game Customization content
@@ -30,7 +28,6 @@ const rawDecoder = D.struct({
   profileIconId: D.number, // The ID of the profile icon used by this participant
   bot: D.boolean, // Flag indicating whether or not this participant is a bot
   teamId: TeamId.decoder, // The team ID of this participant, indicating the participant's team
-  summonerId: SummonerId.codec, // The encrypted summoner ID of this participant
   spell1Id: SummonerSpellKey.codec, // The ID of the first summoner spell used by this participant
   spell2Id: SummonerSpellKey.codec, // The ID of the second summoner spell used by this participant
   gameCustomizationObjects: List.decoder(rawGameCustomizationObjectDecoder), // List of Game Customizations

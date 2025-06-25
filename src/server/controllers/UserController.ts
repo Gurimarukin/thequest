@@ -329,7 +329,7 @@ function UserController(
             pipe(
               userService.setChampionsShardsForSummonerBulk(
                 user.id,
-                summoner.id,
+                summoner.puuid,
                 championShardsLevel,
               ),
               Future.map(

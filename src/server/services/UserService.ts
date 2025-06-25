@@ -20,7 +20,6 @@ import type { ChampionShardsLevel } from '../models/ChampionShardsLevel'
 import type { DiscordConnection } from '../models/discord/DiscordConnection'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import type { SummonerWithRiotId } from '../models/summoner/Summoner'
-import type { SummonerId } from '../models/summoner/SummonerId'
 import { TokenContent } from '../models/user/TokenContent'
 import { User } from '../models/user/User'
 import type { UserDiscordInfos } from '../models/user/UserDiscordInfos'
@@ -38,7 +37,6 @@ const accountTokenTtl = MsDuration.days(30)
 
 export type SummonerWithDiscordInfos = {
   summoner: {
-    id: SummonerId
     platform: Platform
     puuid: Puuid
     riotId: RiotId
@@ -181,7 +179,7 @@ const UserService = (
     findChampionShardsForChampion: championShardPersistence.findForChampion,
     setChampionsShardsForSummonerBulk: (
       user: UserId,
-      summoner: SummonerId,
+      summoner: Puuid,
       champions: NonEmptyArray<ChampionShardsLevel>,
     ): Future<boolean> => {
       const { left: toUpsert, right: toDelete } = pipe(

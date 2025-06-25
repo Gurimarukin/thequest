@@ -7,12 +7,10 @@ import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { SummonerId } from './SummonerId'
 
 type SummonerDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
-  id: SummonerId.codec,
   puuid: Puuid.codec,
   platform: Platform.codec,
   /**

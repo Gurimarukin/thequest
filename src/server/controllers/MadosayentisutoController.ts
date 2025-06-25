@@ -110,7 +110,7 @@ const MadosayentisutoController = (
         ([{ riotId }, summoner, { champions }, staticData]): TheQuestProgression => ({
           userId,
           summoner: {
-            id: summoner.id,
+            puuid: summoner.puuid,
             platform: summoner.platform,
             riotId,
             profileIconId: summoner.profileIconId,
