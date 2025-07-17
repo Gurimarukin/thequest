@@ -180,10 +180,8 @@ const of = (
     const platformRiotId = `${Platform.encoderLower.encode(platform)}/${gameName}-${tagLine}`
 
     return pipe(
-      getWithUserAgent(`/${poroLang}/live/${platformRiotId}/ranked-only/season`),
-      Future.chain(() =>
-        getWithUserAgent(`/partial/${poroLang}/live-partial/${platformRiotId}/ranked-only/season`),
-      ),
+      getWithUserAgent(`/${poroLang}/live/${platformRiotId}`),
+      Future.chain(() => getWithUserAgent(`/partial/${poroLang}/live-partial/${platformRiotId}`)),
     )
   }
 
