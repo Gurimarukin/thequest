@@ -340,7 +340,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 const poroLink = (lang: Lang, platform: Platform, { gameName, tagLine }: RiotId): string =>
   `${config.poroApiBaseUrl}/${Business.poroLang[lang]}/live/${Platform.encoderLower.encode(
     platform,
-  )}/${gameName}-${tagLine}/ranked-only/season`
+  )}/${gameName}-${tagLine}/season`
 
 type ParticipantsProps = {
   platform: Platform

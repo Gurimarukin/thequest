@@ -177,11 +177,13 @@ const of = (
 
   function fetch(lang: Lang, platform: Platform, { gameName, tagLine }: RiotId): Future<string> {
     const poroLang = Business.poroLang[lang]
-    const platformRiotId = `${Platform.encoderLower.encode(platform)}/${gameName}-${tagLine}`
+    const platformAndRiotId = `${Platform.encoderLower.encode(platform)}/${gameName}-${tagLine}`
 
     return pipe(
-      getWithUserAgent(`/${poroLang}/live/${platformRiotId}`),
-      Future.chain(() => getWithUserAgent(`/partial/${poroLang}/live-partial/${platformRiotId}`)),
+      getWithUserAgent(`/${poroLang}/live/${platformAndRiotId}/season`),
+      Future.chain(() =>
+        getWithUserAgent(`/partial/${poroLang}/live-partial/${platformAndRiotId}/season`),
+      ),
     )
   }
 
