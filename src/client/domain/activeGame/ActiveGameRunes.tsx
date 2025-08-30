@@ -51,39 +51,80 @@ export const ActiveGameRunes: React.FC<Props> = ({
     }
   }, [perks, runeById, runeStyleById])
 
+  const nonEmpty =
+    List.isNonEmpty(primaryPath) || List.isNonEmpty(secondaryPath) || List.isNonEmpty(shards)
+
   return (
-    <div className={cx('flex gap-1.5', reverse ? 'flex-row-reverse items-end' : 'items-start')}>
-      <div className={cx('flex gap-2', reverse ? 'flex-col-reverse pr-1' : 'flex-col pl-1')}>
+    <div
+      className={cx(
+        'relative flex min-h-[4.25rem] gap-1.5',
+        reverse ? 'flex-row-reverse items-end' : 'items-start',
+      )}
+    >
+      <div
+        className={cx('grid gap-2', nonEmpty ? (reverse ? 'pr-1' : 'pl-1') : undefined)}
+        style={
+          reverse
+            ? {
+                gridTemplateAreas: '"shards" "secondary" "primary"',
+                gridTemplateRows: '.75rem 1.25rem 1.25rem',
+              }
+            : {
+                gridTemplateAreas: '"primary" "secondary" "shards"',
+                gridTemplateRows: '1.25rem 1.25rem .75rem',
+              }
+        }
+      >
         <RunePath
           runes={primaryPath}
           reverse={reverse}
           tooltipShouldHide={tooltipShouldHide}
           draggable={draggable}
-          className="gap-1"
+          className="gap-1 area-[primary]"
         />
         <RunePath
           runes={secondaryPath}
           reverse={reverse}
           tooltipShouldHide={tooltipShouldHide}
           draggable={draggable}
-          className="gap-1"
+          className="gap-1 area-[secondary]"
         />
         <RunePath
           runes={shards}
           reverse={reverse}
           tooltipShouldHide={tooltipShouldHide}
           draggable={draggable}
-          className="gap-1.5"
+          className="gap-1.5 area-[shards]"
           liClassName="!w-3 h-3 overflow-hidden"
           runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
         />
       </div>
-      <span className={cx('flex h-9 w-9', reverse ? '-mb-1.5' : '-mt-1.5')}>
-        {pipe(
-          keyStone,
+
+      {List.isEmpty(secondaryPath) &&
+        pipe(
+          runeStyleById(perks.perkSubStyle),
           Maybe.fold(
-            () => <div className="size-full bg-black" />,
-            r => (
+            () => null,
+            rune => (
+              <div className={cx('absolute size-5', reverse ? 'left-4 top-1' : 'bottom-1 right-4')}>
+                <Rune
+                  icon={rune.icon}
+                  name={rune.name}
+                  tooltipShouldHide={tooltipShouldHide}
+                  draggable={draggable}
+                  className="w-full"
+                />
+              </div>
+            ),
+          ),
+        )}
+
+      {pipe(
+        keyStone,
+        Maybe.fold(
+          () => null,
+          r => (
+            <span className={cx('flex size-9', reverse ? '-mb-1.5' : '-mt-1.5')}>
               <Rune
                 icon={r.iconPath}
                 name={r.name}
@@ -92,10 +133,10 @@ export const ActiveGameRunes: React.FC<Props> = ({
                 draggable={draggable}
                 className="w-full"
               />
-            ),
+            </span>
           ),
-        )}
-      </span>
+        ),
+      )}
     </div>
   )
 }

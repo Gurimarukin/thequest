@@ -10,7 +10,7 @@ const base = DDragonUtils.ddragon('/cdn/img/')
 type Props = {
   icon: string
   name: string
-  description: string
+  description?: string
   tooltipShouldHide?: boolean
   draggable?: boolean
   className?: string
@@ -43,7 +43,9 @@ export const Rune: React.FC<Props> = ({
         className="flex max-w-xs flex-col gap-1"
       >
         <span className="font-bold">{name}</span>
-        <span dangerouslySetInnerHTML={{ __html: description }} className="whitespace-normal" />
+        {description !== undefined && (
+          <span dangerouslySetInnerHTML={{ __html: description }} className="whitespace-normal" />
+        )}
       </Tooltip>
     </>
   )
