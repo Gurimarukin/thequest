@@ -149,7 +149,7 @@ export const getMapChanges =
               href={wikiLink}
               target="_blank"
               rel="noreferrer"
-              className="peer border-b border-b-transparent transition-all duration-100 hover:border-b-goldenrod"
+              className="peer border-b border-b-wheat/50 transition-all duration-100 hover:border-b-goldenrod"
             >
               {wikiLink}
             </a>
