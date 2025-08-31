@@ -100,7 +100,6 @@ export const ActiveGameSummoner: React.FC<Props> = ({
         <img
           src={assets.summonerIcon(profileIconId)}
           alt={t.common.summonerIconAlt(RiotId.stringify(riotId))}
-          draggable={false}
           className="w-12"
         />
         <div

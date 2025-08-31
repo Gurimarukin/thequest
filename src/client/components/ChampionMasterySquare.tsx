@@ -57,7 +57,6 @@ export type ChampionMasterySquareProps = {
    * @default false
    */
   noShadow?: boolean
-  draggable?: boolean
 }
 
 export type SetChampionShards = {
@@ -87,7 +86,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   centerLevel = true,
   centerShards = false,
   noShadow = false,
-  draggable,
 }) => {
   const { t } = useTranslation('common')
 
@@ -153,7 +151,6 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         <CroppedChampionSquare
           championKey={championId}
           championName={name}
-          isDraggable={draggable}
           className={cx(
             'h-[54px] w-[54px] self-center justify-self-center rounded-bl-lg bg-black text-2xs text-transparent area-1',
             isHistogram ? 'rounded-br-lg' : 'rounded-tr-lg',

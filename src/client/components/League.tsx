@@ -27,7 +27,6 @@ type Props = {
    */
   reverse?: boolean
   tooltipShouldHide?: boolean
-  draggable?: boolean
   className?: string
 }
 
@@ -45,7 +44,6 @@ export const League: React.FC<Props> = ({
   league,
   reverse = false,
   tooltipShouldHide,
-  draggable,
   className,
 }) => {
   const { t } = useTranslation('common')
@@ -129,7 +127,6 @@ export const League: React.FC<Props> = ({
           ref={currentSplitIconRef}
           tier={tier}
           rank={rank}
-          draggable={draggable}
           className={cx(
             ['h-16 w-16', variant === 'base'],
             ['h-9 w-9', variant === 'small'],
@@ -164,13 +161,7 @@ export const League: React.FC<Props> = ({
                 s => (
                   <span ref={previousSplitRef} className="flex items-center text-grey-400">
                     (
-                    <LeagueImg
-                      tier={s.tier}
-                      rank={s.rank}
-                      draggable={draggable}
-                      className="mx-0.5 size-5"
-                    />
-                    )
+                    <LeagueImg tier={s.tier} rank={s.rank} className="mx-0.5 size-5" />)
                   </span>
                 ),
               ),

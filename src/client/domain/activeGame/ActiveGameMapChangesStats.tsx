@@ -10,7 +10,7 @@ import {
 } from '../../components/mapChanges/stats/mapChangesStats'
 import { cx } from '../../utils/cx'
 
-type Props = Pick<MapChangesStatsProps, 'data' | 'draggable'> & {
+type Props = Pick<MapChangesStatsProps, 'data'> & {
   reverse: boolean
 }
 
@@ -19,7 +19,7 @@ export const ActiveGameMapChangesStats: React.FC<Props> = ({ reverse, ...props }
     () =>
       getMapChangesStats(
         (t, name) => {
-          const icon = renderStatIcon(t.mapChanges, name, props.draggable, 'size-full')
+          const icon = renderStatIcon(t.mapChanges, name, 'size-full')
           const renderStatValue_ = renderStatValue(name, '')
 
           return value => (
@@ -40,7 +40,7 @@ export const ActiveGameMapChangesStats: React.FC<Props> = ({ reverse, ...props }
         ),
         5,
       ),
-    [props.draggable, reverse],
+    [reverse],
   )
 
   return <MapChangesStats {...props}>{renderMapChangesStats}</MapChangesStats>

@@ -167,7 +167,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         tooltipShouldHide,
         centerShards: true,
         noShadow: true,
-        draggable: false,
       }),
     ),
   )
@@ -271,7 +270,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 league={soloDuo}
                 reverse={reverse}
                 tooltipShouldHide={tooltipShouldHide}
-                draggable={false}
                 className="-mt-0.5"
               />
               <League
@@ -280,7 +278,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 league={flex}
                 reverse={reverse}
                 tooltipShouldHide={tooltipShouldHide}
-                draggable={false}
               />
             </Cell>
           ),
@@ -383,7 +380,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           data => (
             <Cell gridColStart={6} className={cx('flex flex-col justify-center', padding)}>
               <div ref={mapChangesRef} className="py-1 text-2xs">
-                <ActiveGameMapChangesStats reverse={reverse} data={data} draggable={false} />
+                <ActiveGameMapChangesStats reverse={reverse} data={data} />
               </div>
               <Tooltip hoverRef={mapChangesRef} shouldHide={tooltipShouldHide}>
                 <MapChangesTooltip data={data} />
@@ -406,7 +403,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <SummonerSpell
                   spell={s}
                   tooltipShouldHide={tooltipShouldHide}
-                  draggable={false}
                   className="size-full"
                 />
               ),
@@ -422,7 +418,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 <SummonerSpell
                   spell={s}
                   tooltipShouldHide={tooltipShouldHide}
-                  draggable={false}
                   className="size-full"
                 />
               ),
@@ -449,7 +444,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
                 perks={perks}
                 reverse={reverse}
                 tooltipShouldHide={tooltipShouldHide}
-                draggable={false}
               />
             </Cell>
           ),

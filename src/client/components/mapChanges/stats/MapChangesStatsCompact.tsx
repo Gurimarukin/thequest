@@ -2,8 +2,8 @@ import type { MapChangesStatsProps } from './mapChangesStats'
 import { getMapChangesStats, renderStatIcon, renderStatValue } from './mapChangesStats'
 
 export const MapChangesStatsCompact: React.FC<MapChangesStatsProps> = getMapChangesStats(
-  (t, name, draggable) => {
-    const icon = renderStatIcon(t.mapChanges, name, draggable, 'h-2.5 w-2.5')
+  (t, name) => {
+    const icon = renderStatIcon(t.mapChanges, name, 'h-2.5 w-2.5')
     const renderStatValue_ = renderStatValue(name, 'gap-px')
 
     return value => (
