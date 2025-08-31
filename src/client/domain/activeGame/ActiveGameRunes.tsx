@@ -90,7 +90,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
           reverse={reverse}
           tooltipShouldHide={tooltipShouldHide}
           className="gap-1.5 area-[shards]"
-          liClassName="!w-3 h-3 overflow-hidden"
+          liClassName="!size-3 overflow-hidden"
           runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
         />
       </div>

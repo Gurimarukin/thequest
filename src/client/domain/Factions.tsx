@@ -190,10 +190,7 @@ const Champion: React.FC<ChampionProps> = ({ champion }) => {
         ref={hoverRef}
         championKey={champion.key}
         championName={champion.name}
-        className={cx('h-12 w-12 rounded-xl shadow-even shadow-black', [
-          'hidden',
-          champion.isHidden,
-        ])}
+        className={cx('size-12 rounded-xl shadow-even shadow-black', ['hidden', champion.isHidden])}
       />
       <Tooltip hoverRef={hoverRef} placement="top" className="flex flex-col gap-1">
         <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>

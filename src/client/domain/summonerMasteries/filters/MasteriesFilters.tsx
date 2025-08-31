@@ -243,7 +243,7 @@ export const MasteriesFilters: React.FC<Props> = ({ searchCount, randomChampion 
                 ) : (
                   <ChampionFactionImg
                     faction={faction}
-                    className={cx('h-6 w-6', isChecked ? 'text-black' : 'text-wheat-bis')}
+                    className={cx('size-6', isChecked ? 'text-black' : 'text-wheat-bis')}
                   />
                 ),
               label: t.common.labels.factionOrNone[faction],

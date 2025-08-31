@@ -104,11 +104,7 @@ export const ChallengeWithProgression: React.FC<ChallengeWithProgressionProps> =
       <Tooltip hoverRef={hoverRef} placementRef={placementRef} className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-3">
           <div className="pl-1 pt-1">
-            <img
-              src={src}
-              alt={alt}
-              className={cx('h-20 w-20', ['grayscale', Maybe.isNone(tier)])}
-            />
+            <img src={src} alt={alt} className={cx('size-20', ['grayscale', Maybe.isNone(tier)])} />
           </div>
 
           <div className="flex flex-col self-center">

@@ -3,7 +3,7 @@ import { getMapChangesStats, renderStatIcon, renderStatValue } from './mapChange
 
 export const MapChangesStatsCompact: React.FC<MapChangesStatsProps> = getMapChangesStats(
   (t, name) => {
-    const icon = renderStatIcon(t.mapChanges, name, 'h-2.5 w-2.5')
+    const icon = renderStatIcon(t.mapChanges, name, 'size-2.5')
     const renderStatValue_ = renderStatValue(name, 'gap-px')
 
     return value => (

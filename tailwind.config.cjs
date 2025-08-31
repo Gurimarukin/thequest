@@ -58,6 +58,10 @@ module.exports = {
       gridArea: {
         1: '1 / 1', // useful for superposing multiple elements in a grid element
       },
+      // https://v3.tailwindcss.com/docs/theme#spacing
+      spacing: {
+        13.5: '3.375rem',
+      },
       fontSize: {
         '2xs': ['.625rem', { lineHeight: '0.75rem' }],
       },

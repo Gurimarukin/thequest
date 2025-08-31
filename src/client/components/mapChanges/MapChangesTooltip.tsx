@@ -14,7 +14,7 @@ export const MapChangesTooltip: React.FC<Props> = ({ data }) => (
 
 const MapChangesStatsFull: React.FC<MapChangesStatsProps> = getMapChangesStats(
   (t, name) => {
-    const icon = renderStatIcon(t.mapChanges, name, 'h-4, w-4')
+    const icon = renderStatIcon(t.mapChanges, name, 'size-4')
     const renderStatValue_ = renderStatValue(name, 'gap-[3px]')
 
     return value => (

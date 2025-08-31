@@ -128,8 +128,8 @@ export const League: React.FC<Props> = ({
           tier={tier}
           rank={rank}
           className={cx(
-            ['h-16 w-16', variant === 'base'],
-            ['h-9 w-9', variant === 'small'],
+            ['size-16', variant === 'base'],
+            ['size-9', variant === 'small'],
             ['col-start-2', reverse],
           )}
         />
