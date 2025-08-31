@@ -116,10 +116,9 @@ export const SearchChampion: React.FC<Props> = ({
           ) : null}
         </div>
         <span
-          className={cx('absolute top-full pt-0.5 text-zinc-400', [
-            'hidden',
-            Maybe.isNone(initialSearch),
-          ])}
+          className={cx('absolute top-full pt-0.5 text-zinc-400', {
+            hidden: Maybe.isNone(initialSearch),
+          })}
         >
           {t.nResults(searchCount)}
         </span>

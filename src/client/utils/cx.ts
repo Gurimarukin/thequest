@@ -1,21 +1,32 @@
-import { pipe } from 'fp-ts/function'
+import { readonlyArray } from 'fp-ts'
 
-import type { Tuple } from '../../shared/utils/fp'
-import { List, Maybe } from '../../shared/utils/fp'
+import type { List, Tuple } from '../../shared/utils/fp'
+import { Dict } from '../../shared/utils/fp'
 
-export const cx = (
-  ...c: List<string | undefined | Tuple<string | undefined, boolean>>
-): string | undefined =>
-  pipe(
-    c,
-    List.filterMap((arg): Maybe<string> => {
-      if (arg === undefined) return Maybe.none
-      if (typeof arg === 'string') return Maybe.some(arg)
+export function cx(
+  ...c: List<string | undefined | Tuple<string | undefined, boolean> | Record<string, boolean>>
+): string | undefined {
+  const classes = c.flatMap((arg): List<string> => {
+    if (arg === undefined) return []
 
+    if (typeof arg === 'string') return [arg]
+
+    if (isArray(arg)) {
       const [className, display] = arg
-      return display && className !== undefined ? Maybe.some(className) : Maybe.none
-    }),
-    Maybe.fromPredicate(List.isNonEmpty),
-    Maybe.map(List.mkString(' ')),
-    Maybe.toUndefined,
-  )
+
+      if (className === undefined || !display) return []
+
+      return [className]
+    }
+
+    return Dict.toReadonlyArray(arg).flatMap(([className, display]) => (display ? [className] : []))
+  })
+
+  if (readonlyArray.isEmpty(classes)) return undefined
+
+  return classes.join(' ')
+}
+
+const isArray = Array.isArray as unknown as (
+  c: Tuple<string | undefined, boolean> | Record<string, boolean>,
+) => c is Tuple<string | undefined, boolean>

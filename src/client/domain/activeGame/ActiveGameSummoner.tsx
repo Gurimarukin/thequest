@@ -68,10 +68,9 @@ export const ActiveGameSummoner: React.FC<Props> = ({
             () => null,
             id => (
               <div
-                className={cx('flex items-center gap-1 text-xs font-semibold text-white', padding, [
-                  'flex-row-reverse',
-                  !reverse,
-                ])}
+                className={cx('flex items-center gap-1 text-xs font-semibold text-white', padding, {
+                  'flex-row-reverse': !reverse,
+                })}
               >
                 <PeopleSharp className="h-3" />
                 <span className="mt-0.5">{id}</span>

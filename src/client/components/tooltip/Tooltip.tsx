@@ -171,18 +171,11 @@ export const Tooltip: React.FC<Props> = ({
             style={styles['arrow']}
           >
             <CaretUpSharpCropped
-              className={cx(
-                'text-tooltip group-data-popper-top:rotate-180',
-                ['group-data-popper-bottom:rotate-0', placement.startsWith('top')],
-                [
-                  'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
-                  placement.startsWith('right'),
-                ],
-                [
-                  'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90',
-                  placement.startsWith('left'),
-                ],
-              )}
+              className={cx('text-tooltip group-data-popper-top:rotate-180', {
+                'group-data-popper-bottom:rotate-0': placement.startsWith('top'),
+                'group-data-popper-left:rotate-90 group-data-popper-right:-rotate-90':
+                  placement.startsWith('right') || placement.startsWith('left'),
+              })}
             />
           </div>
         </div>,

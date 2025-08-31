@@ -54,10 +54,9 @@ export const SearchSummonerInput = forwardRef<HTMLDivElement, Props>(
           onChange={handleChange}
           onFocus={handleFocus}
           placeholder={t.layout.searchSummoner}
-          className={cx('w-0 min-w-full bg-transparent px-2 text-wheat/0 caret-wheat area-1', [
-            'font-normal',
-            summonerRaw === '',
-          ])}
+          className={cx('w-0 min-w-full bg-transparent px-2 text-wheat/0 caret-wheat area-1', {
+            'font-normal': summonerRaw === '',
+          })}
         />
       </div>
     )

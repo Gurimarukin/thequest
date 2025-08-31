@@ -195,10 +195,9 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       >
         {List.isNonEmpty(tags) ? (
           <ul
-            className={cx('flex items-center justify-end gap-1 px-2', [
-              'flex-row-reverse',
-              reverse,
-            ])}
+            className={cx('flex items-center justify-end gap-1 px-2', {
+              'flex-row-reverse': reverse,
+            })}
           >
             {tags.map((tag, i) => (
               // eslint-disable-next-line react/no-array-index-key

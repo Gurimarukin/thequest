@@ -60,7 +60,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
       )}
     >
       <div
-        className={cx('grid gap-2', nonEmpty ? (reverse ? 'pr-1' : 'pl-1') : undefined)}
+        className={cx('grid gap-2', [reverse ? 'pr-1' : 'pl-1', nonEmpty])}
         style={
           reverse
             ? {

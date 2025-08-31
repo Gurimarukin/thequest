@@ -127,11 +127,11 @@ export const League: React.FC<Props> = ({
           ref={currentSplitIconRef}
           tier={tier}
           rank={rank}
-          className={cx(
-            ['size-16', variant === 'base'],
-            ['size-9', variant === 'small'],
-            ['col-start-2', reverse],
-          )}
+          className={cx({
+            'size-16': variant === 'base',
+            'size-9': variant === 'small',
+            'col-start-2': reverse,
+          })}
         />
         <div
           className={cx(
@@ -144,11 +144,10 @@ export const League: React.FC<Props> = ({
           )}
         >
           <span
-            className={cx(
-              'flex gap-1.5 whitespace-nowrap',
-              ['font-semibold', isSomeCurrentSplit],
-              ['text-grey-400', variant === 'small'],
-            )}
+            className={cx('flex gap-1.5 whitespace-nowrap', {
+              'font-semibold': isSomeCurrentSplit,
+              'text-grey-400': variant === 'small',
+            })}
           >
             {description}
           </span>

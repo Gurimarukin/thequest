@@ -50,16 +50,14 @@ const LangButton: React.FC<LangButtonProps> = ({ l }) => {
       type="button"
       disabled={isSelected}
       onClick={handleClick}
-      className={cx('group flex items-center justify-between gap-3.5 py-1.5 pl-4 pr-2', [
-        'bg-zinc-700',
-        isSelected,
-      ])}
+      className={cx('group flex items-center justify-between gap-3.5 py-1.5 pl-4 pr-2', {
+        'bg-zinc-700': isSelected,
+      })}
     >
       <span
-        className={cx('border-y border-y-transparent leading-4', [
-          'group-hover:border-b-goldenrod',
-          !isSelected,
-        ])}
+        className={cx('border-y border-y-transparent leading-4', {
+          'group-hover:border-b-goldenrod': !isSelected,
+        })}
       >
         {TranslationUtils.labels.lang[l]}
       </span>

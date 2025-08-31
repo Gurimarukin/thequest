@@ -206,12 +206,11 @@ const Champion: React.FC<ChampionProps> = ({
 
       <div
         ref={containerRef}
-        className={cx(
-          'relative',
-          ['hidden', isHidden],
-          [champion.aram.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isAram],
-          [champion.urf.category !== 'balanced' ? 'col-span-5' : 'col-span-3', isUrf],
-        )}
+        className={cx('relative', {
+          hidden: isHidden,
+          [champion.aram.category !== 'balanced' ? 'col-span-5' : 'col-span-3']: isAram,
+          [champion.urf.category !== 'balanced' ? 'col-span-5' : 'col-span-3']: isUrf,
+        })}
       >
         {/* glow */}
         <Glow isGlowing={isGlowing} />
