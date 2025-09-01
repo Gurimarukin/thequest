@@ -35,6 +35,7 @@ import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
+import { useUser } from '../../contexts/UserContext'
 import { useRefWithResize } from '../../hooks/useRefWithResize'
 import { cx } from '../../utils/cx'
 import { ActiveGameMapChangesStats } from './ActiveGameMapChangesStats'
@@ -121,6 +122,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   gestureProps,
 }) => {
   const { t } = useTranslation()
+  const { maybeUser } = useUser()
   const { championByKey } = useStaticData()
 
   const championRef = useRef<HTMLDivElement>(null)
@@ -401,6 +403,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               s => (
                 <SummonerSpell
                   spell={s}
+                  cooldownDisabled={Maybe.isNone(maybeUser)}
                   tooltipShouldHide={tooltipShouldHide}
                   className="size-full"
                 />
@@ -416,6 +419,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               s => (
                 <SummonerSpell
                   spell={s}
+                  cooldownDisabled={Maybe.isNone(maybeUser)}
                   tooltipShouldHide={tooltipShouldHide}
                   className="size-full"
                 />

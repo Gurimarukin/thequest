@@ -5,6 +5,7 @@
 - render newtypes
 - visual hint if `tokensEarned > markRequiredForNextLevel`
 - bug: hide tooltip on route change
+- depcruiser: forbid components to contexts
 
 - are `fromIO`s useful (simply use `myIo()`)?
 - try fancy league icons?
