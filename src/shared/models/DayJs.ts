@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/fr'
 import customParseFormatPlugin from 'dayjs/plugin/customParseFormat'
+import duration from 'dayjs/plugin/duration'
 import utcPlugin from 'dayjs/plugin/utc'
 import type { eq } from 'fp-ts'
 import { io, ord } from 'fp-ts'
@@ -15,7 +16,8 @@ import { MsDuration } from './MsDuration'
 /* eslint-disable functional/no-expression-statements */
 dayjs.extend(customParseFormatPlugin)
 dayjs.extend(utcPlugin)
-dayjs.locale('fr')
+dayjs.extend(duration)
+dayjs.locale('fr') // TODO: always FR?
 /* eslint-enable functional/no-expression-statements */
 
 export type DayJs = Newtype<{ readonly DayJs: unique symbol }, dayjs.Dayjs>
@@ -179,4 +181,8 @@ export const DayJs = {
   minute,
   second,
   millisecond,
+
+  Duration: {
+    formatSeconds: (s: number): string => dayjs.duration(s, 'seconds').format('m:ss'),
+  },
 }

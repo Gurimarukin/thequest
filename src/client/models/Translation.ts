@@ -60,7 +60,7 @@ export type Translation = {
     }
     championIconAlt: (name: string) => string
     championKey: (key: ChampionKey) => string
-    cooldownSeconds: (cooldown: number, highlightClassName: string) => React.ReactNode
+    cooldownSeconds: (cooldownSeconds: number, highlightClassName: string) => React.ReactNode
     emptyChampionIconAlt: string
     error: React.ReactNode
     errors: {

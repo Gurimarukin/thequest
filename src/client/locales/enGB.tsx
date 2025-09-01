@@ -1,3 +1,4 @@
+import { DayJs } from '../../shared/models/DayJs'
 import type { WikiStatsBalanceKey } from '../../shared/models/WikiStatsBalance'
 import type { SpellName } from '../../shared/models/api/SpellName'
 import type {
@@ -159,9 +160,10 @@ const enGBTranslation: Translation = {
     },
     championIconAlt: name => `${name}’s icon`,
     championKey: key => `<Champion ${key}>`,
-    cooldownSeconds: (cooldown, highlightClassName) => (
+    cooldownSeconds: (cooldownSeconds, highlightClassName) => (
       <>
-        <span className={highlightClassName}>cooldown:</span> {nls(cooldown)}s
+        <span className={highlightClassName}>cooldown:</span>{' '}
+        {DayJs.Duration.formatSeconds(cooldownSeconds)}
       </>
     ),
     emptyChampionIconAlt: 'Empty champion icon',
