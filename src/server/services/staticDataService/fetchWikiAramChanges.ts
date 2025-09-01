@@ -6,4 +6,4 @@ import { fetFetchMapChanges } from './getFetchMapChanges'
 
 // 'Template:Map changes/data/aram'
 export const fetchWikiAramChanges: (httpClient: HttpClient) => Future<WikiMapChanges> =
-  fetFetchMapChanges(1399551, 2)
+  fetFetchMapChanges(1399551, 3)
