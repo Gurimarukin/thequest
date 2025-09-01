@@ -140,11 +140,11 @@ const containerClassName = 'z-10'
 
 const controlClassName = 'h-full pl-1.5 pr-1 gap-1 border-y border-l border-goldenrod'
 
-const singleValueClassName = 'min-w-[32px]'
+const singleValueClassName = 'min-w-8'
 
 const menuClassName = 'bg-zinc-700 rounded-b-md'
 
-const optionClassName = 'py-[3px] px-1.5'
+const optionClassName = 'py-0.75 px-1.5'
 const optionIsFocusedClassName = 'bg-black'
 const optionIsSelectedClassName = 'bg-goldenrod-bis'
 const optionNotSelectedClassName = 'cursor-pointer hover:bg-black'

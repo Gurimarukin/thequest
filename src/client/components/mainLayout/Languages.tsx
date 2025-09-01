@@ -23,7 +23,7 @@ export const Languages: React.FC = () => {
         </button>
 
         {languagesIsVisible ? (
-          <div className="absolute right-[calc(1px_-_12px)] top-full z-10 flex flex-col border border-goldenrod bg-zinc-900">
+          <div className="absolute right-[calc(1px_-_0.75rem)] top-full z-10 flex flex-col border border-goldenrod bg-zinc-900">
             {Lang.values.map(l => (
               <LangButton key={l} l={l} />
             ))}

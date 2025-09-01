@@ -33,7 +33,7 @@ export const SearchSummonerInput = forwardRef<HTMLDivElement, Props>(
     const summonerRaw = pipe(summoner, Either.fold(identity, RiotId.stringify))
 
     return (
-      <div ref={ref} className="grid min-w-[200px] items-center area-1">
+      <div ref={ref} className="grid min-w-50 items-center area-1">
         <div className="w-full px-2 area-1">
           {pipe(
             summoner,

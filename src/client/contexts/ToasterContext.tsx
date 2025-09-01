@@ -112,14 +112,14 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
       {children}
       <>
         {createPortal(
-          <div className="absolute right-0 top-0 flex w-[384px] max-w-[100vw] flex-col">
+          <div className="absolute right-0 top-0 flex w-96 max-w-screen flex-col">
             {transitions(({ opacity, height, ttl }, toaster) => (
               <animated.div style={{ opacity, height }}>
                 <div ref={onMount(toaster)} className="pt-1">
-                  <div className={cx('p-[3px] text-[beige] shadow-even', container[toaster.type])}>
+                  <div className={cx('p-0.75 text-[beige] shadow-even', container[toaster.type])}>
                     <div
                       className={cx(
-                        'grid grid-cols-[1fr_auto] border-[3px] py-2 pl-2 pr-1',
+                        'grid grid-cols-[1fr_auto] border-3 py-2 pl-2 pr-1',
                         border[toaster.type],
                       )}
                     >

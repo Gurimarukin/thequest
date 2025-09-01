@@ -123,7 +123,7 @@ export const ActiveGameSummoner: React.FC<Props> = ({
             Maybe.fold(
               () => null,
               m => (
-                <div className="mt-[5px]">
+                <div className="mt-1.25">
                   <span className="flex gap-1.5">
                     <span ref={percentsRef} className="whitespace-nowrap font-semibold">
                       {t.common.percents(round(m.questPercents, 1))}
@@ -153,7 +153,7 @@ export const ActiveGameSummoner: React.FC<Props> = ({
           )}
           {List.isNonEmpty(mainRoles) ? (
             <>
-              <ul ref={mainRolesRef} className="mt-[3px] flex items-start gap-1">
+              <ul ref={mainRolesRef} className="mt-0.75 flex items-start gap-1">
                 {mainRoles.map(r => {
                   const isCurrent = pipe(role, Maybe.elem(ChampionPosition.Eq)(r))
                   return (

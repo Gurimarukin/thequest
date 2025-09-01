@@ -98,7 +98,7 @@ export const AccountConnected: React.FC<AccountConnectedProps> = ({ user }) => {
                 <img
                   src={staticData.assets.summonerIcon(profileIconId)}
                   alt={t.summonerIconAlt(RiotId.stringify(riotId))}
-                  className="w-[30px] shadow-even shadow-black"
+                  className="w-7.5 shadow-even shadow-black"
                 />
               </HighlightLink>
             ),

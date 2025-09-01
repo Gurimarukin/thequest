@@ -192,7 +192,7 @@ const getMasteryImgWithCount =
         <span className={cx('text-sm font-semibold', masteryTextColor(level))}>
           {t.number(count ?? -1)}
         </span>
-        <MasteryImg level={level} className={cx('w-[3.375rem]', imgClassName)} />
+        <MasteryImg level={level} className={cx('w-13.5', imgClassName)} />
       </div>
     )
   }

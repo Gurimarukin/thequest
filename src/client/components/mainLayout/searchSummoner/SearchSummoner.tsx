@@ -121,7 +121,7 @@ export const SearchSummoner: React.FC = () => {
           />
           <ul
             className={cx(
-              'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] min-w-[336px] items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
+              'absolute top-full z-40 max-h-[calc(100vh_-_5rem)] min-w-84 items-center gap-y-3 overflow-auto border border-goldenrod bg-zinc-900 py-2',
               Maybe.isSome(maybeUser) ? 'grid-cols-[auto_auto_auto]' : 'grid-cols-[auto_1fr] pr-3',
               showSearches ? 'grid' : 'hidden',
             )}

@@ -55,7 +55,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
   return (
     <div
       className={cx(
-        'relative flex min-h-[4.25rem] gap-1.5',
+        'relative flex min-h-17 gap-1.5',
         reverse ? 'flex-row-reverse items-end' : 'items-start',
       )}
     >
@@ -91,7 +91,7 @@ export const ActiveGameRunes: React.FC<Props> = ({
           tooltipShouldHide={tooltipShouldHide}
           className="gap-1.5 area-[shards]"
           liClassName="!size-3 overflow-hidden"
-          runeClassName="!w-[calc(100%_+_8px)] -m-1 max-w-none"
+          runeClassName="!w-[calc(100%_+_0.5rem)] -m-1 max-w-none"
         />
       </div>
 

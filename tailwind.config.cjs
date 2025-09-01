@@ -1,6 +1,14 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
 
+/**
+ * | rem  | x4 = name | x4 = px |
+ * | ---- | --------- | ------- |
+ * | 1rem | 4         | 16px    |
+ *
+ * rem = px / 16
+ */
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   mode: 'jit',
@@ -48,6 +56,17 @@ module.exports = {
       'discord-green': '#57f287',
       'discord-red': '#ed4245',
     },
+    borderRadius: {
+      none: '0px',
+      sm: '0.125rem', // 2px
+      DEFAULT: '0.25rem', // 4px
+      5: '0.3125rem', // 5px
+      md: '0.375rem', // 6px
+      lg: '0.5rem', // 8px
+      xl: '0.75rem', // 12px
+      '2xl': '1rem', // 16px
+      '3xl': '1.5rem', // 24px
+    },
     extend: {
       data: {
         'popper-top': "popper-placement^='top'",
@@ -60,13 +79,42 @@ module.exports = {
       },
       // https://v3.tailwindcss.com/docs/theme#spacing
       spacing: {
-        13.5: '3.375rem',
+        0.75: '.1875rem', // 3px
+        1.25: '.3125rem', // 5px
+        1.75: '.4375rem', // 7px
+        3.75: '.9375rem', // 15px
+        4.5: '1.125rem', // 18px
+        7.5: '1.875rem', // 30px
+        9.75: '2.4375rem', // 39pxx
+        13.5: '3.375rem', // 54px
+        17: '4.25rem', // 68px
+        19.5: '4.875rem', // 78px
+        32.5: '8.125rem', // 130px
+        41: '10.25rem', // 164px
+        50: '12.5rem', // 200px
+        84: '21rem', // 336px
+        96: '24rem', // 384px
+        125: '31.25rem', // 500px
+        416: '104rem', // 1664px
+      },
+      maxWidth: {
+        screen: '100vw',
+      },
+      borderWidth: {
+        3: '0.1875rem', // 3px
       },
       fontSize: {
-        '2xs': ['.625rem', { lineHeight: '0.75rem' }],
+        '2xs': [
+          '.625rem', // 10px
+          { lineHeight: '.75rem' }, // 12px
+        ],
+        15: [
+          '.9375rem', // 15px
+          { lineHeight: '.5625rem' }, // 9px
+        ],
       },
       lineHeight: {
-        2.5: '.625rem',
+        2.5: '.625rem', // 10px
       },
       boxShadow: {
         even: '0 0 8px 0 var(--tw-shadow-color)',

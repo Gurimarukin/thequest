@@ -112,7 +112,7 @@ export const ChampionPositionsAndFactions: React.FC<ChampionPositionsAndFactions
   const { t } = useTranslation('common')
 
   return (
-    <ul className="flex w-full max-w-[164px] flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
+    <ul className="flex w-full max-w-41 flex-wrap items-center justify-center gap-x-3 gap-y-0.5">
       {List.isNonEmpty(positions)
         ? pipe(
             positions,

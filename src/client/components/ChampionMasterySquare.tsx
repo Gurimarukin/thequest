@@ -162,7 +162,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
           {/* champion level */}
           <div
             className={cx(
-              'flex overflow-hidden bg-black pb-[3px] pr-[5px] text-sm font-bold leading-2.5',
+              'flex overflow-hidden bg-black pb-0.75 pr-1.25 text-sm font-bold leading-2.5',
               Maybe.isNone(tokens) ? 'rounded-br-lg' : 'rounded-br',
               ['pl-0.5 pt-0.5', centerLevel],
               masteryTextColor(championLevel),
@@ -327,8 +327,8 @@ const Shards: React.FC<ShardsProps> = ({
           className={cx(
             'absolute -right-px z-10 hidden flex-col justify-center overflow-hidden bg-black p-px group-hover:flex',
             ['gap-4', canAddShard === canRemoveShard],
-            canAddShard ? '-top-4 rounded-t-[5px]' : '-bottom-4 rounded-tl-[5px]',
-            ['rounded-b-[5px]', canRemoveShard],
+            canAddShard ? '-top-4 rounded-t-5' : '-bottom-4 rounded-tl-5',
+            ['rounded-b-5', canRemoveShard],
           )}
         >
           <span className={cx('flex', ['mb-3', !canRemoveShard], ['hidden', !canAddShard])}>
@@ -350,7 +350,7 @@ const Shards: React.FC<ShardsProps> = ({
               </>
             )}
           </span>
-          <span className={cx('flex', ['mt-[15px]', !canAddShard], ['hidden', !canRemoveShard])}>
+          <span className={cx('flex', ['mt-3.75', !canAddShard], ['hidden', !canRemoveShard])}>
             {isLoading ? (
               <Loading className="w-3 text-goldenrod-bis" />
             ) : (
@@ -379,9 +379,9 @@ const Shards: React.FC<ShardsProps> = ({
             : cx('pl-1.5 group-hover:w-4 group-hover:pl-1', ['group-hover:pt-0.5', canAddShard]),
         )}
       >
-        <span className="text-[15px] leading-[9px]">{shardsCount}</span>
+        <span className="text-15">{shardsCount}</span>
       </div>
-      <span className="relative z-10 mr-[-3px] rounded-tl bg-black pl-px pt-px">
+      <span className="relative z-10 -mr-0.75 rounded-tl bg-black pl-px pt-px">
         <SparklesSharp className="size-2.5 rotate-180" />
       </span>
     </div>

@@ -107,14 +107,14 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
   )
 }
 
-const mapChangesClassName = 'grid grid-cols-[repeat(auto-fit,10px)] items-start gap-x-4 gap-y-1'
+const mapChangesClassName = 'grid grid-cols-[repeat(auto-fit,0.625rem)] items-start gap-x-4 gap-y-1'
 
 const viewContainerClassName: Dict<MasteriesQueryView, string> = {
-  compact: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
+  compact: 'grid max-w-416 grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
   histogram: 'grid max-w-7xl grid-cols-[auto_1fr] gap-y-2',
   aram: mapChangesClassName,
   urf: mapChangesClassName,
-  factions: 'grid max-w-[104rem] grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
+  factions: 'grid max-w-416 grid-cols-[repeat(auto-fit,4rem)] items-start gap-4',
 }
 
 type ChampionProps = {
@@ -247,12 +247,12 @@ const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
   <div
     className={
       isGlowing
-        ? 'absolute left-[-7px] top-[-7px] grid size-[78px] place-items-center overflow-hidden rounded-1/2'
+        ? 'absolute -left-1.75 -top-1.75 grid size-19.5 place-items-center overflow-hidden rounded-1/2'
         : 'hidden'
     }
   >
     <div className="col-start-1 row-start-1 size-full animate-my-spin-reverse rounded-1/2 border-2 border-dashed border-white" />
-    <div className="col-start-1 row-start-1 size-[calc(100%_-_4px)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
+    <div className="col-start-1 row-start-1 size-[calc(100%_-_.25rem)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
   </div>
 )
 

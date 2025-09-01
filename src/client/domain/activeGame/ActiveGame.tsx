@@ -302,7 +302,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   shouldWrap={shouldWrap}
                   rowMultiple={3}
                   iconClassName={cx(
-                    'col-span-full col-start-1 pt-[39px]',
+                    'col-span-full col-start-1 pt-9.75',
                     reverse ? 'justify-self-start -ml-2.5' : 'justify-self-end -mr-2.5',
                   )}
                 />
@@ -329,7 +329,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         {shouldShowPositions && !shouldWrap ? (
           <ActiveGamePositions
             shouldWrap={shouldWrap}
-            iconClassName="col-span-2 justify-self-center col-start-1 pt-[39px]"
+            iconClassName="col-span-2 justify-self-center col-start-1 pt-9.75"
           />
         ) : null}
       </div>

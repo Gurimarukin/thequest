@@ -276,7 +276,7 @@ const Pending: React.FC<PendingProps> = ({ guildMembers, addPending }) => {
             SingleValue: UserSingleValue,
             Option: UserOption,
           }}
-          className="min-w-[320px] text-black"
+          className="min-w-80 text-black"
         />
       </Td>
       <Td />
@@ -482,7 +482,7 @@ const Button: React.FC<
   <button
     {...props}
     className={cx(
-      'border-2 bg-discord-blurple px-1.5 pb-[3px] pt-0.5 text-white enabled:active:border-dashed disabled:border-grey-400 disabled:text-grey-400',
+      'border-2 bg-discord-blurple px-1.5 pb-0.75 pt-0.5 text-white enabled:active:border-dashed disabled:border-grey-400 disabled:text-grey-400',
       className,
     )}
   />

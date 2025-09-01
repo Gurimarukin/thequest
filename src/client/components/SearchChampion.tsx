@@ -105,7 +105,7 @@ export const SearchChampion: React.FC<Props> = ({
             onFocus={onFocus}
             placeholder={t.searchChamion}
             className={cx(
-              'w-[130px] justify-self-start rounded-sm border border-grey-disabled bg-transparent py-0.5 pl-2 area-1',
+              'w-32.5 justify-self-start rounded-sm border border-grey-disabled bg-transparent py-0.5 pl-2 area-1',
               search === '' ? 'pr-2' : 'pr-7',
             )}
           />

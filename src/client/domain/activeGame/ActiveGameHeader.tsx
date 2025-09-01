@@ -137,7 +137,7 @@ const Ban: React.FC<BanProps> = ({ bannedChampion }) => {
             as="li"
             className="relative size-10"
           >
-            <span className="absolute top-[calc(100%_-_2px)] w-20 origin-left -rotate-45 border-t-4 border-red-ban shadow-even shadow-black" />
+            <span className="absolute top-[calc(100%_-_0.125rem)] w-20 origin-left -rotate-45 border-t-4 border-red-ban shadow-even shadow-black" />
           </CroppedChampionSquare>,
           bannedChampionName,
         )

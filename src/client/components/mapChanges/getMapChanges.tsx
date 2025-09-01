@@ -118,7 +118,7 @@ export const getMapChanges =
             className="self-center"
           />
 
-          <div className="grid w-full grid-cols-[repeat(auto-fit,1px)] items-start gap-x-[15px] gap-y-1">
+          <div className="grid w-full grid-cols-[repeat(auto-fit,1px)] items-start gap-x-3.75 gap-y-1">
             {pipe(
               filteredAndSortedChampions,
               ListUtils.mapWithPrevious((maybePrev, c) => (

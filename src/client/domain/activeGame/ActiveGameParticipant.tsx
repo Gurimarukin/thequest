@@ -219,7 +219,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <div className="relative" style={{ height: bevelHeight }}>
           <div
             className={cx(
-              'absolute size-[500px] bg-current shadow-even shadow-black',
+              'absolute size-125 bg-current shadow-even shadow-black',
               reverse ? 'bottom-0 origin-bottom-left' : 'right-0 origin-top-right',
             )}
             style={{ transform: `rotate(${bevelRotate}rad)` }}

@@ -3,6 +3,7 @@ import { useTranslation } from '../contexts/TranslationContext'
 
 export const Home: React.FC = () => {
   const { t } = useTranslation('home')
+
   return (
     <MainLayout>
       <div className="grid h-full grid-rows-[1fr_auto] justify-center gap-3 p-3">
