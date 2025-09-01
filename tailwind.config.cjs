@@ -46,9 +46,15 @@ module.exports = {
       'green-toaster-bis': 'darkgreen',
       'red-toaster': '#b51414',
       'red-toaster-bis': 'darkred',
+      beige: 'beige',
       tooltip: '#725a34',
       'aram-stats': colors.zinc[800],
       'histogram-grey': colors.gray[600],
+
+      'poro-red': '#cd4545', // #e9422e // (poro colors)
+      'poro-orange': '#cd8837', // #fac552
+      'poro-green': '#149c3a', // #3cbc8d
+      'poro-blue': '#25acd6', // #2796bc
 
       'discord-blurple': '#5865f2',
       'discord-darkgreen': '#248045',

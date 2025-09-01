@@ -16,7 +16,7 @@ export const ActiveGameTag: React.FC<Props> = ({ niceness, label, tooltip }) => 
       <li
         ref={ref}
         className={cx(
-          'whitespace-nowrap rounded-b px-0.5 text-white shadow-even shadow-black saturate-[.7]',
+          'whitespace-nowrap rounded-b px-0.5 text-white shadow-even shadow-black saturate-[0.7]',
           nicenessClassName[niceness],
         )}
       >
@@ -30,8 +30,8 @@ export const ActiveGameTag: React.FC<Props> = ({ niceness, label, tooltip }) => 
 }
 
 const nicenessClassName: Dict<`${PoroNiceness}`, string> = {
-  '-1': 'bg-[#cd4545]', // #e9422e // (poro colors)
-  0: 'bg-[#cd8837]', // #fac552
-  1: 'bg-[#149c3a]', // #3cbc8d
-  2: 'bg-[#25acd6]', // #2796bc
+  '-1': 'bg-poro-red', // #e9422e // (poro colors)
+  0: 'bg-poro-orange', // #fac552
+  1: 'bg-poro-green', // #3cbc8d
+  2: 'bg-poro-blue', // #2796bc
 }

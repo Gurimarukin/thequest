@@ -116,7 +116,7 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
             {transitions(({ opacity, height, ttl }, toaster) => (
               <animated.div style={{ opacity, height }}>
                 <div ref={onMount(toaster)} className="pt-1">
-                  <div className={cx('p-0.75 text-[beige] shadow-even', container[toaster.type])}>
+                  <div className={cx('p-0.75 text-beige shadow-even', container[toaster.type])}>
                     <div
                       className={cx(
                         'grid grid-cols-[1fr_auto] border-3 py-2 pl-2 pr-1',
