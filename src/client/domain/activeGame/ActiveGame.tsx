@@ -29,8 +29,8 @@ import { RiotId } from '../../../shared/models/riot/RiotId'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import type { Dict, List } from '../../../shared/utils/fp'
-import { Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
+import type { List } from '../../../shared/utils/fp'
+import { Dict, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
 
 import { AsyncRenderer } from '../../components/AsyncRenderer'
 import { Pre } from '../../components/Pre'
@@ -232,6 +232,11 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
   )
 
   const shouldShowPositions = MapId.isSummonersRift(mapId)
+  const gameQueue = pipe(
+    t.common.labels.gameQueue,
+    Dict.lookup(`${gameQueueConfigId}`),
+    Maybe.getOrElseW(() => gameQueueConfigId),
+  )
 
   return (
     <div className="grid min-h-full grid-rows-[1fr_auto_auto_1fr] gap-4 py-3">
@@ -239,9 +244,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
         <button type="button" onClick={refreshGame}>
           <RefreshOutline className="w-6" />
         </button>
-        <h2 className="text-xl font-bold text-goldenrod">
-          {t.common.labels.gameQueue[gameQueueConfigId]}
-        </h2>
+        <h2 className="text-xl font-bold text-goldenrod">{gameQueue}</h2>
         {pipe(
           gameStartTime,
           Maybe.fold(

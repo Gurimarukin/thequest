@@ -5,7 +5,6 @@ import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
 import { MapId } from '../../../../shared/models/api/MapId'
 import type { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
-import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import type { NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
@@ -47,7 +46,8 @@ const rawDecoder = D.struct({
   /** GameMode */
   gameMode: D.string, // The game mode
   bannedChampions: List.decoder(rawBannedChampionDecoder), // Banned champion information
-  gameQueueConfigId: GameQueue.decoder, // The queue type (queue types are documented on the Game Constants page)
+  /** GameQueue */
+  gameQueueConfigId: D.number, // The queue type (queue types are documented on the Game Constants page)
   observers: rawObserver, // The observer information
   participants: List.decoder(RiotCurrentGameParticipant.rawDecoder), // The participant information
 })

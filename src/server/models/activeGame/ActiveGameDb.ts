@@ -5,7 +5,6 @@ import { GameId } from '../../../shared/models/api/GameId'
 import { MapId } from '../../../shared/models/api/MapId'
 import type { BannedChampionOutput } from '../../../shared/models/api/activeGame/BannedChampion'
 import { BannedChampion } from '../../../shared/models/api/activeGame/BannedChampion'
-import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
@@ -63,7 +62,8 @@ const codec = C.struct({
   /** GameMode */
   gameMode: C.string,
   gameStartTime: Maybe.codec(DayJsFromDate.codec),
-  gameQueueConfigId: GameQueue.codec,
+  /** GameQueue */
+  gameQueueConfigId: C.number,
   isDraft: C.boolean,
   bannedChampions: C.readonly(C.partial(bannedChampionsProperties)),
   participants: C.readonly(C.partial(participantsProperties)),

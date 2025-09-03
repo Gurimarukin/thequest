@@ -8,7 +8,6 @@ import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
 import { MapId } from '../../../../shared/models/api/MapId'
 import type { Platform } from '../../../../shared/models/api/Platform'
-import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
 import { List, Maybe, NonEmptyArray, PartialDict } from '../../../../shared/utils/fp'
@@ -63,7 +62,8 @@ const rawDecoder = D.struct({
       gameVersion: D.string,
       mapId: MapId.codec,
       participants: List.decoder(RiotMatchParticipant.rawDecoder),
-      queueId: GameQueue.codec,
+      /** GameQueue */
+      queueId: D.number,
       teams: List.decoder(
         D.struct({
           bans: List.decoder(

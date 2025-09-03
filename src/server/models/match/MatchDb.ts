@@ -8,7 +8,6 @@ import { MsDuration } from '../../../shared/models/MsDuration'
 import { GameId } from '../../../shared/models/api/GameId'
 import { MapId } from '../../../shared/models/api/MapId'
 import { Platform } from '../../../shared/models/api/Platform'
-import { GameQueue } from '../../../shared/models/api/activeGame/GameQueue'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionId } from '../../../shared/models/api/champion/ChampionId'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -213,7 +212,8 @@ function codec<O>(dayjsCodec: Codec<unknown, O, DayJs>) {
     gameType: GameType.codec,
     gameVersion: C.string,
     mapId: MapId.codec,
-    queueId: GameQueue.codec,
+    /** GameQueue */
+    queueId: C.number,
     teams: C.partial(teamProperties),
     win: TeamId.codec,
   })

@@ -9,7 +9,6 @@ import type { ActiveGameParticipantViewOutput } from './ActiveGameParticipantVie
 import { ActiveGameParticipantView } from './ActiveGameParticipantView'
 import type { BannedChampionOutput } from './BannedChampion'
 import { BannedChampion } from './BannedChampion'
-import { GameQueue } from './GameQueue'
 import type { TeamId } from './TeamId'
 
 type ActiveGameView = C.TypeOf<typeof codec>
@@ -39,7 +38,8 @@ const codec = C.struct({
   mapId: MapId.codec,
   /** GameMode */
   gameMode: C.string,
-  gameQueueConfigId: GameQueue.codec,
+  /** GameQueue */
+  gameQueueConfigId: C.number,
   isDraft: C.boolean,
   bannedChampions: C.readonly(C.partial(bannedChampionsProperties)),
   participants: C.readonly(C.partial(participantsProperties)),
