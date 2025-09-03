@@ -3,7 +3,6 @@ import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
-import { GameMode } from '../../../../shared/models/api/GameMode'
 import { MapId } from '../../../../shared/models/api/MapId'
 import type { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
@@ -45,7 +44,8 @@ const rawDecoder = D.struct({
   mapId: MapId.decoder, // The ID of the map
   gameLength: pipe(D.number, D.map(MsDuration.seconds)), // The amount of time in seconds that has passed since the game started
   // platformId: PlatformId.codec, // The ID of the platform on which the game is being played
-  gameMode: GameMode.decoder, // The game mode
+  /** GameMode */
+  gameMode: D.string, // The game mode
   bannedChampions: List.decoder(rawBannedChampionDecoder), // Banned champion information
   gameQueueConfigId: GameQueue.decoder, // The queue type (queue types are documented on the Game Constants page)
   observers: rawObserver, // The observer information

@@ -51,12 +51,7 @@ const MadosayentisutoController = (
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const getStaticData: EndedMiddleware = withIpAndToken(
-    pipe(
-      staticDataService.getLatest(lang),
-      Future.map((data): StaticData => ({ ...data, docErrors: Maybe.none })),
-      M.fromTaskEither,
-      M.ichain(M.json(StaticData.codec)),
-    ),
+    pipe(staticDataService.getLatest(lang), M.fromTaskEither, M.ichain(M.json(StaticData.codec))),
   )
 
   const getUsersProgression: EndedMiddleware = withIpAndToken(

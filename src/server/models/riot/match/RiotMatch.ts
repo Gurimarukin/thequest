@@ -6,7 +6,6 @@ import type { Except, Merge, OverrideProperties } from 'type-fest'
 import { DayJs } from '../../../../shared/models/DayJs'
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
-import { GameMode } from '../../../../shared/models/api/GameMode'
 import { MapId } from '../../../../shared/models/api/MapId'
 import type { Platform } from '../../../../shared/models/api/Platform'
 import { GameQueue } from '../../../../shared/models/api/activeGame/GameQueue'
@@ -56,7 +55,8 @@ const rawDecoder = D.struct({
        */
       gameEndTimestamp: Maybe.decoder(DayJsFromNumber.decoder),
       gameId: GameId.codec,
-      gameMode: GameMode.codec,
+      /** GameMode */
+      gameMode: D.string,
       gameName: D.string,
       gameStartTimestamp: DayJsFromNumber.decoder,
       gameType: GameType.codec,

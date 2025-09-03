@@ -13,7 +13,6 @@ import {
 } from 'react'
 
 import { Business } from '../../../shared/Business'
-import type { GameMode } from '../../../shared/models/api/GameMode'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
@@ -74,7 +73,8 @@ type ParticipantProps = {
   runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
   runeById: (id: RuneId) => Maybe<StaticDataRune>
   platform: Platform
-  gameMode: GameMode
+  /** GameMode */
+  gameMode: string
   participant: ActiveGameParticipantView
   shouldWrap: boolean
   highlight: boolean
@@ -221,7 +221,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         <div className="relative" style={{ height: bevelHeight }}>
           <div
             className={cx(
-              'absolute size-125 bg-current shadow-even shadow-black',
+              'size-125 absolute bg-current shadow-even shadow-black',
               reverse ? 'bottom-0 origin-bottom-left' : 'right-0 origin-top-right',
             )}
             style={{ transform: `rotate(${bevelRotate}rad)` }}

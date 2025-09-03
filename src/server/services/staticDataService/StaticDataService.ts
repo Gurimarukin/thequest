@@ -2,7 +2,6 @@ import { apply, io, predicate, readonlyMap } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
 import type { Lens } from 'monocle-ts/Lens'
-import type { Except } from 'type-fest'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { ValidatedNea } from '../../../shared/models/ValidatedNea'
@@ -18,7 +17,7 @@ import { StaticDataChampion } from '../../../shared/models/api/staticData/Static
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
-import type { NotUsed, PartialDict } from '../../../shared/utils/fp'
+import type { PartialDict } from '../../../shared/utils/fp'
 import {
   Either,
   Future,
@@ -69,23 +68,9 @@ const StaticDataService = (
       lang =>
         (version: DDragonVersion): Future<StaticData> =>
           pipe(
-            apply.sequenceT(Future.ApplyPar)(
-              pipe(
-                ddragonService.champions(version, lang),
-                Future.map(d => DictUtils.values(d.data)),
-                Future.chain(staticDataFetch(version)),
-              ),
-              pipe(
-                ddragonService.checkQueuesMapsAndModes,
-                Future.chainFirstIOEitherK<Maybe<NonEmptyArray<string>>, NotUsed>(
-                  Maybe.fold(
-                    () => logger.info('Queues, maps and modes OK'),
-                    flow(List.mkString('Doc errors:\n- ', '\n- ', ''), logger.warn),
-                  ),
-                ),
-              ),
-            ),
-            Future.map(([data, docErrors]): StaticData => ({ ...data, docErrors })),
+            ddragonService.champions(version, lang),
+            Future.map(d => DictUtils.values(d.data)),
+            Future.chain(staticDataFetch(version)),
           ),
       version => data => DDragonVersion.Eq.equals(data.value.version, version),
     )
@@ -208,7 +193,7 @@ const StaticDataService = (
 
   function staticDataFetch(
     version: DDragonVersion,
-  ): (ddragonChampions: List<DDragonChampion>) => Future<Except<StaticData, 'docErrors'>> {
+  ): (ddragonChampions: List<DDragonChampion>) => Future<StaticData> {
     return ddragonChampions =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
@@ -249,7 +234,7 @@ const StaticDataService = (
                 Maybe.some,
               ),
             ),
-            (champions): Except<StaticData, 'docErrors'> => ({ version, champions }),
+            (champions): StaticData => ({ version, champions }),
           ),
         ),
       )

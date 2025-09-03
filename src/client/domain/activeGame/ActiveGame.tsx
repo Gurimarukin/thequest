@@ -10,7 +10,6 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
-import type { GameMode } from '../../../shared/models/api/GameMode'
 import type { Lang } from '../../../shared/models/api/Lang'
 import { MapId } from '../../../shared/models/api/MapId'
 import { Platform } from '../../../shared/models/api/Platform'
@@ -345,7 +344,8 @@ const poroLink = (lang: Lang, platform: Platform, { gameName, tagLine }: RiotId)
 type ParticipantsProps = {
   platform: Platform
   summoner: SummonerShort
-  gameMode: GameMode
+  /** GameMode */
+  gameMode: string
   shouldWrap: boolean
   teamId: TeamId
   reverse: boolean

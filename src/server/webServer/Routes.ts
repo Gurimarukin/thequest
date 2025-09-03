@@ -30,7 +30,7 @@ export const Routes = (
   return [
     m(api.healthcheck.get, () => healthCheckController.check),
 
-    m(api.staticData.lang.get, ({ lang }) => maybeWithAuth(staticDataController.staticData(lang))),
+    m(api.staticData.lang.get, ({ lang }) => staticDataController.staticData(lang)),
     m(api.staticData.lang.additional.get, ({ lang }) =>
       staticDataController.additionalStaticData(lang),
     ),
