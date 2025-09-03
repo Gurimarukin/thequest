@@ -21,8 +21,8 @@ import { CacheUtils } from '../utils/CacheUtils'
 import type { RiotApiService } from './RiotApiService'
 
 const missingFromDoc = {
-  queues: [480, 2300] satisfies List<GameQueue>,
-  gameModes: ['CHERRY', 'SWIFTPLAY', 'BRAWL'] satisfies List<GameMode>,
+  queues: [480, 2300, 4210] satisfies List<GameQueue>,
+  gameModes: ['CHERRY', 'SWIFTPLAY', 'BRAWL', 'RUBY'] satisfies List<GameMode>,
   maps: [35] satisfies List<MapId>,
 }
 

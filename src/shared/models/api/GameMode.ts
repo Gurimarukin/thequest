@@ -26,6 +26,7 @@ const GameMode = createEnum(
   'CHERRY', // Arena
   'SWIFTPLAY', // Swiftplay
   'BRAWL',
+  'RUBY',
 )
 
 export { GameMode }

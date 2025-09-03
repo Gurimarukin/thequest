@@ -101,6 +101,7 @@ const e = createEnum(
   2010, // Summoner's Rift — Tutorial 2
   2020, // Summoner's Rift — Tutorial 3
   2300, // The Bandlewood — Brawl map
+  4210, // Summoner's Rift — Doom Bots
 )
 
 const GameQueue = e

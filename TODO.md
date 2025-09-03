@@ -21,3 +21,6 @@
 - discord OAuth2: proper state (redirect url)
 - clean old cache entries
 - use https://www.mongodb.com/docs/manual/tutorial/expire-data for cache?
+
+- `GET ​https://127.0.0.1:2999/liveclientdata/playerlist`
+- `https://127.0.0.1:2999/liveclientdata/allgamedata`
