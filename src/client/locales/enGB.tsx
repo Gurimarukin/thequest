@@ -285,6 +285,7 @@ const enGBTranslation: Translation = {
         2020: 'Tutorial 3', // Summoner's Rift — Tutorial 3
         2300: 'Brawl', // The Bandlewood — Brawl map
         4210: 'Doom Bots (?)', // Summoner's Rift — Doom Bots
+        4220: 'Doom Bots Hard',
       },
       leagueTier,
       position,

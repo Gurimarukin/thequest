@@ -98,3 +98,4 @@ export type GameQueue =
   | 2020 // Summoner's Rift — Tutorial 3
   | 2300 // The Bandlewood — Brawl map
   | 4210 // Summoner's Rift — Doom Bots
+  | 4220 // Summoner's Rift — Doom Bots Hard
