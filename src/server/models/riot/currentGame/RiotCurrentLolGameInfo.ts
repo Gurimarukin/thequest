@@ -3,7 +3,6 @@ import * as D from 'io-ts/Decoder'
 
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
-import { MapId } from '../../../../shared/models/api/MapId'
 import type { BannedChampion } from '../../../../shared/models/api/activeGame/BannedChampion'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
@@ -40,7 +39,8 @@ const rawDecoder = D.struct({
         : pipe(DayJsFromNumber.numberDecoder.decode(n), Either.map(Maybe.some)),
     ),
   ), // The game start time represented in epoch milliseconds
-  mapId: MapId.decoder, // The ID of the map
+  /** MapId */
+  mapId: D.number, // The ID of the map
   gameLength: pipe(D.number, D.map(MsDuration.seconds)), // The amount of time in seconds that has passed since the game started
   // platformId: PlatformId.codec, // The ID of the platform on which the game is being played
   /** GameMode */

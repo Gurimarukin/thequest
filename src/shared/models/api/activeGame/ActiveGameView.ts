@@ -4,7 +4,6 @@ import * as C from 'io-ts/Codec'
 import type { Dict } from '../../../utils/fp'
 import { Maybe, NonEmptyArray } from '../../../utils/fp'
 import { DayJsFromISOString } from '../../../utils/ioTsUtils'
-import { MapId } from '../MapId'
 import type { ActiveGameParticipantViewOutput } from './ActiveGameParticipantView'
 import { ActiveGameParticipantView } from './ActiveGameParticipantView'
 import type { BannedChampionOutput } from './BannedChampion'
@@ -35,7 +34,8 @@ const participantsProperties: Dict<
 
 const codec = C.struct({
   gameStartTime: Maybe.codec(DayJsFromISOString.codec),
-  mapId: MapId.codec,
+  /** MapId */
+  mapId: C.number,
   /** GameMode */
   gameMode: C.string,
   /** GameQueue */

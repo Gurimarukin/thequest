@@ -6,7 +6,6 @@ import * as E from 'io-ts/Encoder'
 import type { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
 import { GameId } from '../../../shared/models/api/GameId'
-import { MapId } from '../../../shared/models/api/MapId'
 import { Platform } from '../../../shared/models/api/Platform'
 import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { ChampionId } from '../../../shared/models/api/champion/ChampionId'
@@ -211,7 +210,8 @@ function codec<O>(dayjsCodec: Codec<unknown, O, DayJs>) {
     gameStartTimestamp: dayjsCodec,
     gameType: GameType.codec,
     gameVersion: C.string,
-    mapId: MapId.codec,
+    /** MapId */
+    mapId: C.number,
     /** GameQueue */
     queueId: C.number,
     teams: C.partial(teamProperties),

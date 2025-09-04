@@ -6,7 +6,6 @@ import type { Except, Merge, OverrideProperties } from 'type-fest'
 import { DayJs } from '../../../../shared/models/DayJs'
 import { MsDuration } from '../../../../shared/models/MsDuration'
 import { GameId } from '../../../../shared/models/api/GameId'
-import { MapId } from '../../../../shared/models/api/MapId'
 import type { Platform } from '../../../../shared/models/api/Platform'
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
 import { ChampionKey } from '../../../../shared/models/api/champion/ChampionKey'
@@ -60,7 +59,8 @@ const rawDecoder = D.struct({
       gameStartTimestamp: DayJsFromNumber.decoder,
       gameType: GameType.codec,
       gameVersion: D.string,
-      mapId: MapId.codec,
+      /** MapId */
+      mapId: D.number,
       participants: List.decoder(RiotMatchParticipant.rawDecoder),
       /** GameQueue */
       queueId: D.number,

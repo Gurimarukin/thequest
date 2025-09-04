@@ -543,7 +543,7 @@ export const shouldNotifyChampionLeveledUp =
  */
 const sortParticipants =
   (champions: List<WikiChampionData>) =>
-  (mapId: MapId) =>
+  (mapId: number) =>
   (
     participants: NonEmptyArray<ActiveGameParticipantView>,
   ): NonEmptyArray<ActiveGameParticipantView> => {

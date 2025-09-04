@@ -13,6 +13,7 @@
 - challenge progression discord notification
 - account menu
 - forget about Discord Riot Connection, remove getLinkedRiotAccount
+- unknown `GameMode`, `GameQueue`, `MapId` warnings
 
 - limit favorites
 - modal: trap focus
