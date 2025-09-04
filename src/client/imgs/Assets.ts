@@ -46,7 +46,7 @@ const masteries: Dict<`${ChampionLevel}`, string> = {
 
 // https://wiki.leagueoflegends.com/en-us/Category:Champion_stat_assets
 const stats: Dict<WikiStatsBalanceKey, string> = {
-  dmg_dealt: new URL('./stats/damage_amp.png', import.meta.url).toString(),
+  dmg_dealt: new URL('./stats/damage_amp.webp', import.meta.url).toString(),
   dmg_taken: new URL('./stats/armor_penetration.webp', import.meta.url).toString(),
   healing: new URL('./stats/heal_power.webp', import.meta.url).toString(),
   shielding: new URL('./stats/shield_power.webp', import.meta.url).toString(),
