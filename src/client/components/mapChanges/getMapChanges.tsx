@@ -1,15 +1,18 @@
 /* eslint-disable functional/no-expression-statements,
                   functional/no-return-void */
 import { io, random } from 'fp-ts'
-import { flow, pipe } from 'fp-ts/function'
+import { flow, identity, pipe } from 'fp-ts/function'
 import { Fragment, useMemo, useRef } from 'react'
 
+import type { WikiStatsBalanceKey } from '../../../shared/models/WikiStatsBalance'
+import { WikiStatsBalance } from '../../../shared/models/WikiStatsBalance'
 import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
+import { SpellName } from '../../../shared/models/api/SpellName'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { ChampionPositionsAndFactions } from '../../components/ChampionTooltip'
@@ -20,6 +23,7 @@ import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
+import { Assets } from '../../imgs/Assets'
 import { OpenInNew } from '../../imgs/svgs/icons'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
@@ -181,7 +185,7 @@ const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
     <div
       ref={containerRef}
       className={cx(
-        'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-aram-stats text-2xs',
+        'overflow-hidden rounded-lg bg-aram-stats text-2xs',
         MapChangesChampionCategory.fromData(getData(champion)) !== 'balanced'
           ? 'col-span-7'
           : 'col-span-4',
@@ -192,20 +196,125 @@ const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
         ref={championHoverRef}
         championKey={champion.key}
         championName={champion.name}
-        className="size-12 rounded-xl shadow-even shadow-black"
+        className="float-left size-12 rounded-lg shadow-even shadow-black"
       />
       <Tooltip hoverRef={championHoverRef} placement="top" className="flex flex-col gap-1">
         <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>
         <ChampionPositionsAndFactions positions={champion.positions} factions={champion.factions} />
       </Tooltip>
 
-      <MapChangesStatsCompact data={getData(champion)} splitAt={5}>
+      {/* <MapChangesStatsCompact data={getData(champion)} splitAt={5}>
         {renderChildrenCompact}
-      </MapChangesStatsCompact>
-      <Tooltip hoverRef={[mapChangesHoverRef1, mapChangesHoverRef2]} placementRef={containerRef}>
+      </MapChangesStatsCompact> */}
+      <Plouf data={getData(champion)} />
+      <Tooltip hoverRef={containerRef}>
         <MapChangesTooltip data={getData(champion)} />
       </Tooltip>
     </div>
+  )
+}
+
+type PloufProps = {
+  data: MapChangesData
+}
+
+const Plouf: React.FC<PloufProps> = ({ data }) => {
+  const toto = pipe(
+    [
+      pipe(
+        data.stats,
+        Maybe.chain(stats =>
+          pipe(
+            WikiStatsBalance.keys,
+            List.filterMap(key =>
+              pipe(
+                Dict.lookup(key, stats),
+                Maybe.map(value => <Stat key={key} name={key} value={value} />),
+              ),
+            ),
+            NonEmptyArray.fromReadonlyArray,
+          ),
+        ),
+      ),
+      pipe(
+        data.spells,
+        Maybe.chain(spells =>
+          pipe(
+            SpellName.values,
+            List.filterMap(spell =>
+              pipe(
+                Dict.lookup(spell, spells),
+                Maybe.map(value => <Spell key={spell} spell={spell} html={value.spell} />),
+              ),
+            ),
+            NonEmptyArray.fromReadonlyArray,
+          ),
+        ),
+      ),
+    ],
+    List.compact,
+    List.chain(identity),
+  )
+
+  return <ul className="flex flex-wrap gap-x-1 p-0.5">{toto}</ul>
+}
+
+type StatProps = {
+  name: WikiStatsBalanceKey
+  value: number
+}
+
+const Stat: React.FC<StatProps> = ({ name, value }) => {
+  const { t } = useTranslation('mapChanges')
+
+  const isMalusStat = WikiStatsBalance.isMalusStat(name)
+  const maybeUnit = WikiStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
+
+  const n = WikiStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
+
+  return (
+    <li className="grid grid-cols-[auto_1fr] items-center justify-items-start gap-1">
+      <img
+        src={Assets.stats[name]}
+        alt={t.statIconAlt(name)}
+        className="size-2.5 bg-contain brightness-75 sepia"
+      />
+
+      <span
+        className={cx(
+          'flex font-lib-mono',
+          (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
+        )}
+      >
+        <span>
+          {n < 0 ? null : '+'}
+          {n}
+        </span>
+        {pipe(
+          maybeUnit,
+          Maybe.fold(
+            () => null,
+            u => <span>{u}</span>,
+          ),
+        )}
+      </span>
+    </li>
+  )
+}
+
+type SpellProps = {
+  spell: SpellName
+  html: string
+}
+
+const Spell: React.FC<SpellProps> = ({ spell, html }) => {
+  const { t } = useTranslation('common')
+
+  return (
+    <li className="flex items-center gap-1">
+      <span dangerouslySetInnerHTML={{ __html: html }} className="wiki compact" />
+      <span>{t.labels.spell[spell]}</span>
+    </li>
   )
 }
 
