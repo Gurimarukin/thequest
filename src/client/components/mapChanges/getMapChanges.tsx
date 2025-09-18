@@ -2,7 +2,7 @@
                   functional/no-return-void */
 import { io, random } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import { Fragment, useMemo } from 'react'
+import { Fragment, useMemo, useRef } from 'react'
 
 import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -20,8 +20,12 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { OpenInNew } from '../../imgs/svgs/icons'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
+import { cx } from '../../utils/cx'
+import { ChampionPositionsAndFactions } from '../ChampionTooltip'
+import { CroppedChampionSquare } from '../CroppedChampionSquare'
+import { Tooltip } from '../tooltip/Tooltip'
 import type { EnrichedStaticDataChampion } from './ChampionSquareChanges'
-import { ChampionSquareChanges } from './ChampionSquareChanges'
+import { ChampionSquareChanges, championSquareChangesClassName } from './ChampionSquareChanges'
 
 import './mapChanges.css'
 
@@ -124,7 +128,7 @@ export const getMapChanges =
                     <ChampionCategoryTitle category={c.category} className="pt-4" />
                   ) : null}
 
-                  <ChampionSquareChanges getData={getData} champion={c} />
+                  <Champion getData={getData} champion={c} />
                 </Fragment>
               )),
             )}
@@ -150,3 +154,44 @@ export const getMapChanges =
       </MainLayout>
     )
   }
+
+type ChampionProps = {
+  getData: (c: StaticDataChampion) => MapChangesData
+  champion: EnrichedStaticDataChampion
+}
+
+const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const championRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <div
+      ref={containerRef}
+      className={cx(
+        championSquareChangesClassName,
+        'text-2xs',
+        MapChangesChampionCategory.fromData(getData(champion)) !== 'balanced'
+          ? 'col-span-7'
+          : 'col-span-4',
+        ['hidden', champion.isHidden],
+      )}
+    >
+      <CroppedChampionSquare
+        ref={championRef}
+        championKey={champion.key}
+        championName={champion.name}
+        className="size-12 rounded-lg shadow-even shadow-black"
+      />
+      <Tooltip hoverRef={championRef} placement="top" className="flex flex-col gap-1">
+        <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>
+        <ChampionPositionsAndFactions positions={champion.positions} factions={champion.factions} />
+      </Tooltip>
+
+      <ChampionSquareChanges
+        tooltiPlacementRef={containerRef}
+        getData={getData}
+        champion={champion}
+      />
+    </div>
+  )
+}

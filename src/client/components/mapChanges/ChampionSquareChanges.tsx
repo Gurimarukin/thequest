@@ -12,14 +12,13 @@ import { Dict, Either, List, Maybe, NonEmptyArray } from '../../../shared/utils/
 
 import { useTranslation } from '../../contexts/TranslationContext'
 import { Assets } from '../../imgs/Assets'
-import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
+import type { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { cx } from '../../utils/cx'
-import { ChampionPositionsAndFactions } from '../ChampionTooltip'
-import { CroppedChampionSquare } from '../CroppedChampionSquare'
 import { Tooltip } from '../tooltip/Tooltip'
 import { MapChangesTooltip } from './MapChangesTooltip'
 
 type Props = {
+  tooltiPlacementRef: React.RefObject<Element>
   getData: (c: StaticDataChampion) => MapChangesData
   champion: EnrichedStaticDataChampion
 }
@@ -29,10 +28,14 @@ export type EnrichedStaticDataChampion = StaticDataChampion & {
   category: MapChangesChampionCategory
 }
 
-export const ChampionSquareChanges: React.FC<Props> = ({ getData, champion }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const championRef = useRef<HTMLDivElement>(null)
+export const championSquareChangesClassName =
+  'grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] overflow-hidden rounded-lg bg-aram-stats'
 
+export const ChampionSquareChanges: React.FC<Props> = ({
+  tooltiPlacementRef,
+  getData,
+  champion,
+}) => {
   const initialRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
 
@@ -42,41 +45,19 @@ export const ChampionSquareChanges: React.FC<Props> = ({ getData, champion }) =>
   )
 
   return (
-    <div
-      ref={containerRef}
-      className={cx(
-        'grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] overflow-hidden rounded-lg bg-aram-stats text-2xs',
-        MapChangesChampionCategory.fromData(getData(champion)) !== 'balanced'
-          ? 'col-span-7'
-          : 'col-span-4',
-        ['hidden', champion.isHidden],
-      )}
-    >
-      <CroppedChampionSquare
-        ref={championRef}
-        championKey={champion.key}
-        championName={champion.name}
-        className="size-12 rounded-lg shadow-even shadow-black"
-      />
-      <Tooltip hoverRef={championRef} placement="top" className="flex flex-col gap-1">
-        <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>
-        <ChampionPositionsAndFactions positions={champion.positions} factions={champion.factions} />
-      </Tooltip>
+    <>
+      <div ref={initialRef} className="row-span-2 grid place-items-center">
+        {List.isNonEmpty(initial) && <ul className="p-0.5">{initial}</ul>}
+      </div>
 
-      {List.isNonEmpty(initial) && (
-        <div ref={initialRef} className="row-span-2 grid place-items-center p-0.5">
-          <ul>{initial}</ul>
-        </div>
-      )}
-      {List.isNonEmpty(more) && (
-        <div ref={moreRef} className="grid items-end justify-items-center p-0.5">
-          <ul>{more}</ul>
-        </div>
-      )}
-      <Tooltip hoverRef={[initialRef, moreRef]} placementRef={containerRef}>
+      <div ref={moreRef} className="grid items-end justify-items-center">
+        {List.isNonEmpty(more) && <ul className="p-0.5">{more}</ul>}
+      </div>
+
+      <Tooltip hoverRef={[initialRef, moreRef]} placementRef={tooltiPlacementRef}>
         <MapChangesTooltip data={getData(champion)} />
       </Tooltip>
-    </div>
+    </>
   )
 }
 
