@@ -82,6 +82,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
   return (
     <>
       <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
+
       <div className={cx('w-full', viewContainerClassName[masteriesQuery.view])}>
         {pipe(
           filteredAndSortedMasteries,
@@ -100,6 +101,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
           )),
         )}
       </div>
+
       <div className="self-center text-sm">
         {t.nChampionsFraction(championsCount, champions.length)}
       </div>
@@ -206,10 +208,8 @@ const Champion: React.FC<ChampionProps> = ({
 
       <div
         ref={containerRef}
-        className={cx('relative', {
+        className={cx('relative', colSpanClassName(masteriesQuery.view, champion), {
           hidden: isHidden,
-          [champion.aram.category !== 'balanced' ? 'col-span-5' : 'col-span-3']: isAram,
-          [champion.urf.category !== 'balanced' ? 'col-span-5' : 'col-span-3']: isUrf,
         })}
       >
         {/* glow */}
@@ -237,6 +237,23 @@ const Champion: React.FC<ChampionProps> = ({
       />
     </>
   )
+}
+
+const balancedClassName = 'col-span-3'
+const unbalancedClassName = 'col-span-5'
+
+function colSpanClassName(
+  view: MasteriesQueryView,
+  champion: EnrichedChampionMastery,
+): string | undefined {
+  switch (view) {
+    case 'aram':
+    case 'urf':
+      return champion[view].category === 'balanced' ? balancedClassName : unbalancedClassName
+
+    default:
+      return undefined
+  }
 }
 
 type GlowProps = {
