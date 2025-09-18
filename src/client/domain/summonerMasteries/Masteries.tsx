@@ -26,7 +26,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { CountWithTotal } from '../../models/CountWithTotal'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
+import { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { masteryHistogramGradient, masteryRulerColor, masteryTextColor } from '../../utils/colors'
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -140,7 +140,9 @@ const Champion: React.FC<ChampionProps> = ({
   champion,
   setChampionShards,
 }) => {
-  const { masteriesQuery } = useHistory()
+  const {
+    masteriesQuery: { view },
+  } = useHistory()
 
   const containerRef = useRef<HTMLDivElement>(null)
   const mapChangesHoverRef1 = useRef<HTMLUListElement>(null)
@@ -157,37 +159,21 @@ const Champion: React.FC<ChampionProps> = ({
     [],
   )
 
-  const isHistogram = masteriesQuery.view === 'histogram'
-  const isAram = masteriesQuery.view === 'aram'
-  const isUrf = masteriesQuery.view === 'urf'
-  const isFactions = masteriesQuery.view === 'factions'
+  const isHistogram = view === 'histogram'
+  const isFactions = view === 'factions'
 
   return (
     <>
-      {isAram &&
+      {MasteriesQueryView.isBalance(view) &&
       !isHidden &&
       !pipe(
         maybePrev,
         Maybe.exists(prev =>
-          MapChangesChampionCategory.Eq.equals(prev.aram.category, champion.aram.category),
+          MapChangesChampionCategory.Eq.equals(prev[view].category, champion[view].category),
         ),
       ) ? (
         <ChampionCategoryTitle
-          category={champion.aram.category}
-          className={cx(['pt-4', Maybe.isSome(maybePrev)])}
-        />
-      ) : null}
-
-      {isUrf &&
-      !isHidden &&
-      !pipe(
-        maybePrev,
-        Maybe.exists(prev =>
-          MapChangesChampionCategory.Eq.equals(prev.urf.category, champion.urf.category),
-        ),
-      ) ? (
-        <ChampionCategoryTitle
-          category={champion.urf.category}
+          category={champion[view].category}
           className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
@@ -208,7 +194,7 @@ const Champion: React.FC<ChampionProps> = ({
 
       <div
         ref={containerRef}
-        className={cx('relative', colSpanClassName(masteriesQuery.view, champion), {
+        className={cx('relative', colSpanClassName(view, champion), {
           hidden: isHidden,
         })}
       >
@@ -225,8 +211,7 @@ const Champion: React.FC<ChampionProps> = ({
             centerLevel={false}
           />
 
-          {isAram ? renderMapChanges(champion.aram.data) : null}
-          {isUrf ? renderMapChanges(champion.urf.data) : null}
+          {MasteriesQueryView.isBalance(view) ? renderMapChanges(champion[view].data) : null}
         </div>
       </div>
 
@@ -246,14 +231,11 @@ function colSpanClassName(
   view: MasteriesQueryView,
   champion: EnrichedChampionMastery,
 ): string | undefined {
-  switch (view) {
-    case 'aram':
-    case 'urf':
-      return champion[view].category === 'balanced' ? balancedClassName : unbalancedClassName
-
-    default:
-      return undefined
+  if (MasteriesQueryView.isBalance(view)) {
+    return champion[view].category === 'balanced' ? balancedClassName : unbalancedClassName
   }
+
+  return undefined
 }
 
 type GlowProps = {
