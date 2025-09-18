@@ -4,7 +4,6 @@ import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 import type { SWRResponse } from 'swr'
 
-import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -17,8 +16,10 @@ import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
 import type { SetChampionShards } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
-import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
-import { MapChangesStatsCompact } from '../../components/mapChanges/stats/MapChangesStatsCompact'
+import {
+  ChampionSquareChanges,
+  championSquareChangesClassName,
+} from '../../components/mapChanges/ChampionSquareChanges'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -145,19 +146,6 @@ const Champion: React.FC<ChampionProps> = ({
   } = useHistory()
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const mapChangesHoverRef1 = useRef<HTMLUListElement>(null)
-  const mapChangesHoverRef2 = useRef<HTMLSpanElement>(null)
-
-  const renderMapChanges = useMemo(
-    () =>
-      getRenderMapChanges(
-        containerRef,
-        mapChangesHoverRef1,
-        mapChangesHoverRef2,
-        getRenderChildrenCompact(mapChangesHoverRef1),
-      ),
-    [],
-  )
 
   const isHistogram = view === 'histogram'
   const isFactions = view === 'factions'
@@ -201,7 +189,7 @@ const Champion: React.FC<ChampionProps> = ({
         {/* glow */}
         <Glow isGlowing={isGlowing} />
 
-        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats">
+        <div className={cx(championSquareChangesClassName, 'relative')}>
           <ChampionMasterySquare
             {...champion}
             setChampionShards={setChampionShards}
@@ -211,7 +199,13 @@ const Champion: React.FC<ChampionProps> = ({
             centerLevel={false}
           />
 
-          {MasteriesQueryView.isBalance(view) ? renderMapChanges(champion[view].data) : null}
+          {MasteriesQueryView.isBalance(view) ? (
+            <ChampionSquareChanges
+              tooltiPlacementRef={containerRef}
+              imageSize={16}
+              data={champion[view].data}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -254,27 +248,6 @@ const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
     <div className="col-start-1 row-start-1 size-[calc(100%_-_.25rem)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
   </div>
 )
-
-const getRenderMapChanges =
-  (
-    containerRef: React.RefObject<HTMLDivElement>,
-    mapChangesHoverRef1: React.RefObject<HTMLUListElement>,
-    mapChangesHoverRef2: React.RefObject<HTMLSpanElement>,
-    renderChildrenCompact: (children: List<React.ReactElement>) => React.ReactElement,
-  ) =>
-  (data: MapChangesData): React.ReactElement => (
-    <>
-      <MapChangesStatsCompact data={data} splitAt={Infinity}>
-        {renderChildrenCompact}
-      </MapChangesStatsCompact>
-
-      <Tooltip hoverRef={[mapChangesHoverRef1, mapChangesHoverRef2]} placementRef={containerRef}>
-        <MapChangesTooltip data={data} />
-      </Tooltip>
-
-      <span ref={mapChangesHoverRef2} className="rounded-bl-xl" />
-    </>
-  )
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
@@ -388,14 +361,3 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
     </>
   )
 }
-
-const getRenderChildrenCompact =
-  (ref: React.RefObject<HTMLUListElement>) =>
-  (children: List<React.ReactElement>): React.ReactElement => (
-    <ul
-      ref={ref}
-      className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1 text-2xs"
-    >
-      {children}
-    </ul>
-  )

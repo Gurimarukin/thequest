@@ -19,8 +19,8 @@ import { MapChangesTooltip } from './MapChangesTooltip'
 
 type Props = {
   tooltiPlacementRef: React.RefObject<Element>
-  getData: (c: StaticDataChampion) => MapChangesData
-  champion: EnrichedStaticDataChampion
+  imageSize: number
+  data: MapChangesData
 }
 
 export type EnrichedStaticDataChampion = StaticDataChampion & {
@@ -29,19 +29,15 @@ export type EnrichedStaticDataChampion = StaticDataChampion & {
 }
 
 export const championSquareChangesClassName =
-  'grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] overflow-hidden rounded-lg bg-aram-stats'
+  'grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] overflow-hidden rounded-lg bg-aram-stats text-2xs'
 
-export const ChampionSquareChanges: React.FC<Props> = ({
-  tooltiPlacementRef,
-  getData,
-  champion,
-}) => {
+export const ChampionSquareChanges: React.FC<Props> = ({ tooltiPlacementRef, imageSize, data }) => {
   const initialRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
 
   const { left: initial, right: more } = useMemo(
-    () => splitStatsAndSpells(getData(champion)),
-    [champion, getData],
+    () => splitStatsAndSpells(imageSize, data),
+    [data, imageSize],
   )
 
   return (
@@ -55,7 +51,7 @@ export const ChampionSquareChanges: React.FC<Props> = ({
       </div>
 
       <Tooltip hoverRef={[initialRef, moreRef]} placementRef={tooltiPlacementRef}>
-        <MapChangesTooltip data={getData(champion)} />
+        <MapChangesTooltip data={data} />
       </Tooltip>
     </>
   )
@@ -131,6 +127,7 @@ type Spell = {
 }
 
 function splitStatsAndSpells(
+  imageSize: number,
   data: MapChangesData,
 ): Separated<List<React.ReactElement>, List<React.ReactElement>> {
   const separated_: List<Maybe<NonEmptyArray<Either<Stat, Spell>>>> = pipe([
@@ -170,7 +167,7 @@ function splitStatsAndSpells(
     separated_,
     List.compact,
     List.chain(identity),
-    splitWhileSmallerThanImage,
+    splitWhileSmallerThanImage(imageSize),
     evenOddRights,
     separated.bimap(toElement, toElement),
   )
@@ -178,41 +175,42 @@ function splitStatsAndSpells(
 
 // Must be aligned with CSS
 const sizes = {
-  image: 12,
   paddingY: 0.5,
   stat: 3,
   spell: 5,
 }
 
-function splitWhileSmallerThanImage(
-  data: List<Either<Stat, Spell>>,
-  accLeft: List<Either<Stat, Spell>> = [],
-  accHeight: number = sizes.paddingY * 2,
-): Separated<List<Either<Stat, Spell>>, List<Either<Stat, Spell>>> {
-  const [head, ...tail] = data
+const splitWhileSmallerThanImage =
+  (imageSize: number) =>
+  (
+    data: List<Either<Stat, Spell>>,
+    accLeft: List<Either<Stat, Spell>> = [],
+    accHeight: number = sizes.paddingY * 2,
+  ): Separated<List<Either<Stat, Spell>>, List<Either<Stat, Spell>>> => {
+    const [head, ...tail] = data
 
-  if (head === undefined) {
-    return { left: accLeft, right: tail }
+    if (head === undefined) {
+      return { left: accLeft, right: tail }
+    }
+
+    const newAccLeft = pipe(accLeft, List.append(head))
+
+    const newAccHeight =
+      accHeight +
+      pipe(
+        head,
+        Either.fold(
+          () => sizes.stat,
+          () => sizes.spell,
+        ),
+      )
+
+    if (newAccHeight > imageSize) {
+      return { left: newAccLeft, right: tail }
+    }
+
+    return splitWhileSmallerThanImage(imageSize)(tail, newAccLeft, newAccHeight)
   }
-
-  const newAccLeft = pipe(accLeft, List.append(head))
-
-  const newAccHeight =
-    accHeight +
-    pipe(
-      head,
-      Either.fold(
-        () => sizes.stat,
-        () => sizes.spell,
-      ),
-    )
-
-  if (newAccHeight > sizes.image) {
-    return { left: newAccLeft, right: tail }
-  }
-
-  return splitWhileSmallerThanImage(tail, newAccLeft, newAccHeight)
-}
 
 function evenOddRights<A>({
   left,
