@@ -380,9 +380,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
           () => null,
           data => (
             <Cell gridColStart={6} className={cx('flex flex-col justify-center', padding)}>
-              <div ref={mapChangesRef} className="py-1 text-2xs">
-                <ActiveGameMapChangesStats reverse={reverse} data={data} />
-              </div>
+              <ActiveGameMapChangesStats ref={mapChangesRef} reverse={reverse} data={data} />
               <Tooltip hoverRef={mapChangesRef} shouldHide={tooltipShouldHide}>
                 <MapChangesTooltip data={data} />
               </Tooltip>

@@ -7,7 +7,7 @@ import { List } from '../../../shared/utils/fp'
 import type { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { Tooltip } from '../tooltip/Tooltip'
 import { MapChangesTooltip } from './MapChangesTooltip'
-import { newPartitionStats } from './newPartitionStats'
+import { partitionStatsWrap } from './newPartitionStats'
 
 type Props = {
   tooltiPlacementRef: React.RefObject<Element>
@@ -34,8 +34,8 @@ export const ChampionSquareChanges: React.FC<Props> = ({
   const initialRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
 
-  const { left: initial, right: more } = useMemo(
-    () => newPartitionStats(wrapAfterSize, data),
+  const { initial, more } = useMemo(
+    () => partitionStatsWrap(wrapAfterSize, data),
     [data, wrapAfterSize],
   )
 

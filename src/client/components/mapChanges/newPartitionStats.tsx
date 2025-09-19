@@ -1,4 +1,4 @@
-import { separated } from 'fp-ts'
+import { monoid, number, separated } from 'fp-ts'
 import type { Separated } from 'fp-ts/Separated'
 import { identity, pipe } from 'fp-ts/function'
 
@@ -81,14 +81,33 @@ type Spell = {
   value: ChampionSpellHtml
 }
 
+type InitialMore<A> = {
+  initial: List<A>
+  more: List<A>
+}
+
 /**
+ * Puts elements in `initial` until `wrapAfterSize` is reached.
+ * Then puts remaining even elements in `more`, and appends odd elements to `initial`.
+ *
  * @param wrapAfterSize should be `imageSize - 2 x paddingYSize`
  */
-export function newPartitionStats(
+export function partitionStatsWrap(
   wrapAfterSize: number,
   data: MapChangesData,
-): Separated<List<React.ReactElement>, List<React.ReactElement>> {
-  const separated_: List<Maybe<NonEmptyArray<Either<Stat, Spell>>>> = pipe([
+): InitialMore<React.ReactElement> {
+  const { left: initial, right: more } = pipe(
+    separateData(data),
+    splitWhileSmallerThan(wrapAfterSize),
+    evenOddRights,
+    separated.bimap(toElements, toElements),
+  )
+
+  return { initial, more }
+}
+
+function separateData(data: MapChangesData): List<Either<Stat, Spell>> {
+  const maybes: List<Maybe<NonEmptyArray<Either<Stat, Spell>>>> = pipe([
     pipe(
       data.stats,
       Maybe.chain(stats =>
@@ -121,14 +140,7 @@ export function newPartitionStats(
     ),
   ])
 
-  return pipe(
-    separated_,
-    List.compact,
-    List.chain(identity),
-    splitWhileSmallerThanImage(wrapAfterSize),
-    evenOddRights,
-    separated.bimap(toElement, toElement),
-  )
+  return pipe(maybes, List.compact, List.chain(identity))
 }
 
 // Must be aligned with CSS
@@ -138,10 +150,10 @@ const sizes = {
 }
 
 /**
- * @param wrapAfterSize should be `imageSize - 2 x paddingYSize`
+ * @param limitSize should be `imageSize - 2 x paddingYSize`
  */
-const splitWhileSmallerThanImage =
-  (wrapAfterSize: number) =>
+const splitWhileSmallerThan =
+  (limitSize: number) =>
   (
     data: List<Either<Stat, Spell>>,
     accLeft: List<Either<Stat, Spell>> = [],
@@ -165,11 +177,11 @@ const splitWhileSmallerThanImage =
         ),
       )
 
-    if (newAccHeight > wrapAfterSize) {
+    if (newAccHeight > limitSize) {
       return { left: newAccLeft, right: tail }
     }
 
-    return splitWhileSmallerThanImage(wrapAfterSize)(tail, newAccLeft, newAccHeight)
+    return splitWhileSmallerThan(limitSize)(tail, newAccLeft, newAccHeight)
   }
 
 function evenOddRights<A>({
@@ -187,9 +199,43 @@ function evenOddRights<A>({
   }
 }
 
-const toElement = List.map(
+const toElements = List.map(
   Either.fold<Stat, Spell, React.ReactElement>(
     ({ key, value }) => <Stat key={key} name={key} value={value} />,
     ({ key, value }) => <Spell key={key} spell={key} html={value.spell} />,
   ),
 )
+
+/**
+ * @param limitSize should be `imageSize - 2 x paddingYSize`
+ * @returns One column, if smaller than `limitSize`, else splits elements in two even columns.
+ */
+export function partitionStats2Cols(
+  limitSize: number,
+  data: MapChangesData,
+): InitialMore<React.ReactElement> {
+  const eithers = separateData(data)
+
+  const sizes_ = pipe(
+    eithers,
+    List.map(
+      Either.fold(
+        () => sizes.stat,
+        () => sizes.spell,
+      ),
+    ),
+  )
+
+  const totalSize = pipe(sizes_, monoid.concatAll(number.MonoidSum))
+
+  if (totalSize <= limitSize) {
+    return { initial: toElements(eithers), more: [] }
+  }
+
+  const { left: initial, right: more } = pipe(
+    splitWhileSmallerThan(totalSize / 2)(eithers),
+    separated.bimap(toElements, toElements),
+  )
+
+  return { initial, more }
+}

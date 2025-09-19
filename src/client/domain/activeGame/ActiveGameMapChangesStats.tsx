@@ -1,57 +1,33 @@
-import { useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 
+import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import { List } from '../../../shared/utils/fp'
 
-import type { MapChangesStatsProps } from '../../components/mapChanges/stats/mapChangesStats'
-import {
-  getMapChangesStats,
-  renderStatIcon,
-  renderStatValue,
-} from '../../components/mapChanges/stats/mapChangesStats'
+import { partitionStats2Cols } from '../../components/mapChanges/newPartitionStats'
 import { cx } from '../../utils/cx'
 
-type Props = Pick<MapChangesStatsProps, 'data'> & {
+type Props = {
+  data: MapChangesData
   reverse: boolean
 }
 
-export const ActiveGameMapChangesStats: React.FC<Props> = ({ reverse, ...props }) => {
-  const MapChangesStats = useMemo(
-    () =>
-      getMapChangesStats(
-        (t, name) => {
-          const icon = renderStatIcon(t.mapChanges, name, 'size-full')
-          const renderStatValue_ = renderStatValue(name, '')
+export const ActiveGameMapChangesStats = forwardRef<HTMLDivElement, Props>(
+  ({ data, reverse }, ref) => {
+    const { initial, more } = useMemo(
+      () => partitionStats2Cols(24.5 /* 98px */ - 2 /* (padding) */, data),
+      [data],
+    )
 
-          return value => (
-            <li key={name} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-              <span className="size-2.5">{icon}</span>
-              {renderStatValue_(value)}
-            </li>
-          )
-        },
-        (t, spell) => html => (
-          <li key={spell} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-            <span
-              dangerouslySetInnerHTML={{ __html: html.spell }}
-              className="wiki compact size-5"
-            />
-            <span>{t.common.labels.spell[spell]}</span>
-          </li>
-        ),
-        5,
-      ),
-    [reverse],
-  )
-
-  return <MapChangesStats {...props}>{renderMapChangesStats}</MapChangesStats>
-}
-
-const renderMapChangesStats = (
-  children1: List<React.ReactElement>,
-  children2: List<React.ReactElement>,
-): React.ReactElement => (
-  <>
-    <ul className="flex flex-col gap-0.5">{children1}</ul>
-    {List.isNonEmpty(children2) ? <ul className="flex flex-col gap-0.5">{children2}</ul> : null}
-  </>
+    return (
+      <div
+        ref={ref}
+        className={cx('flex items-center gap-1 overflow-hidden py-1 text-2xs', {
+          'justify-end': reverse,
+        })}
+      >
+        {List.isNonEmpty(initial) && <ul>{initial}</ul>}
+        {List.isNonEmpty(more) && <ul>{more}</ul>}
+      </div>
+    )
+  },
 )
