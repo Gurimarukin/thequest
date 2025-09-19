@@ -71,7 +71,7 @@ const Stat: React.FC<StatProps> = ({ name, value }) => {
   const n = WikiStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
 
   return (
-    <div className="grid grid-cols-[auto_1fr] items-center justify-items-start gap-1">
+    <li className="grid grid-cols-[auto_1fr] items-center justify-items-start gap-1">
       <img
         src={Assets.stats[name]}
         alt={t.statIconAlt(name)}
@@ -96,7 +96,7 @@ const Stat: React.FC<StatProps> = ({ name, value }) => {
           ),
         )}
       </span>
-    </div>
+    </li>
   )
 }
 
@@ -109,10 +109,10 @@ const Spell: React.FC<SpellProps> = ({ spell, html }) => {
   const { t } = useTranslation('common')
 
   return (
-    <div className="flex items-center gap-1">
+    <li className="flex items-center gap-1">
       <span dangerouslySetInnerHTML={{ __html: html }} className="wiki compact" />
       <span>{t.labels.spell[spell]}</span>
-    </div>
+    </li>
   )
 }
 
