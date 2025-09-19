@@ -13,45 +13,65 @@ import { Assets } from '../../imgs/Assets'
 import { cx } from '../../utils/cx'
 
 type StatProps = {
-  name: WikiStatsBalanceKey
+  stat: WikiStatsBalanceKey
   value: number
 }
 
-const Stat: React.FC<StatProps> = ({ name, value }) => {
+const Stat: React.FC<StatProps> = ({ stat, value }) => (
+  <li className="grid grid-cols-[auto_1fr] items-center justify-items-start gap-1">
+    <StatIcon stat={stat} />
+
+    <StatValue stat={stat} value={value} />
+  </li>
+)
+
+type StatIconProps = {
+  stat: WikiStatsBalanceKey
+  className?: string
+}
+
+export const StatIcon: React.FC<StatIconProps> = ({ stat, className }) => {
   const { t } = useTranslation('mapChanges')
 
-  const isMalusStat = WikiStatsBalance.isMalusStat(name)
-  const maybeUnit = WikiStatsBalance.isPercentsStat(name) ? Maybe.some('%') : Maybe.none
+  return (
+    <img
+      src={Assets.stats[stat]}
+      alt={t.statIconAlt(stat)}
+      className={cx('size-2.5 bg-contain brightness-75 sepia', className)}
+    />
+  )
+}
 
-  const n = WikiStatsBalance.isModifierStat(name) ? (value * 1000 - 1000) / 10 : value
+type StatValueProps = {
+  stat: WikiStatsBalanceKey
+  value: number
+}
+
+export const StatValue: React.FC<StatValueProps> = ({ stat, value }) => {
+  const isMalusStat = WikiStatsBalance.isMalusStat(stat)
+  const maybeUnit = WikiStatsBalance.isPercentsStat(stat) ? Maybe.some('%') : Maybe.none
+
+  const n = WikiStatsBalance.isModifierStat(stat) ? (value * 1000 - 1000) / 10 : value
 
   return (
-    <li className="grid grid-cols-[auto_1fr] items-center justify-items-start gap-1">
-      <img
-        src={Assets.stats[name]}
-        alt={t.statIconAlt(name)}
-        className="size-2.5 bg-contain brightness-75 sepia"
-      />
-
-      <span
-        className={cx(
-          'flex font-lib-mono',
-          (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
-        )}
-      >
-        <span>
-          {n < 0 ? null : '+'}
-          {n}
-        </span>
-        {pipe(
-          maybeUnit,
-          Maybe.fold(
-            () => null,
-            u => <span>{u}</span>,
-          ),
-        )}
+    <span
+      className={cx(
+        'flex font-lib-mono',
+        (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
+      )}
+    >
+      <span>
+        {n < 0 ? null : '+'}
+        {n}
       </span>
-    </li>
+      {pipe(
+        maybeUnit,
+        Maybe.fold(
+          () => null,
+          u => <span>{u}</span>,
+        ),
+      )}
+    </span>
   )
 }
 
@@ -72,13 +92,13 @@ const Spell: React.FC<SpellProps> = ({ spell, html }) => {
 }
 
 type Stat = {
-  key: WikiStatsBalanceKey
+  stat: WikiStatsBalanceKey
   value: number
 }
 
 type Spell = {
-  key: SpellName
-  value: ChampionSpellHtml
+  spell: SpellName
+  html: ChampionSpellHtml
 }
 
 type InitialMore<A> = {
@@ -97,7 +117,7 @@ export function partitionStatsWrap(
   data: MapChangesData,
 ): InitialMore<React.ReactElement> {
   const { left: initial, right: more } = pipe(
-    separateData(data),
+    dataToStatsAndSpells(data),
     splitWhileSmallerThan(wrapAfterSize),
     evenOddRights,
     separated.bimap(toElements, toElements),
@@ -106,17 +126,17 @@ export function partitionStatsWrap(
   return { initial, more }
 }
 
-function separateData(data: MapChangesData): List<Either<Stat, Spell>> {
+export function dataToStatsAndSpells(data: MapChangesData): List<Either<Stat, Spell>> {
   const maybes: List<Maybe<NonEmptyArray<Either<Stat, Spell>>>> = pipe([
     pipe(
       data.stats,
       Maybe.chain(stats =>
         pipe(
           WikiStatsBalance.keys,
-          List.filterMap(key =>
+          List.filterMap(stat =>
             pipe(
-              Dict.lookup(key, stats),
-              Maybe.map(value => Either.left({ key, value })),
+              Dict.lookup(stat, stats),
+              Maybe.map(value => Either.left<Stat>({ stat, value })),
             ),
           ),
           NonEmptyArray.fromReadonlyArray,
@@ -128,10 +148,10 @@ function separateData(data: MapChangesData): List<Either<Stat, Spell>> {
       Maybe.chain(spells =>
         pipe(
           SpellName.values,
-          List.filterMap(key =>
+          List.filterMap(spell =>
             pipe(
-              Dict.lookup(key, spells),
-              Maybe.map(value => Either.right({ key, value })),
+              Dict.lookup(spell, spells),
+              Maybe.map(html => Either.right<never, Spell>({ spell, html })),
             ),
           ),
           NonEmptyArray.fromReadonlyArray,
@@ -201,8 +221,8 @@ function evenOddRights<A>({
 
 const toElements = List.map(
   Either.fold<Stat, Spell, React.ReactElement>(
-    ({ key, value }) => <Stat key={key} name={key} value={value} />,
-    ({ key, value }) => <Spell key={key} spell={key} html={value.spell} />,
+    ({ stat, value }) => <Stat key={stat} stat={stat} value={value} />,
+    ({ spell, html }) => <Spell key={spell} spell={spell} html={html.spell} />,
   ),
 )
 
@@ -214,7 +234,7 @@ export function partitionStats2Cols(
   limitSize: number,
   data: MapChangesData,
 ): InitialMore<React.ReactElement> {
-  const eithers = separateData(data)
+  const eithers = dataToStatsAndSpells(data)
 
   const sizes_ = pipe(
     eithers,

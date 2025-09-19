@@ -3,7 +3,7 @@ import { forwardRef, useMemo } from 'react'
 import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import { List } from '../../../shared/utils/fp'
 
-import { partitionStats2Cols } from '../../components/mapChanges/newPartitionStats'
+import { partitionStats2Cols } from '../../components/mapChanges/partitionStats'
 import { cx } from '../../utils/cx'
 
 type Props = {

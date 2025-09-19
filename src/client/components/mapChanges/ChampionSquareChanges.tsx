@@ -7,7 +7,7 @@ import { List } from '../../../shared/utils/fp'
 import type { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { Tooltip } from '../tooltip/Tooltip'
 import { MapChangesTooltip } from './MapChangesTooltip'
-import { partitionStatsWrap } from './newPartitionStats'
+import { partitionStatsWrap } from './partitionStats'
 
 type Props = {
   tooltiPlacementRef: React.RefObject<Element>
