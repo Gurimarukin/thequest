@@ -81,8 +81,11 @@ type Spell = {
   value: ChampionSpellHtml
 }
 
+/**
+ * @param wrapAfterSize should be `imageSize - 2 x paddingYSize`
+ */
 export function newPartitionStats(
-  imageSize: number,
+  wrapAfterSize: number,
   data: MapChangesData,
 ): Separated<List<React.ReactElement>, List<React.ReactElement>> {
   const separated_: List<Maybe<NonEmptyArray<Either<Stat, Spell>>>> = pipe([
@@ -122,7 +125,7 @@ export function newPartitionStats(
     separated_,
     List.compact,
     List.chain(identity),
-    splitWhileSmallerThanImage(imageSize),
+    splitWhileSmallerThanImage(wrapAfterSize),
     evenOddRights,
     separated.bimap(toElement, toElement),
   )
@@ -130,17 +133,19 @@ export function newPartitionStats(
 
 // Must be aligned with CSS
 const sizes = {
-  paddingY: 0.5,
   stat: 3,
   spell: 5,
 }
 
+/**
+ * @param wrapAfterSize should be `imageSize - 2 x paddingYSize`
+ */
 const splitWhileSmallerThanImage =
-  (imageSize: number) =>
+  (wrapAfterSize: number) =>
   (
     data: List<Either<Stat, Spell>>,
     accLeft: List<Either<Stat, Spell>> = [],
-    accHeight: number = sizes.paddingY * 2,
+    accHeight = 0,
   ): Separated<List<Either<Stat, Spell>>, List<Either<Stat, Spell>>> => {
     const [head, ...tail] = data
 
@@ -160,11 +165,11 @@ const splitWhileSmallerThanImage =
         ),
       )
 
-    if (newAccHeight > imageSize) {
+    if (newAccHeight > wrapAfterSize) {
       return { left: newAccLeft, right: tail }
     }
 
-    return splitWhileSmallerThanImage(imageSize)(tail, newAccLeft, newAccHeight)
+    return splitWhileSmallerThanImage(wrapAfterSize)(tail, newAccLeft, newAccHeight)
   }
 
 function evenOddRights<A>({

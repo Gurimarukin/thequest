@@ -189,7 +189,7 @@ const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
 
       <ChampionSquareChanges
         tooltiPlacementRef={containerRef}
-        imageSize={12}
+        wrapAfterSize={11}
         data={getData(champion)}
       />
     </div>

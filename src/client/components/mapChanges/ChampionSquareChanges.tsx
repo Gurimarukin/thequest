@@ -11,7 +11,10 @@ import { newPartitionStats } from './newPartitionStats'
 
 type Props = {
   tooltiPlacementRef: React.RefObject<Element>
-  imageSize: number
+  /**
+   * @param wrapAfterSize should be `imageSize - 2 x paddingYSize`
+   */
+  wrapAfterSize: number
   data: MapChangesData
 }
 
@@ -23,13 +26,17 @@ export type EnrichedStaticDataChampion = StaticDataChampion & {
 export const championSquareChangesClassName =
   'grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] overflow-hidden rounded-lg bg-aram-stats text-2xs'
 
-export const ChampionSquareChanges: React.FC<Props> = ({ tooltiPlacementRef, imageSize, data }) => {
+export const ChampionSquareChanges: React.FC<Props> = ({
+  tooltiPlacementRef,
+  wrapAfterSize,
+  data,
+}) => {
   const initialRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
 
   const { left: initial, right: more } = useMemo(
-    () => newPartitionStats(imageSize, data),
-    [data, imageSize],
+    () => newPartitionStats(wrapAfterSize, data),
+    [data, wrapAfterSize],
   )
 
   return (

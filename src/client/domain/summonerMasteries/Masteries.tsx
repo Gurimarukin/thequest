@@ -202,7 +202,7 @@ const Champion: React.FC<ChampionProps> = ({
           {MasteriesQueryView.isBalance(view) ? (
             <ChampionSquareChanges
               tooltiPlacementRef={containerRef}
-              imageSize={16}
+              wrapAfterSize={15}
               data={champion[view].data}
             />
           ) : null}
