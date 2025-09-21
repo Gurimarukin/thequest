@@ -2,6 +2,7 @@
 /.env
 /.eslintcache
 /.parcel-cache
+/.podman-data
 /dependencygraph.html
 /dist
 /node_modules

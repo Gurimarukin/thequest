@@ -4,7 +4,6 @@ import { flow, pipe } from 'fp-ts/function'
 import { useMemo, useRef } from 'react'
 import type { SWRResponse } from 'swr'
 
-import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import type { ChallengesView } from '../../../shared/models/api/challenges/ChallengesView'
 import { ChampionFactionOrNone } from '../../../shared/models/api/champion/ChampionFaction'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
@@ -17,8 +16,10 @@ import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
 import { ChampionFactionTitle } from '../../components/ChampionFactionTitle'
 import type { SetChampionShards } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
-import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
-import { MapChangesStatsCompact } from '../../components/mapChanges/stats/MapChangesStatsCompact'
+import {
+  ChampionSquareChanges,
+  championSquareChangesClassName,
+} from '../../components/mapChanges/ChampionSquareChanges'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
@@ -26,7 +27,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { CountWithTotal } from '../../models/CountWithTotal'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { MasteriesQuery } from '../../models/masteriesQuery/MasteriesQuery'
-import type { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
+import { MasteriesQueryView } from '../../models/masteriesQuery/MasteriesQueryView'
 import { masteryHistogramGradient, masteryRulerColor, masteryTextColor } from '../../utils/colors'
 import { cx } from '../../utils/cx'
 import type { EnrichedChampionMastery } from './EnrichedChampionMastery'
@@ -82,6 +83,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
   return (
     <>
       <MasteriesFilters searchCount={searchCount} randomChampion={randomChampion} />
+
       <div className={cx('w-full', viewContainerClassName[masteriesQuery.view])}>
         {pipe(
           filteredAndSortedMasteries,
@@ -100,6 +102,7 @@ export const Masteries: React.FC<Props> = ({ challenges, masteries, setChampionS
           )),
         )}
       </div>
+
       <div className="self-center text-sm">
         {t.nChampionsFraction(championsCount, champions.length)}
       </div>
@@ -138,54 +141,27 @@ const Champion: React.FC<ChampionProps> = ({
   champion,
   setChampionShards,
 }) => {
-  const { masteriesQuery } = useHistory()
+  const {
+    masteriesQuery: { view },
+  } = useHistory()
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const mapChangesHoverRef1 = useRef<HTMLUListElement>(null)
-  const mapChangesHoverRef2 = useRef<HTMLSpanElement>(null)
 
-  const renderMapChanges = useMemo(
-    () =>
-      getRenderMapChanges(
-        containerRef,
-        mapChangesHoverRef1,
-        mapChangesHoverRef2,
-        getRenderChildrenCompact(mapChangesHoverRef1),
-      ),
-    [],
-  )
-
-  const isHistogram = masteriesQuery.view === 'histogram'
-  const isAram = masteriesQuery.view === 'aram'
-  const isUrf = masteriesQuery.view === 'urf'
-  const isFactions = masteriesQuery.view === 'factions'
+  const isHistogram = view === 'histogram'
+  const isFactions = view === 'factions'
 
   return (
     <>
-      {isAram &&
+      {MasteriesQueryView.isBalance(view) &&
       !isHidden &&
       !pipe(
         maybePrev,
         Maybe.exists(prev =>
-          MapChangesChampionCategory.Eq.equals(prev.aram.category, champion.aram.category),
+          MapChangesChampionCategory.Eq.equals(prev[view].category, champion[view].category),
         ),
       ) ? (
         <ChampionCategoryTitle
-          category={champion.aram.category}
-          className={cx(['pt-4', Maybe.isSome(maybePrev)])}
-        />
-      ) : null}
-
-      {isUrf &&
-      !isHidden &&
-      !pipe(
-        maybePrev,
-        Maybe.exists(prev =>
-          MapChangesChampionCategory.Eq.equals(prev.urf.category, champion.urf.category),
-        ),
-      ) ? (
-        <ChampionCategoryTitle
-          category={champion.urf.category}
+          category={champion[view].category}
           className={cx(['pt-4', Maybe.isSome(maybePrev)])}
         />
       ) : null}
@@ -206,16 +182,14 @@ const Champion: React.FC<ChampionProps> = ({
 
       <div
         ref={containerRef}
-        className={cx('relative', {
+        className={cx('relative', colSpanClassName(view, champion), {
           hidden: isHidden,
-          [champion.aram.category !== 'balanced' ? 'col-span-5' : 'col-span-3']: isAram,
-          [champion.urf.category !== 'balanced' ? 'col-span-5' : 'col-span-3']: isUrf,
         })}
       >
         {/* glow */}
         <Glow isGlowing={isGlowing} />
 
-        <div className="relative grid grid-cols-[auto_auto] grid-rows-[auto_1fr] rounded-xl bg-aram-stats">
+        <div className={championSquareChangesClassName}>
           <ChampionMasterySquare
             {...champion}
             setChampionShards={setChampionShards}
@@ -225,8 +199,13 @@ const Champion: React.FC<ChampionProps> = ({
             centerLevel={false}
           />
 
-          {isAram ? renderMapChanges(champion.aram.data) : null}
-          {isUrf ? renderMapChanges(champion.urf.data) : null}
+          {MasteriesQueryView.isBalance(view) ? (
+            <ChampionSquareChanges
+              tooltiPlacementRef={containerRef}
+              wrapAfterSize={15}
+              data={champion[view].data}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -237,6 +216,20 @@ const Champion: React.FC<ChampionProps> = ({
       />
     </>
   )
+}
+
+const balancedClassName = 'col-span-3'
+const unbalancedClassName = 'col-span-5'
+
+function colSpanClassName(
+  view: MasteriesQueryView,
+  champion: EnrichedChampionMastery,
+): string | undefined {
+  if (MasteriesQueryView.isBalance(view)) {
+    return champion[view].category === 'balanced' ? balancedClassName : unbalancedClassName
+  }
+
+  return undefined
 }
 
 type GlowProps = {
@@ -255,27 +248,6 @@ const Glow: React.FC<GlowProps> = ({ isGlowing }) => (
     <div className="col-start-1 row-start-1 size-[calc(100%_-_.25rem)] animate-my-spin rounded-1/2 border-2 border-dashed border-goldenrod" />
   </div>
 )
-
-const getRenderMapChanges =
-  (
-    containerRef: React.RefObject<HTMLDivElement>,
-    mapChangesHoverRef1: React.RefObject<HTMLUListElement>,
-    mapChangesHoverRef2: React.RefObject<HTMLSpanElement>,
-    renderChildrenCompact: (children: List<React.ReactElement>) => React.ReactElement,
-  ) =>
-  (data: MapChangesData): React.ReactElement => (
-    <>
-      <MapChangesStatsCompact data={data} splitAt={Infinity}>
-        {renderChildrenCompact}
-      </MapChangesStatsCompact>
-
-      <Tooltip hoverRef={[mapChangesHoverRef1, mapChangesHoverRef2]} placementRef={containerRef}>
-        <MapChangesTooltip data={data} />
-      </Tooltip>
-
-      <span ref={mapChangesHoverRef2} className="rounded-bl-xl" />
-    </>
-  )
 
 type ChampionMasteryHistogramProps = {
   maybeMaxPoints: Maybe<number>
@@ -389,14 +361,3 @@ const ChampionMasteryHistogram: React.FC<ChampionMasteryHistogramProps> = ({
     </>
   )
 }
-
-const getRenderChildrenCompact =
-  (ref: React.RefObject<HTMLUListElement>) =>
-  (children: List<React.ReactElement>): React.ReactElement => (
-    <ul
-      ref={ref}
-      className="row-span-2 flex flex-col items-start justify-center rounded-r-xl px-0.5 py-1 text-2xs"
-    >
-      {children}
-    </ul>
-  )

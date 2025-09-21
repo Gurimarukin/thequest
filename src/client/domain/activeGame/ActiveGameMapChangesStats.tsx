@@ -1,57 +1,93 @@
-import { useMemo } from 'react'
+import { monoid, number, separated } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
+import { forwardRef, useMemo } from 'react'
 
+import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 import { List } from '../../../shared/utils/fp'
 
-import type { MapChangesStatsProps } from '../../components/mapChanges/stats/mapChangesStats'
+import type { MapChange } from '../../components/mapChanges/helpers'
 import {
-  getMapChangesStats,
-  renderStatIcon,
-  renderStatValue,
-} from '../../components/mapChanges/stats/mapChangesStats'
+  type InitialMore,
+  mapChangesFromData,
+  splitWhileSmallerThan,
+} from '../../components/mapChanges/helpers'
+import {
+  SpellChangeCompact,
+  StatChangeCompact,
+  compactChangeSizes,
+} from '../../components/mapChanges/mapChangeCompact'
 import { cx } from '../../utils/cx'
 
-type Props = Pick<MapChangesStatsProps, 'data'> & {
+type Props = {
+  data: MapChangesData
   reverse: boolean
 }
 
-export const ActiveGameMapChangesStats: React.FC<Props> = ({ reverse, ...props }) => {
-  const MapChangesStats = useMemo(
-    () =>
-      getMapChangesStats(
-        (t, name) => {
-          const icon = renderStatIcon(t.mapChanges, name, 'size-full')
-          const renderStatValue_ = renderStatValue(name, '')
+export const ActiveGameMapChangesStats = forwardRef<HTMLDivElement, Props>(
+  ({ data, reverse }, ref) => {
+    const { initial, more } = useMemo(() => partitionStats2Cols(data, reverse), [data, reverse])
 
-          return value => (
-            <li key={name} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-              <span className="size-2.5">{icon}</span>
-              {renderStatValue_(value)}
-            </li>
-          )
-        },
-        (t, spell) => html => (
-          <li key={spell} className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-            <span
-              dangerouslySetInnerHTML={{ __html: html.spell }}
-              className="wiki compact size-5"
-            />
-            <span>{t.common.labels.spell[spell]}</span>
-          </li>
-        ),
-        5,
-      ),
-    [reverse],
+    return (
+      <div
+        ref={ref}
+        className={cx('flex items-center gap-1 overflow-hidden py-1 text-2xs', {
+          'flex-row-reverse': reverse,
+        })}
+      >
+        {List.isNonEmpty(initial) && <ul>{initial}</ul>}
+
+        {List.isNonEmpty(more) && <ul>{more}</ul>}
+      </div>
+    )
+  },
+)
+
+const limitSize = 24.5 /* 98px */ - 2 /* (padding) */
+
+function partitionStats2Cols(
+  data: MapChangesData,
+  reverse: boolean,
+): InitialMore<React.ReactElement> {
+  const changes = mapChangesFromData(data)
+
+  const sizes_ = changes.map(change => compactChangeSizes[change.type])
+
+  const totalSize = pipe(sizes_, monoid.concatAll(number.MonoidSum))
+
+  if (totalSize <= limitSize) {
+    return { initial: toElements(reverse)(changes), more: [] }
+  }
+
+  const { left: initial, right: more } = pipe(
+    splitWhileSmallerThan({ ...compactChangeSizes, limit: totalSize / 2 })(changes),
+    separated.bimap(toElements(reverse), toElements(reverse)),
   )
 
-  return <MapChangesStats {...props}>{renderMapChangesStats}</MapChangesStats>
+  return { initial, more }
 }
 
-const renderMapChangesStats = (
-  children1: List<React.ReactElement>,
-  children2: List<React.ReactElement>,
-): React.ReactElement => (
-  <>
-    <ul className="flex flex-col gap-0.5">{children1}</ul>
-    {List.isNonEmpty(children2) ? <ul className="flex flex-col gap-0.5">{children2}</ul> : null}
-  </>
-)
+const toElements = (reverse: boolean): ((changes: List<MapChange>) => List<React.ReactElement>) =>
+  // List.map((change: MapChange): React.ReactElement => {
+  List.map(change => {
+    switch (change.type) {
+      case 'stat':
+        return (
+          <StatChangeCompact
+            key={change.name}
+            name={change.name}
+            value={change.value}
+            reverse={reverse}
+          />
+        )
+
+      case 'spell':
+        return (
+          <SpellChangeCompact
+            key={change.name}
+            name={change.name}
+            spellHtml={change.html.spell}
+            reverse={reverse}
+          />
+        )
+    }
+  })

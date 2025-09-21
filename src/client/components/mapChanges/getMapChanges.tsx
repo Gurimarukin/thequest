@@ -12,11 +12,8 @@ import { StringUtils } from '../../../shared/utils/StringUtils'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { ChampionCategoryTitle } from '../../components/ChampionCategoryTitle'
-import { ChampionPositionsAndFactions } from '../../components/ChampionTooltip'
-import { CroppedChampionSquare } from '../../components/CroppedChampionSquare'
 import { SearchChampion } from '../../components/SearchChampion'
 import { MainLayout } from '../../components/mainLayout/MainLayout'
-import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
@@ -24,17 +21,15 @@ import { OpenInNew } from '../../imgs/svgs/icons'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
-import { MapChangesTooltip } from './MapChangesTooltip'
-import { MapChangesStatsCompact } from './stats/MapChangesStatsCompact'
+import { ChampionPositionsAndFactions } from '../ChampionTooltip'
+import { CroppedChampionSquare } from '../CroppedChampionSquare'
+import { Tooltip } from '../tooltip/Tooltip'
+import type { EnrichedStaticDataChampion } from './ChampionSquareChanges'
+import { ChampionSquareChanges, championSquareChangesClassName } from './ChampionSquareChanges'
 
 import './mapChanges.css'
 
 const { cleanChampionName } = StringUtils
-
-type EnrichedStaticDataChampion = StaticDataChampion & {
-  isHidden: boolean
-  category: MapChangesChampionCategory
-}
 
 type CategoryOrHidden = MapChangesChampionCategory | 'hidden'
 
@@ -167,21 +162,13 @@ type ChampionProps = {
 
 const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-
-  const championHoverRef = useRef<HTMLDivElement>(null)
-
-  const mapChangesHoverRef1 = useRef<HTMLUListElement>(null)
-  const mapChangesHoverRef2 = useRef<HTMLUListElement>(null)
-  const renderChildrenCompact = useMemo(
-    () => getRenderChildrenCompact(mapChangesHoverRef1, mapChangesHoverRef2),
-    [],
-  )
+  const championRef = useRef<HTMLDivElement>(null)
 
   return (
     <div
       ref={containerRef}
       className={cx(
-        'grid grid-cols-[auto_auto] grid-rows-[auto_1fr] overflow-hidden rounded-xl bg-aram-stats text-2xs',
+        championSquareChangesClassName,
         MapChangesChampionCategory.fromData(getData(champion)) !== 'balanced'
           ? 'col-span-7'
           : 'col-span-4',
@@ -189,38 +176,21 @@ const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
       )}
     >
       <CroppedChampionSquare
-        ref={championHoverRef}
+        ref={championRef}
         championKey={champion.key}
         championName={champion.name}
-        className="size-12 rounded-xl shadow-even shadow-black"
+        className="size-12 rounded-lg shadow-even shadow-black"
       />
-      <Tooltip hoverRef={championHoverRef} placement="top" className="flex flex-col gap-1">
+      <Tooltip hoverRef={championRef} placement="top" className="flex flex-col gap-1">
         <h3 className="self-center px-2 font-bold shadow-black text-shadow">{champion.name}</h3>
         <ChampionPositionsAndFactions positions={champion.positions} factions={champion.factions} />
       </Tooltip>
 
-      <MapChangesStatsCompact data={getData(champion)} splitAt={5}>
-        {renderChildrenCompact}
-      </MapChangesStatsCompact>
-      <Tooltip hoverRef={[mapChangesHoverRef1, mapChangesHoverRef2]} placementRef={containerRef}>
-        <MapChangesTooltip data={getData(champion)} />
-      </Tooltip>
+      <ChampionSquareChanges
+        tooltiPlacementRef={containerRef}
+        wrapAfterSize={11}
+        data={getData(champion)}
+      />
     </div>
   )
 }
-
-const getRenderChildrenCompact =
-  (ref1: React.RefObject<HTMLUListElement>, ref2: React.RefObject<HTMLUListElement>) =>
-  (
-    children1: List<React.ReactElement>,
-    children2: List<React.ReactElement>,
-  ): React.ReactElement => (
-    <>
-      <ul ref={ref1} className="row-span-2 flex flex-col justify-center p-0.5">
-        {children1}
-      </ul>
-      <ul ref={ref2} className={cx('flex flex-col', ['px-1.5 py-0.5', List.isNonEmpty(children2)])}>
-        {children2}
-      </ul>
-    </>
-  )
