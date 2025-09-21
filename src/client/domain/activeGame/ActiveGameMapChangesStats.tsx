@@ -25,13 +25,13 @@ type Props = {
 
 export const ActiveGameMapChangesStats = forwardRef<HTMLDivElement, Props>(
   ({ data, reverse }, ref) => {
-    const { initial, more } = useMemo(() => partitionStats2Cols(data), [data])
+    const { initial, more } = useMemo(() => partitionStats2Cols(data, reverse), [data, reverse])
 
     return (
       <div
         ref={ref}
         className={cx('flex items-center gap-1 overflow-hidden py-1 text-2xs', {
-          'justify-end': reverse,
+          'flex-row-reverse': reverse,
         })}
       >
         {List.isNonEmpty(initial) && <ul>{initial}</ul>}
@@ -44,7 +44,10 @@ export const ActiveGameMapChangesStats = forwardRef<HTMLDivElement, Props>(
 
 const limitSize = 24.5 /* 98px */ - 2 /* (padding) */
 
-function partitionStats2Cols(data: MapChangesData): InitialMore<React.ReactElement> {
+function partitionStats2Cols(
+  data: MapChangesData,
+  reverse: boolean,
+): InitialMore<React.ReactElement> {
   const changes = mapChangesFromData(data)
 
   const sizes_ = changes.map(change => compactChangeSizes[change.type])
@@ -52,25 +55,39 @@ function partitionStats2Cols(data: MapChangesData): InitialMore<React.ReactEleme
   const totalSize = pipe(sizes_, monoid.concatAll(number.MonoidSum))
 
   if (totalSize <= limitSize) {
-    return { initial: toElements(changes), more: [] }
+    return { initial: toElements(reverse)(changes), more: [] }
   }
 
   const { left: initial, right: more } = pipe(
     splitWhileSmallerThan({ ...compactChangeSizes, limit: totalSize / 2 })(changes),
-    separated.bimap(toElements, toElements),
+    separated.bimap(toElements(reverse), toElements(reverse)),
   )
 
   return { initial, more }
 }
 
-const toElements = List.map((change: MapChange): React.ReactElement => {
-  switch (change.type) {
-    case 'stat':
-      return <StatChangeCompact key={change.name} name={change.name} value={change.value} />
+const toElements = (reverse: boolean): ((changes: List<MapChange>) => List<React.ReactElement>) =>
+  // List.map((change: MapChange): React.ReactElement => {
+  List.map(change => {
+    switch (change.type) {
+      case 'stat':
+        return (
+          <StatChangeCompact
+            key={change.name}
+            name={change.name}
+            value={change.value}
+            reverse={reverse}
+          />
+        )
 
-    case 'spell':
-      return (
-        <SpellChangeCompact key={change.name} name={change.name} spellHtml={change.html.spell} />
-      )
-  }
-})
+      case 'spell':
+        return (
+          <SpellChangeCompact
+            key={change.name}
+            name={change.name}
+            spellHtml={change.html.spell}
+            reverse={reverse}
+          />
+        )
+    }
+  })

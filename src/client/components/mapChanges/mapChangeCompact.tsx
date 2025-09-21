@@ -3,6 +3,7 @@ import type { SpellName } from '../../../shared/models/api/SpellName'
 import type { Dict } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
+import { cx } from '../../utils/cx'
 import type { MapChange } from './helpers'
 import { StatChangeIcon, StatChangeValue } from './statChange'
 
@@ -14,10 +15,16 @@ export const compactChangeSizes: Dict<MapChange['type'], number> = {
 type StatChangeCompactProps = {
   name: WikiStatsBalanceKey
   value: number
+  /** @default false */
+  reverse?: boolean
 }
 
-export const StatChangeCompact: React.FC<StatChangeCompactProps> = ({ name, value }) => (
-  <li className="flex items-center gap-1">
+export const StatChangeCompact: React.FC<StatChangeCompactProps> = ({
+  name,
+  value,
+  reverse = false,
+}) => (
+  <li className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
     <StatChangeIcon name={name} className="size-2.5" />
 
     <StatChangeValue name={name} value={value} />
@@ -27,13 +34,19 @@ export const StatChangeCompact: React.FC<StatChangeCompactProps> = ({ name, valu
 type SpellChangeCompactProps = {
   name: SpellName
   spellHtml: string
+  /** @default false */
+  reverse?: boolean
 }
 
-export const SpellChangeCompact: React.FC<SpellChangeCompactProps> = ({ name, spellHtml }) => {
+export const SpellChangeCompact: React.FC<SpellChangeCompactProps> = ({
+  name,
+  spellHtml,
+  reverse = false,
+}) => {
   const { t } = useTranslation('common')
 
   return (
-    <li className="flex items-center gap-1">
+    <li className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
       <span dangerouslySetInnerHTML={{ __html: spellHtml }} className="wiki compact shrink-0" />
 
       <span>{t.labels.spell[name]}</span>
