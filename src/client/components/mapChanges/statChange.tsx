@@ -39,7 +39,7 @@ export const StatChangeValue: React.FC<StatChangeValueProps> = ({ name, value })
   return (
     <span
       className={cx(
-        'flex font-lib-mono',
+        'flex shrink-0 font-lib-mono',
         (isMalusStat ? 0 < n : n < 0) ? 'text-red' : 'text-green',
       )}
     >

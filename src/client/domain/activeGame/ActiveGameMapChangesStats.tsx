@@ -1,9 +1,9 @@
 import { monoid, number, separated } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { identity, pipe } from 'fp-ts/function'
 import { forwardRef, useMemo } from 'react'
 
 import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
-import { List } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 
 import type { MapChange } from '../../components/mapChanges/helpers'
 import {
@@ -27,16 +27,25 @@ export const ActiveGameMapChangesStats = forwardRef<HTMLDivElement, Props>(
   ({ data, reverse }, ref) => {
     const { initial, more } = useMemo(() => partitionStats2Cols(data, reverse), [data, reverse])
 
+    const uls = pipe(
+      [initial, more],
+      List.filterMapWithIndex((i, lis) =>
+        List.isNonEmpty(lis) ? Maybe.some(<ul key={i}>{lis}</ul>) : Maybe.none,
+      ),
+      reverse ? List.reverse : identity,
+    )
+
+    if (List.isEmpty(uls)) {
+      return null
+    }
+
     return (
       <div
         ref={ref}
-        className={cx('flex items-center gap-1 overflow-hidden py-1 text-2xs', {
-          'flex-row-reverse': reverse,
-        })}
+        className={cx('grid items-center py-1 text-2xs', ['gap-1', uls.length > 1])}
+        style={{ gridTemplateColumns: `repeat(${uls.length}, auto)` }}
       >
-        {List.isNonEmpty(initial) && <ul>{initial}</ul>}
-
-        {List.isNonEmpty(more) && <ul>{more}</ul>}
+        {uls}
       </div>
     )
   },
@@ -67,7 +76,6 @@ function partitionStats2Cols(
 }
 
 const toElements = (reverse: boolean): ((changes: List<MapChange>) => List<React.ReactElement>) =>
-  // List.map((change: MapChange): React.ReactElement => {
   List.map(change => {
     switch (change.type) {
       case 'stat':

@@ -1,6 +1,8 @@
+import { identity, pipe } from 'fp-ts/function'
+
 import type { WikiStatsBalanceKey } from '../../../shared/models/WikiStatsBalance'
 import type { SpellName } from '../../../shared/models/api/SpellName'
-import type { Dict } from '../../../shared/utils/fp'
+import { type Dict, List } from '../../../shared/utils/fp'
 
 import { useTranslation } from '../../contexts/TranslationContext'
 import { cx } from '../../utils/cx'
@@ -23,13 +25,17 @@ export const StatChangeCompact: React.FC<StatChangeCompactProps> = ({
   name,
   value,
   reverse = false,
-}) => (
-  <li className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-    <StatChangeIcon name={name} className="size-2.5" />
+}) => {
+  const elems = pipe(
+    [
+      <StatChangeIcon key="icon" name={name} className="size-2.5" />,
+      <StatChangeValue key="value" name={name} value={value} />,
+    ],
+    reverse ? List.reverse : identity,
+  )
 
-    <StatChangeValue name={name} value={value} />
-  </li>
-)
+  return <li className={gridClassName(reverse)}>{elems}</li>
+}
 
 type SpellChangeCompactProps = {
   name: SpellName
@@ -45,11 +51,20 @@ export const SpellChangeCompact: React.FC<SpellChangeCompactProps> = ({
 }) => {
   const { t } = useTranslation('common')
 
-  return (
-    <li className={cx('flex items-center gap-1', ['flex-row-reverse', reverse])}>
-      <span dangerouslySetInnerHTML={{ __html: spellHtml }} className="wiki compact shrink-0" />
+  const elems = pipe(
+    [
+      <span key="html" dangerouslySetInnerHTML={{ __html: spellHtml }} className="wiki compact" />,
+      <span key="name">{t.labels.spell[name]}</span>,
+    ],
+    reverse ? List.reverse : identity,
+  )
 
-      <span>{t.labels.spell[name]}</span>
-    </li>
+  return <li className={gridClassName(reverse)}>{elems}</li>
+}
+
+function gridClassName(reverse: boolean): string | undefined {
+  return cx(
+    'grid items-center gap-1',
+    reverse ? 'grid-cols-[1fr_max-content] justify-items-end' : 'grid-cols-[max-content_1fr]',
   )
 }
