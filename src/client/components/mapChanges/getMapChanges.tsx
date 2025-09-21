@@ -169,7 +169,6 @@ const Champion: React.FC<ChampionProps> = ({ getData, champion }) => {
       ref={containerRef}
       className={cx(
         championSquareChangesClassName,
-        'text-2xs',
         MapChangesChampionCategory.fromData(getData(champion)) !== 'balanced'
           ? 'col-span-7'
           : 'col-span-4',

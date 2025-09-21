@@ -189,7 +189,7 @@ const Champion: React.FC<ChampionProps> = ({
         {/* glow */}
         <Glow isGlowing={isGlowing} />
 
-        <div className={cx(championSquareChangesClassName, 'relative')}>
+        <div className={championSquareChangesClassName}>
           <ChampionMasterySquare
             {...champion}
             setChampionShards={setChampionShards}
