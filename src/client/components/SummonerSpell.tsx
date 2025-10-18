@@ -12,16 +12,19 @@ import { Tooltip } from './tooltip/Tooltip'
 
 type Props = {
   spell: StaticDataSummonerSpell
-  cooldownDisabled: boolean
+  /** @default false */
+  timerDisabled?: boolean
   tooltipShouldHide?: boolean
   className?: string
+  timerClassName?: string
 }
 
 export const SummonerSpell: React.FC<Props> = ({
   spell,
-  cooldownDisabled,
+  timerDisabled = false,
   tooltipShouldHide,
   className,
+  timerClassName,
 }) => {
   const { t } = useTranslation('common')
   const { assets } = useStaticData()
@@ -79,11 +82,11 @@ export const SummonerSpell: React.FC<Props> = ({
         type="button"
         onClick={onClick}
         // prevent drag and drop above
-        onPointerDown={!cooldownDisabled ? stopPropagation : undefined}
-        disabled={cooldownDisabled}
+        onPointerDown={!timerDisabled ? stopPropagation : undefined}
+        disabled={timerDisabled}
         className={cx(
           'relative grid place-items-center',
-          ['cursor-[inherit]', cooldownDisabled],
+          ['cursor-[inherit]', timerDisabled],
           className,
         )}
       >
@@ -94,12 +97,14 @@ export const SummonerSpell: React.FC<Props> = ({
         />
 
         {remainingSeconds !== undefined && (
-          <>
-            <span className="size-full bg-black/50 area-1" />
-            <span className="absolute font-lib-mono text-white shadow-black text-shadow">
-              {DayJs.Duration.formatSeconds(remainingSeconds)}
-            </span>
-          </>
+          <span
+            className={cx(
+              'grid size-full place-items-center bg-black/50 font-lib-mono text-white shadow-black area-1 text-shadow',
+              timerClassName,
+            )}
+          >
+            {DayJs.Duration.formatSeconds(remainingSeconds)}
+          </span>
         )}
       </button>
 

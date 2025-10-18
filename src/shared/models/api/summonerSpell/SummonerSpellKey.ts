@@ -6,6 +6,7 @@ import * as D from 'io-ts/Decoder'
 import type { Newtype } from 'newtype-ts'
 import { iso } from 'newtype-ts'
 
+import { immutableAssign } from '../../../utils/fp'
 import { NumberFromString, fromNewtype } from '../../../utils/ioTsUtils'
 
 // Summoner spell's number id
@@ -25,6 +26,6 @@ const isSmite = (spell: SummonerSpellKey): boolean => unwrap(spell) === 11
 
 const Eq: eq.Eq<SummonerSpellKey> = pipe(number.Eq, eq.contramap(unwrap))
 
-const SummonerSpellKey = { unwrap, codec, fromStringCodec, isSmite, Eq }
+const SummonerSpellKey = immutableAssign(wrap, { unwrap, codec, fromStringCodec, isSmite, Eq })
 
 export { SummonerSpellKey }

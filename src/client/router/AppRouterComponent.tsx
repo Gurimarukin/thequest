@@ -15,6 +15,7 @@ import { Home } from '../domain/Home'
 import { Login } from '../domain/Login'
 import { Register } from '../domain/Register'
 import { SummonerByPuuidGame, SummonerByPuuidProfile } from '../domain/SummonerBy'
+import { Timers } from '../domain/Timers'
 import { Urf } from '../domain/Urf'
 import { ActiveGame } from '../domain/activeGame/ActiveGame'
 import { DiscordRedirect } from '../domain/discordRedirect/DiscordRedirect'
@@ -57,6 +58,7 @@ export const AppRouterComponent: React.FC = getRouterComponent(
     .alt(appParsers.aram.map(() => e(<Aram />, t => t.aram)))
     .alt(appParsers.urf.map(() => e(<Urf />, t => t.urf)))
     .alt(appParsers.factions.map(() => e(<Factions />, t => t.factions)))
+    .alt(appParsers.timers.map(() => e(<Timers />, t => t.timers)))
     .alt(appParsers.login.map(() => e(<Login />, t => t.login)))
     .alt(appParsers.register.map(() => e(<Register />, t => t.register)))
     .alt(appParsers.discordRedirect.map(() => e(<DiscordRedirect />)))

@@ -6,7 +6,7 @@ import ReactSelect from 'react-select'
 
 import { type List } from '../../shared/utils/fp'
 
-import { ChevronForwardFilled } from '../imgs/svgs/icons'
+import { ChevronForwardFilled as ChevronForwardFilled_ } from '../imgs/svgs/icons'
 import { cx } from '../utils/cx'
 
 type Props<A extends string> = {
@@ -26,6 +26,10 @@ function SelectOption<A extends string>(value: A, label: string = value): Select
 }
 
 export { SelectOption }
+
+const ChevronForwardFilled: React.FC<{ className?: string }> = ({ className }) => (
+  <ChevronForwardFilled_ className={className} />
+)
 
 export function Select<A extends string>({
   options,
@@ -67,7 +71,7 @@ export function Select<A extends string>({
       isSearchable={false}
       components={{
         IndicatorSeparator: null,
-        DropdownIndicator: ChevronForwardFilled as React.FC<{ className?: string }>,
+        DropdownIndicator: ChevronForwardFilled,
       }}
       className={className}
       styles={{

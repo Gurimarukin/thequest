@@ -90,6 +90,7 @@ module.exports = {
         1.75: '.4375rem', // 7px
         3.75: '.9375rem', // 15px
         4.5: '1.125rem', // 18px
+        5.5: '1.375rem', // 22px
         7.5: '1.875rem', // 30px
         9.75: '2.4375rem', // 39pxx
         13.5: '3.375rem', // 54px
@@ -169,6 +170,13 @@ module.exports = {
       matchUtilities(
         { 'text-shadow': textShadow => ({ textShadow }) },
         { values: theme('textShadow') },
+      ),
+    ),
+
+    plugin(({ matchUtilities, theme }) =>
+      matchUtilities(
+        { secondary: color => ({ '--secondary-color': color }) },
+        { type: ['color'], values: theme('colors') },
       ),
     ),
   ],

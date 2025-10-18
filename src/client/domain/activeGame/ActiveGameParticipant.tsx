@@ -210,7 +210,6 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </Cell>
 
       {/* line 1 */}
-
       <Cell gridColStart={1} className="col-span-8 bg-current shadow-even shadow-black" />
       <Cell
         ref={onBevelMount}
@@ -401,7 +400,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               s => (
                 <SummonerSpell
                   spell={s}
-                  cooldownDisabled={Maybe.isNone(maybeUser)}
+                  timerDisabled={Maybe.isNone(maybeUser)}
                   tooltipShouldHide={tooltipShouldHide}
                   className="size-full"
                 />
@@ -417,7 +416,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               s => (
                 <SummonerSpell
                   spell={s}
-                  cooldownDisabled={Maybe.isNone(maybeUser)}
+                  timerDisabled={Maybe.isNone(maybeUser)}
                   tooltipShouldHide={tooltipShouldHide}
                   className="size-full"
                 />

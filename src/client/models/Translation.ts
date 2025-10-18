@@ -93,6 +93,7 @@ export type Translation = {
       aramSpecificBalanceChanges: React.ReactNode
       urfSpecificBalanceChanges: React.ReactNode
       globetrotterChallenges: React.ReactNode
+      timers: React.ReactNode
       login: React.ReactNode
       logout: React.ReactNode
       profile: React.ReactNode
@@ -217,6 +218,7 @@ export type Translation = {
     aram: string
     urf: string
     factions: string
+    timers: string
     login: string
     register: string
     notFound: string

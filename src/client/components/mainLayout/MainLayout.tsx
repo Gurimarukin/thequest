@@ -8,6 +8,7 @@ import { useUser } from '../../contexts/UserContext'
 import { usePathMatch } from '../../hooks/usePathMatch'
 import { Assets } from '../../imgs/Assets'
 import { HowlingAbyssSimple } from '../../imgs/svgs/HowlingAbyss'
+import { HourglassOutline } from '../../imgs/svgs/icons'
 import { AsyncState } from '../../models/AsyncState'
 import type { ChildrenFC } from '../../models/ChildrenFC'
 import { appParsers, appRoutes } from '../../router/AppRouter'
@@ -22,7 +23,7 @@ import { Languages } from './Languages'
 import { SearchSummoner } from './searchSummoner/SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
-  const { user } = useUser()
+  const { user, maybeUser } = useUser()
   const { t } = useTranslation('common')
 
   const summoner = usePathMatch(appParsers.anyPlatformRiotId)
@@ -50,7 +51,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 tooltip={t.layout.aramSpecificBalanceChanges}
                 className="py-2"
               >
-                <HowlingAbyssSimple className="w-5" />
+                <HowlingAbyssSimple className="w-5 secondary-wheat/60" />
               </HighlightLink>
 
               <HighlightLink
@@ -70,6 +71,17 @@ export const MainLayout: ChildrenFC = ({ children }) => {
               >
                 <MaskedImage src={Assets.runeterra} className="size-5" />
               </HighlightLink>
+
+              {Maybe.isSome(maybeUser) && (
+                <HighlightLink
+                  to={appRoutes.timers}
+                  parser={appParsers.timers}
+                  tooltip={t.layout.timers}
+                  className="overflow-x-hidden py-1"
+                >
+                  <HourglassOutline className="-mx-0.5 w-6 secondary-wheat/60" />
+                </HighlightLink>
+              )}
             </div>
           </div>
 

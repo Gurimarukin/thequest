@@ -14,7 +14,7 @@ import { appRoutes } from './AppRouter'
 import type { ElementWithTitle } from './getRouterComponent'
 import { e, getRouterComponent } from './getRouterComponent'
 
-const RouterComponent = getRouterComponent(
+const AdminRouter = getRouterComponent(
   zero<ElementWithTitle>()
     .alt(adminParsers.index.map(() => e(<Navigate to={adminRoutes.hallOfFame} replace={true} />)))
     .alt(adminParsers.hallOfFame.map(() => e(<AdminHallOfFame />, () => 'Admin - Hall of Fame'))),
@@ -23,6 +23,7 @@ const RouterComponent = getRouterComponent(
 const AdminRouterComponent: React.FC = () => {
   const { user } = useUser()
 
+  // TODO: AsyncState.fold
   const { data, error } = AsyncState.toSWR(user)
 
   if (data === undefined && error === undefined) return <Loading className="my-2 h-5" />
@@ -35,9 +36,10 @@ const AdminRouterComponent: React.FC = () => {
       Maybe.isSome,
     )
   ) {
-    return <RouterComponent />
+    return <AdminRouter />
   }
 
+  // TODO: not found
   return <Navigate to={appRoutes.index} replace={true} />
 }
 

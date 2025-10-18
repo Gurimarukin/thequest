@@ -32,6 +32,8 @@ const platformRiotIdGameMatch = platformRiotIdMatch.then(lit('game'))
 const aramMatch = lit('aram')
 const urfMatch = lit('urf')
 const factionsMatch = lit('factions')
+const timersMatch = lit('timers')
+
 const loginMatch = lit('login')
 const registerMatch = lit('register')
 const discordRedirectMatch = lit('discordRedirect')
@@ -80,6 +82,8 @@ export const appParsers = {
   aram: p(aramMatch),
   urf: p(urfMatch),
   factions: p(factionsMatch),
+  timers: p(timersMatch),
+
   login: p(loginMatch),
   register: p(registerMatch),
   discordRedirect: p(discordRedirectMatch),
@@ -121,6 +125,8 @@ export const appRoutes = {
     withQuery(format(urfMatch.formatter, {}), PartialGenericQuery, query),
   factions: (query: PartialGenericQuery) =>
     withQuery(format(factionsMatch.formatter, {}), PartialGenericQuery, query),
+  timers: format(timersMatch.formatter, {}),
+
   login: format(loginMatch.formatter, {}),
   register: format(registerMatch.formatter, {}),
 }

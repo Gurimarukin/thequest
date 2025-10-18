@@ -1,3 +1,4 @@
+- spells to base static data?
 - sodium
 - store full match
 - single discord oauth (login/register)
