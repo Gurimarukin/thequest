@@ -23,6 +23,7 @@ import { RiotSummoner } from '../models/riot/RiotSummoner'
 import { RiotCurrentGameInfo } from '../models/riot/currentGame/RiotCurrentGameInfo'
 import { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
+import { DDragonItems } from '../models/riot/ddragon/DDragonItems'
 import { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import { RiotMatch } from '../models/riot/match/RiotMatch'
@@ -125,7 +126,13 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
               [List.decoder(DDragonRuneStyle.decoder), 'List<DDragonRuneStyle>'],
             )
 
-            return { champion, summoner, runesReforged }
+            const items: Future<DDragonItems> = httpClient.json(
+              [ddragonCdn(version, `/data/${lang}/item.json`), 'get'],
+              {},
+              [DDragonItems.decoder, 'DDragonItems'],
+            )
+
+            return { champion, summoner, runesReforged, items }
           },
         }),
       },

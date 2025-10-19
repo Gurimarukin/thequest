@@ -2,6 +2,7 @@ import * as C from 'io-ts/Codec'
 
 import { List } from '../../../utils/fp'
 import { DDragonVersion } from '../DDragonVersion'
+import { StaticDataItem } from './StaticDataItem'
 import { StaticDataRune } from './StaticDataRune'
 import { StaticDataRuneStyle } from './StaticDataRuneStyle'
 import { StaticDataSummonerSpell } from './StaticDataSummonerSpell'
@@ -13,6 +14,7 @@ const codec = C.struct({
   summonerSpells: List.codec(StaticDataSummonerSpell.codec),
   runeStyles: List.codec(StaticDataRuneStyle.codec),
   runes: List.codec(StaticDataRune.codec),
+  items: List.codec(StaticDataItem.codec),
 })
 
 const AdditionalStaticData = { codec }

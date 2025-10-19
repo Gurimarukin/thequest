@@ -77,6 +77,7 @@ export default tseslint.config(
             'DiscordUserId',
             'GameId',
             'GameName',
+            'ItemId',
             'MsDuration',
             'Puuid',
             'SummonerName',

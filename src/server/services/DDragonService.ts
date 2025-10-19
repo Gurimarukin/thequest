@@ -12,6 +12,7 @@ import type { RiotApiCacheTtlConfig } from '../config/Config'
 import { StoredAt } from '../models/StoredAt'
 import type { CDragonRune } from '../models/riot/ddragon/CDragonRune'
 import type { DDragonChampions } from '../models/riot/ddragon/DDragonChampions'
+import type { DDragonItems } from '../models/riot/ddragon/DDragonItems'
 import type { DDragonRuneStyle } from '../models/riot/ddragon/DDragonRuneStyle'
 import type { DDragonSummoners } from '../models/riot/ddragon/DDragonSummoners'
 import { CacheUtils } from '../utils/CacheUtils'
@@ -83,6 +84,11 @@ const DDragonService = (
     lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).runesReforged,
   )
 
+  const itemsCached: (lang: Lang) => (version: DDragonVersion) => Future<DDragonItems> =
+    fetchCached(
+      lang => version => riotApiService.leagueoflegends.ddragon.cdn(version).data(lang).items,
+    )
+
   return {
     latestVersionCached,
     latestChampions: (lang: Lang): Future<WithVersion<DDragonChampions>> =>
@@ -94,6 +100,7 @@ const DDragonService = (
     champions,
     summonersCached,
     runeStylesCached,
+    itemsCached,
 
     cdragon: {
       latestRunesCached: (lang: Lang): Future<List<CDragonRune>> =>

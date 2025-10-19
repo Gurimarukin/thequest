@@ -12,6 +12,8 @@ import { Tooltip } from './tooltip/Tooltip'
 
 type Props = {
   spell: StaticDataSummonerSpell
+  /** @default 0 */
+  haste?: number
   /** @default false */
   timerDisabled?: boolean
   tooltipShouldHide?: boolean
@@ -21,6 +23,7 @@ type Props = {
 
 export const SummonerSpell: React.FC<Props> = ({
   spell,
+  haste = 0,
   timerDisabled = false,
   tooltipShouldHide,
   className,
@@ -28,6 +31,9 @@ export const SummonerSpell: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation('common')
   const { assets } = useStaticData()
+
+  // https://wiki.leagueoflegends.com/en-us/Haste#Formula
+  const cooldown = spell.cooldown * (100 / (100 + haste))
 
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -67,11 +73,11 @@ export const SummonerSpell: React.FC<Props> = ({
         })
       }, 1000)
 
-      setRemainingSeconds(spell.cooldown)
+      setRemainingSeconds(cooldown)
     } else {
       setRemainingSeconds(undefined)
     }
-  }, [remainingSeconds, spell.cooldown])
+  }, [remainingSeconds, cooldown])
 
   const stopPropagation = useCallback((e: React.SyntheticEvent) => e.stopPropagation(), [])
 
@@ -114,9 +120,7 @@ export const SummonerSpell: React.FC<Props> = ({
         className="grid max-w-xs grid-cols-[auto_auto] gap-1"
       >
         <span className="font-bold">{spell.name}</span>
-        <span className="justify-self-end">
-          {t.cooldownSeconds(spell.cooldown, 'text-goldenrod')}
-        </span>
+        <span className="justify-self-end">{t.cooldownSeconds(cooldown, 'text-goldenrod')}</span>
         <span className="col-span-2 whitespace-normal">{spell.description}</span>
       </Tooltip>
     </>

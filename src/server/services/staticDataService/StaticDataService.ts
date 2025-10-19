@@ -6,6 +6,7 @@ import type { Lens } from 'monocle-ts/Lens'
 import { DayJs } from '../../../shared/models/DayJs'
 import { ValidatedNea } from '../../../shared/models/ValidatedNea'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
+import { ItemId } from '../../../shared/models/api/ItemId'
 import { Lang } from '../../../shared/models/api/Lang'
 import type { ChampionSpellHtml } from '../../../shared/models/api/MapChangesData'
 import { MapChangesData } from '../../../shared/models/api/MapChangesData'
@@ -14,6 +15,7 @@ import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
 import type { StaticData } from '../../../shared/models/api/staticData/StaticData'
 import { StaticDataChampion } from '../../../shared/models/api/staticData/StaticDataChampion'
+import type { StaticDataItem } from '../../../shared/models/api/staticData/StaticDataItem'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
@@ -151,11 +153,12 @@ const StaticDataService = (
             summoners: ddragonService.summonersCached(lang)(version),
             runeStyles: ddragonService.runeStylesCached(lang)(version),
             runes: ddragonService.cdragon.latestRunesCached(lang),
+            items: ddragonService.itemsCached(lang)(version),
           }),
         ),
       ),
       Future.map(
-        ({ version, summoners, runeStyles, runes }): AdditionalStaticData => ({
+        ({ version, summoners, runeStyles, runes, items }): AdditionalStaticData => ({
           version,
           summonerSpells: pipe(
             summoners.data,
@@ -186,6 +189,18 @@ const StaticDataService = (
             })),
           ),
           runes,
+          items: pipe(
+            items.data,
+            DictUtils.entries,
+            List.map(
+              ([id, { image, ...item }]): StaticDataItem => ({
+                ...item,
+                // TODO: check isNaN?
+                id: ItemId(Number(id)),
+                image: image.full,
+              }),
+            ),
+          ),
         }),
       ),
     )

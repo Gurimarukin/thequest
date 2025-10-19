@@ -2,6 +2,7 @@ import { flow, pipe } from 'fp-ts/function'
 import { createContext, useContext, useMemo } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
+import type { ItemId } from '../../shared/models/api/ItemId'
 import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import { StaticData } from '../../shared/models/api/staticData/StaticData'
 import type { StaticDataChampion } from '../../shared/models/api/staticData/StaticDataChampion'
@@ -26,7 +27,8 @@ export type StaticDataContext = {
       square: (champion: ChampionKey) => string
     }
     summonerIcon: (iconId: number) => string
-    summonerSpell: (spell: SummonerSpellId) => string
+    summonerSpell: (spellId: SummonerSpellId) => string
+    item: (itemId: ItemId) => string
   }
 }
 
@@ -80,6 +82,7 @@ const StaticDataLoaded: React.FC<StaticDataContextProviderLoaderProps> = ({
       },
       summonerIcon: iconId => ddragonCdn(version, `/img/profileicon/${iconId}.png`),
       summonerSpell: spellId => ddragonCdn(version, `/img/spell/${spellId}.png`),
+      item: itemId => ddragonCdn(version, `/img/item/${itemId}.png`),
     },
   }
 
