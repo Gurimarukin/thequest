@@ -1,4 +1,6 @@
 /* eslint-disable functional/no-return-void */
+import { useCallback, useId } from 'react'
+
 import type { NonEmptyArray } from '../../shared/utils/fp'
 
 import { cx } from '../utils/cx'
@@ -25,31 +27,60 @@ export function Radios<A extends Value>({
 }: RadiosProps<A>): React.ReactElement {
   return (
     <div className="flex flex-wrap">
-      {children.map(({ value: val, label }) => {
-        const isChecked = val === value
-
-        return (
-          <label key={val} className="group">
-            <input
-              type="radio"
-              name={name}
-              checked={isChecked}
-              // eslint-disable-next-line react/jsx-no-bind
-              onChange={() => setValue(val)}
-              className="hidden"
-            />
-            <span
-              className={cx(
-                'flex border-l border-goldenrod-bis group-first:rounded-l-md group-first:border-l-0 group-last:rounded-r-md',
-                isChecked ? 'bg-goldenrod-bis text-black' : 'cursor-pointer bg-zinc-700',
-              )}
-            >
-              {label}
-            </span>
-          </label>
-        )
-      })}
+      {children.map(({ value: val, label }) => (
+        <Radio
+          key={val}
+          name={name}
+          value={val}
+          setValue={setValue}
+          label={label}
+          isChecked={val === value}
+        />
+      ))}
     </div>
+  )
+}
+
+type RadioProps<A extends Value> = {
+  name: string
+  value: A
+  setValue: (a: A) => void
+  label: React.ReactNode
+  isChecked: boolean
+}
+
+function Radio<A extends Value>({
+  name,
+  value,
+  setValue,
+  label,
+  isChecked,
+}: RadioProps<A>): React.ReactNode {
+  const onChange = useCallback(() => setValue(value), [setValue, value])
+
+  const id = useId()
+
+  return (
+    <span className="group">
+      <input
+        type="radio"
+        name={name}
+        id={id}
+        checked={isChecked}
+        onChange={onChange}
+        className="sr-only"
+      />
+
+      <label
+        htmlFor={id}
+        className={cx(
+          'flex border-l border-goldenrod-bis group-first:rounded-l-md group-first:border-l-0 group-last:rounded-r-md',
+          isChecked ? 'bg-goldenrod-bis text-black' : 'cursor-pointer bg-zinc-700',
+        )}
+      >
+        {label}
+      </label>
+    </span>
   )
 }
 

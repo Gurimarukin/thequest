@@ -4,7 +4,7 @@ import { readonlySet } from 'fp-ts'
 import type { Endomorphism } from 'fp-ts/Endomorphism'
 import type { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
-import { useCallback, useRef } from 'react'
+import { useCallback, useId, useRef } from 'react'
 
 import { List } from '../../../../shared/utils/fp'
 
@@ -111,18 +111,24 @@ function LabelCheckbox<A>({
   tooltipPlacement,
   iconClassName,
 }: LabelCheckboxProps<A>): React.ReactElement {
-  const hoverRef = useRef<HTMLSpanElement>(null)
+  const hoverRef = useRef<HTMLLabelElement>(null)
   const isChecked = isAllChecked ? false : readonlySet.elem(eq)(value, checked)
+
+  const id = useId()
+
   return (
-    <label className="group/checkbox">
+    <span className="group/checkbox">
       <input
         type="checkbox"
+        id={id}
         checked={isChecked}
         onChange={toggleChecked(value)}
-        className="hidden"
+        className="sr-only"
       />
-      <span
+
+      <label
         ref={hoverRef}
+        htmlFor={id}
         className={cx(
           'flex h-9 shrink-0 cursor-pointer items-center',
           isMenuVisible === true
@@ -133,10 +139,11 @@ function LabelCheckbox<A>({
         )}
       >
         {icon(isChecked)}
-      </span>
+      </label>
+
       <Tooltip hoverRef={hoverRef} placement={tooltipPlacement}>
         {label}
       </Tooltip>
-    </label>
+    </span>
   )
 }
