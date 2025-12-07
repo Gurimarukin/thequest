@@ -14,8 +14,6 @@ type Props = {
   spell: StaticDataSummonerSpell
   /** @default 0 */
   haste?: number
-  /** @default false */
-  timerDisabled?: boolean
   tooltipShouldHide?: boolean
   className?: string
   timerClassName?: string
@@ -24,7 +22,6 @@ type Props = {
 export const SummonerSpell: React.FC<Props> = ({
   spell,
   haste = 0,
-  timerDisabled = false,
   tooltipShouldHide,
   className,
   timerClassName,
@@ -88,13 +85,8 @@ export const SummonerSpell: React.FC<Props> = ({
         type="button"
         onClick={onClick}
         // prevent drag and drop above
-        onPointerDown={!timerDisabled ? stopPropagation : undefined}
-        disabled={timerDisabled}
-        className={cx(
-          'relative grid place-items-center',
-          ['cursor-[inherit]', timerDisabled],
-          className,
-        )}
+        onPointerDown={stopPropagation}
+        className={cx('relative grid place-items-center', className)}
       >
         <img
           src={assets.summonerSpell(spell.id)}

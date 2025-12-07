@@ -23,7 +23,7 @@ import { Languages } from './Languages'
 import { SearchSummoner } from './searchSummoner/SearchSummoner'
 
 export const MainLayout: ChildrenFC = ({ children }) => {
-  const { user, maybeUser } = useUser()
+  const { user } = useUser()
   const { t } = useTranslation('common')
 
   const summoner = usePathMatch(appParsers.anyPlatformRiotId)
@@ -72,16 +72,14 @@ export const MainLayout: ChildrenFC = ({ children }) => {
                 <MaskedImage src={Assets.runeterra} className="size-5" />
               </HighlightLink>
 
-              {Maybe.isSome(maybeUser) && (
-                <HighlightLink
-                  to={appRoutes.timers}
-                  parser={appParsers.timers}
-                  tooltip={t.layout.timers}
-                  className="overflow-x-hidden py-1"
-                >
-                  <HourglassOutline className="-mx-0.5 w-6 secondary-wheat/60" />
-                </HighlightLink>
-              )}
+              <HighlightLink
+                to={appRoutes.timers}
+                parser={appParsers.timers}
+                tooltip={t.layout.timers}
+                className="overflow-x-hidden py-1"
+              >
+                <HourglassOutline className="-mx-0.5 w-6 secondary-wheat/60" />
+              </HighlightLink>
             </div>
           </div>
 

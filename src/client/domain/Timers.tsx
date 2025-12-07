@@ -18,17 +18,13 @@ import { List, Maybe, Tuple } from '../../shared/utils/fp'
 
 import { AsyncRenderer } from '../components/AsyncRenderer'
 import { ChampionPositionImg } from '../components/ChampionPositionImg'
-import { Loading } from '../components/Loading'
-import { Navigate } from '../components/Navigate'
 import { Rune } from '../components/Rune'
 import { SummonerSpell } from '../components/SummonerSpell'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { Tooltip } from '../components/tooltip/Tooltip'
 import { useStaticData } from '../contexts/StaticDataContext'
 import { useTranslation } from '../contexts/TranslationContext'
-import { useUser } from '../contexts/UserContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
-import { appRoutes } from '../router/AppRouter'
 import { cx } from '../utils/cx'
 
 // [id, summonerSpellHaste]
@@ -54,21 +50,6 @@ const spellsByPosition: Dict<ChampionPosition, ReadonlySet<SummonerSpellKey>> = 
 }
 
 export const Timers: React.FC = () => {
-  const { user } = useUser()
-
-  if (user.type === 'Loading') {
-    return <Loading className="my-2 h-5" />
-  }
-
-  if (user.type === 'Success' && Maybe.isSome(user.loadedValue)) {
-    return <AllowedTimers />
-  }
-
-  // TODO: not found
-  return <Navigate to={appRoutes.index} replace={true} />
-}
-
-const AllowedTimers: React.FC = () => {
   const { lang } = useTranslation()
 
   return (
