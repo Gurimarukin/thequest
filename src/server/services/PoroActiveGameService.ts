@@ -186,7 +186,7 @@ const of = (
 
   function fetch(lang: Lang, platform: Platform, { gameName, tagLine }: RiotId): Future<string> {
     const poroLang = Business.poroLang[lang]
-    const platformAndRiotId = `${Platform.encoderLower.encode(platform)}/${gameName}-${tagLine}`
+    const platformAndRiotId = `${platform === 'EUN' ? 'eune' : Platform.encoderLower.encode(platform)}/${gameName}-${tagLine}`
 
     return pipe(
       getWithUserAgent(`/${poroLang}/live/${platformAndRiotId}/season`),
