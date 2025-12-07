@@ -267,7 +267,7 @@ function parsePoroActiveGameOnlyTagsBis(
       ValidatedNea.chain(
         Either.fold(
           () =>
-            // streamer mode
+            // streamer mode, no tags, no need to try to match by champion id
             ValidatedNea.valid(Maybe.none),
           riotId =>
             pipe(
