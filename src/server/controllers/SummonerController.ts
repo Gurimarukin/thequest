@@ -384,10 +384,6 @@ const SummonerController = (
       )
   }
 
-  function couldntFindAccountError(puuid: Puuid): Error {
-    return Error(`Couldn't find Riot account for summoner: ${puuid}`)
-  }
-
   type ParticipanViewWithIndex = ActiveGameParticipantView & { index: number }
 
   function activeGamePoro(
@@ -438,6 +434,10 @@ const SummonerController = (
           }),
         ),
       )
+  }
+
+  function couldntFindAccountError(puuid: Puuid): Error {
+    return Error(`Couldn't find Riot account for summoner: ${puuid}`)
   }
 
   function enrichParticipantPoro(
