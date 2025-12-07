@@ -23,7 +23,7 @@ const { round } = NumberUtils
 
 export type ChampionMasterySquareProps = {
   championId: ChampionKey
-  masteries: Maybe<ChampionTooltipMasteries>
+  masteries: ChampionTooltipMasteries | undefined
   name: string
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
@@ -92,7 +92,7 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   const hoverRef = overrideHoverRef ?? hoverRef_
 
   const tokens = pipe(
-    masteries,
+    Maybe.fromNullable(masteries),
     Maybe.chain(m =>
       pipe(
         repeatElements(Math.min(m.tokensEarned, m.markRequiredForNextLevel), i => (
@@ -122,30 +122,23 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
             ['shadow-even shadow-black', !noShadow],
           )}
         >
-          {pipe(
-            masteries,
-            Maybe.filter(m => 0 < m.championLevel),
-            Maybe.fold(
-              () => null,
-              m => (
-                <LevelSVG
-                  championLevel={m.championLevel}
-                  {...(isHistogram
-                    ? {
-                        // always full for histogram
-                        championPointsUntilNextLevel: 0,
-                        championPointsSinceLastLevel: 1,
-                        stroke: 'currentColor',
-                      }
-                    : {
-                        championPointsUntilNextLevel: m.championPointsUntilNextLevel,
-                        championPointsSinceLastLevel: m.championPointsSinceLastLevel,
-                        stroke: `url(#${masterySquareBorderGradientId(m.championLevel)})`,
-                      })}
-                />
-              ),
-            ),
-          )}
+          {masteries !== undefined && 0 < masteries.championLevel ? (
+            <LevelSVG
+              championLevel={masteries.championLevel}
+              {...(isHistogram
+                ? {
+                    // always full for histogram
+                    championPointsUntilNextLevel: 0,
+                    championPointsSinceLastLevel: 1,
+                    stroke: 'currentColor',
+                  }
+                : {
+                    championPointsUntilNextLevel: masteries.championPointsUntilNextLevel,
+                    championPointsSinceLastLevel: masteries.championPointsSinceLastLevel,
+                    stroke: `url(#${masterySquareBorderGradientId(masteries.championLevel)})`,
+                  })}
+            />
+          ) : null}
         </div>
 
         {/* champion image */}
@@ -166,25 +159,14 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
               'flex overflow-hidden bg-black pb-0.75 pr-1.25 text-sm font-bold leading-2.5',
               Maybe.isNone(tokens) ? 'rounded-br-lg' : 'rounded-br',
               ['pl-0.5 pt-0.5', centerLevel],
-              masteryTextColor(
-                pipe(
-                  masteries,
-                  Maybe.fold(
-                    () => 0,
-                    m => m.championLevel,
-                  ),
-                ),
-              ),
+              masteryTextColor(masteries?.championLevel ?? 0),
             )}
           >
             <span>
-              {pipe(
-                masteries,
-                Maybe.fold(
-                  () => '?',
-                  m => t.number(m.championLevel),
-                ),
-              )}
+              {masteries !== undefined
+                ? t.number(masteries.championLevel)
+                : // TODO: translation?
+                  '?'}
             </span>
           </div>
 

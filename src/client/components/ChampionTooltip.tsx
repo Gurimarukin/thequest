@@ -11,7 +11,7 @@ import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
 
 type Props = {
-  masteries: Maybe<ChampionTooltipMasteries>
+  masteries: ChampionTooltipMasteries | undefined
   name: string
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
@@ -39,37 +39,31 @@ export const ChampionTooltip: React.FC<Props> = ({
 
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 font-semibold shadow-black text-shadow">
-      {pipe(
-        masteries,
-        Maybe.fold(
-          () => t.masteries.unknownPercents,
-          m => t.common.percents(Math.round(m.percents)),
-        ),
-      )}
+      {masteries !== undefined
+        ? t.common.percents(Math.round(masteries.percents))
+        : t.masteries.unknownPercents}
     </span>
   )
 
   const tokenShards = pipe(
-    masteries,
-    Maybe.chain(m =>
+    [
+      masteries !== undefined && 0 < masteries.markRequiredForNextLevel
+        ? Maybe.some(
+            <span key="tokens">
+              {t.masteries.nMarksOfMastery(
+                masteries.tokensEarned,
+                masteries.markRequiredForNextLevel,
+              )}
+            </span>,
+          )
+        : Maybe.none,
       pipe(
-        [
-          0 < m.markRequiredForNextLevel
-            ? Maybe.some(
-                <span key="tokens">
-                  {t.masteries.nMarksOfMastery(m.tokensEarned, m.markRequiredForNextLevel)}
-                </span>,
-              )
-            : Maybe.none,
-          pipe(
-            shardsCount,
-            Maybe.map(shards => <span key="shards">{t.masteries.nShards(shards)}</span>),
-          ),
-        ],
-        List.compact,
-        NonEmptyArray.fromReadonlyArray,
+        shardsCount,
+        Maybe.map(shards => <span key="shards">{t.masteries.nShards(shards)}</span>),
       ),
-    ),
+    ],
+    List.compact,
+    NonEmptyArray.fromReadonlyArray,
   )
 
   return (
@@ -84,33 +78,20 @@ export const ChampionTooltip: React.FC<Props> = ({
         <h3
           className={cx(
             'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black',
-            masteryHistogramGradient(
-              pipe(
-                masteries,
-                Maybe.fold(
-                  () => 0,
-                  m => m.championLevel,
-                ),
-              ),
-            ),
+            masteryHistogramGradient(masteries?.championLevel ?? 0),
           )}
         >
           {name}
         </h3>
       </div>
       <p className="border-b border-tooltip px-2 py-1 text-center">
-        {pipe(
-          masteries,
-          Maybe.fold(
-            () => t.masteries.unknownPoints('font-semibold'),
-            m =>
-              t.masteries.points(
-                m.championPoints,
-                m.championPoints + m.championPointsUntilNextLevel,
-                'font-semibold',
-              ),
-          ),
-        )}
+        {masteries !== undefined
+          ? t.masteries.points(
+              masteries.championPoints,
+              masteries.championPoints + masteries.championPointsUntilNextLevel,
+              'font-semibold',
+            )
+          : t.masteries.unknownPoints('font-semibold')}
       </p>
       <div className="flex grow flex-col items-center justify-center gap-1 px-2 py-1">
         {pipe(

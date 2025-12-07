@@ -192,7 +192,7 @@ const Champion: React.FC<ChampionProps> = ({
         <div className={championSquareChangesClassName}>
           <ChampionMasterySquare
             championId={champion.championId}
-            masteries={Maybe.some({
+            masteries={{
               tokensEarned: champion.tokensEarned,
               markRequiredForNextLevel: champion.markRequiredForNextLevel,
               championLevel: champion.championLevel,
@@ -200,7 +200,7 @@ const Champion: React.FC<ChampionProps> = ({
               championPointsSinceLastLevel: champion.championPointsSinceLastLevel,
               championPointsUntilNextLevel: champion.championPointsUntilNextLevel,
               percents: champion.percents,
-            })}
+            }}
             name={champion.name}
             shardsCount={champion.shardsCount}
             positions={champion.positions}
