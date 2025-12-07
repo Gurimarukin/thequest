@@ -17,6 +17,7 @@ import { ChampionFactionTitle } from '../components/ChampionFactionTitle'
 import { ChampionPositionsAndFactions } from '../components/ChampionTooltip'
 import { CroppedChampionSquare } from '../components/CroppedChampionSquare'
 import { SearchChampion } from '../components/SearchChampion'
+import { WikiLink } from '../components/WikiLink'
 import { MainLayout } from '../components/mainLayout/MainLayout'
 import { Tooltip } from '../components/tooltip/Tooltip'
 import { useHistory } from '../contexts/HistoryContext'
@@ -147,6 +148,7 @@ export const Factions: React.FC = () => {
           onChange={onSearchChange}
           className="self-center"
         />
+
         <div className="grid w-full grid-cols-[repeat(auto-fit,3rem)] items-start gap-2">
           {pipe(
             filteredAndSortedChampions,
@@ -169,9 +171,12 @@ export const Factions: React.FC = () => {
             )),
           )}
         </div>
+
         <div className="mt-6 self-center">
           {t.nChampionsFraction(searchCount, champions.length)}
         </div>
+
+        <WikiLink href="https://wiki.leagueoflegends.com/en-us/Challenges#Faction_Challenges" />
       </div>
     </MainLayout>
   )

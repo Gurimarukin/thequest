@@ -17,12 +17,12 @@ import { MainLayout } from '../../components/mainLayout/MainLayout'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { OpenInNew } from '../../imgs/svgs/icons'
 import { MapChangesChampionCategory } from '../../models/MapChangesChampionCategory'
 import { GenericQuery } from '../../models/genericQuery/GenericQuery'
 import { cx } from '../../utils/cx'
 import { ChampionPositionsAndFactions } from '../ChampionTooltip'
 import { CroppedChampionSquare } from '../CroppedChampionSquare'
+import { WikiLink } from '../WikiLink'
 import { Tooltip } from '../tooltip/Tooltip'
 import type { EnrichedStaticDataChampion } from './ChampionSquareChanges'
 import { ChampionSquareChanges, championSquareChangesClassName } from './ChampionSquareChanges'
@@ -138,18 +138,7 @@ export const getMapChanges =
             {t.nChampionsFraction(searchCount, champions.length)}
           </div>
 
-          <span className="mt-24 flex items-center gap-2 self-center text-sm">
-            <OpenInNew className="invisible size-3.5" /> {/* for hitbox */}
-            <a
-              href={wikiLink}
-              target="_blank"
-              rel="noreferrer"
-              className="peer border-b border-b-wheat/50 transition-all duration-100 hover:border-b-goldenrod"
-            >
-              {wikiLink}
-            </a>
-            <OpenInNew className="invisible size-3.5 opacity-0 transition-all duration-100 peer-hover:visible peer-hover:opacity-100" />
-          </span>
+          <WikiLink href={wikiLink} />
         </div>
       </MainLayout>
     )
