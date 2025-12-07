@@ -1,5 +1,5 @@
 import { apply } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 
 import { MsDuration } from '../shared/models/MsDuration'
 import { PubSub } from '../shared/models/rx/PubSub'
@@ -183,6 +183,10 @@ const load = (config: Config): Future<Context> => {
           Logger,
           poroActiveGamePersistence,
           httpClient,
+          flow(
+            staticDataService.getLatest,
+            Future.map(d => d.champions),
+          ),
           cronJobPubSub.observable,
         ),
         SummonerService(

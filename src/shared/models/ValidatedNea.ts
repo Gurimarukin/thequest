@@ -72,6 +72,10 @@ const ValidatedNea = {
   ) => <A>(a: A) => ValidatedNea<E, NonNullable<A>>,
   fromEmptyE,
   fromEmptyErrors,
+  fold: Either.fold as <E, A, B>(
+    onLeft: (e: NonEmptyArray<E>) => B,
+    onRight: (a: A) => B,
+  ) => (ma: ValidatedNea<E, A>) => B,
   map: Either.map as <A, B>(f: (a: A) => B) => <E>(fa: ValidatedNea<E, A>) => ValidatedNea<E, B>,
   chain: Either.chain as <E, A, B>(
     f: (a: A) => ValidatedNea<E, B>,

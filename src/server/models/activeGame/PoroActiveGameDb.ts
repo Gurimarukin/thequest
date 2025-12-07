@@ -1,13 +1,16 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
+import * as D from 'io-ts/Decoder'
 
 import { GameId } from '../../../shared/models/api/GameId'
 import { Lang } from '../../../shared/models/api/Lang'
 import { PoroNiceness } from '../../../shared/models/api/activeGame/PoroNiceness'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { Either, List, Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 
@@ -31,7 +34,17 @@ const poroLeagueCodec = C.struct({
   ),
 })
 
+type Streamer = C.TypeOf<typeof streamerCodec>
+
+const streamerCodec = C.struct({
+  index: C.number,
+  championId: ChampionKey.codec,
+})
+
+type Participant = C.TypeOf<typeof participantCodec>
+
 const participantCodec = C.struct({
+  index: C.number,
   premadeId: Maybe.codec(C.number),
   riotId: RiotId.fromStringCodec,
   summonerLevel: C.number,
@@ -59,12 +72,32 @@ const participantCodec = C.struct({
   ),
 })
 
+const eitherParticipantCodec = C.make<
+  unknown,
+  C.OutputOf<typeof streamerCodec> | C.OutputOf<typeof participantCodec>,
+  Either<Streamer, Participant>
+>(
+  pipe(
+    participantCodec,
+    D.map(Either.right),
+    D.alt(() =>
+      pipe(
+        streamerCodec,
+        D.map(s => Either.left<Streamer, Participant>(s)),
+      ),
+    ),
+  ),
+  {
+    encode: Either.foldW(streamerCodec.encode, participantCodec.encode),
+  },
+)
+
 type PoroActiveGameDb = C.TypeOf<typeof codec>
 
 const codec = C.struct({
   lang: Lang.codec,
   gameId: GameId.codec,
-  participants: List.codec(participantCodec),
+  participants: List.codec(eitherParticipantCodec),
   insertedAt: DayJsFromDate.codec,
 })
 
