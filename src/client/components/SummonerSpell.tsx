@@ -109,7 +109,7 @@ export const SummonerSpell: React.FC<Props> = ({
               timerClassName,
             )}
           >
-            {DayJs.Duration.formatSeconds(remainingSeconds)}
+            <span className="-mx-96 area-1">{DayJs.Duration.formatSeconds(remainingSeconds)}</span>
           </span>
         )}
       </button>
