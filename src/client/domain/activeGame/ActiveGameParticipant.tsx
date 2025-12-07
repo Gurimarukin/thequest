@@ -336,6 +336,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               <>
                 <span className="invisible">h</span>
                 {props.masteries === undefined || props.masteries.championLevel < 5 ? (
+                  // hide points
                   <>
                     <ChampionMasterySquare {...props} />
                     <span className="invisible">h</span>
