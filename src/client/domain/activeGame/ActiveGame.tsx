@@ -10,6 +10,7 @@ import { apiRoutes } from '../../../shared/ApiRouter'
 import { Business } from '../../../shared/Business'
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
+import { ItemId } from '../../../shared/models/api/ItemId'
 import type { Lang } from '../../../shared/models/api/Lang'
 import { MapId } from '../../../shared/models/api/MapId'
 import { Platform } from '../../../shared/models/api/Platform'
@@ -20,6 +21,7 @@ import { TeamId } from '../../../shared/models/api/activeGame/TeamId'
 import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { AdditionalStaticData } from '../../../shared/models/api/staticData/AdditionalStaticData'
+import type { StaticDataItem } from '../../../shared/models/api/staticData/StaticDataItem'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
@@ -231,6 +233,15 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
     [additionalStaticData.runes],
   )
 
+  const itemById = useMemo(
+    (): ((id: ItemId) => Maybe<StaticDataItem>) =>
+      pipe(
+        additionalStaticData.items,
+        ListUtils.findFirstBy(ItemId.Eq)(i => i.id),
+      ),
+    [additionalStaticData.items],
+  )
+
   const shouldShowPositions = MapId.isSummonersRift(mapId)
   const gameQueue = pipe(
     t.common.labels.gameQueue,
@@ -322,6 +333,7 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
                   summonerSpellByKey={summonerSpellByKey}
                   runeStyleById={runeStyleById}
                   runeById={runeById}
+                  itemById={itemById}
                 />
               )}
             </ul>
@@ -356,6 +368,7 @@ type ParticipantsProps = {
   summonerSpellByKey: (key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>
   runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
   runeById: (id: RuneId) => Maybe<StaticDataRune>
+  itemById: (id: ItemId) => Maybe<StaticDataItem>
 }
 
 const Participants: React.FC<ParticipantsProps> = ({
@@ -369,6 +382,7 @@ const Participants: React.FC<ParticipantsProps> = ({
   summonerSpellByKey,
   runeStyleById,
   runeById,
+  itemById,
 }) => {
   const [isDragging, setIsDragging] = useState(false)
 
@@ -432,6 +446,7 @@ const Participants: React.FC<ParticipantsProps> = ({
             summonerSpellByKey={summonerSpellByKey}
             runeStyleById={runeStyleById}
             runeById={runeById}
+            itemById={itemById}
             platform={platform}
             gameMode={gameMode}
             participant={participant}

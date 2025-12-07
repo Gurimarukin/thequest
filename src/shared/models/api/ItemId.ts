@@ -15,6 +15,6 @@ const codec = fromNewtype<ItemId>(C.number)
 
 const Eq: eq.Eq<ItemId> = pipe(number.Eq, eq.contramap(unwrap))
 
-const ItemId = immutableAssign(wrap, { codec, Eq })
+const ItemId = immutableAssign(wrap, { unwrap, codec, Eq })
 
 export { ItemId }

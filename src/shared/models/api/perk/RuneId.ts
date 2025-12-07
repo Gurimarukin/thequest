@@ -15,6 +15,6 @@ const codec = fromNewtype<RuneId>(C.number)
 
 const Eq: eq.Eq<RuneId> = pipe(number.Eq, eq.contramap(unwrap))
 
-const RuneId = immutableAssign(wrap, { codec, Eq })
+const RuneId = immutableAssign(wrap, { unwrap, codec, Eq })
 
 export { RuneId }

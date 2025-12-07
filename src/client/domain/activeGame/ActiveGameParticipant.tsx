@@ -13,22 +13,25 @@ import {
 } from 'react'
 
 import { Business } from '../../../shared/Business'
+import type { ItemId } from '../../../shared/models/api/ItemId'
 import type { Platform } from '../../../shared/models/api/Platform'
 import type { ActiveGameChampionMasteryView } from '../../../shared/models/api/activeGame/ActiveGameChampionMasteryView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
-import type { RuneId } from '../../../shared/models/api/perk/RuneId'
-import type { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
+import { RuneId } from '../../../shared/models/api/perk/RuneId'
+import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
+import type { StaticDataItem } from '../../../shared/models/api/staticData/StaticDataItem'
 import type { StaticDataRune } from '../../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataRuneStyle } from '../../../shared/models/api/staticData/StaticDataRuneStyle'
 import type { StaticDataSummonerSpell } from '../../../shared/models/api/staticData/StaticDataSummonerSpell'
-import type { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
 import type { Dict } from '../../../shared/utils/fp'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { List, Maybe, Tuple } from '../../../shared/utils/fp'
 
 import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
 import type { ChampionTooltipMasteries } from '../../components/ChampionTooltip'
+import { HasteBonuses, cosmicInsight } from '../../components/HasteBonuses'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
@@ -48,6 +51,8 @@ const gridTotalCols = 9
 
 const bevelWidth = 32 // px
 
+const inspirationPath = RuneStyleId(8300)
+
 type Reverse = boolean
 
 export const gridCols: Dict<`${Reverse}`, React.CSSProperties> = {
@@ -61,6 +66,7 @@ type ParticipantProps = {
   summonerSpellByKey: (key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>
   runeStyleById: (id: RuneStyleId) => Maybe<StaticDataRuneStyle>
   runeById: (id: RuneId) => Maybe<StaticDataRune>
+  itemById: (id: ItemId) => Maybe<StaticDataItem>
   platform: Platform
   /** GameMode */
   gameMode: string
@@ -82,6 +88,7 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   summonerSpellByKey,
   runeStyleById,
   runeById,
+  itemById,
   platform,
   gameMode,
   participant: {
@@ -117,8 +124,36 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const championWinRateRef = useRef<HTMLDivElement>(null)
   const mapChangesRef = useRef<HTMLDivElement>(null)
 
-  const spell1 = summonerSpellByKey(spell1Id)
-  const spell2 = summonerSpellByKey(spell2Id)
+  const spells = [spell1Id, spell2Id].map(id => Tuple.of(id, summonerSpellByKey(id)))
+
+  const [totalHaste, setTotalHaste] = useState(0)
+  const onToggleHaste = useCallback((addHaste: number) => setTotalHaste(h => h + addHaste), [])
+
+  const hasInspirationPath = pipe(
+    maybePerks,
+    Maybe.exists(
+      perks =>
+        RuneStyleId.Eq.equals(perks.perkStyle, inspirationPath) ||
+        RuneStyleId.Eq.equals(perks.perkSubStyle, inspirationPath),
+    ),
+  )
+
+  /** `runeById`, but only if rune style exists for rune `id` */
+  const filteredRuneById = useCallback(
+    (id: RuneId): Maybe<StaticDataRune> => {
+      if (RuneId.Eq.equals(id, cosmicInsight.id)) {
+        return hasInspirationPath ? runeById(id) : Maybe.none
+      }
+
+      return runeById(id)
+    },
+    [hasInspirationPath, runeById],
+  )
+
+  const hasCosmicInsight = pipe(
+    maybePerks,
+    Maybe.exists(perks => List.elem(RuneId.Eq)(cosmicInsight.id, perks.perkIds)),
+  )
 
   const champion = championByKey(championId)
 
@@ -379,40 +414,40 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         ),
       )}
       <Cell
-        type={animated.ul}
+        type={animated.div}
         gridColStart={7}
-        className={cx('flex flex-col items-center justify-center gap-2', padding)}
+        className={cx('flex flex-col justify-center gap-2', padding)}
       >
-        <li className="size-7">
-          {pipe(
-            spell1,
-            Maybe.fold(
-              () => <Empty className="size-full">{t.common.spellKey(spell1Id)}</Empty>,
-              s => (
-                <SummonerSpell
-                  spell={s}
-                  tooltipShouldHide={tooltipShouldHide}
-                  className="size-full"
-                />
-              ),
-            ),
-          )}
-        </li>
-        <li className="size-7">
-          {pipe(
-            spell2,
-            Maybe.fold(
-              () => <Empty className="size-full">{t.common.spellKey(spell2Id)}</Empty>,
-              s => (
-                <SummonerSpell
-                  spell={s}
-                  tooltipShouldHide={tooltipShouldHide}
-                  className="size-full"
-                />
-              ),
-            ),
-          )}
-        </li>
+        <ul className="flex gap-2">
+          {spells.map(([id, spell]) => (
+            <li key={SummonerSpellKey.unwrap(id)} className="size-7">
+              {pipe(
+                spell,
+                Maybe.fold(
+                  () => <Empty className="size-full">{t.common.spellKey(id)}</Empty>,
+                  s => (
+                    <SummonerSpell
+                      spell={s}
+                      haste={totalHaste}
+                      tooltipShouldHide={tooltipShouldHide}
+                      className="size-full"
+                    />
+                  ),
+                ),
+              )}
+            </li>
+          ))}
+        </ul>
+
+        <HasteBonuses
+          runeById={filteredRuneById}
+          itemById={itemById}
+          onToggle={onToggleHaste}
+          cosmicInsightDefaultChecked={true}
+          cosmicInsightDisabled={hasCosmicInsight}
+          size="small"
+          className={cx('justify-center', reverse ? 'flex-row-reverse' : undefined)}
+        />
       </Cell>
       {pipe(
         maybePerks,

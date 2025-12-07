@@ -1,7 +1,5 @@
-/* eslint-disable functional/no-expression-statements,
-                  functional/no-return-void */
 import { flow, pipe } from 'fp-ts/function'
-import { useCallback, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import { ItemId } from '../../shared/models/api/ItemId'
@@ -9,27 +7,21 @@ import type { ChampionPosition } from '../../shared/models/api/champion/Champion
 import { RuneId } from '../../shared/models/api/perk/RuneId'
 import { AdditionalStaticData } from '../../shared/models/api/staticData/AdditionalStaticData'
 import type { StaticDataItem } from '../../shared/models/api/staticData/StaticDataItem'
+import type { StaticDataRune } from '../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataSummonerSpell } from '../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
 import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
 import type { Dict } from '../../shared/utils/fp'
-import { List, Maybe, Tuple } from '../../shared/utils/fp'
+import { List, Maybe } from '../../shared/utils/fp'
 
 import { AsyncRenderer } from '../components/AsyncRenderer'
 import { ChampionPositionImg } from '../components/ChampionPositionImg'
-import { Rune } from '../components/Rune'
+import { HasteBonuses } from '../components/HasteBonuses'
 import { SummonerSpell } from '../components/SummonerSpell'
 import { MainLayout } from '../components/mainLayout/MainLayout'
-import { Tooltip } from '../components/tooltip/Tooltip'
-import { useStaticData } from '../contexts/StaticDataContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
-import { cx } from '../utils/cx'
-
-// [id, summonerSpellHaste]
-const cosmicInsight = Tuple.of(RuneId(8347), 18)
-const ionianBootsOfLucidity = Tuple.of(ItemId(3158), 10)
 
 const cleanse = SummonerSpellKey(1)
 const exhaust = SummonerSpellKey(3)
@@ -80,41 +72,35 @@ const Loaded: React.FC<LoadedProps> = ({ additionalStaticData }) => {
     [additionalStaticData.summonerSpells],
   )
 
+  const runeById = useMemo(
+    (): ((id: RuneId) => Maybe<StaticDataRune>) =>
+      pipe(
+        additionalStaticData.runes,
+        ListUtils.findFirstBy(RuneId.Eq)(r => r.id),
+      ),
+    [additionalStaticData.runes],
+  )
+
+  const itemById = useMemo(
+    (): ((id: ItemId) => Maybe<StaticDataItem>) =>
+      pipe(
+        additionalStaticData.items,
+        ListUtils.findFirstBy(ItemId.Eq)(i => i.id),
+      ),
+    [additionalStaticData.items],
+  )
+
   return (
     <div className="grid min-h-full place-items-center">
       <ul className="flex flex-col gap-5">
         {DictUtils.entries(spellsByPosition).map(([position, spells]) => (
           <Position
             key={position}
+            runeById={runeById}
+            itemById={itemById}
             position={position}
             spells={spells}
             summonerSpellByKey={summonerSpellByKey}
-            summonerSpellHaste={[
-              pipe(
-                pipe(
-                  additionalStaticData.runes,
-                  ListUtils.findFirstBy(RuneId.Eq)(r => r.id),
-                )(cosmicInsight[0]),
-                Maybe.map(r =>
-                  Tuple.of(
-                    <Rune
-                      icon={r.iconPath}
-                      name={r.name}
-                      description={r.longDesc}
-                      className="w-full"
-                    />,
-                    cosmicInsight[1],
-                  ),
-                ),
-              ),
-              pipe(
-                pipe(
-                  additionalStaticData.items,
-                  ListUtils.findFirstBy(ItemId.Eq)(i => i.id),
-                )(ionianBootsOfLucidity[0]),
-                Maybe.map(item => Tuple.of(<Item item={item} />, ionianBootsOfLucidity[1])),
-              ),
-            ]}
           />
         ))}
       </ul>
@@ -123,17 +109,19 @@ const Loaded: React.FC<LoadedProps> = ({ additionalStaticData }) => {
 }
 
 type PositionProps = {
+  runeById: (id: RuneId) => Maybe<StaticDataRune>
+  itemById: (id: ItemId) => Maybe<StaticDataItem>
   position: ChampionPosition
   spells: ReadonlySet<SummonerSpellKey>
   summonerSpellByKey: (key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>
-  summonerSpellHaste: List<Maybe<Tuple<React.ReactNode, number>>>
 }
 
 const Position: React.FC<PositionProps> = ({
+  runeById,
+  itemById,
   position,
   spells,
   summonerSpellByKey,
-  summonerSpellHaste,
 }) => {
   const [totalHaste, setTotalHaste] = useState(0)
 
@@ -141,21 +129,7 @@ const Position: React.FC<PositionProps> = ({
 
   return (
     <li className="flex items-center gap-5">
-      <ul className="flex gap-2">
-        {pipe(
-          summonerSpellHaste,
-          List.filterMapWithIndex((i, h) =>
-            pipe(
-              h,
-              Maybe.map(([children, haste]) => (
-                <HasteBonus key={i} haste={haste} onToggle={onToggleHaste}>
-                  {children}
-                </HasteBonus>
-              )),
-            ),
-          ),
-        )}
-      </ul>
+      <HasteBonuses runeById={runeById} itemById={itemById} onToggle={onToggleHaste} />
 
       <ChampionPositionImg position={position} className="size-12" />
 
@@ -180,72 +154,5 @@ const Position: React.FC<PositionProps> = ({
         )}
       </ul>
     </li>
-  )
-}
-
-type HasteBonusProps = {
-  haste: number
-  onToggle: (addHaste: number) => void
-  children?: React.ReactNode
-}
-
-const HasteBonus: React.FC<HasteBonusProps> = ({ haste, onToggle, children }) => {
-  const [checked, setChecked] = useState(false)
-
-  const handleToggle = useCallback(() => {
-    if (checked) {
-      onToggle(-haste)
-      setChecked(false)
-    } else {
-      onToggle(haste)
-      setChecked(true)
-    }
-  }, [checked, haste, onToggle])
-
-  const id = useId()
-
-  return (
-    <li className="flex">
-      <input
-        type="checkbox"
-        id={id}
-        checked={checked}
-        onChange={handleToggle}
-        className="sr-only"
-      />
-
-      <label htmlFor={id} className="relative flex w-10 cursor-pointer overflow-hidden bg-black">
-        <span className={cx(['opacity-60', !checked])}>{children}</span>
-
-        {!checked && (
-          <span className="absolute top-[calc(100%_-_0.125rem)] w-20 origin-left -rotate-45 border-t-4 border-red-ban shadow-even shadow-black" />
-        )}
-      </label>
-    </li>
-  )
-}
-
-type ItemProps = {
-  item: StaticDataItem
-}
-
-const Item: React.FC<ItemProps> = ({ item }) => {
-  const { assets } = useStaticData()
-
-  const ref = useRef<HTMLImageElement>(null)
-
-  return (
-    <>
-      <img ref={ref} src={assets.item(item.id)} alt={item.name} className="w-full" />
-
-      <Tooltip hoverRef={ref} className="flex max-w-xs flex-col gap-1">
-        <span className="font-bold">{item.name}</span>
-        <span className="whitespace-break-spaces">{item.plaintext}</span>
-        <span
-          dangerouslySetInnerHTML={{ __html: item.description }}
-          className="whitespace-normal"
-        />
-      </Tooltip>
-    </>
   )
 }

@@ -76,15 +76,13 @@ export const SummonerSpell: React.FC<Props> = ({
     }
   }, [remainingSeconds, cooldown])
 
-  const stopPropagation = useCallback((e: React.SyntheticEvent) => e.stopPropagation(), [])
-
   return (
     <>
       <button
         ref={ref}
         type="button"
         onClick={onClick}
-        // prevent drag and drop above
+        // prevent drag and drop in parents
         onPointerDown={stopPropagation}
         className={cx('relative grid place-items-center', className)}
       >
@@ -117,4 +115,8 @@ export const SummonerSpell: React.FC<Props> = ({
       </Tooltip>
     </>
   )
+}
+
+function stopPropagation(e: React.SyntheticEvent): void {
+  e.stopPropagation()
 }
