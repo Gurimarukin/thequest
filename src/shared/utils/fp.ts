@@ -104,6 +104,12 @@ const partialDictTraverse = readonlyRecord.traverse as <F extends URIS2>(
   f: (a: A | undefined) => Kind2<F, E, B | undefined>,
 ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>
 
+const partialDictTraverseWithIndex = readonlyRecord.traverseWithIndex as <F extends URIS2>(
+  F: Applicative2<F>,
+) => <K extends string, E, A, B>(
+  f: (k: K, a: A | undefined) => Kind2<F, E, B | undefined>,
+) => (ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>
+
 export const PartialDict = {
   empty: <K extends string = string, A = never>(): PartialDict<K, A> => ({}),
 
@@ -133,6 +139,15 @@ export const PartialDict = {
       f: (a: A) => Kind2<F, E, B | undefined>,
     ): (<K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>) =>
       partialDictTraverse(F)(a => (a !== undefined ? f(a) : F.of<E, B | undefined>(undefined))),
+
+  traverseWithIndex:
+    <F extends URIS2>(F: Applicative2<F>) =>
+    <K extends string, E, A, B>(
+      f: (k: K, a: A) => Kind2<F, E, B | undefined>,
+    ): ((ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>) =>
+      partialDictTraverseWithIndex(F)((k, a) =>
+        a !== undefined ? f(k, a) : F.of<E, B | undefined>(undefined),
+      ),
 }
 
 export function emptyReadonlyMap<K, V>(): ReadonlyMap<K, V> {

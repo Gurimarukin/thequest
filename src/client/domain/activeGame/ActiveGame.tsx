@@ -422,9 +422,13 @@ const Participants: React.FC<ParticipantsProps> = ({
       {springs.map((springStyle, j) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const participant = participants[j]!
+
         return (
           <ActiveGameParticipant
-            key={RiotId.stringify(participant.riotId)}
+            key={pipe(
+              participant.riotId,
+              Maybe.foldW(() => j, RiotId.stringify),
+            )}
             summonerSpellByKey={summonerSpellByKey}
             runeStyleById={runeStyleById}
             runeById={runeById}
@@ -432,7 +436,10 @@ const Participants: React.FC<ParticipantsProps> = ({
             gameMode={gameMode}
             participant={participant}
             shouldWrap={shouldWrap}
-            highlight={RiotId.Eq.equals(participant.riotId, summoner.riotId)}
+            highlight={pipe(
+              participant.riotId,
+              Maybe.exists(id => RiotId.Eq.equals(id, summoner.riotId)),
+            )}
             reverse={reverse}
             index={j}
             isLast={j === springs.length - 1}

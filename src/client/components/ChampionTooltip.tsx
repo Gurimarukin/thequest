@@ -11,26 +11,26 @@ import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
 
 type Props = {
-  tokensEarned: number
-  markRequiredForNextLevel: number
-  championLevel: number
-  championPoints: number
-  championPointsUntilNextLevel: number
+  masteries: ChampionTooltipMasteries | undefined
   name: string
-  percents: number
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
 }
 
+export type ChampionTooltipMasteries = {
+  tokensEarned: number
+  markRequiredForNextLevel: number
+  championLevel: number
+  championPoints: number
+  championPointsSinceLastLevel: number
+  championPointsUntilNextLevel: number
+  percents: number
+}
+
 export const ChampionTooltip: React.FC<Props> = ({
-  championLevel,
-  percents,
-  championPoints,
-  championPointsUntilNextLevel,
+  masteries,
   name,
-  tokensEarned,
-  markRequiredForNextLevel,
   shardsCount,
   positions,
   factions,
@@ -39,16 +39,21 @@ export const ChampionTooltip: React.FC<Props> = ({
 
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 font-semibold shadow-black text-shadow">
-      {t.common.percents(Math.round(percents))}
+      {masteries !== undefined
+        ? t.common.percents(Math.round(masteries.percents))
+        : t.masteries.unknownPercents}
     </span>
   )
 
   const tokenShards = pipe(
     [
-      0 < markRequiredForNextLevel
+      masteries !== undefined && 0 < masteries.markRequiredForNextLevel
         ? Maybe.some(
             <span key="tokens">
-              {t.masteries.nMarksOfMastery(tokensEarned, markRequiredForNextLevel)}
+              {t.masteries.nMarksOfMastery(
+                masteries.tokensEarned,
+                masteries.markRequiredForNextLevel,
+              )}
             </span>,
           )
         : Maybe.none,
@@ -73,18 +78,20 @@ export const ChampionTooltip: React.FC<Props> = ({
         <h3
           className={cx(
             'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black',
-            masteryHistogramGradient(championLevel),
+            masteryHistogramGradient(masteries?.championLevel ?? 0),
           )}
         >
           {name}
         </h3>
       </div>
       <p className="border-b border-tooltip px-2 py-1 text-center">
-        {t.masteries.points(
-          championPoints,
-          championPoints + championPointsUntilNextLevel,
-          'font-semibold',
-        )}
+        {masteries !== undefined
+          ? t.masteries.points(
+              masteries.championPoints,
+              masteries.championPoints + masteries.championPointsUntilNextLevel,
+              'font-semibold',
+            )
+          : t.masteries.unknownPoints('font-semibold')}
       </p>
       <div className="flex grow flex-col items-center justify-center gap-1 px-2 py-1">
         {pipe(

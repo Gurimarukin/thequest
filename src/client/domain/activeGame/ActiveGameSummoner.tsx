@@ -26,7 +26,7 @@ const allLevels = new Set<ChampionLevel>(ChampionLevel.values)
 
 type Props = {
   platform: Platform
-  riotId: RiotId
+  riotId: Maybe<RiotId>
   profileIconId: number
   masteries: Maybe<ActiveGameMasteriesView>
   premadeId: Maybe<number>
@@ -79,26 +79,39 @@ export const ActiveGameSummoner: React.FC<Props> = ({
           ),
         )}
         <div className={cx('flex grow', reverse ? 'justify-start' : 'justify-end')}>
-          <a
-            href={appRoutes.platformRiotId(platform, riotId, {
-              view: 'histogram',
-              level: allLevels,
-            })}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-baseline gap-0.5 whitespace-pre"
-          >
-            <span className="text-lg font-semibold leading-6 text-goldenrod">
-              {GameName.unwrap(riotId.gameName)}
-            </span>
-            <span className="leading-5 text-grey-500">#{TagLine.unwrap(riotId.tagLine)}</span>
-          </a>
+          {pipe(
+            riotId,
+            Maybe.fold(
+              () => <span className="leading-5 text-grey-500">{t.activeGame.streamerMode}</span>,
+              id => (
+                <a
+                  href={appRoutes.platformRiotId(platform, id, {
+                    view: 'histogram',
+                    level: allLevels,
+                  })}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-baseline gap-0.5 whitespace-pre"
+                >
+                  <span className="text-lg font-semibold leading-6 text-goldenrod">
+                    {GameName.unwrap(id.gameName)}
+                  </span>
+                  <span className="leading-5 text-grey-500">#{TagLine.unwrap(id.tagLine)}</span>
+                </a>
+              ),
+            ),
+          )}
         </div>
       </div>
       <div className={cx('flex items-center gap-2', ['flex-row-reverse', !reverse])}>
         <img
           src={assets.summonerIcon(profileIconId)}
-          alt={t.common.summonerIconAlt(RiotId.stringify(riotId))}
+          alt={t.common.summonerIconAlt(
+            pipe(
+              riotId,
+              Maybe.fold(() => t.activeGame.streamerMode, RiotId.stringify),
+            ),
+          )}
           className="w-12"
         />
         <div

@@ -3,16 +3,23 @@ import { pipe } from 'fp-ts/function'
 import type { ActiveGameMasteriesView } from '../../../shared/models/api/activeGame/ActiveGameMasteriesView'
 import type { ActiveGameParticipantView } from '../../../shared/models/api/activeGame/ActiveGameParticipantView'
 import type { PoroTag } from '../../../shared/models/api/activeGame/PoroTag'
+import type { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import type { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import type { RiotId } from '../../../shared/models/riot/RiotId'
-import type { List } from '../../../shared/utils/fp'
+import type { Either, List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { PoroLeagues } from '../league/PoroLeagues'
 import { WinRate } from '../league/WinRate'
 import type { ActiveGameParticipant } from './ActiveGameParticipant'
 
-type PoroActiveGameParticipant = {
+export type PoroActiveGameStreamer = {
+  index: number
+  championId: ChampionKey
+}
+
+type PoroActiveGameParticipantVisible = {
+  index: number
   premadeId: Maybe<number>
   riotId: RiotId
   summonerLevel: number
@@ -31,16 +38,14 @@ export type PoroActiveGameParticipantChampion = {
   assists: number
 }
 
-type ToView = {
-  participant: ActiveGameParticipant
-  masteries: Maybe<ActiveGameMasteriesView>
-  shardsCount: Maybe<number>
-}
-
-const toView =
-  ({ participant, masteries, shardsCount }: ToView) =>
-  (poroParticipant: PoroActiveGameParticipant): ActiveGameParticipantView => ({
-    riotId: poroParticipant.riotId,
+function toView(
+  poroParticipant: PoroActiveGameParticipantVisible,
+  participant: ActiveGameParticipant,
+  masteries: Maybe<ActiveGameMasteriesView>,
+  shardsCount: Maybe<number>,
+): ActiveGameParticipantView {
+  return {
+    riotId: Maybe.some(poroParticipant.riotId),
     profileIconId: participant.profileIconId,
     leagues: Maybe.some(PoroLeagues.toView(poroParticipant.leagues)),
     championId: participant.championId,
@@ -62,8 +67,14 @@ const toView =
     role: poroParticipant.role,
     mainRoles: poroParticipant.mainRoles,
     tags: poroParticipant.tags,
-  })
+  }
+}
 
-const PoroActiveGameParticipant = { toView }
+const PoroActiveGameParticipantVisible = { toView }
 
-export { PoroActiveGameParticipant }
+export { PoroActiveGameParticipantVisible }
+
+export type PoroActiveGameParticipant = Either<
+  PoroActiveGameStreamer,
+  PoroActiveGameParticipantVisible
+>

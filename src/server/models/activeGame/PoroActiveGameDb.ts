@@ -1,16 +1,16 @@
-import { flow, pipe } from 'fp-ts/function'
-import type { Codec } from 'io-ts/Codec'
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
+import * as D from 'io-ts/Decoder'
 
 import { GameId } from '../../../shared/models/api/GameId'
 import { Lang } from '../../../shared/models/api/Lang'
 import { PoroNiceness } from '../../../shared/models/api/activeGame/PoroNiceness'
-import type { TeamId } from '../../../shared/models/api/activeGame/TeamId'
+import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { ChampionPosition } from '../../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import { RiotId } from '../../../shared/models/riot/RiotId'
-import { Dict, List, Maybe, NonEmptyArray, PartialDict } from '../../../shared/utils/fp'
+import { Either, List, Maybe } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 
@@ -34,9 +34,17 @@ const poroLeagueCodec = C.struct({
   ),
 })
 
+type Streamer = C.TypeOf<typeof streamerCodec>
+
+const streamerCodec = C.struct({
+  index: C.number,
+  championId: ChampionKey.codec,
+})
+
 type Participant = C.TypeOf<typeof participantCodec>
 
 const participantCodec = C.struct({
+  index: C.number,
   premadeId: Maybe.codec(C.number),
   riotId: RiotId.fromStringCodec,
   summonerLevel: C.number,
@@ -64,39 +72,24 @@ const participantCodec = C.struct({
   ),
 })
 
-const rawParticipantsCodec = Maybe.codec(NonEmptyArray.codec(participantCodec))
-
-const maybeParticipantsProperties: Dict<`${TeamId}`, typeof rawParticipantsCodec> = {
-  100: rawParticipantsCodec,
-  200: rawParticipantsCodec,
-}
-
-const maybeParticipantsCodec = C.struct(maybeParticipantsProperties)
-
-const participants: Codec<
+const eitherParticipantCodec = C.make<
   unknown,
-  C.OutputOf<typeof maybeParticipantsCodec>,
-  PartialDict<`${TeamId}`, NonEmptyArray<Participant>>
-> = pipe(
-  maybeParticipantsCodec,
-  C.imap(
-    flow(
-      Dict.toReadonlyArray,
-      List.reduce(PartialDict.empty(), (acc, [teamId, ps]) =>
-        pipe(
-          ps,
-          Maybe.fold(
-            () => acc,
-            p => ({ ...acc, [teamId]: p }),
-          ),
-        ),
+  C.OutputOf<typeof streamerCodec> | C.OutputOf<typeof participantCodec>,
+  Either<Streamer, Participant>
+>(
+  pipe(
+    participantCodec,
+    D.map(Either.right),
+    D.alt(() =>
+      pipe(
+        streamerCodec,
+        D.map(s => Either.left<Streamer, Participant>(s)),
       ),
     ),
-    partial => ({
-      100: Maybe.fromNullable(partial[100]),
-      200: Maybe.fromNullable(partial[200]),
-    }),
   ),
+  {
+    encode: Either.foldW(streamerCodec.encode, participantCodec.encode),
+  },
 )
 
 type PoroActiveGameDb = C.TypeOf<typeof codec>
@@ -104,7 +97,7 @@ type PoroActiveGameDb = C.TypeOf<typeof codec>
 const codec = C.struct({
   lang: Lang.codec,
   gameId: GameId.codec,
-  participants,
+  participants: List.codec(eitherParticipantCodec),
   insertedAt: DayJsFromDate.codec,
 })
 

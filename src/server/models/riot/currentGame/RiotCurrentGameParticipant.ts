@@ -22,7 +22,7 @@ const rawPerksDecoder = D.struct({
 type RawCurrentGameParticipant = D.TypeOf<typeof rawDecoder>
 
 const rawDecoder = D.struct({
-  puuid: Puuid.codec,
+  puuid: Maybe.codec(Puuid.codec),
   championId: ChampionKey.codec, // The ID of the champion played by this participant
   perks: Maybe.decoder(rawPerksDecoder), // Perks/Runes Reforged Information
   profileIconId: D.number, // The ID of the profile icon used by this participant

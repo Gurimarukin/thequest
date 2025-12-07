@@ -19,7 +19,7 @@ export type ActiveGameParticipantDb = C.TypeOf<typeof participantCodec>
 type ActiveGameParticipantPbOutput = C.OutputOf<typeof participantCodec>
 
 const participantCodec = C.struct({
-  puuid: Puuid.codec,
+  puuid: Maybe.codec(Puuid.codec),
   profileIconId: C.number,
   championId: ChampionKey.codec,
   spell1Id: SummonerSpellKey.codec,

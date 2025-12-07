@@ -9,8 +9,7 @@ import { iso } from 'newtype-ts'
 import { immutableAssign } from '../../../utils/fp'
 import { NumberFromString, fromNewtype } from '../../../utils/ioTsUtils'
 
-// Champion's number id
-
+/** Champion's number id */
 type ChampionKey = Newtype<{ readonly ChampionKey: unique symbol }, number>
 
 const { wrap, unwrap } = iso<ChampionKey>()
