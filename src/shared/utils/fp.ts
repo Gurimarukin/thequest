@@ -104,11 +104,6 @@ const partialDictTraverse = readonlyRecord.traverse as <F extends URIS2>(
   f: (a: A | undefined) => Kind2<F, E, B | undefined>,
 ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>
 
-// export declare function traverseWithIndex<F extends URIS2>(
-//   F: Applicative2<F>
-// ): <K extends string, E, A, B>(
-//   f: (k: K, a: A) => Kind2<F, E, B>
-// ) => (ta: ReadonlyRecord<K, A>) => Kind2<F, E, ReadonlyRecord<K, B>>
 const partialDictTraverseWithIndex = readonlyRecord.traverseWithIndex as <F extends URIS2>(
   F: Applicative2<F>,
 ) => <K extends string, E, A, B>(
