@@ -12,7 +12,6 @@ import { Lang } from '../../shared/models/api/Lang'
 import { Platform } from '../../shared/models/api/Platform'
 import { PoroNiceness } from '../../shared/models/api/activeGame/PoroNiceness'
 import type { PoroTag } from '../../shared/models/api/activeGame/PoroTag'
-import type { TeamId } from '../../shared/models/api/activeGame/TeamId'
 import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { LeagueRank } from '../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../shared/models/api/league/LeagueTier'
@@ -28,8 +27,6 @@ import {
   List,
   Maybe,
   NonEmptyArray,
-  NotUsed,
-  PartialDict,
   Try,
   Tuple,
   toNotUsed,
@@ -155,19 +152,14 @@ const of = (
         futureMaybe.map(
           (onlyTags): PoroActiveGame => ({
             ...activeGameDefaultLang,
-
             participants: pipe(
               activeGameDefaultLang.participants,
-              PartialDict.mapWithIndex((teamId, participants) =>
-                pipe(
-                  participants,
-                  NonEmptyArray.mapWithIndex(
-                    (i, participant): PoroActiveGameParticipant => ({
-                      ...participant,
-                      tags: onlyTags.participants[teamId]?.[i]?.tags ?? participant.tags,
-                    }),
-                  ),
-                ),
+
+              List.mapWithIndex(
+                (i, participant): PoroActiveGameParticipant => ({
+                  ...participant,
+                  tags: onlyTags.participants[i]?.tags ?? participant.tags,
+                }),
               ),
             ),
           }),
@@ -199,7 +191,7 @@ export { PoroActiveGameService }
 const defaultLang: Lang = 'en_GB'
 
 type PoroActiveGameOnlyTags = {
-  participants: PartialDict<`${TeamId}`, NonEmptyArray<PoroActiveGameParticipantOnlyTags>>
+  participants: List<PoroActiveGameParticipantOnlyTags>
 }
 
 type PoroActiveGameParticipantOnlyTags = Pick<PoroActiveGameParticipant, 'tags'>
@@ -263,54 +255,71 @@ function parsePoroActiveGameBis(domHandler: DomHandler): ValidatedNea<string, Po
       ValidatedNea.chain(decode([NumberFromString.codec, 'NumberFromString'])),
       ValidatedNea.chain(decode([GameId.codec, 'GameId'])),
     ),
-    participants: parseParticipants(domHandler, parseParticipant),
+    participants: pipe(
+      parseParticipants(domHandler, parseParticipant),
+      ValidatedNea.map(List.compact),
+    ),
   })
 
   function parseParticipant(
     i: number,
     participant: HTMLElement,
-  ): ValidatedNea<string, PoroActiveGameParticipant> {
+  ): ValidatedNea<string, Maybe<PoroActiveGameParticipant>> {
     const premadeHistoryTagContainerDiv = '.premadeHistoryTagContainer > div'
     const championBoxLevel = '.championBox .level'
 
     return pipe(
-      seqS<PoroActiveGameParticipant>({
-        premadeId: pipe(
-          participant.querySelector(premadeHistoryTagContainerDiv),
-          Maybe.fromNullable,
-          Maybe.chainNullableK(e => e.textContent),
-          Maybe.fold(
-            () => ValidatedNea.valid(Maybe.none),
-            flow(
-              string.trim,
-              decode([NumberFromString.decoder, 'NumberFromString']),
-              ValidatedNea.map(Maybe.some),
-            ),
+      participant,
+      datasetGet('summonername'),
+      ValidatedNea.chain(summonerName =>
+        pipe(
+          summonerName,
+          decode([RiotId.fromStringCodec, 'RiotId']),
+          ValidatedNea.fold(
+            () =>
+              // streamer mode
+              ValidatedNea.valid(Maybe.none),
+            riotId =>
+              pipe(
+                seqS<PoroActiveGameParticipant>({
+                  premadeId: pipe(
+                    participant.querySelector(premadeHistoryTagContainerDiv),
+                    Maybe.fromNullable,
+                    Maybe.chainNullableK(e => e.textContent),
+                    Maybe.fold(
+                      () => ValidatedNea.valid(Maybe.none),
+                      flow(
+                        string.trim,
+                        decode([NumberFromString.decoder, 'NumberFromString']),
+                        ValidatedNea.map(Maybe.some),
+                      ),
+                    ),
+                    prefixErrors(`${premadeHistoryTagContainerDiv}: `),
+                  ),
+                  riotId: ValidatedNea.valid(riotId),
+                  summonerLevel: pipe(
+                    participant,
+                    domHandler.querySelectorEnsureOneTextContent(championBoxLevel),
+                    ValidatedNea.fromEither,
+                    ValidatedNea.chain(
+                      flow(
+                        decode([NumberFromString.decoder, 'NumberFromString']),
+                        prefixErrors(`${championBoxLevel}:`),
+                      ),
+                    ),
+                  ),
+                  champion: parseChampion(participant),
+                  leagues: parseLeagues(participant),
+                  role: parseRole(participant),
+                  mainRoles: parseRoles(participant),
+                  tags: parseTags(domHandler, participant),
+                }),
+                ValidatedNea.map(Maybe.some),
+              ),
           ),
-          prefixErrors(`${premadeHistoryTagContainerDiv}: `),
         ),
-        riotId: pipe(
-          participant,
-          datasetGet('summonername'),
-          ValidatedNea.chain(decode([RiotId.fromStringCodec, 'RiotId'])),
-        ),
-        summonerLevel: pipe(
-          participant,
-          domHandler.querySelectorEnsureOneTextContent(championBoxLevel),
-          ValidatedNea.fromEither,
-          ValidatedNea.chain(
-            flow(
-              decode([NumberFromString.decoder, 'NumberFromString']),
-              prefixErrors(`${championBoxLevel}:`),
-            ),
-          ),
-        ),
-        champion: parseChampion(participant),
-        leagues: parseLeagues(participant),
-        role: parseRole(participant),
-        mainRoles: parseRoles(participant),
-        tags: parseTags(domHandler, participant),
-      }),
+      ),
+
       prefixErrors(`[${i}] `),
     )
   }
@@ -484,8 +493,15 @@ function parsePoroActiveGameBis(domHandler: DomHandler): ValidatedNea<string, Po
     const titleClass = '.rolesBox > .imgFlex > .txt > .title'
 
     return pipe(
-      participant.querySelector(titleClass)?.firstChild?.textContent?.trim(),
-      ValidatedNea.fromNullable([`Element "${titleClass}" has no textContent`]),
+      participant,
+      DomHandler.querySelectorEnsureOne(titleClass),
+      Either.chain(title =>
+        pipe(
+          title.firstChild?.textContent?.trim(),
+          Either.fromNullable(`Element "${titleClass}" has no textContent`),
+        ),
+      ),
+      ValidatedNea.fromEither,
       ValidatedNea.chain(lane =>
         lane === unknownLane
           ? ValidatedNea.valid(Maybe.none)
@@ -526,46 +542,16 @@ function parsePoroActiveGameBis(domHandler: DomHandler): ValidatedNea<string, Po
 function parseParticipants<A>(
   domHandler: DomHandler,
   parseParticipant: (i: number, participant: HTMLElement) => ValidatedNea<string, A>,
-): ValidatedNea<string, PartialDict<`${TeamId}`, NonEmptyArray<A>>> {
+): ValidatedNea<string, List<A>> {
   const { window } = domHandler
 
-  const cardsListClass = 'div.site-content > ul.cards-list'
+  const cardsClass = 'div.site-content > ul.cards-list > li > div'
 
   return pipe(
     window.document,
-    DomHandler.querySelectorAll(cardsListClass, window.Element),
-    ValidatedNea.chain(([team100, team200, ...remain]) =>
-      apply.sequenceT(validation)(
-        parseTeam(100, team100),
-        parseTeam(200, team200),
-        List.isEmpty(remain)
-          ? ValidatedNea.valid(NotUsed)
-          : ValidatedNea.invalid([`Got more than 2 teams ${cardsListClass}`]),
-      ),
-    ),
-    ValidatedNea.map(
-      ([team100, team200]): Dict<`${TeamId}`, NonEmptyArray<A> | undefined> => ({
-        100: List.isNonEmpty(team100) ? team100 : undefined,
-        200: List.isNonEmpty(team200) ? team200 : undefined,
-      }),
-    ),
+    DomHandler.querySelectorAll(cardsClass, window.HTMLElement),
+    ValidatedNea.chain(List.traverseWithIndex(validation)(parseParticipant)),
   )
-
-  function parseTeam(
-    teamId: TeamId,
-    cardsList: Element | undefined,
-  ): ValidatedNea<string, List<A>> {
-    return pipe(
-      cardsList === undefined
-        ? ValidatedNea.invalid(['Not found'])
-        : pipe(
-            cardsList,
-            DomHandler.querySelectorAll(`:scope > li > div`, window.HTMLElement),
-            ValidatedNea.chain(List.traverseWithIndex(validation)(parseParticipant)),
-          ),
-      prefixErrors(`Team ${teamId} `),
-    )
-  }
 }
 
 function parseTags(

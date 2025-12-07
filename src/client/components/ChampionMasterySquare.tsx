@@ -13,6 +13,7 @@ import { useTranslation } from '../contexts/TranslationContext'
 import { AddOutline, RemoveOutline, SparkSolid, SparklesSharp } from '../imgs/svgs/icons'
 import { masteryBgColor, masterySquareBorderGradientId, masteryTextColor } from '../utils/colors'
 import { cx } from '../utils/cx'
+import type { ChampionTooltipMasteries } from './ChampionTooltip'
 import { ChampionTooltip } from './ChampionTooltip'
 import { CroppedChampionSquare } from './CroppedChampionSquare'
 import { Loading } from './Loading'
@@ -22,14 +23,8 @@ const { round } = NumberUtils
 
 export type ChampionMasterySquareProps = {
   championId: ChampionKey
-  tokensEarned: number
-  markRequiredForNextLevel: number
-  championLevel: number
-  championPoints: number
-  championPointsSinceLastLevel: number
-  championPointsUntilNextLevel: number
+  masteries: Maybe<ChampionTooltipMasteries>
   name: string
-  percents: number
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
@@ -66,14 +61,8 @@ export type SetChampionShards = {
 
 export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   championId,
-  championLevel,
-  championPoints,
-  championPointsSinceLastLevel,
-  championPointsUntilNextLevel,
-  tokensEarned,
-  markRequiredForNextLevel,
+  masteries,
   name,
-  percents,
   shardsCount,
   positions,
   factions,
@@ -103,18 +92,23 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
   const hoverRef = overrideHoverRef ?? hoverRef_
 
   const tokens = pipe(
-    repeatElements(Math.min(tokensEarned, markRequiredForNextLevel), i => (
-      <SparkSolid key={i} className={`-mt-px h-2.5 ${masteryTextColor(championLevel)}`} />
-    )),
-    List.concat(
-      repeatElements(Math.max(markRequiredForNextLevel - tokensEarned, 0), i => (
-        <span
-          key={tokensEarned + i}
-          className="m-0.5 mt-px size-1.5 rounded-1/2 border border-grey-500"
-        />
-      )),
+    masteries,
+    Maybe.chain(m =>
+      pipe(
+        repeatElements(Math.min(m.tokensEarned, m.markRequiredForNextLevel), i => (
+          <SparkSolid key={i} className={`-mt-px h-2.5 ${masteryTextColor(m.championLevel)}`} />
+        )),
+        List.concat(
+          repeatElements(Math.max(m.markRequiredForNextLevel - m.tokensEarned, 0), i => (
+            <span
+              key={m.tokensEarned + i}
+              className="m-0.5 mt-px size-1.5 rounded-1/2 border border-grey-500"
+            />
+          )),
+        ),
+        NonEmptyArray.fromReadonlyArray,
+      ),
     ),
-    NonEmptyArray.fromReadonlyArray,
   )
 
   return (
@@ -128,23 +122,30 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
             ['shadow-even shadow-black', !noShadow],
           )}
         >
-          {0 < championLevel ? (
-            <LevelSVG
-              championLevel={championLevel}
-              {...(isHistogram
-                ? {
-                    // always full for histogram
-                    championPointsUntilNextLevel: 0,
-                    championPointsSinceLastLevel: 1,
-                    stroke: 'currentColor',
-                  }
-                : {
-                    championPointsUntilNextLevel,
-                    championPointsSinceLastLevel,
-                    stroke: `url(#${masterySquareBorderGradientId(championLevel)})`,
-                  })}
-            />
-          ) : null}
+          {pipe(
+            masteries,
+            Maybe.filter(m => 0 < m.championLevel),
+            Maybe.fold(
+              () => null,
+              m => (
+                <LevelSVG
+                  championLevel={m.championLevel}
+                  {...(isHistogram
+                    ? {
+                        // always full for histogram
+                        championPointsUntilNextLevel: 0,
+                        championPointsSinceLastLevel: 1,
+                        stroke: 'currentColor',
+                      }
+                    : {
+                        championPointsUntilNextLevel: m.championPointsUntilNextLevel,
+                        championPointsSinceLastLevel: m.championPointsSinceLastLevel,
+                        stroke: `url(#${masterySquareBorderGradientId(m.championLevel)})`,
+                      })}
+                />
+              ),
+            ),
+          )}
         </div>
 
         {/* champion image */}
@@ -165,10 +166,26 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
               'flex overflow-hidden bg-black pb-0.75 pr-1.25 text-sm font-bold leading-2.5',
               Maybe.isNone(tokens) ? 'rounded-br-lg' : 'rounded-br',
               ['pl-0.5 pt-0.5', centerLevel],
-              masteryTextColor(championLevel),
+              masteryTextColor(
+                pipe(
+                  masteries,
+                  Maybe.fold(
+                    () => 0,
+                    m => m.championLevel,
+                  ),
+                ),
+              ),
             )}
           >
-            <span>{t.number(championLevel)}</span>
+            <span>
+              {pipe(
+                masteries,
+                Maybe.fold(
+                  () => '?',
+                  m => t.number(m.championLevel),
+                ),
+              )}
+            </span>
           </div>
 
           {/* tokens next to champion level */}
@@ -210,13 +227,8 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
         className="!p-0"
       >
         <ChampionTooltip
-          tokensEarned={tokensEarned}
-          markRequiredForNextLevel={markRequiredForNextLevel}
-          championLevel={championLevel}
-          championPoints={championPoints}
-          championPointsUntilNextLevel={championPointsUntilNextLevel}
+          masteries={masteries}
           name={name}
-          percents={percents}
           shardsCount={filteredShardsCount}
           positions={positions}
           factions={factions}

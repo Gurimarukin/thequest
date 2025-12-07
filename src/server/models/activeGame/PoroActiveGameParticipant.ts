@@ -31,16 +31,14 @@ export type PoroActiveGameParticipantChampion = {
   assists: number
 }
 
-type ToView = {
-  participant: ActiveGameParticipant
-  masteries: Maybe<ActiveGameMasteriesView>
-  shardsCount: Maybe<number>
-}
-
-const toView =
-  ({ participant, masteries, shardsCount }: ToView) =>
-  (poroParticipant: PoroActiveGameParticipant): ActiveGameParticipantView => ({
-    riotId: poroParticipant.riotId,
+function toView(
+  poroParticipant: PoroActiveGameParticipant,
+  participant: ActiveGameParticipant,
+  masteries: Maybe<ActiveGameMasteriesView>,
+  shardsCount: Maybe<number>,
+): ActiveGameParticipantView {
+  return {
+    riotId: Maybe.some(poroParticipant.riotId),
     profileIconId: participant.profileIconId,
     leagues: Maybe.some(PoroLeagues.toView(poroParticipant.leagues)),
     championId: participant.championId,
@@ -62,7 +60,8 @@ const toView =
     role: poroParticipant.role,
     mainRoles: poroParticipant.mainRoles,
     tags: poroParticipant.tags,
-  })
+  }
+}
 
 const PoroActiveGameParticipant = { toView }
 

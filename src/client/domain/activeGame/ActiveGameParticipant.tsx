@@ -28,6 +28,7 @@ import { List, Maybe } from '../../../shared/utils/fp'
 
 import type { ChampionMasterySquareProps } from '../../components/ChampionMasterySquare'
 import { ChampionMasterySquare } from '../../components/ChampionMasterySquare'
+import type { ChampionTooltipMasteries } from '../../components/ChampionTooltip'
 import { League } from '../../components/League'
 import { SummonerSpell } from '../../components/SummonerSpell'
 import { MapChangesTooltip } from '../../components/mapChanges/MapChangesTooltip'
@@ -56,17 +57,6 @@ export const gridCols: Dict<`${Reverse}`, React.CSSProperties> = {
 }
 
 type StyleProps = Parameters<AnimatedComponent<'li'>>[0]['style'] // Merge<CSSProperties, TransformProps>;
-
-type SquarePropsRest = Pick<
-  ChampionMasterySquareProps,
-  | 'tokensEarned'
-  | 'markRequiredForNextLevel'
-  | 'championLevel'
-  | 'championPoints'
-  | 'championPointsSinceLastLevel'
-  | 'championPointsUntilNextLevel'
-  | 'percents'
->
 
 type ParticipantProps = {
   summonerSpellByKey: (key: SummonerSpellKey) => Maybe<StaticDataSummonerSpell>
@@ -149,21 +139,26 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
         positions: c.positions,
         factions: c.factions,
         setChampionShards: null,
-        ...pipe(
+        masteries: pipe(
           masteries,
           Maybe.chain(m => m.champion),
-          Maybe.fold<ActiveGameChampionMasteryView, SquarePropsRest>(
-            () => ({
-              chestGranted: false,
-              tokensEarned: 0,
-              markRequiredForNextLevel: 0,
-              championLevel: 0,
-              championPoints: 0,
-              championPointsSinceLastLevel: 0,
-              championPointsUntilNextLevel: 0,
-              percents: 0,
-            }),
-            m => ({ ...m, percents: Business.championPercents(m) }),
+          Maybe.fold<ActiveGameChampionMasteryView, Maybe<ChampionTooltipMasteries>>(
+            () =>
+              pipe(
+                riotId,
+                Maybe.map(
+                  (): ChampionTooltipMasteries => ({
+                    tokensEarned: 0,
+                    markRequiredForNextLevel: 0,
+                    championLevel: 0,
+                    championPoints: 0,
+                    championPointsSinceLastLevel: 0,
+                    championPointsUntilNextLevel: 0,
+                    percents: 0,
+                  }),
+                ),
+              ),
+            m => Maybe.some({ ...m, percents: Business.championPercents(m) }),
           ),
         ),
         tooltipShouldHide,
@@ -337,23 +332,32 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
               </>
             ),
             props => {
-              const hidePoints = props.championLevel < 5
+              const championPoints = pipe(
+                props.masteries,
+                Maybe.chain(m => (m.championLevel < 5 ? Maybe.none : Maybe.some(m.championPoints))),
+              )
 
               return (
                 <>
                   <span className="invisible">h</span>
-                  {hidePoints ? (
-                    <>
-                      <ChampionMasterySquare {...props} />
-                      <span className="invisible">h</span>
-                    </>
-                  ) : (
-                    <div ref={championRef} className="flex flex-col items-center gap-px">
-                      <ChampionMasterySquare tooltipHoverRef={championRef} {...props} />
-                      <span className="font-medium">
-                        {t.common.numberK(round(props.championPoints / 1000, 1))}
-                      </span>
-                    </div>
+                  {pipe(
+                    championPoints,
+                    Maybe.fold(
+                      () => (
+                        <>
+                          <ChampionMasterySquare {...props} />
+                          <span className="invisible">h</span>
+                        </>
+                      ),
+                      points => (
+                        <div ref={championRef} className="flex flex-col items-center gap-px">
+                          <ChampionMasterySquare tooltipHoverRef={championRef} {...props} />
+                          <span className="font-medium">
+                            {t.common.numberK(round(points / 1000, 1))}
+                          </span>
+                        </div>
+                      ),
+                    ),
                   )}
                 </>
               )

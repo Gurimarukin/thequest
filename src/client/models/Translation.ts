@@ -38,6 +38,7 @@ export type Translation = {
     otpIndex: (otpIndex: number, highlightClassName?: string) => React.ReactNode
     mainRoles: React.ReactNode
     currentRole: React.ReactNode
+    streamerMode: string
   }
   mapChanges: {
     category: {
@@ -174,6 +175,8 @@ export type Translation = {
     nShards: (n: number) => React.ReactNode
     nMarksOfMastery: (earned: number, total: number) => React.ReactNode
     points: (points: number, total?: number, highlightClassName?: string) => React.ReactNode
+    unknownPoints: (highlightClassName?: string) => React.ReactNode
+    unknownPercents: React.ReactNode
     pointsSinceLastLevel: (points: number, level: number) => string
     pointsUntilNextLevel: (points: number, level: number) => string
     removeShard: React.ReactNode

@@ -11,26 +11,26 @@ import { ChampionFactionImg } from './ChampionFactionImg'
 import { ChampionPositionImg } from './ChampionPositionImg'
 
 type Props = {
-  tokensEarned: number
-  markRequiredForNextLevel: number
-  championLevel: number
-  championPoints: number
-  championPointsUntilNextLevel: number
+  masteries: Maybe<ChampionTooltipMasteries>
   name: string
-  percents: number
   shardsCount: Maybe<number>
   positions: List<ChampionPosition>
   factions: List<ChampionFaction>
 }
 
+export type ChampionTooltipMasteries = {
+  tokensEarned: number
+  markRequiredForNextLevel: number
+  championLevel: number
+  championPoints: number
+  championPointsSinceLastLevel: number
+  championPointsUntilNextLevel: number
+  percents: number
+}
+
 export const ChampionTooltip: React.FC<Props> = ({
-  championLevel,
-  percents,
-  championPoints,
-  championPointsUntilNextLevel,
+  masteries,
   name,
-  tokensEarned,
-  markRequiredForNextLevel,
   shardsCount,
   positions,
   factions,
@@ -39,26 +39,37 @@ export const ChampionTooltip: React.FC<Props> = ({
 
   const percentsElement = (
     <span className="relative flex items-center py-0.5 pl-1.5 font-semibold shadow-black text-shadow">
-      {t.common.percents(Math.round(percents))}
+      {pipe(
+        masteries,
+        Maybe.fold(
+          () => t.masteries.unknownPercents,
+          m => t.common.percents(Math.round(m.percents)),
+        ),
+      )}
     </span>
   )
 
   const tokenShards = pipe(
-    [
-      0 < markRequiredForNextLevel
-        ? Maybe.some(
-            <span key="tokens">
-              {t.masteries.nMarksOfMastery(tokensEarned, markRequiredForNextLevel)}
-            </span>,
-          )
-        : Maybe.none,
+    masteries,
+    Maybe.chain(m =>
       pipe(
-        shardsCount,
-        Maybe.map(shards => <span key="shards">{t.masteries.nShards(shards)}</span>),
+        [
+          0 < m.markRequiredForNextLevel
+            ? Maybe.some(
+                <span key="tokens">
+                  {t.masteries.nMarksOfMastery(m.tokensEarned, m.markRequiredForNextLevel)}
+                </span>,
+              )
+            : Maybe.none,
+          pipe(
+            shardsCount,
+            Maybe.map(shards => <span key="shards">{t.masteries.nShards(shards)}</span>),
+          ),
+        ],
+        List.compact,
+        NonEmptyArray.fromReadonlyArray,
       ),
-    ],
-    List.compact,
-    NonEmptyArray.fromReadonlyArray,
+    ),
   )
 
   return (
@@ -73,17 +84,32 @@ export const ChampionTooltip: React.FC<Props> = ({
         <h3
           className={cx(
             'grow py-0.5 pl-4 pr-2 text-center font-bold shadow-black',
-            masteryHistogramGradient(championLevel),
+            masteryHistogramGradient(
+              pipe(
+                masteries,
+                Maybe.fold(
+                  () => 0,
+                  m => m.championLevel,
+                ),
+              ),
+            ),
           )}
         >
           {name}
         </h3>
       </div>
       <p className="border-b border-tooltip px-2 py-1 text-center">
-        {t.masteries.points(
-          championPoints,
-          championPoints + championPointsUntilNextLevel,
-          'font-semibold',
+        {pipe(
+          masteries,
+          Maybe.fold(
+            () => t.masteries.unknownPoints('font-semibold'),
+            m =>
+              t.masteries.points(
+                m.championPoints,
+                m.championPoints + m.championPointsUntilNextLevel,
+                'font-semibold',
+              ),
+          ),
         )}
       </p>
       <div className="flex grow flex-col items-center justify-center gap-1 px-2 py-1">

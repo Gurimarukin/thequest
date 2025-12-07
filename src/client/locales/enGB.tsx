@@ -126,6 +126,7 @@ const enGBTranslation: Translation = {
     ),
     mainRoles: 'Main roles:',
     currentRole: 'Current role:',
+    streamerMode: 'Streamer mode',
   },
   mapChanges: {
     category: {
@@ -427,12 +428,19 @@ const enGBTranslation: Translation = {
         <span className={highlightClassName}>{nls(points)}</span>{' '}
         {total !== undefined ? (
           <>
-            / <span className={highlightClassName}>{nls(total)}</span>{' '}
+            / <span className={highlightClassName}>{nls(total)}</span> {pluralUnit('point')(total)}
           </>
-        ) : null}
-        points
+        ) : (
+          pluralUnit('point')(points)
+        )}
       </>
     ),
+    unknownPoints: highlightClassName => (
+      <>
+        <span className={highlightClassName}>???</span> points
+      </>
+    ),
+    unknownPercents: `??%`,
     pointsSinceLastLevel: (points, level) =>
       points < 0
         ? `${plural('point')(Math.abs(points))} until level ${nls(level)}`

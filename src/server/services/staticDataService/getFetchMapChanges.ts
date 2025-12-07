@@ -260,7 +260,7 @@ function preProcessHtml(body: HTMLElement): IO<void> {
 
 const validation = ValidatedNea.getValidation<string>()
 
-function parseGroupHtml(elements: ReadonlyArray<Element>): ValidatedNea<string, WikiMapChanges> {
+function parseGroupHtml(elements: List<Element>): ValidatedNea<string, WikiMapChanges> {
   return pipe(
     elements,
     splitMapArray(e => (e.tagName === 'H2' ? Maybe.some(e) : Maybe.none)),
@@ -285,7 +285,7 @@ function parseGroupHtml(elements: ReadonlyArray<Element>): ValidatedNea<string, 
 }
 
 function parseH3s(
-  elements: ReadonlyArray<Element>,
+  elements: List<Element>,
 ): ValidatedNea<string, PartialDict<SpellName, ChampionSpellHtml>> {
   return pipe(
     elements,
@@ -325,7 +325,7 @@ const parseFirstChildTextContent =
       Either.mapLeft(NonEmptyArray.of),
     )
 
-function parseSpellHtml(elts: ReadonlyArray<Element>): ValidatedNea<string, ChampionSpellHtml> {
+function parseSpellHtml(elts: List<Element>): ValidatedNea<string, ChampionSpellHtml> {
   const [e1, e2, ...tail] = elts
 
   if (e1 === undefined || e2 === undefined) {
@@ -393,7 +393,7 @@ const parseXML =
 
 export const splitMapArray =
   <A, B>(f: (a: A) => Maybe<B>) =>
-  (as: ReadonlyArray<A>): Maybe<ReadonlyArray<Tuple<B, ReadonlyArray<A>>>> => {
+  (as: List<A>): Maybe<List<Tuple<B, List<A>>>> => {
     if (!List.isNonEmpty(as)) return Maybe.some([])
 
     const [head, ...tail] = as
@@ -407,7 +407,7 @@ export const splitMapArray =
     let acc: A[] = []
     /* eslint-enable functional/no-let */
 
-    const res: Tuple<B, ReadonlyArray<A>>[] = []
+    const res: Tuple<B, List<A>>[] = []
 
     /* eslint-disable functional/no-expression-statements, functional/immutable-data*/
     tail.forEach(a => {

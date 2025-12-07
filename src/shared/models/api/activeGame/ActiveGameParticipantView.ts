@@ -16,7 +16,7 @@ type ActiveGameParticipantView = C.TypeOf<typeof codec>
 type ActiveGameParticipantViewOutput = C.OutputOf<typeof codec>
 
 const codec = C.struct({
-  riotId: RiotId.fromStringCodec,
+  riotId: Maybe.codec(RiotId.fromStringCodec),
   profileIconId: C.number,
   leagues: Maybe.codec(SummonerLeaguesView.codec),
   championId: ChampionKey.codec,

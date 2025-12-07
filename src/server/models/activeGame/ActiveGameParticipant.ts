@@ -11,7 +11,7 @@ import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
 type ActiveGameParticipant = {
-  puuid: Puuid
+  puuid: Maybe<Puuid>
   profileIconId: number
   championId: ChampionKey
   spell1Id: SummonerSpellKey
@@ -23,16 +23,14 @@ type ActiveGameParticipant = {
   }>
 }
 
-type ToView = {
-  riotId: RiotId
-  leagues: Maybe<SummonerLeaguesView>
-  masteries: Maybe<ActiveGameMasteriesView>
-  shardsCount: Maybe<number>
-}
-
-const toView =
-  ({ riotId, leagues, masteries, shardsCount }: ToView) =>
-  (participant: ActiveGameParticipant): ActiveGameParticipantView => ({
+function toView(
+  participant: ActiveGameParticipant,
+  riotId: Maybe<RiotId>,
+  leagues: Maybe<SummonerLeaguesView>,
+  masteries: Maybe<ActiveGameMasteriesView>,
+  shardsCount: Maybe<number>,
+): ActiveGameParticipantView {
+  return {
     riotId,
     profileIconId: participant.profileIconId,
     leagues,
@@ -49,7 +47,8 @@ const toView =
     role: Maybe.none,
     mainRoles: [],
     tags: [],
-  })
+  }
+}
 
 const ActiveGameParticipant = { toView }
 
