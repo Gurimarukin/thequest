@@ -191,7 +191,20 @@ const Champion: React.FC<ChampionProps> = ({
 
         <div className={championSquareChangesClassName}>
           <ChampionMasterySquare
-            {...champion}
+            championId={champion.championId}
+            masteries={Maybe.some({
+              tokensEarned: champion.tokensEarned,
+              markRequiredForNextLevel: champion.markRequiredForNextLevel,
+              championLevel: champion.championLevel,
+              championPoints: champion.championPoints,
+              championPointsSinceLastLevel: champion.championPointsSinceLastLevel,
+              championPointsUntilNextLevel: champion.championPointsUntilNextLevel,
+              percents: champion.percents,
+            })}
+            name={champion.name}
+            shardsCount={champion.shardsCount}
+            positions={champion.positions}
+            factions={champion.factions}
             setChampionShards={setChampionShards}
             isHistogram={isHistogram}
             tooltipPlacementRef={containerRef}
