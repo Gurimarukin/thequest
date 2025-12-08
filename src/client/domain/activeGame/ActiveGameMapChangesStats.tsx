@@ -93,7 +93,7 @@ const toElements = (reverse: boolean): ((changes: List<MapChange>) => List<React
           <SpellChangeCompact
             key={change.name}
             name={change.name}
-            spellHtml={change.html.spell}
+            spellImage={change.html.image}
             reverse={reverse}
           />
         )

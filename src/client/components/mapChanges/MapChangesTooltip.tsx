@@ -38,7 +38,7 @@ export const MapChangesTooltip: React.FC<Props> = ({ data }) => {
             return (
               <li key={c.name} className="col-span-3 flex flex-col gap-1 last:mb-1">
                 <div className="flex items-center gap-1">
-                  <span dangerouslySetInnerHTML={{ __html: c.html.spell }} className="wiki" />
+                  <span dangerouslySetInnerHTML={{ __html: c.html.image }} className="wiki" />
 
                   <span>{t.mapChanges.spell(c.name)}</span>
                 </div>

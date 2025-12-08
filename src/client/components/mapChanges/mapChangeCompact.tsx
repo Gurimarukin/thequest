@@ -39,21 +39,21 @@ export const StatChangeCompact: React.FC<StatChangeCompactProps> = ({
 
 type SpellChangeCompactProps = {
   name: SpellName
-  spellHtml: string
+  spellImage: string
   /** @default false */
   reverse?: boolean
 }
 
 export const SpellChangeCompact: React.FC<SpellChangeCompactProps> = ({
   name,
-  spellHtml,
+  spellImage,
   reverse = false,
 }) => {
   const { t } = useTranslation('common')
 
   const elems = pipe(
     [
-      <span key="html" dangerouslySetInnerHTML={{ __html: spellHtml }} className="wiki compact" />,
+      <span key="html" dangerouslySetInnerHTML={{ __html: spellImage }} className="wiki compact" />,
       <span key="name">{t.labels.spell[name]}</span>,
     ],
     reverse ? List.reverse : identity,

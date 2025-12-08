@@ -91,7 +91,7 @@ const toElements = List.map((change: MapChange): React.ReactElement => {
 
     case 'spell':
       return (
-        <SpellChangeCompact key={change.name} name={change.name} spellHtml={change.html.spell} />
+        <SpellChangeCompact key={change.name} name={change.name} spellImage={change.html.image} />
       )
   }
 })

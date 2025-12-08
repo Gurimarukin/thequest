@@ -10,7 +10,7 @@ type ChampionSpellHtml = C.TypeOf<typeof championSpellHtmlCodec>
 type ChampionSpellHtmlOutput = C.OutputOf<typeof championSpellHtmlCodec>
 
 const championSpellHtmlCodec = C.struct({
-  spell: C.string,
+  image: C.string,
   description: C.string,
 })
 
