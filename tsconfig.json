@@ -12,6 +12,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src", "test", "uibook"],
+  "include": ["src", "test", "uibook", "jest.config.ts"],
   "exclude": ["node_modules"]
 }
