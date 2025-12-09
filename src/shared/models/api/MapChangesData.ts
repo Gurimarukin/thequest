@@ -10,16 +10,9 @@ import type { Expect } from '../typeUtils'
 import { Ability } from './Ability'
 import { Skill } from './Skill'
 
-type ChampionSpellHtml = C.TypeOf<typeof championSpellHtmlCodec>
+type MapChangesDataAbilities = ReadonlyMap<Ability, string>
 
-const championSpellHtmlCodec = C.struct({
-  name: Ability.codec,
-  description: C.string,
-})
-
-type MapChangesDataAbilities = ReadonlyMap<Ability, ChampionSpellHtml>
-
-const abilitiesCodec = MapFromArray.codec(idcOrd(Ability.Eq))(Ability.codec, championSpellHtmlCodec)
+const abilitiesCodec = MapFromArray.codec(idcOrd(Ability.Eq))(Ability.codec, C.string)
 
 type MapChangesDataSkill = C.TypeOf<typeof skillCodec>
 
@@ -59,10 +52,4 @@ const empty: MapChangesData = {
 
 const MapChangesData = { codec, empty }
 
-export {
-  ChampionSpellHtml,
-  MapChangesData,
-  MapChangesDataAbilities,
-  MapChangesDataSkill,
-  MapChangesDataSkills,
-}
+export { MapChangesData, MapChangesDataAbilities, MapChangesDataSkill, MapChangesDataSkills }

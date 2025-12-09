@@ -8,7 +8,6 @@ import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { ItemId } from '../../../shared/models/api/ItemId'
 import { Lang } from '../../../shared/models/api/Lang'
 import type {
-  ChampionSpellHtml,
   MapChangesDataSkill,
   MapChangesDataSkills,
 } from '../../../shared/models/api/MapChangesData'
@@ -335,7 +334,8 @@ function skillsMapChanges(
         }),
         Maybe.fold(
           () => ValidatedSoft(Maybe.none, `ability not found: ${ability}`),
-          flow(spellMapChanges(ability, htmlDescription), ValidatedSoft.map(Maybe.some)),
+          ([skill, skillName]) =>
+            ValidatedSoft(Maybe.some(Tuple.of(skill, { skillName, ability, htmlDescription }))),
         ),
       ),
     ),
@@ -350,23 +350,9 @@ type SkillEntry = Tuple<
   {
     skillName: Ability
     ability: Ability
-    html: ChampionSpellHtml
+    htmlDescription: string
   }
 >
-
-function spellMapChanges(
-  ability: Ability,
-  description: string,
-): ([skill, skillName]: Tuple<Skill, Ability>) => ValidatedSoft<SkillEntry, string> {
-  return ([skill, skillName]) => {
-    const html: ChampionSpellHtml = {
-      name: ability,
-      description,
-    }
-
-    return ValidatedSoft(Tuple.of(skill, { skillName, ability, html }))
-  }
-}
 
 const groupSpells: (entries: List<SkillEntry>) => MapChangesDataSkills = flow(
   List.groupBy(Tuple.fst),
@@ -377,7 +363,7 @@ const groupSpells: (entries: List<SkillEntry>) => MapChangesDataSkills = flow(
       abilities: new Map(
         pipe(
           abilities_,
-          List.map(([, { ability, html }]) => Tuple.of(ability, html)),
+          List.map(([, { ability, htmlDescription }]) => Tuple.of(ability, htmlDescription)),
         ),
       ),
     }),
