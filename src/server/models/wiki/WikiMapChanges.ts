@@ -1,10 +1,7 @@
-import type { ChampionSpellHtml } from '../../../shared/models/api/MapChangesData'
-import type { SpellName } from '../../../shared/models/api/SpellName'
-import type { PartialDict } from '../../../shared/utils/fp'
+import type { Ability } from '../../../shared/models/api/Ability'
 
 import type { ChampionEnglishName } from './ChampionEnglishName'
 
-export type WikiMapChanges = ReadonlyMap<
-  ChampionEnglishName,
-  PartialDict<SpellName, ChampionSpellHtml>
->
+export type WikiMapChanges = ReadonlyMap<ChampionEnglishName, WikiMapChangeAbilities>
+
+export type WikiMapChangeAbilities = ReadonlyMap<Ability, string>
