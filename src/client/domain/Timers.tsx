@@ -3,16 +3,14 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
 import { ItemId } from '../../shared/models/api/ItemId'
-import type { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
+import { ChampionPosition } from '../../shared/models/api/champion/ChampionPosition'
 import { RuneId } from '../../shared/models/api/perk/RuneId'
 import { AdditionalStaticData } from '../../shared/models/api/staticData/AdditionalStaticData'
 import type { StaticDataItem } from '../../shared/models/api/staticData/StaticDataItem'
 import type { StaticDataRune } from '../../shared/models/api/staticData/StaticDataRune'
 import type { StaticDataSummonerSpell } from '../../shared/models/api/staticData/StaticDataSummonerSpell'
 import { SummonerSpellKey } from '../../shared/models/api/summonerSpell/SummonerSpellKey'
-import { DictUtils } from '../../shared/utils/DictUtils'
 import { ListUtils } from '../../shared/utils/ListUtils'
-import type { Dict } from '../../shared/utils/fp'
 import { List, Maybe } from '../../shared/utils/fp'
 
 import { AsyncRenderer } from '../components/AsyncRenderer'
@@ -33,15 +31,8 @@ const teleport = SummonerSpellKey(12)
 const ignite = SummonerSpellKey(14)
 const barrier = SummonerSpellKey(21)
 
-const all = new Set([flash, teleport, ignite, barrier, heal, ghost, exhaust, cleanse])
-
-const spellsByPosition: Dict<ChampionPosition, ReadonlySet<SummonerSpellKey>> = {
-  top: all,
-  jun: new Set([...all, smite]),
-  mid: all,
-  bot: all,
-  sup: all,
-}
+const normalSpells = new Set([flash, teleport, ignite, barrier, heal, ghost, exhaust, cleanse])
+const junSpells = new Set([...normalSpells, smite])
 
 export const Timers: React.FC = () => {
   const { lang } = useTranslation()
@@ -95,13 +86,13 @@ const Loaded: React.FC<LoadedProps> = ({ additionalStaticData }) => {
   return (
     <div className="grid min-h-full place-items-center">
       <ul className="flex flex-col gap-5">
-        {DictUtils.entries(spellsByPosition).map(([position, spells]) => (
+        {ChampionPosition.values.map(position => (
           <Position
             key={position}
             runeById={runeById}
             itemById={itemById}
             position={position}
-            spells={spells}
+            spells={position === 'jun' ? junSpells : normalSpells}
             summonerSpellByKey={summonerSpellByKey}
           />
         ))}
