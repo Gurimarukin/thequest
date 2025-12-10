@@ -77,7 +77,7 @@ export const Login: React.FC = () => {
           <MainLayout>
             <div className="flex flex-col items-center gap-12 px-4 py-20">
               <a
-                href={discordApiOAuth2Authorize('login')}
+                href={discordApiOAuth2Authorize}
                 className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
               >
                 {t.form.loginWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}

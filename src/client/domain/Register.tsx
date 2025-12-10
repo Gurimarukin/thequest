@@ -148,7 +148,7 @@ export const Register: React.FC = () => {
               <hr className="w-full max-w-xl border-t border-goldenrod" />
 
               <a
-                href={discordApiOAuth2Authorize('register')}
+                href={discordApiOAuth2Authorize}
                 className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
               >
                 {t.common.form.loginWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}

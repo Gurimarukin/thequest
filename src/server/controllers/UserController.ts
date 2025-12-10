@@ -92,29 +92,6 @@ function UserController(
     M.ichain(() => M.send('')),
   )
 
-  const registerDiscord: EndedMiddleware = EndedMiddleware.withBody(DiscordCodePayload.codec)(
-    ({ code }) =>
-      pipe(
-        exchangeCodeAndGetUsersMe(code),
-        Future.chain(discord =>
-          pipe(
-            userService.createUserDiscord(discord),
-            Future.map(Either.fromOption(() => 'Discord account already used')),
-            futureEither.chainTaskEitherK(user =>
-              userService.signToken({ id: user.id, role: user.role }),
-            ),
-            Future.chainFirstIOEitherK(() =>
-              logger.info(
-                `Discord user created: ${discord.username}#${discord.discriminator} (${discord.id})`,
-              ),
-            ),
-          ),
-        ),
-        M.fromTaskEither,
-        M.ichain(Either.fold(M.sendWithStatus(Status.BadRequest), sendToken)),
-      ),
-  )
-
   const registerPassword: EndedMiddleware = EndedMiddleware.withBody(LoginPasswordPayload.codec)(
     flow(
       Either.right,
@@ -222,7 +199,6 @@ function UserController(
     loginDiscord,
     loginPassword,
     logout,
-    registerDiscord,
     registerPassword,
   }
 

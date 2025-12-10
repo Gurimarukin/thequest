@@ -84,7 +84,6 @@ const userSelfSummonerChampionsShardsCountPost = m(
 const userLoginDiscordPost = m(userLogin.then(lit('discord')), 'post')
 const userLoginPasswordPost = m(userLogin.then(lit('password')), 'post')
 const userLogoutPost = m(user.then(lit('logout')), 'post')
-const userRegisterDiscordPost = m(userRegister.then(lit('discord')), 'post')
 const userRegisterPasswordPost = m(userRegister.then(lit('password')), 'post')
 
 const adminHallOfFameGet = m(adminHallOfFame, 'get')
@@ -143,7 +142,6 @@ export const apiParsers = {
     },
     logout: { post: p(userLogoutPost) },
     register: {
-      discord: { post: p(userRegisterDiscordPost) },
       password: { post: p(userRegisterPasswordPost) },
     },
   },
@@ -209,7 +207,6 @@ export const apiRoutes = {
     },
     logout: { post: r(userLogoutPost, {}) },
     register: {
-      discord: { post: r(userRegisterDiscordPost, {}) },
       password: { post: r(userRegisterPasswordPost, {}) },
     },
   },

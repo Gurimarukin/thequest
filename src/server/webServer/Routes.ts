@@ -71,9 +71,6 @@ export const Routes = (
       rateLimiter(2, MsDuration.minute(1))(userController.loginPassword),
     ),
     m(api.user.logout.post, () => userController.logout),
-    m(api.user.register.discord.post, () =>
-      rateLimiter(2, MsDuration.minute(1))(userController.registerDiscord),
-    ),
     m(api.user.register.password.post, () =>
       rateLimiter(2, MsDuration.minute(1))(userController.registerPassword),
     ),
