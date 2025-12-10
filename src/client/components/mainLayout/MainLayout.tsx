@@ -33,8 +33,8 @@ export const MainLayout: ChildrenFC = ({ children }) => {
   return (
     <div className="flex h-full flex-col">
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
-        <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-6">
+        <div className="relative flex w-full max-w-7xl flex-wrap items-center gap-4">
+          <div className="flex grow basis-0 flex-wrap items-center gap-x-6">
             <Link ref={homeRef} to={appRoutes.index} className="pt-2">
               <img
                 src={Assets.yuumiHome}
@@ -46,7 +46,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             </Link>
             <Tooltip hoverRef={homeRef}>{t.layout.home}</Tooltip>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 py-2">
               <HighlightLink
                 to={appRoutes.aram({})}
                 parser={appParsers.aram}
@@ -110,7 +110,7 @@ export const MainLayout: ChildrenFC = ({ children }) => {
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 self-stretch">
+          <div className="flex grow basis-0 flex-wrap items-center justify-end gap-x-4 self-stretch">
             {pipe(
               user,
               AsyncState.fold(
