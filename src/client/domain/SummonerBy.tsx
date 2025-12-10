@@ -2,8 +2,9 @@
 import { useEffect } from 'react'
 
 import { apiRoutes } from '../../shared/ApiRouter'
+import type { ValidatedSoft } from '../../shared/models/ValidatedSoft'
 import type { Platform } from '../../shared/models/api/Platform'
-import { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
+import type { SummonerActiveGameView } from '../../shared/models/api/activeGame/SummonerActiveGameView'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import { SummonerMasteriesView } from '../../shared/models/api/summoner/SummonerMasteriesView'
 import { Maybe } from '../../shared/utils/fp'
@@ -16,6 +17,7 @@ import { useTranslation } from '../contexts/TranslationContext'
 import { useSWRHttp } from '../hooks/useSWRHttp'
 import { MasteriesQuery } from '../models/masteriesQuery/MasteriesQuery'
 import { appRoutes } from '../router/AppRouter'
+import { activeGameViewCodec, useLogActiveGameErrors } from './activeGame/useActiveGame'
 
 type ByPuuidProps = {
   platform: Platform
@@ -41,12 +43,13 @@ export const SummonerByPuuidGame: React.FC<ByPuuidProps> = ({ platform, puuid })
   return (
     <MainLayout>
       <AsyncRenderer
-        {...useSWRHttp(apiRoutes.summoner.byPuuid(platform)(puuid).activeGame(lang).get, {}, [
-          SummonerActiveGameView.codec,
-          'SummonerActiveGameView',
-        ])}
+        {...useSWRHttp(
+          apiRoutes.summoner.byPuuid(platform)(puuid).activeGame(lang).get,
+          {},
+          activeGameViewCodec,
+        )}
       >
-        {game => <SummonerByGameLoaded platform={platform} game={game} />}
+        {data => <SummonerByGameLoaded platform={platform} data={data} />}
       </AsyncRenderer>
     </MainLayout>
   )
@@ -78,10 +81,14 @@ const SummonerByProfileLoaded: React.FC<ProfileLoadedProps> = ({ platform, maste
 }
 type GameLoadedProps = {
   platform: Platform
-  game: SummonerActiveGameView
+  data: ValidatedSoft<SummonerActiveGameView, string>
 }
 
-const SummonerByGameLoaded: React.FC<GameLoadedProps> = ({ platform, game }) => {
+const SummonerByGameLoaded: React.FC<GameLoadedProps> = ({ platform, data }) => {
+  const game = data.value
+
+  useLogActiveGameErrors(data.errors)
+
   const { modifyHistoryStateRef } = useHistory()
 
   useEffect(() => {

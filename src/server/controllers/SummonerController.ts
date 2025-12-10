@@ -6,6 +6,7 @@ import { Status } from 'hyper-ts'
 
 import { Business } from '../../shared/Business'
 import type { DayJs } from '../../shared/models/DayJs'
+import { ValidatedSoft } from '../../shared/models/ValidatedSoft'
 import type { Lang } from '../../shared/models/api/Lang'
 import { MapId } from '../../shared/models/api/MapId'
 import type { Platform } from '../../shared/models/api/Platform'
@@ -65,6 +66,7 @@ import type { UserService } from '../services/UserService'
 import type { StaticDataService } from '../services/staticDataService/StaticDataService'
 import type { EndedMiddleware } from '../webServer/models/MyMiddleware'
 import { MyMiddleware as M } from '../webServer/models/MyMiddleware'
+import { validateSoftEncoder } from '../webServer/utils/permissions'
 
 const queueTypes = {
   soloDuo: 'RANKED_SOLO_5x5',
@@ -252,15 +254,25 @@ const SummonerController = (
   ): (summoner: Future<Maybe<SummonerWithRiotId>>) => EndedMiddleware {
     return flow(
       Future.map(Either.fromOption(() => 'Summoner not found')),
-      futureEither.chain(summoner =>
+      futureEither.chainTaskEitherK(summoner =>
         pipe(
           activeGame(lang, summoner, maybeUser),
-          Future.map(game => Either.right<never, SummonerActiveGameView>({ summoner, game })),
+          Future.map(
+            Maybe.fold(
+              () => ValidatedSoft<SummonerActiveGameView>({ summoner, game: Maybe.none }),
+              ValidatedSoft.map(
+                (game): SummonerActiveGameView => ({ summoner, game: Maybe.some(game) }),
+              ),
+            ),
+          ),
         ),
       ),
       M.fromTaskEither,
       M.ichain(
-        Either.fold(M.sendWithStatus(Status.NotFound), M.json(SummonerActiveGameView.codec)),
+        Either.fold(
+          M.sendWithStatus(Status.NotFound),
+          M.json(validateSoftEncoder(maybeUser, SummonerActiveGameView.codec)),
+        ),
       ),
     )
   }
@@ -269,7 +281,7 @@ const SummonerController = (
     lang: Lang,
     summoner: SummonerWithRiotId,
     maybeUser: Maybe<TokenContent>,
-  ): Future<Maybe<ActiveGameView>> {
+  ): Future<Maybe<ValidatedSoft<ActiveGameView, string>>> {
     return pipe(
       activeGameService.findBySummoner(summoner.platform, summoner.puuid),
       futureMaybe.chainTaskEitherK(game =>
@@ -277,22 +289,32 @@ const SummonerController = (
           poroActiveGameService.find(lang, game.gameId, summoner.platform, summoner.riotId),
           task.chain(
             Try.fold(
-              e =>
-                pipe(
-                  logger.warn('Error while fetching Poro game (falling back to Riot API only):', e),
+              e => {
+                const msg = 'Error while fetching Poro game (falling back to Riot API only):'
+
+                return pipe(
+                  logger.warn(msg, e),
                   Future.fromIOEither,
                   Future.chain(() => activeGameRiot(summoner.platform, maybeUser, game)),
-                ),
+                  Future.map(g => ValidatedSoft(g, `${msg} ${e.name} ${e.message}`)),
+                )
+              },
               Maybe.fold(
-                () =>
-                  pipe(
-                    logger.warn(
-                      'Poro game not found while Riot API returned one (falling back to Riot API only)',
-                    ),
+                () => {
+                  const msg =
+                    'Poro game not found while Riot API returned one (falling back to Riot API only)'
+
+                  return pipe(
+                    logger.warn(msg),
                     Future.fromIOEither,
                     Future.chain(() => activeGameRiot(summoner.platform, maybeUser, game)),
-                  ),
-                activeGamePoro(summoner.platform, maybeUser, game),
+                    Future.map(g => ValidatedSoft(g, msg)),
+                  )
+                },
+                flow(
+                  activeGamePoro(summoner.platform, maybeUser, game),
+                  Future.map(g => ValidatedSoft(g)),
+                ),
               ),
             ),
           ),

@@ -3,8 +3,6 @@ import type { Functor2 } from 'fp-ts/Functor'
 import { type LazyArg, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
-import type { Encoder } from 'io-ts/Encoder'
-import * as E_ from 'io-ts/Encoder'
 
 import { List, Maybe, immutableAssign } from '../utils/fp'
 
@@ -101,15 +99,7 @@ function decoder<A, E>(
   })
 }
 
-function encoder<O, A, W, E>(
-  valueEncoder: Encoder<O, A>,
-  errorEncoder: Encoder<W, E>,
-): Encoder<ValidatedSoft<O, W>, ValidatedSoft<A, E>> {
-  return E_.struct({
-    value: valueEncoder,
-    errors: E_.readonly(E_.array(errorEncoder)),
-  })
-}
+// don't declare encoder to enforce empty errors if no permission for user
 
 const ValidatedSoft = immutableAssign(of, {
   fromOption,
@@ -122,7 +112,6 @@ const ValidatedSoft = immutableAssign(of, {
   chainFirst,
   Applicative,
   decoder,
-  encoder,
 })
 
 export { ValidatedSoft }

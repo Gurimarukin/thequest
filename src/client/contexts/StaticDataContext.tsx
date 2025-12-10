@@ -45,7 +45,7 @@ export const StaticDataContextProvider: ChildrenFC = ({ children }) => {
       {...useSWRHttp(
         apiRoutes.staticData(lang).get,
         {},
-        [ValidatedSoft.decoder(StaticData.codec, D.string), 'StaticData'],
+        [ValidatedSoft.decoder(StaticData.codec, D.string), 'ValidatedSoft<StaticData, string>'],
         {
           revalidateIfStale: false,
           revalidateOnFocus: false,
@@ -70,7 +70,7 @@ const StaticDataLoaded: React.FC<StaticDataContextProviderLoaderProps> = ({ data
 
   useEffect(() => {
     if (List.isNonEmpty(data.errors)) {
-      console.warn(List.mkString('Static data errors:\n- ', '\n- ', '')(data.errors))
+      console.warn(List.mkString('Static data errors:\n- ', '\n- ', '\n')(data.errors))
 
       showToaster('warn', 'Static data warning')
     }
