@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/function'
 
-import { futureRunUnsafe } from '../../../../src/client/utils/futureRunUnsafe'
+import { Future } from '../../../../src/shared/utils/fp'
 
 import { HttpClient } from '../../../../src/server/helpers/HttpClient'
 import { fetchWikiMapChanges } from '../../../../src/server/services/staticDataService/fetchWikiMapChanges'
@@ -8,5 +8,5 @@ import { fetchWikiMapChanges } from '../../../../src/server/services/staticDataS
 import { Logger } from '../../Logger'
 
 describe('fetchWikiMapChanges', () => {
-  it('should fetch', () => pipe(fetchWikiMapChanges(HttpClient(Logger), 'aram'), futureRunUnsafe))
+  it('should fetch', () => pipe(fetchWikiMapChanges(HttpClient(Logger), 'aram'), Future.runUnsafe))
 })
