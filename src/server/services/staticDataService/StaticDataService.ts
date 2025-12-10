@@ -1,6 +1,7 @@
 import { apply, io, predicate } from 'fp-ts'
 import type { Predicate } from 'fp-ts/Predicate'
 import { flow, pipe } from 'fp-ts/function'
+import type { Merge } from 'type-fest'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { Ability } from '../../../shared/models/api/Ability'
@@ -25,6 +26,7 @@ import { DictUtils } from '../../../shared/utils/DictUtils'
 import { ListUtils } from '../../../shared/utils/ListUtils'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import {
+  Dict,
   Future,
   IO,
   List,
@@ -217,11 +219,13 @@ const StaticDataService = (
         apply.sequenceS(Future.ApplyPar)({
           wikiChampions: fetchCachedWikiChampionsData,
           challenges: fetchWikiChallengesSafe,
-          aramChanges: fetchWikiAramChanges,
-          urfChanges: fetchWikiUrfChanges,
+          mapChanges: apply.sequenceS(Future.ApplyPar)({
+            aram: fetchWikiAramChanges,
+            urf: fetchWikiUrfChanges,
+          }),
         }),
-        Future.map(({ wikiChampions, challenges, aramChanges, urfChanges }) =>
-          enrichChampions(ddragonChampions, wikiChampions, challenges, aramChanges, urfChanges),
+        Future.map(({ wikiChampions, challenges, mapChanges }) =>
+          enrichChampions(ddragonChampions, wikiChampions, challenges, mapChanges),
         ),
         Future.chainFirstIOEitherK(
           flow(
@@ -248,12 +252,14 @@ const StaticDataService = (
 
 export { StaticDataService }
 
+type MapName = 'aram' | 'urf'
+type MapChanges = Dict<MapName, WikiMapChanges>
+
 function enrichChampions(
   ddragonChampions: List<DDragonChampion>,
   wikiChampions: List<WikiChampionData>,
   challenges: List<WikiChallenge>,
-  aramChanges: WikiMapChanges,
-  urfChanges: WikiMapChanges,
+  mapChanges: MapChanges,
 ): ValidatedSoft<List<StaticDataChampion>, string> {
   const wikiChampionByKey = pipe(
     wikiChampions,
@@ -272,11 +278,12 @@ function enrichChampions(
         ValidatedSoft.mapLeft(e => `[${ddragonChampion.key}] ${e}`),
       ),
     ),
+    ValidatedSoft.chainFirst(detectUnmatchedChanges(mapChanges)),
   )
 
   function enrichChampion(
     ddragonChampion: DDragonChampion,
-  ): (wikiChampion: WikiChampionData) => ValidatedSoft<StaticDataChampion, string> {
+  ): (wikiChampion: WikiChampionData) => ValidatedSoft<StaticChampionWithEnglishName, string> {
     return wikiChampion =>
       pipe(
         apply.sequenceS(ValidatedSoft.Applicative)({
@@ -285,11 +292,13 @@ function enrichChampions(
             Maybe.map(List.map(p => WikiChampionPosition.position[p])),
             ValidatedSoft.fromOption(() => [List.empty<ChampionPosition>(), 'empty positons']),
           ),
-          aramSkills: skillsMapChanges('ARAM', aramChanges, wikiChampion),
-          urfSkills: skillsMapChanges('URF', urfChanges, wikiChampion),
+          skills: pipe(
+            mapChanges,
+            Dict.traverseWithIndex(ValidatedSoft.Applicative)(skillsMapChanges(wikiChampion)),
+          ),
         }),
         ValidatedSoft.map(
-          ({ positions, aramSkills, urfSkills }): StaticDataChampion => ({
+          ({ positions, skills }): StaticChampionWithEnglishName => ({
             id: ddragonChampion.id,
             key: ddragonChampion.key,
             name: ddragonChampion.name,
@@ -302,8 +311,9 @@ function enrichChampions(
                   : Maybe.none,
               ),
             ),
-            aram: { stats: wikiChampion.stats.aram, skills: aramSkills },
-            urf: { stats: wikiChampion.stats.urf, skills: urfSkills },
+            aram: { stats: wikiChampion.stats.aram, skills: skills.aram },
+            urf: { stats: wikiChampion.stats.urf, skills: skills.urf },
+            englishName: Maybe.some(wikiChampion.englishName),
           }),
         ),
       )
@@ -311,39 +321,39 @@ function enrichChampions(
 }
 
 function skillsMapChanges(
-  mapName: string,
-  changes: WikiMapChanges,
   wikiChampion: WikiChampionData,
-): ValidatedSoft<Maybe<MapChangesDataSkills>, string> {
-  const abilities = changes.get(wikiChampion.englishName)
+): (map: MapName, changes: WikiMapChanges) => ValidatedSoft<Maybe<MapChangesDataSkills>, string> {
+  return (map, changes) => {
+    const abilities = changes.get(wikiChampion.englishName)
 
-  if (abilities === undefined) {
-    return ValidatedSoft(Maybe.none)
-  }
+    if (abilities === undefined) {
+      return ValidatedSoft(Maybe.none)
+    }
 
-  return pipe(
-    Array.from(abilities.entries()),
-    List.traverse(ValidatedSoft.Applicative)(([ability, description]) =>
-      pipe(
-        Skill.values,
-        List.findFirstMap(skill => {
-          const abilities_ = wikiChampion[`skill_${StringUtils.toLowerCase(skill)}`]
+    return pipe(
+      Array.from(abilities.entries()),
+      List.traverse(ValidatedSoft.Applicative)(([ability, description]) =>
+        pipe(
+          Skill.values,
+          List.findFirstMap(skill => {
+            const abilities_ = wikiChampion[`skill_${StringUtils.toLowerCase(skill)}`]
 
-          return List.elem(Ability.Eq)(ability, abilities_)
-            ? Maybe.some(Tuple.of(skill, abilities_[0]))
-            : Maybe.none
-        }),
-        Maybe.fold(
-          () => ValidatedSoft(Maybe.none, `ability not found: ${ability}`),
-          ([skill, skillName]) =>
-            ValidatedSoft(Maybe.some(Tuple.of(skill, { skillName, ability, description }))),
+            return List.elem(Ability.Eq)(ability, abilities_)
+              ? Maybe.some(Tuple.of(skill, abilities_[0]))
+              : Maybe.none
+          }),
+          Maybe.fold(
+            () => ValidatedSoft(Maybe.none, `ability not found: ${ability}`),
+            ([skill, skillName]) =>
+              ValidatedSoft(Maybe.some(Tuple.of(skill, { skillName, ability, description }))),
+          ),
         ),
       ),
-    ),
-    // eslint-disable-next-line fp-ts/prefer-bimap
-    ValidatedSoft.map(flow(List.compact, groupSpells(wikiChampion.englishName), Maybe.some)),
-    ValidatedSoft.mapLeft(e => `[${mapName}] ${e}`),
-  )
+      // eslint-disable-next-line fp-ts/prefer-bimap
+      ValidatedSoft.map(flow(List.compact, groupSpells(wikiChampion.englishName), Maybe.some)),
+      ValidatedSoft.mapLeft(e => `[${map}] ${e}`),
+    )
+  }
 }
 
 type SkillEntry = Tuple<
@@ -384,7 +394,42 @@ function groupSpells(
   )
 }
 
-function emptyStaticDataChampion(ddragonChampion: DDragonChampion): StaticDataChampion {
+type StaticChampionWithEnglishName = Merge<
+  StaticDataChampion,
+  { englishName: Maybe<ChampionEnglishName> }
+>
+
+function detectUnmatchedChanges(
+  mapChanges: MapChanges,
+): (champions: List<StaticChampionWithEnglishName>) => ValidatedSoft<Dict<MapName, void>, string> {
+  return champions => {
+    const championEnglishNames = pipe(
+      champions,
+      List.filterMap(c => c.englishName),
+    )
+
+    return pipe(
+      mapChanges,
+      Dict.traverseWithIndex(ValidatedSoft.Applicative)((map, changes) => {
+        const diff = pipe(
+          Array.from(changes.keys()),
+          List.difference(ChampionEnglishName.Eq)(championEnglishNames),
+        )
+
+        if (!List.isNonEmpty(diff)) {
+          return ValidatedSoft(undefined)
+        }
+
+        return ValidatedSoft(
+          undefined,
+          `${map} changes, champions not found: ${pipe(diff, NonEmptyArray.map(ChampionEnglishName.unwrap), List.mkString(', '))}`,
+        )
+      }),
+    )
+  }
+}
+
+function emptyStaticDataChampion(ddragonChampion: DDragonChampion): StaticChampionWithEnglishName {
   return {
     id: ddragonChampion.id,
     key: ddragonChampion.key,
@@ -393,12 +438,11 @@ function emptyStaticDataChampion(ddragonChampion: DDragonChampion): StaticDataCh
     factions: [],
     aram: MapChangesData.empty,
     urf: MapChangesData.empty,
+    englishName: Maybe.none,
   }
 }
 
-/**
- * See [`preProcessHtml`](./fetchWikiMapChanges.ts)
- */
+/** See [`preProcessHtml`](./fetchWikiMapChanges.ts) */
 function abilityIconHtml(champion: ChampionEnglishName, ability: Ability): string {
   const renamed = championRename.get(champion) ?? ChampionEnglishName.unwrap(champion)
 
@@ -424,7 +468,6 @@ function skipAbility(name: Ability): string {
 /**
  * Cache for constants.staticDataCacheTtl
  */
-
 function fetchCachedStoredAt<K extends string, A, Args extends List<unknown>>(
   cacheFor: NonEmptyArray<K>,
   fetch: (key: K) => (...args: Args) => Future<A>,

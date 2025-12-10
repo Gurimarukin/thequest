@@ -60,6 +60,24 @@ function ap_<E, A, B>(
   }
 }
 
+const chain =
+  <E, A, B>(f: (a: A) => ValidatedSoft<B, E>) =>
+  (fa: ValidatedSoft<A, E>): ValidatedSoft<B, E> => {
+    const fb = f(fa.value)
+
+    return { value: fb.value, errors: pipe(fa.errors, List.concat(fb.errors)) }
+  }
+
+const chainFirst = <E, A, B>(
+  f: (a: A) => ValidatedSoft<B, E>,
+): ((fa: ValidatedSoft<A, E>) => ValidatedSoft<A, E>) =>
+  chain(a =>
+    pipe(
+      f(a),
+      map(() => a),
+    ),
+  )
+
 const map_: Functor2<URI>['map'] = (fa, f) => pipe(fa, map(f))
 
 const Applicative: Applicative2<URI> = {
@@ -76,6 +94,8 @@ const ValidatedSoft = immutableAssign(of, {
   map,
   mapLeft,
   bimap,
+  chain,
+  chainFirst,
   Applicative,
 })
 

@@ -77,6 +77,7 @@ function parseHtml(res: ParseText): IO<WikiMapChanges> {
 const imageRegexWithSize = /^(.*\.png)\/\d+px(.*\.png).*$/
 const imageRegex = /^(.*\.png).*$/
 
+/** See [`abilityIconHtml`](./StaticDataService.ts) */
 function preProcessHtml(body: HTMLElement): IO<void> {
   return () => {
     /* eslint-disable functional/no-expression-statements */
