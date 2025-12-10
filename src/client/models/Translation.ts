@@ -100,7 +100,7 @@ export type Translation = {
       profile: React.ReactNode
       searchSummoner: string
       register: React.ReactNode
-      yuumiIconAlt: string
+      yuumiHomeAlt: string
     }
     league: {
       label: Dict<keyof SummonerLeaguesView, React.ReactNode>

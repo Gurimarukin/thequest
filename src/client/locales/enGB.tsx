@@ -308,7 +308,7 @@ const enGBTranslation: Translation = {
       profile: 'Profile',
       searchSummoner: 'Search summoner',
       register: 'Register',
-      yuumiIconAlt: 'Home icon (Yuumi)',
+      yuumiHomeAlt: 'Home icon (Yuumi)',
     },
     league: {
       label: {

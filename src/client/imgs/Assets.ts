@@ -66,5 +66,5 @@ export const Assets = {
   runeterra: new URL('./runeterra.png', import.meta.url).toString(),
   spatula: new URL('./spatula.png', import.meta.url).toString(),
   stats,
-  yuumi: new URL('./yuumi.png', import.meta.url).toString(),
+  yuumiHome: new URL('./yuumi-home.png', import.meta.url).toString(),
 }

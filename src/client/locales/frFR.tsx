@@ -310,7 +310,7 @@ const frFRTranslation: Translation = {
       profile: 'Profil',
       searchSummoner: 'Rechercher invocateur',
       register: 'Inscription',
-      yuumiIconAlt: 'Icône accueil (Yuumi)',
+      yuumiHomeAlt: 'Icône accueil (Yuumi)',
     },
     league: {
       label: {

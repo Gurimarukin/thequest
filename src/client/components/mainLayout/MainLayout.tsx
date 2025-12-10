@@ -35,11 +35,13 @@ export const MainLayout: ChildrenFC = ({ children }) => {
       <header className="flex justify-center border-b border-goldenrod bg-gradient-to-br from-zinc-950 to-zinc-900 px-3">
         <div className="relative flex w-full max-w-7xl flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-6">
-            <Link ref={homeRef} to={appRoutes.index} className="py-2">
+            <Link ref={homeRef} to={appRoutes.index} className="pt-2">
               <img
-                src={Assets.yuumi}
-                alt={t.layout.yuumiIconAlt}
-                className="size-12 rounded-sm bg-black text-2xs text-transparent"
+                src={Assets.yuumiHome}
+                alt={t.layout.yuumiHomeAlt}
+                width={224}
+                height={128}
+                className="h-14 w-auto text-2xs text-transparent opacity-90"
               />
             </Link>
             <Tooltip hoverRef={homeRef}>{t.layout.home}</Tooltip>
