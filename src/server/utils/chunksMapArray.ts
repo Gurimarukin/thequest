@@ -4,7 +4,6 @@ import { List, Maybe } from '../../shared/utils/fp'
 /**
  * Chunks the as where `f(a)` is true.
  */
-
 export const chunksMapArray =
   <A>(f: (a: A) => boolean) =>
   (as: List<A>): Maybe<List<Tuple<A, List<A>>>> => {
