@@ -1,3 +1,4 @@
+- spells timers depending on game mode
 - spells to base static data?
 - sodium
 - store full match

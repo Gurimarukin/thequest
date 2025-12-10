@@ -22,10 +22,10 @@ function MapChangeStat(name: WikiStatsBalanceKey, value: number) {
   return { type: 'stat', name, value } as const
 }
 
-export type MapChangeSkill = ReturnType<typeof MapChangeSpell>
+export type MapChangeSkill = ReturnType<typeof MapChangeSkill>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function MapChangeSpell(skill: Skill, changes: MapChangesDataSkill) {
+function MapChangeSkill(skill: Skill, changes: MapChangesDataSkill) {
   return { type: 'skill', skill, changes } as const
 }
 
@@ -56,7 +56,7 @@ export function mapChangesFromData(data: MapChangesData): List<MapChange> {
           List.filterMap(skill =>
             pipe(
               Dict.lookup(skill, skills),
-              Maybe.map(changes => MapChangeSpell(skill, changes)),
+              Maybe.map(changes => MapChangeSkill(skill, changes)),
             ),
           ),
           NonEmptyArray.fromReadonlyArray,
