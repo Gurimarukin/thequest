@@ -1,6 +1,6 @@
 import { DayJs } from '../../shared/models/DayJs'
 import type { WikiStatsBalanceKey } from '../../shared/models/WikiStatsBalance'
-import type { SpellName } from '../../shared/models/api/SpellName'
+import type { Skill } from '../../shared/models/api/Skill'
 import type {
   ChampionFaction,
   ChampionFactionOrNone,
@@ -82,7 +82,7 @@ const rank: Dict<LeagueRank, string> = {
   IV: 'IV',
 }
 
-const spell: Dict<SpellName, string> = {
+const skill: Dict<Skill, string> = {
   I: 'P',
   Q: 'Q',
   W: 'Z',
@@ -149,7 +149,7 @@ const frFRTranslation: Translation = {
         balanced: 'Champions avec aucun équilibrage',
       },
     },
-    spell: s => `(${spell[s]}) :`,
+    skill: s => `(${skill[s]}) :`,
     statIconAlt: name => `Icône stat ${wikiStatsBalance[name]}`,
   },
   common: {
@@ -292,7 +292,7 @@ const frFRTranslation: Translation = {
       },
       leagueTier,
       position,
-      spell,
+      skill,
       wikiStatsBalance,
     },
     layout: {

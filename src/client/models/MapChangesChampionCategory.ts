@@ -20,7 +20,7 @@ const fromData = (data: MapChangesData): MapChangesChampionCategory =>
     }),
     Maybe.getOrElse(() =>
       pipe(
-        data.spells,
+        data.skills,
         Maybe.fold<unknown, MapChangesChampionCategory>(
           () => 'balanced',
           () => 'other',

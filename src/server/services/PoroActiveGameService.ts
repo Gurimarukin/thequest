@@ -62,7 +62,7 @@ const PoroActiveGameService = (
   Logger: LoggerGetter,
   poroActiveGamePersistence: PoroActiveGamePersistence,
   httpClient: HttpClient,
-  getStaticDataChampions: (lang: Lang) => Future<List<StaticDataChampion>>,
+  getStaticDataChampions: (lang: Lang) => Future<List<StaticDataChampion>>, // TODO: not this responsability
   cronJobObservable: TObservable<CronJobEvent>,
 ): IO<PoroActiveGameService> => {
   const logger = Logger('SummonerService')

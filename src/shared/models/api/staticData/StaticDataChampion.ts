@@ -2,7 +2,6 @@ import { ord, string } from 'fp-ts'
 import type { Ord } from 'fp-ts/Ord'
 import { flow, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
-import { lens } from 'monocle-ts'
 
 import { StringUtils } from '../../../utils/StringUtils'
 import { List, Maybe } from '../../../utils/fp'
@@ -35,11 +34,6 @@ const byName: Ord<StaticDataChampion> = pipe(
   ord.contramap((c: StaticDataChampion) => StringUtils.cleanUTF8ToASCII(c.name)),
 )
 
-const Lens = {
-  aramSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('aram'), lens.prop('spells')),
-  urfSpells: pipe(lens.id<StaticDataChampion>(), lens.prop('urf'), lens.prop('spells')),
-}
-
-const StaticDataChampion = { codec, getFaction, Ord: { byName }, Lens }
+const StaticDataChampion = { codec, getFaction, Ord: { byName } }
 
 export { StaticDataChampion }

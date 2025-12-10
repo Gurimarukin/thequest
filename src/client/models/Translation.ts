@@ -1,6 +1,6 @@
 import type { WikiStatsBalanceKey } from '../../shared/models/WikiStatsBalance'
 import type { ChallengeId } from '../../shared/models/api/ChallengeId'
-import type { SpellName } from '../../shared/models/api/SpellName'
+import type { Skill } from '../../shared/models/api/Skill'
 import type { GameQueue } from '../../shared/models/api/activeGame/GameQueue'
 import type {
   ChampionFaction,
@@ -45,7 +45,7 @@ export type Translation = {
       label: Dict<MapChangesChampionCategory, React.ReactNode>
       description: Dict<MapChangesChampionCategory, React.ReactNode>
     }
-    spell: (spell: SpellName) => React.ReactNode
+    skill: (skill: Skill) => React.ReactNode
     statIconAlt: (name: WikiStatsBalanceKey) => string
   }
   common: {
@@ -82,7 +82,7 @@ export type Translation = {
       gameQueue: Dict<`${GameQueue}`, React.ReactNode>
       leagueTier: Dict<LeagueTier, React.ReactNode>
       position: Dict<ChampionPosition, React.ReactNode>
-      spell: Dict<SpellName, React.ReactNode>
+      skill: Dict<Skill, React.ReactNode>
       wikiStatsBalance: Dict<WikiStatsBalanceKey, React.ReactNode>
     }
     layout: {

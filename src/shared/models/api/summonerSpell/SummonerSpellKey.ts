@@ -9,8 +9,7 @@ import { iso } from 'newtype-ts'
 import { immutableAssign } from '../../../utils/fp'
 import { NumberFromString, fromNewtype } from '../../../utils/ioTsUtils'
 
-// Summoner spell's number id
-
+/** Summoner spell's number id */
 type SummonerSpellKey = Newtype<{ readonly SummonerSpellKey: unique symbol }, number>
 
 const { wrap, unwrap } = iso<SummonerSpellKey>()

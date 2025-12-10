@@ -501,17 +501,18 @@ const SummonerController = (
     participant: ActiveGameParticipant,
   ): (riotAccount: RiotAccount) => Future<ParticipanViewWithIndex> {
     return riotAccount => {
+      const riotId = RiotId.trim(riotAccount.riotId)
       const maybePoroParticipant = pipe(
         poroParticipants,
         List.findFirstMap(p =>
-          Either.isRight(p) && RiotId.Eq.equals(p.right.riotId, riotAccount.riotId)
+          Either.isRight(p) && RiotId.Eq.equals(p.right.riotId, riotId)
             ? Maybe.some(p.right)
             : Maybe.none,
         ),
       )
 
       if (!Maybe.isSome(maybePoroParticipant)) {
-        return couldntFindPoroParticipantError(RiotId.stringify(riotAccount.riotId))
+        return couldntFindPoroParticipantError(RiotId.stringify(riotId))
       }
 
       const poroParticipant = maybePoroParticipant.value

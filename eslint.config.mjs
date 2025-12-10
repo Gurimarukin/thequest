@@ -68,6 +68,7 @@ export default tseslint.config(
         'error',
         {
           ignoredTypeNames: [
+            'Ability',
             'AccessToken',
             'ChallengeId',
             'ChampionEnglishName',

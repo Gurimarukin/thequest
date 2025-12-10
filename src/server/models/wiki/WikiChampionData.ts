@@ -4,6 +4,7 @@ import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 
 import { WikiStatsBalance } from '../../../shared/models/WikiStatsBalance'
+import { Ability } from '../../../shared/models/api/Ability'
 import { ChampionKey } from '../../../shared/models/api/champion/ChampionKey'
 import { Dict, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { StrictStruct } from '../../../shared/utils/ioTsUtils'
@@ -140,11 +141,11 @@ const rawProperties = {
   // adaptivetype: AdaptiveType.decoder,
   // be: D.number,
   // rp: D.number,
-  // skill_i: NonEmptyArray.decoder(D.string),
-  // skill_q: NonEmptyArray.decoder(D.string),
-  // skill_w: NonEmptyArray.decoder(D.string),
-  // skill_e: NonEmptyArray.decoder(D.string),
-  // skill_r: NonEmptyArray.decoder(D.string),
+  skill_i: NonEmptyArray.decoder(Ability.codec),
+  skill_q: NonEmptyArray.decoder(Ability.codec),
+  skill_w: NonEmptyArray.decoder(Ability.codec),
+  skill_e: NonEmptyArray.decoder(Ability.codec),
+  skill_r: NonEmptyArray.decoder(Ability.codec),
   // skills: Maybe.decoder(NonEmptyArray.decoder(D.string)),
 }
 

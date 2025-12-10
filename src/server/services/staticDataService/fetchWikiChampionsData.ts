@@ -1,6 +1,5 @@
 import { separated } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import * as luainjs from 'lua-in-js'
 
 import type { LoggerType } from '../../../shared/models/logger/LoggerType'
 import { DictUtils } from '../../../shared/utils/DictUtils'
@@ -12,10 +11,9 @@ import { DomHandler } from '../../helpers/DomHandler'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { RawWikiChampionsData } from '../../models/wiki/RawWikiChampionsData'
 import { RawWikiChampionData, WikiChampionData } from '../../models/wiki/WikiChampionData'
+import { luaInJsParse } from '../../utils/luaInJs'
 
 const championDataUrl = `${constants.lolWikiDomain}/en-us/Module:ChampionData/data`
-
-const mwCodeClassName = '.mw-code'
 
 export const fetchWikiChampionsData = (
   logger: LoggerType,
@@ -26,8 +24,9 @@ export const fetchWikiChampionsData = (
     Future.chainIOEitherK(wikiChampionsDataFromHtml(logger)),
   )
 
-// export for testing purpose
-export const wikiChampionsDataFromHtml =
+const mwCodeClassName = '.mw-code'
+
+const wikiChampionsDataFromHtml =
   (logger: LoggerType) =>
   (html: string): IO<List<WikiChampionData>> =>
     pipe(
@@ -39,14 +38,14 @@ export const wikiChampionsDataFromHtml =
           Either.mapLeft(withUrlError),
         ),
       ),
-      Try.chainNullableK(
-        Error(`[${championDataUrl}] empty text content for selector: ${mwCodeClassName}`),
-      )(mwCode => mwCode.textContent),
-      Try.chain(str => Try.tryCatch(() => luainjs.createEnv().parse(str).exec())),
-      Try.chain(u =>
+      Try.chainNullableK(withUrlError(`empty text content for selector: ${mwCodeClassName}`))(
+        mwCode => mwCode.textContent,
+      ),
+      Try.chain(luaInJsParse),
+      Try.chain(i =>
         pipe(
-          RawWikiChampionsData.decoder.decode(u),
-          Either.mapLeft(decodeError('RawWikiChampionsData')(u)),
+          RawWikiChampionsData.decoder.decode(i),
+          Either.mapLeft(decodeError('RawWikiChampionsData')(i)),
         ),
       ),
       Try.map(
