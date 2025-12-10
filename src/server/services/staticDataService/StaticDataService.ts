@@ -4,6 +4,7 @@ import { flow, pipe } from 'fp-ts/function'
 import type { Merge } from 'type-fest'
 
 import { DayJs } from '../../../shared/models/DayJs'
+import { ValidatedSoft } from '../../../shared/models/ValidatedSoft'
 import { Ability } from '../../../shared/models/api/Ability'
 import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { ItemId } from '../../../shared/models/api/ItemId'
@@ -41,7 +42,6 @@ import type { Config } from '../../config/Config'
 import { constants } from '../../config/constants'
 import type { HttpClient } from '../../helpers/HttpClient'
 import { StoredAt } from '../../models/StoredAt'
-import { ValidatedSoft } from '../../models/ValidatedSoft'
 import type { LoggerGetter } from '../../models/logger/LoggerGetter'
 import type { DDragonChampion } from '../../models/riot/ddragon/DDragonChampion'
 import { ChampionEnglishName } from '../../models/wiki/ChampionEnglishName'
@@ -69,18 +69,29 @@ const StaticDataService = (
 ) => {
   const logger = Logger('StaticDataService')
 
-  const fetchCachedStaticData: (lang: Lang) => (version: DDragonVersion) => Future<StaticData> =
-    fetchCachedStoredAt(
-      Lang.values,
-      lang =>
-        (version: DDragonVersion): Future<StaticData> =>
-          pipe(
-            ddragonService.champions(version, lang),
-            Future.map(d => DictUtils.values(d.data)),
-            Future.chain(staticDataFetch(version)),
+  const fetchCachedStaticData: (
+    lang: Lang,
+  ) => (version: DDragonVersion) => Future<ValidatedSoft<StaticData, string>> = fetchCachedStoredAt(
+    Lang.values,
+    lang =>
+      (version: DDragonVersion): Future<ValidatedSoft<StaticData, string>> =>
+        pipe(
+          ddragonService.champions(version, lang),
+          Future.map(d => DictUtils.values(d.data)),
+          Future.chain(staticDataFetch(version)),
+          Future.chainFirstIOEitherK(
+            flow(
+              ValidatedSoft.errors,
+              NonEmptyArray.fromReadonlyArray,
+              Maybe.fold(
+                () => IO.notUsed,
+                flow(List.mkString('Static data errors:\n- ', '\n- ', ''), logger.warn),
+              ),
+            ),
           ),
-      version => data => DDragonVersion.Eq.equals(data.value.version, version),
-    )
+        ),
+    version => data => DDragonVersion.Eq.equals(data.value.value.version, version),
+  )
 
   const fetchCachedWikiChampionsData: Future<List<WikiChampionData>> = pipe(
     fetchCachedStoredAt([''], () => () => fetchWikiChampionsData(logger, httpClient))('')(),
@@ -132,9 +143,14 @@ const StaticDataService = (
       futureMaybe.getOrElse(() => fetchCachedWikiChampionsData),
     ),
 
-    getLatest: (lang: Lang): Future<StaticData> =>
+    getLatest: (lang: Lang): Future<ValidatedSoft<StaticData, string>> =>
       pipe(
-        config.mock ? mockService.staticData : futureMaybe.none,
+        config.mock
+          ? pipe(
+              mockService.staticData,
+              futureMaybe.map(d => ValidatedSoft(d)),
+            )
+          : futureMaybe.none,
         futureMaybe.getOrElse(() =>
           pipe(ddragonService.latestVersionCached, Future.chain(fetchCachedStaticData(lang))),
         ),
@@ -213,7 +229,7 @@ const StaticDataService = (
 
   function staticDataFetch(
     version: DDragonVersion,
-  ): (ddragonChampions: List<DDragonChampion>) => Future<StaticData> {
+  ): (ddragonChampions: List<DDragonChampion>) => Future<ValidatedSoft<StaticData, string>> {
     return ddragonChampions =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
@@ -227,25 +243,7 @@ const StaticDataService = (
         Future.map(({ wikiChampions, challenges, mapChanges }) =>
           enrichChampions(ddragonChampions, wikiChampions, challenges, mapChanges),
         ),
-        Future.chainFirstIOEitherK(
-          flow(
-            ValidatedSoft.errors,
-            NonEmptyArray.fromReadonlyArray,
-            Maybe.fold(
-              () => IO.notUsed,
-              flow(
-                List.mkString('Errors while enriching champions data:\n- ', '\n- ', ''),
-                logger.warn,
-              ),
-            ),
-          ),
-        ),
-        Future.map(
-          (champions): StaticData => ({
-            version,
-            champions: champions.value,
-          }),
-        ),
+        Future.map(ValidatedSoft.map((champions): StaticData => ({ version, champions }))),
       )
   }
 }

@@ -16,7 +16,7 @@ import type { HallOfFameMemberService } from '../services/HallOfFameMemberServic
 import type { RiotAccountService } from '../services/RiotAccountService'
 import type { SummonerService } from '../services/SummonerService'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
-import { WithPermissions } from '../webServer/utils/WithPermissions'
+import { WithPermissions } from '../webServer/utils/permissions'
 
 const discordUserIdMapTraversable = readonlyMap.getTraversable(idcOrd(DiscordUserId.Eq))
 

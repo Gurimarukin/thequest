@@ -1,8 +1,12 @@
 import type { Applicative2 } from 'fp-ts/Applicative'
 import type { Functor2 } from 'fp-ts/Functor'
 import { type LazyArg, pipe } from 'fp-ts/function'
+import type { Decoder } from 'io-ts/Decoder'
+import * as D from 'io-ts/Decoder'
+import type { Encoder } from 'io-ts/Encoder'
+import * as E_ from 'io-ts/Encoder'
 
-import { List, Maybe, immutableAssign } from '../../shared/utils/fp'
+import { List, Maybe, immutableAssign } from '../utils/fp'
 
 const URI = 'ValidatedSoft'
 
@@ -20,7 +24,7 @@ type ValidatedSoft<A, E> = {
   readonly errors: List<E>
 }
 
-function of<A, E>(value: A, ...errors: List<E>): ValidatedSoft<A, E> {
+function of<A, E = never>(value: A, ...errors: List<E>): ValidatedSoft<A, E> {
   return { value, errors }
 }
 
@@ -87,6 +91,26 @@ const Applicative: Applicative2<URI> = {
   of,
 }
 
+function decoder<A, E>(
+  valueDecoder: Decoder<unknown, A>,
+  errorDecoder: Decoder<unknown, E>,
+): Decoder<unknown, ValidatedSoft<A, E>> {
+  return D.struct({
+    value: valueDecoder,
+    errors: D.array(errorDecoder),
+  })
+}
+
+function encoder<O, A, W, E>(
+  valueEncoder: Encoder<O, A>,
+  errorEncoder: Encoder<W, E>,
+): Encoder<ValidatedSoft<O, W>, ValidatedSoft<A, E>> {
+  return E_.struct({
+    value: valueEncoder,
+    errors: E_.readonly(E_.array(errorEncoder)),
+  })
+}
+
 const ValidatedSoft = immutableAssign(of, {
   fromOption,
   value,
@@ -97,6 +121,8 @@ const ValidatedSoft = immutableAssign(of, {
   chain,
   chainFirst,
   Applicative,
+  decoder,
+  encoder,
 })
 
 export { ValidatedSoft }

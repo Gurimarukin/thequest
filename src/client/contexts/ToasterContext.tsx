@@ -31,7 +31,7 @@ type ToasterContext = {
   showToaster: (type: ToasterType, content: React.ReactNode, options?: ToasterOptions) => ToasterId
 }
 
-type ToasterType = 'success' | 'error'
+type ToasterType = 'success' | 'warn' | 'error'
 type ToasterOptions = {
   onClick?: (self: ToasterId) => void
   onClose?: (self: ToasterId) => void
@@ -142,11 +142,13 @@ export const ToasterContextProvider: ChildrenFC = ({ children }) => {
 
 const container: Dict<ToasterType, string> = {
   success: 'bg-green-toaster',
+  warn: 'bg-orange-toaster',
   error: 'bg-red-toaster',
 }
 
 const border: Dict<ToasterType, string> = {
   success: 'border-green-toaster-bis',
+  warn: 'border-orange-toaster-bis',
   error: 'border-red-toaster-bis',
 }
 

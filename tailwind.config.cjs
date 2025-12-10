@@ -44,6 +44,8 @@ module.exports = {
 
       'green-toaster': 'forestgreen',
       'green-toaster-bis': 'darkgreen',
+      'orange-toaster': colors.orange[500],
+      'orange-toaster-bis': colors.amber[700],
       'red-toaster': '#b51414',
       'red-toaster-bis': 'darkred',
       beige: 'beige',

@@ -21,3 +21,7 @@ export const WithPermissions = {
     },
   },
 }
+
+export const ServerPermissions = {
+  staticDataViewErrors: (role: UserRole): boolean => role === 'admin',
+}

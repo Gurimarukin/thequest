@@ -4,6 +4,7 @@ import { Status } from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
 import { Business } from '../../shared/Business'
+import { ValidatedSoft } from '../../shared/models/ValidatedSoft'
 import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
@@ -51,7 +52,12 @@ const MadosayentisutoController = (
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
   const getStaticData: EndedMiddleware = withIpAndToken(
-    pipe(staticDataService.getLatest(lang), M.fromTaskEither, M.ichain(M.json(StaticData.codec))),
+    pipe(
+      staticDataService.getLatest(lang),
+      Future.map(ValidatedSoft.value),
+      M.fromTaskEither,
+      M.ichain(M.json(StaticData.codec)),
+    ),
   )
 
   const getUsersProgression: EndedMiddleware = withIpAndToken(

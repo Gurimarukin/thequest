@@ -185,7 +185,7 @@ const load = (config: Config): Future<Context> => {
           httpClient,
           flow(
             staticDataService.getLatest,
-            Future.map(d => d.champions),
+            Future.map(d => d.value.champions),
           ),
           cronJobPubSub.observable,
         ),
