@@ -41,7 +41,10 @@ export const MapChangesTooltip: React.FC<Props> = ({ data }) => {
                     ([ability, { icon, description }]) => (
                       <li key={Ability.unwrap(ability)}>
                         <div className="flex items-center gap-1">
-                          <span dangerouslySetInnerHTML={{ __html: icon }} className="wiki large" />
+                          <span
+                            dangerouslySetInnerHTML={{ __html: icon }}
+                            className="wiki large mr-1"
+                          />
 
                           <span>{Ability.unwrap(c.changes.name)}</span>
 
