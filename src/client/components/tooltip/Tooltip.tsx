@@ -75,7 +75,7 @@ export const Tooltip: React.FC<Props> = ({
         { name: 'arrow', options: { element: arrowRef.current } },
         { name: 'offset', options: { offset: [0, 7] } },
         { name: 'preventOverflow', options: { padding: 8 } },
-        // { name: 'flip', options: { padding: 8 } },
+        { name: 'flip', options: { padding: 8 } },
         { name: 'eventListeners', enabled: eventListenersEnabled },
       ],
     }),
