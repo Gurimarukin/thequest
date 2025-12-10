@@ -12,7 +12,7 @@ import {
   splitWhileSmallerThan,
 } from '../../components/mapChanges/helpers'
 import {
-  SpellChangeCompact,
+  SkillChangeCompact,
   StatChangeCompact,
   compactChangeSizes,
 } from '../../components/mapChanges/mapChangeCompact'
@@ -88,12 +88,12 @@ const toElements = (reverse: boolean): ((changes: List<MapChange>) => List<React
           />
         )
 
-      case 'spell':
+      case 'skill':
         return (
-          <SpellChangeCompact
-            key={change.name}
-            name={change.name}
-            spellImage={change.html.image}
+          <SkillChangeCompact
+            key={change.skill}
+            skill={change.skill}
+            changes={change.changes}
             reverse={reverse}
           />
         )

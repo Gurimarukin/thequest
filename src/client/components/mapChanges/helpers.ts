@@ -2,8 +2,8 @@ import type { Separated } from 'fp-ts/Separated'
 import { identity, pipe } from 'fp-ts/function'
 
 import { WikiStatsBalance, type WikiStatsBalanceKey } from '../../../shared/models/WikiStatsBalance'
-import type { ChampionSpellHtml, MapChangesData } from '../../../shared/models/api/MapChangesData'
-import { SpellName } from '../../../shared/models/api/SpellName'
+import type { MapChangesData, MapChangesDataSkill } from '../../../shared/models/api/MapChangesData'
+import { Skill } from '../../../shared/models/api/Skill'
 import { Dict, List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 export type InitialMore<A> = {
@@ -13,7 +13,7 @@ export type InitialMore<A> = {
 
 // ---
 
-export type MapChange = MapChangeStat | MapChangeSpell
+export type MapChange = MapChangeStat | MapChangeSkill
 
 export type MapChangeStat = ReturnType<typeof MapChangeStat>
 
@@ -22,11 +22,11 @@ function MapChangeStat(name: WikiStatsBalanceKey, value: number) {
   return { type: 'stat', name, value } as const
 }
 
-export type MapChangeSpell = ReturnType<typeof MapChangeSpell>
+export type MapChangeSkill = ReturnType<typeof MapChangeSpell>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function MapChangeSpell(name: SpellName, html: ChampionSpellHtml) {
-  return { type: 'spell', name, html } as const
+function MapChangeSpell(skill: Skill, changes: MapChangesDataSkill) {
+  return { type: 'skill', skill, changes } as const
 }
 
 // ---
@@ -49,14 +49,14 @@ export function mapChangesFromData(data: MapChangesData): List<MapChange> {
       ),
     ),
     pipe(
-      data.spells,
-      Maybe.chain(spells =>
+      data.skills,
+      Maybe.chain(skills =>
         pipe(
-          SpellName.values,
-          List.filterMap(name =>
+          Skill.values,
+          List.filterMap(skill =>
             pipe(
-              Dict.lookup(name, spells),
-              Maybe.map(html => MapChangeSpell(name, html)),
+              Dict.lookup(skill, skills),
+              Maybe.map(changes => MapChangeSpell(skill, changes)),
             ),
           ),
           NonEmptyArray.fromReadonlyArray,

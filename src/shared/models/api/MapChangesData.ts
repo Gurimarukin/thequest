@@ -10,14 +10,28 @@ import type { Expect } from '../typeUtils'
 import { Ability } from './Ability'
 import { Skill } from './Skill'
 
-type MapChangesDataAbilities = ReadonlyMap<Ability, string>
+type MapChangesDataAbility = C.TypeOf<typeof mapChangesDataAbilityCodec>
 
-const abilitiesCodec = MapFromArray.codec(idcOrd(Ability.Eq))(Ability.codec, C.string)
+const mapChangesDataAbilityCodec = C.struct({
+  icon: C.string,
+  description: C.string,
+})
+
+type MapChangesDataAbilities = ReadonlyMap<Ability, MapChangesDataAbility>
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type TestAbilities = Expect<IsEqual<MapChangesDataAbilities, C.TypeOf<typeof abilitiesCodec>>>
+
+const abilitiesCodec = MapFromArray.codec(idcOrd(Ability.Eq))(
+  Ability.codec,
+  mapChangesDataAbilityCodec,
+)
 
 type MapChangesDataSkill = C.TypeOf<typeof skillCodec>
 
 const skillCodec = C.struct({
   name: Ability.codec,
+  icon: C.string,
   abilities: abilitiesCodec,
 })
 
@@ -52,4 +66,10 @@ const empty: MapChangesData = {
 
 const MapChangesData = { codec, empty }
 
-export { MapChangesData, MapChangesDataAbilities, MapChangesDataSkill, MapChangesDataSkills }
+export {
+  MapChangesData,
+  MapChangesDataAbilities,
+  MapChangesDataAbility,
+  MapChangesDataSkill,
+  MapChangesDataSkills,
+}

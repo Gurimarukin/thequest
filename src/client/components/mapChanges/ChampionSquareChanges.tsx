@@ -12,7 +12,7 @@ import { Tooltip } from '../tooltip/Tooltip'
 import { MapChangesTooltip } from './MapChangesTooltip'
 import type { InitialMore, MapChange } from './helpers'
 import { mapChangesFromData, splitWhileSmallerThan } from './helpers'
-import { SpellChangeCompact, StatChangeCompact, compactChangeSizes } from './mapChangeCompact'
+import { SkillChangeCompact, StatChangeCompact, compactChangeSizes } from './mapChangeCompact'
 
 type Props = {
   tooltiPlacementRef: React.RefObject<Element>
@@ -89,10 +89,8 @@ const toElements = List.map((change: MapChange): React.ReactElement => {
     case 'stat':
       return <StatChangeCompact key={change.name} name={change.name} value={change.value} />
 
-    case 'spell':
-      return (
-        <SpellChangeCompact key={change.name} name={change.name} spellImage={change.html.image} />
-      )
+    case 'skill':
+      return <SkillChangeCompact key={change.skill} skill={change.skill} changes={change.changes} />
   }
 })
 

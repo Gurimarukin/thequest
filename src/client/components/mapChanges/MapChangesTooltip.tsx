@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 
+import { Ability } from '../../../shared/models/api/Ability'
 import type { MapChangesData } from '../../../shared/models/api/MapChangesData'
 
 import { useTranslation } from '../../contexts/TranslationContext'
@@ -16,7 +17,7 @@ export const MapChangesTooltip: React.FC<Props> = ({ data }) => {
   const changes = useMemo(() => mapChangesFromData(data), [data])
 
   return (
-    <ul className="grid max-w-sm grid-cols-[auto_auto_1fr] items-center gap-y-2 py-1">
+    <ul className="grid max-w-sm grid-cols-[auto_1fr] items-center gap-y-2 py-1">
       {changes.map(c => {
         switch (c.type) {
           case 'stat':
@@ -29,21 +30,29 @@ export const MapChangesTooltip: React.FC<Props> = ({ data }) => {
                 </div>
 
                 <StatChangeValue name={c.name} value={c.value} />
-
-                <span />
               </li>
             )
 
-          case 'spell':
+          case 'skill':
             return (
-              <li key={c.name} className="col-span-3 flex flex-col gap-1 last:mb-1">
-                <div className="flex items-center gap-1">
-                  <span dangerouslySetInnerHTML={{ __html: c.html.image }} className="wiki" />
+              <li key={c.skill} className="col-span-2">
+                <ul className="flex flex-col gap-1">
+                  {Array.from(c.changes.abilities.entries()).map(
+                    ([ability, { icon, description }]) => (
+                      <li key={Ability.unwrap(ability)}>
+                        <div className="flex items-center gap-1">
+                          <span dangerouslySetInnerHTML={{ __html: icon }} className="wiki large" />
 
-                  <span>{t.mapChanges.spell(c.name)}</span>
-                </div>
+                          <span>{Ability.unwrap(c.changes.name)}</span>
 
-                <span dangerouslySetInnerHTML={{ __html: c.html.description }} className="wiki" />
+                          <span>{t.mapChanges.skill(c.skill)}</span>
+                        </div>
+
+                        <span dangerouslySetInnerHTML={{ __html: description }} className="wiki" />
+                      </li>
+                    ),
+                  )}
+                </ul>
               </li>
             )
         }

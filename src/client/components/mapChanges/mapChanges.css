@@ -25,6 +25,14 @@
   padding-left: 0.75rem;
 }
 
+.wiki.compact img {
+  width: 1.25rem;
+}
+
+.wiki.large img {
+  width: 1.75rem;
+}
+
 .wiki .inline-image {
   display: inline-flex;
   align-items: center;

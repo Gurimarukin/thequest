@@ -8,6 +8,7 @@ import { DDragonVersion } from '../../../shared/models/api/DDragonVersion'
 import { ItemId } from '../../../shared/models/api/ItemId'
 import { Lang } from '../../../shared/models/api/Lang'
 import type {
+  MapChangesDataAbility,
   MapChangesDataSkill,
   MapChangesDataSkills,
 } from '../../../shared/models/api/MapChangesData'
@@ -322,7 +323,7 @@ function skillsMapChanges(
 
   return pipe(
     Array.from(abilities.entries()),
-    List.traverse(ValidatedSoft.Applicative)(([ability, htmlDescription]) =>
+    List.traverse(ValidatedSoft.Applicative)(([ability, description]) =>
       pipe(
         Skill.values,
         List.findFirstMap(skill => {
@@ -335,12 +336,12 @@ function skillsMapChanges(
         Maybe.fold(
           () => ValidatedSoft(Maybe.none, `ability not found: ${ability}`),
           ([skill, skillName]) =>
-            ValidatedSoft(Maybe.some(Tuple.of(skill, { skillName, ability, htmlDescription }))),
+            ValidatedSoft(Maybe.some(Tuple.of(skill, { skillName, ability, description }))),
         ),
       ),
     ),
     // eslint-disable-next-line fp-ts/prefer-bimap
-    ValidatedSoft.map(flow(List.compact, groupSpells, Maybe.some)),
+    ValidatedSoft.map(flow(List.compact, groupSpells(wikiChampion.englishName), Maybe.some)),
     ValidatedSoft.mapLeft(e => `[${mapName}] ${e}`),
   )
 }
@@ -350,25 +351,38 @@ type SkillEntry = Tuple<
   {
     skillName: Ability
     ability: Ability
-    htmlDescription: string
+    description: string
   }
 >
 
-const groupSpells: (entries: List<SkillEntry>) => MapChangesDataSkills = flow(
-  List.groupBy(Tuple.fst),
-  PartialDict.map(
-    (abilities_): MapChangesDataSkill => ({
+function groupSpells(
+  champion: ChampionEnglishName,
+): (entries: List<SkillEntry>) => MapChangesDataSkills {
+  return flow(
+    List.groupBy(Tuple.fst),
+    PartialDict.map((abilities_): MapChangesDataSkill => {
       // each element of `abilities` should have the same `.[1].skillName`
-      name: abilities_[0][1].skillName,
-      abilities: new Map(
-        pipe(
-          abilities_,
-          List.map(([, { ability, htmlDescription }]) => Tuple.of(ability, htmlDescription)),
+      const name = abilities_[0][1].skillName
+
+      return {
+        name,
+        icon: abilityIconHtml(champion, name),
+        abilities: new Map(
+          pipe(
+            abilities_,
+            List.map(
+              ([, { ability, description }]): Tuple<Ability, MapChangesDataAbility> =>
+                Tuple.of(ability, {
+                  icon: abilityIconHtml(champion, ability),
+                  description,
+                }),
+            ),
+          ),
         ),
-      ),
+      }
     }),
-  ),
-)
+  )
+}
 
 function emptyStaticDataChampion(ddragonChampion: DDragonChampion): StaticDataChampion {
   return {
@@ -382,24 +396,15 @@ function emptyStaticDataChampion(ddragonChampion: DDragonChampion): StaticDataCh
   }
 }
 
-/*
-<img alt="An icon for Bel'Veth's ability Void Surge" src="/en-us/images/thumb/Bel%27Veth_Void_Surge.png/20px-Bel%27Veth_Void_Surge.png?f2bba" decoding="async" loading="lazy" width="20" height="20" class="mw-file-element" srcset="/en-us/images/thumb/Bel%27Veth_Void_Surge.png/40px-Bel%27Veth_Void_Surge.png?f2bba 2x" data-file-width="64" data-file-height="64">
-
-<img alt="An icon for Nunu's ability Snowball Barrage" src="/en-us/images/thumb/Nunu_Snowball_Barrage.png/20px-Nunu_Snowball_Barrage.png?c0582" decoding="async" loading="lazy" width="20" height="20" class="mw-file-element" srcset="/en-us/images/thumb/Nunu_Snowball_Barrage.png/40px-Nunu_Snowball_Barrage.png?c0582 2x" data-file-width="64" data-file-height="64">
-
-<img src="/en-us/images/Hwei_Subject-_Disaster.png?4674d" decoding="async" loading="lazy" width="64" height="64" class="mw-file-element" data-file-width="64" data-file-height="64">
-*/
-
 /**
  * See [`preProcessHtml`](./fetchWikiMapChanges.ts)
  */
-function spellImageHtml(champion: ChampionEnglishName, ability: Ability): string {
+function abilityIconHtml(champion: ChampionEnglishName, ability: Ability): string {
   const renamed = championRename.get(champion) ?? ChampionEnglishName.unwrap(champion)
 
   const png = `${skipChampion(renamed)}_${skipAbility(ability)}.png`
 
-  return `<img alt="An icon for ${champion}'s ability ${ability}" src="${constants.lolWikiDomain}/en-us/images/thumb/${png}/40px-${png}" decoding="async" loading="lazy" width="20" height="20" />`
-  // class="mw-file-element" srcset="/en-us/images/thumb/Alistar_Unbreakable_Will.png/40px-Alistar_Unbreakable_Will.png?f9bce 2x" data-file-width="64" data-file-height="64"
+  return `<img alt="An icon for ${champion}'s ability ${ability}" src="${constants.lolWikiDomain}/en-us/images/thumb/${png}/40px-${png}" decoding="async" loading="lazy" />`
 }
 
 const championRename: ReadonlyMap<ChampionEnglishName, string> = new Map([
