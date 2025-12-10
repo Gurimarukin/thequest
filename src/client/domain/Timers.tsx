@@ -33,12 +33,14 @@ const teleport = SummonerSpellKey(12)
 const ignite = SummonerSpellKey(14)
 const barrier = SummonerSpellKey(21)
 
+const all = new Set([flash, teleport, ignite, barrier, heal, ghost, exhaust, cleanse])
+
 const spellsByPosition: Dict<ChampionPosition, ReadonlySet<SummonerSpellKey>> = {
-  top: new Set([flash, teleport, ignite, ghost, exhaust]),
-  jun: new Set([flash, smite, ignite, ghost, exhaust, teleport]),
-  mid: new Set([flash, teleport, ignite, barrier, ghost, exhaust, cleanse]),
-  bot: new Set([flash, barrier, cleanse, teleport, heal, exhaust]),
-  sup: new Set([flash, heal, ignite, exhaust]),
+  top: all,
+  jun: new Set([...all, smite]),
+  mid: all,
+  bot: all,
+  sup: all,
 }
 
 export const Timers: React.FC = () => {
