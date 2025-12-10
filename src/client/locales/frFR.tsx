@@ -360,7 +360,6 @@ const frFRTranslation: Translation = {
       password: 'Mot de passe :',
       passwordsShouldBeIdentical: 'Les mots de passe doivent être identiques',
       register: 'S’inscrire',
-      registerWithDiscord: discordLogo => <>S’inscrire avec {discordLogo}</>,
       userName: 'Utilisateur :',
     },
   },
@@ -466,27 +465,9 @@ const frFRTranslation: Translation = {
     accessRecentSearches: recentSearches =>
       `Voir les ${nls(recentSearches)} recherches les plus récentes (stockage local du navigateur)`,
     accessSummonerDetails: 'Accéder à tous les détails d’un invocateur via la recherche',
-    addSummonerToFavorites: 'Ajouter des invocateur en favori',
-    customiseChampionPositions: 'Personnaliser les champions associés à un rôle',
-    discordHallOfFameRanking:
-      'Classement dans le temple de la renommée sur le serveur Discord du capitaine :',
-    discordServer: 'Serveur Discord',
-    discordServerIconAlt: name => `Icône du serveur ${name}`,
-    join: 'Rejoindre',
-    keepTrackOfShards: 'Garder le compte des fragments de champions',
-    quickSummonerAccess: 'Accès rapide au profil d’invocateur lié',
-    registrationExplanation: (
-      <>
-        Avoir un compte lié à un compte Discord, lui-même lié à un compte Riot Games, permet d’avoir
-        accès à plus de fonctionnalités.
-        <br />
-        Comme Riot Games, c’est tout pourri, il n’est pas possible de lier directement un compte
-        Riot Games. Il faut passer par un compte Discord et que celui-ci soit lié à un compte Riot
-        Games.
-      </>
-    ),
-    withAccountLinked: 'Avec un compte lié à Riot Games',
-    withAccountNotLinked: 'Avec un compte NON lié à Riot Games',
+    addSummonerToFavorites: 'Ajouter des invocateurs en favoris',
+    customiseChampionPositions: 'Personnaliser les champions associés à un rôle (à venir)',
+    withAccount: 'Avec compte',
     withoutAccount: 'Sans compte',
   },
   summoner: {

@@ -141,7 +141,6 @@ export type Translation = {
       password: React.ReactNode
       passwordsShouldBeIdentical: string
       register: React.ReactNode
-      registerWithDiscord: (discordLogo: React.ReactNode) => React.ReactNode
       userName: React.ReactNode
     }
   }
@@ -192,15 +191,7 @@ export type Translation = {
     accessSummonerDetails: React.ReactNode
     addSummonerToFavorites: React.ReactNode
     customiseChampionPositions: React.ReactNode
-    discordHallOfFameRanking: React.ReactNode
-    discordServer: React.ReactNode
-    discordServerIconAlt: (name: string) => string
-    join: React.ReactNode
-    keepTrackOfShards: React.ReactNode
-    quickSummonerAccess: React.ReactNode
-    registrationExplanation: React.ReactNode
-    withAccountLinked: React.ReactNode
-    withAccountNotLinked: React.ReactNode
+    withAccount: React.ReactNode
     withoutAccount: React.ReactNode
   }
   summoner: {

@@ -358,7 +358,6 @@ const enGBTranslation: Translation = {
       password: 'Password:',
       passwordsShouldBeIdentical: 'Passwords should be identical',
       register: 'Register',
-      registerWithDiscord: discordLogo => <>Register with {discordLogo}</>,
       userName: 'Username:',
     },
   },
@@ -462,24 +461,8 @@ const enGBTranslation: Translation = {
       `View ${nls(recentSearches)} most recent searches (browser’s local storage)`,
     accessSummonerDetails: 'Search for summoner’s details',
     addSummonerToFavorites: 'Adding favorite summoners',
-    customiseChampionPositions: 'Customize the champions associated with a positon',
-    discordHallOfFameRanking: 'Ranking in the Hall of Fame on the Captain’s Discord server:',
-    discordServer: 'Discord server',
-    discordServerIconAlt: name => `${name} server’s icon`,
-    join: 'Join',
-    keepTrackOfShards: 'Keeping track of champion shards',
-    quickSummonerAccess: 'Quick access to linked summoner profile',
-    registrationExplanation: (
-      <>
-        Having an account linked to a Discord account, itself linked to a Riot Games account, gives
-        you access to more features.
-        <br />
-        Because Riot Games sucks, it’s not possible to link a Riot Games directly. You have to use a
-        Discord account and link it to a Riot Game account.
-      </>
-    ),
-    withAccountLinked: 'With an account linked to Riot Games',
-    withAccountNotLinked: 'With an account NOT linked to Riot Games',
+    customiseChampionPositions: 'Customize the champions associated with a positon (soon)',
+    withAccount: 'With account',
     withoutAccount: 'Without account',
   },
   summoner: {

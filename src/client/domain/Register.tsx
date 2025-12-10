@@ -31,13 +31,6 @@ import { cx } from '../utils/cx'
 import { discordApiOAuth2Authorize } from '../utils/discordApiOAuth2Authorize'
 import { futureRunUnsafe } from '../utils/futureRunUnsafe'
 
-const lesQuaisAbattoirs = {
-  inviteLink: 'https://discord.gg/M4jnkHd',
-  name: 'Les Quais-Abattoirs',
-  image:
-    'https://cdn.discordapp.com/icons/707621148652994642/a_8b2674e8d2831749f540f330df66a63e.gif?size=240',
-}
-
 type State = {
   userName: string
   password: string
@@ -105,14 +98,12 @@ export const Register: React.FC = () => {
         () => (
           <MainLayout>
             <div className="flex flex-col items-center gap-12 px-4 py-20">
-              <p className="leading-8">{t.register.registrationExplanation}</p>
-              <table className="grid grid-cols-[auto_repeat(3,1fr)]">
+              <table className="grid grid-cols-[auto_1fr_1fr]">
                 <thead className="contents">
                   <tr className="contents">
                     <th />
                     <Th>{t.register.withoutAccount}</Th>
-                    <Th>{t.register.withAccountNotLinked}</Th>
-                    <Th>{t.register.withAccountLinked}</Th>
+                    <Th>{t.register.withAccount}</Th>
                   </tr>
                 </thead>
                 <tbody className="contents">
@@ -121,75 +112,31 @@ export const Register: React.FC = () => {
                       {t.register.accessSummonerDetails}
                     </Td>
                     <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
-                    <Td className="justify-center border-t border-goldenrod pt-12">{greenCheck}</Td>
                     <Td className="justify-center border-r border-t border-goldenrod pt-12">
                       {greenCheck}
                     </Td>
                   </tr>
+
                   <tr className="contents">
                     <Td className="border-l border-goldenrod pl-6">
                       {t.register.accessRecentSearches(constants.recentSearchesMaxCount)}
                     </Td>
                     <Td className="justify-center">{greenCheck}</Td>
-                    <Td className="justify-center">{greenCheck}</Td>
                     <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
                   </tr>
+
                   <tr className="contents">
                     <Td className="border-l border-goldenrod pl-6">
                       {t.register.addSummonerToFavorites}
                     </Td>
                     <EmptyTd />
-                    <Td className="justify-center">{greenCheck}</Td>
                     <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
                   </tr>
+
                   <tr className="contents">
-                    <Td className="border-l border-goldenrod pl-6">
-                      {t.register.keepTrackOfShards}
-                    </Td>
-                    <EmptyTd />
-                    <Td className="justify-center">{greenCheck}</Td>
-                    <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
-                  </tr>
-                  <tr className="contents">
-                    <Td className="border-l border-goldenrod pl-6">
+                    <Td className="border-b border-l border-goldenrod pb-12 pl-6">
                       {t.register.customiseChampionPositions}
                     </Td>
-                    <EmptyTd />
-                    <Td className="justify-center">{greenCheck}</Td>
-                    <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
-                  </tr>
-                  <tr className="contents">
-                    <Td className="border-l border-goldenrod pl-6">
-                      {t.register.quickSummonerAccess}
-                    </Td>
-                    <EmptyTd />
-                    <EmptyTd />
-                    <Td className="justify-center border-r border-goldenrod">{greenCheck}</Td>
-                  </tr>
-                  <tr className="contents">
-                    <Td className="flex-col gap-3 border-b border-l border-goldenrod pb-12 pl-6">
-                      <span className="self-start">{t.register.discordHallOfFameRanking}</span>
-                      <div className="flex items-center self-start rounded bg-discord-darkgrey px-6 py-5 text-white">
-                        <img
-                          src={lesQuaisAbattoirs.image}
-                          alt={t.register.discordServerIconAlt(lesQuaisAbattoirs.name)}
-                          className="w-12 rounded-xl"
-                        />
-                        <span className="ml-4 flex flex-col">
-                          <span className="font-bold">{lesQuaisAbattoirs.name}</span>
-                          <span className="text-sm text-zinc-400">{t.register.discordServer}</span>
-                        </span>
-                        <a
-                          href={lesQuaisAbattoirs.inviteLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ml-8 rounded bg-discord-darkgreen px-3 py-2 text-sm font-medium"
-                        >
-                          {t.register.join}
-                        </a>
-                      </div>
-                    </Td>
-                    <EmptyTd className="border-b border-goldenrod pb-12" />
                     <EmptyTd className="border-b border-goldenrod pb-12" />
                     <Td className="justify-center border-b border-r border-goldenrod pb-12">
                       {greenCheck}
@@ -204,7 +151,7 @@ export const Register: React.FC = () => {
                 href={discordApiOAuth2Authorize('register')}
                 className="flex items-center rounded-md bg-discord-blurple px-6 text-white"
               >
-                {t.common.form.registerWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
+                {t.common.form.loginWithDiscord(<DiscordLogoTitle className="my-3 ml-3 h-6" />)}
               </a>
 
               <p>{t.common.form.or}</p>
@@ -213,6 +160,8 @@ export const Register: React.FC = () => {
                 onSubmit={handleSubmit}
                 className="flex flex-col items-center gap-8 border border-goldenrod bg-zinc-900 px-12 py-8"
               >
+                <h3 className="text-lg font-bold">{t.common.layout.register}</h3>
+
                 <div className="grid grid-cols-[auto_auto] gap-x-3">
                   <label className="contents">
                     <span>{t.common.form.userName}</span>

@@ -89,6 +89,8 @@ export const Login: React.FC = () => {
                 onSubmit={handleSubmit}
                 className="flex flex-col items-center gap-8 border border-goldenrod bg-zinc-900 px-12 py-8"
               >
+                <h3 className="text-lg font-bold">{t.layout.login}</h3>
+
                 <div className="grid grid-cols-[auto_auto] gap-x-3">
                   <label className="contents">
                     <span>{t.form.userName}</span>
