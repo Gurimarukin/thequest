@@ -241,6 +241,7 @@ const SummonerViewComponent: React.FC<SummonerViewProps> = ({
         )}
       >
         <Summoner
+          platform={platform}
           summoner={{ ...summoner, ...enrichedSummoner }}
           leagues={leagues}
           masteries={masteries}

@@ -62,9 +62,15 @@ export const Assets = {
   factions,
   globetrotter: new URL('./globetrotter.png', import.meta.url).toString(),
   masteries,
-  poro: new URL('./poro.png', import.meta.url).toString(),
   runeterra: new URL('./runeterra.png', import.meta.url).toString(),
   spatula: new URL('./spatula.png', import.meta.url).toString(),
   stats,
+  thirdParty: {
+    dpmLol: new URL('./third-party/dpm-lol.png', import.meta.url).toString(),
+    leagueOfGraphs: new URL('./third-party/league-of-graphs.png', import.meta.url).toString(),
+    opGg: new URL('./third-party/op-gg.png', import.meta.url).toString(),
+    porofessor: new URL('./third-party/porofessor.png', import.meta.url).toString(),
+    yearInLol: new URL('./third-party/year-in-lol.png', import.meta.url).toString(),
+  },
   yuumiHome: new URL('./yuumi-home.png', import.meta.url).toString(),
 }

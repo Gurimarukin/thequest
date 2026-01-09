@@ -266,7 +266,11 @@ const ActiveGameComponent: React.FC<ActiveGameComponentProps> = ({
 
         <div className="flex items-center gap-0.5">
           <a href={poroLink(lang, platform, summoner.riotId)} target="_blank" rel="noreferrer">
-            <img src={Assets.poro} alt={t.activeGame.poroIconAlt} className="h-5" />
+            <img
+              src={Assets.thirdParty.porofessor}
+              alt={t.activeGame.poroIconAlt}
+              className="h-5"
+            />
           </a>
 
           {isPoroOK ? (

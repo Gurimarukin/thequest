@@ -3,6 +3,7 @@ import { useMemo, useRef } from 'react'
 
 import { DayJs } from '../../../shared/models/DayJs'
 import { MsDuration } from '../../../shared/models/MsDuration'
+import type { Platform } from '../../../shared/models/api/Platform'
 import { ChampionLevel } from '../../../shared/models/api/champion/ChampionLevel'
 import { SummonerLeaguesView } from '../../../shared/models/api/summoner/SummonerLeaguesView'
 import type { SummonerView } from '../../../shared/models/api/summoner/SummonerView'
@@ -11,14 +12,16 @@ import { RiotId } from '../../../shared/models/riot/RiotId'
 import { SummonerName } from '../../../shared/models/riot/SummonerName'
 import { TagLine } from '../../../shared/models/riot/TagLine'
 import { NumberUtils } from '../../../shared/utils/NumberUtils'
-import { type Dict, Maybe } from '../../../shared/utils/fp'
+import type { Dict, Tuple } from '../../../shared/utils/fp'
+import { Maybe } from '../../../shared/utils/fp'
 
 import { League } from '../../components/League'
 import { MasteryImg } from '../../components/MasteryImg'
 import { Tooltip } from '../../components/tooltip/Tooltip'
 import { useStaticData } from '../../contexts/StaticDataContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { InformationCircleOutline } from '../../imgs/svgs/icons'
+import { Assets } from '../../imgs/Assets'
+import { InformationCircleOutline, OpenInNew } from '../../imgs/svgs/icons'
 import type { Translation } from '../../models/Translation'
 import { TranslationUtils } from '../../utils/TranslationUtils'
 import { masteryTextColor } from '../../utils/colors'
@@ -27,6 +30,7 @@ import { cx } from '../../utils/cx'
 const { round } = NumberUtils
 
 type Props = {
+  platform: Platform
   summoner: EnrichedSummonerView
   leagues: SummonerLeaguesView
   masteries: {
@@ -44,6 +48,7 @@ export type EnrichedSummonerView = SummonerView & {
 }
 
 export const Summoner: React.FC<Props> = ({
+  platform,
   summoner: {
     riotId,
     name: maybeName,
@@ -169,8 +174,61 @@ export const Summoner: React.FC<Props> = ({
           </Tooltip>
         </span>
       </div>
+
+      <div className="grid justify-items-end gap-1.5 self-start">
+        {Object.entries(otherThirdPartySites).map(([key, [icon, href]]) => (
+          <div
+            key={key}
+            className="grid grid-cols-[auto,auto] items-center gap-1 self-center text-sm"
+          >
+            <a
+              href={href(platform, riotId)}
+              target="_blank"
+              rel="noreferrer"
+              className="peer border-b border-b-wheat/50 leading-none transition-all duration-100 hover:border-b-goldenrod"
+            >
+              {key}
+            </a>
+
+            <img
+              src={icon}
+              className="size-3.5 transition-[visibility,opacity] duration-100 area-[1/2] peer-hover:invisible peer-hover:opacity-0"
+            />
+
+            <OpenInNew className="invisible size-3.5 opacity-0 transition-[visibility,opacity] duration-100 area-[1/2] peer-hover:visible peer-hover:opacity-100" />
+          </div>
+        ))}
+      </div>
     </div>
   )
+}
+
+// TODO: platform
+const otherThirdPartySites: Dict<
+  string,
+  Tuple</* icon: */ string, (platform: Platform, riotId: RiotId) => string>
+> = {
+  'op.gg': [
+    Assets.thirdParty.opGg,
+    (platform, riotId) => `https://op.gg/lol/summoners/${pr(platform, riotId)}`,
+  ],
+  LeagueOfGraphs: [
+    Assets.thirdParty.leagueOfGraphs,
+    (platform, riotId) => `https://www.leagueofgraphs.com/summoner/${pr(platform, riotId)}`,
+  ],
+  'DPM.LOL': [Assets.thirdParty.dpmLol, (_, riotId) => `https://dpm.lol/${r(riotId)}`],
+  'YearIn.LoL': [
+    Assets.thirdParty.yearInLol,
+    (_, riotId) => `https://yearin.lol/profile/${r(riotId)}`,
+  ],
+}
+
+function pr(platform: Platform, riotId: RiotId): string {
+  return `${platform.toLowerCase()}/${r(riotId)}`
+}
+
+function r(riotId: RiotId): string {
+  return `${riotId.gameName}-${riotId.tagLine}`
 }
 
 type MasteryImgWithCountProps = {
