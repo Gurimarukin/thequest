@@ -461,7 +461,17 @@ const enGBTranslation: Translation = {
       `View ${nls(recentSearches)} most recent searches (browser’s local storage)`,
     accessSummonerDetails: 'Search for summoner’s details',
     addSummonerToFavorites: 'Adding favorite summoners',
-    customiseChampionPositions: 'Customize the champions associated with a positon (soon)',
+    customiseChampionPositions: 'Customize the champions associated with a positon (one day)',
+    discordHallOfFameRanking: (
+      <>
+        Ranking in the Hall of Fame on the Captain’s Discord server
+        <br />
+        <i>(Ask to be added)</i>:
+      </>
+    ),
+    discordServer: 'Discord server',
+    discordServerIconAlt: name => `${name} server’s icon`,
+    join: 'Join',
     withAccount: 'With account',
     withoutAccount: 'Without account',
   },

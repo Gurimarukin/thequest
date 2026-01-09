@@ -59,6 +59,9 @@ module.exports = {
       'poro-blue': '#25acd6', // #2796bc
 
       'discord-blurple': '#5865f2',
+      'discord-darkgreen': '#248045',
+      'discord-darkgrey': '#2b2d31',
+      'discord-green': '#57f287',
     },
     borderRadius: {
       none: '0px',

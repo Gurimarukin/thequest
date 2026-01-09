@@ -191,6 +191,10 @@ export type Translation = {
     accessSummonerDetails: React.ReactNode
     addSummonerToFavorites: React.ReactNode
     customiseChampionPositions: React.ReactNode
+    discordHallOfFameRanking: React.ReactNode
+    discordServer: React.ReactNode
+    discordServerIconAlt: (name: string) => string
+    join: React.ReactNode
     withAccount: React.ReactNode
     withoutAccount: React.ReactNode
   }

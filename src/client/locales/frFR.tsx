@@ -466,7 +466,17 @@ const frFRTranslation: Translation = {
       `Voir les ${nls(recentSearches)} recherches les plus récentes (stockage local du navigateur)`,
     accessSummonerDetails: 'Accéder à tous les détails d’un invocateur via la recherche',
     addSummonerToFavorites: 'Ajouter des invocateurs en favoris',
-    customiseChampionPositions: 'Personnaliser les champions associés à un rôle (à venir)',
+    customiseChampionPositions: 'Personnaliser les champions associés à un rôle (un jour)',
+    discordHallOfFameRanking: (
+      <>
+        Classement dans le temple de la renommée sur le serveur Discord du capitaine
+        <br />
+        <i>(demander à être ajouté)</i> :
+      </>
+    ),
+    discordServer: 'Serveur Discord',
+    discordServerIconAlt: name => `Icône du serveur ${name}`,
+    join: 'Rejoindre',
     withAccount: 'Avec compte',
     withoutAccount: 'Sans compte',
   },
