@@ -96,7 +96,12 @@ export const ChampionMasterySquare: React.FC<ChampionMasterySquareProps> = ({
     Maybe.chain(m =>
       pipe(
         repeatElements(Math.min(m.tokensEarned, m.markRequiredForNextLevel), i => (
-          <SparkSolid key={i} className={`-mt-px h-2.5 ${masteryTextColor(m.championLevel)}`} />
+          <SparkSolid
+            key={i}
+            className={cx('-mt-px h-2.5', masteryTextColor(m.championLevel), {
+              'rotate-45': m.tokensEarned > m.markRequiredForNextLevel,
+            })}
+          />
         )),
         List.concat(
           repeatElements(Math.max(m.markRequiredForNextLevel - m.tokensEarned, 0), i => (
