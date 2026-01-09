@@ -168,6 +168,7 @@ const frFRTranslation: Translation = {
         {DayJs.Duration.formatSeconds(cooldownSeconds)}
       </>
     ),
+    totalHaste: haste => `Total : ${nls(haste)}`,
     emptyChampionIconAlt: 'Icône de champion vide',
     error: 'erreur',
     errors: {

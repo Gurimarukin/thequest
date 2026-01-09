@@ -123,10 +123,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
   const championRef = useRef<HTMLDivElement>(null)
   const championWinRateRef = useRef<HTMLDivElement>(null)
   const mapChangesRef = useRef<HTMLDivElement>(null)
+  const totalHasteRef = useRef<HTMLDivElement>(null)
 
   const spells = [spell1Id, spell2Id].map(id => Tuple.of(id, summonerSpellByKey(id)))
 
-  const [totalHaste, setTotalHaste] = useState(0)
+  const [totalHaste, setTotalHaste] = useState(
+    foldGameMode(gameMode, { onAram: 70, onUrf: 300, default: 0 }),
+  )
   const onToggleHaste = useCallback((addHaste: number) => setTotalHaste(h => h + addHaste), [])
 
   const hasInspirationPath = pipe(
@@ -389,18 +392,13 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       </Cell>
       {pipe(
         champion,
-        Maybe.chain(c => {
-          switch (gameMode) {
-            case 'ARAM':
-              return Maybe.some(c.aram)
-
-            case 'URF':
-              return Maybe.some(c.urf)
-
-            default:
-              return Maybe.none
-          }
-        }),
+        Maybe.chain(c =>
+          foldGameMode(gameMode, {
+            onAram: Maybe.some(c.aram),
+            onUrf: Maybe.some(c.urf),
+            default: Maybe.none,
+          }),
+        ),
         Maybe.fold(
           () => null,
           data => (
@@ -416,38 +414,48 @@ export const ActiveGameParticipant: React.FC<ParticipantProps> = ({
       <Cell
         type={animated.div}
         gridColStart={7}
-        className={cx('flex flex-col justify-center gap-2', padding)}
+        className={cx('flex flex-col justify-center', padding)}
       >
-        <ul className="flex gap-2">
-          {spells.map(([id, spell]) => (
-            <li key={SummonerSpellKey.unwrap(id)} className="size-7">
-              {pipe(
-                spell,
-                Maybe.fold(
-                  () => <Empty className="size-full">{t.common.spellKey(id)}</Empty>,
-                  s => (
-                    <SummonerSpell
-                      spell={s}
-                      haste={totalHaste}
-                      tooltipShouldHide={tooltipShouldHide}
-                      className="size-full"
-                    />
+        <div ref={totalHasteRef} className="flex flex-col gap-2">
+          <ul className="flex gap-2">
+            {spells.map(([id, spell]) => (
+              <li key={SummonerSpellKey.unwrap(id)} className="size-7">
+                {pipe(
+                  spell,
+                  Maybe.fold(
+                    () => <Empty className="size-full">{t.common.spellKey(id)}</Empty>,
+                    s => (
+                      <SummonerSpell
+                        spell={s}
+                        haste={totalHaste}
+                        tooltipShouldHide={tooltipShouldHide}
+                        className="size-full"
+                      />
+                    ),
                   ),
-                ),
-              )}
-            </li>
-          ))}
-        </ul>
+                )}
+              </li>
+            ))}
+          </ul>
 
-        <HasteBonuses
-          runeById={filteredRuneById}
-          itemById={itemById}
-          onToggle={onToggleHaste}
-          cosmicInsightDefaultChecked={true}
-          cosmicInsightDisabled={hasCosmicInsight}
-          size="small"
-          className={cx('justify-center', reverse ? 'flex-row-reverse' : undefined)}
-        />
+          <HasteBonuses
+            runeById={filteredRuneById}
+            itemById={itemById}
+            onToggle={onToggleHaste}
+            cosmicInsightDefaultChecked={true}
+            cosmicInsightDisabled={hasCosmicInsight}
+            canBuyCrimsonLucidity={pipe(
+              role,
+              Maybe.exists(r => r === 'mid'),
+            )}
+            size="small"
+            className={cx('justify-center', reverse ? 'flex-row-reverse' : undefined)}
+          />
+        </div>
+
+        <Tooltip hoverRef={totalHasteRef} placement="top">
+          {t.common.totalHaste(totalHaste)}
+        </Tooltip>
       </Cell>
       {pipe(
         maybePerks,
@@ -586,3 +594,25 @@ type EmptyProps = {
 const Empty: React.FC<EmptyProps> = ({ className, children }) => (
   <div className={cx('bg-black text-2xs', className)}>{children}</div>
 )
+
+type FoldGameMode<A> = {
+  onAram: A
+  onUrf: A
+  default: A
+}
+
+function foldGameMode<A>(
+  gameMode: string,
+  { onAram, onUrf, default: default_ }: FoldGameMode<A>,
+): A {
+  switch (gameMode) {
+    case 'ARAM':
+      return onAram
+
+    case 'URF':
+      return onUrf
+
+    default:
+      return default_
+  }
+}

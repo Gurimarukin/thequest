@@ -1,10 +1,10 @@
-- spells timers depending on game mode
 - spells to base static data?
 - sodium
 - store full match
 - render newtypes
 - bug: hide tooltip on route change
 - depcruiser: forbid components to contexts
+- unleashed teleport timer? bonus teleport timer (top)?
 
 - are `fromIO`s useful (simply use `myIo()`)?
 - try fancy league icons?

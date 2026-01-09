@@ -122,7 +122,13 @@ const Position: React.FC<PositionProps> = ({
 
   return (
     <li className="flex items-center gap-5">
-      <HasteBonuses runeById={runeById} itemById={itemById} onToggle={onToggleHaste} />
+      <HasteBonuses
+        runeById={runeById}
+        itemById={itemById}
+        totalHaste={totalHaste}
+        onToggle={onToggleHaste}
+        canBuyCrimsonLucidity={position === 'mid'}
+      />
 
       <ChampionPositionImg position={position} className="size-12" />
 
