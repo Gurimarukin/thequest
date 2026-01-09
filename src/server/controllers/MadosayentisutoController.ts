@@ -133,6 +133,11 @@ const MadosayentisutoController = (
             List.map(m => m.championLevel),
             monoid.concatAll(number.MonoidSum),
           ),
+          totalMasteryPoints: pipe(
+            champions,
+            List.map(c => c.championPoints),
+            monoid.concatAll(number.MonoidSum),
+          ),
           champions: pipe(
             champions,
             List.filter(m => 5 <= m.championLevel),

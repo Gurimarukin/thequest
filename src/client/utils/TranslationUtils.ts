@@ -27,8 +27,8 @@ const challenge =
     )
 
 const numberUnit = (t: Translation['common']) => (pts: number) => {
-  if (1000000 <= pts) return t.numberM(round(pts / 1000000, 1))
-  if (1000 <= pts) return t.numberK(round(pts / 1000, 1))
+  if (1_000_000 <= pts) return t.numberM(round(pts / 1_000_000, 1))
+  if (1_000 <= pts) return t.numberK(round(pts / 1_000, 1))
   return t.number(pts)
 }
 

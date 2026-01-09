@@ -19,6 +19,7 @@ const encoder = E.struct({
   }),
   percents: E.id<number>(),
   totalMasteryLevel: E.id<number>(),
+  totalMasteryPoints: E.id<number>(),
   champions: E.record(NonEmptyArray.encoder(ChampionKey.codec)), // champion level as keys
 })
 
