@@ -335,18 +335,12 @@ const SummonerController = (
           game.participants,
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(participant =>
-              pipe(
-                futureMaybe.fromNullable(participant.puuid),
-                futureMaybe.chainTaskEitherK(
-                  enrichParticipantRiot(platform, maybeUser, game.insertedAt, participant),
-                ),
-                futureMaybe.getOrElse(() =>
-                  // streamer mode
+              participant.puuid === null
+                ? // streamer mode
                   Future.successful<ActiveGameParticipantView>(
                     ActiveGameParticipant.toView(participant, Maybe.none, Maybe.none, Maybe.none),
-                  ),
-                ),
-              ),
+                  )
+                : enrichParticipantRiot(platform, maybeUser, game.insertedAt, participant),
             ),
           ),
         ),
@@ -365,26 +359,25 @@ const SummonerController = (
     platform: Platform,
     maybeUser: Maybe<TokenContent>,
     gameInsertedAt: DayJs,
-    participant: ActiveGameParticipant,
-  ): (participantPuuid: Puuid) => Future<ActiveGameParticipantView> {
-    return participantPuuid =>
-      pipe(
-        apply.sequenceS(Future.ApplyPar)({
-          leagues: findLeagues(platform, participantPuuid, {
-            overrideInsertedAfter: gameInsertedAt,
-          }),
-          masteriesAndShardsCount: findMasteriesAndShardsCount(
-            platform,
-            maybeUser,
-            gameInsertedAt,
-            participantPuuid,
-            participant.championId,
-          ),
+    participant: ActiveGameParticipantVisible,
+  ): Future<ActiveGameParticipantView> {
+    return pipe(
+      apply.sequenceS(Future.ApplyPar)({
+        leagues: findLeagues(platform, participant.puuid, {
+          overrideInsertedAfter: gameInsertedAt,
         }),
-        Future.map(({ leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
-          ActiveGameParticipant.toView(participant, leagues, masteries, shardsCount),
+        masteriesAndShardsCount: findMasteriesAndShardsCount(
+          platform,
+          maybeUser,
+          gameInsertedAt,
+          participant.puuid,
+          participant.championId,
         ),
-      )
+      }),
+      Future.map(({ leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
+        ActiveGameParticipant.toView(participant, leagues, masteries, shardsCount),
+      ),
+    )
   }
 
   type ParticipantViewWithIndex = ActiveGameParticipantView & { index: number }
