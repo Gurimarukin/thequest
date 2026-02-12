@@ -376,12 +376,7 @@ const SummonerController = (
     return participantPuuid =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
-          riotAccount: pipe(
-            riotAccountService.findByPuuid(participantPuuid),
-            futureMaybe.getOrElse(() =>
-              Future.failed<RiotAccount>(couldntFindAccountError(participantPuuid)),
-            ),
-          ),
+          riotAccount: riotAccountByPuuid(participantPuuid),
           leagues: findLeagues(platform, participantPuuid, {
             overrideInsertedAfter: gameInsertedAt,
           }),
@@ -422,12 +417,7 @@ const SummonerController = (
               participant.puuid,
               Maybe.fold(
                 () => Future.successful(Maybe.none),
-                puuid =>
-                  pipe(
-                    riotAccountService.findByPuuid(puuid),
-                    futureMaybe.getOrElse(() => Future.failed(couldntFindAccountError(puuid))),
-                    Future.map(Maybe.some),
-                  ),
+                puuid => pipe(riotAccountByPuuid(puuid), Future.map(Maybe.some)),
               ),
               Future.chain(
                 enrichParticipantPoro(
@@ -456,10 +446,6 @@ const SummonerController = (
           }),
         ),
       )
-  }
-
-  function couldntFindAccountError(puuid: Puuid): Error {
-    return Error(`Couldn't find Riot account for summoner: ${puuid}`)
   }
 
   function enrichParticipantPoro(
@@ -560,6 +546,15 @@ const SummonerController = (
         ),
       )
     }
+  }
+
+  function riotAccountByPuuid(puuid: Puuid): Future<RiotAccount> {
+    return pipe(
+      riotAccountService.findByPuuid(puuid),
+      futureMaybe.getOrElse(() =>
+        Future.failed(Error(`Couldn't find Riot account for summoner: ${puuid}`)),
+      ),
+    )
   }
 
   function findMasteriesAndShardsCount(
