@@ -387,7 +387,7 @@ const SummonerController = (
       )
   }
 
-  type ParticipanViewWithIndex = ActiveGameParticipantView & { index: number }
+  type ParticipantViewWithIndex = ActiveGameParticipantView & { index: number }
 
   function activeGamePoro(
     platform: Platform,
@@ -412,7 +412,7 @@ const SummonerController = (
         ),
         Future.map(
           (
-            participants: PartialDict<`${TeamId}`, NonEmptyArray<ParticipanViewWithIndex>>,
+            participants: PartialDict<`${TeamId}`, NonEmptyArray<ParticipantViewWithIndex>>,
           ): ActiveGameView => ({
             gameStartTime: game.gameStartTime,
             mapId: game.mapId,
@@ -430,7 +430,7 @@ const SummonerController = (
   function enrichParticipantPoroStreamer(
     poroParticipants: List<PoroActiveGameParticipant>,
     participant: ActiveGameParticipant,
-  ): Future<ParticipanViewWithIndex> {
+  ): Future<ParticipantViewWithIndex> {
     const maybePoroParticipant = pipe(
       poroParticipants,
       List.findFirstMap(p =>
@@ -446,7 +446,7 @@ const SummonerController = (
 
     const poroParticipant = maybePoroParticipant.value
 
-    return Future.successful<ParticipanViewWithIndex>({
+    return Future.successful<ParticipantViewWithIndex>({
       ...ActiveGameParticipant.toView(participant, Maybe.none, Maybe.none, Maybe.none),
       index: poroParticipant.index,
     })
@@ -464,7 +464,7 @@ const SummonerController = (
     gameInsertedAt: DayJs,
     poroParticipants: List<PoroActiveGameParticipant>,
     participant: ActiveGameParticipantVisible,
-  ): Future<ParticipanViewWithIndex> {
+  ): Future<ParticipantViewWithIndex> {
     const riotId = RiotId.trim(participant.riotId)
     const maybePoroParticipant = pipe(
       poroParticipants,
@@ -490,7 +490,7 @@ const SummonerController = (
         participant.championId,
       ),
       Future.map(
-        ({ masteries, shardsCount }): ParticipanViewWithIndex => ({
+        ({ masteries, shardsCount }): ParticipantViewWithIndex => ({
           ...PoroActiveGameParticipantVisible.toView(
             poroParticipant,
             participant,
