@@ -43,6 +43,7 @@ import { futureEither } from '../../shared/utils/futureEither'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import { ActiveGame } from '../models/activeGame/ActiveGame'
+import type { ActiveGameParticipantVisible } from '../models/activeGame/ActiveGameParticipant'
 import { ActiveGameParticipant } from '../models/activeGame/ActiveGameParticipant'
 import type { PoroActiveGame } from '../models/activeGame/PoroActiveGame'
 import type { PoroActiveGameParticipant } from '../models/activeGame/PoroActiveGameParticipant'
@@ -50,7 +51,6 @@ import { PoroActiveGameParticipantVisible } from '../models/activeGame/PoroActiv
 import { LeagueEntry } from '../models/league/LeagueEntry'
 import { Leagues } from '../models/league/Leagues'
 import type { LoggerGetter } from '../models/logger/LoggerGetter'
-import type { RiotAccount } from '../models/riot/RiotAccount'
 import type { Summoner, SummonerWithRiotId } from '../models/summoner/Summoner'
 import type { TokenContent } from '../models/user/TokenContent'
 import type { WikiChampionData } from '../models/wiki/WikiChampionData'
@@ -336,20 +336,14 @@ const SummonerController = (
           PartialDict.traverse(Future.ApplicativePar)(
             NonEmptyArray.traverse(Future.ApplicativePar)(participant =>
               pipe(
-                futureMaybe.fromOption(participant.puuid),
+                futureMaybe.fromNullable(participant.puuid),
                 futureMaybe.chainTaskEitherK(
                   enrichParticipantRiot(platform, maybeUser, game.insertedAt, participant),
                 ),
                 futureMaybe.getOrElse(() =>
                   // streamer mode
                   Future.successful<ActiveGameParticipantView>(
-                    ActiveGameParticipant.toView(
-                      participant,
-                      Maybe.none,
-                      Maybe.none,
-                      Maybe.none,
-                      Maybe.none,
-                    ),
+                    ActiveGameParticipant.toView(participant, Maybe.none, Maybe.none, Maybe.none),
                   ),
                 ),
               ),
@@ -376,7 +370,6 @@ const SummonerController = (
     return participantPuuid =>
       pipe(
         apply.sequenceS(Future.ApplyPar)({
-          riotAccount: riotAccountByPuuid(participantPuuid),
           leagues: findLeagues(platform, participantPuuid, {
             overrideInsertedAfter: gameInsertedAt,
           }),
@@ -388,15 +381,8 @@ const SummonerController = (
             participant.championId,
           ),
         }),
-        Future.map(
-          ({ riotAccount, leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
-            ActiveGameParticipant.toView(
-              participant,
-              Maybe.some(riotAccount.riotId),
-              leagues,
-              masteries,
-              shardsCount,
-            ),
+        Future.map(({ leagues, masteriesAndShardsCount: { masteries, shardsCount } }) =>
+          ActiveGameParticipant.toView(participant, leagues, masteries, shardsCount),
         ),
       )
   }
@@ -413,22 +399,15 @@ const SummonerController = (
         game.participants,
         PartialDict.traverse(Future.ApplicativePar)(
           NonEmptyArray.traverse(Future.ApplicativePar)(participant =>
-            pipe(
-              participant.puuid,
-              Maybe.fold(
-                () => Future.successful(Maybe.none),
-                puuid => pipe(riotAccountByPuuid(puuid), Future.map(Maybe.some)),
-              ),
-              Future.chain(
-                enrichParticipantPoro(
+            participant.puuid === null
+              ? enrichParticipantPoroStreamer(poroGame.participants, participant)
+              : enrichParticipantPoroVisible(
                   platform,
                   maybeUser,
                   game.insertedAt,
                   poroGame.participants,
                   participant,
                 ),
-              ),
-            ),
           ),
         ),
         Future.map(
@@ -446,28 +425,6 @@ const SummonerController = (
           }),
         ),
       )
-  }
-
-  function enrichParticipantPoro(
-    platform: Platform,
-    maybeUser: Maybe<TokenContent>,
-    gameInsertedAt: DayJs,
-    poroParticipants: List<PoroActiveGameParticipant>,
-    participant: ActiveGameParticipant,
-  ): (
-    /** Defined if `participant.puuid` is defined */
-    maybeRiotAccount: Maybe<RiotAccount>,
-  ) => Future<ParticipanViewWithIndex> {
-    return Maybe.fold(
-      () => enrichParticipantPoroStreamer(poroParticipants, participant),
-      enrichParticipantPoroVisible(
-        platform,
-        maybeUser,
-        gameInsertedAt,
-        poroParticipants,
-        participant,
-      ),
-    )
   }
 
   function enrichParticipantPoroStreamer(
@@ -490,7 +447,7 @@ const SummonerController = (
     const poroParticipant = maybePoroParticipant.value
 
     return Future.successful<ParticipanViewWithIndex>({
-      ...ActiveGameParticipant.toView(participant, Maybe.none, Maybe.none, Maybe.none, Maybe.none),
+      ...ActiveGameParticipant.toView(participant, Maybe.none, Maybe.none, Maybe.none),
       index: poroParticipant.index,
     })
   }
@@ -506,53 +463,42 @@ const SummonerController = (
     maybeUser: Maybe<TokenContent>,
     gameInsertedAt: DayJs,
     poroParticipants: List<PoroActiveGameParticipant>,
-    participant: ActiveGameParticipant,
-  ): (riotAccount: RiotAccount) => Future<ParticipanViewWithIndex> {
-    return riotAccount => {
-      const riotId = RiotId.trim(riotAccount.riotId)
-      const maybePoroParticipant = pipe(
-        poroParticipants,
-        List.findFirstMap(p =>
-          Either.isRight(p) && RiotId.Eq.equals(p.right.riotId, riotId)
-            ? Maybe.some(p.right)
-            : Maybe.none,
-        ),
-      )
+    participant: ActiveGameParticipantVisible,
+  ): Future<ParticipanViewWithIndex> {
+    const riotId = RiotId.trim(participant.riotId)
+    const maybePoroParticipant = pipe(
+      poroParticipants,
+      List.findFirstMap(p =>
+        Either.isRight(p) && RiotId.Eq.equals(p.right.riotId, riotId)
+          ? Maybe.some(p.right)
+          : Maybe.none,
+      ),
+    )
 
-      if (!Maybe.isSome(maybePoroParticipant)) {
-        return couldntFindPoroParticipantError(RiotId.stringify(riotId))
-      }
-
-      const poroParticipant = maybePoroParticipant.value
-
-      return pipe(
-        findMasteriesAndShardsCount(
-          platform,
-          maybeUser,
-          gameInsertedAt,
-          riotAccount.puuid,
-          participant.championId,
-        ),
-        Future.map(
-          ({ masteries, shardsCount }): ParticipanViewWithIndex => ({
-            ...PoroActiveGameParticipantVisible.toView(
-              poroParticipant,
-              participant,
-              masteries,
-              shardsCount,
-            ),
-            index: poroParticipant.index,
-          }),
-        ),
-      )
+    if (!Maybe.isSome(maybePoroParticipant)) {
+      return couldntFindPoroParticipantError(RiotId.stringify(riotId))
     }
-  }
 
-  function riotAccountByPuuid(puuid: Puuid): Future<RiotAccount> {
+    const poroParticipant = maybePoroParticipant.value
+
     return pipe(
-      riotAccountService.findByPuuid(puuid),
-      futureMaybe.getOrElse(() =>
-        Future.failed(Error(`Couldn't find Riot account for summoner: ${puuid}`)),
+      findMasteriesAndShardsCount(
+        platform,
+        maybeUser,
+        gameInsertedAt,
+        participant.puuid,
+        participant.championId,
+      ),
+      Future.map(
+        ({ masteries, shardsCount }): ParticipanViewWithIndex => ({
+          ...PoroActiveGameParticipantVisible.toView(
+            poroParticipant,
+            participant,
+            masteries,
+            shardsCount,
+          ),
+          index: poroParticipant.index,
+        }),
       ),
     )
   }

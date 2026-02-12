@@ -10,8 +10,7 @@ import type { RiotId } from '../../../shared/models/riot/RiotId'
 import type { List } from '../../../shared/utils/fp'
 import { Maybe } from '../../../shared/utils/fp'
 
-type ActiveGameParticipant = {
-  puuid: Maybe<Puuid>
+type Common = {
   profileIconId: number
   championId: ChampionKey
   spell1Id: SummonerSpellKey
@@ -23,15 +22,25 @@ type ActiveGameParticipant = {
   }>
 }
 
+type ActiveGameParticipant = ActiveGameParticipantStreamer | ActiveGameParticipantVisible
+
+export type ActiveGameParticipantStreamer = {
+  puuid: null
+} & Common
+
+export type ActiveGameParticipantVisible = {
+  puuid: Puuid
+  riotId: RiotId
+} & Common
+
 function toView(
   participant: ActiveGameParticipant,
-  riotId: Maybe<RiotId>,
   leagues: Maybe<SummonerLeaguesView>,
   masteries: Maybe<ActiveGameMasteriesView>,
   shardsCount: Maybe<number>,
 ): ActiveGameParticipantView {
   return {
-    riotId,
+    riotId: participant.puuid === null ? Maybe.none : Maybe.some(participant.riotId),
     profileIconId: participant.profileIconId,
     leagues,
     championId: participant.championId,

@@ -1,3 +1,4 @@
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { TeamId } from '../../../../shared/models/api/activeGame/TeamId'
@@ -6,6 +7,7 @@ import { RuneId } from '../../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../../shared/models/api/perk/RuneStyleId'
 import { Puuid } from '../../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { RiotId } from '../../../../shared/models/riot/RiotId'
 import { List, Maybe } from '../../../../shared/utils/fp'
 
 const rawGameCustomizationObjectDecoder = D.struct({
@@ -19,10 +21,7 @@ const rawPerksDecoder = D.struct({
   perkSubStyle: RuneStyleId.codec, // Secondary runes path
 })
 
-type RawCurrentGameParticipant = D.TypeOf<typeof rawDecoder>
-
-const rawDecoder = D.struct({
-  puuid: Maybe.codec(Puuid.codec),
+const rawCommon = D.struct({
   championId: ChampionKey.codec, // The ID of the champion played by this participant
   perks: Maybe.decoder(rawPerksDecoder), // Perks/Runes Reforged Information
   profileIconId: D.number, // The ID of the profile icon used by this participant
@@ -33,7 +32,28 @@ const rawDecoder = D.struct({
   gameCustomizationObjects: List.decoder(rawGameCustomizationObjectDecoder), // List of Game Customizations
 })
 
-type RiotCurrentGameParticipant = Omit<RawCurrentGameParticipant, 'teamId'>
+const rawStreamer = pipe(
+  D.struct({
+    puuid: D.literal(null),
+    // riotId: D.string, // champion name
+  }),
+  D.intersect(rawCommon),
+)
+
+const rawVisible = pipe(
+  D.struct({
+    puuid: Puuid.codec,
+    riotId: pipe(D.string, D.compose(RiotId.fromStringDecoder)),
+  }),
+  D.intersect(rawCommon),
+)
+
+const rawDecoder = D.union(rawStreamer, rawVisible)
+
+type OmitFromRaw = 'teamId'
+type RiotCurrentGameParticipant =
+  | Omit<D.TypeOf<typeof rawStreamer>, OmitFromRaw>
+  | Omit<D.TypeOf<typeof rawVisible>, OmitFromRaw>
 
 const RiotCurrentGameParticipant = { rawDecoder }
 

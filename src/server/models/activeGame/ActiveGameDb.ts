@@ -1,5 +1,8 @@
+import { pipe } from 'fp-ts/function'
 import type { Codec } from 'io-ts/Codec'
 import * as C from 'io-ts/Codec'
+import * as D from 'io-ts/Decoder'
+import * as E from 'io-ts/Encoder'
 
 import { GameId } from '../../../shared/models/api/GameId'
 import type { BannedChampionOutput } from '../../../shared/models/api/activeGame/BannedChampion'
@@ -10,16 +13,26 @@ import { RuneId } from '../../../shared/models/api/perk/RuneId'
 import { RuneStyleId } from '../../../shared/models/api/perk/RuneStyleId'
 import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { SummonerSpellKey } from '../../../shared/models/api/summonerSpell/SummonerSpellKey'
+import { RiotId } from '../../../shared/models/riot/RiotId'
 import type { Dict } from '../../../shared/utils/fp'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
 
-export type ActiveGameParticipantDb = C.TypeOf<typeof participantCodec>
-type ActiveGameParticipantPbOutput = C.OutputOf<typeof participantCodec>
+export type ActiveGameParticipantDb = D.TypeOf<typeof participantDecoder>
+type ActiveGameParticipantPbOutput = E.OutputOf<typeof participantEncoder>
 
-const participantCodec = C.struct({
-  puuid: Maybe.codec(Puuid.codec),
+const participantStreamer = C.struct({
+  puuid: C.literal(null),
+  // riotId: D.string, // champion name
+})
+
+const participantVisible = C.struct({
+  puuid: Puuid.codec,
+  riotId: RiotId.fromStringCodec,
+})
+
+const participantCommon = C.struct({
   profileIconId: C.number,
   championId: ChampionKey.codec,
   spell1Id: SummonerSpellKey.codec,
@@ -32,6 +45,20 @@ const participantCodec = C.struct({
     }),
   ),
 })
+
+const participantDecoder = pipe(
+  D.union(participantStreamer, participantVisible),
+  D.intersect(participantCommon),
+)
+
+const participantEncoder = {
+  encode: (p: ActiveGameParticipantDb) =>
+    p.puuid === null
+      ? pipe(participantStreamer, E.intersect(participantCommon)).encode(p)
+      : pipe(participantVisible, E.intersect(participantCommon)).encode(p),
+}
+
+const participantCodec = C.make(participantDecoder, participantEncoder)
 
 type ActiveGameDb = C.TypeOf<typeof codec>
 
