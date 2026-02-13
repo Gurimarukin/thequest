@@ -98,6 +98,12 @@ const partialDictMapWithIndex = readonlyRecord.mapWithIndex as <K extends string
   f: (k: K, a: A | undefined) => B | undefined,
 ) => (fa: PartialDict<K, A | undefined>) => PartialDict<K, B>
 
+const partialDictSequence = readonlyRecord.sequence as <F extends URIS2>(
+  F: Applicative2<F>,
+) => <K extends string, E, A>(
+  ta: PartialDict<K, Kind2<F, E, A | undefined>>,
+) => Kind2<F, E, PartialDict<K, A>>
+
 const partialDictTraverse = readonlyRecord.traverse as <F extends URIS2>(
   F: Applicative2<F>,
 ) => <E, A, B>(
@@ -132,6 +138,8 @@ export const PartialDict = {
     f: (k: K, a: A) => B | undefined,
   ): ((fa: PartialDict<K, A>) => PartialDict<K, B>) =>
     partialDictMapWithIndex((k, a) => (a !== undefined ? f(k, a) : undefined)),
+
+  sequence: partialDictSequence,
 
   traverse:
     <F extends URIS2>(F: Applicative2<F>) =>
