@@ -8,7 +8,6 @@ import { Puuid } from '../../../shared/models/api/summoner/Puuid'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { DayJsFromDate } from '../../utils/ioTsUtils'
-import { LeagueId } from '../riot/LeagueId'
 
 const commonCodec = C.struct({
   leaguePoints: C.number,
@@ -29,7 +28,6 @@ const leagueEntryCodec = pipe(
       }),
       ranked: C.struct({
         type: C.literal('ranked'),
-        leagueId: LeagueId.codec,
         queueType: C.string,
         tier: LeagueTier.codec,
         rank: LeagueRank.codec,

@@ -7,7 +7,6 @@ import type { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import type { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import type { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import type { LeagueId } from '../riot/LeagueId'
 import type { RiotLeagueEntry } from '../riot/RiotLeagueEntry'
 
 type Common = {
@@ -26,7 +25,6 @@ type LeagueEntryCherry = Common & {
 
 type LeagueEntryRanked = Common & {
   type: 'ranked'
-  leagueId: LeagueId
   queueType: string
   tier: LeagueTier
   rank: LeagueRank

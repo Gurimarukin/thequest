@@ -8,8 +8,6 @@ import { LeagueRank } from '../../../shared/models/api/league/LeagueRank'
 import { LeagueTier } from '../../../shared/models/api/league/LeagueTier'
 import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
-import { LeagueId } from './LeagueId'
-
 const commonDecoder = D.struct({
   leaguePoints: D.number,
   wins: D.number,
@@ -39,7 +37,6 @@ const rankedDecoder = pipe(
   commonDecoder,
   D.intersect(
     D.struct({
-      leagueId: LeagueId.codec,
       queueType: D.string,
       tier: LeagueTier.codec,
       rank: LeagueRank.codec,
