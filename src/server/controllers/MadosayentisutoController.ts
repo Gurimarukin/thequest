@@ -19,6 +19,7 @@ import { DayJsFromISOString } from '../../shared/utils/ioTsUtils'
 
 import type { MadosayentisutoConfig } from '../config/Config'
 import type { HallOfFameMember } from '../models/HallOfFameMember'
+import type { LoggerGetter } from '../models/logger/LoggerGetter'
 import { TheQuestProgression } from '../models/madosayentisuto/TheQuestProgression'
 import { MatchDb } from '../models/match/MatchDb'
 import type { DDragonService } from '../services/DDragonService'
@@ -41,6 +42,7 @@ type MadosayentisutoController = ReturnType<typeof MadosayentisutoController>
 
 const MadosayentisutoController = (
   config: MadosayentisutoConfig,
+  Logger: LoggerGetter,
   withIp: WithIp,
   ddragonService: DDragonService,
   hallOfFameMemberService: HallOfFameMemberService,
@@ -51,6 +53,8 @@ const MadosayentisutoController = (
   staticDataService: StaticDataService,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) => {
+  const logger = Logger('MadosayentisutoController')
+
   const getStaticData: EndedMiddleware = withIpAndToken(
     pipe(
       staticDataService.getLatest(lang),
@@ -152,7 +156,11 @@ const MadosayentisutoController = (
   function withIpAndToken(m: EndedMiddleware): EndedMiddleware {
     return withIp('madosayentisuto route')(ip =>
       !List.elem(string.Eq)(ip, config.whitelistedIps)
-        ? M.sendWithStatus(Status.NotFound)('')
+        ? pipe(
+            logger.debug(`Failed madosayentisuto attempt with IP: ${ip}`),
+            M.fromIOEither,
+            M.ichain(() => M.sendWithStatus(Status.NotFound)('')),
+          )
         : withToken(m),
     )
   }

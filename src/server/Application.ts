@@ -74,6 +74,7 @@ export const Application = ({
 
   const madosayentisutoController = MadosayentisutoController(
     config.madosayentisuto,
+    Logger,
     withIp,
     ddragonService,
     hallOfFameMemberService,
