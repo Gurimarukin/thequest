@@ -23,6 +23,10 @@ type LeagueEntryCherry = Common & {
   type: 'cherry'
 }
 
+type LeagueEntryJade = Common & {
+  type: 'jade'
+}
+
 type LeagueEntryRanked = Common & {
   type: 'ranked'
   queueType: string
@@ -31,7 +35,7 @@ type LeagueEntryRanked = Common & {
   miniSeriesProgress: Maybe<NonEmptyArray<LeagueMiniSeriesProgress>>
 }
 
-type LeagueEntry = LeagueEntryCherry | LeagueEntryRanked
+type LeagueEntry = LeagueEntryCherry | LeagueEntryJade | LeagueEntryRanked
 
 const fromRiot: (e: RiotLeagueEntry) => LeagueEntry = identity
 

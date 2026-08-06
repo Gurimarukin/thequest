@@ -31,6 +31,21 @@ const cherryDecoder = pipe(
   ),
 )
 
+/** League Classic */
+
+const JADE_RANKED_SOLO_5x5 = 'JADE_RANKED_SOLO_5x5'
+
+type RiotLeagueEntryJade = D.TypeOf<typeof jadeDecoder>
+
+const jadeDecoder = pipe(
+  commonDecoder,
+  D.intersect(
+    D.struct({
+      queueType: D.literal(JADE_RANKED_SOLO_5x5),
+    }),
+  ),
+)
+
 type RiotLeagueEntryRanked = D.TypeOf<typeof rankedDecoder>
 
 const rankedDecoder = pipe(
@@ -58,12 +73,13 @@ const rankedDecoder = pipe(
 
 type RiotLeagueEntry =
   | ({ type: 'cherry' } & Omit<RiotLeagueEntryCherry, 'queueType'>)
+  | ({ type: 'jade' } & Omit<RiotLeagueEntryJade, 'queueType'>)
   | ({ type: 'ranked' } & Omit<RiotLeagueEntryRanked, 'miniSeries'> & {
         miniSeriesProgress: Maybe<NonEmptyArray<LeagueMiniSeriesProgress>>
       })
 
 const decoder: Decoder<unknown, RiotLeagueEntry> = pipe(
-  D.union(cherryDecoder, rankedDecoder),
+  D.union(cherryDecoder, jadeDecoder, rankedDecoder),
   D.map((e): RiotLeagueEntry => {
     if (isCherry(e)) {
       const {
@@ -71,6 +87,14 @@ const decoder: Decoder<unknown, RiotLeagueEntry> = pipe(
         ...attrs
       } = e
       return { type: 'cherry', ...attrs }
+    }
+
+    if (isJade(e)) {
+      const {
+        queueType: {},
+        ...attrs
+      } = e
+      return { type: 'jade', ...attrs }
     }
 
     const { miniSeries, ...attrs } = e
@@ -85,8 +109,15 @@ const decoder: Decoder<unknown, RiotLeagueEntry> = pipe(
   }),
 )
 
-const isCherry = (e: RiotLeagueEntryCherry | RiotLeagueEntryRanked): e is RiotLeagueEntryCherry =>
-  e.queueType === CHERRY
+type RiotLeagueEntryRaw = RiotLeagueEntryCherry | RiotLeagueEntryJade | RiotLeagueEntryRanked
+
+function isCherry(e: RiotLeagueEntryRaw): e is RiotLeagueEntryCherry {
+  return e.queueType === CHERRY
+}
+
+function isJade(e: RiotLeagueEntryRaw): e is RiotLeagueEntryJade {
+  return e.queueType === JADE_RANKED_SOLO_5x5
+}
 
 const RiotLeagueEntry = { decoder }
 

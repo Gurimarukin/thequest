@@ -26,6 +26,9 @@ const leagueEntryCodec = pipe(
       cherry: C.struct({
         type: C.literal('cherry'),
       }),
+      jade: C.struct({
+        type: C.literal('jade'),
+      }),
       ranked: C.struct({
         type: C.literal('ranked'),
         queueType: C.string,
