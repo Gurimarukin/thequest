@@ -1,3 +1,4 @@
+- League Classic rank (UNRANKED|SALT|WOOD|LEGEND) + masteries
 - spells to base static data?
 - sodium
 - store full match

@@ -4,12 +4,13 @@ import { DDragonVersion } from '../../shared/models/api/DDragonVersion'
 import type { GameId } from '../../shared/models/api/GameId'
 import type { Lang } from '../../shared/models/api/Lang'
 import type { Platform } from '../../shared/models/api/Platform'
+import { ChampionKey } from '../../shared/models/api/champion/ChampionKey'
 import type { Puuid } from '../../shared/models/api/summoner/Puuid'
 import type { GameName } from '../../shared/models/riot/GameName'
 import type { TagLine } from '../../shared/models/riot/TagLine'
 import { DDragonUtils } from '../../shared/utils/DDragonUtils'
-import type { Dict, Future, Maybe } from '../../shared/utils/fp'
-import { Either, List, NonEmptyArray } from '../../shared/utils/fp'
+import type { Maybe } from '../../shared/utils/fp'
+import { Dict, Either, Future, List, NonEmptyArray } from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 
 import type { Config } from '../config/Config'
@@ -108,10 +109,18 @@ const RiotApiService = (config: Config, httpClient: HttpClient, mockService: Moc
 
         cdn: (version: DDragonVersion) => ({
           data: (lang: Lang) => {
-            const champion: Future<DDragonChampions> = httpClient.json(
-              [ddragonCdn(version, `/data/${lang}/champion.json`), 'get'],
-              {},
-              [DDragonChampions.decoder, 'DDragonChampions'],
+            const champion: Future<DDragonChampions> = pipe(
+              httpClient.json([ddragonCdn(version, `/data/${lang}/champion.json`), 'get'], {}, [
+                DDragonChampions.decoder,
+                'DDragonChampions',
+              ]),
+              Future.map(res => ({
+                ...res,
+                data: pipe(
+                  res.data,
+                  Dict.filter(c => ChampionKey.unwrap(c.key) < 60_000), // ignore League Classic champions
+                ),
+              })),
             )
 
             const summoner: Future<DDragonSummoners> = httpClient.json(
