@@ -28,11 +28,11 @@ export function getRouterComponent(parser: Parser<ElementWithTitle>): React.FC {
       )
       const title_ = pipe(
         [
-          Maybe.some(t.theQuest),
           pipe(
             subTitle,
             Maybe.map(s => s(t)),
           ),
+          Maybe.some(t.theQuest),
         ],
         List.compact,
         List.mkString(' | '),

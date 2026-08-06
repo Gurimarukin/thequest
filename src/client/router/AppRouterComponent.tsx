@@ -41,9 +41,8 @@ export const AppRouterComponent: React.FC = getRouterComponent(
     )
     .alt(
       withPlatformLower(appMatches.platformRiotId, ({ platform, riotId }) =>
-        e(
-          <SummonerMasteries platform={platform} riotId={riotId} />,
-          () => `${RiotId.stringify(riotId)} (${platform})`,
+        e(<SummonerMasteries platform={platform} riotId={riotId} />, () =>
+          RiotId.stringify(riotId),
         ),
       ),
     )
@@ -51,7 +50,7 @@ export const AppRouterComponent: React.FC = getRouterComponent(
       withPlatformLower(appMatches.platformRiotIdGame, ({ platform, riotId }) =>
         e(
           <ActiveGame platform={platform} riotId={riotId} />,
-          t => `${RiotId.stringify(riotId)} (${platform}) | ${t.game})`,
+          t => `${RiotId.stringify(riotId)} — ${t.game}`,
         ),
       ),
     )
